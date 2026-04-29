@@ -75,6 +75,35 @@ describe('domain-invoice-selector', () => {
     expect(p.customService).toBe(true)
   })
 
+  it('buildInvoiceAddPayload prefers explicit serviceType field on the row', () => {
+    const p = buildInvoiceAddPayloadFromCatalogRow({
+      _id: 'bbbbbbbbbbbbbbbbbbbbbbbb',
+      name: 'Whatever',
+      fieldName: 'anyField',
+      serviceType: ServiceType.Inflicion,
+    })
+    expect(p.type).toBe(ServiceType.Inflicion)
+    expect(p.serviceId).toBe('bbbbbbbbbbbbbbbbbbbbbbbb')
+    expect(p.customService).toBeUndefined()
+  })
+
+  it('flattenDomainCatalogServices threads serviceType through', () => {
+    const rows = flattenDomainCatalogServices([
+      {
+        groupName: 'A',
+        services: [
+          {
+            _id: '1',
+            name: 'One',
+            fieldName: 'one',
+            serviceType: ServiceType.Water,
+          },
+        ],
+      },
+    ])
+    expect(rows[0].serviceType).toBe(ServiceType.Water)
+  })
+
   // Two real catalog ids both map to ServiceType.Water in
   // COMMUNAL_UTILITY_CUSTOM_SERVICE_ID_TO_SERVICE_TYPE:
   //   '68156cdbf520914e5e1ad877'  // Водопостачання

@@ -1,5 +1,6 @@
 import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
-import { UTILITY_SERVICE_ID_TO_TYPE, ServiceType } from '../constants'
+import { ServiceType } from '../constants'
+import { resolveServiceType } from './resolve-service-type'
 
 export type IInvoiceLineAddPayload = Partial<IPaymentField> & {
   type: ServiceType | string
@@ -10,6 +11,7 @@ export interface IDomainCatalogServiceRow {
   name: string
   fieldName: string
   groupName: string
+  serviceType?: string | null
 }
 
 export interface IDomainCatalogGroup {
@@ -18,10 +20,9 @@ export interface IDomainCatalogGroup {
     _id: string | unknown
     name: string
     fieldName: string
+    serviceType?: string | null
   }[]
 }
-
-const SERVICE_TYPE_VALUES = new Set<string>(Object.values(ServiceType))
 
 export function flattenDomainCatalogServices(
   groups: IDomainCatalogGroup[]
@@ -39,6 +40,7 @@ export function flattenDomainCatalogServices(
         name: s.name,
         fieldName: s.fieldName,
         groupName: gName,
+        serviceType: s.serviceType ?? null,
       })
     }
   }
@@ -57,26 +59,20 @@ export function invoiceLineExcludeKey(
   return `stype:${t}`
 }
 
-function isEnumUtilityServiceType(
-  fieldName: string
-): fieldName is ServiceType {
-  return (
-    SERVICE_TYPE_VALUES.has(fieldName) &&
-    fieldName !== ServiceType.Custom &&
-    fieldName !== 'custom'
-  )
-}
-
 export function buildInvoiceAddPayloadFromCatalogRow(
-  row: Pick<IDomainCatalogServiceRow, '_id' | 'name' | 'fieldName'>
+  row: Pick<
+    IDomainCatalogServiceRow,
+    '_id' | 'name' | 'fieldName' | 'serviceType'
+  >
 ): IInvoiceLineAddPayload {
   const id = String(row._id)
-  const mapped = UTILITY_SERVICE_ID_TO_TYPE[id]
-  if (mapped) {
-    return { type: mapped, serviceId: id }
-  }
-  if (row.fieldName && isEnumUtilityServiceType(row.fieldName)) {
-    return { type: row.fieldName, serviceId: id }
+  const resolved = resolveServiceType({
+    _id: id,
+    serviceType: row.serviceType ?? null,
+    fieldName: row.fieldName,
+  })
+  if (resolved) {
+    return { type: resolved, serviceId: id }
   }
   return {
     type: ServiceType.Custom,

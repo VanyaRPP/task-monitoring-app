@@ -4,10 +4,13 @@
  * Idempotent: re-running keeps existing built-in templates intact and only
  * adds missing ones. Designed to be run once per environment.
  *
- * Run with: `npx tsx scripts/seed-domain-type-templates.ts`
+ * Run with:
+ *   npx tsx --env-file=.env.local scripts/seed-domain-type-templates.ts
+ *
+ * The `--env-file` flag is required because dbConnect.ts validates
+ * MONGODB_URI at module-load time, which happens BEFORE any in-script
+ * dotenv.config() call (ES-module imports are hoisted).
  */
-import dotenv from 'dotenv'
-dotenv.config({ path: '.env.local' })
 import dbConnect from '../utils/dbConnect'
 import DomainTypeTemplate from '../common/modules/models/domain-type-template'
 import { defaultServices } from '../utils/constants'

@@ -1,12 +1,26 @@
 import CustomService from '@modules/models/CustomService'
 import Domain from '@modules/models/Domain'
 import start, { Data } from '@pages/api/api.config'
+import { ServiceType } from '@utils/constants'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import { defaultServicesSet, isProtectedService } from '@utils/helpers'
 import { transliterateAndCamelCase } from '@utils/transliterateAndCamelCase'
 import mongoose from 'mongoose'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { escapeRegexForMongo } from '@utils/escape-regex/escape-regex'
+
+const SERVICE_TYPE_VALUES = new Set<string>(Object.values(ServiceType))
+
+function parseServiceTypeInput(raw: unknown): {
+  ok: boolean
+  value?: ServiceType | undefined
+} {
+  if (raw === undefined) return { ok: true, value: undefined }
+  if (raw === null || raw === '') return { ok: true, value: undefined }
+  const v = String(raw)
+  if (!SERVICE_TYPE_VALUES.has(v)) return { ok: false }
+  return { ok: true, value: v as ServiceType }
+}
 
 start()
 export default async function handler(
@@ -50,9 +64,18 @@ export default async function handler(
           })
         }
 
+        const parsedType = parseServiceTypeInput(req.body?.serviceType)
+        if (!parsedType.ok) {
+          return res.status(400).json({
+            success: false,
+            message: 'Невалідний serviceType',
+          })
+        }
+
         const customService = await CustomService.create({
           name: trimmedName,
           fieldName: transliterateAndCamelCase(trimmedName),
+          ...(parsedType.value ? { serviceType: parsedType.value } : {}),
         })
 
         return res.status(201).json({
@@ -154,12 +177,29 @@ export default async function handler(
           })
         }
 
+        const parsedType = parseServiceTypeInput(req.body?.serviceType)
+        if (!parsedType.ok) {
+          return res.status(400).json({
+            success: false,
+            message: 'Невалідний serviceType',
+          })
+        }
+
+        const update: Record<string, unknown> = {
+          name: trimmedName,
+          fieldName: transliterateAndCamelCase(trimmedName),
+        }
+        if (req.body?.serviceType !== undefined) {
+          if (parsedType.value) {
+            update.serviceType = parsedType.value
+          } else {
+            update.$unset = { serviceType: '' }
+          }
+        }
+
         const updatedService = await CustomService.findByIdAndUpdate(
           id,
-          {
-            name: trimmedName,
-            fieldName: transliterateAndCamelCase(trimmedName),
-          },
+          update,
           { new: true }
         )
 
