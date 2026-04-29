@@ -28,6 +28,7 @@ export interface PaymentsHeaderProps {
   setPaymentsDeleteItems: (items: PaymentDeleteItem[]) => void
   enablePaymentsButton: boolean
   onColumnsSelect: (columns: ServiceType[]) => void
+  onBulkMarkPaid?: (payments: IExtendedPayment[]) => void
   onDeleteClick?: () => void
   domainFilter: IFilter[]
   realEstatesFilter: IFilter[]
@@ -49,6 +50,7 @@ const PaymentsHeader: React.FC<PaymentsHeaderProps> = ({
   setPaymentsDeleteItems,
   enablePaymentsButton,
   onColumnsSelect,
+  onBulkMarkPaid,
   domainFilter,
   realEstatesFilter,
   isDashboard,
@@ -70,6 +72,7 @@ const PaymentsHeader: React.FC<PaymentsHeaderProps> = ({
       setPaymentsDeleteItems={setPaymentsDeleteItems}
       enablePaymentsButton={enablePaymentsButton}
       onColumnsSelect={onColumnsSelect}
+      onBulkMarkPaid={onBulkMarkPaid}
       domainFilter={domainFilter}
       realEstatesFilter={realEstatesFilter}
       isDashboard={isDashboard}
