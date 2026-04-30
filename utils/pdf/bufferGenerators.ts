@@ -1,7 +1,22 @@
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import archiver from 'archiver'
+import dayjs from 'dayjs'
 import puppeteer from 'puppeteer'
 import { generateHtmlFromThemplate } from './pdfThemplate'
+
+export function getModernInvoiceFileSlug(payment: IExtendedPayment): string {
+  const invoiceNo = String(payment?.invoiceNumber ?? '')
+  const invoiceDatePrefix = dayjs(payment?.invoiceCreationDate).isValid()
+    ? dayjs(payment.invoiceCreationDate).format('DDMMYY')
+    : ''
+  return `${invoiceDatePrefix}${invoiceNo}`
+}
+
+export function getPaymentPdfBaseFileName(payment: IExtendedPayment): string {
+  const companyName = payment?.reciever?.companyName ?? 'invoice'
+  const slug = getModernInvoiceFileSlug(payment)
+  return `${companyName} inv ${slug}`.trim()
+}
 
 export async function generatePdf(payment: IExtendedPayment): Promise<Buffer> {
   const browser = await puppeteer.launch({ headless: true })
@@ -58,8 +73,11 @@ export async function generateZip(
       })
       await page.close()
 
+      const slug = getModernInvoiceFileSlug(payment)
+      const archiveBaseName = `${payment?.reciever?.companyName}-inv-${slug}`
+
       archive.append(pdfBuffer, {
-        name: `${payment?.reciever?.companyName}-inv-${payment?.invoiceNumber}.pdf`,
+        name: `${archiveBaseName}.pdf`,
       })
     }
   } finally {
