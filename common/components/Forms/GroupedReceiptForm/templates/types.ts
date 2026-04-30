@@ -7,6 +7,8 @@ export interface TemplateProps {
   currencyLabel: string
   currency?: string
   modernInvoiceNumber: string
+  domainName?: string
+  companyLabel?: string
   rows: any[]
   getQty: (item: any) => number
   subtotal: number

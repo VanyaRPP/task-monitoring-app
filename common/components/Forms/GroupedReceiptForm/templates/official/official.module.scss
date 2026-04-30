@@ -1,0 +1,412 @@
+$font: 'Helvetica Neue', Arial, sans-serif;
+$mono: 'JetBrains Mono', 'Courier New', monospace;
+
+$ink:        rgba(255, 255, 255, 0.92);
+$ink-muted:  rgba(255, 255, 255, 0.50);
+$ink-light:  rgba(255, 255, 255, 0.32);
+$border:     rgba(255, 255, 255, 0.12);
+$bg:         rgba(255, 255, 255, 0.02);
+$bg-row:     rgba(255, 255, 255, 0.04);
+$accent:     #4a6491;
+$accent-dim: #5b76a4;
+
+$ink-l:        #111111;
+$ink-muted-l:  #888888;
+$ink-light-l:  #bbbbbb;
+$border-l:     #e2e2e2;
+$bg-l:         #ffffff;
+$bg-row-l:     #fafafa;
+
+.clInvoice {
+  font-family: $font;
+  font-size: 13px;
+  line-height: 1.55;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 2.8rem 3.2rem;
+  box-sizing: border-box;
+  background: $bg;
+  color: $ink;
+  border: 1px solid $border;
+  border-radius: 6px;
+}
+
+/* ── Header ── */
+.clHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2.4rem;
+}
+
+.clTitle {
+  font-size: 2.6rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  text-transform: uppercase;
+  color: $ink;
+}
+
+.clHeaderRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.9rem;
+  margin-left: auto;
+  min-width: 0;
+  max-width: 30rem;
+  flex: 0 0 auto;
+  padding-right: 0.6rem;
+}
+
+.clFromBlock,
+.clToBlock {
+  display: grid;
+  grid-template-columns: 16rem 1fr;
+  column-gap: 0.9rem;
+  align-items: baseline;
+  width: 100%;
+}
+
+.clFromLabel,
+.clToLabel {
+  font-size: 0.75rem;
+  color: $ink-muted;
+  text-align: right;
+  padding-right: 0.15rem;
+  justify-self: end;
+  white-space: nowrap;
+}
+
+.clFromValue {
+  font-weight: 700;
+  font-size: 1rem;
+  border-left: 3px solid $accent;
+  padding-left: 0.7rem;
+  color: $ink;
+}
+
+.clToValue {
+  font-weight: 700;
+  font-size: 1rem;
+  border-left: 3px solid $accent;
+  padding-left: 0.7rem;
+  color: $ink;
+}
+
+.clMeta {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 2rem;
+  border-top: 1px solid $border;
+}
+
+.clMetaRow {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  border-bottom: 1px solid $border;
+  min-height: 36px;
+
+  &:nth-child(even) {
+    background: $bg-row;
+  }
+}
+
+.clMetaLabel {
+  font-size: 0.78rem;
+  color: $ink-muted;
+  padding: 0.55rem 0;
+  display: flex;
+  align-items: center;
+}
+
+.clMetaValue {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: $ink;
+  border-left: 1px solid $border;
+  padding: 0.55rem 1rem;
+  display: flex;
+  align-items: center;
+}
+
+.clTableWrap {
+  border: 1px solid $border;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 0;
+}
+
+.clTable {
+  width: 100%;
+  border-collapse: collapse;
+
+  thead {
+    background: $bg-row;
+
+    th {
+      font-size: 0.7rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: $ink-muted;
+      font-weight: 700;
+      padding: 0.65rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid $border;
+
+      &:nth-child(2),
+      &:nth-child(3),
+      &:nth-child(4) {
+        text-align: right;
+      }
+    }
+  }
+
+  tbody tr {
+    border-bottom: 1px solid $border;
+
+    &:last-child { border-bottom: none; }
+    &:nth-child(even) { background: $bg-row; }
+
+    td {
+      font-size: 0.88rem;
+      padding: 0.7rem 1rem;
+      vertical-align: middle;
+      color: $ink;
+
+      &:nth-child(2),
+      &:nth-child(3),
+      &:nth-child(4) {
+        text-align: right;
+        font-family: $mono;
+        font-size: 0.83rem;
+        white-space: nowrap;
+      }
+    }
+  }
+
+  th:nth-child(1), td:nth-child(1) { width: auto; }
+  th:nth-child(2), td:nth-child(2) { width: 10%; }
+  th:nth-child(3), td:nth-child(3) { width: 16%; }
+  th:nth-child(4), td:nth-child(4) { width: 18%; font-weight: 600; }
+}
+
+.clSummary {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1.4rem;
+}
+
+.clTotals {
+  min-width: 300px;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid $border;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.clTotalRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.45rem 1rem;
+  font-size: 0.85rem;
+  border-bottom: 1px solid $border;
+  background: $bg-row;
+
+  span   { color: $ink-muted; font-size: 0.78rem; }
+  strong { font-family: $mono; color: $ink; }
+
+  &:last-child { border-bottom: none; }
+}
+
+.clGrandTotal {
+  background: linear-gradient(135deg, $accent 0%, $accent-dim 100%) !important;
+  padding: 0.6rem 1rem;
+
+  span {
+    color: #ffffff !important;
+    font-size: 0.78rem !important;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 800;
+  }
+
+  strong {
+    color: #ffffff !important;
+    font-size: 1.05rem;
+    font-weight: 800;
+  }
+}
+
+$lightRoot: ":global(:root[data-theme='light'])";
+
+.clInvoice {
+  #{$lightRoot} & {
+    background: $bg-l;
+    color: $ink-l;
+    border-color: $border-l;
+  }
+}
+
+.clTitle {
+  #{$lightRoot} & { color: $ink-l; }
+}
+
+.clFromLabel,
+.clToLabel {
+  #{$lightRoot} & { color: $ink-muted-l; }
+}
+
+.clFromValue,
+.clToValue {
+  #{$lightRoot} & {
+    color: $ink-l;
+    border-left-color: $accent;
+  }
+}
+
+.clMeta {
+  #{$lightRoot} & { border-top-color: $border-l; }
+}
+
+.clMetaRow {
+  #{$lightRoot} & {
+    border-bottom-color: $border-l;
+    &:nth-child(even) { background: $bg-row-l; }
+  }
+}
+
+.clMetaLabel {
+  #{$lightRoot} & { color: $ink-muted-l; }
+}
+
+.clMetaValue {
+  #{$lightRoot} & {
+    color: $ink-l;
+    border-left-color: $border-l;
+  }
+}
+
+.clTableWrap {
+  #{$lightRoot} & { border-color: $border-l; }
+}
+
+.clTable {
+  #{$lightRoot} & {
+    thead {
+      background: $bg-row-l;
+      th {
+        color: $ink-muted-l;
+        border-bottom-color: $border-l;
+      }
+    }
+    tbody tr {
+      border-bottom-color: $border-l;
+      &:nth-child(even) { background: $bg-row-l; }
+      td { color: $ink-l; }
+    }
+  }
+}
+
+.clTotals {
+  #{$lightRoot} & { border-color: $border-l; }
+}
+
+.clTotalRow {
+  #{$lightRoot} & {
+    background: $bg-row-l;
+    border-bottom-color: $border-l;
+    span   { color: $ink-muted-l; }
+    strong { color: $ink-l; }
+  }
+}
+
+@media (max-width: 760px) {
+  .clInvoice { padding: 1.4rem 1rem; }
+
+  .clHeader {
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+
+  .clHeaderRight { align-items: flex-start; }
+
+  .clFromBlock,
+  .clToBlock {
+    max-width: 100%;
+    grid-template-columns: 7.75rem 1fr;
+  }
+
+  .clMetaRow { grid-template-columns: 100px 1fr; }
+}
+
+@media print {
+  @page { size: A4; margin: 12mm 14mm; }
+
+  .clInvoice {
+    max-width: none !important;
+    width: 100% !important;
+    padding: 1.8rem 2rem !important;
+    margin: 0 !important;
+    border: 1px solid #ddd !important;
+    border-radius: 4px !important;
+    background: #fff !important;
+    color: #111 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .clTitle      { color: #111 !important; }
+
+  .clFromLabel,
+  .clToLabel    { color: #555 !important; }
+  .clFromValue,
+  .clToValue {
+    color: #111 !important;
+    border-left-color: $accent !important;
+  }
+
+  .clMeta       { border-top-color: #e2e2e2 !important; }
+  .clMetaRow {
+    border-bottom-color: #e2e2e2 !important;
+    &:nth-child(even) { background: #fafafa !important; }
+  }
+  .clMetaLabel  { color: #555 !important; }
+  .clMetaValue {
+    color: #111 !important;
+    border-left-color: #e2e2e2 !important;
+  }
+
+  .clTableWrap  { border-color: #e2e2e2 !important; }
+  .clTable {
+    thead {
+      background: #fafafa !important;
+      th { color: #555 !important; border-bottom-color: #e2e2e2 !important; }
+    }
+    tbody tr {
+      border-bottom-color: #e2e2e2 !important;
+      &:nth-child(even) { background: #fafafa !important; }
+      td { color: #111 !important; }
+    }
+  }
+
+  .clTotals     { border-color: #e2e2e2 !important; }
+  .clTotalRow {
+    background: #fafafa !important;
+    border-bottom-color: #e2e2e2 !important;
+    span   { color: #555 !important; }
+    strong { color: #111 !important; }
+  }
+
+  .clGrandTotal {
+    background: #4a6491 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+
+    span   { color: #ffffff !important; }
+    strong { color: #ffffff !important; }
+  }
+}

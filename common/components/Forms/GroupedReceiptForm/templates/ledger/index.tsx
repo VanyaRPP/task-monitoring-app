@@ -1,13 +1,22 @@
 import { FC } from 'react'
 import dayjs from 'dayjs'
 import { TemplateProps } from '../types'
+import {
+  getBillFromHeadingAndBodyLines,
+  getIssuedToHeadingAndBodyLines,
+} from '../invoice-party-headings'
 import lg from './ledger.module.scss'
 
 const LedgerTemplate: FC<TemplateProps> = ({
-  data, componentRef, isEnglish, currencyLabel, modernInvoiceNumber,
+  data, componentRef, isEnglish, currencyLabel, modernInvoiceNumber, domainName,
   rows, getQty, subtotal, taxPercent, taxAmount, total,
   paymentInfoLines, issuedToLines, normalizedBankDetailsLines,
 }) => {
+  const { heading: paymentHeading, bodyLines: paymentBodyLines } =
+    getBillFromHeadingAndBodyLines(data, paymentInfoLines)
+  const { heading: issuedHeading, bodyLines: issuedBodyLines } =
+    getIssuedToHeadingAndBodyLines(data, issuedToLines, domainName)
+
   return (
     <div
       className={lg.lgInvoice}
@@ -58,10 +67,15 @@ const LedgerTemplate: FC<TemplateProps> = ({
             {isEnglish ? 'Provider (Contractor)' : 'Підрядник'}
           </div>
           <div className={lg.lgPartyBody}>
-            {paymentInfoLines.map((line: string, idx: number) => (
+            {!!paymentHeading && (
+              <div className={lg.lgPartyName}>{paymentHeading}</div>
+            )}
+            {paymentBodyLines.map((line: string, idx: number) => (
               <div
                 key={`pi-${idx}`}
-                className={idx === 0 ? lg.lgPartyName : lg.lgPartyLine}
+                className={
+                  !paymentHeading && idx === 0 ? lg.lgPartyName : lg.lgPartyLine
+                }
               >
                 {line}
               </div>
@@ -89,10 +103,15 @@ const LedgerTemplate: FC<TemplateProps> = ({
             {isEnglish ? 'Customer (Recipient)' : 'Замовник'}
           </div>
           <div className={lg.lgPartyBody}>
-            {issuedToLines.map((line: string, idx: number) => (
+            {!!issuedHeading && (
+              <div className={lg.lgPartyName}>{issuedHeading}</div>
+            )}
+            {issuedBodyLines.map((line: string, idx: number) => (
               <div
                 key={`it-${idx}`}
-                className={idx === 0 ? lg.lgPartyName : lg.lgPartyLine}
+                className={
+                  !issuedHeading && idx === 0 ? lg.lgPartyName : lg.lgPartyLine
+                }
               >
                 {line}
               </div>

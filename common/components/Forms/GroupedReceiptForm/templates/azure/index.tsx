@@ -1,13 +1,22 @@
 import { FC } from 'react'
 import dayjs from 'dayjs'
 import { TemplateProps } from '../types'
+import {
+  getBillFromHeadingAndBodyLines,
+  getIssuedToHeadingAndBodyLines,
+} from '../invoice-party-headings'
 import az from './azure.module.scss'
 
 const AzureTemplate: FC<TemplateProps> = ({
-  data, componentRef, isEnglish, currencyLabel, modernInvoiceNumber,
+  data, componentRef, isEnglish, currencyLabel, modernInvoiceNumber, domainName,
   rows, getQty, subtotal, taxPercent, taxAmount, total,
   paymentInfoLines, issuedToLines, normalizedBankDetailsLines,
 }) => {
+  const { heading: paymentHeading, bodyLines: paymentBodyLines } =
+    getBillFromHeadingAndBodyLines(data, paymentInfoLines)
+  const { heading: issuedHeading, bodyLines: issuedBodyLines } =
+    getIssuedToHeadingAndBodyLines(data, issuedToLines, domainName)
+
   return (
     <div
       className={az.azInvoice}
@@ -58,10 +67,15 @@ const AzureTemplate: FC<TemplateProps> = ({
           <div className={az.azPartyLabel}>
             {isEnglish ? 'Bill from' : 'Платіжні дані'}
           </div>
-          {paymentInfoLines.map((line: string, idx: number) => (
+          {!!paymentHeading && (
+            <div className={az.azPartyName}>{paymentHeading}</div>
+          )}
+          {paymentBodyLines.map((line: string, idx: number) => (
             <div
               key={`pi-${idx}`}
-              className={idx === 0 ? az.azPartyName : az.azPartyLine}
+              className={
+                !paymentHeading && idx === 0 ? az.azPartyName : az.azPartyLine
+              }
             >
               {line}
             </div>
@@ -87,10 +101,15 @@ const AzureTemplate: FC<TemplateProps> = ({
           <div className={az.azPartyLabel}>
             {isEnglish ? 'Issued to' : 'Отримувач'}
           </div>
-          {issuedToLines.map((line: string, idx: number) => (
+          {!!issuedHeading && (
+            <div className={az.azPartyName}>{issuedHeading}</div>
+          )}
+          {issuedBodyLines.map((line: string, idx: number) => (
             <div
               key={`it-${idx}`}
-              className={idx === 0 ? az.azPartyName : az.azPartyLine}
+              className={
+                !issuedHeading && idx === 0 ? az.azPartyName : az.azPartyLine
+              }
             >
               {line}
             </div>

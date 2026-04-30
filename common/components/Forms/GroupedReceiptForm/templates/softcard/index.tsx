@@ -1,13 +1,22 @@
 import { FC } from 'react'
 import dayjs from 'dayjs'
 import { TemplateProps } from '../types'
+import {
+  getBillFromHeadingAndBodyLines,
+  getIssuedToHeadingAndBodyLines,
+} from '../invoice-party-headings'
 import sc from './softcard.module.scss'
 
 const SoftcardTemplate: FC<TemplateProps> = ({
-  data, componentRef, isEnglish, currencyLabel, modernInvoiceNumber,
+  data, componentRef, isEnglish, currencyLabel, modernInvoiceNumber, domainName,
   rows, getQty, subtotal, taxPercent, taxAmount, total,
   paymentInfoLines, issuedToLines, normalizedBankDetailsLines,
 }) => {
+  const { heading: paymentHeading, bodyLines: paymentBodyLines } =
+    getBillFromHeadingAndBodyLines(data, paymentInfoLines)
+  const { heading: issuedHeading, bodyLines: issuedBodyLines } =
+    getIssuedToHeadingAndBodyLines(data, issuedToLines, domainName)
+
   return (
     <div
       className={sc.scInvoice}
@@ -56,10 +65,17 @@ const SoftcardTemplate: FC<TemplateProps> = ({
             <div className={sc.scPartyLabel}>
               {isEnglish ? 'Bill from' : 'Платіжні дані'}
             </div>
-            {paymentInfoLines.map((line: string, idx: number) => (
+            {!!paymentHeading && (
+              <div className={sc.scPartyName}>{paymentHeading}</div>
+            )}
+            {paymentBodyLines.map((line: string, idx: number) => (
               <div
                 key={`pi-${idx}`}
-                className={idx === 0 ? sc.scPartyName : sc.scPartyLine}
+                className={
+                  !paymentHeading && idx === 0
+                    ? sc.scPartyName
+                    : sc.scPartyLine
+                }
               >
                 {line}
               </div>
@@ -92,10 +108,15 @@ const SoftcardTemplate: FC<TemplateProps> = ({
           <div className={sc.scPartyLabel}>
             {isEnglish ? 'Issued to' : 'Отримувач'}
           </div>
-          {issuedToLines.map((line: string, idx: number) => (
+          {!!issuedHeading && (
+            <div className={sc.scPartyName}>{issuedHeading}</div>
+          )}
+          {issuedBodyLines.map((line: string, idx: number) => (
             <div
               key={`it-${idx}`}
-              className={idx === 0 ? sc.scPartyName : sc.scPartyLine}
+              className={
+                !issuedHeading && idx === 0 ? sc.scPartyName : sc.scPartyLine
+              }
             >
               {line}
             </div>
