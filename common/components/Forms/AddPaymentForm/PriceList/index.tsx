@@ -1,6 +1,5 @@
 import { FC, useEffect, useRef, useState } from 'react'
 import { useReactToPrint } from 'react-to-print'
-import { PrinterOutlined, TableOutlined } from '@ant-design/icons'
 import { Tooltip } from 'antd'
 import dayjs from 'dayjs'
 import styles from './styles.module.scss'
@@ -43,42 +42,35 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
 
   return (
     <>
-      <Tooltip
-        title={
-          isEnglish
-            ? 'Show quantity and price columns in the act table'
-            : 'Показувати кількість і ціну в таблиці акту'
-        }
-      >
-        <TableOutlined
-          role="button"
-          tabIndex={0}
-          aria-label={
-            showQuantityInPreview
-              ? isEnglish
-                ? 'Hide quantity and price in act table'
-                : 'Приховати кількість і ціну в акті'
-              : isEnglish
-                ? 'Show quantity and price in act table'
-                : 'Показати кількість і ціну в акті'
+      <div className={styles.actions} style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+        {/* 1. ПРИНТЕР ТЕПЕР ПЕРШИЙ + ТУЛТИП */}
+        <Tooltip title={isEnglish ? 'Print' : 'Надрукувати'}>
+          <PrinterOutlined className={styles.print} onClick={handlePrint} />
+        </Tooltip>
+
+        {/* 2. РЕДАГУВАННЯ (Я додав іконку, якої не було в твоєму початковому коді, але яка була в правках) */}
+        <Tooltip title={isEnglish ? 'Select template' : 'Обрати шаблон'}>
+          <EditOutlined className={styles.edit} />
+        </Tooltip>
+
+        {/* 3. ТАБЛИЦЯ */}
+        <Tooltip
+          title={
+            isEnglish
+              ? 'Show quantity and price columns in the act table'
+              : 'Показувати кількість і ціну в таблиці акту'
           }
-          aria-pressed={showQuantityInPreview}
-          className={`${styles.tableDetailsToggle} ${
-            showQuantityInPreview ? styles.tableDetailsToggleActive : ''
-          }`}
-          onClick={() => setShowQuantityInPreview(!showQuantityInPreview)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault()
-              setShowQuantityInPreview(!showQuantityInPreview)
-            }
-          }}
-        />
-      </Tooltip>
-      
-      <Tooltip title="Друк" placement="top">
-        <PrinterOutlined className={styles.print} onClick={handlePrint} />
-      </Tooltip>
+        >
+          <TableOutlined
+            role="button"
+            tabIndex={0}
+            className={`${styles.tableDetailsToggle} ${
+              showQuantityInPreview ? styles.tableDetailsToggleActive : ''
+            }`}
+            onClick={() => setShowQuantityInPreview(!showQuantityInPreview)}
+          />
+        </Tooltip>
+      </div>
 
       <div ref={componentRef}>
         <div
