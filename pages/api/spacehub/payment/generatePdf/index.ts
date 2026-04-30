@@ -3,7 +3,11 @@ import {
   IGeneratePaymentPDF,
 } from '@common/api/paymentApi/payment.api.types'
 import { NextApiRequest, NextApiResponse } from 'next'
-import { generatePdf, generateZip } from '@utils/pdf/bufferGenerators'
+import {
+  generatePdf,
+  generateZip,
+  getPaymentPdfBaseFileName,
+} from '@utils/pdf/bufferGenerators'
 
 export default async function handler(
   req: NextApiRequest,
@@ -22,7 +26,7 @@ export default async function handler(
           res.setHeader('Content-Disposition', 'attachment; filename=formData')
 
           const response = {
-            fileName: `${payments[0]?.reciever?.companyName} inv ${payments[0]?.invoiceNumber}`,
+            fileName: getPaymentPdfBaseFileName(payment),
             fileExtension: 'pdf',
             buffer: pdfBuffer,
           }
