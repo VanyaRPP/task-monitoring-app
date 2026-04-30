@@ -32,7 +32,8 @@ function processExpected(data: any[]) {
       ...rest,
       _id: _id.toString(),
       street: (street?._id || street)?.toString(),
-      domain: (domain?._id || domain)?.toString()
+      domain: (domain?._id || domain)?.toString(),
+      rnokpp: '',
     };
   }));
 }
