@@ -465,14 +465,21 @@ const [template, setTemplate] = useState<TemplateKey>(
       company: formData.company,
       monthService: monthServiceId,
       invoiceCreationDate: formData.invoiceCreationDate
-        ? new Date(
+      ? (() => {    
+        const now = new Date()  
+        return new Date(    
             Date.UTC(
               formData.invoiceCreationDate.year(),
               formData.invoiceCreationDate.month(),
-              formData.invoiceCreationDate.date()
-            )
+              formData.invoiceCreationDate.date(),
+              now.getUTCHours(),
+              now.getUTCMinutes(),
+              now.getUTCSeconds(),
+              now.getUTCMilliseconds()
           )
-        : null,
+        )
+      })()
+      : new Date(),
       description: formData.description || '',
       generalSum: formData.generalSum || formData.debit,
       currency: formData.currency || Currency.UAH,
