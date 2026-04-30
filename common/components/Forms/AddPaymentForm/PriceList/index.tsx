@@ -1,5 +1,6 @@
 import { FC, useEffect, useRef, useState } from 'react'
 import { useReactToPrint } from 'react-to-print'
+import { PrinterOutlined, TableOutlined } from '@ant-design/icons'
 import { Tooltip } from 'antd'
 import dayjs from 'dayjs'
 import styles from './styles.module.scss'
@@ -7,6 +8,10 @@ import GroupedPricesTable from '@components/Forms/GroupedReceiptForm/GroupedPric
 import { IPayment } from '@common/api/paymentApi/payment.api.types'
 import { getCurrencyNames, normalizeCurrency } from '@utils/helpers'
 import { usePaymentContext } from '@components/AddPaymentModal'
+import {
+  getDomainHeading,
+  getRecipientCompanyHeading,
+} from '@common/components/Forms/GroupedReceiptForm/templates/invoice-party-headings'
 
 const PriceList: FC<{ data: IPayment }> = ({ data }) => {
   const [payment, setPayment] = useState(data)
@@ -25,13 +30,39 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
     setTotalFractionSum(Number(fraction))
   }, [payment])
 
-  const company = payment?.company as { currency?: string } | string | undefined
-  const companyCurrency = typeof company === 'object' ? company?.currency : undefined
-  const currency = companyCurrency || payment?.domain?.currency
-  const currencyNames = getCurrencyNames(currency)
+  const paymentCompany = payment?.company as { currency?: string } | string | undefined
+  const companyCurrency = typeof paymentCompany === 'object' ? paymentCompany?.currency : undefined
+  const currency = payment?.currency || companyCurrency || payment?.domain?.currency 
   const isEnglish = normalizeCurrency(currency) !== 'UAH'
+  const currencyNames = getCurrencyNames(currency, isEnglish)
 
-  const { showQuantityInPreview, setShowQuantityInPreview } = usePaymentContext()
+  const { company, showQuantityInPreview, setShowQuantityInPreview } =
+    usePaymentContext()
+
+  const domainNameFromContext =
+    typeof company?.domain === 'object' && company?.domain !== null
+      ? (company.domain as { name?: string }).name
+      : undefined
+  const domainHeading = getDomainHeading(payment, domainNameFromContext)
+  const customerHeading = getRecipientCompanyHeading(
+    payment,
+    company?.companyName
+  )
+
+  const formatActNarrowSpace = (value: string | undefined) =>
+    (value?.trim() || '').replace(/(:\s)/g, ':\u00A0')
+  const introCustomerText = [
+    customerHeading,
+    formatActNarrowSpace(payment?.reciever?.description),
+  ]
+    .filter((s) => s.length > 0)
+    .join(' ')
+  const introProviderText = [
+    domainHeading,
+    formatActNarrowSpace(payment?.provider?.description),
+  ]
+    .filter((s) => s.length > 0)
+    .join(' ')
 
   const componentRef = useRef()
   const handlePrint = useReactToPrint({
@@ -42,35 +73,42 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
 
   return (
     <>
-      <div className={styles.actions} style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
-        {/* 1. ПРИНТЕР ТЕПЕР ПЕРШИЙ + ТУЛТИП */}
-        <Tooltip title={isEnglish ? 'Print' : 'Надрукувати'}>
-          <PrinterOutlined className={styles.print} onClick={handlePrint} />
-        </Tooltip>
-
-        {/* 2. РЕДАГУВАННЯ (Я додав іконку, якої не було в твоєму початковому коді, але яка була в правках) */}
-        <Tooltip title={isEnglish ? 'Select template' : 'Обрати шаблон'}>
-          <EditOutlined className={styles.edit} />
-        </Tooltip>
-
-        {/* 3. ТАБЛИЦЯ */}
-        <Tooltip
-          title={
-            isEnglish
-              ? 'Show quantity and price columns in the act table'
-              : 'Показувати кількість і ціну в таблиці акту'
+      <Tooltip
+        title={
+          isEnglish
+            ? 'Show quantity and price columns in the act table'
+            : 'Показувати кількість і ціну в таблиці акту'
+        }
+      >
+        <TableOutlined
+          role="button"
+          tabIndex={0}
+          aria-label={
+            showQuantityInPreview
+              ? isEnglish
+                ? 'Hide quantity and price in act table'
+                : 'Приховати кількість і ціну в акті'
+              : isEnglish
+                ? 'Show quantity and price in act table'
+                : 'Показати кількість і ціну в акті'
           }
-        >
-          <TableOutlined
-            role="button"
-            tabIndex={0}
-            className={`${styles.tableDetailsToggle} ${
-              showQuantityInPreview ? styles.tableDetailsToggleActive : ''
-            }`}
-            onClick={() => setShowQuantityInPreview(!showQuantityInPreview)}
-          />
-        </Tooltip>
-      </div>
+          aria-pressed={showQuantityInPreview}
+          className={`${styles.tableDetailsToggle} ${
+            showQuantityInPreview ? styles.tableDetailsToggleActive : ''
+          }`}
+          onClick={() => setShowQuantityInPreview(!showQuantityInPreview)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              setShowQuantityInPreview(!showQuantityInPreview)
+            }
+          }}
+        />
+      </Tooltip>
+
+      <Tooltip title={isEnglish ? 'Print act' : 'Друкувати акт'}>
+        <PrinterOutlined className={styles.print} onClick={handlePrint} />
+      </Tooltip>
 
       <div ref={componentRef}>
         <div
@@ -88,6 +126,12 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
                 <div>
                   <strong>{isEnglish ? 'APPROVED' : 'ЗАТВЕРДЖУЮ'}</strong>
                   <br />
+                  {!!domainHeading && (
+                    <>
+                      <strong>{domainHeading}</strong>
+                      <br />
+                    </>
+                  )}
                   <pre>{payment.provider.description?.trim()}</pre>
                 </div>
               </div>
@@ -95,6 +139,12 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
                 <div>
                   <strong>{isEnglish ? 'APPROVED' : 'ЗАТВЕРДЖУЮ'}</strong>
                   <br />
+                  {!!customerHeading && (
+                    <>
+                      <strong>{customerHeading}</strong>
+                      <br />
+                    </>
+                  )}
                   <pre>
                     {payment?.reciever?.description?.trim()} <br />
                     {payment?.reciever?.adminEmails?.map((email) => (
@@ -139,13 +189,9 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
               {isEnglish ? (
                 <>
                   We, the undersigned, the representative of the Customer{' '}
-                  {payment.reciever.description
-                    ?.trim()
-                    .replace(/(:\s)/g, ':\u00A0')}
+                  {introCustomerText}
                   , on one side, and the representative of the Provider{' '}
-                  {payment.provider.description
-                    ?.trim()
-                    .replace(/(:\s)/g, ':\u00A0')}
+                  {introProviderText}
                   , on the other side, have executed this Act confirming that,
                   under the agreement, the Provider performed the following
                   services:
@@ -153,14 +199,9 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
               ) : (
                 <>
                   Ми, що нижче підписалися, представник Замовника{' '}
-                  {payment.reciever.description
-                    ?.trim()
-                    .replace(/(:\s)/g, ':\u00A0')}
-                  , з одного боку, і представник Виконавця{' '}
-                  {payment.provider.description
-                    ?.trim()
-                    .replace(/(:\s)/g, ':\u00A0')}
-                  , з іншого боку, склали цей акт про те, що на підставі
+                  {introCustomerText}
+                  , з одного боку, і представник Виконавця {introProviderText},
+                  з іншого боку, склали цей акт про те, що на підставі
                   договору, Виконавцем були виконані наступні роботи (надані
                   такі послуги):
                 </>
@@ -184,7 +225,7 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
                 {isEnglish ? (
                   <>
                     The total cost of services excluding VAT is{' '}
-                    {totalSum.toFixed(0)} {currencyNames.major}{' '}
+                    {totalSum.toFixed(0)} {currencyNames.major}{}
                     {totalFractionSum} {currencyNames.minor}, VAT is 0{' '}
                     {currencyNames.major} 00 {currencyNames.minor}, and the
                     total cost including VAT is {totalSum.toFixed(0)}{' '}
@@ -218,6 +259,12 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
                 <div>
                   <b>{isEnglish ? 'Provider' : 'Від Виконавця'}</b>
                   <br />
+                  {!!domainHeading && (
+                    <>
+                      <b>{domainHeading}</b>
+                      <br />
+                    </>
+                  )}
                   <br />
                   <hr />
                   <br />
@@ -232,6 +279,12 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
                 <div>
                   <b>{isEnglish ? 'Customer' : 'Від Замовника'}</b>
                   <br />
+                  {!!customerHeading && (
+                    <>
+                      <b>{customerHeading}</b>
+                      <br />
+                    </>
+                  )}
                   <br />
                   <hr />
                   <br />
