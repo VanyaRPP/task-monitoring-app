@@ -195,6 +195,28 @@ export const domainApi = createApi({
         data: { archived?: boolean; deleted?: boolean; usageCount: number }
       }) => response.data,
     }),
+    cloneDomainTypeTemplateForDomain: builder.mutation<
+      {
+        groups: { groupName: string; services: string[] }[]
+        clonedCount: number
+        missingCount: number
+      },
+      { _id: string; domainId: string }
+    >({
+      query: ({ _id, domainId }) => ({
+        url: `domain-type-templates/${_id}/clone-for-domain`,
+        method: 'POST',
+        body: { domainId },
+      }),
+      transformResponse: (response: {
+        success: boolean
+        data: {
+          groups: { groupName: string; services: string[] }[]
+          clonedCount: number
+          missingCount: number
+        }
+      }) => response.data,
+    }),
   }),
 })
 
@@ -211,4 +233,5 @@ export const {
   useAddDomainTypeTemplateMutation,
   useEditDomainTypeTemplateMutation,
   useDeleteDomainTypeTemplateMutation,
+  useCloneDomainTypeTemplateForDomainMutation,
 } = domainApi

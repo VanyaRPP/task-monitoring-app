@@ -52,18 +52,6 @@ export default async function handler(
           })
         }
 
-        const escapedName = escapeRegexForMongo(trimmedName)
-        const existingService = await CustomService.findOne({
-          name: { $regex: `^${escapedName}$`, $options: 'i' },
-        })
-
-        if (existingService) {
-          return res.status(409).json({
-            success: false,
-            message: 'Послуга з такою назвою вже існує',
-          })
-        }
-
         const parsedType = parseServiceTypeInput(req.body?.serviceType)
         if (!parsedType.ok) {
           return res.status(400).json({
@@ -72,10 +60,43 @@ export default async function handler(
           })
         }
 
+        let domainObjectId: mongoose.Types.ObjectId | undefined
+        const rawDomainId = req.body?.domainId
+        if (rawDomainId !== undefined && rawDomainId !== null && rawDomainId !== '') {
+          if (!mongoose.Types.ObjectId.isValid(String(rawDomainId))) {
+            return res.status(400).json({
+              success: false,
+              message: 'Невалідний domainId',
+            })
+          }
+          domainObjectId = new mongoose.Types.ObjectId(String(rawDomainId))
+        }
+
+        const escapedName = escapeRegexForMongo(trimmedName)
+        const nameRegex = { $regex: `^${escapedName}$`, $options: 'i' }
+        const uniquenessFilter: Record<string, unknown> = { name: nameRegex }
+        if (domainObjectId) {
+          uniquenessFilter.domain = domainObjectId
+        } else {
+          uniquenessFilter.$or = [
+            { domain: null },
+            { domain: { $exists: false } },
+          ]
+        }
+        const existingService = await CustomService.findOne(uniquenessFilter)
+
+        if (existingService) {
+          return res.status(409).json({
+            success: false,
+            message: 'Послуга з такою назвою вже існує',
+          })
+        }
+
         const customService = await CustomService.create({
           name: trimmedName,
           fieldName: transliterateAndCamelCase(trimmedName),
           ...(parsedType.value ? { serviceType: parsedType.value } : {}),
+          ...(domainObjectId ? { domain: domainObjectId } : {}),
         })
 
         return res.status(201).json({
@@ -224,7 +245,7 @@ export default async function handler(
 
     case 'GET':
       try {
-        const { _id } = req.query
+        const { _id, domainId: rawDomainId } = req.query
 
         if (isUser) {
           return res.status(400).json({
@@ -233,12 +254,34 @@ export default async function handler(
           })
         }
 
+        const filter: Record<string, unknown> = {}
+        if (
+          rawDomainId !== undefined &&
+          rawDomainId !== null &&
+          rawDomainId !== ''
+        ) {
+          const domainIdStr = Array.isArray(rawDomainId)
+            ? String(rawDomainId[0])
+            : String(rawDomainId)
+          if (!mongoose.Types.ObjectId.isValid(domainIdStr)) {
+            return res.status(400).json({
+              success: false,
+              message: 'Невалідний domainId',
+            })
+          }
+          filter.$or = [
+            { domain: new mongoose.Types.ObjectId(domainIdStr) },
+            { domain: { $in: [null, undefined] } },
+            { domain: { $exists: false } },
+          ]
+        }
+
         const hasExplicitIds =
           _id !== undefined && _id !== null && _id !== ''
 
         let customServices
         if (!hasExplicitIds) {
-          customServices = await CustomService.find().lean()
+          customServices = await CustomService.find(filter).lean()
         } else {
           const rawIds: string[] = Array.isArray(_id)
             ? _id.flatMap((value) => String(value).split(','))
@@ -248,7 +291,10 @@ export default async function handler(
             .filter((id) => mongoose.Types.ObjectId.isValid(id))
 
           customServices = validIds.length
-            ? await CustomService.find({ _id: { $in: validIds } }).lean()
+            ? await CustomService.find({
+                ...filter,
+                _id: { $in: validIds },
+              }).lean()
             : []
         }
 

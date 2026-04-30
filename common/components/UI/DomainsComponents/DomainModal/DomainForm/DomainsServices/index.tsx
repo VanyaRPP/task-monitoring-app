@@ -2,7 +2,10 @@ import {
   useGetCustomServicesQuery,
   useCreateCustomServiceMutation,
 } from '@common/api/customServicesApi/customServices.api'
-import { useGetDomainTypeTemplatesQuery } from '@common/api/domainApi/domain.api'
+import {
+  useCloneDomainTypeTemplateForDomainMutation,
+  useGetDomainTypeTemplatesQuery,
+} from '@common/api/domainApi/domain.api'
 import { IDomainTypeTemplate } from '@common/api/domainApi/domain.api.types'
 import { useCreateDomainSnapshotMutation } from '@common/api/domainSnapshotsApi/domain-snapshots.api'
 import { Button, Form, FormInstance, Modal, message } from 'antd'
@@ -31,13 +34,16 @@ function templateToFormGroups(template: IDomainTypeTemplate) {
 const DomainsServices: FC<Props> = ({ form, editable, domainId }) => {
   const [createCustomService] = useCreateCustomServiceMutation()
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const { data: customServicesData } = useGetCustomServicesQuery({})
+  const { data: customServicesData } = useGetCustomServicesQuery({
+    ...(domainId ? { domainId } : {}),
+  })
   const { data: templates = [] } = useGetDomainTypeTemplatesQuery(undefined, {
     skip: !editable,
   })
   const [createSnapshot] = useCreateDomainSnapshotMutation()
+  const [cloneTemplate] = useCloneDomainTypeTemplateForDomainMutation()
 
-  const applyTemplate = (templateId: string | null) => {
+  const applyTemplate = async (templateId: string | null) => {
     form.setFieldsValue({ domainTypeTemplateId: templateId })
     if (!templateId) {
       form.setFieldsValue({ customServices: [] })
@@ -45,6 +51,19 @@ const DomainsServices: FC<Props> = ({ form, editable, domainId }) => {
     }
     const template = templates.find((t) => t._id === templateId)
     if (!template) return
+    if (domainId) {
+      try {
+        const result = await cloneTemplate({
+          _id: templateId,
+          domainId,
+        }).unwrap()
+        form.setFieldsValue({ customServices: result.groups })
+        return
+      } catch (e) {
+        console.warn('clone-for-domain failed, falling back to references', e)
+      }
+    }
+
     form.setFieldsValue({ customServices: templateToFormGroups(template) })
   }
 
@@ -57,11 +76,6 @@ const DomainsServices: FC<Props> = ({ form, editable, domainId }) => {
     )
   }
 
-  // Tracks the templateId that is CURRENTLY applied to the form. We can't
-  // read this from the form once Select fires onChange because Form.Item
-  // updates form state synchronously to the new value before our handler
-  // runs. So we maintain it ourselves: seed once when initialValues land,
-  // then update only after a successful apply / restore.
   const lastAppliedTemplateIdRef = useRef<string | null>(null)
   const seededRef = useRef(false)
   const watchedTemplateId = Form.useWatch('domainTypeTemplateId', form) as
@@ -76,9 +90,9 @@ const DomainsServices: FC<Props> = ({ form, editable, domainId }) => {
     seededRef.current = true
   }, [watchedTemplateId])
 
-  const handleTemplateChange = (templateId: string | null) => {
+  const handleTemplateChange = async (templateId: string | null) => {
     if (!hasUserData()) {
-      applyTemplate(templateId)
+      await applyTemplate(templateId)
       lastAppliedTemplateIdRef.current = templateId
       return
     }
@@ -94,10 +108,6 @@ const DomainsServices: FC<Props> = ({ form, editable, domainId }) => {
       okButtonProps: { danger: true },
       onOk: async () => {
         if (canSnapshot) {
-          // Capture form's current customServices (Select.onChange does not
-          // touch this field — still the OLD groups) and use the previous
-          // templateId from the ref (NOT the form, which AntD already moved
-          // to the new selection).
           const currentGroups = (form.getFieldValue('customServices') ??
             []) as { groupName?: string; services?: string[] }[]
           const payload = buildSnapshotPayloadOnTemplateSwitch({
@@ -112,16 +122,13 @@ const DomainsServices: FC<Props> = ({ form, editable, domainId }) => {
               ...payload,
             }).unwrap()
           } catch (e) {
-            // Empty/missing form state isn't a hard failure — proceed with switch.
             console.warn('snapshot before template switch skipped', e)
           }
         }
-        applyTemplate(templateId)
+        await applyTemplate(templateId)
         lastAppliedTemplateIdRef.current = templateId
       },
       onCancel: () => {
-        // Form.Item already moved to the new value when Select fired onChange.
-        // Restore the previous one without re-running customServices logic.
         form.setFieldsValue({ domainTypeTemplateId: previousId })
       },
     })
