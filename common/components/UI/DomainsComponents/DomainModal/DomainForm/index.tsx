@@ -57,14 +57,18 @@ const DomainForm: React.FC<Props> = ({
         domainId={domainId}
       />
       <DomainInfo editable={editable} form={form} currentDomainId={domainId} setIsValueChanged={setIsValueChanged} />
-      <Form.Item name="defaultTemplate" label="Шаблон за замовчуванням для рахунків">
-        <Select
-          options={TEMPLATE_OPTIONS}
-          placeholder="Класичний шаблон"
-          disabled={!editable}
-          allowClear
-        />
-      </Form.Item>
+          <Form.Item 
+      name="defaultTemplate" 
+      label="Шаблон за замовчуванням для рахунків"
+      className={s.templateItem} // Додаємо наш новий клас сюди
+    >
+      <Select
+        options={TEMPLATE_OPTIONS}
+        placeholder="Класичний шаблон"
+        disabled={!editable}
+        allowClear
+      />
+    </Form.Item>
     </Form>
   )
 }
