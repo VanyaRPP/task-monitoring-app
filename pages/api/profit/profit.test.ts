@@ -48,7 +48,21 @@ jest.mock('@next-auth/mongodb-adapter', () => ({
     })),
   })),
 }))
+jest.mock('next-auth', () => ({
+  __esModule: true,
+  default: jest.fn(),
+  getServerSession: jest.fn(),
+}))
 
+jest.mock('next-auth/providers/github', () => ({ __esModule: true, default: jest.fn() }))
+jest.mock('next-auth/providers/google', () => ({ __esModule: true, default: jest.fn() }))
+jest.mock('next-auth/providers/credentials', () => ({ __esModule: true, default: jest.fn() }))
+
+jest.mock('@pages/api/auth/[...nextauth]', () => ({
+  __esModule: true,
+  authOptions: {},
+  default: jest.fn(),
+}))
 describe('Profit Payment API - GET', () => {
   beforeEach(() => {
     jest.clearAllMocks()
