@@ -1,4 +1,6 @@
 import { expect } from '@jest/globals'
+if (typeof global.fetch === 'undefined') 
+  global.fetch = jest.fn() as any
 import { mockLoginAs } from '@utils/mockLoginAs'
 import { setupTestEnvironment } from '@utils/setupTestEnvironment'
 import { profits, users, domains } from '@utils/testData'
