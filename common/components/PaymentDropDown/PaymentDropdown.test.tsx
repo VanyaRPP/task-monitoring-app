@@ -16,6 +16,10 @@ jest.mock('@assets/features/formatDate', () => ({
   dateToDefaultFormat: jest.fn(() => '01.01.2025'),
 }))
 
+jest.mock('@common/api/paymentApi/payment.api', () => ({
+  useGeneratePdfMutation: () => [jest.fn(), { isLoading: false }],
+}))
+
 const modalConfirmMock = Modal.confirm as jest.Mock
 
 const basePayment = {

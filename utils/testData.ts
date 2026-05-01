@@ -371,6 +371,8 @@ export const paymentsForDates = [
     description: '',
     invoice: [],
     generalSum: 99993,
+    currency: 'UAH',
+    template: 'classic',
   },
   {
     _id: '64f047a89f13c12200836945',
@@ -383,6 +385,8 @@ export const paymentsForDates = [
     description: '',
     invoice: [],
     generalSum: 1387,
+    currency: 'UAH',
+    template: 'ledger',
   },
   {
     _id: '64f0462a9f13c12200836914',
@@ -395,6 +399,8 @@ export const paymentsForDates = [
     description: '',
     invoice: [],
     generalSum: 33580.25,
+    currency: 'UAH',
+    template: 'classic',
   },
   {
     _id: '64f086673fcebe9d3ccfdacc',
@@ -407,6 +413,8 @@ export const paymentsForDates = [
     description: 'dsc',
     invoice: [],
     generalSum: 0,
+    currency: 'UAH',
+    template: 'ledger',
   },
   {
     _id: '64ee5a28d276c6c1938bd068',
@@ -419,6 +427,8 @@ export const paymentsForDates = [
     description: '',
     invoice: [],
     generalSum: 30017.13,
+    currency: 'UAH',
+    template: 'olimp',
   },
   {
     _id: '64ee5a28d276c6c1938bd065',
@@ -431,6 +441,8 @@ export const paymentsForDates = [
     description: '',
     invoice: [],
     generalSum: 28534.3,
+    currency: 'UAH',
+    template: 'classic',
   },
   {
     _id: '64ee5a28d276c6c1938bd063',
@@ -443,6 +455,8 @@ export const paymentsForDates = [
     description: '',
     invoice: [],
     generalSum: 27207.77,
+    currency: 'UAH',
+    template: 'olimp',
   },
 ]
 
@@ -484,6 +498,8 @@ export const payments = [
       },
     ],
     generalSum: 1000,
+    currency: 'UAH',
+    template: 'classic',
   },
   {
     _id: '64d68421d9ba2fc8fea79d61',
@@ -522,6 +538,8 @@ export const payments = [
       },
     ],
     generalSum: 1000,
+    currency: 'UAH',
+    template: 'olimp',
   },
   {
     _id: '64d68421d9ba2fc8fea79d62',
@@ -560,6 +578,8 @@ export const payments = [
       },
     ],
     generalSum: 1600,
+    currency: 'UAH',
+    template: 'classic',
   },
   {
     _id: '64d68421d9ba2fc8fea79d63',
@@ -598,6 +618,8 @@ export const payments = [
       },
     ],
     generalSum: 1000,
+    currency: 'UAH',
+    template: 'ledger',
   },
   ...paymentsForDates,
 ].sort((a, b) => compareDates(a.invoiceCreationDate, b.invoiceCreationDate))

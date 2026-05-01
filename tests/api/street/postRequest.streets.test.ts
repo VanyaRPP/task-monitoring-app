@@ -60,7 +60,7 @@ describe('API Route - POST Method', () => {
     expect(mockResponse.json).toHaveBeenCalledWith(
       expect.objectContaining({
         success: false,
-        message: 'not allowed',
+        message: 'Access denied: not an admin',
       })
     )
   })

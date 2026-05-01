@@ -105,7 +105,7 @@ export const Sum: React.FC<InvoiceComponentProps> = ({ form, name: _name }) => {
   const { company } = usePaymentContext()
 
   useEffect(() => {
-    form.setFieldValue(['invoice', ...name, 'sum'], +price)
+    form.setFieldValue(['invoice', ...name, 'sum'], +price || 0)
   }, [form, name, price])
 
   return <strong>{currencyWithUnit(toRoundFixed(sum), company)}</strong>
