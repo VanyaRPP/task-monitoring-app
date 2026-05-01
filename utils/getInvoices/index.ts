@@ -404,11 +404,7 @@ export const getGarbageCollectorInvoice = ({
   }
 
   if (company?.garbageCollector === false) {
-    return {
-      type: ServiceType.GarbageCollector,
-      price: 0,
-      sum: 0,
-    }
+    return
   }
 
   if (

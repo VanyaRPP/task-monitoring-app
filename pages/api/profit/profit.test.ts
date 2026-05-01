@@ -23,9 +23,18 @@ jest.setTimeout(60000)
 dayjs.extend(isSameOrBefore)
 dayjs.extend(isSameOrAfter)
 
-jest.mock('@utils/getCurrentUser')
-jest.mock('@modules/models/Domain')
-jest.mock('@modules/models/Payment')
+jest.mock('@utils/getCurrentUser', () => ({
+  __esModule: true,
+  getCurrentUser: jest.fn(),
+}))
+jest.mock('@modules/models/Domain', () => ({
+  __esModule: true,
+  default: { find: jest.fn() },
+}))
+jest.mock('@modules/models/Payment', () => ({
+  __esModule: true,
+  default: { find: jest.fn() },
+}))
 jest.mock('@modules/models/Credit', () => ({
   find: jest.fn(),
 }))
