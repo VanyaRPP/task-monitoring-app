@@ -15,7 +15,7 @@
     margin: 0;
   }
 }
-
+ 
 .wrapper {
   margin: 24px 0;
 }
@@ -94,4 +94,14 @@
 .noData {
   padding: 20px;
   text-align: center;
+}
+.templateItem {
+  margin-top: 24px !important; // Відступ від кнопки токена зверху
+  margin-bottom: 0 !important;
+
+  :global {
+    .ant-form-item-label {
+      padding-bottom: 8px !important; // Відступ між текстом і селектом
+    }
+  }
 }
