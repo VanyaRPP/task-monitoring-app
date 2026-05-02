@@ -225,7 +225,7 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
                 {isEnglish ? (
                   <>
                     The total cost of services excluding VAT is{' '}
-                    {totalSum.toFixed(0)} {currencyNames.major}{}
+                    {totalSum.toFixed(0)} {currencyNames.major}{' '}
                     {totalFractionSum} {currencyNames.minor}, VAT is 0{' '}
                     {currencyNames.major} 00 {currencyNames.minor}, and the
                     total cost including VAT is {totalSum.toFixed(0)}{' '}
