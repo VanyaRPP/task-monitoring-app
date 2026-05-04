@@ -1,5 +1,5 @@
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
-import { useState, useEffect, useCallback, useLayoutEffect, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import DomainsBlock from '@components/DashboardPage/blocks/domains'
 import PaymentsBlock from '@components/DashboardPage/blocks/payments'
 import RealEstateBlock from '@components/DashboardPage/blocks/realEstates'
@@ -7,12 +7,12 @@ import ServicesBlock from '@components/DashboardPage/blocks/services'
 import StreetsBlock from '@components/DashboardPage/blocks/streets'
 import CompaniesAreaChart from '@components/DashboardPage/blocks/сompaniesAreaChart'
 import { Roles } from '@utils/constants'
-import { Col, Row, Space, Button, Flex,  message, Tooltip, Dropdown } from 'antd'
+import { Button, message, Tooltip, Dropdown } from 'antd'
 import { CloseOutlined, SaveOutlined, EyeOutlined, QuestionCircleOutlined } from '@ant-design/icons'
 import PaymentsChart from '@components/DashboardPage/blocks/paymentChart'
 import ProfitPage from '@components/Pages/ProfiitPage'
 import { addButton, removeButton } from '@modules/store/floatButtonSlice'
-import { useEditModelFloatButton, useDragDropPanelFloatButton  } from '@modules/hooks/useFloatButton'
+import { useEditModelFloatButton, useDragDropPanelFloatButton } from '@modules/hooks/useFloatButton'
 import { useDispatch } from 'react-redux'
 import s from './style.module.scss'
 import useTheme from '@modules/hooks/useTheme'
@@ -47,7 +47,9 @@ const ALL_WIDGETS = [
   'profits',
   'companies',
 ] as const
+
 export type WidgetKey = (typeof ALL_WIDGETS)[number]
+
 const widgetLabels: Record<WidgetKey, string> = {
   payments: 'Платежі',
   paymentsChart: 'Графік платежів',
@@ -98,6 +100,7 @@ const SortableWidget: React.FC<SortableWidgetProps> = ({ id, isEditMode, childre
     boxSizing: 'border-box',
     overflow: 'hidden',
   }
+
   return (
     <div
       ref={setNodeRef}
@@ -117,15 +120,14 @@ const Dashboard: React.FC = () => {
   const isGlobalAdmin = userResponse?.roles?.includes(Roles.GLOBAL_ADMIN)
   const [showTour, setShowTour] = useState(false)
 
-  const [isEditMode, toggleEditMode, editFloatButton] =
-    useEditModelFloatButton('dashboard')
-  const [isPanelVisible, togglePanelVisible, panelFloatButton] =
-    useDragDropPanelFloatButton('dashboard')
+  const [isEditMode, toggleEditMode] = useEditModelFloatButton('dashboard')
+  const [isPanelVisible, togglePanelVisible, panelFloatButton] = useDragDropPanelFloatButton('dashboard')
 
   const [theme] = useTheme()
   const isDark = theme === 'dark'
 
   const [hiddenWidget, setHiddenWidget] = useState<WidgetKey[]>([])
+
   const menu = (
     <div style={{ padding: 8 }}>
       <WidgetVisibilityMenu
@@ -144,9 +146,10 @@ const Dashboard: React.FC = () => {
       toggleEditMode()
     }
   }, [isPanelVisible, isEditMode, toggleEditMode])
+
   const tourFloatButton = useMemo(() => ({
     key: 'dashboard-tour',
-    icon: <QuestionCircleOutlined/>,
+    icon: <QuestionCircleOutlined />,
     onClick: () => setShowTour(true),
     tooltip: 'Тур',
     order: 5,
@@ -163,6 +166,7 @@ const Dashboard: React.FC = () => {
 
   const getLayoutStorageKey = (userId?: string) =>
     userId ? `dashboard-layout-${userId}` : 'dashboard-layout'
+
   const visibleWidgets = useMemo<WidgetKey[]>(() => {
     if (isGlobalAdmin === undefined) return [...ALL_WIDGETS]
     return isGlobalAdmin
@@ -193,7 +197,7 @@ const Dashboard: React.FC = () => {
       setOrderedWidgets(visibleWidgets)
     }
     setIsLayoutReady(true)
-  }, [userResponse?._id])
+  }, [userResponse?._id, visibleWidgets])
 
   const renderedWidgets = useMemo(
     () => orderedWidgets.filter((w) => !hiddenWidget.includes(w)),
@@ -206,17 +210,12 @@ const Dashboard: React.FC = () => {
     })
   )
 
-  const [isDraggingActive, setIsDraggingActive] = useState(false)
-
-  const handleDragStart = useCallback((_event: DragStartEvent) => {
-    setIsDraggingActive(true)
+  const handleDragStart = useCallback(() => {
     document.body.style.cursor = 'grabbing'
   }, [])
 
   const handleDragEnd = useCallback((event: DragEndEvent) => {
-    setIsDraggingActive(false)
     document.body.style.cursor = ''
-
     const { active, over } = event
     if (!over || active.id === over.id) return
 
@@ -228,7 +227,6 @@ const Dashboard: React.FC = () => {
   }, [])
 
   const handleDragCancel = useCallback(() => {
-    setIsDraggingActive(false)
     document.body.style.cursor = ''
   }, [])
 
@@ -306,8 +304,7 @@ const Dashboard: React.FC = () => {
                     rowHeight={1.3}
                     marginY={MARGIN_Y}
                     isEditMode={isEditMode}
-                    onHeightChange={() => {
-                    }}
+                    onHeightChange={() => {}}
                   >
                     <div className={s.filterWrapper}>
                       {widgetMap[key]}
@@ -322,7 +319,7 @@ const Dashboard: React.FC = () => {
       <DashboardTour 
         isVisible={showTour} 
         onClose={() => setShowTour(false)}
-        isManualStart={showTour} // Активується тільки коли натискаєш кнопку "Тур"
+        isManualStart={showTour} 
         userRoles={userResponse?.roles || []}
       />
     </div>

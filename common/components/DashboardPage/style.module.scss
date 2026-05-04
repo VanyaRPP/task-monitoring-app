@@ -1,27 +1,33 @@
+.wrapper {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px; // Відступи між рядами віджетів
+  width: 100%;
+}
+
 .gridItem {
   position: relative;
-} 
-.gridItem:hover::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  border-radius: 10px;
-  background-color: rgba(0, 0, 0, 0.1);
-  pointer-events: none;
-}
+  background: var(--component-background); 
+  border-radius: 8px;
+  box-sizing: border-box;
+  overflow: hidden;
+  transition: box-shadow 0.3s ease;
+  background-color: #fff; // За замовчуванням для світлої теми
 
-.gridItem:hover .deleteIcon {
-  opacity: 1;
-}
-
-.wrapper {
-  width: 100%;
-}
-
-.filterWrapper {
-  width: 100%;
-  height: 100%;
+  &:hover {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+    
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      border-radius: 10px;
+      background-color: rgba(0, 0, 0, 0.05);
+      pointer-events: none;
+    }
+  }
 }
 
 .toolbar {
@@ -35,28 +41,37 @@
   padding: 15px 25px 15px 15px;
   border-radius: 8px;
   margin-bottom: 25px;
+
+  &.light {
+    background: #fff;
+    color: #000;
+    border: 1px solid #d9d9d9;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  &.dark {
+    background: #141414;
+    color: #fff;
+    border: 1px solid #333;
+  }
 }
-.toolbar.light {
-  background: #fff;
-  color: #000;
-  border: 1px solid #d9d9d9;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-.toolbar.dark {
-  background: #141414;
-  color: #fff;
-  border: 1px solid #333;
-}
+
 .buttonsBlock {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+
+  button {
+    white-space: nowrap; // Щоб назви кнопок не переносилися
+  }
 }
+
 .actions {
   display: flex;
   align-items: center;
   gap: 8px;
 }
+
 .divider {
   width: 1px;
   height: 23px;
@@ -64,69 +79,72 @@
   margin-right: 25px;
   margin-top: 5px;
 }
+
+.filterWrapper {
+  width: 100%;
+  height: 100%;
+}
+
+// СТИЛІ ДЛЯ СЕЛЕКТІВ (ВИПРАВЛЕННЯ ТЕМИ ТА ПЕРЕНОСУ)
 .dropdownNoWrap {
   :global {
     .ant-select-item-option-content {
-      white-space: nowrap !important;
-    }
-  }
-}
-.wrapper {
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px; // Відступи між рядами віджетів
-}
-
-.gridItem {
-  background: var(--component-background); // Твій колір фону
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transition: box-shadow 0.3s ease;
-
-  &:hover {
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
-  }
-}
-
-// Це для кнопок у тулбарі редагування (як на image_62c2a6.png)
-.buttonsBlock {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  
-  button {
-    white-space: nowrap; // Щоб назви кнопок не переносилися
-  }
-}
-.dropdownNoWrap {
-  :global {
-    .ant-select-item-option-content {
-      white-space: nowrap !important;
+      white-space: nowrap !important; // Фікс переносу "березень 2026"
     }
 
-    // Стилі для світлої теми (за замовчуванням)
+    // Світла тема (виправлення затемнення з image_58c61c.png)
     .ant-select-dropdown {
-      background-color: #ffffff !important; // Білий фон
-      .ant-select-item-option-active {
-        background-color: #f5f5f5 !important; // Світлий ховер
-      }
+      background-color: #ffffff !important; 
+      border: 1px solid #d9d9d9;
+      
       .ant-select-item {
-        color: rgba(0, 0, 0, 0.85) !important; // Темний текст
+        color: rgba(0, 0, 0, 0.85) !important; 
+      }
+
+      .ant-select-item-option-active {
+        background-color: #f5f5f5 !important; 
       }
     }
   }
 }
 
-// Якщо у вашому проекті на body або контейнер додається клас .dark
+// Темна тема для селектів
 :global(.dark) {
   .dropdownNoWrap {
     :global {
       .ant-select-dropdown {
-        background-color: #1f1f1f !important; // Темний фон
+        background-color: #1f1f1f !important;
+        border-color: #333;
+        
         .ant-select-item {
-          color: #ffffff !important; // Білий текст
+          color: #ffffff !important; 
         }
+
+        .ant-select-item-option-active {
+          background-color: #333 !important;
+        }
+      }
+    }
+  }
+
+  .gridItem {
+    background-color: #141414;
+  }
+}
+
+// СТИЛІ ДЛЯ ФОРМИ (DOMAIN MODAL)
+.Form {
+  .formInput {
+    width: 100%;
+  }
+
+  .templateItem {
+    margin-top: 24px !important; // Відступ як на image_e28cd7.png
+    margin-bottom: 0 !important;
+
+    :global {
+      .ant-form-item-label {
+        padding-bottom: 8px !important; 
       }
     }
   }
