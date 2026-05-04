@@ -20,6 +20,7 @@ interface UseQuickSendProps {
   domain: IExtendedDomain
   selectedCompanyId: string | null
   relatedCompanies: IRealestate[]
+  onSuccess?: () => void
 }
 
 export const useQuickSend = ({
@@ -27,6 +28,7 @@ export const useQuickSend = ({
   domain,
   selectedCompanyId,
   relatedCompanies,
+  onSuccess,
 }: UseQuickSendProps) => {
   const [loading, setLoading] = useState(false)
   const [addPayment] = useAddPaymentMutation()
@@ -97,6 +99,8 @@ export const useQuickSend = ({
         }).unwrap()
 
         message.success(`Рахунок за ${formatDate(service.date, 'MMMM YYYY')} успішно створено!`)
+
+        onSuccess?.()
       } catch (error) {
         console.error('Quick send error:', error)
         message.error('Помилка при створенні рахунку')
@@ -104,7 +108,7 @@ export const useQuickSend = ({
         setLoading(false)
       }
     },
-    [selectedCompanyId, relatedCompanies, domain, addPayment, transaction, company]
+    [selectedCompanyId, relatedCompanies, domain, addPayment, transaction, company, onSuccess]
   )
 
   return {
