@@ -49,6 +49,7 @@ import GroupedReceiptForm from '../Forms/GroupedReceiptForm'
 import PaymentReceiptForm from '../Forms/PaymentReceiptForm'
 import ReceiptForm from '../Forms/ReceiptForm'
 import serviceFilter from './serviceFilter'
+import { normalizeTechnicalTransactionId } from '../Pages/BankTransactions/components/TransactionsTable/components/bankHelper'
 import s from './style.module.scss'
 
 const DEFAULT_INVOICES = [
@@ -203,7 +204,7 @@ const [template, setTemplate] = useState<TemplateKey>(
     AUT_CNTR_NAM: paymentData?.transaction?.AUT_CNTR_NAM || '',
     AUT_CNTR_MFO: paymentData?.transaction?.AUT_CNTR_MFO || '',
     Description: paymentData?.transaction?.Description || '',
-    TECHNICAL_TRANSACTION_ID: paymentData?.transaction?.TECHNICAL_TRANSACTION_ID,
+    TECHNICAL_TRANSACTION_ID: normalizeTechnicalTransactionId(paymentData?.transaction?.TECHNICAL_TRANSACTION_ID),
   }
 
   useEffect(() => {
