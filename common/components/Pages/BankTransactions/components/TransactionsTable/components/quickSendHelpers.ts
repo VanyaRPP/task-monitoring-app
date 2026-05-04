@@ -1,6 +1,10 @@
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { ITransaction } from './transactionTypes'
-import { getResolvedDescription } from './bankHelper'
+import {
+  buildFinalTechnicalTransactionId,
+  getResolvedDescription,
+  normalizeTechnicalTransactionId,
+} from './bankHelper'
 
 export interface TransactionPayload {
   AUT_CNTR_ACC: string
@@ -26,6 +30,8 @@ export function buildTransactionPayload(
     AUT_CNTR_MFO: transaction.AUT_CNTR_MFO,
     OSND: transaction.OSND,
     Description: getResolvedDescription(transaction, companies),
-    TECHNICAL_TRANSACTION_ID: transaction.TECHNICAL_TRANSACTION_ID,
+    TECHNICAL_TRANSACTION_ID:
+      buildFinalTechnicalTransactionId(transaction) ||
+      normalizeTechnicalTransactionId(transaction.TECHNICAL_TRANSACTION_ID),
   }
 }

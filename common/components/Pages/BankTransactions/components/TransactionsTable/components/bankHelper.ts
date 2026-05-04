@@ -1,6 +1,35 @@
 import { IRealestate } from "@common/api/realestateApi/realestate.api.types";
 import { ITransaction } from "./transactionTypes";
 
+export const normalizeTechnicalTransactionId = (
+  id: string | undefined | null
+): string => {
+  if (!id || typeof id !== 'string') return ''
+  return id.trim().replace(/_online$/, '')
+}
+
+export const buildFinalTechnicalTransactionId = (
+  tx: Pick<ITransaction, 'REF' | 'REFN' | 'DATE_TIME_DAT_OD_TIM_P'> | null | undefined
+): string => {
+  if (!tx?.REF || !tx?.REFN || !tx?.DATE_TIME_DAT_OD_TIM_P) return ''
+  const m = String(tx.DATE_TIME_DAT_OD_TIM_P).match(
+    /^(\d{2})\.(\d{2})\.(\d{4}) (\d{2}):(\d{2}):(\d{2})$/
+  )
+  if (!m) return ''
+  const [, dd, mm, yyyy, hh, min, ss] = m
+  return `${tx.REF}${tx.REFN}${dd}${mm}${yyyy}${hh}${min}${ss}`
+}
+
+export const technicalTransactionIdMatchCandidates = (
+  tx: Pick<ITransaction, 'TECHNICAL_TRANSACTION_ID' | 'REF' | 'REFN' | 'DATE_TIME_DAT_OD_TIM_P'> | null | undefined
+): string[] => {
+  if (!tx) return []
+  const incoming = (tx.TECHNICAL_TRANSACTION_ID || '').trim()
+  const normalized = normalizeTechnicalTransactionId(incoming)
+  const reconstructed = buildFinalTechnicalTransactionId(tx)
+  return Array.from(new Set([incoming, normalized, reconstructed].filter(Boolean)))
+}
+
 export enum MatchType {
   ACCOUNT = 'account',
   RNOKPP = 'rnokpp',
