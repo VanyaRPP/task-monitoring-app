@@ -69,14 +69,43 @@ describe('checkTransaction', () => {
     })
   })
 
-  it('calls Payment.find with TECHNICAL_TRANSACTION_ID only', async () => {
+  it('calls Payment.find with normalized TECHNICAL_TRANSACTION_ID (strips _online suffix)', async () => {
     mockedFind.mockResolvedValue([{ company: 'company-1' }])
 
     await checkTransaction({ transaction, domainId: null })
 
     expect(mockedFind).toHaveBeenCalledTimes(1)
     expect(mockedFind).toHaveBeenCalledWith({
-      'transaction.TECHNICAL_TRANSACTION_ID': 'tx_001_online',
+      'transaction.TECHNICAL_TRANSACTION_ID': { $in: ['tx_001_online', 'tx_001'] },
+    })
+  })
+
+  it('reconstructs final TECHNICAL_TRANSACTION_ID from REF+REFN+date+time and matches Payments stored in final form', async () => {
+    mockedFind.mockResolvedValue([{ company: 'company-reconstructed' }])
+
+    const result = await checkTransaction({
+      transaction: {
+        ...transaction,
+        TECHNICAL_TRANSACTION_ID: '4934881536_online',
+        REF: 'HS4HQ0501K01UM',
+        REFN: 'P',
+        DATE_TIME_DAT_OD_TIM_P: '01.05.2026 10:33:00',
+      },
+      domainId: null,
+    })
+
+    expect(mockedFind).toHaveBeenCalledWith({
+      'transaction.TECHNICAL_TRANSACTION_ID': {
+        $in: [
+          '4934881536_online',
+          '4934881536',
+          'HS4HQ0501K01UMP01052026103300',
+        ],
+      },
+    })
+    expect(result).toEqual({
+      isMatchingPayment: true,
+      previousCompanyId: 'company-reconstructed',
     })
   })
 
@@ -228,7 +257,9 @@ describe('checkTransaction', () => {
     })
 
     expect(mockedFind).toHaveBeenCalledWith({
-      'transaction.TECHNICAL_TRANSACTION_ID': 'D3K4Q3QAS2IGJEP26032026204100',
+      'transaction.TECHNICAL_TRANSACTION_ID': {
+        $in: ['D3K4Q3QAS2IGJEP26032026204100'],
+      },
     })
     expect(mockedFindOne).toHaveBeenCalledWith({
       'transaction.OSND': 'Сплата за послуги знідно рахунку, Чорна Марина Євгеніївна',
@@ -290,7 +321,9 @@ describe('checkTransaction', () => {
     expect(result.isMatchingPayment).toBe(false)
 
     expect(mockedFind).toHaveBeenCalledWith({
-      'transaction.TECHNICAL_TRANSACTION_ID': 'tx_completely_different',
+      'transaction.TECHNICAL_TRANSACTION_ID': {
+        $in: ['tx_completely_different'],
+      },
     })
   })
 

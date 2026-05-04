@@ -93,10 +93,26 @@ describe('buildTransactionPayload', () => {
     expect(result.OSND).toBe('Invoice payment')
   })
 
-  it('copies TECHNICAL_TRANSACTION_ID from transaction', () => {
-    const tx = makeTransaction({ TECHNICAL_TRANSACTION_ID: 'TECH-XYZ' })
+  it('reconstructs final TECHNICAL_TRANSACTION_ID from REF+REFN+date+time (canonical form for matching)', () => {
+    const tx = makeTransaction({
+      TECHNICAL_TRANSACTION_ID: '4934881536_online',
+      REF: 'REF001',
+      REFN: 'P',
+      DATE_TIME_DAT_OD_TIM_P: '19.01.2026 12:00:00',
+    })
     const result = buildTransactionPayload(tx, [])
-    expect(result.TECHNICAL_TRANSACTION_ID).toBe('TECH-XYZ')
+    expect(result.TECHNICAL_TRANSACTION_ID).toBe('REF001P19012026120000')
+  })
+
+  it('falls back to normalized TECHNICAL_TRANSACTION_ID when REF/REFN/date are missing', () => {
+    const tx = makeTransaction({
+      TECHNICAL_TRANSACTION_ID: 'tx_001_online',
+      REF: '',
+      REFN: '',
+      DATE_TIME_DAT_OD_TIM_P: '',
+    })
+    const result = buildTransactionPayload(tx, [])
+    expect(result.TECHNICAL_TRANSACTION_ID).toBe('tx_001')
   })
 
   it('sets Description to OSND when no account match', () => {

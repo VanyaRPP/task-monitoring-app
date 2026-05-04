@@ -348,11 +348,11 @@ describe('Auto-match fallback for old companies (via previousCompanyId)', () => 
 
 
 describe('transactionPayload passed to AddPaymentModal', () => {
-  it('includes TECHNICAL_TRANSACTION_ID', async () => {
+  it('includes TECHNICAL_TRANSACTION_ID reconstructed to canonical final form (REF+REFN+date+time)', async () => {
     mockUseGetAllRealEstateQuery.mockReturnValue({
       data: { data: [makeCompany({ account: 'NO_MATCH' })] },
     })
-    renderDrawer(makeTransaction({ TECHNICAL_TRANSACTION_ID: 'tx_unique_001' }))
+    renderDrawer(makeTransaction({ TECHNICAL_TRANSACTION_ID: 'tx_unique_001_online' }))
 
     await userEvent.click(screen.getByRole('combobox'))
     await userEvent.click(await screen.findByText('ТОВ Тест'))
@@ -362,7 +362,7 @@ describe('transactionPayload passed to AddPaymentModal', () => {
       expect(screen.getByTestId('add-payment-modal')).toBeInTheDocument()
     })
 
-    expect(lastPaymentData?.transaction?.TECHNICAL_TRANSACTION_ID).toBe('tx_unique_001')
+    expect(lastPaymentData?.transaction?.TECHNICAL_TRANSACTION_ID).toBe('HS4AP1222L05X7P22122025154500')
   })
 
   it('includes OSND so future transit sibling lookups can find this payment', async () => {

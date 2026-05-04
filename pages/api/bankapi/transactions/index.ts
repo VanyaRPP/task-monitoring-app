@@ -6,6 +6,11 @@ import { getTransactionsForDateInterval } from './utils/getTransactions/index'
 import Payment from '@modules/models/Payment'
 import Domain from '@modules/models/Domain'
 import { getCurrentUser } from '@utils/getCurrentUser'
+import {
+  buildFinalTechnicalTransactionId,
+  normalizeTechnicalTransactionId,
+  technicalTransactionIdMatchCandidates,
+} from '@components/Pages/BankTransactions/components/TransactionsTable/components/bankHelper'
 
 start()
 
@@ -16,11 +21,11 @@ export function normalizeBankAccount(acc: string | undefined | null) {
 
 export async function checkTransaction({ transaction, domainId }) {
   try {
-    const txId = normalizeBankAccount(transaction.TECHNICAL_TRANSACTION_ID)
+    const candidates = technicalTransactionIdMatchCandidates(transaction)
 
-    if (txId) {
+    if (candidates.length > 0) {
       const allPayments = await Payment.find({
-        'transaction.TECHNICAL_TRANSACTION_ID': txId,
+        'transaction.TECHNICAL_TRANSACTION_ID': { $in: candidates },
       })
 
       if (allPayments.length > 0) {

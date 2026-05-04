@@ -13,6 +13,25 @@ const httpClient = new FetchHttpClient({
   baseURL: 'https://acp.privatbank.ua/api',
 })
 
+function dateTimeSortKey(value: string | undefined | null): string {
+  if (!value || typeof value !== 'string') return ''
+  const m = value.match(/^(\d{2})\.(\d{2})\.(\d{4}) (\d{2}):(\d{2}):(\d{2})$/)
+  if (!m) return ''
+  const [, dd, mm, yyyy, hh, min, ss] = m
+  return `${yyyy}${mm}${dd}${hh}${min}${ss}`
+}
+
+export function sortTransactionsNewestFirst(
+  transactions: ITransaction[]
+): ITransaction[] {
+  return [...transactions].sort((a, b) => {
+    const ka = dateTimeSortKey(a.DATE_TIME_DAT_OD_TIM_P)
+    const kb = dateTimeSortKey(b.DATE_TIME_DAT_OD_TIM_P)
+    if (ka !== kb) return kb.localeCompare(ka)
+    return String(b.ID || '').localeCompare(String(a.ID || ''))
+  })
+}
+
 export async function getFinalTransactions(token: string, limit?: number) {
   const apiPrivatAdapter = new PrivatBankApiAdapter(httpClient, {
     token: token,
@@ -79,7 +98,7 @@ export async function getTransactionsForDateInterval(
         break
       }
     }
-    return allTransactions
+    return sortTransactionsNewestFirst(allTransactions)
   } catch (error) {
     throw new Error(`Error in fetch ${error}`)
   }
