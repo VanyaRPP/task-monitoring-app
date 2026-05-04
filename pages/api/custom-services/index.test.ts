@@ -57,7 +57,8 @@ describe('CustomServices API', () => {
 
       expect(res.status).toHaveBeenCalledWith(201)
       expect(CustomService.findOne).toHaveBeenCalledWith({
-        name: { $regex: '^Service\\.\\*$', $options: 'i' }
+        name: { $regex: '^Service\\.\\*$', $options: 'i' },
+        $or: [{ domain: null }, { domain: { $exists: false } }],
       })
     })
   })

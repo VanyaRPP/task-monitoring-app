@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { validateField } from '@assets/features/validators'
 import EmailSelect from '@components/UI/Reusable/EmailSelect'
 import { Form, FormInstance, Input, Select } from 'antd'
@@ -27,10 +26,6 @@ const DomainForm: React.FC<Props> = ({
   setIsValueChanged,
   domainId,
 }) => {
-  const [customServices, setCustomServices] = useState<
-    { _id: string; name: string }[]
-  >([])
-
   return (
     <Form
       form={form}
@@ -53,7 +48,6 @@ const DomainForm: React.FC<Props> = ({
       <DomainsServices
         form={form}
         editable={editable}
-        onCustomServicesChange={setCustomServices}
         domainId={domainId}
       />
       <DomainInfo editable={editable} form={form} currentDomainId={domainId} setIsValueChanged={setIsValueChanged} />

@@ -20,10 +20,13 @@ export const customServicesApi = createApi({
       IGetCustomServicesResponse,
       IGetCustomServicesRequest
     >({
-      query: ({ _id }) => ({
+      query: ({ _id, domainId }) => ({
         url: 'custom-services',
         method: 'GET',
-        params: { _id },
+        params: {
+          ...(_id ? { _id } : {}),
+          ...(domainId ? { domainId } : {}),
+        },
       }),
       providesTags: ['CustomService'],
     }),
@@ -64,8 +67,9 @@ export const customServicesApi = createApi({
       Partial<IExtendedCustomService>
     >({
       query: ({ _id, ...body }) => ({
-        url: `custom-services/${_id}`,
+        url: 'custom-services',
         method: 'PATCH',
+        params: { id: _id },
         body,
       }),
       invalidatesTags: ['CustomService'],

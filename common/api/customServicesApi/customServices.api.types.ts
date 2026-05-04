@@ -19,6 +19,7 @@ export interface ICustomDomainService {
 
 export interface IGetCustomServicesRequest {
   _id?: string[]
+  domainId?: string
 }
 
 export interface IGetCustomServicesByDomainRequest {

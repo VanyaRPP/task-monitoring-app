@@ -1,6 +1,9 @@
 import '@testing-library/jest-dom'
 import { TextEncoder, TextDecoder } from 'util'
 
+process.env.MONGODB_URI =
+  process.env.MONGODB_URI ?? 'mongodb://test-placeholder/jest'
+
 ;(global as any).TextEncoder = TextEncoder
 ;(global as any).TextDecoder = TextDecoder
 

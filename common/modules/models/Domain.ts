@@ -1,4 +1,4 @@
-import mongoose, { ObjectId, Schema } from 'mongoose'
+import mongoose, { ObjectId, Schema, Types } from 'mongoose'
 
 export interface IDomain {
   _id: string
@@ -13,6 +13,7 @@ export interface IDomain {
   domainBankToken: IDomainBankToken[]
   domainServices: string[]
   customServices: ICustomService[]
+  domainTypeTemplateId?: Types.ObjectId
   defaultTemplate?: string
 }
 
@@ -55,6 +56,11 @@ const DomainSchema = new Schema<IDomain>({
       services: [{ type: String, required: true }],
     },
   ],
+  domainTypeTemplateId: {
+    type: Schema.Types.ObjectId,
+    ref: 'DomainTypeTemplate',
+    required: false,
+  },
 })
 
 const Domain =
