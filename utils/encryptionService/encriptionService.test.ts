@@ -4,6 +4,14 @@ describe('EncryptionService', () => {
   const validSecretKey = 'my-secret-key'
   const service = new EncryptionService(validSecretKey)
 
+  let errorSpy: jest.SpyInstance
+  beforeAll(() => {
+    errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+  })
+  afterAll(() => {
+    errorSpy.mockRestore()
+  })
+
   it('should encrypt and decrypt a value correctly', () => {
     const originalText = 'Hello World'
     const encrypted = service.encrypt(originalText)

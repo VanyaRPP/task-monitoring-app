@@ -7,6 +7,8 @@ process.env.MONGODB_URI =
 ;(global as any).TextEncoder = TextEncoder
 ;(global as any).TextDecoder = TextDecoder
 
+process.env.SUPPRESS_JEST_WARNINGS = 'true'
+
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
   value: jest.fn().mockImplementation(query => ({

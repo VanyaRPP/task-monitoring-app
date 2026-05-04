@@ -7,7 +7,6 @@ import {
   paymentsCredit,
   realEstates,
   domains,
-  services,
 } from '@utils/testData'
 import { setupTestEnvironment } from '@utils/setupTestEnvironment'
 import { expect } from '@jest/globals'
@@ -22,9 +21,8 @@ jest.mock('@modules/models/RealEstate')
 setupTestEnvironment()
 
 describe('Deptors API - GET', () => {
-  it('should return companies with payments for the given domainId', async () => {
+  it('should return companies with positive debt for the given domainId', async () => {
     await mockLoginAs(users.globalAdmin)
-    // Мокаємо методи моделей
     const mockDomainId = domains[0]._id
 
     ;(Payment.find as jest.Mock).mockResolvedValue(paymentsCredit)
@@ -32,9 +30,8 @@ describe('Deptors API - GET', () => {
 
     const mockReq = {
       method: 'GET',
-      query: { domainId: mockDomainId },
+      query: { domainIds: mockDomainId },
     } as any
-
     const mockRes = {
       status: jest.fn(() => mockRes),
       json: jest.fn(),
@@ -42,43 +39,28 @@ describe('Deptors API - GET', () => {
 
     await handler(mockReq, mockRes)
 
-    const response = {
-      status: mockRes.status,
-      data: mockRes.json.mock.lastCall[0].companies,
-    }
+    expect(mockRes.status).toHaveBeenCalledWith(200)
 
-    expect(response.status).toHaveBeenCalledWith(200)
-
-    const expectedResponse = [
+    const body = mockRes.json.mock.lastCall[0]
+    expect(body.success).toBe(true)
+    expect(body.companies).toEqual([
       {
         companyId: '64d68421d9ba2fc8fea79d21',
         companyName: 'company_0',
-        debtPerMonth: [
-          {
-            monthService: services[0]._id,
-            totalDue: 0,
-            paid: -1000,
-            remaining: 1000,
-          },
-        ],
         totalDebt: 1000,
       },
-    ]
-
-    expect(response.data).toEqual(expectedResponse)
+    ])
   })
 
   it('should return empty companies array if no payments found', async () => {
-    const mockDomainId = 'mockDomainId'
-
+    await mockLoginAs(users.globalAdmin)
     ;(Payment.find as jest.Mock).mockResolvedValue([])
     ;(RealEstate.find as jest.Mock).mockResolvedValue([])
 
     const mockReq = {
       method: 'GET',
-      query: { domainId: mockDomainId },
+      query: { domainIds: 'mockDomainId' },
     } as any
-
     const mockRes = {
       status: jest.fn(() => mockRes),
       json: jest.fn(),
@@ -86,16 +68,12 @@ describe('Deptors API - GET', () => {
 
     await handler(mockReq, mockRes)
 
-    const response = {
-      status: mockRes.status,
-      data: mockRes.json.mock.lastCall[0].companies,
-    }
-
-    expect(response.status).toHaveBeenCalledWith(200)
-    expect(response.data).toEqual([])
+    expect(mockRes.status).toHaveBeenCalledWith(200)
+    expect(mockRes.json.mock.lastCall[0].companies).toEqual([])
   })
 
   it('should return status 500 if an error occurs', async () => {
+    await mockLoginAs(users.globalAdmin)
     ;(Payment.find as jest.Mock).mockRejectedValue(new Error('Database error'))
     ;(RealEstate.find as jest.Mock).mockRejectedValue(
       new Error('Database error')
@@ -103,9 +81,8 @@ describe('Deptors API - GET', () => {
 
     const mockReq = {
       method: 'GET',
-      query: { domainId: 'mockDomainId' },
+      query: { domainIds: 'mockDomainId' },
     } as any
-
     const mockRes = {
       status: jest.fn(() => mockRes),
       json: jest.fn(),

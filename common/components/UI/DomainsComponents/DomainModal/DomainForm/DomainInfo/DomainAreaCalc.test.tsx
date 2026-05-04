@@ -29,6 +29,7 @@ describe('AreaCalculationCard Component', () => {
   const mockForm = {
     getFieldValue: jest.fn(),
     setFieldValue: jest.fn(),
+    setFieldsValue: jest.fn(),
   };
 
   const mockRefetch = jest.fn();
@@ -82,13 +83,13 @@ describe('AreaCalculationCard Component', () => {
     expect(screen.getByText('20.00 м²')).toBeInTheDocument();
   });
 
-  test('Calls form.setFieldValue on data initialization', async () => {
+  test('Calls form.setFieldsValue on data initialization', async () => {
     mockForm.getFieldValue.mockReturnValue(null);
 
     render(<AreaCalculationCard domainId="123" editable={true} form={mockForm} />);
 
     await waitFor(() => {
-      expect(mockForm.setFieldValue).toHaveBeenCalledWith('companiesAreas', expect.any(Array));
+      expect(mockForm.setFieldsValue).toHaveBeenCalledWith({ companiesAreas: expect.any(Array) });
     });
   });
 
