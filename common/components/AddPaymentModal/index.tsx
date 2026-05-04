@@ -591,7 +591,7 @@ const [template, setTemplate] = useState<TemplateKey>(
             currency: payment?.currency || Currency.UAH,
             invoiceNumber: payment?.invoiceNumber,
             invoiceCreationDate: dayjs(payment?.invoiceCreationDate),
-            operation: payment?.type || Operations.Credit,
+            operation: payment?.type || Operations.Debit,
           }}
           form={form}
           layout="vertical"
