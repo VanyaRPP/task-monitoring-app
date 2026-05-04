@@ -166,10 +166,7 @@ const rowSelection = hasRowSelection
           onSetDeleteItems(
             rows.map(item => ({
               id: item._id,
-              date:
-                typeof item.monthService === 'object' && (item.monthService as any)?.date
-                  ? String((item.monthService as any).date)
-                  : String(item.invoiceCreationDate),
+              date: item.invoiceCreationDate ? String(item.invoiceCreationDate) : '',
               domain: (item.domain as any)?.name || '',
               company: (item.company as any)?.companyName || '',
             }))
@@ -182,10 +179,7 @@ const rowSelection = hasRowSelection
               ...paymentsDeleteItems,
               {
                 id: record._id,
-                date:
-                  typeof record.monthService === 'object' && (record.monthService as any)?.date
-                    ? String((record.monthService as any).date)
-                    : String(record.invoiceCreationDate),
+                date: record.invoiceCreationDate ? String(record.invoiceCreationDate) : '',
                 domain: (record.domain as any)?.name || '',
                 company: (record.company as any)?.companyName || '',
               },

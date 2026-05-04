@@ -233,9 +233,9 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     },
     {
       title: 'Дата',
-      dataIndex: 'date',
+      dataIndex: 'date', 
       key: 'date',
-      render: (date) => dateToDefaultFormat(date),
+      render: (date) => (date && date !== 'undefined') ? dateToDefaultFormat(date) : '-',
     },
   ]
 
