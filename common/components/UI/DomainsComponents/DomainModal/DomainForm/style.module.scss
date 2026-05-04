@@ -105,3 +105,19 @@
     }
   }
 }
+.monthDropdown {
+  :global {
+    // Стилізуємо кожен пункт списку
+    .ant-select-item-option-content {
+      white-space: nowrap !important; // Забороняємо перенос рядка
+      display: flex;
+      align-items: center;
+      gap: 8px; // Відступ між іконкою та текстом
+    }
+    
+    // Щоб весь список був достатньо широким
+    .ant-select-dropdown {
+      min-width: 160px !important; 
+    }
+  }
+}

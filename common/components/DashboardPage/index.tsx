@@ -319,11 +319,10 @@ const Dashboard: React.FC = () => {
           </SortableContext>
         </DndContext>
       )}
-      <DashboardTour userRoles={userResponse?.roles || []} />
       <DashboardTour 
         isVisible={showTour} 
         onClose={() => setShowTour(false)}
-        isManualStart={true}
+        isManualStart={showTour} // Активується тільки коли натискаєш кнопку "Тур"
         userRoles={userResponse?.roles || []}
       />
     </div>
