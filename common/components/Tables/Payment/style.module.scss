@@ -1,0 +1,14 @@
+.headerText {
+  display: inline-block;
+  position: relative;
+  z-index: 10;
+  margin-right: 4px;
+  
+
+  
+  :global(.ant-table-column-sorter) {
+    position: relative;
+    z-index: 20;
+    pointer-events: auto !important;
+  }
+}

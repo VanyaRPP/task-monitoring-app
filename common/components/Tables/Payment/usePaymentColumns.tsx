@@ -97,6 +97,7 @@ export function usePaymentColumns({
   deleteLoading,
 }: Params): ColumnsType<IExtendedPayment> {
   const { token } = theme.useToken()
+  const isEnglish = payments?.data?.[0]?.currency !== 'UAH'
 
   const isSingleCompanyByData = useMemo(
     () => companiesFilter?.length === 1,
@@ -255,7 +256,11 @@ export function usePaymentColumns({
         filterMultiple: false,
         children: [
           {
-            title: <Tooltip title="Дебет (Реалізація)">Дебет</Tooltip>,
+           title: (
+  <Tooltip title={isEnglish ? "Debit (Realization)" : "Дебет (Реалізація)"}>
+    <span className={s.headerText} onMouseEnter={e => e.stopPropagation()}>Дебет</span>
+  </Tooltip>
+),
             dataIndex: 'debit',
             align: 'center',
             width: sepDomainID ? 45 : 130,
@@ -269,9 +274,19 @@ export function usePaymentColumns({
               ? undefined
               : (a: IExtendedPayment, b: IExtendedPayment) =>
                   a.generalSum - b.generalSum,
+     showSorterTooltip: { 
+  title: isEnglish ? 'Click to sort' : 'Натисніть для сортування', 
+  target: 'sorter-icon', 
+  mouseEnterDelay: 0, 
+  mouseLeaveDelay: 0 
+},
           },
           {
-            title: <Tooltip title="Кредит (Оплата)">Кредит</Tooltip>,
+          title: (
+  <Tooltip title={isEnglish ? "Credit (Payment)" : "Кредит (Оплата)"}>
+    <span className={s.headerText} onMouseEnter={e => e.stopPropagation()}>Кредит</span>
+  </Tooltip>
+),
             dataIndex: 'credit',
             align: 'center',
             width: sepDomainID ? 45 : 130,
@@ -285,6 +300,12 @@ export function usePaymentColumns({
               ? undefined
               : (a: IExtendedPayment, b: IExtendedPayment) =>
                   a.generalSum - b.generalSum,
+   showSorterTooltip: { 
+  title: isEnglish ? 'Click to sort' : 'Натисніть для сортування', 
+  target: 'sorter-icon', 
+  mouseEnterDelay: 0, 
+  mouseLeaveDelay: 0 
+},
           },
         ],
       },
@@ -366,7 +387,14 @@ export function usePaymentColumns({
         },
       },
       ...(selectedColumns.map(value => ({
-        title: ServiceName[value],
+       title: (
+  <Tooltip title={ServiceName[value]}>
+    <span className={s.headerText} onMouseEnter={e => e.stopPropagation()}>
+      {ServiceName[value]}
+    </span>
+  </Tooltip>
+
+),
         dataIndex: value,
         width: 132,
         ellipsis: true,
@@ -379,6 +407,12 @@ export function usePaymentColumns({
         sorter: (a: IExtendedPayment, b: IExtendedPayment) =>
           (a.invoice.find(i => i.type === value)?.sum || 0) -
           (b.invoice.find(i => i.type === value)?.sum || 0),
+showSorterTooltip: { 
+  title: isEnglish ? 'Click to sort' : 'Натисніть для сортування', 
+  target: 'sorter-icon', 
+  mouseEnterDelay: 0, 
+  mouseLeaveDelay: 0 
+},
       })) as ColumnType<IExtendedPayment>[]),
       {
         align: 'center',
