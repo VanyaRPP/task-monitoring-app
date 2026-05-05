@@ -24,10 +24,17 @@ const OlimpTemplate: FC<TemplateProps> = ({
   issuedToLines,
   normalizedBankDetailsLines,
 }) => {
-  const { heading: paymentHeading, bodyLines: paymentBodyLines } =
+  const { heading: paymentHeading, bodyLines: rawPaymentBodyLines } =
     getBillFromHeadingAndBodyLines(data, paymentInfoLines)
   const { heading: issuedHeading, bodyLines: issuedBodyLines } =
     getIssuedToHeadingAndBodyLines(data, issuedToLines, domainName)
+
+  const entrepreneurTitleSplitRegex =
+    /^(private entrepreneur|private enterprise|fop|фоп|фізична особа\s*-?\s*підприємець)\s+(.+)$/i
+  const paymentBodyLines = rawPaymentBodyLines.flatMap((line) => {
+    const match = line.match(entrepreneurTitleSplitRegex)
+    return match ? [match[1], match[2]] : [line]
+  })
 
   const [topInfoCardHeight, setTopInfoCardHeight] = useState<number>(0)
   const paymentInfoCardRef = useRef<HTMLDivElement | null>(null)
