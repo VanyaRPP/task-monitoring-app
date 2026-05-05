@@ -1,14 +1,31 @@
 const trimText = (s: string | undefined) => (s ?? '').trim()
 
-const withoutLeadingDuplicate = (lines: string[], heading: string): string[] => {
+const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
+const stripHeadingFromLine = (line: string, heading: string): string => {
+  const trimmed = trimText(line)
+  if (!trimmed) return ''
+
+  if (trimmed.toLowerCase() === heading.toLowerCase()) {
+    return ''
+  }
+
+  const escaped = escapeRegExp(heading)
+  const prefix = new RegExp(`^${escaped}\\b\\s*`, 'i')
+  const suffix = new RegExp(`\\s*\\b${escaped}$`, 'i')
+
+  return trimmed.replace(prefix, '').replace(suffix, '').trim()
+}
+
+const withoutHeadingDuplicates = (
+  lines: string[],
+  heading: string
+): string[] => {
   const h = trimText(heading)
   if (!h || !lines.length) {
     return lines
   }
-  if (trimText(lines[0]) === h) {
-    return lines.slice(1)
-  }
-  return lines
+  return lines.map((line) => stripHeadingFromLine(line, h)).filter(Boolean)
 }
 
 export const getDomainHeading = (data: any, domainName?: string): string =>
@@ -25,7 +42,7 @@ export const getBillFromHeadingAndBodyLines = (
 ): { heading: string; bodyLines: string[] } => {
   const heading = getReceiverCompanyHeading(data)
   const bodyLines = heading
-    ? withoutLeadingDuplicate(paymentInfoLines, heading)
+    ? withoutHeadingDuplicates(paymentInfoLines, heading)
     : paymentInfoLines
   return { heading, bodyLines }
 }
@@ -37,7 +54,7 @@ export const getIssuedToHeadingAndBodyLines = (
 ): { heading: string; bodyLines: string[] } => {
   const heading = getDomainHeading(data, domainName)
   const bodyLines = heading
-    ? withoutLeadingDuplicate(issuedToLines, heading)
+    ? withoutHeadingDuplicates(issuedToLines, heading)
     : issuedToLines
   return { heading, bodyLines }
 }
