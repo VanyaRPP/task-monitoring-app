@@ -8,11 +8,15 @@ import {
   IExtendedAreas,
   IGetAreasResponse,
   IGetDomainByPkResponse,
+  IDomainTypeTemplate,
+  IDomainTypeTemplateGroup,
+  IDomainTypeTemplateWithUsage,
+  DomainTypeTemplateCategory,
 } from './domain.api.types'
 
 export const domainApi = createApi({
   reducerPath: 'domainApi',
-  tagTypes: ['Domain', 'IDomain'],
+  tagTypes: ['Domain', 'IDomain', 'DomainTypeTemplate'],
   refetchOnFocus: true,
   refetchOnReconnect: true,
   baseQuery: fetchBaseQuery({ baseUrl: `/api/` }),
@@ -100,6 +104,119 @@ export const domainApi = createApi({
       ],
       transformResponse: (response: IGetDomainByPkResponse) => response.data,
     }),
+    getDomainTypeTemplates: builder.query<
+      IDomainTypeTemplate[],
+      { includeArchived?: boolean } | void
+    >({
+      query: (arg) => ({
+        url: 'domain-type-templates',
+        method: 'GET',
+        params:
+          arg && 'includeArchived' in arg && arg.includeArchived
+            ? { includeArchived: 'true' }
+            : {},
+      }),
+      providesTags: ['DomainTypeTemplate'],
+      transformResponse: (response: {
+        success: boolean
+        data: IDomainTypeTemplate[]
+      }) => response.data ?? [],
+    }),
+    getDomainTypeTemplateById: builder.query<IDomainTypeTemplateWithUsage, string>({
+      query: (id) => ({
+        url: `domain-type-templates/${id}`,
+        method: 'GET',
+      }),
+      providesTags: (result, error, id) => [
+        { type: 'DomainTypeTemplate', id },
+      ],
+      transformResponse: (response: {
+        success: boolean
+        data: IDomainTypeTemplateWithUsage
+      }) => response.data,
+    }),
+    addDomainTypeTemplate: builder.mutation<
+      IDomainTypeTemplate,
+      {
+        name: string
+        groups: IDomainTypeTemplateGroup[]
+        category?: DomainTypeTemplateCategory
+      }
+    >({
+      query: (body) => ({
+        url: 'domain-type-templates',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['DomainTypeTemplate'],
+      transformResponse: (response: {
+        success: boolean
+        data: IDomainTypeTemplate
+      }) => response.data,
+    }),
+    editDomainTypeTemplate: builder.mutation<
+      IDomainTypeTemplate,
+      {
+        _id: string
+        name?: string
+        category?: DomainTypeTemplateCategory
+        groups?: IDomainTypeTemplateGroup[]
+      }
+    >({
+      query: ({ _id, ...body }) => ({
+        url: `domain-type-templates/${_id}`,
+        method: 'PATCH',
+        body,
+      }),
+      invalidatesTags: (result, error, { _id }) => [
+        'DomainTypeTemplate',
+        { type: 'DomainTypeTemplate', id: _id },
+      ],
+      transformResponse: (response: {
+        success: boolean
+        data: IDomainTypeTemplate
+      }) => response.data,
+    }),
+    deleteDomainTypeTemplate: builder.mutation<
+      { archived?: boolean; deleted?: boolean; usageCount: number },
+      { _id: string; force?: boolean; archive?: boolean }
+    >({
+      query: ({ _id, force, archive }) => ({
+        url: `domain-type-templates/${_id}`,
+        method: 'DELETE',
+        params: {
+          ...(force ? { force: 'true' } : {}),
+          ...(archive ? { archive: 'true' } : {}),
+        },
+      }),
+      invalidatesTags: ['DomainTypeTemplate'],
+      transformResponse: (response: {
+        success: boolean
+        data: { archived?: boolean; deleted?: boolean; usageCount: number }
+      }) => response.data,
+    }),
+    cloneDomainTypeTemplateForDomain: builder.mutation<
+      {
+        groups: { groupName: string; services: string[] }[]
+        clonedCount: number
+        missingCount: number
+      },
+      { _id: string; domainId: string }
+    >({
+      query: ({ _id, domainId }) => ({
+        url: `domain-type-templates/${_id}/clone-for-domain`,
+        method: 'POST',
+        body: { domainId },
+      }),
+      transformResponse: (response: {
+        success: boolean
+        data: {
+          groups: { groupName: string; services: string[] }[]
+          clonedCount: number
+          missingCount: number
+        }
+      }) => response.data,
+    }),
   }),
 })
 
@@ -111,4 +228,10 @@ export const {
   useEditDomainMutation,
   useGetDomainByPkQuery,
   useGetDomainsByAdminQuery,
+  useGetDomainTypeTemplatesQuery,
+  useGetDomainTypeTemplateByIdQuery,
+  useAddDomainTypeTemplateMutation,
+  useEditDomainTypeTemplateMutation,
+  useDeleteDomainTypeTemplateMutation,
+  useCloneDomainTypeTemplateForDomainMutation,
 } = domainApi

@@ -6,6 +6,7 @@ import { customerApi } from '@common/api/customerApi/customer.api'
 import { customServicesApi } from '@common/api/customServicesApi/customServices.api'
 import { debtorsApi } from '@common/api/debtorsApi/debtors.api'
 import { domainApi } from '@common/api/domainApi/domain.api'
+import { domainSnapshotsApi } from '@common/api/domainSnapshotsApi/domain-snapshots.api'
 import { FeatureFlagApi } from '@common/api/featureFlagsApi/featureFlag.api'
 import { filterApi } from '@common/api/filterApi/filter.api'
 import { notificationApi } from '@common/api/notificationApi/notification.api'
@@ -35,6 +36,7 @@ export const store = configureStore({
     [userApi.reducerPath]: userApi.reducer,
     [taskApi.reducerPath]: taskApi.reducer,
     [domainApi.reducerPath]: domainApi.reducer,
+    [domainSnapshotsApi.reducerPath]: domainSnapshotsApi.reducer,
     [paymentApi.reducerPath]: paymentApi.reducer,
     [serviceApi.reducerPath]: serviceApi.reducer,
     [customerApi.reducerPath]: customerApi.reducer,
@@ -69,6 +71,7 @@ export const store = configureStore({
       .concat(taskApi.middleware)
       .concat(categoryApi.middleware)
       .concat(domainApi.middleware)
+      .concat(domainSnapshotsApi.middleware)
       .concat(paymentApi.middleware)
       .concat(serviceApi.middleware)
       .concat(customerApi.middleware)

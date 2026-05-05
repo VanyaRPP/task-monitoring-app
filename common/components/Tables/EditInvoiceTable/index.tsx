@@ -1,7 +1,14 @@
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons'
+import { useGetCustomServicesByDomainQuery } from '@common/api/customServicesApi/customServices.api'
 import { IPayment } from '@common/api/paymentApi/payment.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
 import { ServiceType } from '@utils/constants'
+import {
+  catalogRowToSelectOption,
+  flattenDomainCatalogServices,
+  IInvoiceLineAddPayload,
+  invoiceLineExcludeKey,
+} from '@utils/domain/domain-invoice-selector'
 import { Form, FormInstance, Select, Table } from 'antd'
 import React, { useCallback, useMemo } from 'react'
 
@@ -150,8 +157,11 @@ export const EditInvoicesTable_unstable: React.FC<EditInvoicesTableProps> = ({
               editable
                 ? () => (
                     <InvoiceSelector
-                      exclude={invoices?.map(({ type }) => type as ServiceType)}
-                      onSelect={(value) => add({ type: value })}
+                      service={service}
+                      excludeKeys={
+                        invoices?.map((inv) => invoiceLineExcludeKey(inv)) ?? []
+                      }
+                      onSelect={(payload) => add(payload)}
                     />
                   )
                 : null
@@ -167,45 +177,69 @@ export const EditInvoicesTable_unstable: React.FC<EditInvoicesTableProps> = ({
 }
 
 export const InvoiceSelector: React.FC<{
-  exclude?: ServiceType[]
-  onSelect?: (value: ServiceType) => void
-}> = ({ exclude, onSelect }) => {
-  const handleSelect = useCallback(
-    (value: ServiceType) => {
-      if (value === ServiceType.Custom || !exclude?.includes(value)) {
-        onSelect?.(value)
-      }
-    },
-    [exclude, onSelect]
+  service?: IService
+  excludeKeys?: string[]
+  onSelect?: (payload: IInvoiceLineAddPayload) => void
+}> = ({ service, excludeKeys, onSelect }) => {
+  const domainId = service?.domain?._id
+    ? String(service.domain._id)
+    : undefined
+
+  const { data: catalogRes, isLoading } = useGetCustomServicesByDomainQuery(
+    { domainId: domainId ? [domainId] : undefined },
+    { skip: !domainId }
   )
 
-  const options = useMemo(
-    () =>
-      [
-        { value: ServiceType.Maintenance, label: 'Утримання' },
-        { value: ServiceType.Placing, label: 'Розміщення' },
-        { value: ServiceType.Inflicion, label: 'Інфляція' },
-        { value: ServiceType.GarbageCollector, label: 'Вивіз ТПВ' },
-        { value: ServiceType.Electricity, label: 'Електропостачання' },
-        { value: ServiceType.Water, label: 'Водопостачання' },
-        { value: ServiceType.WaterPart, label: 'Частка водопостачання' },
-        { value: ServiceType.Cleaning, label: 'Прибирання' },
-        { value: ServiceType.Discount, label: 'Знижка' },
-        { value: ServiceType.Custom, label: 'Власне' },
-      ].filter(
-        ({ value }) => value === ServiceType.Custom || !exclude?.includes(value)
-      ),
-    [exclude]
+  const options = useMemo(() => {
+    if (!domainId) return []
+    const groups = catalogRes?.data ?? []
+    const rows = flattenDomainCatalogServices(groups)
+    const catalogOptions = rows.map(catalogRowToSelectOption).filter(
+      (opt) => !excludeKeys?.includes(opt.value)
+    )
+    const customOption = {
+      value: ServiceType.Custom,
+      label: 'Власне',
+      payload: { type: ServiceType.Custom },
+    }
+    return [...catalogOptions, customOption]
+  }, [catalogRes, domainId, excludeKeys])
+
+  const handleSelect = useCallback(
+    (value: string) => {
+      if (value === ServiceType.Custom) {
+        onSelect?.({ type: ServiceType.Custom })
+        return
+      }
+      const opt = options.find((o) => o.value === value)
+      if (!opt || excludeKeys?.includes(opt.value)) return
+      onSelect?.(opt.payload)
+    },
+    [excludeKeys, onSelect, options]
   )
 
   return (
     <Select
       style={{ width: '100%' }}
       suffixIcon={<PlusOutlined />}
-      placeholder="Додати поле..."
+      placeholder={
+        domainId
+          ? 'Додати поле з каталогу домену...'
+          : 'Немає домену в сервісі — каталог недоступний'
+      }
       onSelect={handleSelect}
-      value={null}
+      value={undefined}
       options={options}
+      loading={!!domainId && isLoading}
+      disabled={!domainId || isLoading}
+      allowClear
+      showSearch
+      optionFilterProp="label"
+      notFoundContent={
+        domainId && !isLoading
+          ? 'У групах домену немає послуг'
+          : undefined
+      }
     />
   )
 }

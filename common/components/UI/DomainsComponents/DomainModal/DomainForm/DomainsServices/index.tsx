@@ -3,164 +3,213 @@ import {
   useCreateCustomServiceMutation,
 } from '@common/api/customServicesApi/customServices.api'
 import {
-  Button,
-  FormInstance,
-  message,
-} from 'antd'
-import React, { FC, useState } from 'react'
-import DomainModal, { ServiceItem } from './DomainModal'
+  useCloneDomainTypeTemplateForDomainMutation,
+  useGetDomainTypeTemplatesQuery,
+} from '@common/api/domainApi/domain.api'
+import { IDomainTypeTemplate } from '@common/api/domainApi/domain.api.types'
+import { useCreateDomainSnapshotMutation } from '@common/api/domainSnapshotsApi/domain-snapshots.api'
+import { Button, Form, FormInstance, Modal, message } from 'antd'
+import React, { FC, useEffect, useRef, useState } from 'react'
+import { buildSnapshotPayloadOnTemplateSwitch } from '@utils/domain/build-snapshot-payload'
+import DomainModal, {
+  IDomainServiceGroupSavePayload,
+  ServiceItem,
+} from './DomainModal'
+import DomainModalType from './DomainModalType'
+import DomainSnapshotsList from './DomainSnapshotsList'
 
 interface Props {
   form: FormInstance
   editable: boolean
   domainId?: string
-  onCustomServicesChange: (
-    customServices: { _id: string; name: string }[]
-  ) => void
 }
 
-const DomainsServices: FC<Props> = ({
-  form,
-  editable,
-  domainId,
-  onCustomServicesChange,
-}) => {
+function templateToFormGroups(template: IDomainTypeTemplate) {
+  return template.groups.map((g) => ({
+    groupName: g.groupName,
+    services: g.serviceIds.map(String),
+  }))
+}
+
+const DomainsServices: FC<Props> = ({ form, editable, domainId }) => {
   const [createCustomService] = useCreateCustomServiceMutation()
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const { data: customServicesData } = useGetCustomServicesQuery({})
+  const { data: customServicesData } = useGetCustomServicesQuery({
+    ...(domainId ? { domainId } : {}),
+  })
+  const { data: templates = [] } = useGetDomainTypeTemplatesQuery(undefined, {
+    skip: !editable,
+  })
+  const [createSnapshot] = useCreateDomainSnapshotMutation()
+  const [cloneTemplate] = useCloneDomainTypeTemplateForDomainMutation()
 
-  const handleSave = async (fieldKey: number) => {
-    const service = form.getFieldValue(['domainServices', fieldKey])
-    if (!service?.name) {
-      message.error('Будь ласка, введіть назву послуги')
+  const applyTemplate = async (templateId: string | null) => {
+    form.setFieldsValue({ domainTypeTemplateId: templateId })
+    if (!templateId) {
+      form.setFieldsValue({ customServices: [] })
       return
     }
-
-    try {
-      const result = await createCustomService({
-        domainId: domainId || '',
-        name: service?.name,
-      }).unwrap()
-      const savedService = result.data
-      form.setFieldsValue({
-        domainServices: form
-          .getFieldValue('domainServices')
-          .map((s, idx) =>
-            idx === fieldKey ? { ...s, _id: savedService._id } : s
-          ),
-      })
-      message.success('Послугу успішно збережено')
-    } catch (error) {
-      message.error('Помилка збереження послуги')
+    const template = templates.find((t) => t._id === templateId)
+    if (!template) return
+    if (domainId) {
+      try {
+        const result = await cloneTemplate({
+          _id: templateId,
+          domainId,
+        }).unwrap()
+        form.setFieldsValue({ customServices: result.groups })
+        return
+      } catch (e) {
+        console.warn('clone-for-domain failed, falling back to references', e)
+      }
     }
+
+    form.setFieldsValue({ customServices: templateToFormGroups(template) })
   }
 
-  const handleRemove = (fieldName: number) => {
-    const updatedServices = form
-      .getFieldValue('domainServices')
-      .filter((_, idx) => idx !== fieldName)
-    form.setFieldsValue({ domainServices: updatedServices })
+  const hasUserData = (): boolean => {
+    const groups = form.getFieldValue('customServices') ?? []
+    return groups.some(
+      (g: { groupName?: string; services?: string[] }) =>
+        (g?.groupName ?? '').trim() !== '' ||
+        (g?.services ?? []).length > 0
+    )
   }
 
-  const handleOpenModal = () => {
-    setIsModalOpen(true)
-  }
-  
-  const handleSaveServices = (servicesByGroup: { [groupName: string]: string[] }) => {
-    if (!customServicesData) return
-    const allServices = 'data' in customServicesData 
-      ? customServicesData.data 
-      : customServicesData
-    
-    const customServices = Object.entries(servicesByGroup).map(([groupName, services]) => ({
-      groupName,
-      services
-    }))
- 
-    form.setFieldsValue({
-      customServices: customServices
-    })
-    
-    const allSelectedServices: any[] = []
-    Object.values(servicesByGroup).forEach(groupServices => {
-      groupServices.forEach(serviceId => {
-        const service = allServices.find((s: any) => s._id === serviceId)
-        if (service && !allSelectedServices.find(s => s._id === serviceId)) {
-          allSelectedServices.push(service)
+  const lastAppliedTemplateIdRef = useRef<string | null>(null)
+  const seededRef = useRef(false)
+  const watchedTemplateId = Form.useWatch('domainTypeTemplateId', form) as
+    | string
+    | null
+    | undefined
+
+  useEffect(() => {
+    if (seededRef.current) return
+    if (watchedTemplateId === undefined) return
+    lastAppliedTemplateIdRef.current = watchedTemplateId ?? null
+    seededRef.current = true
+  }, [watchedTemplateId])
+
+  const handleTemplateChange = async (templateId: string | null) => {
+    if (!hasUserData()) {
+      await applyTemplate(templateId)
+      lastAppliedTemplateIdRef.current = templateId
+      return
+    }
+    const previousId = lastAppliedTemplateIdRef.current
+    const canSnapshot = Boolean(domainId)
+    Modal.confirm({
+      title: 'Замінити налаштування послуг?',
+      content: canSnapshot
+        ? 'Поточні групи й обрані послуги будуть перезаписані. Збережений раніше стан домену буде заархівований у історії — його можна відновити пізніше.'
+        : 'Поточні групи й обрані послуги будуть перезаписані вмістом обраного шаблону.',
+      okText: 'Замінити',
+      cancelText: 'Скасувати',
+      okButtonProps: { danger: true },
+      onOk: async () => {
+        if (canSnapshot) {
+          const currentGroups = (form.getFieldValue('customServices') ??
+            []) as { groupName?: string; services?: string[] }[]
+          const payload = buildSnapshotPayloadOnTemplateSwitch({
+            previousTemplateId: previousId,
+            templates,
+            currentGroups,
+          })
+          try {
+            await createSnapshot({
+              domainId: domainId as string,
+              reason: 'template-switch',
+              ...payload,
+            }).unwrap()
+          } catch (e) {
+            console.warn('snapshot before template switch skipped', e)
+          }
         }
-      })
+        await applyTemplate(templateId)
+        lastAppliedTemplateIdRef.current = templateId
+      },
+      onCancel: () => {
+        form.setFieldsValue({ domainTypeTemplateId: previousId })
+      },
     })
-    
+  }
+
+  const handleSaveServices = (
+    orderedGroups: IDomainServiceGroupSavePayload[]
+  ) => {
     form.setFieldsValue({
-      domainServices: allSelectedServices.map((service: any) => ({
-        _id: service._id,
-        name: service.name,
+      customServices: orderedGroups.map((g) => ({
+        groupName: g.groupName,
+        services: [...g.services],
       })),
     })
-    
-    onCustomServicesChange(allSelectedServices.map((service: any) => ({
-      _id: service._id,
-      name: service.name,
-    })))
-
     setIsModalOpen(false)
     message.success('Зміни збережено')
   }
-  
+
   const getServicesData = (): ServiceItem[] => {
     if (!customServicesData) return []
-
-    const allServices = 'data' in customServicesData 
-      ? customServicesData.data 
-      : customServicesData
-
+    const allServices =
+      'data' in customServicesData
+        ? customServicesData.data
+        : customServicesData
     return allServices.map((service: any) => ({
       key: service._id,
       title: service.name,
     }))
   }
-  
+
   const getServiceGroups = () => {
-    const customServices = form.getFieldValue('customServices') || []
-    const groups = customServices.map((group: any, index: number) => {
-      const groupName = group?.groupName || `Група ${index + 1}`
-      const selectedServices = group?.services || []
-      
-      return {
-        groupName,
-        services: selectedServices
-      }
-    })
-    
-    return groups
+    const customServicesField = form.getFieldValue('customServices') || []
+    return customServicesField.map((group: any, index: number) => ({
+      groupName: group?.groupName || `Група ${index + 1}`,
+      services: group?.services || [],
+    }))
   }
 
   const handleCreateCustomService = async (name: string) => {
-    const result = await createCustomService({ name, domainId: domainId || '' }).unwrap()
-    return result
+    return createCustomService({
+      name,
+      domainId: domainId || '',
+    }).unwrap()
   }
+
+  const handleRestored = (snap: {
+    groups: { groupName: string; services: string[] }[]
+    templateId?: string | null
+  }) => {
+    const restoredGroups = snap.groups.map((g) => ({
+      groupName: g.groupName,
+      services: (g.services ?? []).map(String),
+    }))
+    form.setFieldsValue({
+      customServices: restoredGroups,
+      domainTypeTemplateId: snap.templateId ?? null,
+    })
+    lastAppliedTemplateIdRef.current = snap.templateId ?? null
+  }
+
+  if (!editable) return null
 
   return (
     <>
-      {editable && (
-        <>
-          <Button
-            style={{ marginBottom: 10 }} 
-            block
-            onClick={handleOpenModal}
-          >
-            Мої Послуги
-          </Button>
-          <DomainModal
-            open={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
-            data={getServicesData()}
-            serviceGroups={getServiceGroups()}
-            onSave={handleSaveServices}
-            onCreateCustomService={handleCreateCustomService}
-          />
-        </>
-      )}
+      <DomainModalType
+        templates={templates}
+        editable={editable}
+        onTemplateChange={handleTemplateChange}
+      />
+      <DomainSnapshotsList domainId={domainId} onRestored={handleRestored} />
+      <Button style={{ marginBottom: 10 }} block onClick={() => setIsModalOpen(true)}>
+        Мої Послуги
+      </Button>
+      <DomainModal
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        data={getServicesData()}
+        serviceGroups={getServiceGroups()}
+        onSave={handleSaveServices}
+        onCreateCustomService={handleCreateCustomService}
+      />
     </>
   )
 }

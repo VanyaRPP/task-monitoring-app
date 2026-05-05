@@ -36,8 +36,6 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
   const isEnglish = normalizeCurrency(currency) !== 'UAH'
   const currencyNames = getCurrencyNames(currency, isEnglish)
 
-  
-
   const { company, showQuantityInPreview, setShowQuantityInPreview } =
     usePaymentContext()
 
@@ -107,7 +105,11 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
           }}
         />
       </Tooltip>
-      <PrinterOutlined className={styles.print} onClick={handlePrint} />
+
+      <Tooltip title={isEnglish ? 'Print act' : 'Друкувати акт'}>
+        <PrinterOutlined className={styles.print} onClick={handlePrint} />
+      </Tooltip>
+
       <div ref={componentRef}>
         <div
           className={styles.container}
