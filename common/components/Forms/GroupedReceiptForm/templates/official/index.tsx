@@ -26,10 +26,16 @@ const OfficialTemplate: FC<TemplateProps> = ({
   const domainLabel = getDomainHeading(data, domainNameFromProps)
   const clientCompany = getRecipientCompanyHeading(data, companyLabelFromProps)
 
+  // 1. ФІКС: Шукаємо місяць послуги, якщо його немає - беремо дату інвойса
+  const serviceMonth =
+    typeof data?.monthService === 'object' && (data.monthService as any)?.date
+      ? (data.monthService as any).date
+      : data?.invoiceCreationDate
+
   const subjectText =
     data?.notes ||
-    (data?.invoiceCreationDate
-      ? `Services rendered for ${dayjs(data.invoiceCreationDate).locale('en').format('MMMM YYYY')}`
+    (serviceMonth
+      ? `Services rendered for ${dayjs(serviceMonth).locale('en').format('MMMM YYYY')}`
       : `Invoice ${modernInvoiceNumber}`)
 
   return (
@@ -103,8 +109,8 @@ const OfficialTemplate: FC<TemplateProps> = ({
                 <tr key={`${item?.type || item?.name}-${index}`}>
                   <td>{item?.name || item?.description || item?.type || '—'}</td>
                   <td>{qty?.toFixed?.(2) ?? qty}</td>
-                  <td>{currencyLabel}&nbsp;{rate.toFixed(2)}</td>
-                  <td>{currencyLabel}&nbsp;{Number(item?.sum || 0).toFixed(2)}</td>
+                  <td>{rate.toFixed(2)}</td>
+                  <td>{Number(item?.sum || 0).toFixed(2)}</td>
                 </tr>
               )
             })}
