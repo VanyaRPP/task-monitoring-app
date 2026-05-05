@@ -10,6 +10,7 @@ import {
   useGetCurrentUserQuery 
 } from '@common/api/userApi/user.api'
 import type { IUser } from '@common/api/userApi/user.api.types'
+import type { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 import { Roles } from '@utils/constants'
 import { EditUserModal } from '@common/components/EditUserModal'
 
@@ -63,7 +64,12 @@ const EditUserButton: React.FC<{ userId?: IUser['_id'] }> = ({ userId }) => {
   )
 }
 
-export const UsersTable: React.FC = () => {
+interface Props {
+  domains?: IExtendedDomain[]
+  isDomainAdmin?: boolean
+}
+
+export const UsersTable: React.FC<Props> = ({domains = [],isDomainAdmin = false, }) => {
   const { data: currentUser } = useGetCurrentUserQuery()
   const { data: users = [], isLoading } = useGetAllUsersQuery()
   const [updateUser, { isLoading: isUpdatingUser }] =
@@ -74,6 +80,11 @@ export const UsersTable: React.FC = () => {
   const [searchEmail, setSearchEmail] = useState('')
   const [searchRole, setSearchRole] = useState<string>('all')
   const [pageSize, setPageSize] = useState(10)
+
+  const domainAdminEmails = useMemo(() => {
+    if (!isDomainAdmin) return null
+    return domains.flatMap(d => d.adminEmails)
+  }, [domains, isDomainAdmin])
 
   const filteredUsers = useMemo(
     () =>
@@ -86,9 +97,13 @@ export const UsersTable: React.FC = () => {
         const matchesEmail = email.includes(searchEmail.toLowerCase())
         const matchesRole = searchRole === 'all' || userRole === searchRole
 
-        return matchesName && matchesEmail && matchesRole
+        const matchesDomain =
+          !isDomainAdmin ||
+          domainAdminEmails?.includes(user.email)
+
+        return matchesName && matchesEmail && matchesRole && matchesDomain
       }),
-    [users, searchName, searchEmail, searchRole]
+    [users, searchName, searchEmail, searchRole, isDomainAdmin, domainAdminEmails]
   )
 
   const columns = useMemo<ColumnsType<IUser>>(
@@ -161,6 +176,7 @@ export const UsersTable: React.FC = () => {
         title: (
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             Роль
+            {!isDomainAdmin && (
             <Select
               placeholder="Пошук по ролям"
               value={searchRole}
@@ -170,10 +186,14 @@ export const UsersTable: React.FC = () => {
               allowClear
               onClear={() => setSearchRole('all')}
             />
+              )}
           </div>
         ),
         render: (_, user) => {
           const currentRole = getUserRoleValue(user)
+           if (isDomainAdmin) {
+    return currentRole
+  }
           const isSelf = currentUser?._id?.toString() === user?._id?.toString()
           const isGlobalAdminUser = currentRole === Roles.GLOBAL_ADMIN
           if (isSelf && isGlobalAdminUser) {
@@ -238,6 +258,7 @@ export const UsersTable: React.FC = () => {
       isUpdatingUser,
       updatingUserId,
       updateUser,
+      currentUser
     ]
   )
 
