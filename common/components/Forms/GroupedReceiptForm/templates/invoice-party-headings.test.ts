@@ -103,6 +103,54 @@ describe('getBillFromHeadingAndBodyLines', () => {
     expect(result.heading).toBe('Acme')
     expect(result.bodyLines).toEqual([])
   })
+
+  it('strips heading suffix from body lines (entrepreneur title case)', () => {
+    const result = getBillFromHeadingAndBodyLines(
+      { reciever: { companyName: 'KOTLIAR VADYM1' } },
+      ['PRIVATE ENTREPRENEUR KOTLIAR VADYM1', 'address']
+    )
+    expect(result.bodyLines).toEqual(['PRIVATE ENTREPRENEUR', 'address'])
+  })
+
+  it('strips heading prefix from body lines', () => {
+    const result = getBillFromHeadingAndBodyLines(
+      { reciever: { companyName: 'Acme' } },
+      ['Acme office at 123 Main St']
+    )
+    expect(result.bodyLines).toEqual(['office at 123 Main St'])
+  })
+
+  it('removes duplicates from any line, not only the first', () => {
+    const result = getBillFromHeadingAndBodyLines(
+      { reciever: { companyName: 'Acme' } },
+      ['line 1', 'Acme', 'line 3']
+    )
+    expect(result.bodyLines).toEqual(['line 1', 'line 3'])
+  })
+
+  it('does not strip heading occurring inside a word', () => {
+    const result = getBillFromHeadingAndBodyLines(
+      { reciever: { companyName: 'Co' } },
+      ['Coca Cola HQ']
+    )
+    expect(result.bodyLines).toEqual(['Coca Cola HQ'])
+  })
+
+  it('matches heading case-insensitively', () => {
+    const result = getBillFromHeadingAndBodyLines(
+      { reciever: { companyName: 'Acme' } },
+      ['ACME', 'private entrepreneur acme']
+    )
+    expect(result.bodyLines).toEqual(['private entrepreneur'])
+  })
+
+  it('handles headings with regex-special characters safely', () => {
+    const result = getBillFromHeadingAndBodyLines(
+      { reciever: { companyName: 'Acme & Co.' } },
+      ['Acme & Co.', 'rest']
+    )
+    expect(result.bodyLines).toEqual(['rest'])
+  })
 })
 
 describe('getIssuedToHeadingAndBodyLines', () => {
