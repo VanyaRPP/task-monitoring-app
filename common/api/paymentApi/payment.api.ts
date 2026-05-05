@@ -138,6 +138,7 @@ export const paymentApi = createApi({
     getPaymentNumber: builder.query<number, object>({
       query: () => `spacehub/payment/number`,
       transformResponse: (response: IGetPaymentNumberResponse) => response.data,
+      providesTags: ['Payment'],
     }),
     editPayment: builder.mutation<IExtendedPayment, Partial<IExtendedPayment>>({
       query(data) {
