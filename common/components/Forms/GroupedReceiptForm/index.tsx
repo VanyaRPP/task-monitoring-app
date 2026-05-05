@@ -303,7 +303,9 @@ const GroupedReceiptForm: FC<Props> = ({
 
   return (
     <>
-      <PrinterOutlined className={s.print} onClick={handlePrint} />
+      <Tooltip title="Друк">
+  <PrinterOutlined className={s.print} onClick={handlePrint} />
+</Tooltip>
       <Dropdown
         trigger={['click']}
         placement="bottomLeft"
