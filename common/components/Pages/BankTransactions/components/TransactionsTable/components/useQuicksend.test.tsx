@@ -168,6 +168,25 @@ describe('useQuickSend', () => {
     expect(createdDate.getDate()).toBe(15)
   })
 
+  it('calls onSuccess callback after successful send', async () => {
+    const onSuccess = jest.fn()
+    const { result } = renderHook(() =>
+      useQuickSend({
+        transaction,
+        domain,
+        selectedCompanyId: 'company_1',
+        relatedCompanies,
+        onSuccess,
+      })
+    )
+
+    await act(async () => {
+      await result.current.handleQuickSend({ _id: 'service_1', date: '2026-05-01' } as any)
+    })
+
+    expect(onSuccess).toHaveBeenCalledTimes(1)
+  })
+
   it('sends PAYMENT_CREATED message through BroadcastChannel', async () => {
     jest.useFakeTimers()
     try {
