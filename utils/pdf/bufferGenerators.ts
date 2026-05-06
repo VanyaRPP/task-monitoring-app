@@ -4,6 +4,17 @@ import dayjs from 'dayjs'
 import puppeteer from 'puppeteer'
 import { generateHtmlFromThemplate } from './pdfThemplate'
 
+const PUPPETEER_LAUNCH_OPTIONS = {
+  headless: true as const,
+  args: [
+    '--no-sandbox',
+    '--disable-setuid-sandbox',
+    '--disable-dev-shm-usage',
+    '--disable-gpu',
+  ],
+  protocolTimeout: 60_000,
+}
+
 export function getModernInvoiceFileSlug(payment: IExtendedPayment): string {
   const invoiceNo = String(payment?.invoiceNumber ?? '')
   const invoiceDatePrefix = dayjs(payment?.invoiceCreationDate).isValid()
@@ -19,7 +30,7 @@ export function getPaymentPdfBaseFileName(payment: IExtendedPayment): string {
 }
 
 export async function generatePdf(payment: IExtendedPayment): Promise<Buffer> {
-  const browser = await puppeteer.launch({ headless: true })
+  const browser = await puppeteer.launch(PUPPETEER_LAUNCH_OPTIONS)
   const page = await browser.newPage()
 
   const html = await generateHtmlFromThemplate(payment)
@@ -58,7 +69,7 @@ export async function generateZip(
     })
   })
 
-  const browser = await puppeteer.launch({ headless: true })
+  const browser = await puppeteer.launch(PUPPETEER_LAUNCH_OPTIONS)
 
   try {
     for (const payment of payments) {
