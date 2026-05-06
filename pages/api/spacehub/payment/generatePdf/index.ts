@@ -6,6 +6,13 @@ import {
   getPaymentPdfBaseFileName,
 } from '@utils/pdf/bufferGenerators'
 
+export const config = {
+  maxDuration: 60,
+  api: {
+    responseLimit: '8mb',
+  },
+}
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
