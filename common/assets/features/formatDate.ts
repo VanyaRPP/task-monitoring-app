@@ -52,3 +52,6 @@ export const formatInvoiceDueDate = (date?: Date | string | null, days = 5): str
   const d = dayjs(date)
   return d.isValid() ? d.add(days, 'd').format('DD.MM.YYYY') : ''
 }
+
+export const dateShiftMs = (date: Date | string, ms: number): Date =>
+  new Date(new Date(date).getTime() + ms)

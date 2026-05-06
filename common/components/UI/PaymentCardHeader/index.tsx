@@ -158,15 +158,17 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
     }
   }
 
-  const handleMenuClick: MenuProps['onClick'] = ({ key }) => {
-    if (key === 'export') handleExportExcel()
-    if (key === 'import') setIsImportModalOpen(true)
-    if (key === 'invoices') router.push(AppRoutes.PAYMENT_BULK)
-    if (key === 'add') setIsModalOpen(true)
-    if (key === 'download') handleGeneratePdf()
-    if (key === 'delete') onDeleteClick()
-    if (key === 'bulkMarkPaid') onBulkMarkPaid?.(selectedPayments as IExtendedPayment[])
+  const menuActions: Record<string, () => void> = {
+    export:       handleExportExcel,
+    import:       () => setIsImportModalOpen(true),
+    invoices:     () => router.push(AppRoutes.PAYMENT_BULK),
+    add:          () => setIsModalOpen(true),
+    download:     handleGeneratePdf,
+    delete:       onDeleteClick,
+    bulkMarkPaid: () => onBulkMarkPaid?.(selectedPayments as IExtendedPayment[]),
   }
+
+  const handleMenuClick: MenuProps['onClick'] = ({ key }) => menuActions[key]?.()
 
   const selectedCompany = useMemo(
     () => resolvePreselectedCompany(filters?.company, realEstatesFilter),
@@ -187,7 +189,7 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
 
   const canBulkMarkPaid = useMemo(
     () =>
-      selectedPayments.length > 1 &&
+      selectedPayments.length >= 1 &&
       selectedPayments.every(
         (payment: IExtendedPayment) => payment.type === Operations.Debit
       ),
@@ -268,14 +270,13 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
             <Tooltip title="Додаткові дії">
               <Button
                 type="text"
-                icon={<MoreOutlined style={{ color: '#fff', fontSize: 18 }} />}
+                icon={<MoreOutlined style={{ color: token.colorText, fontSize: 18 }} />}
                 style={{
                   padding: 8,
                   minWidth: 40,
                   minHeight: 40,
-                  border: '1px solid rgba(255,255,255,0.18)',
+                  border: `1px solid ${token.colorBorder}`,
                   borderRadius: 8,
-                  background: 'rgba(255,255,255,0.08)',
                 }}
               />
             </Tooltip>
@@ -324,14 +325,13 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
             <Tooltip title="Додаткові дії">
               <Button
                 type="text"
-                icon={<MoreOutlined style={{ color: '#fff', fontSize: 18 }} />}
+                icon={<MoreOutlined style={{ color: token.colorText, fontSize: 18 }} />}
                 style={{
                   padding: 8,
                   minWidth: 40,
                   minHeight: 40,
-                  border: '1px solid rgba(255,255,255,0.18)',
+                  border: `1px solid ${token.colorBorder}`,
                   borderRadius: 8,
-                  background: 'rgba(255,255,255,0.08)',
                 }}
               />
             </Tooltip>
