@@ -558,6 +558,15 @@ const getDefaultColumns = ({
   }
 
   const domainColumn: any = {
+    title: 'Надавач послуг',
+    dataIndex: 'domain',
+    width: 200,
+    render: (i) => i?.name,
+    hidden: domainsFilter?.length <= 1,
+    filterSearch: true,
+  }
+
+  const companyColumn: any = {
     
     fixed: 'left',
     title: 'Назва компанії',
@@ -597,14 +606,7 @@ const getDefaultColumns = ({
       )
     },
   }
-const companyColumn: any = {
-    title: 'Надавач послуг',
-    dataIndex: 'domain',
-    width: 200,
-    render: (i) => i?.name,
-    hidden: domainsFilter?.length <= 1,
-    filterSearch: true,
-  }
+
   const streetColumn: any = {
     title: 'Адреса',
     dataIndex: 'street',
@@ -619,23 +621,23 @@ const companyColumn: any = {
 
   if (isAdmin) {
     if (!isSingleCompanyByData) {
-      domainColumn.filters =
+      companyColumn.filters =
         pathname === AppRoutes.REAL_ESTATE ? realEstatesFilter : null
-      domainColumn.filteredValue = filters?.company || null
+      companyColumn.filteredValue = filters?.company || null
     }
-    companyColumn.filters =
+    domainColumn.filters =
       pathname === AppRoutes.REAL_ESTATE ? domainsFilter : null
-    companyColumn.filteredValue = filters?.domain || null
+    domainColumn.filteredValue = filters?.domain || null
     streetColumn.filters =
       pathname === AppRoutes.REAL_ESTATE ? streetsFilter : null
     streetColumn.filteredValue = filters?.street || null
   }
 
   columns.unshift(streetColumn)
-  columns.unshift(companyColumn)
+  columns.unshift(domainColumn)
 
   if (!isSingleCompanyByData) {
-    columns.unshift(domainColumn)
+    columns.unshift(companyColumn)
   }
 
   return columns
