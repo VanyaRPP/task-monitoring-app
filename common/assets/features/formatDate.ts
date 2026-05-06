@@ -2,6 +2,7 @@ import { toFirstUpperCase } from '@utils/helpers'
 import { DatePickerProps } from 'antd'
 import dayjs from 'dayjs'
 import 'dayjs/locale/uk'
+import 'dayjs/locale/en'
 import localizedFormat from 'dayjs/plugin/localizedFormat'
 
 dayjs.extend(localizedFormat)
@@ -25,6 +26,9 @@ export const dateToDayYearMonthFormat = (date: Date): string =>
 
 export const dateToMonthYear = (date: Date): string =>
   dayjs(date).format('MMMM YYYY')
+
+export const dateToMonthYearEn = (date: Date | string): string =>
+  dayjs(date).locale('en').format('MMMM YYYY')
 
 export const dateToMonth = (date: Date): string => dayjs(date).format('MMMM')
 
@@ -51,4 +55,16 @@ export const formatInvoiceDueDate = (date?: Date | string | null, days = 5): str
   if (!date) return ''
   const d = dayjs(date)
   return d.isValid() ? d.add(days, 'd').format('DD.MM.YYYY') : ''
+}
+
+export const formatInvoiceDateUs = (date?: Date | string | null): string => {
+  if (!date) return ''
+  const d = dayjs(date)
+  return d.isValid() ? d.format('MM/DD/YYYY') : ''
+}
+
+export const formatInvoiceDueDateUs = (date?: Date | string | null, days = 5): string => {
+  if (!date) return ''
+  const d = dayjs(date)
+  return d.isValid() ? d.add(days, 'd').format('MM/DD/YYYY') : ''
 }

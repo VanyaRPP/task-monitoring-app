@@ -1,5 +1,6 @@
 import { FC } from 'react'
-import dayjs from 'dayjs'
+import { dateToMonthYearEn, formatInvoiceDateUs, formatInvoiceDueDateUs } from '@assets/features/formatDate'
+import { resolveServiceMonth } from './resolveServiceMonth'
 import { TemplateProps } from '../types'
 import {
   getDomainHeading,
@@ -26,16 +27,12 @@ const OfficialTemplate: FC<TemplateProps> = ({
   const domainLabel = getDomainHeading(data, domainNameFromProps)
   const clientCompany = getRecipientCompanyHeading(data, companyLabelFromProps)
 
-  // 1. ФІКС: Шукаємо місяць послуги, якщо його немає - беремо дату інвойса
-  const serviceMonth =
-    typeof data?.monthService === 'object' && (data.monthService as any)?.date
-      ? (data.monthService as any).date
-      : data?.invoiceCreationDate
+  const serviceMonth = resolveServiceMonth(data?.monthService, data?.invoiceCreationDate)
 
   const subjectText =
     data?.notes ||
     (serviceMonth
-      ? `Services rendered for ${dayjs(serviceMonth).locale('en').format('MMMM YYYY')}`
+      ? `Services rendered for ${dateToMonthYearEn(serviceMonth)}`
       : `Invoice ${modernInvoiceNumber}`)
 
   return (
@@ -72,13 +69,13 @@ const OfficialTemplate: FC<TemplateProps> = ({
         <div className={cl.clMetaRow}>
           <div className={cl.clMetaLabel}>Issue Date</div>
           <div className={cl.clMetaValue}>
-            {dayjs(data?.invoiceCreationDate).format('MM/DD/YYYY')}
+            {formatInvoiceDateUs(data?.invoiceCreationDate)}
           </div>
         </div>
         <div className={cl.clMetaRow}>
           <div className={cl.clMetaLabel}>Due Date</div>
           <div className={cl.clMetaValue}>
-            {dayjs(data?.invoiceCreationDate).add(5, 'd').format('MM/DD/YYYY')} (upon receipt)
+            {formatInvoiceDueDateUs(data?.invoiceCreationDate)} (upon receipt)
           </div>
         </div>
         <div className={cl.clMetaRow}>
