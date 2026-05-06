@@ -151,10 +151,23 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
           saveAs(blob, `${data.fileName}.${data.fileExtension}`)
         }
       } else {
-        message.error('Сталася помилка під час генерації PDF')
+        // TEMP: surface real server error to debug PDF generation issue.
+        // eslint-disable-next-line no-console
+        console.error('generatePdf failed:', response.error)
+        const serverMsg = (response.error as { data?: { error?: string } })
+          ?.data?.error
+        message.error(
+          serverMsg
+            ? `PDF: ${serverMsg}`
+            : 'Сталася помилка під час генерації PDF'
+        )
       }
     } catch (error) {
-      message.error('Сталася несподівана помилка під час генерації PDF')
+      // eslint-disable-next-line no-console
+      console.error('generatePdf threw:', error)
+      message.error(
+        `PDF: ${(error as Error)?.message ?? 'несподівана помилка'}`
+      )
     }
   }
 
