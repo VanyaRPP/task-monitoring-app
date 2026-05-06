@@ -1,4 +1,4 @@
-import { formatInvoiceDate, formatInvoiceDueDate } from './formatDate'
+import { formatInvoiceDate, formatInvoiceDueDate, dateShiftMs } from './formatDate'
 
 describe('formatInvoiceDate', () => {
   it('форматує Date в DD.MM.YYYY', () => {
@@ -45,5 +45,23 @@ describe('formatInvoiceDueDate', () => {
 
   it('повертає порожній рядок для невалідної дати', () => {
     expect(formatInvoiceDueDate('not-a-date')).toBe('')
+  })
+})
+
+describe('dateShiftMs', () => {
+  it('зсуває Date на +1мс', () => {
+    const base = new Date('2024-03-15T10:00:00.000Z')
+    const result = dateShiftMs(base, 1)
+    expect(result.getTime()).toBe(base.getTime() + 1)
+  })
+
+  it('зсуває рядок ISO на +1мс', () => {
+    const base = '2024-03-15T10:00:00.000Z'
+    const result = dateShiftMs(base, 1)
+    expect(result.getTime()).toBe(new Date(base).getTime() + 1)
+  })
+
+  it('повертає Date', () => {
+    expect(dateShiftMs(new Date(), 1)).toBeInstanceOf(Date)
   })
 })

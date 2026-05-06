@@ -26,7 +26,7 @@ import PaymentsTable from '@components/Tables/Payment/Table'
 import ModalDelete from '@components/UI/ModalDelete'
 
 import { AppRoutes, ServiceType, Roles, Operations } from '@utils/constants'
-import { dateToDefaultFormat } from '@assets/features/formatDate'
+import { dateToDefaultFormat, dateShiftMs } from '@assets/features/formatDate'
 
 import {
   TablePaginationConfig,
@@ -54,8 +54,7 @@ import {
   setSelectedDateField,
 } from '@modules/store/paymentsSlice'
 import { RootState } from '@modules/store/store'
-import { formatDateFilterForQuery } from '@utils/helpers'
-import { getTypeOperation } from '@utils/helpers'
+import { formatDateFilterForQuery, getTypeOperation } from '@utils/helpers'
 import { PaymentDeleteItem } from '@components/Tables/Payment/Header'
 
 export interface PaymentsBlockProps {
@@ -197,7 +196,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
         return
       }
 
-      const response = await editPayment({ _id: source._id, type: Operations.Credit })
+      const response = await editPayment({ _id: source._id, type: Operations.Credit, invoiceCreationDate: dateShiftMs(source.invoiceCreationDate, 1) })
       if ('data' in response) {
         message.success('Платіж позначено як оплачений')
       } else {
@@ -211,15 +210,15 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
       const debitPayments = payments.filter(
         (payment) => payment.type === Operations.Debit
       )
-      if (debitPayments.length <= 1) {
-        message.info('Оберіть щонайменше два дебетових платежі')
+      if (debitPayments.length < 1) {
+        message.info('Оберіть щонайменше один дебетовий платіж')
         return
       }
 
       const results = await Promise.all(
-        debitPayments.map((payment) =>
-          editPayment({ _id: payment._id, type: Operations.Credit })
-        )
+        debitPayments.map((payment) => {
+          return editPayment({ _id: payment._id, type: Operations.Credit, invoiceCreationDate: dateShiftMs(payment.invoiceCreationDate, 1) })
+        })
       )
 
       const successCount = results.filter((res) => 'data' in res).length
@@ -304,7 +303,6 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     }
 
     if (extra.action === 'filter') {
-      dispatch(setFilters(allFilters ?? undefined))
       const raw = (allFilters as any)?.invoiceCreationDate
       const invoiceVals = Array.isArray(raw)
         ? (raw.filter((x) => typeof x === 'string') as string[])
