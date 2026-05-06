@@ -100,11 +100,10 @@ const OlimpTemplate: FC<TemplateProps> = ({
       <div className={s.invoiceHeader}>
         <div className={s.brandBlock}>
           <div className={s.brandText}>
-            <div>{data?.reciever?.companyName || ''}</div>
-              <span className={s.dateOlimp}>
-                {isEnglish ? 'Note:' : 'Примітка:'} {dayjs(data?.monthService.date)?.locale?.(isEnglish ? 'en' : 'uk')?.format?.( 'MMMM YYYY' )}
-              </span>
-          </div> 
+            <span className={s.dateOlimp}>
+              {isEnglish ? 'Note:' : 'Примітка:'} {dayjs(data?.monthService?.date)?.locale?.(isEnglish ? 'en' : 'uk')?.format?.('MMMM YYYY')}
+            </span>
+          </div>
         </div>
         <h1>{isEnglish ? 'INVOICE' : 'РАХУНОК'} №{modernInvoiceNumber}</h1>
       </div>
@@ -117,23 +116,29 @@ const OlimpTemplate: FC<TemplateProps> = ({
           >
             <h4>{isEnglish ? 'PAYMENT INFO:' : 'ПЛАТІЖНІ ДАНІ:'}</h4>
             <div className={s.infoList}>
-              {!!paymentHeading && (
-                <div className={`${s.infoLine} ${s.infoLineAccent}`}>
-                  {paymentHeading}
-                </div>
-              )}
-              {paymentBodyLines.map((line: string, idx: number) => (
-                <div
-                  className={
-                    !paymentHeading && idx === 0
-                      ? `${s.infoLine} ${s.infoLineAccent}`
-                      : s.infoLine
-                  }
-                  key={`${line}-${idx}`}
-                >
-                  {line}
-                </div>
-              ))}
+              {paymentBodyLines.map((line: string, idx: number) => {
+                const trimmed = line.trim().toLowerCase()
+                const isCompanyName =
+                  !!paymentHeading &&
+                  trimmed === paymentHeading.trim().toLowerCase()
+                const isEntrepreneurTitle =
+                  /^(private entrepreneur|private enterprise|fop|фоп|фізична особа\s*-?\s*підприємець)$/i.test(
+                    line.trim()
+                  )
+                const accent = isCompanyName || isEntrepreneurTitle
+                return (
+                  <div
+                    className={
+                      accent
+                        ? `${s.infoLine} ${s.infoLineAccent}`
+                        : s.infoLine
+                    }
+                    key={`${line}-${idx}`}
+                  >
+                    {line}
+                  </div>
+                )
+              })}
             </div>
           </div>
 

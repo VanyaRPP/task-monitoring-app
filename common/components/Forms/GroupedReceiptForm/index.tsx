@@ -167,12 +167,13 @@ const GroupedReceiptForm: FC<Props> = ({
 
   const componentRef = useRef<HTMLDivElement | null>(null)
 
+  const printCompanyName =
+    data?.company?.companyName ?? data?.reciever?.companyName ?? ''
+
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
     documentTitle:
-      (data?.company?.companyName ?? data?.reciever?.companyName ?? '') +
-        '-inv-' +
-        (data?.invoiceNumber ?? '') || 'invoice',
+      `${printCompanyName}-inv-${modernInvoiceNumber}` || 'invoice',
   })
   if (!rawData) {
     return null
