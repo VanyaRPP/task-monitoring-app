@@ -1,9 +1,11 @@
 import { SelectOutlined, LoadingOutlined } from '@ant-design/icons'
+import { useGetDomainByPkQuery } from '@common/api/domainApi/domain.api'
 import {
   useAddPaymentMutation,
   useGetPaymentNumberQuery,
 } from '@common/api/paymentApi/payment.api'
 import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
+import { resolveTemplate } from '@common/components/AddPaymentModal/resolveTemplate'
 import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
 import MonthServiceSelect from '@common/components/Forms/AddPaymentForm/MonthServiceSelect'
 import { useResolveMonthServiceId } from '@common/components/Forms/AddPaymentForm/useResolveMonthServiceId'
@@ -24,6 +26,12 @@ const InvoicesHeader = () => {
   const { data: newInvoiceNumber = 1 } = useGetPaymentNumberQuery({})
   const [isLoading, setIsLoading] = useState(false)
   const resolveMonthServiceId = useResolveMonthServiceId()
+
+  const domainId = service?.domain?._id
+  const { data: domain } = useGetDomainByPkQuery(
+    { domainId },
+    { skip: !domainId }
+  )
 
   const handleClickSaveButton = async () => {
     try {
@@ -46,12 +54,11 @@ const InvoicesHeader = () => {
   const handleSave = async () => {
     const values = await form.validateFields()
 
-    const domain = service?.domain?._id
-    const street = service?.street?._id
+    const streetId = service?.street?._id
 
     let monthServiceId: string
     try {
-      monthServiceId = await resolveMonthServiceId(service?._id, domain, street)
+      monthServiceId = await resolveMonthServiceId(service?._id, domainId, streetId)
     } catch (e) {
       console.error('resolveMonthServiceId failed', e)
       message.error('Не вдалося підготувати місяць послуг')
@@ -59,9 +66,10 @@ const InvoicesHeader = () => {
     }
 
     const payments = values.payments?.map((payment, index) => {
-      const { provider, reciever } = getPaymentProviderAndReciever(
-        companies?.find(({ _id }) => payment.company?._id === _id)
+      const matchedCompany = companies?.find(
+        ({ _id }) => payment.company?._id === _id
       )
+      const { provider, reciever } = getPaymentProviderAndReciever(matchedCompany)
 
       const invoice = Object.values(payment.invoice || {}).filter(
         ({ sum }) => sum
@@ -75,11 +83,17 @@ const InvoicesHeader = () => {
         0
       )
 
+      const template = resolveTemplate(
+        undefined,
+        matchedCompany?.defaultTemplate,
+        domain?.defaultTemplate
+      )
+
       return {
         invoiceNumber: newInvoiceNumber + index,
         type: Operations.Debit,
-        domain,
-        street,
+        domain: domainId,
+        street: streetId,
         company: payment.company?._id,
         monthService: monthServiceId,
         invoiceCreationDate: new Date(),
@@ -88,6 +102,7 @@ const InvoicesHeader = () => {
         provider,
         reciever,
         invoice: filteredInvoice,
+        template,
       }
     })
 

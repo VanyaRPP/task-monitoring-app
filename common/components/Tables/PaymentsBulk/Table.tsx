@@ -1,5 +1,6 @@
 import { useGetCustomServicesByDomainQuery } from '@common/api/customServicesApi/customServices.api'
 import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
+import { buildBulkInvoiceMap } from '@common/components/Tables/PaymentsBulk/buildInvoiceMap'
 import { getDefaultColumns } from '@common/components/Tables/PaymentsBulk/column.config'
 import serviceFilter from '@components/AddPaymentModal/serviceFilter'
 import { AppRoutes, Operations } from '@utils/constants'
@@ -80,24 +81,9 @@ const InvoicesTable: React.FC = () => {
 
       const filteredInvoice = serviceFilter(allinvoice, allowedServices)
 
-      const invoiceObjectForTheAll = allinvoice.reduce((acc, inv) => {
-        acc[inv.name || inv.type] = inv
-        return acc
-      }, {} as Record<string, any>)
-
-      const invoiceObjectForCustom = filteredInvoice.reduce((acc, inv) => {
-        acc[inv.fieldName || inv.type] = inv
-        return acc
-      }, {} as Record<string, any>)
-
-      const invoiceObject = {
-        ...invoiceObjectForTheAll,
-        ...invoiceObjectForCustom,
-      }
-
       return {
         company,
-        invoice: invoiceObject,
+        invoice: buildBulkInvoiceMap(allinvoice, filteredInvoice),
       }
     })
   }, [companies, service, prevService, prevPayments, allowedServices])
