@@ -46,6 +46,7 @@ import { shouldOpenModal } from '@utils/shouldOpenModal'
 import PaymentCardLabel from './PaymentCardLabel'
 import styles from './styles.module.scss'
 import ImportInvoicesModal from './ImportInvoices/ImportInvoicesModal'
+import { resolvePreselectedCompany, resolvePreselectedDomain } from './preselect'
 const { useBreakpoint } = Grid
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 
@@ -169,19 +170,15 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
 
   const handleMenuClick: MenuProps['onClick'] = ({ key }) => menuActions[key]?.()
 
-  const selectedCompany =
-     useMemo(() => {
-    if (filters?.company?.length === 1) return filters.company[0]
-    if (realEstatesFilter?.length === 1) return realEstatesFilter[0].value
-    return undefined
-  }, [filters?.company, realEstatesFilter])
+  const selectedCompany = useMemo(
+    () => resolvePreselectedCompany(filters?.company, realEstatesFilter),
+    [filters?.company, realEstatesFilter]
+  )
 
-  const selectedDomain =
-  useMemo(() => {
-    if (filters?.domain?.length === 1) return filters.domain[0]
-    if (domainFilter?.length === 1) return domainFilter[0].value
-    return undefined
-  }, [filters?.domain, domainFilter])
+  const selectedDomain = useMemo(
+    () => resolvePreselectedDomain(filters?.domain, domainFilter),
+    [filters?.domain, domainFilter]
+  )
 
   const infoTooltip = useMemo(() => {
     const texts: string[] = []
