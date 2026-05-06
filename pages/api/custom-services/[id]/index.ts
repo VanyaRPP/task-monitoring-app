@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-// @ts-nocheck
 import CustomService from '@modules/models/CustomService'
 import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
@@ -11,22 +9,28 @@ start()
 function escapeRegex(str: string) {
   return str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')
 }
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  const { isGlobalAdmin, isDomainAdmin, isUser } = await getCurrentUser(
-    req,
-    res
-  )
+  const { isAdmin } = await getCurrentUser(req, res)
 
   switch (req.method) {
     case 'PATCH':
       try {
-        if (!(isGlobalAdmin || isDomainAdmin || isAdmin)) {
+        if (!isAdmin) {
           return res
             .status(400)
-            .json({ success: false, message: 'Not allowed' })
+            .json({ success: false, message: 'Не дозволено' })
+        }
+
+        const { id } = req.query
+        if (!id || Array.isArray(id)) {
+          return res.status(400).json({
+            success: false,
+            message: 'Відсутній або некоректний id',
+          })
         }
 
         const { name } = req.body
@@ -35,26 +39,26 @@ export default async function handler(
         if (!trimmedName) {
           return res.status(400).json({
             success: false,
-            message: 'Name cannot be empty',
+            message: 'Назва послуги не може бути порожньою',
           })
         }
 
         const escapedName = escapeRegex(trimmedName)
 
         const existingService = await CustomService.findOne({
-          _id: { $ne: req.query.id },
+          _id: { $ne: id },
           name: { $regex: `^${escapedName}$`, $options: 'i' },
         })
 
         if (existingService) {
-          return res.status(400).json({
+          return res.status(409).json({
             success: false,
-            message: 'Service with this name already exists',
+            message: 'Послуга з такою назвою вже існує',
           })
         }
 
         const updatedService = await CustomService.findOneAndUpdate(
-          { _id: req.query.id },
+          { _id: id },
           {
             name: trimmedName,
             fieldName: transliterateAndCamelCase(trimmedName),
@@ -62,15 +66,29 @@ export default async function handler(
           { new: true }
         )
 
+        if (!updatedService) {
+          return res.status(404).json({
+            success: false,
+            message: 'Сервіс не знайдений',
+          })
+        }
+
         return res.status(200).json({
           success: true,
           data: updatedService,
         })
-      } catch (error) {
-        return res.status(400).json({
+      } catch (error: any) {
+        return res.status(500).json({
           success: false,
+          message: 'Помилка при оновленні сервісу',
           error: error.message,
         })
       }
+
+    default:
+      return res.status(405).json({
+        success: false,
+        message: `Метод ${req.method} не дозволений`,
+      })
   }
 }
