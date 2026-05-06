@@ -12,6 +12,8 @@ export interface IUser {
   email: string
   image?: string
   roles?: string[]
+  adminDomains?: ObjectId[] | string[]
+  adminCompanies?: ObjectId[] | string[]
   tasks?: [ITask]
   payments?: [IPayment]
   services?: [IService]
@@ -129,6 +131,8 @@ const UserSchema = new mongoose.Schema<IUser>({
     default: 'https://avatars.githubusercontent.com/u/583231?v=4',
   },
   roles: { type: [String], default: ['User'] },
+  adminDomains: [{ type: Schema.Types.ObjectId, ref: 'Domain' }],
+  adminCompanies: [{ type: Schema.Types.ObjectId, ref: 'RealEstate' }],
   tasks: [{ type: Schema.Types.ObjectId, ref: 'Task' }],
   payments: [{ type: Schema.Types.ObjectId, ref: 'Payment' }],
   services: [{ type: Schema.Types.ObjectId, ref: 'Service' }],
