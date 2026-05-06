@@ -1,11 +1,3 @@
-// Tests for domain-change → company-reset behavior
-// Logic lives in AddPaymentModal/index.tsx:
-//   useEffect(() => {
-//     if (firstRunRef.current) { firstRunRef.current = false; return }
-//     if (preselectedCompany) return
-//     form.resetFields(['company'])
-//   }, [domainId, form])
-
 describe('company reset on domain change', () => {
   const makeForm = () => {
     const fields: Record<string, any> = {}
@@ -19,14 +11,12 @@ describe('company reset on domain change', () => {
 
   const runEffect = (
     form: ReturnType<typeof makeForm>,
-    firstRunRef: { current: boolean },
-    preselectedCompany: string | undefined
+    firstRunRef: { current: boolean }
   ) => {
     if (firstRunRef.current) {
       firstRunRef.current = false
       return
     }
-    if (preselectedCompany) return
     form.resetFields(['company'])
   }
 
@@ -34,24 +24,24 @@ describe('company reset on domain change', () => {
     const form = makeForm()
     const ref = { current: true }
     form.setFieldsValue({ company: 'company-1' })
-    runEffect(form, ref, undefined)
+    runEffect(form, ref)
     expect(form.resetFields).not.toHaveBeenCalled()
     expect(ref.current).toBe(false)
   })
 
-  it('зміна домену скидує компанію коли preselectedCompany не задано', () => {
+  it('зміна домену скидує компанію', () => {
     const form = makeForm()
     const ref = { current: false }
     form.setFieldsValue({ company: 'company-1' })
-    runEffect(form, ref, undefined)
+    runEffect(form, ref)
     expect(form.resetFields).toHaveBeenCalledWith(['company'])
   })
 
-  it('зміна домену НЕ скидує компанію коли preselectedCompany задано', () => {
+  it('зміна домену скидує компанію навіть якщо preselectedCompany задано', () => {
     const form = makeForm()
     const ref = { current: false }
     form.setFieldsValue({ company: 'company-1' })
-    runEffect(form, ref, 'company-1')
-    expect(form.resetFields).not.toHaveBeenCalled()
+    runEffect(form, ref)
+    expect(form.resetFields).toHaveBeenCalledWith(['company'])
   })
 })

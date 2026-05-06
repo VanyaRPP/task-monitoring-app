@@ -212,7 +212,6 @@ const [template, setTemplate] = useState<TemplateKey>(
       firstRunRef.current = false
       return
     }
-    if (preselectedCompany) return
     form.resetFields(['company'])
   }, [domainId, form])
 
