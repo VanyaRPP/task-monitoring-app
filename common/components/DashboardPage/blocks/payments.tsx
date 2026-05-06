@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react'
-import { buildCreditFromDebit } from './buildCreditFromDebit'
 import { useRouter } from 'next/router'
 import { message } from 'antd'
 
@@ -15,8 +14,7 @@ import {
   useDeletePaymentMutation,
   useDeleteMultiplePaymentsMutation,
   paymentApi,
-  useGetPaymentNumberQuery,
-  useAddPaymentMutation,
+  useEditPaymentMutation,
 } from '@common/api/paymentApi/payment.api'
 import { useGetDebtorsQuery } from '@common/api/debtorsApi/debtors.api'
 
@@ -27,8 +25,8 @@ import PaymentsHeader from '@components/Tables/Payment/Header'
 import PaymentsTable from '@components/Tables/Payment/Table'
 import ModalDelete from '@components/UI/ModalDelete'
 
-import { AppRoutes, ServiceType, Roles } from '@utils/constants'
-import { dateToDefaultFormat } from '@assets/features/formatDate'
+import { AppRoutes, ServiceType, Roles, Operations } from '@utils/constants'
+import { dateToDefaultFormat, dateShiftMs } from '@assets/features/formatDate'
 
 import {
   TablePaginationConfig,
@@ -56,8 +54,7 @@ import {
   setSelectedDateField,
 } from '@modules/store/paymentsSlice'
 import { RootState } from '@modules/store/store'
-import { formatDateFilterForQuery } from '@utils/helpers'
-import { getTypeOperation } from '@utils/helpers'
+import { formatDateFilterForQuery, getTypeOperation } from '@utils/helpers'
 import { PaymentDeleteItem } from '@components/Tables/Payment/Header'
 
 export interface PaymentsBlockProps {
@@ -175,13 +172,11 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     }
   }, [dispatch])
 
-  const [addPayment] = useAddPaymentMutation()
   const [
     deletePaymentMutation,
     { isLoading: deleteLoading, isError: deleteError },
   ] = useDeletePaymentMutation()
   const [deleteMultiplePayments] = useDeleteMultiplePaymentsMutation()
-  const { data: newInvoiceNumber = 1, refetch: refetchInvoiceNumber } = useGetPaymentNumberQuery({})
   const handleDeletePayment = useCallback(
     async (id: string) => {
       const response = await deletePaymentMutation(id)
@@ -193,18 +188,49 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     },
     [deletePaymentMutation]
   )
+  const [editPayment] = useEditPaymentMutation()
   const handleMarkPaid = useCallback(
     async (source: IExtendedPayment) => {
-      const { data: currentNumber } = await refetchInvoiceNumber()
-      const invoiceNumber = currentNumber ?? newInvoiceNumber
-      const response = await addPayment(buildCreditFromDebit(source, invoiceNumber))
+      if (source.type === Operations.Credit) {
+        message.info('Платіж уже позначено як оплачений')
+        return
+      }
+
+      const response = await editPayment({ _id: source._id, type: Operations.Credit, invoiceCreationDate: dateShiftMs(source.invoiceCreationDate, 1) })
       if ('data' in response) {
-        message.success('Кредіт‑платіж створено')
+        message.success('Платіж позначено як оплачений')
       } else {
-        message.error('Не вдалося створити оплату')
+        message.error('Не вдалося позначити платіж як оплачений')
       }
     },
-    [addPayment, newInvoiceNumber, refetchInvoiceNumber]
+    [editPayment]
+  )
+  const handleBulkMarkPaid = useCallback(
+    async (payments: IExtendedPayment[]) => {
+      const debitPayments = payments.filter(
+        (payment) => payment.type === Operations.Debit
+      )
+      if (debitPayments.length < 1) {
+        message.info('Оберіть щонайменше один дебетовий платіж')
+        return
+      }
+
+      const results = await Promise.all(
+        debitPayments.map((payment) => {
+          return editPayment({ _id: payment._id, type: Operations.Credit, invoiceCreationDate: dateShiftMs(payment.invoiceCreationDate, 1) })
+        })
+      )
+
+      const successCount = results.filter((res) => 'data' in res).length
+      if (successCount === debitPayments.length) {
+        message.success('Платежі позначено як оплачені')
+      } else if (successCount > 0) {
+        message.warning('Деякі платежі були позначені, але не всі')
+      } else {
+        message.error('Не вдалося позначити платежі як оплачені')
+      }
+    },
+    [editPayment]
   )
   const handleDeleteConfirm = async () => {
     const response = await deleteMultiplePayments(
@@ -277,7 +303,6 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     }
 
     if (extra.action === 'filter') {
-      dispatch(setFilters(allFilters ?? undefined))
       const raw = (allFilters as any)?.invoiceCreationDate
       const invoiceVals = Array.isArray(raw)
         ? (raw.filter((x) => typeof x === 'string') as string[])
@@ -357,6 +382,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     enablePaymentsButton: !sepDomainID,
     onColumnsSelect: (cols: ServiceType[]) =>
       dispatch(setSelectedColumns(cols)),
+    onBulkMarkPaid: handleBulkMarkPaid,
     domainFilter: filterProps.domainsFilter,
     realEstatesFilter: filterProps.companiesFilter,
     isDashboard: router.pathname === AppRoutes.INDEX,

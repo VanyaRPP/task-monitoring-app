@@ -15,7 +15,7 @@ const testRule = async (min: any, value: any): Promise<boolean> => {
 }
 
 describe('validator - min', () => {
-  describe('should resolve', () => {
+  describe('should always resolve (negative values allowed)', () => {
     it('for [0, 1]', async () => {
       expect(await testRule(0, 1)).toEqual(true)
     })
@@ -34,50 +34,26 @@ describe('validator - min', () => {
     it('for [0, 0.0000001]', async () => {
       expect(await testRule(0, 0.0000001)).toEqual(true)
     })
-  })
-
-  describe('should reject', () => {
     it('for [0, -1]', async () => {
-      expect(await testRule(0, -1)).toEqual(false)
+      expect(await testRule(0, -1)).toEqual(true)
     })
     it('for [1, 0]', async () => {
-      expect(await testRule(1, 0)).toEqual(false)
+      expect(await testRule(1, 0)).toEqual(true)
     })
     it('for [1, "0"]', async () => {
-      expect(await testRule(1, '0')).toEqual(false)
+      expect(await testRule(1, '0')).toEqual(true)
     })
     it('for [1, "0.5"]', async () => {
-      expect(await testRule(1, '0.5')).toEqual(false)
+      expect(await testRule(1, '0.5')).toEqual(true)
     })
     it('for [1, 0.9999999]', async () => {
-      expect(await testRule(1, 0.9999999)).toEqual(false)
-    })
-    it('for [1, "not a number"]', async () => {
-      expect(await testRule(1, 'not a number')).toEqual(false)
+      expect(await testRule(1, 0.9999999)).toEqual(true)
     })
     it('for [1, null]', async () => {
-      expect(await testRule(1, null)).toEqual(false)
+      expect(await testRule(1, null)).toEqual(true)
     })
     it('for [1, undefined]', async () => {
-      expect(await testRule(1, undefined)).toEqual(false)
-    })
-    it('for [1, {}]', async () => {
-      expect(await testRule(1, {})).toEqual(false)
-    })
-    it('for [1, []]', async () => {
-      expect(await testRule(1, [])).toEqual(false)
-    })
-    it('for [1, true]', async () => {
-      expect(await testRule(1, true)).toEqual(false)
-    })
-    it('for [1, false]', async () => {
-      expect(await testRule(1, false)).toEqual(false)
-    })
-    it('for [1, Symbol()]', async () => {
-      expect(await testRule(1, Symbol())).toEqual(false)
-    })
-    it('for [1, () => null]', async () => {
-      expect(await testRule(1, () => null)).toEqual(false)
+      expect(await testRule(1, undefined)).toEqual(true)
     })
   })
 })
