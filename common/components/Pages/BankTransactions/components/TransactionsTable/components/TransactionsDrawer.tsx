@@ -42,6 +42,7 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
     domain,
     selectedCompanyId: selectedCompany,
     relatedCompanies,
+    onSuccess: refetchTransactions,
   })
 
   useEffect(() => {

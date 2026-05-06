@@ -68,3 +68,6 @@ export const formatInvoiceDueDateUs = (date?: Date | string | null, days = 5): s
   const d = dayjs(date)
   return d.isValid() ? d.add(days, 'd').format('MM/DD/YYYY') : ''
 }
+
+export const dateShiftMs = (date: Date | string, ms: number): Date =>
+  new Date(new Date(date).getTime() + ms)

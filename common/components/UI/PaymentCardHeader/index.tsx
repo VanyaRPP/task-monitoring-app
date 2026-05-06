@@ -1,5 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react'
 import {
+  CheckOutlined,
   DeleteOutlined,
   DownloadOutlined,
   FilterOutlined,
@@ -7,8 +8,9 @@ import {
   SelectOutlined,
   ExportOutlined,
   InfoCircleOutlined,
-  UpOutlined,
   MenuOutlined,
+  ImportOutlined,
+  MoreOutlined,
 } from '@ant-design/icons'
 import { dateToDefaultFormat } from '@assets/features/formatDate'
 import {
@@ -19,7 +21,7 @@ import {
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import AddPaymentModal from '@components/AddPaymentModal'
 import ImportInvoices from '@components/UI/PaymentCardHeader/ImportInvoices'
-import { AppRoutes, Roles, ServiceName } from '@utils/constants'
+import { AppRoutes, Operations, Roles, ServiceName } from '@utils/constants'
 import { isAdminCheck } from '@utils/helpers'
 import {
   Button,
@@ -30,19 +32,21 @@ import {
   Typography,
   message,
   Tooltip,
-  Collapse,
   Modal,
   Divider,
   theme,
   Drawer,
   Grid,
+  Dropdown,
+  MenuProps,
 } from 'antd'
 import { saveAs } from 'file-saver'
 import { useRouter } from 'next/router'
 import { shouldOpenModal } from '@utils/shouldOpenModal'
 import PaymentCardLabel from './PaymentCardLabel'
-import type { CollapseProps } from 'antd'
 import styles from './styles.module.scss'
+import ImportInvoicesModal from './ImportInvoices/ImportInvoicesModal'
+import { resolvePreselectedCompany, resolvePreselectedDomain } from './preselect'
 const { useBreakpoint } = Grid
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 
@@ -67,6 +71,7 @@ export interface PaymentCardHeaderProps {
   singleCompany?: string
   singleDomain?: string
   isDashboard?: boolean
+  onBulkMarkPaid?: (payments: IExtendedPayment[]) => void
 }
 
 const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
@@ -89,11 +94,13 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
   singleCompany,
   singleDomain,
   isDashboard,
-  onDeleteClick
+  onDeleteClick,
+  onBulkMarkPaid,
 }) => {
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [drawerVisible, setDrawerVisible] = useState(false)
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false)
   const screens = useBreakpoint()
 
   const { data: currUser } = useGetCurrentUserQuery()
@@ -150,21 +157,28 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
       message.error('Сталася несподівана помилка під час генерації PDF')
     }
   }
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
 
-  const selectedCompany =
-     useMemo(() => {
-    if (filters?.company?.length === 1) return filters.company[0]
-    if (realEstatesFilter?.length === 1) return realEstatesFilter[0].value
-    return undefined
-  }, [filters?.company, realEstatesFilter])
+  const menuActions: Record<string, () => void> = {
+    export:       handleExportExcel,
+    import:       () => setIsImportModalOpen(true),
+    invoices:     () => router.push(AppRoutes.PAYMENT_BULK),
+    add:          () => setIsModalOpen(true),
+    download:     handleGeneratePdf,
+    delete:       onDeleteClick,
+    bulkMarkPaid: () => onBulkMarkPaid?.(selectedPayments as IExtendedPayment[]),
+  }
 
-  const selectedDomain =
-  useMemo(() => {
-    if (filters?.domain?.length === 1) return filters.domain[0]
-    if (domainFilter?.length === 1) return domainFilter[0].value
-    return undefined
-  }, [filters?.domain, domainFilter])
+  const handleMenuClick: MenuProps['onClick'] = ({ key }) => menuActions[key]?.()
+
+  const selectedCompany = useMemo(
+    () => resolvePreselectedCompany(filters?.company, realEstatesFilter),
+    [filters?.company, realEstatesFilter]
+  )
+
+  const selectedDomain = useMemo(
+    () => resolvePreselectedDomain(filters?.domain, domainFilter),
+    [filters?.domain, domainFilter]
+  )
 
   const infoTooltip = useMemo(() => {
     const texts: string[] = []
@@ -172,6 +186,15 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
     if (singleCompany) texts.push(`Компанія: ${singleCompany}`)
     return texts.join('\n')
   }, [singleDomain, singleCompany])
+
+  const canBulkMarkPaid = useMemo(
+    () =>
+      selectedPayments.length >= 1 &&
+      selectedPayments.every(
+        (payment: IExtendedPayment) => payment.type === Operations.Debit
+      ),
+    [selectedPayments]
+  )
 
   const allowedServices = useMemo(() => {
   if (!payments?.data?.length) return undefined
@@ -213,120 +236,51 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
     )
   }
 
-  const panelStyle: React.CSSProperties = { border: 'none' }
-
-  const label = (
-    <PaymentCardLabel
-      enablePaymentsButton={enablePaymentsButton}
-      onColumnsSelect={onColumnsSelect}
-      setCurrentDateFilter={setCurrentDateFilter}
-      setFilters={setFilters}
-      streets={streets}
-      filters={filters}
-      domainFilter={domainFilter}
-      realEstatesFilter={realEstatesFilter}
-      isAdmin={isAdmin}
-      className={styles.select}
-      allowedServices={allowedServices}
-    />
-  )
-
-  const getItems = (
-    panelStyle: React.CSSProperties
-  ): CollapseProps['items'] => [
-    {
-      key: '1',
-      label,
-      style: panelStyle,
-      collapsible: 'icon',
-      forceRender: true,
-      children: (
-        <>
-          <Divider className={styles.Divider} />
-          <Flex className={styles.flexButtonContainer} align="center">
-            {infoTooltip && (
-              <Tooltip title={infoTooltip}>
-                <InfoCircleOutlined
-                  style={{ marginRight: 16, color: 'rgba(0,0,0,0.45)' }}
-                />
-              </Tooltip>
-            )}
-            {isAdmin &&
-              pathname === AppRoutes.PAYMENT &&
-              selectedPayments.length > 0 && (
-                <Button type="link" onClick={handleExportExcel}>
-                  Export to Excel <ExportOutlined />
-                </Button>
-              )}
-            {isAdmin && <ImportInvoices />}
-            {isAdmin && (
-              <Button
-                type="link"
-                onClick={() => router.push(AppRoutes.PAYMENT_BULK)}
-              >
-                Інвойси <SelectOutlined />
-              </Button>
-            )}
-            {isAdmin && (
-              <Button type="link" onClick={() => setIsModalOpen(true)}>
-                <PlusOutlined /> Додати
-              </Button>
-            )}
-            {shouldOpenModal(isModalOpen, currentPayment, paymentActions) && (
-              <AddPaymentModal
-                paymentActions={
-                  !isAdmin ? { edit: false, preview: true } : paymentActions
-                }
-                paymentData={currentPayment}
-                preselectedCompany={selectedCompany}
-                preselectedDomain={selectedDomain}
-                closeModal={closeModal}
-              />
-            )}
-            {isAdmin &&
-              pathname === AppRoutes.PAYMENT &&
-              selectedPayments.length > 0 && (
-                <Button type="link" onClick={handleGeneratePdf}>
-                  Завантажити рахунки <DownloadOutlined />
-                </Button>
-              )}
-            {isAdmin &&
-              pathname === AppRoutes.PAYMENT &&
-              selectedPayments.length > 0 && (
-                <Button type="link" onClick={onDeleteClick}>
-                  <DeleteOutlined /> Видалити
-                </Button>
-              )}
-          </Flex>
-        </>
-      ),
-    },
+  const items: MenuProps['items'] = [
+    ...(infoTooltip ? [{ key: 'info', label: infoTooltip, icon: <InfoCircleOutlined />, disabled: true }] : []),
+    ...(isAdmin && pathname === AppRoutes.PAYMENT && selectedPayments.length > 0 ? [{ key: 'export', label: 'Export to Excel', icon: <ExportOutlined /> }] : []),
+    ...(isAdmin ? [{ key: 'import', label: 'Імпорт', icon: <ImportOutlined /> }] : []),
+    ...(isAdmin ? [{ key: 'invoices', label: 'Інвойси', icon: <SelectOutlined /> }] : []),
+    ...(isAdmin ? [{ key: 'add', label: 'Додати', icon: <PlusOutlined /> }] : []),
+    ...(isAdmin && pathname === AppRoutes.PAYMENT && selectedPayments.length > 0 ? [{ key: 'download', label: 'Завантажити рахунки', icon: <DownloadOutlined /> }] : []),
+    ...(isAdmin && pathname === AppRoutes.PAYMENT && canBulkMarkPaid ? [{ key: 'bulkMarkPaid', label: 'Позначити оплати', icon: <CheckOutlined /> }] : []),
+    ...(isAdmin && pathname === AppRoutes.PAYMENT && selectedPayments.length > 0 ? [{ key: 'delete', label: 'Видалити', icon: <DeleteOutlined />, danger: true }] : []),
   ]
+
+  const dashboardItems: MenuProps['items'] = [
+    { key: 'import', label: 'Імпорт', icon: <ImportOutlined /> },
+    { key: 'invoices', label: 'Інвойси', icon: <SelectOutlined /> },
+    { key: 'add', label: 'Додати', icon: <PlusOutlined /> },
+  ]
+
   if (isDashboard) {
     return (
       <>
-        <Flex justify="space-between" align="center" style={{ margin: 0 }}>
+        <Flex justify="space-between" align="center" style={{ margin: 0, width: '100%' }}>
           <Button type="link" onClick={() => router.push(AppRoutes.PAYMENT)}>
             Платежі
             <SelectOutlined />
           </Button>
-          <Flex gap={8} wrap="wrap">
-            <ImportInvoices />
-            <Button
-              type="link"
-              icon={<SelectOutlined />}
-              onClick={() => router.push(AppRoutes.PAYMENT_BULK)}
-            >
-              Інвойси
-            </Button>
-            <Button
-              type="link"
-              icon={<PlusOutlined />}
-              onClick={() => setIsModalOpen(true)}
-            >
-              Додати
-            </Button>
-          </Flex>
+          <Dropdown
+            menu={{ items: dashboardItems, onClick: handleMenuClick }}
+            trigger={['click']}
+            placement="bottomRight"
+            overlayStyle={{ minWidth: 190 }}
+          >
+            <Tooltip title="Додаткові дії">
+              <Button
+                type="text"
+                icon={<MoreOutlined style={{ color: token.colorText, fontSize: 18 }} />}
+                style={{
+                  padding: 8,
+                  minWidth: 40,
+                  minHeight: 40,
+                  border: `1px solid ${token.colorBorder}`,
+                  borderRadius: 8,
+                }}
+              />
+            </Tooltip>
+          </Dropdown>
         </Flex>
         {shouldOpenModal(isModalOpen, currentPayment, paymentActions) && (
           <AddPaymentModal
@@ -344,22 +298,57 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
   }
 
   return (
-    <Collapse
-      className={styles.customCollapse}
-      bordered={false}
-      defaultActiveKey={[]}
-      expandIcon={({ isActive }) => (
-        <Tooltip title="Додаткові дії">
-          <UpOutlined
-            rotate={isActive ? 0 : 180}
-            className={styles.collapseButton}
+    <>
+      <Flex justify="space-between" align="center" style={{ marginBottom: 10, marginTop: 10, width: '100%' }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <PaymentCardLabel
+            enablePaymentsButton={enablePaymentsButton}
+            onColumnsSelect={onColumnsSelect}
+            setCurrentDateFilter={setCurrentDateFilter}
+            setFilters={setFilters}
+            streets={streets}
+            filters={filters}
+            domainFilter={domainFilter}
+            realEstatesFilter={realEstatesFilter}
+            isAdmin={isAdmin}
+            className={styles.select}
+            allowedServices={allowedServices}
           />
-        </Tooltip>
+        </div>
+        <div style={{ marginLeft: 12 }}>
+          <Dropdown
+            menu={{ items, onClick: handleMenuClick }}
+            trigger={['click']}
+            placement="bottomRight"
+            overlayStyle={{ minWidth: 190 }}
+          >
+            <Tooltip title="Додаткові дії">
+              <Button
+                type="text"
+                icon={<MoreOutlined style={{ color: token.colorText, fontSize: 18 }} />}
+                style={{
+                  padding: 8,
+                  minWidth: 40,
+                  minHeight: 40,
+                  border: `1px solid ${token.colorBorder}`,
+                  borderRadius: 8,
+                }}
+              />
+            </Tooltip>
+          </Dropdown>
+        </div>
+      </Flex>
+      {shouldOpenModal(isModalOpen, currentPayment, paymentActions) && (
+        <AddPaymentModal
+          paymentActions={!isAdmin ? { edit: false, preview: true } : paymentActions}
+          paymentData={currentPayment}
+          preselectedCompany={selectedCompany}
+          preselectedDomain={selectedDomain}
+          closeModal={closeModal}
+        />
       )}
-      expandIconPosition="right"
-      items={getItems(panelStyle)}
-      ghost
-    />
+      {isImportModalOpen && <ImportInvoicesModal closeModal={() => setIsImportModalOpen(false)} />}
+    </>
   )
 }
 
