@@ -6,6 +6,7 @@ import {
 import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
 import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
 import MonthServiceSelect from '@common/components/Forms/AddPaymentForm/MonthServiceSelect'
+import { useResolveMonthServiceId } from '@common/components/Forms/AddPaymentForm/useResolveMonthServiceId'
 import AddressesSelect from '@common/components/UI/Reusable/AddressesSelect'
 import DomainsSelect from '@common/components/UI/Reusable/DomainsSelect'
 import { AppRoutes, Operations } from '@utils/constants'
@@ -22,6 +23,7 @@ const InvoicesHeader = () => {
   const [addPayment] = useAddPaymentMutation()
   const { data: newInvoiceNumber = 1 } = useGetPaymentNumberQuery({})
   const [isLoading, setIsLoading] = useState(false)
+  const resolveMonthServiceId = useResolveMonthServiceId()
 
   const handleClickSaveButton = async () => {
     try {
@@ -44,6 +46,18 @@ const InvoicesHeader = () => {
   const handleSave = async () => {
     const values = await form.validateFields()
 
+    const domain = service?.domain?._id
+    const street = service?.street?._id
+
+    let monthServiceId: string
+    try {
+      monthServiceId = await resolveMonthServiceId(service?._id, domain, street)
+    } catch (e) {
+      console.error('resolveMonthServiceId failed', e)
+      message.error('Не вдалося підготувати місяць послуг')
+      return
+    }
+
     const payments = values.payments?.map((payment, index) => {
       const { provider, reciever } = getPaymentProviderAndReciever(
         companies?.find(({ _id }) => payment.company?._id === _id)
@@ -64,10 +78,10 @@ const InvoicesHeader = () => {
       return {
         invoiceNumber: newInvoiceNumber + index,
         type: Operations.Debit,
-        domain: service?.domain?._id,
-        street: service?.street?._id,
+        domain,
+        street,
         company: payment.company?._id,
-        monthService: service?._id,
+        monthService: monthServiceId,
         invoiceCreationDate: new Date(),
         description: '',
         generalSum: +toRoundFixed(generalSum),

@@ -14,19 +14,11 @@ import {
   IPayment,
 } from '@common/api/paymentApi/payment.api.types'
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
-import {
-  serviceApi,
-  useAddServiceMutation,
-} from '@common/api/serviceApi/service.api'
 import { IService } from '@common/api/serviceApi/service.api.types'
 import PriceList from '@common/components/Forms/AddPaymentForm/PriceList'
-import {
-  isMonthServicePlaceholder,
-  parseMonthServicePlaceholder,
-} from '@common/components/Forms/AddPaymentForm/month-service-placeholder'
+import { useResolveMonthServiceId } from '@common/components/Forms/AddPaymentForm/useResolveMonthServiceId'
 import Modal from '@components/UI/ModalWindow'
 import { usePaymentFormData } from '@modules/hooks/usePaymentData'
-import { useAppDispatch } from '@modules/store/hooks'
 import { Operations, Currency } from '@utils/constants'
 import { getInvoices } from '@utils/getInvoices'
 import { getPaymentProviderAndReciever } from '@utils/helpers'
@@ -216,55 +208,11 @@ const [template, setTemplate] = useState<TemplateKey>(
     form.resetFields(['company'])
   }, [domainId, form])
 
-  const dispatch = useAppDispatch()
-  const [addService] = useAddServiceMutation()
   const [addPayment, { isLoading: isAddingLoading }] = useAddPaymentMutation()
   const [editPayment, { isLoading: isEditingLoading }] =
     useEditPaymentMutation()
 
-  const resolveMonthServiceId = useCallback(
-    async (raw: string, domain: string, street: string) => {
-      if (!isMonthServicePlaceholder(raw)) {
-        return raw
-      }
-      const monthStart = parseMonthServicePlaceholder(raw)
-      const year = monthStart.year()
-      const month = monthStart.month() + 1
-
-      const existing = await dispatch(
-        serviceApi.endpoints.getAllServices.initiate(
-          {
-            domainId: domain,
-            streetId: street,
-            year,
-            month,
-            limit: 1,
-          },
-          { subscribe: false, forceRefetch: true }
-        )
-      ).unwrap()
-
-      const found = existing.data?.[0]
-      if (found?._id) {
-        return found._id
-      }
-
-      const created = await addService({
-        domain,
-        street,
-        date: monthStart.startOf('month').toDate(),
-        rentPrice: 0,
-        electricityPrice: 0,
-        waterPrice: 0,
-        waterPriceTotal: 0,
-        description: '',
-        customServices: [],
-      }).unwrap()
-
-      return created.data._id
-    },
-    [dispatch, addService]
-  )
+  const resolveMonthServiceId = useResolveMonthServiceId()
   const { data: customDomainServices } = useGetCustomServicesByDomainQuery(
     { domainId },
     { skip: !domainId }
