@@ -1,5 +1,6 @@
 import { FC } from 'react'
-import dayjs from 'dayjs'
+import { dateToMonthYearEn, formatInvoiceDateUs, formatInvoiceDueDateUs } from '@assets/features/formatDate'
+import { resolveServiceMonth } from './resolveServiceMonth'
 import { TemplateProps } from '../types'
 import {
   getDomainHeading,
@@ -26,10 +27,12 @@ const OfficialTemplate: FC<TemplateProps> = ({
   const domainLabel = getDomainHeading(data, domainNameFromProps)
   const clientCompany = getRecipientCompanyHeading(data, companyLabelFromProps)
 
+  const serviceMonth = resolveServiceMonth(data?.monthService, data?.invoiceCreationDate)
+
   const subjectText =
     data?.notes ||
-    (data?.invoiceCreationDate
-      ? `Services rendered for ${dayjs(data.invoiceCreationDate).locale('en').format('MMMM YYYY')}`
+    (serviceMonth
+      ? `Services rendered for ${dateToMonthYearEn(serviceMonth)}`
       : `Invoice ${modernInvoiceNumber}`)
 
   return (
@@ -66,13 +69,13 @@ const OfficialTemplate: FC<TemplateProps> = ({
         <div className={cl.clMetaRow}>
           <div className={cl.clMetaLabel}>Issue Date</div>
           <div className={cl.clMetaValue}>
-            {dayjs(data?.invoiceCreationDate).format('MM/DD/YYYY')}
+            {formatInvoiceDateUs(data?.invoiceCreationDate)}
           </div>
         </div>
         <div className={cl.clMetaRow}>
           <div className={cl.clMetaLabel}>Due Date</div>
           <div className={cl.clMetaValue}>
-            {dayjs(data?.invoiceCreationDate).add(5, 'd').format('MM/DD/YYYY')} (upon receipt)
+            {formatInvoiceDueDateUs(data?.invoiceCreationDate)} (upon receipt)
           </div>
         </div>
         <div className={cl.clMetaRow}>
@@ -103,8 +106,8 @@ const OfficialTemplate: FC<TemplateProps> = ({
                 <tr key={`${item?.type || item?.name}-${index}`}>
                   <td>{item?.name || item?.description || item?.type || '—'}</td>
                   <td>{qty?.toFixed?.(2) ?? qty}</td>
-                  <td>{currencyLabel}&nbsp;{rate.toFixed(2)}</td>
-                  <td>{currencyLabel}&nbsp;{Number(item?.sum || 0).toFixed(2)}</td>
+                  <td>{rate.toFixed(2)}</td>
+                  <td>{Number(item?.sum || 0).toFixed(2)}</td>
                 </tr>
               )
             })}

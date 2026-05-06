@@ -1,4 +1,20 @@
-import { formatInvoiceDate, formatInvoiceDueDate, dateShiftMs } from './formatDate'
+import { formatInvoiceDate, formatInvoiceDueDate, dateToMonthYearEn, dateShiftMs } from './formatDate'
+
+describe('dateToMonthYearEn', () => {
+  it('форматує Date в англійський місяць і рік', () => {
+    expect(dateToMonthYearEn(new Date('2024-03-15'))).toBe('March 2024')
+  })
+
+  it('форматує ISO рядок', () => {
+    expect(dateToMonthYearEn('2024-01-05T00:00:00.000Z')).toBe('January 2024')
+  })
+
+  it('повертає англійську назву місяця, не українську', () => {
+    const result = dateToMonthYearEn(new Date('2024-05-01'))
+    expect(result).toBe('May 2024')
+    expect(result).not.toMatch(/травень/i)
+  })
+})
 
 describe('formatInvoiceDate', () => {
   it('форматує Date в DD.MM.YYYY', () => {
