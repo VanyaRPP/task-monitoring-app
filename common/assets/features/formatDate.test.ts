@@ -1,4 +1,20 @@
-import { formatInvoiceDate, formatInvoiceDueDate } from './formatDate'
+import { formatInvoiceDate, formatInvoiceDueDate, dateToMonthYearEn, dateShiftMs } from './formatDate'
+
+describe('dateToMonthYearEn', () => {
+  it('форматує Date в англійський місяць і рік', () => {
+    expect(dateToMonthYearEn(new Date('2024-03-15'))).toBe('March 2024')
+  })
+
+  it('форматує ISO рядок', () => {
+    expect(dateToMonthYearEn('2024-01-05T00:00:00.000Z')).toBe('January 2024')
+  })
+
+  it('повертає англійську назву місяця, не українську', () => {
+    const result = dateToMonthYearEn(new Date('2024-05-01'))
+    expect(result).toBe('May 2024')
+    expect(result).not.toMatch(/травень/i)
+  })
+})
 
 describe('formatInvoiceDate', () => {
   it('форматує Date в DD.MM.YYYY', () => {
@@ -45,5 +61,23 @@ describe('formatInvoiceDueDate', () => {
 
   it('повертає порожній рядок для невалідної дати', () => {
     expect(formatInvoiceDueDate('not-a-date')).toBe('')
+  })
+})
+
+describe('dateShiftMs', () => {
+  it('зсуває Date на +1мс', () => {
+    const base = new Date('2024-03-15T10:00:00.000Z')
+    const result = dateShiftMs(base, 1)
+    expect(result.getTime()).toBe(base.getTime() + 1)
+  })
+
+  it('зсуває рядок ISO на +1мс', () => {
+    const base = '2024-03-15T10:00:00.000Z'
+    const result = dateShiftMs(base, 1)
+    expect(result.getTime()).toBe(new Date(base).getTime() + 1)
+  })
+
+  it('повертає Date', () => {
+    expect(dateShiftMs(new Date(), 1)).toBeInstanceOf(Date)
   })
 })

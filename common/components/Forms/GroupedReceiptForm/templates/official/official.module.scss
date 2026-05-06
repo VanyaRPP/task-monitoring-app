@@ -223,11 +223,12 @@ $bg-row-l:     #fafafa;
 }
 
 .clGrandTotal {
-  background: linear-gradient(135deg, $accent 0%, $accent-dim 100%) !important;
+  background: transparent !important;
   padding: 0.6rem 1rem;
+  border-top: 2px solid $border;
 
   span {
-    color: #ffffff !important;
+    color: $ink !important;
     font-size: 0.78rem !important;
     letter-spacing: 0.1em;
     text-transform: uppercase;
@@ -235,7 +236,7 @@ $bg-row-l:     #fafafa;
   }
 
   strong {
-    color: #ffffff !important;
+    color: $ink !important;
     font-size: 1.05rem;
     font-weight: 800;
   }
@@ -324,6 +325,14 @@ $lightRoot: ":global(:root[data-theme='light'])";
   }
 }
 
+.clGrandTotal {
+  #{$lightRoot} & {
+    border-top-color: $border-l; 
+    span { color: $ink-l !important; }   
+    strong { color: $ink-l !important; } 
+  }
+}
+
 @media (max-width: 760px) {
   .clInvoice { padding: 1.4rem 1rem; }
 
@@ -402,11 +411,10 @@ $lightRoot: ":global(:root[data-theme='light'])";
   }
 
   .clGrandTotal {
-    background: #4a6491 !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
+    background: transparent !important; /* Прибрали синій #4a6491 */
+    border-top: 2px solid #e2e2e2 !important;
 
-    span   { color: #ffffff !important; }
-    strong { color: #ffffff !important; }
+    span   { color: #111 !important; }
+    strong { color: #111 !important; }
   }
 }
