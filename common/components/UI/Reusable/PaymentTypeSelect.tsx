@@ -1,37 +1,42 @@
 import { validateField } from '@assets/features/validators'
 import { Operations } from '@utils/constants'
-import { Form, Select, Tag } from 'antd'
-
+import { Form, Segmented } from 'antd'
 import { CreditCardFilled, BankFilled } from '@ant-design/icons'
+import styles from './style.module.scss'
 
-const PaymentTypeSelect = ({ edit }: { edit?: boolean }) => {
+const PaymentTypeSelect = () => {
   return (
     <Form.Item
       name="operation"
       label="Тип оплати"
       rules={validateField('required')}
     >
-      <Select placeholder="Оберіть тип оплати">
-        <Select.Option value={Operations.Credit}>
-          <Tag 
-            color="purple" 
-            style={{ display: 'inline-flex', alignItems: 'center', margin: 0, gap: '6px' }}
-          >
-            <CreditCardFilled />
-            Кредит (Оплата)
-          </Tag>
-        </Select.Option>
-        
-        <Select.Option value={Operations.Debit}>
-          <Tag 
-            color="success" 
-            style={{ display: 'inline-flex', alignItems: 'center', margin: 0, gap: '6px' }}
-          >
-            <BankFilled />
-            Дебет (Реалізація)
-          </Tag>
-        </Select.Option>
-      </Select>
+      <Segmented
+        block
+        className={styles.customSegmented} // Змінили назву класу
+        options={[
+          {
+            label: (
+              <div className={styles.segmentedLabel}>
+                <CreditCardFilled />
+                <span>Кредит (Оплата)</span>
+              </div>
+            ),
+            value: Operations.Credit,
+            className: styles.creditSegment,
+          },
+          {
+            label: (
+              <div className={styles.segmentedLabel}>
+                <BankFilled />
+                <span>Дебет (Реалізація)</span>
+              </div>
+            ),
+            value: Operations.Debit,
+            className: styles.debitSegment,
+          },
+        ]}
+      />
     </Form.Item>
   )
 }
