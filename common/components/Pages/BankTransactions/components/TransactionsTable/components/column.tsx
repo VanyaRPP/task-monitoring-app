@@ -289,8 +289,8 @@ export const generateColumns = (
       ...getDateColumnProps('DATE_TIME_DAT_OD_TIM_P'),
     },
     {
-      title: 'Type', // TRANTYPE column
-      width: '100px',
+      title: <span style={{ whiteSpace: 'nowrap' }}>Type</span>, // TRANTYPE column
+      width: '7%',
       dataIndex: 'TRANTYPE',
       key: 'TRANTYPE',
       ...getTrantypeFilterProps(),

@@ -55,7 +55,7 @@ const TransactionsTable: React.FC<Props> = ({
     <>
       <Table<ITransaction>
         key={transactions?.length}
-        scroll={{ x: true }}
+        scroll={{ x: 'max-content' }}
         dataSource={transactions}
         columns={columns}
         pagination={false}

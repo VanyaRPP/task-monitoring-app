@@ -122,11 +122,13 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
             placeholder="Select a related company"
             onChange={handleCompanyChange}
             value={selectedCompany ?? undefined}
-            style={{ width: 'calc(100% - 80px)',maxWidth: 300}}
+            style={{ width: 'calc(100% - 80px)'}}
           >
             {relatedCompanies.map((company) => (
-              <Select.Option key={company._id} value={company._id}>
+              <Select.Option key={company._id} value={company._id} title={company.companyName}>
+                <div style={{overflow: 'hidden', textOverflow: 'ellipsis',maxWidth: '300px'}}>
                 {company.companyName}
+                </div>
               </Select.Option>
             ))}
           </Select>
