@@ -122,7 +122,7 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
             placeholder="Select a related company"
             onChange={handleCompanyChange}
             value={selectedCompany ?? undefined}
-            style={{ width: 'calc(100% - 80px)' }}
+            style={{ width: 'calc(100% - 80px)',maxWidth: 300}}
           >
             {relatedCompanies.map((company) => (
               <Select.Option key={company._id} value={company._id}>
