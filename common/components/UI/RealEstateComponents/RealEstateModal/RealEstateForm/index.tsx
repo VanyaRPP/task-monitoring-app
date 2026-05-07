@@ -124,8 +124,8 @@ const RealEstateForm: FC<Props> = ({
       }}
     >
       <DomainsSelect
-        form={form}
-        disabled={!!currentRealEstate}
+  form={form}
+  edit={!!currentRealEstate}
       />
       <Form.Item name="street" hidden>
         <Input />
