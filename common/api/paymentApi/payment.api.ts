@@ -1,5 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import { Operations } from '@utils/constants'
+import { invalidateDebtorsOnSuccess } from '@common/api/debtorsApi/debtors.api'
 import {
   IAddPaymentResponse,
   IDeletePaymentResponse,
@@ -99,6 +100,7 @@ export const paymentApi = createApi({
         }
       },
       invalidatesTags: (response) => (response ? ['Payment', 'Profit'] : []),
+      onQueryStarted: invalidateDebtorsOnSuccess,
     }),
     addCostPayment: builder.mutation<IAddCostPaymentResponse, ICostPayment>({
       query(body) {
@@ -120,6 +122,7 @@ export const paymentApi = createApi({
         }
       },
       invalidatesTags: (response) => (response ? ['Payment'] : []),
+      onQueryStarted: invalidateDebtorsOnSuccess,
     }),
     deleteMultiplePayments: builder.mutation<
       IDeletePaymentResponse,
@@ -133,6 +136,7 @@ export const paymentApi = createApi({
         }
       },
       invalidatesTags: (response) => (response ? ['Payment'] : []),
+      onQueryStarted: invalidateDebtorsOnSuccess,
     }),
     getPaymentNumber: builder.query<number, object>({
       query: () => `spacehub/payment/number`,
