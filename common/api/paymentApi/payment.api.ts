@@ -17,7 +17,6 @@ import {
   IGetPaymentChangeLogsResponse,
   ICreatePaymentChangeLogResponse,
 } from './payment.api.types'
-import { ITransaction } from '@components/Pages/BankTransactions/components/TransactionsTable/components/transactionTypes'
 
 export const paymentApi = createApi({
   reducerPath: 'paymentApi',
@@ -151,6 +150,29 @@ export const paymentApi = createApi({
       },
       invalidatesTags: (response) => (response ? ['Payment'] : []),
     }),
+    markPaymentsPaid: builder.mutation<
+      {
+        createdIds: string[]
+        skippedIds: string[]
+        totalRequested: number
+      },
+      string[]
+    >({
+      query: (ids) => ({
+        url: `spacehub/payment/mark-paid`,
+        method: 'POST',
+        body: { ids },
+      }),
+      transformResponse: (response: {
+        success: boolean
+        data: {
+          createdIds: string[]
+          skippedIds: string[]
+          totalRequested: number
+        }
+      }) => response.data,
+      invalidatesTags: (response) => (response ? ['Payment'] : []),
+    }),
     generatePdf: builder.mutation<
       IGeneratePaymentPDFResponce,
       IGeneratePaymentPDF
@@ -201,6 +223,7 @@ export const {
   useDeleteMultiplePaymentsMutation,
   useGetPaymentNumberQuery,
   useEditPaymentMutation,
+  useMarkPaymentsPaidMutation,
   useGeneratePdfMutation,
   useGetCostPaymentQuery,
   useAddCostPaymentMutation,

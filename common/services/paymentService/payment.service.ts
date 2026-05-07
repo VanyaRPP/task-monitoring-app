@@ -5,6 +5,7 @@ import Service from '@modules/models/Service'
 import {
   getCreditDebitPipeline,
   getInvoicesTotalPipeline,
+  getMaxInvoiceNumber,
   getTotalGeneralSumPipeline,
 } from '@pages/api/spacehub/payment/pipelines'
 import { quarters, SortOrder } from '@utils/constants'
@@ -240,6 +241,13 @@ export async function getPayments(
     success: true,
     total,
   }
+}
+
+export async function getNextInvoiceNumber(): Promise<number> {
+  const result = (await Payment.aggregate(getMaxInvoiceNumber())) as Array<{
+    maxNumber?: number
+  }>
+  return (result[0]?.maxNumber ?? 0) + 1
 }
 
 export async function createPayment(body: any, isAdmin: boolean) {
