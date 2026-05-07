@@ -106,9 +106,9 @@ const RealEstateModal: FC<Props> = ({
         (s) => typeof s.price === 'number' && s.price > 0
       ) || []
 
-    const realEstateData = {
-      domain: currentRealEstate?.domain || formData.domain,
-      street: currentRealEstate?.street || formData.street,
+   const realEstateData = {
+      domain: getEntityId(formData.domain),
+      street: getEntityId(formData.street) || getEntityId(currentRealEstate?.street),
       companyName: formData.companyName,
       description: formData.description,
       adminEmails: formData.adminEmails,
@@ -140,12 +140,12 @@ const RealEstateModal: FC<Props> = ({
       customServices: filteredCustomServices,
     }
 
-    const response = currentRealEstate
+   const response = currentRealEstate
       ? await editRealEstate({
           _id: currentRealEstate?._id,
           ...realEstateData,
-        })
-      : await addRealEstate(realEstateData)
+        } as any) 
+      : await addRealEstate(realEstateData as any) 
 
     if ('data' in response) {
       form.resetFields()
