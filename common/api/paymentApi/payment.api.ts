@@ -125,7 +125,7 @@ export const paymentApi = createApi({
       onQueryStarted: invalidateDebtorsOnSuccess,
     }),
     deleteMultiplePayments: builder.mutation<
-      IDeletePaymentResponse,
+      { deletedIds: string[] },
       IExtendedPayment['_id'][]
     >({
       query(ids) {
@@ -135,6 +135,10 @@ export const paymentApi = createApi({
           body: { ids },
         }
       },
+      transformResponse: (response: {
+        success: boolean
+        data: { deletedIds: string[] }
+      }) => response.data,
       invalidatesTags: (response) => (response ? ['Payment'] : []),
       onQueryStarted: invalidateDebtorsOnSuccess,
     }),
