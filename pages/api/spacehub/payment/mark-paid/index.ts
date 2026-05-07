@@ -3,12 +3,28 @@ import PaymentChangeLog from '@common/modules/models/PaymentChangeLog'
 import Domain from '@modules/models/Domain'
 import start, { Data } from '@pages/api/api.config'
 import ProfitService from '@common/services/profitService/profit.service'
+import { getNextInvoiceNumber } from '@common/services/paymentService/payment.service'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import { Operations } from '@utils/constants'
 import { dateShiftMs } from '@common/assets/features/formatDate'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 start()
+
+const COPYABLE_PAYMENT_FIELDS = [
+  'domain',
+  'street',
+  'company',
+  'monthService',
+  'description',
+  'invoice',
+  'provider',
+  'reciever',
+  'generalSum',
+  'currency',
+  'losses',
+  'template',
+] as const
 
 export default async function handler(
   req: NextApiRequest,
@@ -20,7 +36,7 @@ export default async function handler(
       .json({ success: false, message: 'Method not allowed' })
   }
 
-  let perms
+  let perms: Awaited<ReturnType<typeof getCurrentUser>>
   try {
     perms = await getCurrentUser(req, res)
   } catch (error: any) {
@@ -42,7 +58,9 @@ export default async function handler(
   }
 
   try {
-    const payments = (await Payment.find({ _id: { $in: ids } })) as any[]
+    const sourcePayments = (await Payment.find({
+      _id: { $in: ids },
+    })) as any[]
 
     let allowedDomainIds: Set<string> | null = null
     if (!isGlobalAdmin) {
@@ -52,81 +70,80 @@ export default async function handler(
       allowedDomainIds = new Set(domains.map((d: any) => d._id.toString()))
     }
 
-    const updatedIds: string[] = []
+    const createdIds: string[] = []
     const skippedIds: string[] = []
 
-    for (const payment of payments) {
-      if (payment.type === Operations.Credit) {
-        skippedIds.push(payment._id.toString())
+    for (const source of sourcePayments) {
+      if (source.type !== Operations.Debit) {
+        skippedIds.push(source._id.toString())
         continue
       }
       if (
         allowedDomainIds &&
-        !allowedDomainIds.has(payment.domain.toString())
+        !allowedDomainIds.has(source.domain.toString())
       ) {
-        skippedIds.push(payment._id.toString())
+        skippedIds.push(source._id.toString())
         continue
       }
 
-      const updated = await Payment.findOneAndUpdate(
-        { _id: payment._id },
-        {
-          $set: {
-            type: Operations.Credit,
-            invoiceCreationDate: dateShiftMs(payment.invoiceCreationDate, 1),
-          },
-        },
-        { new: true }
-      )
+      const creditData: Record<string, any> = {
+        type: Operations.Credit,
+        invoiceCreationDate: dateShiftMs(source.invoiceCreationDate, 1),
+        invoiceNumber: await getNextInvoiceNumber(),
+      }
+      for (const field of COPYABLE_PAYMENT_FIELDS) {
+        if (source[field] !== undefined) {
+          creditData[field] = source[field]
+        }
+      }
 
-      if (!updated) {
-        skippedIds.push(payment._id.toString())
+      const created = (await Payment.create(creditData)) as any
+      if (!created) {
+        skippedIds.push(source._id.toString())
         continue
       }
 
       await PaymentChangeLog.create({
-        paymentId: payment._id,
+        paymentId: source._id,
         date: new Date(),
         reason: 'mark-paid',
         actorId: user?._id,
         actorEmail: user?.email,
         invoiceData: {
-          invoiceNumber: payment.invoiceNumber,
-          invoiceCreationDate: payment.invoiceCreationDate,
-          invoice: payment.invoice,
-          provider: payment.provider,
-          reciever: payment.reciever,
-          generalSum: payment.generalSum,
-          description: payment.description,
-          type: payment.type,
-          template: payment.template,
+          invoiceNumber: source.invoiceNumber,
+          invoiceCreationDate: source.invoiceCreationDate,
+          invoice: source.invoice,
+          provider: source.provider,
+          reciever: source.reciever,
+          generalSum: source.generalSum,
+          description: source.description,
+          type: source.type,
+          template: source.template,
+          creditPaymentId: created._id,
         },
       })
 
       if (isGlobalAdmin) {
-        await ProfitService.updatePayment(updated._id.toString(), {
-          type: updated.type as 'debit' | 'credit',
-          date: updated.invoiceCreationDate,
-          amount: updated.generalSum,
-          description:
-            updated.type === Operations.Debit
-              ? `Інвойс №${updated.invoiceNumber}`
-              : updated.description,
-          invoiceNumber: String(updated.invoiceNumber),
+        await ProfitService.updatePayment(created._id.toString(), {
+          type: Operations.Credit,
+          date: created.invoiceCreationDate,
+          amount: created.generalSum,
+          description: created.description,
+          invoiceNumber: String(created.invoiceNumber),
         })
       }
 
-      updatedIds.push(updated._id.toString())
+      createdIds.push(created._id.toString())
     }
 
     const notFoundIds = ids.filter(
-      (id) => !payments.some((p) => p._id.toString() === id)
+      (id) => !sourcePayments.some((p) => p._id.toString() === id)
     )
 
     return res.status(200).json({
       success: true,
       data: {
-        updatedIds,
+        createdIds,
         skippedIds: [...skippedIds, ...notFoundIds],
         totalRequested: ids.length,
       },

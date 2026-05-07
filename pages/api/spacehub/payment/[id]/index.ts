@@ -23,7 +23,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  let perms
+  let perms: Awaited<ReturnType<typeof getCurrentUser>>
   try {
     perms = await getCurrentUser(req, res)
   } catch (error: any) {

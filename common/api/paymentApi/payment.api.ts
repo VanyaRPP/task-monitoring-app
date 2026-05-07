@@ -150,16 +150,9 @@ export const paymentApi = createApi({
       },
       invalidatesTags: (response) => (response ? ['Payment'] : []),
     }),
-    markPaymentPaid: builder.mutation<IExtendedPayment, string>({
-      query: (id) => ({
-        url: `spacehub/payment/${id}/mark-paid`,
-        method: 'POST',
-      }),
-      invalidatesTags: (response) => (response ? ['Payment'] : []),
-    }),
-    markPaymentsPaidBulk: builder.mutation<
+    markPaymentsPaid: builder.mutation<
       {
-        updatedIds: string[]
+        createdIds: string[]
         skippedIds: string[]
         totalRequested: number
       },
@@ -173,7 +166,7 @@ export const paymentApi = createApi({
       transformResponse: (response: {
         success: boolean
         data: {
-          updatedIds: string[]
+          createdIds: string[]
           skippedIds: string[]
           totalRequested: number
         }
@@ -230,8 +223,7 @@ export const {
   useDeleteMultiplePaymentsMutation,
   useGetPaymentNumberQuery,
   useEditPaymentMutation,
-  useMarkPaymentPaidMutation,
-  useMarkPaymentsPaidBulkMutation,
+  useMarkPaymentsPaidMutation,
   useGeneratePdfMutation,
   useGetCostPaymentQuery,
   useAddCostPaymentMutation,
