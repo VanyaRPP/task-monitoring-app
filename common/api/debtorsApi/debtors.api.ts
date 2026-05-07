@@ -5,6 +5,7 @@ export const debtorsApi = createApi({
   reducerPath: 'debtorsApi',
   refetchOnFocus: true,
   refetchOnReconnect: true,
+  tagTypes: ['Debtors'],
   baseQuery: fetchBaseQuery({ baseUrl: `/api/` }),
   endpoints: (builder) => ({
     getDebtors: builder.query<IGetDebtorsResponse, IGetDebtorsRequest>({
@@ -14,6 +15,7 @@ export const debtorsApi = createApi({
           params: { domainIds },
         }
       },
+      providesTags: ['Debtors'],
     }),
   }),
 })

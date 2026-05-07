@@ -52,6 +52,7 @@ jest.mock('@modules/models/Service', () => ({
 jest.mock('@pages/api/spacehub/payment/pipelines', () => ({
   getCreditDebitPipeline: jest.fn(),
   getInvoicesTotalPipeline: jest.fn(),
+  getMaxInvoiceNumber: jest.fn(() => [{ $group: { _id: null, maxNumber: { $max: '$invoiceNumber' } } }]),
   getTotalGeneralSumPipeline: jest.fn(),
 }))
 
@@ -68,7 +69,11 @@ import Domain from '@modules/models/Domain'
 import Payment from '@modules/models/Payment'
 import ProfitService from '@common/services/profitService/profit.service'
 import { sendInvoiceEmail } from '@utils/email/sendInvoiceEmail'
-import { createPayment, getPayments } from './payment.service'
+import {
+  createPayment,
+  getNextInvoiceNumber,
+  getPayments,
+} from './payment.service'
 import { SortOrder, Operations } from '@utils/constants'
 
 const domainFindByIdMock = Domain.findById as jest.Mock
@@ -270,5 +275,42 @@ describe('createPayment', () => {
         }),
       })
     )
+  })
+})
+
+describe('getNextInvoiceNumber', () => {
+  const aggregateMock = Payment.aggregate as jest.Mock
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
+  it('returns max invoice number + 1', async () => {
+    aggregateMock.mockResolvedValueOnce([{ maxNumber: 42 }])
+    const next = await getNextInvoiceNumber()
+    expect(next).toBe(43)
+  })
+
+  it('returns 1 when there are no payments yet (empty aggregation result)', async () => {
+    aggregateMock.mockResolvedValueOnce([])
+    const next = await getNextInvoiceNumber()
+    expect(next).toBe(1)
+  })
+
+  it('returns 1 when maxNumber is missing on the aggregation result', async () => {
+    aggregateMock.mockResolvedValueOnce([{}])
+    const next = await getNextInvoiceNumber()
+    expect(next).toBe(1)
+  })
+
+  it('returns sequential numbers when called repeatedly with growing max', async () => {
+    aggregateMock
+      .mockResolvedValueOnce([{ maxNumber: 10 }])
+      .mockResolvedValueOnce([{ maxNumber: 11 }])
+      .mockResolvedValueOnce([{ maxNumber: 12 }])
+
+    expect(await getNextInvoiceNumber()).toBe(11)
+    expect(await getNextInvoiceNumber()).toBe(12)
+    expect(await getNextInvoiceNumber()).toBe(13)
   })
 })
