@@ -82,7 +82,7 @@ describe('OLIMP template', () => {
 
   test('displays main invoice data', () => {
     renderOlimp()
-    expect(screen.getAllByText('Test Company').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Test Domain').length).toBeGreaterThan(0)
     expect(screen.getByText('Development services')).toBeInTheDocument()
     expect(screen.getAllByText((c) => c.includes('100.00'))[0]).toBeInTheDocument()
   })

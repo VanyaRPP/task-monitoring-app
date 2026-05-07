@@ -31,6 +31,8 @@ jest.mock('@common/api/paymentApi/payment.api', () => ({
   useDeletePaymentMutation: jest.fn(() => [jest.fn(), { isLoading: false }]),
   useDeleteMultiplePaymentsMutation: jest.fn(() => [jest.fn(), { isLoading: false }]),
   useEditPaymentMutation: jest.fn(() => [jest.fn()]),
+  useMarkPaymentPaidMutation: jest.fn(() => [jest.fn()]),
+  useMarkPaymentsPaidBulkMutation: jest.fn(() => [jest.fn()]),
   useAddPaymentMutation: jest.fn(() => [jest.fn()]),
   useGetPaymentNumberQuery: jest.fn(() => ({ data: 1, refetch: jest.fn() })),
 }))
