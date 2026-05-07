@@ -5,9 +5,9 @@ import {
   useAddPaymentMutation,
   useEditPaymentMutation,
 } from '@common/api/paymentApi/payment.api'
-import { 
-  useGetPaymentChangeLogsQuery, 
-  useDeletePaymentChangeLogMutation 
+import {
+  useGetPaymentChangeLogsQuery,
+  useDeletePaymentChangeLogMutation
 } from '@common/api/changelogApi/changelog.api'
 import {
   IExtendedPayment,
@@ -79,7 +79,7 @@ export const PaymentContext = createContext<IPaymentContext>({
   prevService: null,
   company: null,
   form: null,
-  template: 'classic', 
+  template: 'classic',
   setTemplate: () => void 0,
   showQuantityInPreview: false,
   setShowQuantityInPreview: () => void 0,
@@ -128,7 +128,7 @@ const AddPaymentModal: FC<Props> = ({
     typeof paymentData?.domain === 'object'
       ? (paymentData.domain as any)?.defaultTemplate
       : undefined
-const [template, setTemplate] = useState<TemplateKey>(
+  const [template, setTemplate] = useState<TemplateKey>(
     resolveTemplate(paymentData?.template, companyDefaultTemplate, domainDefaultTemplate)
   )
   const [showQuantityInPreview, setShowQuantityInPreviewState] = useState(false)
@@ -177,7 +177,7 @@ const [template, setTemplate] = useState<TemplateKey>(
 
   const handleDeleteChangeLog = async (logId: string) => {
     if (!logId || !paymentId) return
-    
+
     try {
       await deleteChangeLog({ paymentId, changeLogid: logId }).unwrap()
     } catch (error) {
@@ -413,9 +413,9 @@ const [template, setTemplate] = useState<TemplateKey>(
       company: formData.company,
       monthService: monthServiceId,
       invoiceCreationDate: formData.invoiceCreationDate
-      ? (() => {    
-        const now = new Date()  
-        return new Date(    
+        ? (() => {
+          const now = new Date()
+          return new Date(
             Date.UTC(
               formData.invoiceCreationDate.year(),
               formData.invoiceCreationDate.month(),
@@ -424,10 +424,10 @@ const [template, setTemplate] = useState<TemplateKey>(
               now.getUTCMinutes(),
               now.getUTCSeconds(),
               now.getUTCMilliseconds()
+            )
           )
-        )
-      })()
-      : new Date(),
+        })()
+        : new Date(),
       description: formData.description || '',
       generalSum: formData.generalSum || formData.debit,
       currency: formData.currency || Currency.UAH,
@@ -442,9 +442,9 @@ const [template, setTemplate] = useState<TemplateKey>(
 
     const response = edit
       ? await editPayment({
-          _id: paymentData?._id,
-          ...payment,
-        })
+        _id: paymentData?._id,
+        ...payment,
+      })
       : await addPayment(payment)
 
     if ('data' in response) {
@@ -530,8 +530,8 @@ const [template, setTemplate] = useState<TemplateKey>(
             street: getId(payment?.street),
             company: preselectedCompany || getId(payment?.company),
             monthService: getId(payment?.monthService),
-            invoice: (payment?.invoice && payment.invoice.length > 0) 
-              ? payment.invoice 
+            invoice: (payment?.invoice && payment.invoice.length > 0)
+              ? payment.invoice
               : filteredInvoices,
             description: payment?.description,
             generalSum: payment?.generalSum,

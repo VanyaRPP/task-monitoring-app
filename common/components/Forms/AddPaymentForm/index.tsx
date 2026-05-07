@@ -1,16 +1,11 @@
 import { validateField } from '@assets/features/validators'
-import { IPayment } from '@common/api/paymentApi/payment.api.types'
-import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
-import { IService } from '@common/api/serviceApi/service.api.types'
 import { usePaymentContext } from '@components/AddPaymentModal'
-import { InvoiceType } from '@components/Tables/EditInvoiceTable'
 import AddressesSelect from '@components/UI/Reusable/AddressesSelect'
 import DomainsSelect from '@components/UI/Reusable/DomainsSelect'
 import PaymentTypeSelect from '@components/UI/Reusable/PaymentTypeSelect'
 import { Operations, CURRENCY_SELECT_OPTIONS } from '@utils/constants'
-import { getInvoices } from '@utils/getInvoices'
 import { Form, Input, InputNumber, Select } from 'antd'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect } from 'react'
 import CompanySelect from './CompanySelect'
 import InvoiceCreationDate from './InvoiceCreationDate'
 import InvoiceNumber from './InvoiceNumber'
@@ -28,25 +23,6 @@ type AddPaymentFormProps = {
   changelogLoading?: boolean
 }
 
-export const useInvoice = ({
-  payment,
-  service,
-  company,
-  prevService,
-  prevPayment,
-}: {
-  payment?: IPayment
-  service?: IService
-  company?: IRealestate
-  prevService?: IService
-  prevPayment?: IPayment
-}): Omit<InvoiceType, 'sum'>[] => {
-  const invoices = useMemo(() => {
-    return getInvoices({ payment, service, company, prevService, prevPayment })
-  }, [payment, service, company, prevService, prevPayment])
-  return invoices
-}
-
 function AddPaymentForm({
   paymentActions,
   changelogOptions = [],
@@ -55,38 +31,19 @@ function AddPaymentForm({
   const { preview, edit } = paymentActions
   const selectedActions = { preview, edit }
 
-  const {
-    form,
-    payment,
-    service,
-    company,
-    prevService,
-    prevPayment,
-  } = usePaymentContext()
+  const { form, payment, service, company } = usePaymentContext()
 
-  const [streetHasService, setStreetHasService] = useState(false)
-  const companyId = Form.useWatch('company', form)
   const operation = Form.useWatch('operation', form)
   const changelogId = Form.useWatch('changelogId', form)
 
   useEffect(() => {
     if (!changelogId) return
 
-    const exists = changelogOptions.some(opt => opt.value === changelogId)
+    const exists = changelogOptions.some((opt) => opt.value === changelogId)
     if (!exists) {
       form.setFieldValue('changelogId', undefined)
     }
   }, [changelogOptions, changelogId, form])
-
-  useInvoice({
-    payment,
-    service,
-    company,
-    prevService,
-    prevPayment,
-  })
-  const showCurrentVersionBtn = !!changelogId
-
 
   const showChangelog = changelogOptions.length > 0
 
@@ -96,12 +53,11 @@ function AddPaymentForm({
       <AddressesSelect
         form={form}
         edit={edit}
-        onStreetHasServiceChange={setStreetHasService}
         street={company?.street?._id}
       />
       <MonthServiceSelect form={form} edit={edit} />
       <CompanySelect form={form} edit={edit} company={payment?.company} />
-      <PaymentTypeSelect edit={!companyId || edit} />
+      <PaymentTypeSelect />
       <div className={s.invoiceRow}>
         <InvoiceNumber form={form} paymentActions={selectedActions} />
         <Form.Item name="currency" label=" ">
