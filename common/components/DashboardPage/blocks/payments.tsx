@@ -285,12 +285,15 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
   )
   const handleDeleteConfirm = async () => {
     const idsToDelete = paymentsDeleteItems.map((item) => item.id)
-    const removed =
+    const requested =
       payments?.data?.filter((p) => idsToDelete.includes(p._id)) ?? []
     const response = await deleteMultiplePayments(idsToDelete)
     if ('data' in response) {
+      const { deletedIds } = response.data
+      const deletedSet = new Set(deletedIds)
+      const actuallyRemoved = requested.filter((p) => deletedSet.has(p._id))
       patchDebtorsCache(
-        removed.map((p) => ({
+        actuallyRemoved.map((p) => ({
           companyId: getCompanyId(p),
           debtDelta: debtDeltaForRemoved(p),
         }))
@@ -298,7 +301,13 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
       dispatch(setPaymentsDeleteItems([]))
       dispatch(setSelectedPayments([]))
       setDeleteModalOpen(false)
-      message.success('Видалено!')
+      if (deletedIds.length === idsToDelete.length) {
+        message.success('Видалено!')
+      } else if (deletedIds.length > 0) {
+        message.warning('Деякі платежі видалено, але не всі')
+      } else {
+        message.error('Не вдалося видалити обрані платежі')
+      }
     } else {
       message.error('Помилка при видаленні рахунків')
     }

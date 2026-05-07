@@ -20,3 +20,26 @@ export const debtorsApi = createApi({
   }),
 })
 export const { useGetDebtorsQuery } = debtorsApi
+
+/**
+ * Use as `onQueryStarted` on any mutation that should refresh the debtors badge
+ * after success. Cross-API invalidation can't be expressed via `invalidatesTags`
+ * since `Debtors` lives outside the calling API.
+ */
+export const invalidateDebtorsOnSuccess = async (
+  _arg: unknown,
+  {
+    dispatch,
+    queryFulfilled,
+  }: {
+    dispatch: (action: any) => any
+    queryFulfilled: Promise<unknown>
+  }
+): Promise<void> => {
+  try {
+    await queryFulfilled
+    dispatch(debtorsApi.util.invalidateTags(['Debtors']))
+  } catch {
+    // mutation failed; nothing to invalidate
+  }
+}
