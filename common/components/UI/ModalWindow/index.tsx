@@ -17,6 +17,7 @@ interface Props {
   title: string
   preview?: boolean
   destroyOnHidden?: boolean
+  width?: number | string
 }
 
 const Modal: React.FC<Props> = ({

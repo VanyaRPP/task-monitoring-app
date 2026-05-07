@@ -11,6 +11,7 @@ import DomainForm from './DomainForm'
 import Modal from '../../ModalWindow'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { useEditRealEstateMutation } from '@common/api/realestateApi/realestate.api'
+import { filterChangedCompaniesAreas } from './areasFilter'
 
 interface Props {
   currentDomain: IExtendedDomain
@@ -110,27 +111,26 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
       : await addDomainEstate(domainData)
 
     if ('data' in response) {
-      const companiesAreas = formData.companiesAreas || []
+      const changedCompaniesAreas = filterChangedCompaniesAreas(
+        formData.companiesAreas
+      )
 
-        if (companiesAreas.length > 0) {
-          try {
-            const savePromises = companiesAreas.map((company: any) => {
-              if (company._id) {
-                return editRealEstate({
-                  _id: company._id,
-                  totalArea: company.area,
-                  rentPart: company.rentPart,
-                }).unwrap()
-              }
-              return Promise.resolve()
-            })
-
-            await Promise.all(savePromises)
-          } catch (e) {
-            console.error('Помилка при збереженні площ компаній:', e);
-            return message.error('Виникла помилка при оновленні даних площ');
-          }
+      if (changedCompaniesAreas.length > 0) {
+        try {
+          await Promise.all(
+            changedCompaniesAreas.map((company) =>
+              editRealEstate({
+                _id: company._id,
+                totalArea: company.area,
+                rentPart: company.rentPart,
+              }).unwrap()
+            )
+          )
+        } catch (e) {
+          console.error('Помилка при збереженні площ компаній:', e)
+          return message.error('Виникла помилка при оновленні даних площ')
         }
+      }
       
       closeModal()
       setIsValueChanged(false);
@@ -145,6 +145,7 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
   return (
     <Modal
       open={true}
+      width={1000}
       title={'Надавачі послуг'}
       onOk={handleSubmit}
       changed={() => isValueChanged}

@@ -3,7 +3,7 @@ import { Card, Table, InputNumber, Spin, Form, Empty, Tooltip, Button, Collapse 
 import { ReloadOutlined } from '@ant-design/icons'
 import { useGetAreasQuery } from '@common/api/domainApi/domain.api'
 import ChartComponent from '@components/Chart'
-import s from '../style.module.scss'
+import s from './style.module.scss'
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 
 interface Props {
@@ -79,6 +79,10 @@ const AreaCalculationCard: React.FC<Props> = ({ domainId, editable, form, setIsV
           area: c.totalArea,
           rentPart: c.rentPart,
           key: original?._id || c.companyName,
+          // Stamped on init so handleSubmit can diff against API state and avoid
+          // re-saving rows the user never touched.
+          _initialArea: c.totalArea,
+          _initialRentPart: c.rentPart,
         }
       })
       form.setFieldsValue({ companiesAreas: freshData })

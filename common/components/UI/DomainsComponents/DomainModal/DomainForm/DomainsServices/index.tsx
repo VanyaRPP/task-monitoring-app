@@ -22,6 +22,9 @@ interface Props {
   form: FormInstance
   editable: boolean
   domainId?: string
+  /** When false, the inner Collapse with snapshots list is not rendered.
+   *  Use it when the snapshots are shown in a separate tab. */
+  renderSnapshotsList?: boolean
 }
 
 function templateToFormGroups(template: IDomainTypeTemplate) {
@@ -31,7 +34,12 @@ function templateToFormGroups(template: IDomainTypeTemplate) {
   }))
 }
 
-const DomainsServices: FC<Props> = ({ form, editable, domainId }) => {
+const DomainsServices: FC<Props> = ({
+  form,
+  editable,
+  domainId,
+  renderSnapshotsList = true,
+}) => {
   const [createCustomService] = useCreateCustomServiceMutation()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const { data: customServicesData } = useGetCustomServicesQuery({
@@ -198,7 +206,9 @@ const DomainsServices: FC<Props> = ({ form, editable, domainId }) => {
         editable={editable}
         onTemplateChange={handleTemplateChange}
       />
-      <DomainSnapshotsList domainId={domainId} onRestored={handleRestored} />
+      {renderSnapshotsList && (
+        <DomainSnapshotsList domainId={domainId} onRestored={handleRestored} />
+      )}
       <Button style={{ marginBottom: 10 }} block onClick={() => setIsModalOpen(true)}>
         Мої Послуги
       </Button>
