@@ -143,8 +143,11 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
                 </Button>
               </Dropdown>
               <Dropdown
-                menu={{ items: quickSendMenuItems }}
-                trigger={['hover', 'click']}
+                menu={{
+                  items: quickSendMenuItems,
+                  className: styles.monthsDropdown,
+                }}
+                trigger={['click']}
                 disabled={!selectedCompany || services.length === 0}
               >
                 <Button
@@ -166,11 +169,11 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
                 Send
               </Button>
               <Dropdown
-                menu={{ 
+                menu={{
                   items: quickSendMenuItems,
-                  className: styles.monthsDropdown
+                  className: styles.monthsDropdown,
                 }}
-                trigger={['hover', 'click']}
+                trigger={['click']}
                 disabled={!selectedCompany || services.length === 0}
               >
                 <Button

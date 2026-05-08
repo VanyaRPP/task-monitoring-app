@@ -4,7 +4,8 @@ import { InvoiceComponentProps } from '@components/Tables/EditInvoiceTable'
 import { currencyWithUnit, toArray, toFirstUpperCase, toRoundFixed } from '@utils/helpers'
 import validator from '@utils/validator'
 import { Form, Input, Space, Typography } from 'antd'
-import { useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
+import useSyncSum from '../useSyncSum'
 import { UpdateInvoiceButton } from './UpdateInvoiceButton'
 
 export const Name: React.FC<InvoiceComponentProps> = ({
@@ -146,11 +147,8 @@ export const Sum: React.FC<InvoiceComponentProps> = ({ form, name: _name }) => {
   const amount = Form.useWatch(['invoice', ...name, 'amount'], form)
   const sum = Form.useWatch(['invoice', ...name, 'sum'], form)
   const { company } = usePaymentContext()
-  
-  useEffect(() => {
-    const quantity = +amount > 0 ? +amount : 1
-    form.setFieldValue(['invoice', ...name, 'sum'], +price * quantity)
-  }, [form, name, price, amount])
+
+  useSyncSum(form!, name, +price * (+amount > 0 ? +amount : 1))
 
   return <strong>{currencyWithUnit(toRoundFixed(sum), company)}</strong>
 }

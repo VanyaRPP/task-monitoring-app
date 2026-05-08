@@ -154,13 +154,18 @@ export const getMaintenanceInvoice = ({
     !isNaN(company?.totalArea) &&
     (!isNaN(company?.servicePricePerMeter) || !isNaN(service?.rentPrice))
   ) {
+    // `company.servicePricePerMeter` may be null (Number(null)===0 sneaks past
+    // the !isNaN guard) and `service` may be null while it's still loading.
+    // Resolve the price defensively and skip if neither source is usable. Note
+    // we use `== null` (not `!price`) so a legitimate 0 still produces a row.
+    const price = company.servicePricePerMeter || service?.rentPrice
+    if (price == null) return
+
     return {
       type: ServiceType.Maintenance,
       amount: +toRoundFixed(company.totalArea),
-      price: +toRoundFixed(company.servicePricePerMeter || service.rentPrice),
-      sum: +toRoundFixed(
-        company.totalArea * (company.servicePricePerMeter || service.rentPrice)
-      ),
+      price: +toRoundFixed(price),
+      sum: +toRoundFixed(company.totalArea * price),
     }
   }
 }

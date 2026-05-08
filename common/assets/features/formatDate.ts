@@ -71,3 +71,28 @@ export const formatInvoiceDueDateUs = (date?: Date | string | null, days = 5): s
 
 export const dateShiftMs = (date: Date | string, ms: number): Date =>
   new Date(new Date(date).getTime() + ms)
+
+/**
+ * Combine the user-selected day (year/month/date from a Dayjs instance) with
+ * the *current* wall-clock time (UTC hours/minutes/seconds/ms). Used when
+ * saving payments — user picks a date, we keep the time-of-save granular.
+ *
+ * Returns the current Date when input is falsy.
+ */
+export const combineDayWithCurrentTime = (
+  selectedDay?: { year(): number; month(): number; date(): number } | null
+): Date => {
+  if (!selectedDay) return new Date()
+  const now = new Date()
+  return new Date(
+    Date.UTC(
+      selectedDay.year(),
+      selectedDay.month(),
+      selectedDay.date(),
+      now.getUTCHours(),
+      now.getUTCMinutes(),
+      now.getUTCSeconds(),
+      now.getUTCMilliseconds()
+    )
+  )
+}

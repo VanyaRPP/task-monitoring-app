@@ -1,5 +1,6 @@
 import { useGetCustomServicesByDomainQuery } from '@common/api/customServicesApi/customServices.api'
 import { useGetDomainByPkQuery } from '@common/api/domainApi/domain.api'
+import { buildPaymentPayload } from './buildPaymentPayload'
 import { resolveTemplate, TemplateKey } from './resolveTemplate'
 import {
   useAddPaymentMutation,
@@ -22,7 +23,7 @@ import { usePaymentFormData } from '@modules/hooks/usePaymentData'
 import { Operations, Currency } from '@utils/constants'
 import { getInvoices } from '@utils/getInvoices'
 import { getPaymentProviderAndReciever } from '@utils/helpers'
-import { Form, Tabs, TabsProps, message, Tooltip } from 'antd'
+import { Form, Tabs, TabsProps, message } from 'antd'
 import { FormInstance } from 'antd/es/form/Form'
 import { useChangelogOptions } from './changelog/useChangelogOptions'
 import dayjs from 'dayjs'
@@ -132,9 +133,7 @@ const AddPaymentModal: FC<Props> = ({
     resolveTemplate(paymentData?.template, companyDefaultTemplate, domainDefaultTemplate)
   )
   const [showQuantityInPreview, setShowQuantityInPreviewState] = useState(false)
-  const [activeTabKey, setActiveTabKey] = useState(
-    getActiveTab(paymentData, preview)
-  )
+  const [activeTabKey, setActiveTabKey] = useState(preview ? '2' : '1')
 
   const setShowQuantityInPreview = useCallback(
     (value: boolean) => {
@@ -187,8 +186,13 @@ const AddPaymentModal: FC<Props> = ({
 
   const changelogOptions = useChangelogOptions(changelogRes, handleDeleteChangeLog)
 
-  const { company, service, payment, prevService, prevPayment } =
-    usePaymentFormData(form, paymentData)
+  // `usePaymentFormData` currently returns paymentData unchanged as `payment`,
+  // so we destructure only the actual derived fields and use `paymentData`
+  // directly everywhere a saved payment is needed.
+  const { company, service, prevService, prevPayment } = usePaymentFormData(
+    form,
+    paymentData
+  )
   const { provider, reciever } = getPaymentProviderAndReciever(company)
 
   const transaction = {
@@ -221,7 +225,7 @@ const AddPaymentModal: FC<Props> = ({
     const allInvoices = getInvoices({
       company,
       service,
-      payment,
+      payment: paymentData,
       prevService,
       prevPayment,
     })
@@ -247,7 +251,7 @@ const AddPaymentModal: FC<Props> = ({
   }, [
     company,
     service,
-    payment,
+    paymentData,
     prevService,
     prevPayment,
     customDomainServices,
@@ -319,12 +323,12 @@ const AddPaymentModal: FC<Props> = ({
     })
   }
 
-  if (payment && paymentData?.type !== Operations.Credit && template !== 'olimp') {
+  if (paymentData && paymentData?.type !== Operations.Credit && template !== 'olimp') {
     items.push({
       key: '3',
       label: 'Акт',
       disabled: !shouldTabsEnabled,
-      children: <PriceList data={payment} />,
+      children: <PriceList data={paymentData} />,
     })
   }
 
@@ -353,6 +357,30 @@ const AddPaymentModal: FC<Props> = ({
     setChanged(true)
   }
 
+  /**
+   * Resolve `monthService` (which may still be a placeholder like "month-2026-04")
+   * into a real id, sync it back into the form, and return it. Returns null if
+   * resolution fails (caller decides whether to surface an error).
+   */
+  const prepareMonthService = useCallback(
+    async (values: any): Promise<string | null> => {
+      try {
+        const monthServiceId = await resolveMonthServiceId(
+          values.monthService,
+          values.domain,
+          values.street
+        )
+        form.setFieldsValue({ monthService: monthServiceId })
+        return monthServiceId
+      } catch (e) {
+        console.error('resolveMonthServiceId failed', e)
+        message.error('Не вдалося підготувати місяць послуг')
+        return null
+      }
+    },
+    [resolveMonthServiceId, form]
+  )
+
   const handleOk = async () => {
     setChanged(false)
     setSaved(true)
@@ -364,21 +392,13 @@ const AddPaymentModal: FC<Props> = ({
       return
     }
 
-    let monthServiceId = values.monthService
-    try {
-      monthServiceId = await resolveMonthServiceId(
-        values.monthService,
-        values.domain,
-        values.street
-      )
-    } catch (e) {
-      console.error('resolveMonthServiceId failed', e)
-      message.error('Не вдалося підготувати місяць послуг')
+    const monthServiceId = await prepareMonthService(values)
+    if (monthServiceId === null) {
       setSaved(false)
       setChanged(true)
       return
     }
-    form.setFieldsValue({ monthService: monthServiceId })
+
     setCurrPayment({
       ...values,
       monthService: monthServiceId,
@@ -391,54 +411,17 @@ const AddPaymentModal: FC<Props> = ({
   const handleSubmit = async () => {
     const formData = await form.validateFields()
 
-    let monthServiceId = formData.monthService
-    try {
-      monthServiceId = await resolveMonthServiceId(
-        formData.monthService,
-        formData.domain,
-        formData.street
-      )
-    } catch (e) {
-      console.error('resolveMonthServiceId failed', e)
-      message.error('Не вдалося підготувати місяць послуг')
-      return
-    }
-    form.setFieldsValue({ monthService: monthServiceId })
+    const monthServiceId = await prepareMonthService(formData)
+    if (monthServiceId === null) return
 
-    const payment = {
-      invoiceNumber: formData.invoiceNumber,
-      type: formData.operation,
-      domain: formData.domain,
-      street: formData.street,
-      company: formData.company,
-      monthService: monthServiceId,
-      invoiceCreationDate: formData.invoiceCreationDate
-        ? (() => {
-          const now = new Date()
-          return new Date(
-            Date.UTC(
-              formData.invoiceCreationDate.year(),
-              formData.invoiceCreationDate.month(),
-              formData.invoiceCreationDate.date(),
-              now.getUTCHours(),
-              now.getUTCMinutes(),
-              now.getUTCSeconds(),
-              now.getUTCMilliseconds()
-            )
-          )
-        })()
-        : new Date(),
-      description: formData.description || '',
-      generalSum: formData.generalSum || formData.debit,
-      currency: formData.currency || Currency.UAH,
+    const payment = buildPaymentPayload({
+      formData,
+      monthServiceId,
       provider,
       reciever,
       transaction,
-      invoice: formData.debit
-        ? formData.invoice.filter((invoice) => +invoice.sum !== 0)
-        : [],
       template,
-    }
+    })
 
     const response = edit
       ? await editPayment({
@@ -467,27 +450,27 @@ const AddPaymentModal: FC<Props> = ({
     if (activeTabKey !== '1' || saved || !company || !company._id) return
 
     const isEditing = !!paymentId || edit
-    const currentInvoices = form.getFieldValue('invoice')
-    const hasCurrentInvoices =
-      Array.isArray(currentInvoices) && currentInvoices.length > 0
-    const hasFilteredInvoices =
-      Array.isArray(filteredInvoices) && filteredInvoices.length > 0
-
     if (isEditing) {
       lastLoadedCompanyId.current = company._id
       return
     }
 
+    const hasFilteredInvoices =
+      Array.isArray(filteredInvoices) && filteredInvoices.length > 0
+    if (!hasFilteredInvoices) return
+
+    // Re-seed `invoice` whenever upstream data (company, service, prevService,
+    // prevPayment, customDomainServices) changes — that's exactly when
+    // `filteredInvoices` gets a new reference. Editing existing payments is
+    // already short-circuited above, so user input on a CREATE form is reset
+    // only when the user changes domain/street/company/month, which is the
+    // intended behavior.
+    form.setFieldsValue({ invoice: filteredInvoices })
+
     const isNewCompanySelected = lastLoadedCompanyId.current !== company._id
-    const shouldHydrateEmptyInvoices = !hasCurrentInvoices && hasFilteredInvoices
-
-    if (isNewCompanySelected || shouldHydrateEmptyInvoices) {
-      form.setFieldsValue({ invoice: filteredInvoices })
-      lastLoadedCompanyId.current = company._id
-    }
-
     if (isNewCompanySelected) {
       form.setFieldValue('currency', company.currency || Currency.UAH)
+      lastLoadedCompanyId.current = company._id
     }
   }, [company, filteredInvoices, paymentId, edit, activeTabKey, saved, form])
 
@@ -497,7 +480,7 @@ const AddPaymentModal: FC<Props> = ({
         company,
         service,
         prevService,
-        payment,
+        payment: paymentData,
         prevPayment,
         form,
         template,
@@ -526,19 +509,20 @@ const AddPaymentModal: FC<Props> = ({
         <Form
           initialValues={{
             changelogId: undefined,
-            domain: preselectedDomain || getId(payment?.domain),
-            street: getId(payment?.street),
-            company: preselectedCompany || getId(payment?.company),
-            monthService: getId(payment?.monthService),
-            invoice: (payment?.invoice && payment.invoice.length > 0)
-              ? payment.invoice
-              : filteredInvoices,
-            description: payment?.description,
-            generalSum: payment?.generalSum,
-            currency: payment?.currency || Currency.UAH,
-            invoiceNumber: payment?.invoiceNumber,
-            invoiceCreationDate: dayjs(payment?.invoiceCreationDate),
-            operation: payment?.type || Operations.Debit,
+            domain: preselectedDomain || getId(paymentData?.domain),
+            street: getId(paymentData?.street),
+            company: preselectedCompany || getId(paymentData?.company),
+            monthService: getId(paymentData?.monthService),
+            invoice:
+              paymentData?.invoice && paymentData.invoice.length > 0
+                ? paymentData.invoice
+                : filteredInvoices,
+            description: paymentData?.description,
+            generalSum: paymentData?.generalSum,
+            currency: paymentData?.currency || Currency.UAH,
+            invoiceNumber: paymentData?.invoiceNumber,
+            invoiceCreationDate: dayjs(paymentData?.invoiceCreationDate),
+            operation: paymentData?.type || Operations.Debit,
           }}
           form={form}
           layout="vertical"
@@ -554,10 +538,6 @@ const AddPaymentModal: FC<Props> = ({
       </Modal>
     </PaymentContext.Provider>
   )
-}
-
-function getActiveTab(_paymentData: any, preview: boolean): string {
-  return preview ? '2' : '1'
 }
 
 export default AddPaymentModal

@@ -1,4 +1,11 @@
-import { formatInvoiceDate, formatInvoiceDueDate, dateToMonthYearEn, dateShiftMs } from './formatDate'
+import dayjs from 'dayjs'
+import {
+  combineDayWithCurrentTime,
+  dateShiftMs,
+  dateToMonthYearEn,
+  formatInvoiceDate,
+  formatInvoiceDueDate,
+} from './formatDate'
 
 describe('dateToMonthYearEn', () => {
   it('форматує Date в англійський місяць і рік', () => {
@@ -79,5 +86,46 @@ describe('dateShiftMs', () => {
 
   it('повертає Date', () => {
     expect(dateShiftMs(new Date(), 1)).toBeInstanceOf(Date)
+  })
+})
+
+describe('combineDayWithCurrentTime', () => {
+  beforeEach(() => {
+    jest.useFakeTimers()
+    jest.setSystemTime(new Date('2026-05-08T16:15:15.123Z'))
+  })
+
+  afterEach(() => {
+    jest.useRealTimers()
+  })
+
+  it('бере день із вибраної дати, час із поточного моменту (UTC)', () => {
+    const result = combineDayWithCurrentTime(dayjs('2026-04-27'))
+    expect(result.getUTCFullYear()).toBe(2026)
+    expect(result.getUTCMonth()).toBe(3) // April = 3 in 0-indexed
+    expect(result.getUTCDate()).toBe(27)
+    expect(result.getUTCHours()).toBe(16)
+    expect(result.getUTCMinutes()).toBe(15)
+    expect(result.getUTCSeconds()).toBe(15)
+    expect(result.getUTCMilliseconds()).toBe(123)
+  })
+
+  it('повертає поточний Date коли вхід undefined', () => {
+    expect(combineDayWithCurrentTime(undefined).toISOString()).toBe(
+      '2026-05-08T16:15:15.123Z'
+    )
+  })
+
+  it('повертає поточний Date коли вхід null', () => {
+    expect(combineDayWithCurrentTime(null).toISOString()).toBe(
+      '2026-05-08T16:15:15.123Z'
+    )
+  })
+
+  it('зберігає рік 2024 коли вибраний день у минулому році', () => {
+    const result = combineDayWithCurrentTime(dayjs('2024-12-31'))
+    expect(result.getUTCFullYear()).toBe(2024)
+    expect(result.getUTCMonth()).toBe(11)
+    expect(result.getUTCDate()).toBe(31)
   })
 })

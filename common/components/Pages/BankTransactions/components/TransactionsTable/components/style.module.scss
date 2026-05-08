@@ -1,13 +1,22 @@
 .monthsDropdown {
   max-height: 170px !important;
   overflow-y: auto !important;
-  background-color: #1f1f1f !important; 
+  background-color: #ffffff !important;
   border-radius: 8px !important;
   padding: 4px 0;
   min-width: 170px !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12) !important;
+
+  :global(.ant-dropdown-menu-item) {
+    color: rgba(0, 0, 0, 0.88) !important;
+  }
+
+  :global(.ant-dropdown-menu-item:hover) {
+    background-color: rgba(0, 0, 0, 0.04) !important;
+  }
 
   &::-webkit-scrollbar {
-    width: 14px;
+    width: 10px;
   }
 
   &::-webkit-scrollbar-track {
@@ -15,15 +24,15 @@
   }
 
   &::-webkit-scrollbar-thumb {
-    background-color: rgba(0, 0, 0, 0.786); 
+    background-color: rgba(0, 0, 0, 0.25);
     border-radius: 10px;
-    border: 4px solid #1f1f1f; 
+    border: 3px solid #ffffff;
     background-clip: padding-box;
 
     &:hover {
-      background-color: rgba(0, 0, 0, 0.786);
+      background-color: rgba(0, 0, 0, 0.4);
     }
   }
   scrollbar-width: thin;
-  scrollbar-color: rgba(0, 0, 0, 0.786) #1f1f1f;
+  scrollbar-color: rgba(0, 0, 0, 0.25) #ffffff;
 }
