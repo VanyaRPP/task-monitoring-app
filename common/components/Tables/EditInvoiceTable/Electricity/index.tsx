@@ -6,9 +6,10 @@ import { currencyWithUnit, toArray, toFirstUpperCase, toRoundFixed } from '@util
 import validator from '@utils/validator'
 import { ExclamationCircleOutlined } from '@ant-design/icons'
 import { Form, Input, Space, Typography, Tooltip } from 'antd'
-import { useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 import { ServiceType } from '@utils/constants'
-import UpdateInvoiceButton from '../UpdateInvoiceButton'
+import InvoiceRowName from '../InvoiceRowName'
+import useSyncSum from '../useSyncSum'
 
 export const Name: React.FC<InvoiceComponentProps> = ({
   form,
@@ -16,31 +17,25 @@ export const Name: React.FC<InvoiceComponentProps> = ({
   editable,
   disabled,
 }) => {
-  const { service, payment, company } = usePaymentContext()
+  const { service } = usePaymentContext()
   const name = useMemo(() => toArray<string>(_name), [_name])
   const losses = Form.useWatch(['invoice', ...name, 'losses'], form) ?? 0
 
   return (
-    <Space
-      direction="horizontal"
-      style={{ justifyContent: 'space-between', width: '100%' }}
-    >
-      <Space direction="vertical" size={0}>
-        <Typography.Text>Електропостачання</Typography.Text>
-        <Typography.Text type="secondary" style={{ fontSize: '0.75rem' }}>
+    <InvoiceRowName
+      form={form}
+      name={name}
+      serviceType={ServiceType.Electricity}
+      editable={editable}
+      disabled={disabled}
+      label="Електропостачання"
+      subtitle={
+        <>
           {toFirstUpperCase(dateToMonthYear(service?.date))}{' '}
           {losses > 0 ? `+ Втрати ${losses}%` : ''}
-        </Typography.Text>
-      </Space>
-      {editable && (
-        <UpdateInvoiceButton
-          form={form!}
-          name={name}
-          serviceType={ServiceType.Electricity}
-          disabled={disabled}
-        />
-      )}
-    </Space>
+        </>
+      }
+    />
   )
 }
 
@@ -164,12 +159,7 @@ export const Sum: React.FC<InvoiceComponentProps> = ({ form, name: _name }) => {
   const costAmount = Math.max(+amount - +lastAmount, 0)
   const loss = costAmount + costAmount * (losses / 100)
 
-  useEffect(() => {
-    form.setFieldValue(
-      ['invoice', ...name, 'sum'],
-      losses > 0 ? loss * +price : costAmount * +price
-    )
-  }, [form, name, amount, lastAmount, price, losses])
+  useSyncSum(form!, name, losses > 0 ? loss * +price : costAmount * +price)
 
   return <strong>{currencyWithUnit(toRoundFixed(sum), company)} </strong>
 }

@@ -277,10 +277,17 @@ const ComponentsCollection: {
   [ServiceType.Custom]: Custom,
 }
 
+type ColumnKey = 'name' | 'amount' | 'price' | 'sum'
+
+const COLUMN_TO_SLOT: Record<ColumnKey, 'Name' | 'Amount' | 'Price' | 'Sum'> = {
+  name: 'Name',
+  amount: 'Amount',
+  price: 'Price',
+  sum: 'Sum',
+}
+
 const Component: React.FC<
-  InvoiceComponentProps & {
-    type: 'name' | 'amount' | 'price' | 'sum'
-  }
+  InvoiceComponentProps & { type: ColumnKey }
 > = ({ form, name, type, record, ...props }) => {
   if (!record) return null
 
@@ -288,19 +295,7 @@ const Component: React.FC<
     ComponentsCollection[record.type] ||
     ComponentsCollection[ServiceType.Custom]
 
-  if (!components) return null
-
-  const C =
-    type === 'name'
-      ? components.Name
-      : type === 'amount'
-      ? components.Amount
-      : type === 'price'
-      ? components.Price
-      : type === 'sum'
-      ? components.Sum
-      : null
-
+  const C = components?.[COLUMN_TO_SLOT[type]]
   if (!C) return null
 
   return <C form={form} name={name} {...props} />
