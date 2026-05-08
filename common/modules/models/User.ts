@@ -12,6 +12,8 @@ export interface IUser {
   email: string
   image?: string
   roles?: string[]
+  adminDomains?: ObjectId[] | string[]
+  adminCompanies?: ObjectId[] | string[]
   tasks?: [ITask]
   payments?: [IPayment]
   services?: [IService]
@@ -80,6 +82,18 @@ export interface IPermissions {
  *           items:
  *             type: string
  *           example: ["User"]
+ * * adminDomains:
+ * type: array
+ * items:
+ * type: string
+ * description: ObjectId string referencing Domain
+ * example: ["64c2ab3d4f2e4c7b1f8a9999"]
+ * adminCompanies:
+ * type: array
+ * items:
+ * type: string
+ * description: ObjectId string referencing RealEstate
+ * example: ["64c2ab3d4f2e4c7b1f8a8888"]
  *         tasks:
  *           type: array
  *           items:
@@ -129,6 +143,8 @@ const UserSchema = new mongoose.Schema<IUser>({
     default: 'https://avatars.githubusercontent.com/u/583231?v=4',
   },
   roles: { type: [String], default: ['User'] },
+  adminDomains: [{ type: Schema.Types.ObjectId, ref: 'Domain' }],
+  adminCompanies: [{ type: Schema.Types.ObjectId, ref: 'RealEstate' }],
   tasks: [{ type: Schema.Types.ObjectId, ref: 'Task' }],
   payments: [{ type: Schema.Types.ObjectId, ref: 'Payment' }],
   services: [{ type: Schema.Types.ObjectId, ref: 'Service' }],
