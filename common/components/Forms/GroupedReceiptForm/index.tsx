@@ -1,5 +1,5 @@
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
-import { useEditPaymentMutation } from '@common/api/paymentApi/payment.api'
+import { useEditPaymentMutation, useGeneratePdfMutation } from '@common/api/paymentApi/payment.api'
 import { usePaymentContext } from '@components/AddPaymentModal'
 import { TemplateKey } from '@components/AddPaymentModal/resolveTemplate'
 import { getCurrencyShortLabel, normalizeCurrency } from '@utils/helpers'
@@ -13,10 +13,12 @@ import {
   RightOutlined,
   CheckOutlined,
   TableOutlined,
+  DownloadOutlined,
 } from '@ant-design/icons'
 import { Dropdown, Tooltip, message, MenuProps } from 'antd'
 import dynamic from 'next/dynamic'
 import s from './style.module.scss'
+import { saveAs } from 'file-saver'
 
 const templateItems = [
   { key: 'classic',    label: 'Класичний шаблон' },
@@ -32,7 +34,6 @@ const templateMap = {
   official: dynamic(() => import('./templates/official'), { ssr: false }),
 }
 
-
 interface Props {
   currPayment?: IExtendedPayment | null
   paymentData?: IExtendedPayment | null | undefined
@@ -47,6 +48,8 @@ const GroupedReceiptForm: FC<Props> = ({
   const { template, setTemplate, company, showQuantityInPreview, setShowQuantityInPreview } =
     usePaymentContext()
   const [editPayment] = useEditPaymentMutation()
+  const [generatePdf, { isLoading: pdfLoading }] = useGeneratePdfMutation()
+
   const rawData = currPayment ?? paymentData ?? null
   const data = rawData as any
   const currency =
@@ -175,31 +178,74 @@ const GroupedReceiptForm: FC<Props> = ({
     documentTitle:
       `${printCompanyName}-inv-${modernInvoiceNumber}` || 'invoice',
   })
+
+  const handleDownloadDirectly = async () => {
+    const hideMsg = message.loading('Генеруємо PDF...', 0);
+    try {
+      const response = await generatePdf({ payments: [data] });
+
+      if ('data' in response && response.data) {
+        const responseData = response.data;
+        
+        const buffer = Buffer.from((responseData as any).buffer);
+        const blob = new Blob([buffer as any], {
+          type: `application/${(responseData as any).fileExtension}`,
+        });
+
+        const exactFileName = `${(responseData as any).fileName}.${(responseData as any).fileExtension}`;
+
+        if ('showSaveFilePicker' in window) {
+          try {
+            const fileHandle = await (window as any).showSaveFilePicker({
+              suggestedName: exactFileName,
+              types: [
+                {
+                  description: 'PDF Document',
+                  accept: { 'application/pdf': ['.pdf'] },
+                },
+              ],
+            });
+            const writable = await fileHandle.createWritable();
+            await writable.write(blob);
+            await writable.close();
+            hideMsg();
+            return;
+          } catch (err: any) {
+            hideMsg();
+            return;
+          }
+        }
+        saveAs(blob, exactFileName);
+        hideMsg();
+      } else {
+        hideMsg();
+        message.error('Сталася помилка під час генерації PDF');
+      }
+    } catch (error) {
+      hideMsg();
+      message.error('Несподівана помилка');
+    }
+  };
+
+  const printMenuItems: MenuProps['items'] = [
+    {
+      key: 'print',
+      label: 'Роздрукувати рахунок',
+      icon: <PrinterOutlined />,
+      onClick: handlePrint,
+    },
+    {
+      key: 'download',
+      label: 'Зберегти рахунок PDF',
+      icon: <DownloadOutlined />,
+      onClick: handleDownloadDirectly,
+      disabled: pdfLoading,
+    },
+  ]
+
   if (!rawData) {
     return null
   }
-
-  const handleSendToTelegram = async () => {
-    const hide = message.loading('Генерація та відправка PDF...', 0);
-
-    try {
-      const response = await fetch('/api/telegram/send-pdf', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ paymentData: data }),
-      });
-
-      if (response.ok) {
-        message.success('Готово! Інвойс уже в Telegram.');
-      } else {
-        throw new Error('Помилка сервера при генерації PDF');
-      }
-    } catch (err: any) {
-      message.error(err.message);
-    } finally {
-      hide();
-    }
-  };
 
   const companyLabel = (data?.company as any)?.companyName ?? company?.companyName ?? ''
 
@@ -304,12 +350,20 @@ const GroupedReceiptForm: FC<Props> = ({
 
   return (
     <>
-      <Tooltip title="Друк">
-  <PrinterOutlined className={s.print} onClick={handlePrint} />
-</Tooltip>
+      <Dropdown
+        menu={{ items: printMenuItems }}
+        trigger={['click']}
+        placement="bottomRight"
+      >
+        <PrinterOutlined
+          className={s.print}
+          style={pdfLoading ? { opacity: 0.5, pointerEvents: 'none' } : {}}
+        />
+      </Dropdown>
+
       <Dropdown
         trigger={['click']}
-        placement="bottomLeft"
+        placement="bottomRight"
         menu={{
           items: dropdownItems,
           style: { minWidth: 240 },
@@ -319,28 +373,15 @@ const GroupedReceiptForm: FC<Props> = ({
           <LayoutOutlined className={s.edit} />
         </Tooltip>
       </Dropdown>
+
       <Tooltip title="Показувати кількість і ціну в таблиці перегляду">
         <TableOutlined
           role="button"
           tabIndex={0}
-          aria-label={
-            showQuantityInPreview
-              ? 'Приховати кількість і ціну в перегляді'
-              : 'Показати кількість і ціну в перегляді'
-          }
-          aria-pressed={showQuantityInPreview}
           className={`${s.tableDetailsToggle} ${
             showQuantityInPreview ? s.tableDetailsToggleActive : ''
           }`}
-          onClick={() =>
-            setShowQuantityInPreview(!showQuantityInPreview)
-          }
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault()
-              setShowQuantityInPreview(!showQuantityInPreview)
-            }
-          }}
+          onClick={() => setShowQuantityInPreview(!showQuantityInPreview)}
         />
       </Tooltip>
 
