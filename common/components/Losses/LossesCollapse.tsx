@@ -62,10 +62,22 @@ export const LossesCollapse: React.FC<LossesCollapseProps> = (props) => {
   const labelLossesPercent = lossesPercent ? lossesPercent.toFixed(2) : '0.00'
 
   useEffect(() => {
-    if (!hasElectricityService) {
+    if (!hasElectricityService) return
+
+    // When upstream inputs (consumedElectricity, generalElectricity,
+    // customServices.electricityPrice) are still loading, lossesPercent comes
+    // out as NaN (0/0) or Infinity (X/0). In that case keep whatever was saved
+    // — overwriting with 0 used to wipe the persisted loss value on every
+    // re-render of the form until inputs settled, which is what the user saw
+    // ("значення з'являється тільки після кліку").
+    if (!Number.isFinite(lossesPercent)) {
+      if (form.getFieldValue(name) == null) {
+        form.setFieldValue(name, 0)
+      }
       return
     }
-    form.setFieldValue(name, isNaN(lossesPercent) ? 0 : Number(lossesPercent.toFixed(2)))
+
+    form.setFieldValue(name, Number(lossesPercent.toFixed(2)))
   }, [form, name, lossesPercent, hasElectricityService])
 
    // якщо немає послуги з ціною електроенергії, то не виводимо втрати

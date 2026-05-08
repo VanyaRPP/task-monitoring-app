@@ -42,7 +42,7 @@ describe('UpdateInvoiceButton', () => {
     })
   })
 
-  it('restores garbage collector invoice even when current form values are strings', async () => {
+  it('writes service-driven price even when current form values are strings', async () => {
     const useWatchSpy = jest.spyOn(Form, 'useWatch')
     const setFieldValue = jest.fn()
     const getFieldValue = jest.fn().mockReturnValue([
@@ -71,8 +71,80 @@ describe('UpdateInvoiceButton', () => {
 
     await waitFor(() => {
       expect(setFieldValue).toHaveBeenCalledWith(['invoice', 0, 'price'], 250)
-      expect(setFieldValue).toHaveBeenCalledWith(['invoice', 0, 'sum'], 250)
     })
+    // `sum` is intentionally NOT written by the button — derived fields are
+    // recomputed by each invoice type's Sum component via its own useEffect.
+    // Asserting we did NOT touch sum keeps the responsibility boundary clean.
+    expect(setFieldValue).not.toHaveBeenCalledWith(
+      ['invoice', 0, 'sum'],
+      expect.anything()
+    )
+
+    useWatchSpy.mockRestore()
+  })
+
+  it('does NOT touch user-driven `amount` for electricity (preserves saved meter reading)', async () => {
+    const { getElectricityInvoice: mockGetElectricityInvoice } =
+      jest.requireMock('@utils/getInvoices') as {
+        getElectricityInvoice: jest.Mock
+      }
+    mockGetElectricityInvoice.mockReturnValue({
+      type: ServiceType.Electricity,
+      amount: 30553,    // would-reset to prevAmount, but must NOT be written
+      lastAmount: 30553,
+      price: 11,        // service price changed
+      losses: 6.84,
+      sum: 0,
+    })
+
+    const useWatchSpy = jest.spyOn(Form, 'useWatch')
+    const setFieldValue = jest.fn()
+    const getFieldValue = jest.fn().mockReturnValue([
+      {
+        type: ServiceType.Electricity,
+        amount: 32097,    // user's saved reading
+        lastAmount: 30553,
+        price: 14.99,
+      },
+    ])
+    useWatchSpy.mockReturnValue({
+      type: ServiceType.Electricity,
+      amount: 32097,
+      lastAmount: 30553,
+      price: 14.99,
+    })
+
+    render(
+      <UpdateInvoiceButton
+        form={{ getFieldValue, setFieldValue } as any}
+        name={0}
+        serviceType={ServiceType.Electricity}
+      />
+    )
+
+    await userEvent.click(screen.getByRole('button'))
+
+    await waitFor(() => {
+      expect(setFieldValue).toHaveBeenCalledWith(['invoice', 0, 'price'], 11)
+    })
+    expect(setFieldValue).toHaveBeenCalledWith(
+      ['invoice', 0, 'lastAmount'],
+      30553
+    )
+    expect(setFieldValue).toHaveBeenCalledWith(
+      ['invoice', 0, 'losses'],
+      6.84
+    )
+    // The whole point of the regression: meter reading must survive a refresh.
+    expect(setFieldValue).not.toHaveBeenCalledWith(
+      ['invoice', 0, 'amount'],
+      expect.anything()
+    )
+    // sum is also derived → must NOT be touched.
+    expect(setFieldValue).not.toHaveBeenCalledWith(
+      ['invoice', 0, 'sum'],
+      expect.anything()
+    )
 
     useWatchSpy.mockRestore()
   })

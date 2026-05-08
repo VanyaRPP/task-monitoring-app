@@ -165,6 +165,42 @@ describe('getInvoices - MAINTENANCE', () => {
     })
   })
 
+  describe('regression: null inputs', () => {
+    it('does NOT crash when company.servicePricePerMeter is null AND service is null', () => {
+      const company: Partial<IRealestate> = {
+        totalArea: 109.2,
+        servicePricePerMeter: null as any,
+      }
+      const service: Partial<IService> = null
+
+      // Bug: Number(null) === 0 → !isNaN(null) === true → guard passed →
+      // accessed `service.rentPrice` on null → crash.
+      expect(() => getInvoices({ company, service })).not.toThrow()
+      const invoices = getInvoices({ company, service })
+      expect(invoices).not.toContainEqual(
+        expect.objectContaining({ type: ServiceType.Maintenance })
+      )
+    })
+
+    it('falls back to service.rentPrice when servicePricePerMeter is null and service exists', () => {
+      const company: Partial<IRealestate> = {
+        totalArea: 100,
+        servicePricePerMeter: null as any,
+      }
+      const service: Partial<IService> = { rentPrice: 12.5 }
+
+      const invoices = getInvoices({ company, service })
+      expect(invoices).toContainEqual(
+        expect.objectContaining({
+          type: ServiceType.Maintenance,
+          amount: 100,
+          price: 12.5,
+          sum: 1250,
+        })
+      )
+    })
+  })
+
   describe('props: { service, company }', () => {
     it('should NOT load when service = null, company = null', () => {
       const service: Partial<IService> = null

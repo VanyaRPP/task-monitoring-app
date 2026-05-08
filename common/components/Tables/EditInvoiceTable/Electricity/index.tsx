@@ -51,7 +51,6 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
   disabled,
 }) => {
   const name = useMemo(() => toArray<string>(_name), [_name])
-  const { service, payment } = usePaymentContext()
   const losses = Form.useWatch(['invoice', ...name, 'losses'], form) ?? 0
 
   const lastAmount = Form.useWatch(['invoice', ...name, 'lastAmount'], form)
