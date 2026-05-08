@@ -50,6 +50,18 @@ const invoiceGetters: {
   [ServiceType.Discount]: getDiscountInvoice,
 }
 
+// Fields excluded from the "needs refresh" comparison.
+// `sum` is always derived from amount*price, so it's never a real diff.
+// `amount` is user-driven for meter-style invoices (electricity, water) — the
+// "from-scratch" expected value defaults to lastAmount because the new reading
+// is unknown at compute time, but the saved invoice holds the actual reading.
+// Without skipping these, the button would flash on every saved meter invoice.
+const FIELDS_NEVER_COMPARED = new Set(['type', 'name', 'sum'])
+const USER_INPUT_FIELDS_BY_TYPE: Partial<Record<ServiceType, Set<string>>> = {
+  [ServiceType.Electricity]: new Set(['amount']),
+  [ServiceType.Water]: new Set(['amount']),
+}
+
 export default function UpdateInvoiceButton({
   form,
   name: _name,
@@ -82,12 +94,16 @@ export default function UpdateInvoiceButton({
 
   const hasChanges = useMemo(() => {
     if (!expectedInvoice) return false
-    
+
     if (!currentInvoice) return true
 
+    const userInputFields =
+      USER_INPUT_FIELDS_BY_TYPE[serviceType] ?? new Set<string>()
+
     for (const key in expectedInvoice) {
-      if (key === 'type' || key === 'name') continue
-      
+      if (FIELDS_NEVER_COMPARED.has(key)) continue
+      if (userInputFields.has(key)) continue
+
       const expectedValue = expectedInvoice[key as keyof IPaymentField]
       const currentValue = currentInvoice[key as keyof IPaymentField]
 
@@ -106,7 +122,7 @@ export default function UpdateInvoiceButton({
     }
 
     return false
-  }, [expectedInvoice, currentInvoice])
+  }, [expectedInvoice, currentInvoice, serviceType])
 
   const handleUpdateClick = () => {
     try {
@@ -115,13 +131,6 @@ export default function UpdateInvoiceButton({
         message.error('Функція перерахунку для цього типу сервісу не знайдена.')
         return
       }
-
-      const currentInvoices = form.getFieldValue('invoice') || []
-      const currInvoicesCollection =
-        currentInvoices.reduce((acc: any, invoice: IPaymentField) => {
-          acc[invoice.name || invoice.type] = invoice
-          return acc
-        }, {})
 
       const prevInvoicesCollection =
         prevPayment?.invoice?.reduce((acc: any, invoice: IPaymentField) => {
@@ -142,7 +151,16 @@ export default function UpdateInvoiceButton({
         return
       }
 
+      // Skip the same fields we exclude from the diff: identifiers (type/name),
+      // derived (sum — recomputed by Sum.useEffect), and user-driven inputs
+      // (amount for electricity/water — clicking Refresh must NOT reset the
+      // user's meter reading; only service-driven fields like price/losses
+      // should be re-pulled).
+      const userInputFields =
+        USER_INPUT_FIELDS_BY_TYPE[serviceType] ?? new Set<string>()
       Object.keys(updatedInvoice).forEach((key) => {
+        if (FIELDS_NEVER_COMPARED.has(key)) return
+        if (userInputFields.has(key)) return
         const value = updatedInvoice[key as keyof IPaymentField]
         if (value !== undefined && value !== null) {
           form.setFieldValue(['invoice', ...name, key], value)
