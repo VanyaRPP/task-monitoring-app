@@ -1,51 +1,26 @@
-import { ReloadOutlined } from '@ant-design/icons'
-import { dateToMonthYear } from '@assets/features/formatDate'
 import { usePaymentContext } from '@components/AddPaymentModal'
 import {
   InvoiceComponentProps,
   InvoiceType,
 } from '@components/Tables/EditInvoiceTable'
 import { ServiceType } from '@utils/constants'
-import { currencyWithUnit, toArray, toFirstUpperCase, toRoundFixed } from '@utils/helpers'
+import { currencyWithUnit, toArray, toRoundFixed } from '@utils/helpers'
 import validator from '@utils/validator'
-import { Button, Flex, Form, Input, Space, Tooltip, Typography } from 'antd'
-import { useEffect, useMemo, useState } from 'react'
-import UpdateInvoiceButton from '../UpdateInvoiceButton'
+import { Form, Input, Typography } from 'antd'
+import { useEffect, useMemo } from 'react'
+import InvoiceRowName from '../InvoiceRowName'
+import useSyncSum from '../useSyncSum'
 
-export const Name: React.FC<InvoiceComponentProps> = ({
-  form,
-  name: _name,
-  editable,
-  disabled,
-}) => {
-  const { company, service } = usePaymentContext()
-  const name = useMemo(() => toArray<string>(_name), [_name])
+export const Name: React.FC<InvoiceComponentProps> = (props) => {
+  const { company } = usePaymentContext()
 
   return (
-    <Space
-      direction="horizontal"
-      style={{ justifyContent: 'space-between', width: '100%' }}
-    >
-      <Space direction="vertical" size={0}>
-        <Typography.Text>Розміщення</Typography.Text>
-        {company?.inflicion && (
-          <Typography.Text type="secondary" style={{ fontSize: '0.9rem' }}>
-            (без врах. інд. інф.)
-          </Typography.Text>
-        )}
-        <Typography.Text type="secondary" style={{ fontSize: '0.75rem' }}>
-          {toFirstUpperCase(dateToMonthYear(service?.date))}
-        </Typography.Text>
-      </Space>
-      {editable && (
-        <UpdateInvoiceButton
-          form={form!}
-          name={name}
-          serviceType={ServiceType.Placing}
-          disabled={disabled}
-        />
-      )}
-    </Space>
+    <InvoiceRowName
+      {...props}
+      serviceType={ServiceType.Placing}
+      label="Розміщення"
+      middle={company?.inflicion ? '(без врах. інд. інф.)' : undefined}
+    />
   )
 }
 
@@ -57,9 +32,6 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
 }) => {
   const name = useMemo(() => toArray<string>(_name), [_name])
   const { company, prevService, prevPayment } = usePaymentContext()
-
-  const [snapshotPrice, setSnapshotPrice] = useState<number | null>(null)
-  const [changed, setChanged] = useState<boolean>(false)
 
   const invoices: InvoiceType[] = Form.useWatch(['invoice'], form)
   const amount = Form.useWatch(['invoice', ...name, 'amount'], form)
@@ -97,33 +69,12 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
   }
 
   if (company?.inflicion) {
+    if (!editable && !isInitial) return null
     return (
-      <Flex justify="space-between" align="center">
-        {(editable || (!editable && isInitial)) && (
-          <Typography.Text delete={!isInitial}>
-            {currencyWithUnit(toRoundFixed(rentPrice), company)} +{' '}
-            {currencyWithUnit(toRoundFixed(inflicionInvoice?.sum), company)} ={' '}
-          </Typography.Text>
-        )}
-        {editable && !isInitial && (
-          <Tooltip title="Відновити початкове значення">
-            <Button
-              icon={<ReloadOutlined />}
-              onClick={() => {
-                Promise.resolve().then(() => {
-                  form.setFieldValue(
-                    ['invoice', ...name, 'price'],
-                    calculatedInitialPrice
-                  )
-                  setSnapshotPrice(calculatedInitialPrice)
-                  setChanged(false)
-                  form.setFieldValue(['invoiceMeta', 'changed'], false)
-                })
-              }}
-            />
-          </Tooltip>
-        )}
-      </Flex>
+      <Typography.Text delete={!isInitial}>
+        {currencyWithUnit(toRoundFixed(rentPrice), company)} +{' '}
+        {currencyWithUnit(toRoundFixed(inflicionInvoice?.sum), company)} ={' '}
+      </Typography.Text>
     )
   }
 
@@ -259,12 +210,7 @@ export const Sum: React.FC<InvoiceComponentProps> = ({ form, name: _name }) => {
   const amount = Form.useWatch(['invoice', ...name, 'amount'], form)
   const sum = Form.useWatch(['invoice', ...name, 'sum'], form)
 
-  useEffect(() => {
-    form.setFieldValue(
-      ['invoice', ...name, 'sum'],
-      company?.inflicion ? +price : +price * +amount
-    )
-  }, [form, name, price, amount, company])
+  useSyncSum(form!, name, company?.inflicion ? +price : +price * +amount)
 
   return <strong>{currencyWithUnit(toRoundFixed(sum), company)}</strong>
 }
