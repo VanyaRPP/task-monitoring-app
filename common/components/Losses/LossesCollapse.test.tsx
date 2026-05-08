@@ -12,9 +12,16 @@ const makeForm = () => ({
 })
 
 const mockUseWatch = (values: Record<string, any>) => {
-  jest
-    .spyOn(Form, 'useWatch')
-    .mockImplementation((field: any) => values[field as keyof typeof values])
+  jest.spyOn(Form, 'useWatch').mockImplementation((field: any) => {
+    // Support path arrays like ['customServices', 0, 'price'].
+    if (Array.isArray(field)) {
+      return field.reduce(
+        (acc: any, segment: any) => acc?.[segment],
+        values as any
+      )
+    }
+    return values[field as keyof typeof values]
+  })
 }
 
 describe('LossesCollapse', () => {
