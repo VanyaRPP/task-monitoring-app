@@ -6,7 +6,7 @@ import { getCurrencyShortLabel, normalizeCurrency } from '@utils/helpers'
 import { Currency } from '@utils/constants'
 import dayjs from 'dayjs'
 import { FC, useRef } from 'react'
-import { useReactToPrint } from 'react-to-print'
+import { generateHtmlFromThemplate } from '@utils/pdf/pdfThemplate'
 import {
   PrinterOutlined,
   LayoutOutlined,
@@ -170,11 +170,34 @@ const GroupedReceiptForm: FC<Props> = ({
   const printCompanyName =
     data?.company?.companyName ?? data?.reciever?.companyName ?? ''
 
-  const handlePrint = useReactToPrint({
-    content: () => componentRef.current,
-    documentTitle:
-      `${printCompanyName}-inv-${modernInvoiceNumber}` || 'invoice',
-  })
+  const handlePrint = async () => {
+    try {
+      const html = await generateHtmlFromThemplate({ ...data, template }, template)
+      const iframe = document.createElement('iframe')
+      iframe.style.position = 'fixed'
+      iframe.style.right = '0'
+      iframe.style.bottom = '0'
+      iframe.style.width = '0'
+      iframe.style.height = '0'
+      iframe.style.border = '0'
+      iframe.srcdoc = html
+      document.body.appendChild(iframe)
+
+      iframe.onload = () => {
+        const win = iframe.contentWindow
+        if (!win) return
+        win.focus()
+        win.print()
+        setTimeout(() => {
+          document.body.removeChild(iframe)
+        }, 1000)
+      }
+    } catch (error) {
+      console.error('Failed to print invoice template', error)
+      message.error('Не вдалося підготувати друк. Спробуйте ще раз.')
+    }
+  }
+
   if (!rawData) {
     return null
   }

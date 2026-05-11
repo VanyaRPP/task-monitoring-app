@@ -5,8 +5,9 @@ import { generateOlimpHtml } from './templates/olimpHtml'
 import { generateLedgerHtml } from './templates/ledgerHtml'
 import { generateOfficialHtml } from './templates/officialHtml'
 
-function resolvePaymentTemplate(paymentData: any): string {
+function resolvePaymentTemplate(paymentData: any, overrideTemplate?: string): string {
   return (
+    overrideTemplate ||
     paymentData?.template ||
     (typeof paymentData?.company === 'object' ? paymentData.company?.defaultTemplate : undefined) ||
     (typeof paymentData?.domain === 'object' ? paymentData.domain?.defaultTemplate : undefined) ||
@@ -15,7 +16,8 @@ function resolvePaymentTemplate(paymentData: any): string {
 }
 
 export async function generateHtmlFromThemplate(
-  paymentData: IExtendedPayment | any
+  paymentData: IExtendedPayment | any,
+  overrideTemplate?: string
 ) {
   const isCredit = paymentData?.type === 'credit'
 
@@ -67,7 +69,7 @@ export async function generateHtmlFromThemplate(
     </html>`
   }
 
-  const templateKey = resolvePaymentTemplate(paymentData)
+  const templateKey = resolvePaymentTemplate(paymentData, overrideTemplate)
   if (templateKey === 'olimp') return generateOlimpHtml(paymentData)
   if (templateKey === 'ledger') return generateLedgerHtml(paymentData)
   if (templateKey === 'official') return generateOfficialHtml(paymentData)
