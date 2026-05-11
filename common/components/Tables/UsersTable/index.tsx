@@ -1,13 +1,14 @@
 import { useMemo, useState } from 'react'
-import { Avatar, Card, Table, Select, message, Input, Button } from 'antd'
-import { SearchOutlined, EditOutlined } from '@ant-design/icons'
+import { Avatar, Card, Table, Select, message, Input, Button, Popconfirm } from 'antd'
+import { SearchOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import type { SelectProps } from 'antd'
 
 import {
   useGetAllUsersQuery,
   useUpdateUserMutation,
-  useGetCurrentUserQuery 
+  useGetCurrentUserQuery,
+  useDeleteUserMutation,
 } from '@common/api/userApi/user.api'
 import type { IUser } from '@common/api/userApi/user.api.types'
 import type { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
@@ -61,6 +62,43 @@ const EditUserButton: React.FC<{ userId?: IUser['_id'] }> = ({ userId }) => {
         onCancel={() => setOpen(false)}
       />
     </>
+  )
+}
+
+const DeleteUserButton: React.FC<{ userId?: string; disabled?: boolean }> = ({
+  userId,
+  disabled,
+}) => {
+  const [deleteUser, { isLoading }] = useDeleteUserMutation()
+
+  const handleDelete = async () => {
+    if (!userId) return
+    try {
+      await deleteUser(userId).unwrap()
+      message.success('Юзера видалено')
+    } catch {
+      message.error('Не вдалося видалити юзера')
+    }
+  }
+
+  return (
+    <Popconfirm
+      title="Видалити юзера?"
+      description="Цю дію не можна скасувати."
+      onConfirm={handleDelete}
+      okText="Видалити"
+      cancelText="Скасувати"
+      okButtonProps={{ danger: true }}
+      disabled={disabled}
+    >
+      <Button
+        type="link"
+        danger
+        icon={<DeleteOutlined />}
+        loading={isLoading}
+        disabled={disabled}
+      />
+    </Popconfirm>
   )
 }
 
@@ -245,10 +283,20 @@ export const UsersTable: React.FC<Props> = ({domains = [],isDomainAdmin = false,
       {
         key: 'actions',
         fixed: 'right',
-        width: 48,
-        render: (_: any, user) => (
-          <EditUserButton userId={(user as any)?._id?.toString()} />
-        ),
+        width: 96,
+        render: (_: any, user) => {
+          const userId = (user as any)?._id?.toString()
+          const isSelf = currentUser?._id?.toString() === userId
+          const isTargetGlobalAdmin = getUserRoleValue(user) === Roles.GLOBAL_ADMIN
+          const notInDomain =
+            isDomainAdmin && !domainAdminEmails?.includes(user.email)
+          return (
+            <div style={{ display: 'flex', gap: 4 }}>
+              <EditUserButton userId={userId} />
+              <DeleteUserButton userId={userId} disabled={isSelf || isTargetGlobalAdmin || notInDomain} />
+            </div>
+          )
+        },
       },
     ],
     [
@@ -258,7 +306,9 @@ export const UsersTable: React.FC<Props> = ({domains = [],isDomainAdmin = false,
       isUpdatingUser,
       updatingUserId,
       updateUser,
-      currentUser
+      currentUser,
+      isDomainAdmin,
+      domainAdminEmails,
     ]
   )
 
