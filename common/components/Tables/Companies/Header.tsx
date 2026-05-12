@@ -1,7 +1,7 @@
 import { PlusOutlined, SelectOutlined } from '@ant-design/icons'
 import { Button, Space, Segmented, Select } from 'antd'
 import { useRouter } from 'next/router'
-import { Dispatch, SetStateAction, useState } from 'react'
+import { Dispatch, SetStateAction, useState, useMemo } from 'react'
 import {
   IExtendedRealestate,
   IGetRealestateResponse,
@@ -20,6 +20,10 @@ import {
   useGetRealEstateFiltersQuery,
 } from '@common/api/filterApi/filter.api'
 import { useGetCustomServicesQuery } from '@common/api/customServicesApi/customServices.api'
+import {
+  extractDomainsFromRealEstates,
+  getVisibleServices,
+} from '@utils/servicesVisibility'
 
 export interface Props {
   showAddButton?: boolean
@@ -52,15 +56,26 @@ const CompaniesHeader: React.FC<Props> = ({
   enableRealEstateButton,
   setIsArchive,
   isSingleCompanyByData,
+  realEstates,
 }) => {
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   const { data: customServicesResponse } = useGetCustomServicesQuery({})
-  const customServices = customServicesResponse?.data || []
+  const allCustomServices = customServicesResponse?.data || []
 
   const { data: user } = useGetCurrentUserQuery()
   const isAdmin = isAdminCheck(user?.roles)
+
+  const visibleDomains = useMemo(
+    () => extractDomainsFromRealEstates(realEstates?.data),
+    [realEstates?.data]
+  )
+
+  const customServices = useMemo(
+    () => getVisibleServices(user?.roles, visibleDomains, allCustomServices),
+    [user?.roles, visibleDomains, allCustomServices]
+  )
 
   const openModal = () => {
     setIsModalOpen(true)

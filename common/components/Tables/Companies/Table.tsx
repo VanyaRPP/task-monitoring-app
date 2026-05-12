@@ -42,6 +42,10 @@ import {
 import { useEffect, useState, useMemo } from 'react'
 import { useGetDebtorsQuery } from '@common/api/debtorsApi/debtors.api'
 import CollapsedTags from '@components/UI/CollapsedTags'
+import {
+  extractDomainsFromRealEstates,
+  getVisibleServices,
+} from '@utils/servicesVisibility'
 
 type DebtPerMonth = {
   monthService: string
@@ -189,11 +193,21 @@ const CompaniesTable: React.FC<Props> = ({
     return realEstateData?.realEstatesFilter?.length === 1
   }, [realEstateData?.realEstatesFilter?.length])
 
+  const visibleDomains = useMemo(
+    () => extractDomainsFromRealEstates(realEstates?.data),
+    [realEstates?.data]
+  )
+
   const filteredCustomServices = useMemo(() => {
-    return customServices?.filter((custom) => {
+    const withoutStandard = customServices?.filter((custom) => {
       return !STANDARD_SERVICE_NAMES.includes(custom.name)
     })
-  }, [customServices])
+    return getVisibleServices(
+      userResponse?.roles,
+      visibleDomains,
+      withoutStandard ?? []
+    )
+  }, [customServices, userResponse?.roles, visibleDomains])
 
   if (isError) return <Alert message="Помилка" type="error" showIcon closable />
 

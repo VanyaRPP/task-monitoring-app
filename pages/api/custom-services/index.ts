@@ -247,12 +247,14 @@ export default async function handler(
       try {
         const { _id, domainId: rawDomainId } = req.query
 
+        /*                              // Access for User
         if (isUser) {
           return res.status(400).json({
             success: false,
             message: 'Не дозволено',
           })
         }
+        */
 
         const filter: Record<string, unknown> = {}
         if (
