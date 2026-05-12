@@ -8,7 +8,7 @@ import {
 } from 'react'
 import s from './style.module.scss'
 
-const FRAME_COUNT = 145
+const FRAME_COUNT = 193
 const FRAME_PATH = '/animations/factory-frames/frame_'
 const FRAME_EXT = '.jpg'
 
@@ -99,7 +99,7 @@ const computeCardOpacity = (progress: number, card: Annotation): number => {
 }
 
 type Props = {
-  /** Scroll length in vh — controls how long the animation takes. Default 220 (2.2 viewports). */
+  /** Scroll length in vh — controls how long the animation takes. Default 350 (3.5 viewports). */
   scrollHeight?: number
   /** Optional intro text shown over the dormant first frame */
   introTitle?: string
@@ -107,7 +107,7 @@ type Props = {
 }
 
 const ScrollFactoryAnimation: FC<Props> = ({
-  scrollHeight = 220,
+  scrollHeight = 350,
   introTitle,
   introSubtitle,
 }) => {
@@ -205,8 +205,8 @@ const ScrollFactoryAnimation: FC<Props> = ({
   useEffect(() => {
     // LERP_RATE: how fast displayed progress catches up to target each frame.
     // Higher = snappier (1.0 = instant); lower = smoother but laggier.
-    // 0.18 ≈ ~85ms to settle, feels like Apple-style smooth follow.
-    const LERP_RATE = 0.18
+    // 0.12 ≈ ~135ms to settle — buttery follow without too much input lag.
+    const LERP_RATE = 0.12
     const SETTLE_THRESHOLD = 0.0008
 
     const computeTarget = () => {
