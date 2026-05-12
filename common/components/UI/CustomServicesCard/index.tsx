@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react'
-import { InputNumber, Space, Button, Form, Dropdown, Menu, Tooltip } from 'antd'
+import { InputNumber, Space, Button, Form, Checkbox, Tooltip } from 'antd'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { inputNumberParser } from '@utils/helpers'
-import { CloseOutlined, PlusOutlined } from '@ant-design/icons'
+import { CloseOutlined } from '@ant-design/icons'
 import { Roles } from '@utils/constants'
 
 type CustomServicesCardProps = {
@@ -30,20 +30,61 @@ const CustomServicesCard: React.FC<CustomServicesCardProps> = ({
 
   const customServices = Form.useWatch('customServices', form) || []
 
-  const selectedIds = customServices.map((s: any) => s._id)
-  const dropdownOptions = allCustomServices.filter(
-    (service) => !selectedIds.includes(service?._id)
-  )
+  const selectedIds = customServices.map((s: any) => String(s._id))
+  const allIds = allCustomServices.map((service) => String(service._id))
+  const allSelected = allIds.length > 0 && allIds.every((id) => selectedIds.includes(id))
+  const allIndeterminate =
+    selectedIds.length > 0 && selectedIds.length < allIds.length
 
-  const handleAddService = (service) => {
-    if (customServices.find((s: any) => s._id === service.value)) return
-    const newEntry = {
-      _id: service?._id,
-      label: service?.label,
-      fieldName: service?.fieldName,
-      price: 0,
+  const handleToggleServices = (checkedIds: string[]) => {
+    const selectedServices = allCustomServices
+      .filter((service) => checkedIds.includes(String(service._id)))
+      .map((service) => {
+        const existing = customServices.find(
+          (item: any) => String(item._id) === String(service._id)
+        )
+        return existing
+          ? {
+              ...existing,
+              label: service.label || service.name,
+              fieldName: service.fieldName || existing.fieldName,
+            }
+          : {
+              _id: service._id,
+              label: service.label || service.name || 'Без назви',
+              fieldName: service.fieldName,
+              price: 0,
+            }
+      })
+
+    form.setFieldsValue({ customServices: selectedServices })
+  }
+
+  const handleToggleAll = (checked: boolean) => {
+    if (!checked) {
+      form.setFieldsValue({ customServices: [] })
+      return
     }
-    form.setFieldsValue({ customServices: [...customServices, newEntry] })
+
+    const selectedServices = allCustomServices.map((service) => {
+      const existing = customServices.find(
+        (item: any) => String(item._id) === String(service._id)
+      )
+      return existing
+        ? {
+            ...existing,
+            label: service.label || service.name,
+            fieldName: service.fieldName || existing.fieldName,
+          }
+        : {
+            _id: service._id,
+            label: service.label || service.name || 'Без назви',
+            fieldName: service.fieldName,
+            price: 0,
+          }
+    })
+
+    form.setFieldsValue({ customServices: selectedServices })
   }
 
   const handleRemoveService = (index: number) => {
@@ -51,32 +92,48 @@ const CustomServicesCard: React.FC<CustomServicesCardProps> = ({
     updated.splice(index, 1)
     form.setFieldsValue({ customServices: updated })
   }
+
   const dashIfEmpty = (v: any) => (v === 0 || v ? v : '-')
   return (
     <div>
       {!disabled && !isServiceForm && (
         <Tooltip
-          title={dropdownOptions.length === 0 ? 'У обраного домена відсутні послуги' : ''}
+          title={allCustomServices.length === 0 ? 'У обраного домена відсутні послуги' : ''}
           placement="top"
         >
-          <Dropdown
-            menu={{
-              items: dropdownOptions.map((option) => ({
-                key: option.value,
-                label: option.label,
-                onClick: () => handleAddService(option),
-              })),
-            }}
-            trigger={['click']}
-          >
-            <Button
-              style={{ width: '100%', height: 40, marginBottom: 16 }}
-              type="dashed"
-              icon={<PlusOutlined />}
-            >
+          <div style={{ marginBottom: 16 }}>
+            <div style={{ marginBottom: 10, fontWeight: 600, fontSize: 14 }}>
               Індивідуальні послуги
-            </Button>
-          </Dropdown>
+            </div>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginBottom: 8,
+                gap: 10,
+              }}
+            >
+              <Checkbox
+                checked={allSelected}
+                indeterminate={allIndeterminate}
+                onChange={(event) => handleToggleAll(event.target.checked)}
+                aria-label="Додати усі"
+              >
+                Додати усі
+              </Checkbox>
+            </div>
+            <Checkbox.Group
+              options={allCustomServices.map((service) => ({
+                label: service.label || service.name || 'Без назви',
+                value: String(service._id),
+                disabled: disabled,
+              }))}
+              value={selectedIds}
+              onChange={handleToggleServices}
+              style={{ display: 'flex', flexDirection: 'column', gap: 8 }}
+            />
+          </div>
         </Tooltip>
       )}
 

@@ -54,8 +54,8 @@ describe('CustomServicesCard', () => {
 
     expect(screen.getByText('Індивідуальні послуги')).toBeInTheDocument()
   })
-
-  test('adds custom service from dropdown', () => {
+  
+  test('selects all services when add all checkbox is clicked', () => {
     renderWithForm(
       <CustomServicesCard
         form={{ setFieldsValue: setFieldsValueMock }}
@@ -65,8 +65,7 @@ describe('CustomServicesCard', () => {
       />
     )
 
-    fireEvent.click(screen.getByText('Індивідуальні послуги'))
-    fireEvent.click(screen.getByText('Послуга 1'))
+    fireEvent.click(screen.getByLabelText('Додати усі'))
 
     expect(setFieldsValueMock).toHaveBeenCalledWith({
       customServices: [
