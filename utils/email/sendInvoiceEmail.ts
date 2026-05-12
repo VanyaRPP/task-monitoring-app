@@ -1,6 +1,5 @@
-import { IExtendedPayment, IPayment } from '@common/api/paymentApi/payment.api.types'
+import { IPayment } from '@common/api/paymentApi/payment.api.types'
 import nodemailer from 'nodemailer'
-import { generatePdf } from '@utils/pdf/bufferGenerators'
 
 const REQUIRED_EMAIL_ENV_VARS = [
   'EMAIL_SERVER_HOST',
@@ -71,13 +70,6 @@ function getInvoiceRecipients(payment: InvoiceEmailPayment) {
   )
 }
 
-function getAttachmentFileName(payment: InvoiceEmailPayment) {
-  const companyName = payment?.reciever?.companyName || 'invoice'
-  const safeCompanyName = companyName.replace(/[^a-zA-Z0-9_-]+/g, '_')
-
-  return `${safeCompanyName}-inv-${payment.invoiceNumber}.pdf`
-}
-
 export async function sendInvoiceEmail(
   payment: InvoiceEmailPayment
 ): Promise<boolean> {
@@ -132,17 +124,11 @@ export async function sendInvoiceEmail(
   })
 
   try {
-    logEmailDebug('pdf_generation_started', {
-      invoiceId,
-    })
-    const pdfBuffer = await generatePdf(payment as unknown as IExtendedPayment)
-
-    logEmailDebug('pdf_generation_completed', {
-      invoiceId,
-      pdfSizeBytes: pdfBuffer.length,
-    })
-
-    logEmailDebug('sendMail_started', {
+    // Server-side PDF generation removed when invoice templates were
+    // unified on the client-side renderer. Email is sent without an
+    // attached PDF until a browser-backed renderer is wired into the
+    // server pipeline.
+    logEmailDebug('sendMail_started_no_pdf', {
       invoiceId,
       sender: maskEmail(sender),
       recipients: maskEmails(recipients),
@@ -153,14 +139,7 @@ export async function sendInvoiceEmail(
       to: sender,
       bcc: recipients.join(', '),
       subject: `Invoice ${invoiceId} for ${companyName}`,
-      text: `Invoice ${invoiceId} is attached to this email.`,
-      attachments: [
-        {
-          filename: getAttachmentFileName(payment),
-          content: pdfBuffer,
-          contentType: 'application/pdf',
-        },
-      ],
+      text: `Invoice ${invoiceId} notification (PDF attachment temporarily unavailable).`,
     })
 
     logEmailDebug('sendMail_completed', {
