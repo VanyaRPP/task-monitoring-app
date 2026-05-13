@@ -1,6 +1,8 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import { Operations } from '@utils/constants'
 import { invalidateDebtorsOnSuccess } from '@common/api/debtorsApi/debtors.api'
+import { domainApi } from '@common/api/domainApi/domain.api'
+import { realestateApi } from '@common/api/realestateApi/realestate.api'
 import {
   IAddPaymentResponse,
   IDeletePaymentResponse,
@@ -18,6 +20,29 @@ import {
   IGetPaymentChangeLogsResponse,
   ICreatePaymentChangeLogResponse,
 } from './payment.api.types'
+
+/**
+ * Refresh data in sibling RTK Query slices that a payment write can affect:
+ * - Debtors badge (cross-API; uses its own helper for queryFulfilled handling)
+ * - Domain & RealEstate caches, because changing a payment can flip default
+ *   templates and aggregated counters that those slices expose.
+ */
+const invalidatePaymentSideEffects = async (
+  arg: unknown,
+  api: {
+    dispatch: (action: any) => any
+    queryFulfilled: Promise<unknown>
+  }
+): Promise<void> => {
+  invalidateDebtorsOnSuccess(arg, api)
+  try {
+    await api.queryFulfilled
+    api.dispatch(domainApi.util.invalidateTags(['Domain']))
+    api.dispatch(realestateApi.util.invalidateTags(['RealEstate']))
+  } catch {
+    // mutation failed; nothing to invalidate
+  }
+}
 
 export const paymentApi = createApi({
   reducerPath: 'paymentApi',
@@ -100,7 +125,7 @@ export const paymentApi = createApi({
         }
       },
       invalidatesTags: (response) => (response ? ['Payment', 'Profit'] : []),
-      onQueryStarted: invalidateDebtorsOnSuccess,
+      onQueryStarted: invalidatePaymentSideEffects,
     }),
     addCostPayment: builder.mutation<IAddCostPaymentResponse, ICostPayment>({
       query(body) {
@@ -157,6 +182,7 @@ export const paymentApi = createApi({
         }
       },
       invalidatesTags: (response) => (response ? ['Payment'] : []),
+      onQueryStarted: invalidatePaymentSideEffects,
     }),
     markPaymentsPaid: builder.mutation<
       {
