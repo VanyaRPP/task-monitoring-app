@@ -16,6 +16,9 @@ export interface MainLayoutProps {
   simple?: boolean
   floatButtons?: FloatButtonItem[]
   onPathClick?: (path: string) => void
+  hideHeader?: boolean
+  hideFooter?: boolean
+  hideFloatButtons?: boolean
 }
 
 const MainLayoutInner: React.FC<MainLayoutProps> = ({
@@ -24,11 +27,16 @@ const MainLayoutInner: React.FC<MainLayoutProps> = ({
   simple,
   floatButtons,
   onPathClick,
+  hideHeader,
+  hideFooter,
+  hideFloatButtons,
 }) => {
   if (simple) {
     return (
       <Layout className={styles.SimpleWrapper}>
-        <FloatButtonsLayoutAddon buttons={floatButtons} />
+        {!hideFloatButtons && (
+          <FloatButtonsLayoutAddon buttons={floatButtons} />
+        )}
         <Layout.Content className={styles.Content}>{children}</Layout.Content>
       </Layout>
     )
@@ -36,18 +44,20 @@ const MainLayoutInner: React.FC<MainLayoutProps> = ({
 
   return (
     <Layout hasSider>
-      <FloatButtonsLayoutAddon buttons={floatButtons} />
+      {!hideFloatButtons && <FloatButtonsLayoutAddon buttons={floatButtons} />}
       <Sidebar collapsible className={styles.Sidebar} />
       <Layout>
-        <Header
-          className={styles.Header}
-          path={path}
-          onPathClick={onPathClick}
-        />
+        {!hideHeader && (
+          <Header
+            className={styles.Header}
+            path={path}
+            onPathClick={onPathClick}
+          />
+        )}
         <Layout className={styles.Wrapper}>
           <Layout.Content className={styles.Content}>{children}</Layout.Content>
         </Layout>
-        <Footer className={styles.Footer} />
+        {!hideFooter && <Footer className={styles.Footer} />}
       </Layout>
     </Layout>
   )
