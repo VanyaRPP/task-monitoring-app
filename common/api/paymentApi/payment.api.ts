@@ -100,7 +100,17 @@ export const paymentApi = createApi({
         }
       },
       invalidatesTags: (response) => (response ? ['Payment', 'Profit'] : []),
-      onQueryStarted: invalidateDebtorsOnSuccess,
+      async onQueryStarted(arg, api) {
+        invalidateDebtorsOnSuccess(arg, api)
+
+        try {
+          await api.queryFulfilled
+          api.dispatch({ type: 'domainApi/invalidateTags', payload: ['Domain'] })
+          api.dispatch({ type: 'realEstateApi/invalidateTags', payload: ['RealEstate'] })
+          api.dispatch({ type: 'realestateApi/invalidateTags', payload: ['RealEstate'] })
+        } catch (error) {
+        }
+      },
     }),
     addCostPayment: builder.mutation<IAddCostPaymentResponse, ICostPayment>({
       query(body) {
@@ -157,6 +167,15 @@ export const paymentApi = createApi({
         }
       },
       invalidatesTags: (response) => (response ? ['Payment'] : []),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled
+          dispatch({ type: 'domainApi/invalidateTags', payload: ['Domain'] })
+          dispatch({ type: 'realEstateApi/invalidateTags', payload: ['RealEstate'] })
+          dispatch({ type: 'realestateApi/invalidateTags', payload: ['RealEstate'] })
+        } catch (error) {
+        }
+      },
     }),
     markPaymentsPaid: builder.mutation<
       {

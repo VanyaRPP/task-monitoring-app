@@ -69,6 +69,8 @@ export interface IPaymentContext {
   form: FormInstance
   template: TemplateKey
   setTemplate: (t: TemplateKey) => void
+  templateScope?: 'company' | 'domain'
+  setTemplateScope: (scope: 'company' | 'domain' | undefined) => void
   showQuantityInPreview: boolean
   setShowQuantityInPreview: (value: boolean) => void
 }
@@ -82,6 +84,8 @@ export const PaymentContext = createContext<IPaymentContext>({
   form: null,
   template: 'classic',
   setTemplate: () => void 0,
+  templateScope: undefined,
+  setTemplateScope: () => void 0,
   showQuantityInPreview: false,
   setShowQuantityInPreview: () => void 0,
 })
@@ -132,6 +136,8 @@ const AddPaymentModal: FC<Props> = ({
   const [template, setTemplate] = useState<TemplateKey>(
     resolveTemplate(paymentData?.template, companyDefaultTemplate, domainDefaultTemplate)
   )
+  const [templateScope, setTemplateScope] = useState<'company' | 'domain' | undefined>()
+
   const [showQuantityInPreview, setShowQuantityInPreviewState] = useState(false)
   const [activeTabKey, setActiveTabKey] = useState(preview ? '2' : '1')
 
@@ -423,12 +429,17 @@ const AddPaymentModal: FC<Props> = ({
       template,
     })
 
+    const finalPayload = {
+      ...payment,
+      _templateScope: templateScope
+    }
+
     const response = edit
       ? await editPayment({
         _id: paymentData?._id,
-        ...payment,
+        ...finalPayload,
       })
-      : await addPayment(payment)
+      : await addPayment(finalPayload)
 
     if ('data' in response) {
       const action = edit ? 'Збережено' : 'Додано'
@@ -485,6 +496,8 @@ const AddPaymentModal: FC<Props> = ({
         form,
         template,
         setTemplate,
+        templateScope,
+        setTemplateScope,
         showQuantityInPreview,
         setShowQuantityInPreview,
       }}
