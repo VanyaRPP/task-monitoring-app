@@ -12,7 +12,13 @@ export const deleteExtraWhitespace = (value: string): string =>
     .trimStart()
 
 export const emailRegex =
-  /^(?!\.)[a-zA-Z0-9_.]{6,64}@(?!.*\d)[a-zA-Z][a-zA-Z0-9.-]+\.[a-zA-Z]{2,3}$/i
+  /^(?!\.)[a-zA-Z0-9_.]{1,64}@(?!.*\d)[a-zA-Z][a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/i
+
+export const isValidEmail = (value: string | string[]): boolean => {
+  const emails = Array.isArray(value) ? value : [value]
+  return emails.every((e) => emailRegex.test(e.trim()))
+}
+
 //Validators
 
 export const validateField = (name: string): Rule[] => {
@@ -23,10 +29,8 @@ export const validateField = (name: string): Rule[] => {
 
   const email: Rule = {
     validator(_, value) {
-      // TODO: fix tests
-      // emailRegex.test(value) fix case mykola.ext@gmail.com
       if (!value) {
-        return Promise.resolve() // Allow empty value
+        return Promise.resolve()
       }
 
       const emails = Array.isArray(value) ? value : [value]
