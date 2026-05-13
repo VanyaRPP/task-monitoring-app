@@ -1,13 +1,14 @@
 import User from '@modules/models/User'
+import Domain from '@modules/models/Domain'
 import start from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { Roles } from '@utils/constants' 
+import { Roles } from '@utils/constants'
 
 start()
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const { user: currentUser, isGlobalAdmin } = await getCurrentUser(req, res)
+  const { user: currentUser, isGlobalAdmin, isDomainAdmin } = await getCurrentUser(req, res)
 
   switch (req.method) {
     case 'GET':
@@ -59,6 +60,40 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           data: updatedUser,
           success: true,
         })
+      } catch (error: any) {
+        return res.status(400).json({ success: false, message: error?.message })
+      }
+
+    case 'DELETE':
+      try {
+        if (!isGlobalAdmin && !isDomainAdmin) {
+          return res.status(403).json({ success: false, message: 'not allowed' })
+        }
+
+        const targetId = req.query.id?.toString()
+        const currentId = currentUser?._id?.toString()
+
+        if (targetId === currentId) {
+          return res.status(403).json({ success: false, message: "You can't delete yourself" })
+        }
+
+        if (isDomainAdmin && !isGlobalAdmin) {
+          const targetUser = await User.findById(targetId)
+          if (!targetUser) {
+            return res.status(404).json({ success: false, message: 'User not found' })
+          }
+
+          const adminDomains = await Domain.find({ adminEmails: currentUser.email })
+          const domainEmails = adminDomains.flatMap((d) => d.adminEmails as string[])
+
+          if (!domainEmails.includes(targetUser.email)) {
+            return res.status(403).json({ success: false, message: 'User is not in your domain' })
+          }
+        }
+
+        await User.findByIdAndDelete(targetId)
+
+        return res.status(200).json({ success: true })
       } catch (error: any) {
         return res.status(400).json({ success: false, message: error?.message })
       }

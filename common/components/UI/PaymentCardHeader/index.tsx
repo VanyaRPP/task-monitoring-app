@@ -15,9 +15,11 @@ import {
 import { dateToDefaultFormat } from '@assets/features/formatDate'
 import {
   useDeleteMultiplePaymentsMutation,
-  useGeneratePdfMutation,
+  useHtmlToPdfZipMutation,
   useGenerateExcelMutation,
 } from '@common/api/paymentApi/payment.api'
+import HeadlessReceiptRenderer from '@components/Forms/GroupedReceiptForm/HeadlessReceiptRenderer'
+import dayjs from 'dayjs'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import AddPaymentModal from '@components/AddPaymentModal'
 import ImportInvoices from '@components/UI/PaymentCardHeader/ImportInvoices'
@@ -115,8 +117,71 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
   const isAdmin = isAdminCheck(currUser?.roles)
   const [deletePayment] = useDeleteMultiplePaymentsMutation()
   const [generateExcel] = useGenerateExcelMutation()
-  const [generatePdf] = useGeneratePdfMutation()
+  const [htmlToPdfZip] = useHtmlToPdfZipMutation()
+  const [bulkPaymentsToRender, setBulkPaymentsToRender] = useState<IExtendedPayment[]>([])
+  const capturedHtmlMapRef = React.useRef<Map<string, { html: string; fileName: string }>>(new Map())
   const { token } = theme.useToken()
+
+  const buildBulkFileName = (payment: IExtendedPayment): string => {
+    const companyName = (payment as any)?.reciever?.companyName ?? 'invoice'
+    const datePrefix = dayjs((payment as any)?.invoiceCreationDate).isValid()
+      ? dayjs((payment as any)?.invoiceCreationDate).format('DDMMYY')
+      : ''
+    const slug = `${datePrefix}${(payment as any)?.invoiceNumber ?? ''}`
+    return `${companyName}-inv-${slug}`.trim()
+  }
+
+  const finalizeBulkPdf = async (
+    items: { html: string; fileName: string }[]
+  ) => {
+    try {
+      const response = await htmlToPdfZip({ items })
+      if ('data' in response) {
+        const { data } = response
+        if (data) {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          //@ts-ignore
+          const buffer = Buffer.from(data.buffer)
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          //@ts-ignore
+          const blob = new Blob([buffer], {
+            type: `application/${data.fileExtension}`,
+          })
+          saveAs(blob, `${data.fileName}.${data.fileExtension}`)
+        }
+      } else {
+        // eslint-disable-next-line no-console
+        console.error('htmlToPdfZip failed:', response.error)
+        const serverMsg = (response.error as { data?: { error?: string } })
+          ?.data?.error
+        message.error(
+          serverMsg
+            ? `PDF: ${serverMsg}`
+            : 'Сталася помилка під час генерації PDF'
+        )
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('htmlToPdfZip threw:', error)
+      message.error(
+        `PDF: ${(error as Error)?.message ?? 'несподівана помилка'}`
+      )
+    } finally {
+      capturedHtmlMapRef.current = new Map()
+      setBulkPaymentsToRender([])
+    }
+  }
+
+  const handleBulkCapture = (paymentId: string, fileName: string, html: string) => {
+    capturedHtmlMapRef.current.set(paymentId, { html, fileName })
+    if (capturedHtmlMapRef.current.size === bulkPaymentsToRender.length) {
+      const items = bulkPaymentsToRender.map((p) => {
+        const cached = capturedHtmlMapRef.current.get(p._id)
+        return cached || { html: '', fileName: buildBulkFileName(p) }
+      })
+      finalizeBulkPdf(items)
+    }
+  }
 
   const handleExportExcel = async () => {
     try {
@@ -132,43 +197,10 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
 
  
 
-  const handleGeneratePdf = async () => {
-    try {
-      const response = await generatePdf({ payments: selectedPayments })
-      if ('data' in response) {
-        const { data } = response
-        if (data) {
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          //@ts-ignore
-          const buffer = Buffer.from(data.buffer)
-
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          //@ts-ignore
-          const blob = new Blob([buffer], {
-            type: `application/${data.fileExtension}`,
-          })
-
-          saveAs(blob, `${data.fileName}.${data.fileExtension}`)
-        }
-      } else {
-        // TEMP: surface real server error to debug PDF generation issue.
-        // eslint-disable-next-line no-console
-        console.error('generatePdf failed:', response.error)
-        const serverMsg = (response.error as { data?: { error?: string } })
-          ?.data?.error
-        message.error(
-          serverMsg
-            ? `PDF: ${serverMsg}`
-            : 'Сталася помилка під час генерації PDF'
-        )
-      }
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('generatePdf threw:', error)
-      message.error(
-        `PDF: ${(error as Error)?.message ?? 'несподівана помилка'}`
-      )
-    }
+  const handleGeneratePdf = () => {
+    if (!selectedPayments || selectedPayments.length === 0) return
+    capturedHtmlMapRef.current = new Map()
+    setBulkPaymentsToRender(selectedPayments as IExtendedPayment[])
   }
 
   const menuActions: Record<string, () => void> = {
@@ -361,6 +393,18 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
         />
       )}
       {isImportModalOpen && <ImportInvoicesModal closeModal={() => setIsImportModalOpen(false)} />}
+      {bulkPaymentsToRender.map((p) => (
+        <HeadlessReceiptRenderer
+          key={p._id}
+          payment={p}
+          onCapture={(html) => handleBulkCapture(p._id, buildBulkFileName(p), html)}
+          onError={(err) => {
+            // eslint-disable-next-line no-console
+            console.error('Bulk render failed for', p._id, err)
+            handleBulkCapture(p._id, buildBulkFileName(p), '')
+          }}
+        />
+      ))}
     </>
   )
 }

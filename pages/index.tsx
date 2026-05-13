@@ -4,14 +4,15 @@ import { AppRoutes } from '@utils/constants'
 import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
 import Head from 'next/head'
-import DashboardPage from '../common/components/DashboardPage'
 import DashboardLanding from '../common/components/Pages/DashboardLanding'
 import HomePage from '../common/components/HomePage/index'
 import { authOptions } from './api/auth/[...nextauth]'
 
-const Home: React.FC<{
+interface PageProps {
   isAuth: boolean
-}> = ({ isAuth }) => {
+}
+
+const Home: React.FC<PageProps> = ({ isAuth }) => {
   const { handleNavigateHome } = useScrollToTop()
   return (
     <>
@@ -26,12 +27,14 @@ const Home: React.FC<{
           onPathClick={(path) => {
             if (path === AppRoutes.INDEX) handleNavigateHome()
           }}
+          hideHeader
+          hideFooter
         >
-          <DashboardLanding /> 
+          <DashboardLanding />
         </MainLayout>
       ) : (
-        <MainLayout simple>
-          <HomePage /> 
+        <MainLayout simple hideFloatButtons>
+          <HomePage />
         </MainLayout>
       )}
     </>

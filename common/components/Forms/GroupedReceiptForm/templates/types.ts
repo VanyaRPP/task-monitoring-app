@@ -1,4 +1,5 @@
 import { RefObject } from 'react'
+import type { TemplateOverrides } from '../useReceiptTemplateProps'
 
 export interface TemplateProps {
   data: any
@@ -18,4 +19,5 @@ export interface TemplateProps {
   paymentInfoLines: string[]
   issuedToLines: string[]
   normalizedBankDetailsLines: string[]
+  overrides?: TemplateOverrides
 }

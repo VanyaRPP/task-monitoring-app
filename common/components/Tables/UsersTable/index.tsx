@@ -1,15 +1,17 @@
 import { useMemo, useState } from 'react'
-import { Avatar, Card, Table, Select, message, Input, Button } from 'antd'
-import { SearchOutlined, EditOutlined } from '@ant-design/icons'
+import { Avatar, Card, Table, Select, message, Input, Button, Popconfirm } from 'antd'
+import { SearchOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import type { SelectProps } from 'antd'
 
 import {
   useGetAllUsersQuery,
   useUpdateUserMutation,
-  useGetCurrentUserQuery 
+  useGetCurrentUserQuery,
+  useDeleteUserMutation,
 } from '@common/api/userApi/user.api'
 import type { IUser } from '@common/api/userApi/user.api.types'
+import type { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 import { Roles } from '@utils/constants'
 import { EditUserModal } from '@common/components/EditUserModal'
 
@@ -63,7 +65,49 @@ const EditUserButton: React.FC<{ userId?: IUser['_id'] }> = ({ userId }) => {
   )
 }
 
-export const UsersTable: React.FC = () => {
+const DeleteUserButton: React.FC<{ userId?: string; disabled?: boolean }> = ({
+  userId,
+  disabled,
+}) => {
+  const [deleteUser, { isLoading }] = useDeleteUserMutation()
+
+  const handleDelete = async () => {
+    if (!userId) return
+    try {
+      await deleteUser(userId).unwrap()
+      message.success('Юзера видалено')
+    } catch {
+      message.error('Не вдалося видалити юзера')
+    }
+  }
+
+  return (
+    <Popconfirm
+      title="Видалити юзера?"
+      description="Цю дію не можна скасувати."
+      onConfirm={handleDelete}
+      okText="Видалити"
+      cancelText="Скасувати"
+      okButtonProps={{ danger: true }}
+      disabled={disabled}
+    >
+      <Button
+        type="link"
+        danger
+        icon={<DeleteOutlined />}
+        loading={isLoading}
+        disabled={disabled}
+      />
+    </Popconfirm>
+  )
+}
+
+interface Props {
+  domains?: IExtendedDomain[]
+  isDomainAdmin?: boolean
+}
+
+export const UsersTable: React.FC<Props> = ({domains = [],isDomainAdmin = false, }) => {
   const { data: currentUser } = useGetCurrentUserQuery()
   const { data: users = [], isLoading } = useGetAllUsersQuery()
   const [updateUser, { isLoading: isUpdatingUser }] =
@@ -74,6 +118,11 @@ export const UsersTable: React.FC = () => {
   const [searchEmail, setSearchEmail] = useState('')
   const [searchRole, setSearchRole] = useState<string>('all')
   const [pageSize, setPageSize] = useState(10)
+
+  const domainAdminEmails = useMemo(() => {
+    if (!isDomainAdmin) return null
+    return domains.flatMap(d => d.adminEmails)
+  }, [domains, isDomainAdmin])
 
   const filteredUsers = useMemo(
     () =>
@@ -86,9 +135,13 @@ export const UsersTable: React.FC = () => {
         const matchesEmail = email.includes(searchEmail.toLowerCase())
         const matchesRole = searchRole === 'all' || userRole === searchRole
 
-        return matchesName && matchesEmail && matchesRole
+        const matchesDomain =
+          !isDomainAdmin ||
+          domainAdminEmails?.includes(user.email)
+
+        return matchesName && matchesEmail && matchesRole && matchesDomain
       }),
-    [users, searchName, searchEmail, searchRole]
+    [users, searchName, searchEmail, searchRole, isDomainAdmin, domainAdminEmails]
   )
 
   const columns = useMemo<ColumnsType<IUser>>(
@@ -161,6 +214,7 @@ export const UsersTable: React.FC = () => {
         title: (
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             Роль
+            {!isDomainAdmin && (
             <Select
               placeholder="Пошук по ролям"
               value={searchRole}
@@ -170,10 +224,14 @@ export const UsersTable: React.FC = () => {
               allowClear
               onClear={() => setSearchRole('all')}
             />
+              )}
           </div>
         ),
         render: (_, user) => {
           const currentRole = getUserRoleValue(user)
+           if (isDomainAdmin) {
+    return currentRole
+  }
           const isSelf = currentUser?._id?.toString() === user?._id?.toString()
           const isGlobalAdminUser = currentRole === Roles.GLOBAL_ADMIN
           if (isSelf && isGlobalAdminUser) {
@@ -225,10 +283,20 @@ export const UsersTable: React.FC = () => {
       {
         key: 'actions',
         fixed: 'right',
-        width: 48,
-        render: (_: any, user) => (
-          <EditUserButton userId={(user as any)?._id?.toString()} />
-        ),
+        width: 96,
+        render: (_: any, user) => {
+          const userId = (user as any)?._id?.toString()
+          const isSelf = currentUser?._id?.toString() === userId
+          const isTargetGlobalAdmin = getUserRoleValue(user) === Roles.GLOBAL_ADMIN
+          const notInDomain =
+            isDomainAdmin && !domainAdminEmails?.includes(user.email)
+          return (
+            <div style={{ display: 'flex', gap: 4 }}>
+              <EditUserButton userId={userId} />
+              <DeleteUserButton userId={userId} disabled={isSelf || isTargetGlobalAdmin || notInDomain} />
+            </div>
+          )
+        },
       },
     ],
     [
@@ -238,6 +306,9 @@ export const UsersTable: React.FC = () => {
       isUpdatingUser,
       updatingUserId,
       updateUser,
+      currentUser,
+      isDomainAdmin,
+      domainAdminEmails,
     ]
   )
 

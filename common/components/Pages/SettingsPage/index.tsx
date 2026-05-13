@@ -13,13 +13,20 @@ import { Tabs } from 'antd'
 import {UsersTable} from '@common/components/Tables/UsersTable'
 import { CustomServicesTable } from '@common/components/Tables/CustomService/Table'
 import { DomainTypeTemplatesTable } from '@common/components/Tables/DomainTypeTemplates'
+import { useGetDomainsByAdminQuery } from '@common/api/domainApi/domain.api'
 
 export const AdminPanelPage: React.FC = () => {
   const { data: user } = useGetCurrentUserQuery()
   const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
+  const isDomainAdmin = user?.roles?.includes(Roles.DOMAIN_ADMIN)
+
+  const { data: domains = [] } = useGetDomainsByAdminQuery(undefined, {
+    skip: !isDomainAdmin || isGlobalAdmin,
+  })
 
   const [modalOpen, setModalOpen] = useState(false)
   const [editingFlag, setEditingFlag] = useState(null)
+  if (!isGlobalAdmin && !isDomainAdmin) return null
 
   return (
     <Space
@@ -27,8 +34,6 @@ export const AdminPanelPage: React.FC = () => {
       style={{ width: '100%', position: 'relative' }}
       size="middle"
     >
-      {isGlobalAdmin && (
-        <>
           <Card>
             <Tabs
               defaultActiveKey="users"
@@ -47,10 +52,12 @@ export const AdminPanelPage: React.FC = () => {
                           Користувачі
                         </Typography.Title>
                       </Flex>
-                      <UsersTable />
+                      <UsersTable domains={domains} isDomainAdmin={isDomainAdmin}/>
                     </>
                   ),
                 },
+                ...(isGlobalAdmin
+                  ? [
                 {
                   key: 'flags',
                   label: 'Фічефлаги',
@@ -94,11 +101,11 @@ export const AdminPanelPage: React.FC = () => {
                   label: 'Шаблони типів',
                   children: <DomainTypeTemplatesTable />,
                 },
+              ]
+            : []),
               ]}
             />
           </Card>
-        </>
-      )}
     </Space>
   )
 }

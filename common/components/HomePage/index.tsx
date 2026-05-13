@@ -6,33 +6,21 @@ import { LogoIcon } from '@assets/icon/Logo'
 import { Button, Typography } from 'antd'
 import { useRouter } from 'next/router'
 import CardPage from '@components/CardSwapper'
+import ScrollFactoryAnimation from '@components/ScrollFactoryAnimation'
 import s from './style.module.scss'
 
 const HomePage: React.FC = () => {
   const router = useRouter()
   return (
     <>
-      <SplashCursor />
-      <LottieAnimation
-        src="/animations/WaveForBG.json"
-        loop
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: 'auto',
-          height: '100%',
-          objectFit: 'cover',
-          transform: 'rotate(180deg)',
-        }}
-      />
+      {/* <SplashCursor /> */}
       <div className={s.HomePage}>
-        <div className={s.Header}>
-          <div className={s.Logo}>
-            <LogoIcon style={{ fontSize: '100px', color: 'white' }} />
-            <HomePageTitle />
-          </div>
+        {/* <div className={s.Logo}>
+          <LogoIcon style={{ fontSize: '32px' }} />
+          <HomePageTitle />
+        </div> */}
 
+        <div className={s.Header}>
           <div className={s.Buttons}>
             <Button
               type="primary"
@@ -46,7 +34,6 @@ const HomePage: React.FC = () => {
             <Button
               ghost
               type="primary"
-              className={s.Button}
               onClick={() => {
                 router.push(AppRoutes.CONTACTS)
               }}
@@ -56,29 +43,8 @@ const HomePage: React.FC = () => {
           </div>
         </div>
 
-        <div className={s.Container}>
-          <div className={s.HalfBlock}>
-            <div className={s.TextGlassCard}>
-              <Typography.Title level={2} style={{ fontSize: '2rem' }}>
-                Ласкаво просимо до E-ORENDA!
-              </Typography.Title>
-              <Typography.Paragraph style={{ fontSize: '1.3rem' }}>
-                Керуйте процесом надання послуг нерухомості та систематизуйте
-                відносини між користувачами за допомогою нашого сайту! Ресурс
-                допоможе з автоматичним розрахунком платежів та своєчасним
-                формуванням та виставленням рахунків. Вам, як надавачу послуг,
-                платформа дозволить легко впоратися з усіма аспектами
-                користування нерухомим майном. Забезпечте собі простоту,
-                ефективність та зручність в управлінні!
-              </Typography.Paragraph>
-            </div>
-          </div>
-          <div className={s.HalfBlock}>
-            <div className={s.cardPage}>
-              <CardPage />
-            </div>
-          </div>
-        </div>
+        <ScrollFactoryAnimation />
+
       </div>
     </>
   )
