@@ -1,4 +1,7 @@
-import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
+import {
+  IExtendedPayment,
+  TemplateScope,
+} from '@common/api/paymentApi/payment.api.types'
 import { useEditPaymentMutation } from '@common/api/paymentApi/payment.api'
 import { usePaymentContext } from '@components/AddPaymentModal'
 import { TemplateKey } from '@components/AddPaymentModal/resolveTemplate'
@@ -23,7 +26,6 @@ const templateItems = [
   { key: 'official', label: 'Official Invoice' },
 ]
 
-
 interface Props {
   currPayment?: IExtendedPayment | null
   paymentData?: IExtendedPayment | null | undefined
@@ -35,8 +37,14 @@ const GroupedReceiptForm: FC<Props> = ({
   paymentData,
   paymentActions: _paymentActions,
 }) => {
-  const { template, setTemplate, setTemplateScope, company, showQuantityInPreview, setShowQuantityInPreview } =
-    usePaymentContext()
+  const {
+    template,
+    setTemplate,
+    setTemplateScope,
+    company,
+    showQuantityInPreview,
+    setShowQuantityInPreview,
+  } = usePaymentContext()
   const [editPayment] = useEditPaymentMutation()
   const rawData = currPayment ?? paymentData ?? null
   const data = rawData as any
@@ -81,13 +89,20 @@ const GroupedReceiptForm: FC<Props> = ({
 
   const companyLabel = receiptCompanyLabel
 
-  const handleSaveTemplate = async (templateKey: TemplateKey, scope?: 'company' | 'domain' | 'payment') => {
+  const handleSaveTemplate = async (
+    templateKey: TemplateKey,
+    scope?: TemplateScope
+  ) => {
     setTemplate(templateKey)
 
     if (!data?._id) {
       if (scope === 'company' || scope === 'domain') {
         setTemplateScope(scope)
-        message.info(`Шаблон буде встановлено як дефолт для ${scope === 'company' ? 'компанії' : 'домену'} після створення інвойсу`)
+        message.info(
+          `Шаблон буде встановлено як дефолт для ${
+            scope === 'company' ? 'компанії' : 'домену'
+          } після створення інвойсу`
+        )
       } else if (scope === 'payment') {
         setTemplateScope(undefined)
       }
@@ -121,7 +136,9 @@ const GroupedReceiptForm: FC<Props> = ({
         label: (
           <div>
             Дефолт для компанії{' '}
-            <span style={{ opacity: 0.5, fontSize: '13px' }}>«{companyLabel}»</span>
+            <span style={{ opacity: 0.5, fontSize: '13px' }}>
+              «{companyLabel}»
+            </span>
           </div>
         ),
       },
@@ -130,7 +147,9 @@ const GroupedReceiptForm: FC<Props> = ({
         label: (
           <div>
             Дефолт для домену{' '}
-            <span style={{ opacity: 0.5, fontSize: '13px' }}>«{domainName}»</span>
+            <span style={{ opacity: 0.5, fontSize: '13px' }}>
+              «{domainName}»
+            </span>
           </div>
         ),
       },
@@ -146,12 +165,20 @@ const GroupedReceiptForm: FC<Props> = ({
   const dropdownItems = templateItems.map((item) => ({
     key: item.key,
     label: (
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
         <span
           onClick={() => handleSaveTemplate(item.key as TemplateKey)}
           style={{ display: 'flex', gap: 6, width: '100%' }}
         >
-          {template === item.key && <CheckOutlined style={{ fontSize: 12, opacity: 0.7 }} />}
+          {template === item.key && (
+            <CheckOutlined style={{ fontSize: 12, opacity: 0.7 }} />
+          )}
           {item.label}
         </span>
         <Dropdown
@@ -160,7 +187,12 @@ const GroupedReceiptForm: FC<Props> = ({
           trigger={['click']}
         >
           <RightOutlined
-            style={{ fontSize: 12, opacity: 0.7, padding: '0 8px', cursor: 'pointer' }}
+            style={{
+              fontSize: 12,
+              opacity: 0.7,
+              padding: '0 8px',
+              cursor: 'pointer',
+            }}
             onClick={(e) => e.stopPropagation()}
           />
         </Dropdown>
@@ -218,11 +250,10 @@ const GroupedReceiptForm: FC<Props> = ({
               : 'Показати кількість і ціну в перегляді'
           }
           aria-pressed={showQuantityInPreview}
-          className={`${s.tableDetailsToggle} ${showQuantityInPreview ? s.tableDetailsToggleActive : ''
-            }`}
-          onClick={() =>
-            setShowQuantityInPreview(!showQuantityInPreview)
-          }
+          className={`${s.tableDetailsToggle} ${
+            showQuantityInPreview ? s.tableDetailsToggleActive : ''
+          }`}
+          onClick={() => setShowQuantityInPreview(!showQuantityInPreview)}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault()

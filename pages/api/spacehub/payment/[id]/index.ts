@@ -1,11 +1,11 @@
 import PaymentChangeLog from '@common/modules/models/PaymentChangeLog'
 import Payment from '@common/modules/models/Payment'
-import RealEstate from '@common/modules/models/RealEstate'
 import Domain from '@modules/models/Domain'
 import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import ProfitService from '@common/services/profitService/profit.service'
+import { applyTemplateScope } from '@common/services/paymentService/templateScope.service'
 
 start()
 
@@ -130,37 +130,18 @@ export default async function handler(
         const templateKey = req.body.template
         const scope = req.body._templateScope
 
-        console.log('--- DEBUG PATCH PAYMENT ---', { scope, templateKey, isGlobalAdmin, isDomainAdmin })
+        const scopeResult = await applyTemplateScope({
+          scope,
+          templateKey,
+          companyId: current.company?.toString(),
+          domainId: current.domain?.toString(),
+          perms: { isGlobalAdmin, isDomainAdmin, user },
+        })
 
-        if (scope && templateKey) {
-          if (scope === 'company') {
-            if (isGlobalAdmin) {
-              await RealEstate.findByIdAndUpdate(current.company, {
-                $set: { defaultTemplate: templateKey },
-              })
-              console.log('Company default template updated successfully')
-            } else {
-              console.log('Refused: Not a GlobalAdmin for company scope update')
-            }
-          } else if (scope === 'domain') {
-            let hasAccess = isGlobalAdmin
-            if (!hasAccess) {
-              const domain = await Domain.findOne({
-                _id: current.domain,
-                adminEmails: { $in: [user.email] },
-              })
-              if (domain) hasAccess = true
-            }
-
-            if (hasAccess) {
-              await Domain.findByIdAndUpdate(current.domain, {
-                $set: { defaultTemplate: templateKey },
-              })
-              console.log('Domain default template updated successfully')
-            } else {
-              console.log('Refused: No access to update this domain template')
-            }
-          }
+        if (scopeResult.kind === 'forbidden') {
+          return res
+            .status(403)
+            .json({ success: false, message: scopeResult.message })
         }
 
         const isTemplateUpdate =
@@ -169,7 +150,9 @@ export default async function handler(
 
         if (isTemplateUpdate) {
           if (!isGlobalAdmin && !isDomainAdmin) {
-            return res.status(403).json({ success: false, message: 'not allowed' })
+            return res
+              .status(403)
+              .json({ success: false, message: 'not allowed' })
           }
 
           const response = await Payment.findOneAndUpdate(

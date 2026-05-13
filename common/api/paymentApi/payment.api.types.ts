@@ -6,6 +6,9 @@ import { ServiceType } from '@utils/constants'
 import { ObjectId } from 'mongoose'
 import { IRealestate } from '../realestateApi/realestate.api.types'
 
+export type TemplateScope = 'company' | 'domain' | 'payment'
+export type TemplateScopeTarget = Exclude<TemplateScope, 'payment'>
+
 export interface IPaymentField {
   type: ServiceType | string
   name?: string
@@ -47,7 +50,7 @@ export interface IPayment {
   transaction?: IPaymentTransactions
   losses?: number
   template?: string
-  _templateScope?: string
+  _templateScope?: TemplateScopeTarget
 }
 
 export interface IExtendedPayment extends IPayment {

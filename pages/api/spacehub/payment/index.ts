@@ -5,8 +5,7 @@ import {
   createPayment,
   getPayments,
 } from '@common/services/paymentService/payment.service'
-import RealEstate from '@common/modules/models/RealEstate'
-import Domain from '@modules/models/Domain'
+import { applyTemplateScope } from '@common/services/paymentService/templateScope.service'
 
 start()
 
@@ -31,33 +30,32 @@ export default async function handler(
     }
   } else if (req.method === 'POST') {
     try {
-      if (isAdmin) {
-        const scope = req.body._templateScope
-        const templateKey = req.body.template
-        const companyId = req.body.company
-        const domainId = req.body.domain
-
-        if (scope && templateKey) {
-          if (scope === 'company' && companyId) {
-            await RealEstate.findByIdAndUpdate(companyId, {
-              $set: { defaultTemplate: templateKey },
-            })
-          } else if (scope === 'domain' && domainId) {
-            await Domain.findByIdAndUpdate(domainId, {
-              $set: { defaultTemplate: templateKey },
-            })
-          }
-        }
-
-        /* eslint-disable @typescript-eslint/ban-ts-comment */
-        // @ts-ignore
-        const payment = await createPayment(req.body, isAdmin)
-        return res.status(200).json({ success: true, data: payment })
-      } else {
-        return res.status(400).json({ success: false, message: 'not allowed' })
+      if (!isAdmin) {
+        return res.status(403).json({ success: false, message: 'not allowed' })
       }
+
+      const { _templateScope, ...paymentBody } = req.body ?? {}
+
+      const scopeResult = await applyTemplateScope({
+        scope: _templateScope,
+        templateKey: paymentBody.template,
+        companyId: paymentBody.company,
+        domainId: paymentBody.domain,
+        perms: { isGlobalAdmin, isDomainAdmin, user },
+      })
+
+      if (scopeResult.kind === 'forbidden') {
+        return res
+          .status(403)
+          .json({ success: false, message: scopeResult.message })
+      }
+
+      const payment = await createPayment(paymentBody, isAdmin)
+      return res.status(200).json({ success: true, data: payment })
     } catch (error: any) {
-      return res.status(400).json({ success: false, message: error?.message || error })
+      return res
+        .status(400)
+        .json({ success: false, message: error?.message || error })
     }
   }
 }
