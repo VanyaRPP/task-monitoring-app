@@ -3,6 +3,7 @@
 import User from '@modules/models/User'
 import start, { Data } from '@pages/api/api.config'
 import { saltRounds } from '@utils/constants'
+import { isValidEmail } from '@common/assets/features/validators'
 import bcrypt from 'bcrypt'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
@@ -16,6 +17,10 @@ export default async function handler(
   switch (req.method) {
     case 'POST':
       try {
+        if (!email || !isValidEmail(email)) {
+          return res.status(400).json({ success: false, error: 'Invalid email address' })
+        }
+
         const user = await User.findOne({ email })
 
         if (user) {
