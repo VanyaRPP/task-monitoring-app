@@ -1,4 +1,7 @@
-import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
+import {
+  IExtendedPayment,
+  TemplateScope,
+} from '@common/api/paymentApi/payment.api.types'
 import { useEditPaymentMutation } from '@common/api/paymentApi/payment.api'
 import { usePaymentContext } from '@components/AddPaymentModal'
 import { TemplateKey } from '@components/AddPaymentModal/resolveTemplate'
@@ -17,12 +20,11 @@ import s from './style.module.scss'
 import { templateMap } from './templateMap'
 
 const templateItems = [
-  { key: 'classic',    label: 'Класичний шаблон' },
-  { key: 'olimp',      label: 'OLIMP DIGITAL OÜ' },
-  { key: 'ledger',     label: 'Formal Ledger' },
-  { key: 'official',   label: 'Official Invoice' },
+  { key: 'classic', label: 'Класичний шаблон' },
+  { key: 'olimp', label: 'OLIMP DIGITAL OÜ' },
+  { key: 'ledger', label: 'Formal Ledger' },
+  { key: 'official', label: 'Official Invoice' },
 ]
-
 
 interface Props {
   currPayment?: IExtendedPayment | null
@@ -35,8 +37,14 @@ const GroupedReceiptForm: FC<Props> = ({
   paymentData,
   paymentActions: _paymentActions,
 }) => {
-  const { template, setTemplate, company, showQuantityInPreview, setShowQuantityInPreview } =
-    usePaymentContext()
+  const {
+    template,
+    setTemplate,
+    setTemplateScope,
+    company,
+    showQuantityInPreview,
+    setShowQuantityInPreview,
+  } = usePaymentContext()
   const [editPayment] = useEditPaymentMutation()
   const rawData = currPayment ?? paymentData ?? null
   const data = rawData as any
@@ -81,14 +89,32 @@ const GroupedReceiptForm: FC<Props> = ({
 
   const companyLabel = receiptCompanyLabel
 
-  const handleSaveTemplate = async (templateKey: TemplateKey, scope?: 'company' | 'domain' | 'payment') => {
-    if (!data?._id) return message.warning('Платіж не знайдено')
+  const handleSaveTemplate = async (
+    templateKey: TemplateKey,
+    scope?: TemplateScope
+  ) => {
     setTemplate(templateKey)
+
+    if (!data?._id) {
+      if (scope === 'company' || scope === 'domain') {
+        setTemplateScope(scope)
+        message.info(
+          `Шаблон буде встановлено як дефолт для ${
+            scope === 'company' ? 'компанії' : 'домену'
+          } після створення інвойсу`
+        )
+      } else if (scope === 'payment') {
+        setTemplateScope(undefined)
+      }
+      return
+    }
+
     const result = await editPayment({
       _id: data._id,
       template: templateKey,
       _templateScope: scope !== 'payment' ? scope : undefined,
     })
+
     if ('error' in result) {
       message.error('Помилка збереження')
     } else if (scope === 'company') {
@@ -110,7 +136,9 @@ const GroupedReceiptForm: FC<Props> = ({
         label: (
           <div>
             Дефолт для компанії{' '}
-            <span style={{ opacity: 0.5, fontSize: '13px' }}>«{companyLabel}»</span>
+            <span style={{ opacity: 0.5, fontSize: '13px' }}>
+              «{companyLabel}»
+            </span>
           </div>
         ),
       },
@@ -119,7 +147,9 @@ const GroupedReceiptForm: FC<Props> = ({
         label: (
           <div>
             Дефолт для домену{' '}
-            <span style={{ opacity: 0.5, fontSize: '13px' }}>«{domainName}»</span>
+            <span style={{ opacity: 0.5, fontSize: '13px' }}>
+              «{domainName}»
+            </span>
           </div>
         ),
       },
@@ -135,20 +165,36 @@ const GroupedReceiptForm: FC<Props> = ({
   const dropdownItems = templateItems.map((item) => ({
     key: item.key,
     label: (
-      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
         <span
           onClick={() => handleSaveTemplate(item.key as TemplateKey)}
-          style={{ display: 'flex', gap: 6 }}
+          style={{ display: 'flex', gap: 6, width: '100%' }}
         >
-          {template === item.key && <CheckOutlined style={{ fontSize: 12, opacity: 0.7 }} />}
+          {template === item.key && (
+            <CheckOutlined style={{ fontSize: 12, opacity: 0.7 }} />
+          )}
           {item.label}
         </span>
         <Dropdown
           placement={'right' as unknown as any}
           menu={makeSaveMenu(item.key as TemplateKey)}
-          trigger={['hover']}
+          trigger={['click']}
         >
-          <RightOutlined style={{ fontSize: 12, opacity: 0.7 }} />
+          <RightOutlined
+            style={{
+              fontSize: 12,
+              opacity: 0.7,
+              padding: '0 8px',
+              cursor: 'pointer',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          />
         </Dropdown>
       </div>
     ),
@@ -180,8 +226,8 @@ const GroupedReceiptForm: FC<Props> = ({
   return (
     <>
       <Tooltip title="Друк">
-  <PrinterOutlined className={s.print} onClick={handlePrint} />
-</Tooltip>
+        <PrinterOutlined className={s.print} onClick={handlePrint} />
+      </Tooltip>
       <Dropdown
         trigger={['click']}
         placement="bottomLeft"
@@ -207,9 +253,7 @@ const GroupedReceiptForm: FC<Props> = ({
           className={`${s.tableDetailsToggle} ${
             showQuantityInPreview ? s.tableDetailsToggleActive : ''
           }`}
-          onClick={() =>
-            setShowQuantityInPreview(!showQuantityInPreview)
-          }
+          onClick={() => setShowQuantityInPreview(!showQuantityInPreview)}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault()
