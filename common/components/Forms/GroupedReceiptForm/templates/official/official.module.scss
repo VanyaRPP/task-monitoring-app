@@ -196,6 +196,11 @@ $bg-row-l:     #fafafa;
   display: flex;
   justify-content: flex-end;
   margin-top: 1.4rem;
+  margin-bottom: 1rem;
+  break-inside: avoid;
+  page-break-inside: avoid;
+  break-before: avoid;
+  page-break-before: avoid;
 }
 
 .clTotals {
@@ -205,6 +210,8 @@ $bg-row-l:     #fafafa;
   border: 1px solid $border;
   border-radius: 4px;
   overflow: hidden;
+  break-inside: avoid;
+  page-break-inside: avoid;
 }
 
 .clTotalRow {
@@ -416,5 +423,17 @@ $lightRoot: ":global(:root[data-theme='light'])";
 
     span   { color: #111 !important; }
     strong { color: #111 !important; }
+  }
+
+  .clSummary {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    break-before: avoid;
+    page-break-before: avoid;
+    margin-bottom: 1rem;
+  }
+  .clTotals {
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
 }

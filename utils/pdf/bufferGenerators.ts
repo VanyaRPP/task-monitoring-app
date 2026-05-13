@@ -1,7 +1,4 @@
-import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import archiver from 'archiver'
-import dayjs from 'dayjs'
-import { generateHtmlFromThemplate } from './pdfThemplate'
 
 const isServerless =
   !!process.env.VERCEL_ENV || !!process.env.AWS_LAMBDA_FUNCTION_NAME
@@ -37,27 +34,11 @@ async function launchBrowser() {
   })
 }
 
-export function getModernInvoiceFileSlug(payment: IExtendedPayment): string {
-  const invoiceNo = String(payment?.invoiceNumber ?? '')
-  const invoiceDatePrefix = dayjs(payment?.invoiceCreationDate).isValid()
-    ? dayjs(payment.invoiceCreationDate).format('DDMMYY')
-    : ''
-  return `${invoiceDatePrefix}${invoiceNo}`
-}
-
-export function getPaymentPdfBaseFileName(payment: IExtendedPayment): string {
-  const companyName = payment?.reciever?.companyName ?? 'invoice'
-  const slug = getModernInvoiceFileSlug(payment)
-  return `${companyName} inv ${slug}`.trim()
-}
-
-export async function generatePdf(payment: IExtendedPayment): Promise<Buffer> {
+export async function generatePdfFromHtml(html: string): Promise<Buffer> {
   const browser = await launchBrowser()
   const page = await browser.newPage()
 
-  const html = await generateHtmlFromThemplate(payment)
-
-  await page.setContent(html)
+  await page.setContent(html, { waitUntil: 'networkidle0' })
 
   const pdfBuffer = await page.pdf({
     format: 'a4',
@@ -69,8 +50,13 @@ export async function generatePdf(payment: IExtendedPayment): Promise<Buffer> {
   return pdfBuffer
 }
 
-export async function generateZip(
-  payments: IExtendedPayment[]
+export interface HtmlToPdfItem {
+  html: string
+  fileName: string
+}
+
+export async function generateZipFromHtmls(
+  items: HtmlToPdfItem[]
 ): Promise<Buffer> {
   const archive = archiver('zip', { zlib: { level: 9 } })
   const buffers: Buffer[] = []
@@ -94,11 +80,9 @@ export async function generateZip(
   const browser = await launchBrowser()
 
   try {
-    for (const payment of payments) {
+    for (const item of items) {
       const page = await browser.newPage()
-      const html = await generateHtmlFromThemplate(payment)
-      
-      await page.setContent(html)
+      await page.setContent(item.html, { waitUntil: 'networkidle0' })
 
       const pdfBuffer = await page.pdf({
         format: 'a4',
@@ -106,12 +90,8 @@ export async function generateZip(
       })
       await page.close()
 
-      const slug = getModernInvoiceFileSlug(payment)
-      const archiveBaseName = `${payment?.reciever?.companyName}-inv-${slug}`
-
-      archive.append(pdfBuffer, {
-        name: `${archiveBaseName}.pdf`,
-      })
+      const baseName = item.fileName || 'invoice'
+      archive.append(pdfBuffer, { name: `${baseName}.pdf` })
     }
   } finally {
     await browser.close()
