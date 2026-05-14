@@ -4,6 +4,7 @@ import { IStreet } from '@modules/models/Street'
 import start, { ExtendedData } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import { getDistinctCompanyAndDomain, getDistinctStreets } from '@utils/helpers'
+import { isValidEmail } from '@common/assets/features/validators'
 import { FilterQuery } from 'mongoose'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
@@ -144,6 +145,15 @@ export default async function handler(
           )
         }
 
+        const incomingEmails = req.body?.adminEmails
+        if (incomingEmails !== undefined) {
+          if (!Array.isArray(incomingEmails) || !isValidEmail(incomingEmails)) {
+            return res
+              .status(400)
+              .json({ success: false, message: 'Invalid email address in adminEmails' })
+          }
+        }
+
         if (isDomainAdmin && !isGlobalAdmin) {
           const { domain } = req.body
           if (!domain) {
@@ -174,7 +184,6 @@ export default async function handler(
           }
         }
 
-        // TODO: body validation
         const realEstate = await RealEstate.create(req.body)
         return res.status(200).json({ success: true, data: realEstate })
       } catch (error) {

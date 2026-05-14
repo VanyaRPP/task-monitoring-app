@@ -3,6 +3,7 @@
 import Domain from '@modules/models/Domain'
 import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
+import { isValidEmail } from '@common/assets/features/validators'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import EncryptionService from '@utils/encryptionService'
 import { hidePercentCharacters } from '@utils/hidePercentCharacters/hidePercentCharacters'
@@ -86,6 +87,15 @@ export default async function handler(
           return res
             .status(403)
             .json({ success: false, message: 'Access denied: not an admin' })
+        }
+
+        const incomingEmails = req.body?.adminEmails
+        if (incomingEmails !== undefined) {
+          if (!Array.isArray(incomingEmails) || !isValidEmail(incomingEmails)) {
+            return res
+              .status(400)
+              .json({ success: false, message: 'Invalid email address in adminEmails' })
+          }
         }
 
         if (isDomainAdmin && !isGlobalAdmin) {
