@@ -145,6 +145,15 @@ export default async function handler(
           )
         }
 
+        const incomingEmails = req.body?.adminEmails
+        if (incomingEmails !== undefined) {
+          if (!Array.isArray(incomingEmails) || !isValidEmail(incomingEmails)) {
+            return res
+              .status(400)
+              .json({ success: false, message: 'Invalid email address in adminEmails' })
+          }
+        }
+
         if (isDomainAdmin && !isGlobalAdmin) {
           const { domain } = req.body
           if (!domain) {
@@ -173,11 +182,6 @@ export default async function handler(
           if (!req.body.adminEmails.includes(user.email)) {
             req.body.adminEmails.push(user.email)
           }
-        }
-
-        const incomingEmails = req.body?.adminEmails
-        if (incomingEmails && Array.isArray(incomingEmails) && !isValidEmail(incomingEmails)) {
-          return res.status(400).json({ success: false, message: 'Invalid email address in adminEmails' })
         }
 
         const realEstate = await RealEstate.create(req.body)

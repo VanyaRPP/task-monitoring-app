@@ -90,8 +90,12 @@ export default async function handler(
         }
 
         const incomingEmails = req.body?.adminEmails
-        if (incomingEmails && Array.isArray(incomingEmails) && !isValidEmail(incomingEmails)) {
-          return res.status(400).json({ success: false, message: 'Invalid email address in adminEmails' })
+        if (incomingEmails !== undefined) {
+          if (!Array.isArray(incomingEmails) || !isValidEmail(incomingEmails)) {
+            return res
+              .status(400)
+              .json({ success: false, message: 'Invalid email address in adminEmails' })
+          }
         }
 
         if (isDomainAdmin && !isGlobalAdmin) {

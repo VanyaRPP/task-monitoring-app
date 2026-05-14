@@ -1,11 +1,10 @@
-import { emailRegex } from './validators'
-const { expect, test } = require('@jest/globals')
+import { emailRegex, isValidEmail } from './validators'
 
-describe('isValidValidation', () => {
+describe('emailRegex', () => {
   test('email is valid', () => {
     expect(emailRegex.test('pluserwork24@gmail.com')).toBeTruthy()
     expect(emailRegex.test('exampletest@mail.ua')).toBeTruthy()
-    expect(emailRegex.test('my.yershov@gmail.com')).toBeTruthy()
+    expect(emailRegex.test('qwe.sdf@gmail.com')).toBeTruthy()
   })
   test('email with custom TLDs is valid', () => {
     expect(emailRegex.test('mykola@consideritdone.tech')).toBeTruthy()
@@ -27,8 +26,16 @@ describe('isValidValidation', () => {
     expect(emailRegex.test('ask@consult.expert')).toBeTruthy()
     expect(emailRegex.test('ops@infra.systems')).toBeTruthy()
   })
+  test('local-part with + and - is valid', () => {
+    expect(emailRegex.test('user+tag@gmail.com')).toBeTruthy()
+    expect(emailRegex.test('o-brien@mail.com')).toBeTruthy()
+  })
+  test('domain with digits is valid', () => {
+    expect(emailRegex.test('user@office365.com')).toBeTruthy()
+    expect(emailRegex.test('user@mail1.com')).toBeTruthy()
+    expect(emailRegex.test('user@web3.io')).toBeTruthy()
+  })
   test('email is invalid', () => {
-    expect(emailRegex.test('example@2mail.con')).toBeFalsy()
     expect(emailRegex.test('example2!2@<mail.con')).toBeFalsy()
     expect(emailRegex.test('notanemail')).toBeFalsy()
     expect(emailRegex.test('@nodomain.tech')).toBeFalsy()
@@ -36,9 +43,31 @@ describe('isValidValidation', () => {
     expect(emailRegex.test('spaces in@email.dev')).toBeFalsy()
     expect(emailRegex.test('double@@domain.io')).toBeFalsy()
     expect(emailRegex.test('.startwithdot@domain.ai')).toBeFalsy()
-    expect(emailRegex.test('user@123domain.agency')).toBeFalsy()
     expect(emailRegex.test('user@.nodot.studio')).toBeFalsy()
     expect(emailRegex.test('user@domain.')).toBeFalsy()
     expect(emailRegex.test('user@domain.c')).toBeFalsy()
+    expect(emailRegex.test('a..b@domain.com')).toBeFalsy()
+    expect(emailRegex.test('user@-mail.com')).toBeFalsy()
+  })
+})
+
+describe('isValidEmail', () => {
+  test('returns false for non-string inputs', () => {
+    expect(isValidEmail(undefined)).toBeFalsy()
+    expect(isValidEmail(null)).toBeFalsy()
+    expect(isValidEmail(123)).toBeFalsy()
+    expect(isValidEmail({})).toBeFalsy()
+  })
+  test('returns false for empty string and empty array', () => {
+    expect(isValidEmail('')).toBeFalsy()
+    expect(isValidEmail([])).toBeFalsy()
+  })
+  test('trims surrounding whitespace', () => {
+    expect(isValidEmail('  ok@example.com  ')).toBeTruthy()
+  })
+  test('validates an array of emails', () => {
+    expect(isValidEmail(['a@x.com', 'b@y.io'])).toBeTruthy()
+    expect(isValidEmail(['a@x.com', 'broken'])).toBeFalsy()
+    expect(isValidEmail(['a@x.com', undefined as unknown as string])).toBeFalsy()
   })
 })
