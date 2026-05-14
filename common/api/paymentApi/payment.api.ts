@@ -7,8 +7,10 @@ import {
   IAddPaymentResponse,
   IDeletePaymentResponse,
   IExtendedPayment,
-  IGeneratePaymentPDF,
-  IGeneratePaymentPDFResponce,
+  IHtmlToPdfRequest,
+  IHtmlToPdfResponse,
+  IHtmlToPdfZipRequest,
+  IHtmlToPdfZipResponse,
   IGetPaymentNumberResponse,
   IGetPaymentResponse,
   IPayment,
@@ -207,16 +209,22 @@ export const paymentApi = createApi({
       }) => response.data,
       invalidatesTags: (response) => (response ? ['Payment'] : []),
     }),
-    generatePdf: builder.mutation<
-      IGeneratePaymentPDFResponce,
-      IGeneratePaymentPDF
-    >({
+    htmlToPdf: builder.mutation<IHtmlToPdfResponse, IHtmlToPdfRequest>({
       query: (body) => ({
-        url: 'spacehub/payment/generatePdf',
+        url: 'spacehub/payment/htmlToPdf',
         method: 'POST',
         body,
       }),
     }),
+    htmlToPdfZip: builder.mutation<IHtmlToPdfZipResponse, IHtmlToPdfZipRequest>(
+      {
+        query: (body) => ({
+          url: 'spacehub/payment/htmlToPdfZip',
+          method: 'POST',
+          body,
+        }),
+      }
+    ),
     generateExcel: builder.mutation<
       IGeneratePaymentExcelResponce,
       IGeneratePaymentExcel
@@ -258,7 +266,8 @@ export const {
   useGetPaymentNumberQuery,
   useEditPaymentMutation,
   useMarkPaymentsPaidMutation,
-  useGeneratePdfMutation,
+  useHtmlToPdfMutation,
+  useHtmlToPdfZipMutation,
   useGetCostPaymentQuery,
   useAddCostPaymentMutation,
   useGenerateExcelMutation,

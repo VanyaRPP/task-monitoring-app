@@ -2,29 +2,25 @@ import {
   IExtendedPayment,
   TemplateScope,
 } from '@common/api/paymentApi/payment.api.types'
-import {
-  useEditPaymentMutation,
-  useGeneratePdfMutation,
-} from '@common/api/paymentApi/payment.api'
+import { useEditPaymentMutation } from '@common/api/paymentApi/payment.api'
 import { usePaymentContext } from '@components/AddPaymentModal'
 import { TemplateKey } from '@components/AddPaymentModal/resolveTemplate'
-import { getCurrencyShortLabel, normalizeCurrency } from '@utils/helpers'
-import { Currency } from '@utils/constants'
-import dayjs from 'dayjs'
+import PrintDownloadMenu from '@components/UI/PrintDownloadMenu'
+import { buildInvoiceFileName } from '@utils/pdf/paymentFileName'
+import { usePdfDownload } from '@utils/pdf/usePdfDownload'
 import { FC, useRef } from 'react'
 import { useReactToPrint } from 'react-to-print'
+import { useReceiptTemplateProps } from './useReceiptTemplateProps'
 import {
   PrinterOutlined,
   LayoutOutlined,
   RightOutlined,
   CheckOutlined,
   TableOutlined,
-  DownloadOutlined,
 } from '@ant-design/icons'
 import { Dropdown, Tooltip, message, MenuProps } from 'antd'
-import dynamic from 'next/dynamic'
 import s from './style.module.scss'
-import { saveAs } from 'file-saver'
+import { templateMap } from './templateMap'
 
 const templateItems = [
   { key: 'classic', label: 'Класичний шаблон' },
@@ -32,13 +28,6 @@ const templateItems = [
   { key: 'ledger', label: 'Formal Ledger' },
   { key: 'official', label: 'Official Invoice' },
 ]
-
-const templateMap = {
-  classic: dynamic(() => import('./templates/classic'), { ssr: false }),
-  ledger: dynamic(() => import('./templates/ledger'), { ssr: false }),
-  olimp: dynamic(() => import('./templates/olimp'), { ssr: false }),
-  official: dynamic(() => import('./templates/official'), { ssr: false }),
-}
 
 interface Props {
   currPayment?: IExtendedPayment | null
@@ -60,125 +49,32 @@ const GroupedReceiptForm: FC<Props> = ({
     setShowQuantityInPreview,
   } = usePaymentContext()
   const [editPayment] = useEditPaymentMutation()
-  const [generatePdf, { isLoading: pdfLoading }] = useGeneratePdfMutation()
-
   const rawData = currPayment ?? paymentData ?? null
   const data = rawData as any
-  const currency =
-    data?.currency || data?.company?.currency || company?.currency || data?.domain?.currency
-  const currencyLabel = getCurrencyShortLabel(currency)
-  const isEnglish = normalizeCurrency(currency) !== Currency.UAH
-  const invoiceDatePrefix = dayjs(data?.invoiceCreationDate).isValid()
-    ? dayjs(data?.invoiceCreationDate).format('DDMMYY')
-    : ''
-  const modernInvoiceNumber = `${invoiceDatePrefix}${data?.invoiceNumber || ''}`
-  const domainName =
-    data?.domain?.name ||
-    (typeof company?.domain === 'object' ? company?.domain?.name : '')
-  const rows = (data?.invoice || []).filter((item: any) => Number(item?.sum) !== 0)
 
-  const getQty = (item: any) => {
-    if (Number.isFinite(Number(item?.amount))) {
-      if (Number.isFinite(Number(item?.lastAmount))) {
-        return Number(item.amount) - Number(item.lastAmount)
-      }
-      return Number(item.amount)
-    }
-    return 1
-  }
-
-  const subtotal = rows.reduce(
-    (acc: number, item: any) => acc + Number(item?.sum || 0),
-    0
-  )
-  const taxPercent = 0
-  const taxAmount = 0
-  const total = subtotal + taxAmount
-
-  const domainDescription =
-    data?.domain?.description ||
-    (typeof company?.domain === 'object' ? company?.domain?.description : '')
-
-  const issuedToLines = [...(domainDescription?.trim()?.split('\n') || [])].filter(
-    Boolean
-  )
-
-  const receiverDescriptionLines = (
-    data?.reciever?.description?.split('\n') || []
-  )
-    .map((line: string) => line?.trim())
-    .filter(Boolean)
-
-  const bankDetailsTriggerRegex =
-    /(account details|usd account details|iban|swift|bic|bank name|bank address|bank name and address|рахунок|банк|мфо)/i
-
-  const paymentInfoDescriptionLines: string[] = []
-  const bankDetailsLines: string[] = []
-  let isBankSection = false
-
-  receiverDescriptionLines.forEach((line: string) => {
-    if (bankDetailsTriggerRegex.test(line)) {
-      isBankSection = true
-    }
-
-    if (isBankSection) {
-      bankDetailsLines.push(line)
-    } else {
-      paymentInfoDescriptionLines.push(line)
-    }
+  const receiptProps = useReceiptTemplateProps({
+    data,
+    contextCompany: company,
   })
 
-  const bankAddressLabelRegex =
-    /^(bank name and address|bank name|bank address|назва банку|адреса банку)\s*:/i
-
-  const normalizedBankDetailsLines = bankDetailsLines.reduce(
-    (acc: string[], line: string) => {
-      const normalizedLine = line?.trim()
-      if (!normalizedLine) {
-        return acc
-      }
-
-      const lastLine = acc[acc.length - 1] || ''
-      const shouldAppendToPrevious =
-        !!lastLine &&
-        bankAddressLabelRegex.test(lastLine) &&
-        !normalizedLine.includes(':')
-
-      if (shouldAppendToPrevious) {
-        acc[acc.length - 1] = `${lastLine} ${normalizedLine}`.trim()
-      } else {
-        acc.push(normalizedLine)
-      }
-
-      return acc
-    },
-    []
-  )
-
-  const entrepreneurTitleRegex =
-    /^(private entrepreneur|private enterprise|fop|фоп|фізична особа\s*-?\s*підприємець)$/i
-
-  const normalizedCompanyName = (data?.reciever?.companyName || '').trim()
-  const firstPaymentInfoLine = (paymentInfoDescriptionLines?.[0] || '').trim()
-  const hasEntrepreneurTitle = entrepreneurTitleRegex.test(firstPaymentInfoLine)
-
-  const companyDisplayName = hasEntrepreneurTitle
-    ? `${firstPaymentInfoLine} ${normalizedCompanyName}`.trim()
-    : normalizedCompanyName
-
-  const paymentInfoBodyLines = hasEntrepreneurTitle
-    ? paymentInfoDescriptionLines.slice(1)
-    : paymentInfoDescriptionLines
-
-  const shouldPrependDescriptionTitleLine = hasEntrepreneurTitle || !normalizedCompanyName
-
-  const paymentInfoLines = [
-    ...(shouldPrependDescriptionTitleLine && companyDisplayName
-      ? [companyDisplayName]
-      : []),
-    ...paymentInfoBodyLines,
-    ...(data?.reciever?.adminEmails || []),
-  ].filter(Boolean)
+  const {
+    isEnglish,
+    currencyLabel,
+    currency,
+    modernInvoiceNumber,
+    domainName,
+    companyLabel: receiptCompanyLabel,
+    rows,
+    getQty,
+    subtotal,
+    taxPercent,
+    taxAmount,
+    total,
+    paymentInfoLines,
+    issuedToLines,
+    normalizedBankDetailsLines,
+    overrides,
+  } = receiptProps
 
   const componentRef = useRef<HTMLDivElement | null>(null)
 
@@ -191,75 +87,18 @@ const GroupedReceiptForm: FC<Props> = ({
       `${printCompanyName}-inv-${modernInvoiceNumber}` || 'invoice',
   })
 
-  const handleDownloadDirectly = async () => {
-    const hideMsg = message.loading('Генеруємо PDF...', 0);
-    try {
-      const response = await generatePdf({ payments: [data] });
+  const { download, isLoading: pdfLoading } = usePdfDownload({
+    fileName: buildInvoiceFileName(data, 'inv'),
+    onError: (msg) => message.error(`PDF: ${msg}`),
+  })
 
-      if ('data' in response && response.data) {
-        const responseData = response.data;
-        
-        const buffer = Buffer.from((responseData as any).buffer);
-        const blob = new Blob([buffer as any], {
-          type: `application/${(responseData as any).fileExtension}`,
-        });
-
-        const exactFileName = `${(responseData as any).fileName}.${(responseData as any).fileExtension}`;
-
-        if ('showSaveFilePicker' in window) {
-          try {
-            const fileHandle = await (window as any).showSaveFilePicker({
-              suggestedName: exactFileName,
-              types: [
-                {
-                  description: 'PDF Document',
-                  accept: { 'application/pdf': ['.pdf'] },
-                },
-              ],
-            });
-            const writable = await fileHandle.createWritable();
-            await writable.write(blob);
-            await writable.close();
-            hideMsg();
-            return;
-          } catch (err: any) {
-            hideMsg();
-            return;
-          }
-        }
-        saveAs(blob, exactFileName);
-        hideMsg();
-      } else {
-        hideMsg();
-        message.error('Сталася помилка під час генерації PDF');
-      }
-    } catch (error) {
-      hideMsg();
-      message.error('Несподівана помилка');
-    }
-  };
-
-  const printMenuItems: MenuProps['items'] = [
-    {
-      key: 'print',
-      label: 'Роздрукувати рахунок',
-      icon: <PrinterOutlined />,
-      onClick: handlePrint,
-    },
-    {
-      key: 'download',
-      label: 'Зберегти рахунок PDF',
-      icon: <DownloadOutlined />,
-      onClick: handleDownloadDirectly,
-      disabled: pdfLoading,
-    },
-  ]
+  const handleDownload = () => download(componentRef.current)
 
   if (!rawData) {
     return null
   }
 
-  const companyLabel = (data?.company as any)?.companyName ?? company?.companyName ?? ''
+  const companyLabel = receiptCompanyLabel
 
   const handleSaveTemplate = async (
     templateKey: TemplateKey,
@@ -374,19 +213,15 @@ const GroupedReceiptForm: FC<Props> = ({
 
   const TemplateComponent = templateMap[template] || templateMap.olimp
 
-  const companyLabelForTemplate =
-    (data?.company as { companyName?: string } | undefined)?.companyName ??
-    companyLabel
-
   const templateProps = {
-    data,
+    ...receiptProps,
     componentRef,
     isEnglish,
     currencyLabel,
     currency,
     modernInvoiceNumber,
     domainName,
-    companyLabel: companyLabelForTemplate,
+    companyLabel,
     rows,
     getQty,
     subtotal,
@@ -396,20 +231,26 @@ const GroupedReceiptForm: FC<Props> = ({
     paymentInfoLines,
     issuedToLines,
     normalizedBankDetailsLines,
+    overrides,
   }
 
   return (
     <>
-      <Dropdown
-        menu={{ items: printMenuItems }}
-        trigger={['click']}
-        placement="bottomRight"
-      >
-        <PrinterOutlined
-          className={s.print}
-          style={pdfLoading ? { opacity: 0.5, pointerEvents: 'none' } : {}}
-        />
-      </Dropdown>
+      <PrintDownloadMenu
+        printLabel="Роздрукувати рахунок"
+        downloadLabel="Зберегти рахунок PDF"
+        onPrint={handlePrint}
+        onDownload={handleDownload}
+        loading={pdfLoading}
+        trigger={
+          <PrinterOutlined
+            className={s.print}
+            style={
+              pdfLoading ? { opacity: 0.5, pointerEvents: 'none' } : undefined
+            }
+          />
+        }
+      />
 
       <Dropdown
         trigger={['click']}
@@ -428,6 +269,12 @@ const GroupedReceiptForm: FC<Props> = ({
         <TableOutlined
           role="button"
           tabIndex={0}
+          aria-label={
+            showQuantityInPreview
+              ? 'Приховати кількість і ціну в перегляді'
+              : 'Показати кількість і ціну в перегляді'
+          }
+          aria-pressed={showQuantityInPreview}
           className={`${s.tableDetailsToggle} ${
             showQuantityInPreview ? s.tableDetailsToggleActive : ''
           }`}
