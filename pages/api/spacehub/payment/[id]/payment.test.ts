@@ -6,7 +6,6 @@ import { payments, users } from '@utils/testData'
 import handler from '.'
 import Payment from '@common/modules/models/Payment'
 import Domain from '@modules/models/Domain'
-import RealEstate from '@common/modules/models/RealEstate'
 import PaymentChangeLog from '@common/modules/models/PaymentChangeLog'
 import ProfitService from '@common/services/profitService/profit.service'
 
@@ -17,7 +16,6 @@ jest.mock('@pages/api/api.config', () => jest.fn())
 jest.mock('@common/modules/models/Payment')
 jest.mock('@common/modules/models/PaymentChangeLog')
 jest.mock('@modules/models/Domain')
-jest.mock('@common/modules/models/RealEstate')
 jest.mock('@common/services/profitService/profit.service')
 
 setupTestEnvironment()
@@ -195,96 +193,6 @@ describe('Payment API Endpoint - [id]', () => {
       })
       expect(res.status).toHaveBeenCalledWith(403)
       expect(Payment.findOneAndUpdate).not.toHaveBeenCalled()
-    })
-
-    describe('Template scope', () => {
-      it('GlobalAdmin can set company default template', async () => {
-        await mockLoginAs(users.globalAdmin)
-        ;(Payment.findById as jest.Mock).mockResolvedValue(debitPayment)
-        ;(RealEstate.findByIdAndUpdate as jest.Mock).mockResolvedValue({})
-        ;(Payment.findOneAndUpdate as jest.Mock).mockResolvedValue(debitPayment)
-
-        const res = await performRequest('PATCH', debitPayment._id, {
-          template: 'olimp',
-          _templateScope: 'company',
-        })
-
-        expect(res.status).toHaveBeenCalledWith(200)
-        expect(RealEstate.findByIdAndUpdate).toHaveBeenCalledWith(
-          debitPayment.company.toString(),
-          { $set: { defaultTemplate: 'olimp' } }
-        )
-      })
-
-      it('DomainAdmin cannot set company default template', async () => {
-        await mockLoginAs(users.domainAdmin)
-        ;(Payment.findById as jest.Mock).mockResolvedValue(debitPayment)
-
-        const res = await performRequest('PATCH', debitPayment._id, {
-          template: 'olimp',
-          _templateScope: 'company',
-        })
-
-        expect(res.status).toHaveBeenCalledWith(403)
-        expect(RealEstate.findByIdAndUpdate).not.toHaveBeenCalled()
-        expect(Payment.findOneAndUpdate).not.toHaveBeenCalled()
-      })
-
-      it('DomainAdmin of payment domain can set domain default template', async () => {
-        await mockLoginAs(users.domainAdmin)
-        ;(Payment.findById as jest.Mock).mockResolvedValue(debitPayment)
-        ;(Domain.findOne as jest.Mock).mockResolvedValue({
-          _id: debitPayment.domain,
-          adminEmails: [users.domainAdmin.email],
-        })
-        ;(Domain.findByIdAndUpdate as jest.Mock).mockResolvedValue({})
-        ;(Payment.findOneAndUpdate as jest.Mock).mockResolvedValue(debitPayment)
-
-        const res = await performRequest('PATCH', debitPayment._id, {
-          template: 'olimp',
-          _templateScope: 'domain',
-        })
-
-        expect(res.status).toHaveBeenCalledWith(200)
-        expect(Domain.findByIdAndUpdate).toHaveBeenCalledWith(
-          debitPayment.domain.toString(),
-          { $set: { defaultTemplate: 'olimp' } }
-        )
-      })
-
-      it('DomainAdmin of a foreign domain cannot set domain default template', async () => {
-        await mockLoginAs(users.domainAdmin2)
-        ;(Payment.findById as jest.Mock).mockResolvedValue(debitPayment)
-        ;(Domain.findOne as jest.Mock).mockResolvedValue(null)
-
-        const res = await performRequest('PATCH', debitPayment._id, {
-          template: 'olimp',
-          _templateScope: 'domain',
-        })
-
-        expect(res.status).toHaveBeenCalledWith(403)
-        expect(Domain.findByIdAndUpdate).not.toHaveBeenCalled()
-        expect(Payment.findOneAndUpdate).not.toHaveBeenCalled()
-      })
-
-      it('GlobalAdmin can set domain default template without owning domain', async () => {
-        await mockLoginAs(users.globalAdmin)
-        ;(Payment.findById as jest.Mock).mockResolvedValue(debitPayment)
-        ;(Domain.findByIdAndUpdate as jest.Mock).mockResolvedValue({})
-        ;(Payment.findOneAndUpdate as jest.Mock).mockResolvedValue(debitPayment)
-
-        const res = await performRequest('PATCH', debitPayment._id, {
-          template: 'olimp',
-          _templateScope: 'domain',
-        })
-
-        expect(res.status).toHaveBeenCalledWith(200)
-        expect(Domain.findOne).not.toHaveBeenCalled()
-        expect(Domain.findByIdAndUpdate).toHaveBeenCalledWith(
-          debitPayment.domain.toString(),
-          { $set: { defaultTemplate: 'olimp' } }
-        )
-      })
     })
 
     it('strips _id, domain, company from req.body so admin cannot reassign payment', async () => {

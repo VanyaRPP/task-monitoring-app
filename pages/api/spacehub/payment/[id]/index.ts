@@ -1,11 +1,11 @@
 import PaymentChangeLog from '@common/modules/models/PaymentChangeLog'
 import Payment from '@common/modules/models/Payment'
+import RealEstate from '@common/modules/models/RealEstate'
 import Domain from '@modules/models/Domain'
 import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import ProfitService from '@common/services/profitService/profit.service'
-import { applyTemplateScope } from '@common/services/paymentService/templateScope.service'
 
 start()
 
@@ -127,23 +127,6 @@ export default async function handler(
             .json({ success: false, message: 'Payment not found' })
         }
 
-        const templateKey = req.body.template
-        const scope = req.body._templateScope
-
-        const scopeResult = await applyTemplateScope({
-          scope,
-          templateKey,
-          companyId: current.company?.toString(),
-          domainId: current.domain?.toString(),
-          perms: { isGlobalAdmin, isDomainAdmin, user },
-        })
-
-        if (scopeResult.kind === 'forbidden') {
-          return res
-            .status(403)
-            .json({ success: false, message: scopeResult.message })
-        }
-
         const isTemplateUpdate =
           typeof req.body.template !== 'undefined' &&
           req.body.invoice === undefined
@@ -153,6 +136,39 @@ export default async function handler(
             return res
               .status(403)
               .json({ success: false, message: 'not allowed' })
+          }
+
+          const templateKey = req.body.template
+          const scope = req.body._templateScope
+
+          if (scope === 'company') {
+            if (!isGlobalAdmin) {
+              return res
+                .status(403)
+                .json({ success: false, message: 'not allowed' })
+            }
+            await RealEstate.findByIdAndUpdate(current.company, {
+              $set: { defaultTemplate: templateKey },
+            })
+            return res.status(200).json({ success: true })
+          }
+
+          if (scope === 'domain') {
+            if (!isGlobalAdmin) {
+              const domain = await Domain.findOne({
+                _id: current.domain,
+                adminEmails: { $in: [user.email] },
+              })
+              if (!domain) {
+                return res
+                  .status(403)
+                  .json({ success: false, message: 'not allowed' })
+              }
+            }
+            await Domain.findByIdAndUpdate(current.domain, {
+              $set: { defaultTemplate: templateKey },
+            })
+            return res.status(200).json({ success: true })
           }
 
           const response = await Payment.findOneAndUpdate(
