@@ -13,7 +13,7 @@ import {
 } from '@common/api/customServicesApi/customServices.api'
 import { Roles } from '@utils/constants'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
-import { isProtectedService } from '@utils/helpers'
+import { isAdminCheck, isProtectedService } from '@utils/helpers'
 
 const { Text } = Typography
 
@@ -65,6 +65,7 @@ const DomainModal: FC<Props> = ({
   const [activePanel, setActivePanel] = useState<string | string[]>([])
   const { data: user } = useGetCurrentUserQuery()
   isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
+  const isAdmin = isAdminCheck(user?.roles)
 
   useEffect(() => {
     const initialTargets: Record<string, string[]> = {}
@@ -294,7 +295,7 @@ const DomainModal: FC<Props> = ({
               )}
 
               <Space size="small">
-                {isCustom && isGlobalAdmin && (
+                {isCustom && isAdmin && (
                   <>
                     {isEditing ? (
                       <>

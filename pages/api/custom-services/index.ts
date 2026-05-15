@@ -113,10 +113,10 @@ export default async function handler(
 
     case 'DELETE':
       try {
-        if (!isGlobalAdmin) {
+        if (!isGlobalAdmin && !isDomainAdmin) {
           return res.status(403).json({
             success: false,
-            message: 'Тільки Global Admin може видаляти послуги',
+            message: 'Недостатньо прав для видалення послуги',
           })
         }
 
@@ -159,10 +159,10 @@ export default async function handler(
 
     case 'PATCH':
       try {
-        if (!isGlobalAdmin) {
+        if (!isGlobalAdmin && !isDomainAdmin) {
           return res.status(403).json({
             success: false,
-            message: 'Тільки Global Admin може редагувати послуги',
+            message: 'Недостатньо прав для редагування послуги',
           })
         }
 

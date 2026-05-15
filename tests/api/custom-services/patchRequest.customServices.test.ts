@@ -16,34 +16,18 @@ jest.mock('@utils/getCurrentUser', () => ({
 
 setupTestEnvironment()
 
-describe('API Route - DELETE Method', () => {
+describe('API Route - PATCH Method', () => {
   beforeEach(async () => {
     await CustomService.deleteMany({})
   })
 
   const mockServiceCreation = async (domainId: string) => {
     return CustomService.create({
-      name: 'Test Service',
-      fieldName: 'testService',
+      name: 'Old Service Name',
+      fieldName: 'oldServiceName',
       domain: domainId,
     })
   }
-
-  it('should return 403 when id is missing', async () => {
-    const mockRequest = {
-      method: 'DELETE',
-      query: {},
-    } as any
-
-    const mockResponse = {
-      status: jest.fn(() => mockResponse),
-      json: jest.fn(),
-    } as any
-
-    await handler(mockRequest, mockResponse)
-
-    expect(mockResponse.status).toHaveBeenCalledWith(403)
-  })
 
   it('should block regular users', async () => {
     ;(getCurrentUser as jest.Mock).mockResolvedValueOnce({
@@ -56,8 +40,9 @@ describe('API Route - DELETE Method', () => {
     const service = await mockServiceCreation(domains[0]._id)
 
     const mockRequest = {
-      method: 'DELETE',
+      method: 'PATCH',
       query: { id: service._id },
+      body: { name: 'New Name' },
     } as any
 
     const mockResponse = {
@@ -70,7 +55,7 @@ describe('API Route - DELETE Method', () => {
     expect(mockResponse.status).toHaveBeenCalledWith(403)
   })
 
-  it('should allow GlobalAdmin to delete service', async () => {
+  it('should allow GlobalAdmin to edit service', async () => {
     ;(getCurrentUser as jest.Mock).mockResolvedValueOnce({
       isGlobalAdmin: true,
       isDomainAdmin: false,
@@ -81,8 +66,9 @@ describe('API Route - DELETE Method', () => {
     const service = await mockServiceCreation(domains[0]._id)
 
     const mockRequest = {
-      method: 'DELETE',
+      method: 'PATCH',
       query: { id: service._id },
+      body: { name: 'New Service Name' },
     } as any
 
     const mockResponse = {
@@ -92,13 +78,13 @@ describe('API Route - DELETE Method', () => {
 
     await handler(mockRequest, mockResponse)
 
-    const deleted = await CustomService.findById(service._id)
+    const updated = await CustomService.findById(service._id)
 
     expect(mockResponse.status).toHaveBeenCalledWith(200)
-    expect(deleted).toBeNull()
+    expect(updated?.name).toBe('New Service Name')
   })
 
-  it('should allow DomainAdmin to delete service', async () => {
+  it('should allow DomainAdmin to edit service', async () => {
     ;(getCurrentUser as jest.Mock).mockResolvedValueOnce({
       isGlobalAdmin: false,
       isDomainAdmin: true,
@@ -109,8 +95,9 @@ describe('API Route - DELETE Method', () => {
     const service = await mockServiceCreation(domains[0]._id)
 
     const mockRequest = {
-      method: 'DELETE',
+      method: 'PATCH',
       query: { id: service._id },
+      body: { name: 'Renamed By DomainAdmin' },
     } as any
 
     const mockResponse = {
@@ -120,27 +107,81 @@ describe('API Route - DELETE Method', () => {
 
     await handler(mockRequest, mockResponse)
 
-    const deleted = await CustomService.findById(service._id)
+    const updated = await CustomService.findById(service._id)
 
     expect(mockResponse.status).toHaveBeenCalledWith(200)
-    expect(mockResponse.json).toHaveBeenCalledWith({
-      success: true,
-      data: 'Сервіс успішно видалено',
+    expect(updated?.name).toBe('Renamed By DomainAdmin')
+  })
+
+  it('should return 400 when name is empty', async () => {
+    ;(getCurrentUser as jest.Mock).mockResolvedValueOnce({
+      isGlobalAdmin: false,
+      isDomainAdmin: true,
+      isUser: false,
+      email: 'domainadmin@example.com',
     })
-    expect(deleted).toBeNull()
+
+    const service = await mockServiceCreation(domains[0]._id)
+
+    const mockRequest = {
+      method: 'PATCH',
+      query: { id: service._id },
+      body: { name: '   ' },
+    } as any
+
+    const mockResponse = {
+      status: jest.fn(() => mockResponse),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockRequest, mockResponse)
+
+    expect(mockResponse.status).toHaveBeenCalledWith(400)
+  })
+
+  it('should return 409 if service name already exists', async () => {
+    ;(getCurrentUser as jest.Mock).mockResolvedValueOnce({
+      isGlobalAdmin: false,
+      isDomainAdmin: true,
+      isUser: false,
+      email: 'domainadmin@example.com',
+    })
+
+    await CustomService.create({
+      name: 'Existing Service',
+      fieldName: 'existingService',
+      domain: domains[0]._id,
+    })
+    const service = await mockServiceCreation(domains[0]._id)
+
+    const mockRequest = {
+      method: 'PATCH',
+      query: { id: service._id },
+      body: { name: 'Existing Service' },
+    } as any
+
+    const mockResponse = {
+      status: jest.fn(() => mockResponse),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockRequest, mockResponse)
+
+    expect(mockResponse.status).toHaveBeenCalledWith(409)
   })
 
   it('should return 404 if service not found', async () => {
     ;(getCurrentUser as jest.Mock).mockResolvedValueOnce({
-      isGlobalAdmin: true,
-      isDomainAdmin: false,
+      isGlobalAdmin: false,
+      isDomainAdmin: true,
       isUser: false,
-      email: 'admin@example.com',
+      email: 'domainadmin@example.com',
     })
 
     const mockRequest = {
-      method: 'DELETE',
+      method: 'PATCH',
       query: { id: '507f191e810c19729de860ea' },
+      body: { name: 'Any Name' },
     } as any
 
     const mockResponse = {
