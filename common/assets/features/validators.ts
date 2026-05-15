@@ -17,9 +17,7 @@ export const emailRegex =
 export const isValidEmail = (value: unknown): boolean => {
   const emails = Array.isArray(value) ? value : [value]
   if (emails.length === 0) return false
-  return emails.every(
-    (e) => typeof e === 'string' && emailRegex.test(e.trim())
-  )
+  return emails.every((e) => typeof e === 'string' && emailRegex.test(e.trim()))
 }
 
 //Validators

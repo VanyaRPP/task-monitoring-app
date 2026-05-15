@@ -14,7 +14,10 @@ const basePayment = {
     description: 'line one\nline two',
     adminEmails: ['admin@example.com'],
   },
-  domain: { name: 'My Domain', description: 'Domain line one\nDomain line two' },
+  domain: {
+    name: 'My Domain',
+    description: 'Domain line one\nDomain line two',
+  },
 }
 
 describe('useReceiptTemplateProps', () => {
@@ -49,7 +52,11 @@ describe('useReceiptTemplateProps', () => {
     ).toBe('USD')
     expect(
       useReceiptTemplateProps({
-        data: { ...basePayment, currency: undefined, company: { currency: 'EUR' } },
+        data: {
+          ...basePayment,
+          currency: undefined,
+          company: { currency: 'EUR' },
+        },
       }).currency
     ).toBe('EUR')
     expect(
@@ -164,7 +171,9 @@ describe('useReceiptTemplateProps', () => {
         },
       },
     })
-    expect(props.normalizedBankDetailsLines).toContain('Bank Address: 1 Main St')
+    expect(props.normalizedBankDetailsLines).toContain(
+      'Bank Address: 1 Main St'
+    )
   })
 
   it('exposes overrides slot as undefined (constructor reserved field)', () => {

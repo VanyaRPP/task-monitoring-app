@@ -1,7 +1,12 @@
 import { dateToMonthYear } from '@assets/features/formatDate'
 import { usePaymentContext } from '@components/AddPaymentModal'
 import { InvoiceComponentProps } from '@components/Tables/EditInvoiceTable'
-import { currencyWithUnit, toArray, toFirstUpperCase, toRoundFixed } from '@utils/helpers'
+import {
+  currencyWithUnit,
+  toArray,
+  toFirstUpperCase,
+  toRoundFixed,
+} from '@utils/helpers'
 import validator from '@utils/validator'
 import { Form, Input, Space, Typography } from 'antd'
 import { useMemo } from 'react'
@@ -24,15 +29,17 @@ export const Name: React.FC<InvoiceComponentProps> = ({
     form
   )
 
-const { service, company } = usePaymentContext()
-const currentPrice = Form.useWatch(['invoice', ...name, 'price'], form)
+  const { service, company } = usePaymentContext()
+  const currentPrice = Form.useWatch(['invoice', ...name, 'price'], form)
 
-const defaultPrice = useMemo(() => {
-  if (!fieldName) return undefined
+  const defaultPrice = useMemo(() => {
+    if (!fieldName) return undefined
 
-  return company?.customServices?.find(s => s.fieldName === fieldName)?.price
-      ?? service?.customServices?.find(s => s.fieldName === fieldName)?.price
-}, [company?.customServices, service?.customServices, fieldName])
+    return (
+      company?.customServices?.find((s) => s.fieldName === fieldName)?.price ??
+      service?.customServices?.find((s) => s.fieldName === fieldName)?.price
+    )
+  }, [company?.customServices, service?.customServices, fieldName])
 
   if (!editable || type !== 'custom') {
     return (
@@ -46,26 +53,26 @@ const defaultPrice = useMemo(() => {
   }
 
   return (
-  <Space
+    <Space
       direction="horizontal"
       style={{ justifyContent: 'space-between', width: '100%' }}
-      >
-    <Form.Item
-      name={[...name, 'name']}
-      rules={[validator.required()]}
-      style={{ margin: 0 }}
     >
-      {isCustomService ? (
-        <Space direction="vertical" size={0}>
-          <Typography.Text>{value || 'Назва...'}</Typography.Text>
-          <Typography.Text type="secondary" style={{ fontSize: '0.75rem' }}>
-            {toFirstUpperCase(dateToMonthYear(service?.date))}
-          </Typography.Text>
-        </Space>
-      ) : (
-        <Input placeholder="Назва..." disabled={disabled} />
-      )}
-    </Form.Item>
+      <Form.Item
+        name={[...name, 'name']}
+        rules={[validator.required()]}
+        style={{ margin: 0 }}
+      >
+        {isCustomService ? (
+          <Space direction="vertical" size={0}>
+            <Typography.Text>{value || 'Назва...'}</Typography.Text>
+            <Typography.Text type="secondary" style={{ fontSize: '0.75rem' }}>
+              {toFirstUpperCase(dateToMonthYear(service?.date))}
+            </Typography.Text>
+          </Space>
+        ) : (
+          <Input placeholder="Назва..." disabled={disabled} />
+        )}
+      </Form.Item>
       <UpdateInvoiceButton
         currentPrice={currentPrice}
         defaultPrice={defaultPrice}
@@ -102,11 +109,7 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
       rules={[validator.required(), validator.min(1)]}
       style={{ margin: 0 }}
     >
-      <Input
-        type="number"
-        placeholder="К-сть..."
-        disabled={disabled}
-      />
+      <Input type="number" placeholder="К-сть..." disabled={disabled} />
     </Form.Item>
   )
 }

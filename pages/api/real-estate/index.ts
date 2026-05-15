@@ -20,7 +20,14 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
-        const { companyId, domainId, streetId, archived, services, limit = 0 } = req.query
+        const {
+          companyId,
+          domainId,
+          streetId,
+          archived,
+          services,
+          limit = 0,
+        } = req.query
 
         const servicesIds: string[] | null = services
           ? typeof services === 'string'
@@ -57,7 +64,11 @@ export default async function handler(
 
         if (servicesIds && servicesIds.length > 0) {
           filters.$or = servicesIds.map((serviceKey) => {
-            if (['cleaning', 'totalArea', 'pricePerMeter', 'waterPart'].includes(serviceKey)) {
+            if (
+              ['cleaning', 'totalArea', 'pricePerMeter', 'waterPart'].includes(
+                serviceKey
+              )
+            ) {
               return { [serviceKey]: { $gt: 0 } }
             }
             if (['garbageCollector', 'inflicion'].includes(serviceKey)) {
@@ -65,9 +76,29 @@ export default async function handler(
             }
             return {
               $or: [
-                { services: { $elemMatch: { $or: [{ _id: serviceKey }, { serviceId: serviceKey }, { service: serviceKey }] } } },
-                { customServices: { $elemMatch: { $or: [{ _id: serviceKey }, { serviceId: serviceKey }, { service: serviceKey }] } } }
-              ]
+                {
+                  services: {
+                    $elemMatch: {
+                      $or: [
+                        { _id: serviceKey },
+                        { serviceId: serviceKey },
+                        { service: serviceKey },
+                      ],
+                    },
+                  },
+                },
+                {
+                  customServices: {
+                    $elemMatch: {
+                      $or: [
+                        { _id: serviceKey },
+                        { serviceId: serviceKey },
+                        { service: serviceKey },
+                      ],
+                    },
+                  },
+                },
+              ],
             }
           })
         }
@@ -150,7 +181,10 @@ export default async function handler(
           if (!Array.isArray(incomingEmails) || !isValidEmail(incomingEmails)) {
             return res
               .status(400)
-              .json({ success: false, message: 'Invalid email address in adminEmails' })
+              .json({
+                success: false,
+                message: 'Invalid email address in adminEmails',
+              })
           }
         }
 
@@ -168,12 +202,11 @@ export default async function handler(
           })
 
           if (!adminDomain) {
-            return res
-              .status(403)
-              .json({
-                success: false,
-                message: 'Access denied: domain not found or you are not an admin of this domain',
-              })
+            return res.status(403).json({
+              success: false,
+              message:
+                'Access denied: domain not found or you are not an admin of this domain',
+            })
           }
 
           if (!req.body.adminEmails || !Array.isArray(req.body.adminEmails)) {

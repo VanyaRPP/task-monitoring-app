@@ -1,6 +1,9 @@
 const trimText = (s: string | undefined) => (s ?? '').trim()
 
-const withoutLeadingDuplicate = (lines: string[], heading: string): string[] => {
+const withoutLeadingDuplicate = (
+  lines: string[],
+  heading: string
+): string[] => {
   const h = trimText(heading)
   if (!h || !lines.length) {
     return lines
@@ -14,7 +17,9 @@ const withoutLeadingDuplicate = (lines: string[], heading: string): string[] => 
 export const getDomainHeading = (data: any, domainName?: string): string =>
   (typeof data?.domain === 'object' && data?.domain?.name
     ? data.domain.name
-    : undefined) || (domainName?.trim() || '')
+    : undefined) ||
+  domainName?.trim() ||
+  ''
 
 export const getReceiverCompanyHeading = (data: any): string =>
   (data?.reciever?.companyName || data?.reciever?.name || '').trim()
@@ -42,9 +47,13 @@ export const getIssuedToHeadingAndBodyLines = (
   return { heading, bodyLines }
 }
 
-export const getRecipientCompanyHeading = (data: any, companyLabel?: string): string =>
+export const getRecipientCompanyHeading = (
+  data: any,
+  companyLabel?: string
+): string =>
   (
-    (data?.reciever?.companyName || data?.reciever?.name) ||
+    data?.reciever?.companyName ||
+    data?.reciever?.name ||
     (typeof data?.company === 'object' && data?.company !== null
       ? (data.company as { companyName?: string }).companyName
       : undefined) ||

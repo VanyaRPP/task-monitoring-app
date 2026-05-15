@@ -186,20 +186,18 @@ export function usePaymentFormData(
   const service = serviceById ?? serviceByMonth ?? null
 
   const anchorDate =
-    service?.date != null
-      ? dayjs(service.date)
-      : placeholderAnchor ?? null
+    service?.date != null ? dayjs(service.date) : placeholderAnchor ?? null
   const hasAnchor = anchorDate != null && anchorDate.isValid()
   const prevMonthMongo = !hasAnchor
     ? 0
     : anchorDate.month() === 0
-      ? 12
-      : anchorDate.month()
+    ? 12
+    : anchorDate.month()
   const prevYearMongo = !hasAnchor
     ? 0
     : prevMonthMongo === 12 && anchorDate.month() === 0
-      ? anchorDate.year() - 1
-      : anchorDate.year()
+    ? anchorDate.year() - 1
+    : anchorDate.year()
 
   const { data: { data: { 0: prevService } } = { data: [null] } } =
     useGetAllServicesQuery(

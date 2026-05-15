@@ -43,7 +43,13 @@ const renderForm = () => {
 describe('DomainForm — tabs orchestration', () => {
   it('renders all five tab labels in correct order, including "Банк API"', () => {
     renderForm()
-    const labels = ['Загальне', 'Шаблон', 'Мої послуги', 'Історія налаштувань', 'Банк API']
+    const labels = [
+      'Загальне',
+      'Шаблон',
+      'Мої послуги',
+      'Історія налаштувань',
+      'Банк API',
+    ]
     for (const label of labels) {
       expect(screen.getByRole('tab', { name: label })).toBeInTheDocument()
     }

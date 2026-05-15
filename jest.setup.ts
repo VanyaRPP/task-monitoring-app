@@ -3,7 +3,6 @@ import { TextEncoder, TextDecoder } from 'util'
 
 process.env.MONGODB_URI =
   process.env.MONGODB_URI ?? 'mongodb://test-placeholder/jest'
-
 ;(global as any).TextEncoder = TextEncoder
 ;(global as any).TextDecoder = TextDecoder
 
@@ -11,7 +10,7 @@ process.env.SUPPRESS_JEST_WARNINGS = 'true'
 
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
-  value: jest.fn().mockImplementation(query => ({
+  value: jest.fn().mockImplementation((query) => ({
     matches: false,
     media: query,
     onchange: null,

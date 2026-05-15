@@ -53,7 +53,6 @@ describe('BankTransactions Sync Logic', () => {
 
   beforeEach(() => {
     mockDispatch = jest.fn()
-
     ;(useAppDispatch as unknown as jest.Mock).mockReturnValue(mockDispatch)
     ;(useAppSelector as unknown as jest.Mock).mockReturnValue('some-domain-id')
     ;(useDomainTabs as unknown as jest.Mock).mockReturnValue({
@@ -79,7 +78,7 @@ describe('BankTransactions Sync Logic', () => {
 
   it('should properly close the broadcast channel when the component unmounts', () => {
     const { unmount } = render(<BankTransactions />)
-    
+
     const closeSpy = channelInstance.close
     unmount()
 

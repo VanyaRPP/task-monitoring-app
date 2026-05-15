@@ -44,7 +44,6 @@ const HomePage: React.FC = () => {
         </div>
 
         <ScrollFactoryAnimation />
-
       </div>
     </>
   )

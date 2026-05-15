@@ -49,15 +49,18 @@ const DomainBankTab: FC<Props> = ({ domainId }) => {
     }
   }, [balances, domainId, domain?.iban, dispatch])
 
-  const { data: transactionsData, isLoading: isTransactionsLoading, refetch: refetchTransactions} =
-    useGetTransactionsQuery(
-      {
-        token: decryptedToken,
-        acc: selectedAccount ?? undefined,
-        domainId,
-      },
-      { skip: !decryptedToken || !selectedAccount }
-    )
+  const {
+    data: transactionsData,
+    isLoading: isTransactionsLoading,
+    refetch: refetchTransactions,
+  } = useGetTransactionsQuery(
+    {
+      token: decryptedToken,
+      acc: selectedAccount ?? undefined,
+      domainId,
+    },
+    { skip: !decryptedToken || !selectedAccount }
+  )
 
   const { data: realEstatesData } = useGetAllRealEstateQuery({
     domainId,

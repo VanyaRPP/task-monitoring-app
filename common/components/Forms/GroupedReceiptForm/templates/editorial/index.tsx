@@ -8,9 +8,21 @@ import {
 import ed from './editorial.module.scss'
 
 const EditorialTemplate: FC<TemplateProps> = ({
-  data, componentRef, isEnglish, currencyLabel, modernInvoiceNumber, domainName,
-  rows, getQty, subtotal, taxPercent, taxAmount, total,
-  paymentInfoLines, issuedToLines, normalizedBankDetailsLines,
+  data,
+  componentRef,
+  isEnglish,
+  currencyLabel,
+  modernInvoiceNumber,
+  domainName,
+  rows,
+  getQty,
+  subtotal,
+  taxPercent,
+  taxAmount,
+  total,
+  paymentInfoLines,
+  issuedToLines,
+  normalizedBankDetailsLines,
 }) => {
   const { heading: paymentHeading, bodyLines: paymentBodyLines } =
     getBillFromHeadingAndBodyLines(data, paymentInfoLines)
@@ -32,7 +44,9 @@ const EditorialTemplate: FC<TemplateProps> = ({
         </div>
         <div className={ed.edInvoiceTitle}>
           <h1>{isEnglish ? 'Invoice' : 'Рахунок'}</h1>
-          <span className={ed.edInvoiceNum}>№&thinsp;{modernInvoiceNumber}</span>
+          <span className={ed.edInvoiceNum}>
+            №&thinsp;{modernInvoiceNumber}
+          </span>
         </div>
       </div>
 
@@ -44,13 +58,17 @@ const EditorialTemplate: FC<TemplateProps> = ({
           </span>
         </div>
         <div className={ed.edMetaItem}>
-          <span className={ed.edMetaLabel}>{isEnglish ? 'Due date' : 'Строк оплати'}</span>
+          <span className={ed.edMetaLabel}>
+            {isEnglish ? 'Due date' : 'Строк оплати'}
+          </span>
           <span className={ed.edMetaValue}>
             {dayjs(data?.invoiceCreationDate).add(5, 'd').format('DD.MM.YYYY')}
           </span>
         </div>
         <div className={ed.edMetaItem}>
-          <span className={ed.edMetaLabel}>{isEnglish ? 'Currency' : 'Валюта'}</span>
+          <span className={ed.edMetaLabel}>
+            {isEnglish ? 'Currency' : 'Валюта'}
+          </span>
           <span className={ed.edMetaValue}>{currencyLabel}</span>
         </div>
       </div>
@@ -78,11 +96,17 @@ const EditorialTemplate: FC<TemplateProps> = ({
               {normalizedBankDetailsLines.map((line: string, idx: number) => {
                 const sep = line.indexOf(':')
                 if (sep < 0) {
-                  return <div className={ed.edBankLine} key={`bk-${idx}`}>{line}</div>
+                  return (
+                    <div className={ed.edBankLine} key={`bk-${idx}`}>
+                      {line}
+                    </div>
+                  )
                 }
                 return (
                   <div className={ed.edBankLine} key={`bk-${idx}`}>
-                    <span className={ed.edBankLineLabel}>{line.slice(0, sep + 1)}</span>
+                    <span className={ed.edBankLineLabel}>
+                      {line.slice(0, sep + 1)}
+                    </span>
                     {line.slice(sep + 1)}
                   </div>
                 )
@@ -132,7 +156,9 @@ const EditorialTemplate: FC<TemplateProps> = ({
                 <td>{item?.name || item?.type || '—'}</td>
                 <td>{rate.toFixed(2)}</td>
                 <td>{qty}</td>
-                <td>{Number(item?.sum || 0).toFixed(2)}&nbsp;{currencyLabel}</td>
+                <td>
+                  {Number(item?.sum || 0).toFixed(2)}&nbsp;{currencyLabel}
+                </td>
               </tr>
             )
           })}
@@ -146,8 +172,16 @@ const EditorialTemplate: FC<TemplateProps> = ({
           </div>
           <div className={ed.edPaymentNoteText}>
             {isEnglish
-              ? `Payment for services according to invoice № ${data.invoiceNumber} dated ${dayjs(data?.invoiceCreationDate)?.format?.('DD.MM.YYYY')}`
-              : `Оплата за послуги згідно рахунку № ${data.invoiceNumber} від ${dayjs(data?.invoiceCreationDate)?.format?.('DD.MM.YYYY')}`}
+              ? `Payment for services according to invoice № ${
+                  data.invoiceNumber
+                } dated ${dayjs(data?.invoiceCreationDate)?.format?.(
+                  'DD.MM.YYYY'
+                )}`
+              : `Оплата за послуги згідно рахунку № ${
+                  data.invoiceNumber
+                } від ${dayjs(data?.invoiceCreationDate)?.format?.(
+                  'DD.MM.YYYY'
+                )}`}
           </div>
         </div>
         <div className={ed.edTotalsBlock}>
@@ -155,18 +189,23 @@ const EditorialTemplate: FC<TemplateProps> = ({
             <>
               <div className={ed.edTotalRow}>
                 <span>{isEnglish ? 'Subtotal' : 'Підсумок'}</span>
-                <strong>{subtotal.toFixed(2)}&nbsp;{currencyLabel}</strong>
+                <strong>
+                  {subtotal.toFixed(2)}&nbsp;{currencyLabel}
+                </strong>
               </div>
               <div className={ed.edTotalRow}>
                 <span>VAT {taxPercent}%</span>
-                <strong>{taxAmount.toFixed(2)}&nbsp;{currencyLabel}</strong>
+                <strong>
+                  {taxAmount.toFixed(2)}&nbsp;{currencyLabel}
+                </strong>
               </div>
             </>
           )}
           <div className={`${ed.edTotalRow} ${ed.edGrandTotal}`}>
             <span>{isEnglish ? 'Total Due' : 'До сплати'}</span>
             <strong>
-              {(+data?.generalSum || +data?.debit || total).toFixed(2)}&nbsp;{currencyLabel}
+              {(+data?.generalSum || +data?.debit || total).toFixed(2)}&nbsp;
+              {currencyLabel}
             </strong>
           </div>
         </div>

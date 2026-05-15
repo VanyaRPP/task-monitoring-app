@@ -17,7 +17,9 @@ export default async function handler(
   const paymentId = req.query.id as string
 
   if (!mongoose.Types.ObjectId.isValid(paymentId)) {
-    return res.status(400).json({ success: false, message: 'Invalid payment id' })
+    return res
+      .status(400)
+      .json({ success: false, message: 'Invalid payment id' })
   }
 
   if (req.method === 'GET') {
@@ -39,7 +41,9 @@ export default async function handler(
 
     const exists = await Payment.exists({ _id: paymentId })
     if (!exists) {
-      return res.status(404).json({ success: false, message: 'Payment not found' })
+      return res
+        .status(404)
+        .json({ success: false, message: 'Payment not found' })
     }
 
     const log = await PaymentChangeLog.create({
@@ -57,24 +61,24 @@ export default async function handler(
     const changeLogId = req.query.changeLogId as string
 
     if (
-      !mongoose.Types.ObjectId.isValid(paymentId) || 
+      !mongoose.Types.ObjectId.isValid(paymentId) ||
       !mongoose.Types.ObjectId.isValid(changeLogId)
     ) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid ids'
+        message: 'Invalid ids',
       })
     }
-  
+
     const deleted = await PaymentChangeLog.findOneAndDelete({
       _id: changeLogId,
-      paymentId
+      paymentId,
     })
 
     if (!deleted) {
       return res.status(404).json({
         success: false,
-        message: 'ChangeLog not found'
+        message: 'ChangeLog not found',
       })
     }
 

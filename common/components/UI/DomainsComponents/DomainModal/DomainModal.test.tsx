@@ -118,10 +118,18 @@ jest.mock('./DomainForm', () => ({
         <Form.Item name="companiesAreas" hidden>
           <Input />
         </Form.Item>
-        <button data-testid="seed-areas-untouched" type="button" onClick={seedUntouched}>
+        <button
+          data-testid="seed-areas-untouched"
+          type="button"
+          onClick={seedUntouched}
+        >
           seed-untouched
         </button>
-        <button data-testid="seed-areas-touched" type="button" onClick={seedTouched}>
+        <button
+          data-testid="seed-areas-touched"
+          type="button"
+          onClick={seedTouched}
+        >
           seed-touched
         </button>
       </Form>

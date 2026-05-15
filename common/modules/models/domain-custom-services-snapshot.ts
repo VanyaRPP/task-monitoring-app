@@ -65,7 +65,8 @@ const DomainCustomServicesSnapshotSchema =
 DomainCustomServicesSnapshotSchema.index({ domainId: 1, createdAt: -1 })
 
 const DomainCustomServicesSnapshot =
-  (mongoose.models?.DomainCustomServicesSnapshot as mongoose.Model<IDomainCustomServicesSnapshot>) ||
+  (mongoose.models
+    ?.DomainCustomServicesSnapshot as mongoose.Model<IDomainCustomServicesSnapshot>) ||
   mongoose.model<IDomainCustomServicesSnapshot>(
     'DomainCustomServicesSnapshot',
     DomainCustomServicesSnapshotSchema

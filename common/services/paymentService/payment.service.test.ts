@@ -52,12 +52,16 @@ jest.mock('@modules/models/Service', () => ({
 jest.mock('@pages/api/spacehub/payment/pipelines', () => ({
   getCreditDebitPipeline: jest.fn(),
   getInvoicesTotalPipeline: jest.fn(),
-  getMaxInvoiceNumber: jest.fn(() => [{ $group: { _id: null, maxNumber: { $max: '$invoiceNumber' } } }]),
+  getMaxInvoiceNumber: jest.fn(() => [
+    { $group: { _id: null, maxNumber: { $max: '$invoiceNumber' } } },
+  ]),
   getTotalGeneralSumPipeline: jest.fn(),
 }))
 
 jest.mock('@utils/helpers', () => ({
-  getDistinctCompanyAndDomain: jest.fn().mockResolvedValue({ distinctDomains: [], distinctCompanies: [] }),
+  getDistinctCompanyAndDomain: jest
+    .fn()
+    .mockResolvedValue({ distinctDomains: [], distinctCompanies: [] }),
   getFilterForAddress: jest.fn().mockReturnValue({}),
 }))
 

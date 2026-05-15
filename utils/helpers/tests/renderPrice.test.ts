@@ -53,7 +53,7 @@ describe('renderPrice – matrix (rows & columns)', () => {
       [0, 300],
     ]
 
-    const result = tableData.map(row => row.map(renderPrice))
+    const result = tableData.map((row) => row.map(renderPrice))
 
     expect(result).toEqual([
       ['100', '-'],

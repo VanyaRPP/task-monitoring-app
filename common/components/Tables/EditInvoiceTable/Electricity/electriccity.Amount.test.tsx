@@ -97,7 +97,7 @@ describe('Electricity.Sum', () => {
     })
   })
 
-  it("обробляє null значення (використовує 0 за замовчуванням)", async () => {
+  it('обробляє null значення (використовує 0 за замовчуванням)', async () => {
     const { form } = renderWithForm({
       invoice: {
         electricity: {

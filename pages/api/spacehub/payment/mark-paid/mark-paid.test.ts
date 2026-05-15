@@ -100,7 +100,9 @@ describe('Payment API Endpoint - mark-paid', () => {
     // each credit payment gets a fresh invoiceNumber from getMaxInvoiceNumber + 1
     expect(firstCreateArg.invoiceNumber).toBe(101)
     expect(secondCreateArg.invoiceNumber).toBe(102)
-    expect(firstCreateArg.invoiceNumber).not.toBe(debitPayments[0].invoiceNumber)
+    expect(firstCreateArg.invoiceNumber).not.toBe(
+      debitPayments[0].invoiceNumber
+    )
     // date shifted by 1ms
     expect(firstCreateArg.invoiceCreationDate.getTime()).toBe(
       new Date(debitPayments[0].invoiceCreationDate).getTime() + 1

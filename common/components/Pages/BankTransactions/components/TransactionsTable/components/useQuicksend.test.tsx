@@ -4,8 +4,14 @@ import dayjs from 'dayjs'
 import { useQuickSend } from './useQuicksend'
 import { buildMonthServicePlaceholder } from '@common/components/Forms/AddPaymentForm/month-service-placeholder'
 
-const mockAddPayment = jest.fn().mockReturnValue({ unwrap: jest.fn().mockResolvedValue({ data: {} }) })
-const mockAddService = jest.fn().mockReturnValue({ unwrap: jest.fn().mockResolvedValue({ data: { _id: 'service_123' } }) })
+const mockAddPayment = jest
+  .fn()
+  .mockReturnValue({ unwrap: jest.fn().mockResolvedValue({ data: {} }) })
+const mockAddService = jest
+  .fn()
+  .mockReturnValue({
+    unwrap: jest.fn().mockResolvedValue({ data: { _id: 'service_123' } }),
+  })
 const mockPostMessage = jest.fn()
 const mockClose = jest.fn()
 
@@ -20,7 +26,9 @@ jest.mock('@common/api/paymentApi/payment.api', () => ({
 }))
 
 jest.mock('@utils/helpers', () => ({
-  getPaymentProviderAndReciever: jest.fn().mockReturnValue({ provider: 'provider', reciever: 'reciever' }),
+  getPaymentProviderAndReciever: jest
+    .fn()
+    .mockReturnValue({ provider: 'provider', reciever: 'reciever' }),
 }))
 
 jest.mock('./bankHelper', () => ({
@@ -64,7 +72,9 @@ describe('useQuickSend', () => {
   })
 
   it('uses next invoice number from payment number query', async () => {
-    const { useGetPaymentNumberQuery } = require('@common/api/paymentApi/payment.api')
+    const {
+      useGetPaymentNumberQuery,
+    } = require('@common/api/paymentApi/payment.api')
     useGetPaymentNumberQuery.mockReturnValue({ data: 42 })
 
     const { result } = renderHook(() =>
@@ -77,7 +87,10 @@ describe('useQuickSend', () => {
     )
 
     await act(async () => {
-      await result.current.handleQuickSend({ _id: 'service_1', date: '2026-05-03' } as any)
+      await result.current.handleQuickSend({
+        _id: 'service_1',
+        date: '2026-05-03',
+      } as any)
     })
 
     expect(mockAddPayment).toHaveBeenCalledWith(
@@ -100,7 +113,10 @@ describe('useQuickSend', () => {
     )
 
     await act(async () => {
-      await result.current.handleQuickSend({ _id: placeholderId, date: '2026-05-03' } as any)
+      await result.current.handleQuickSend({
+        _id: placeholderId,
+        date: '2026-05-03',
+      } as any)
     })
 
     expect(mockAddService).toHaveBeenCalledWith(
@@ -134,7 +150,10 @@ describe('useQuickSend', () => {
     )
 
     await act(async () => {
-      await result.current.handleQuickSend({ _id: 'service_1', date: '2026-05-01' } as any)
+      await result.current.handleQuickSend({
+        _id: 'service_1',
+        date: '2026-05-01',
+      } as any)
     })
 
     const calledPayment = mockAddPayment.mock.calls[0][0]
@@ -157,7 +176,10 @@ describe('useQuickSend', () => {
     )
 
     await act(async () => {
-      await result.current.handleQuickSend({ _id: 'service_1', date: '2026-05-15' } as any)
+      await result.current.handleQuickSend({
+        _id: 'service_1',
+        date: '2026-05-15',
+      } as any)
     })
 
     const calledPayment = mockAddPayment.mock.calls[0][0]
@@ -181,7 +203,10 @@ describe('useQuickSend', () => {
     )
 
     await act(async () => {
-      await result.current.handleQuickSend({ _id: 'service_1', date: '2026-05-01' } as any)
+      await result.current.handleQuickSend({
+        _id: 'service_1',
+        date: '2026-05-01',
+      } as any)
     })
 
     expect(onSuccess).toHaveBeenCalledTimes(1)
@@ -200,10 +225,15 @@ describe('useQuickSend', () => {
       )
 
       await act(async () => {
-        await result.current.handleQuickSend({ _id: 'service_1', date: '2026-05-01' } as any)
+        await result.current.handleQuickSend({
+          _id: 'service_1',
+          date: '2026-05-01',
+        } as any)
       })
 
-      expect(global.BroadcastChannel).toHaveBeenCalledWith('payments_sync_channel')
+      expect(global.BroadcastChannel).toHaveBeenCalledWith(
+        'payments_sync_channel'
+      )
       expect(mockPostMessage).toHaveBeenCalledWith('PAYMENT_CREATED')
 
       act(() => {

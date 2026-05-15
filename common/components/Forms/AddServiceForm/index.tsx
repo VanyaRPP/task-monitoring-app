@@ -3,13 +3,7 @@ import { IService } from '@common/api/serviceApi/service.api.types'
 import AddressesSelect from '@components/UI/Reusable/AddressesSelect'
 import DomainsSelect from '@components/UI/Reusable/DomainsSelect'
 import { usePreviousMonthService } from '@modules/hooks/useService'
-import {
-  ConfigProvider,
-  DatePicker,
-  Form,
-  FormInstance,
-  Input,
-} from 'antd'
+import { ConfigProvider, DatePicker, Form, FormInstance, Input } from 'antd'
 import ukUA from 'antd/lib/locale/uk_UA'
 import dayjs from 'dayjs'
 import 'dayjs/locale/uk'
@@ -137,7 +131,7 @@ const AddServiceForm: React.FC<Props> = ({
 
   useEffect(() => {
     const currentCustomServices = form.getFieldValue('customServices')
-      if (!currentCustomServices || currentCustomServices.length === 0) {
+    if (!currentCustomServices || currentCustomServices.length === 0) {
       form.setFieldsValue({
         electricityPrice:
           currentService?.electricityPrice ??
@@ -146,9 +140,12 @@ const AddServiceForm: React.FC<Props> = ({
         inflicionPrice:
           currentService?.inflicionPrice ?? previousMonth?.inflicionPrice ?? 0,
         rentPrice: currentService?.rentPrice ?? previousMonth?.rentPrice ?? 0,
-        waterPrice: currentService?.waterPrice ?? previousMonth?.waterPrice ?? 0,
+        waterPrice:
+          currentService?.waterPrice ?? previousMonth?.waterPrice ?? 0,
         waterPriceTotal:
-          currentService?.waterPriceTotal ?? previousMonth?.waterPriceTotal ?? 0,
+          currentService?.waterPriceTotal ??
+          previousMonth?.waterPriceTotal ??
+          0,
         garbageCollectorPrice:
           currentService?.garbageCollectorPrice ??
           previousMonth?.garbageCollectorPrice ??
@@ -167,8 +164,14 @@ const AddServiceForm: React.FC<Props> = ({
 
   useEffect(() => {
     form.setFields([
-      { name: 'consumedElectricity', value: currentService?.consumedElectricity ?? null },
-      { name: 'generalElectricity', value: currentService?.generalElectricity ?? null },
+      {
+        name: 'consumedElectricity',
+        value: currentService?.consumedElectricity ?? null,
+      },
+      {
+        name: 'generalElectricity',
+        value: currentService?.generalElectricity ?? null,
+      },
       { name: 'isVAT', value: currentService?.isVAT ?? true },
     ])
   }, [currentService, form])
@@ -273,12 +276,9 @@ const AddServiceForm: React.FC<Props> = ({
             className={s.formInput}
           />
         </Form.Item> */}
-        <LossesCollapse
-          form={form}
-          name='losses'
-        />  
-        <br/>
-        <br/>
+        <LossesCollapse form={form} name="losses" />
+        <br />
+        <br />
         <Form.Item name="description" label="Опис">
           <Input.TextArea
             placeholder="Введіть опис"

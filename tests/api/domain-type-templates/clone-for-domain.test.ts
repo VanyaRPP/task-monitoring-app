@@ -209,9 +209,9 @@ describe('POST /api/domain-type-templates/[id]/clone-for-domain', () => {
     })
     // SVC_A exists, SVC_B was deleted from DB
     ;(CustomService.find as jest.Mock).mockReturnValue({
-      lean: jest.fn().mockResolvedValue([
-        { _id: SVC_A, name: 'X', fieldName: 'x' },
-      ]),
+      lean: jest
+        .fn()
+        .mockResolvedValue([{ _id: SVC_A, name: 'X', fieldName: 'x' }]),
     })
     ;(CustomService.create as jest.Mock).mockResolvedValueOnce({ _id: NEW_A })
 

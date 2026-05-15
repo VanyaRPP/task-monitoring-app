@@ -1,4 +1,4 @@
-$accent: #e63329;      
+$accent: #e63329;
 $ink: #0d0d0d;
 $mid: #6b6b6b;
 $rule: rgba(255, 255, 255, 0.14);
@@ -73,8 +73,6 @@ $card-border: rgba(255, 255, 255, 0.12);
   margin-top: 0.3rem;
 }
 
-
-
 .swissMeta {
   display: grid;
   grid-template-columns: repeat(3, auto);
@@ -102,8 +100,6 @@ $card-border: rgba(255, 255, 255, 0.12);
   font-size: 0.88rem;
   font-weight: 600;
 }
-
-
 
 .swissParties {
   display: grid;
@@ -145,8 +141,6 @@ $card-border: rgba(255, 255, 255, 0.12);
   opacity: 1;
 }
 
-
-
 .swissBankCard {
   margin-top: 0.8rem;
   padding: 0.8rem 1rem;
@@ -162,8 +156,6 @@ $card-border: rgba(255, 255, 255, 0.12);
   font-weight: 700;
   font-size: 0.82rem;
 }
-
-
 
 .swissTable {
   width: 100%;
@@ -189,21 +181,18 @@ $card-border: rgba(255, 255, 255, 0.12);
     vertical-align: top;
   }
 
-  
   th:nth-child(2),
   td:nth-child(2) {
     width: 14%;
     text-align: right;
   }
 
-  
   th:nth-child(3),
   td:nth-child(3) {
     width: 9%;
     text-align: right;
   }
 
-  
   th:nth-child(4),
   td:nth-child(4) {
     width: 20%;
@@ -216,8 +205,6 @@ $card-border: rgba(255, 255, 255, 0.12);
     border-bottom: none;
   }
 }
-
-
 
 .swissTotals {
   display: flex;
@@ -254,8 +241,6 @@ $card-border: rgba(255, 255, 255, 0.12);
   opacity: 1;
   letter-spacing: -0.01em;
 }
-
-
 
 .swissFooter {
   margin-top: 2.8rem;
@@ -295,13 +280,11 @@ $card-border: rgba(255, 255, 255, 0.12);
   opacity: 0.45;
 }
 
-
-
-$rule-l:        rgba(0, 0, 0, 0.12);
+$rule-l: rgba(0, 0, 0, 0.12);
 $rule-strong-l: rgba(0, 0, 0, 0.18);
-$surface-l:     rgba(0, 0, 0, 0.015);
-$card-bg-l:     rgba(0, 0, 0, 0.025);
-$card-border-l: rgba(0, 0, 0, 0.10);
+$surface-l: rgba(0, 0, 0, 0.015);
+$card-bg-l: rgba(0, 0, 0, 0.025);
+$card-border-l: rgba(0, 0, 0, 0.1);
 
 :global(:root[data-theme='light']) {
   .swissInvoice {
@@ -310,42 +293,85 @@ $card-border-l: rgba(0, 0, 0, 0.10);
     color: #1a1a1a;
   }
 
-  .swissHeader        { border-bottom-color: $accent; }
-  .swissBrandName     { color: #1a1a1a; }
-  .swissBrandSub      { color: rgba(0, 0, 0, 0.50); }
-  .swissInvoiceLabel h1 { color: #1a1a1a; }
-  .swissInvoiceNumber { color: rgba(0, 0, 0, 0.50); }
+  .swissHeader {
+    border-bottom-color: $accent;
+  }
+  .swissBrandName {
+    color: #1a1a1a;
+  }
+  .swissBrandSub {
+    color: rgba(0, 0, 0, 0.5);
+  }
+  .swissInvoiceLabel h1 {
+    color: #1a1a1a;
+  }
+  .swissInvoiceNumber {
+    color: rgba(0, 0, 0, 0.5);
+  }
 
-  .swissMeta          { border-bottom-color: $rule-l; }
-  .swissMetaLabel     { color: rgba(0, 0, 0, 0.45); }
-  .swissMetaValue     { color: #1a1a1a; }
+  .swissMeta {
+    border-bottom-color: $rule-l;
+  }
+  .swissMetaLabel {
+    color: rgba(0, 0, 0, 0.45);
+  }
+  .swissMetaValue {
+    color: #1a1a1a;
+  }
 
-  .swissPartyLabel    { color: $accent; }
-  .swissPartyName     { color: #1a1a1a; }
-  .swissPartyLine     { color: rgba(0, 0, 0, 0.55); }
+  .swissPartyLabel {
+    color: $accent;
+  }
+  .swissPartyName {
+    color: #1a1a1a;
+  }
+  .swissPartyLine {
+    color: rgba(0, 0, 0, 0.55);
+  }
 
   .swissBankCard {
     border-color: $card-border-l;
     background: $card-bg-l;
   }
-  .swissBankLabel     { color: #1a1a1a; }
-
-  .swissTable {
-    th { border-bottom-color: $rule-strong-l; color: rgba(0, 0, 0, 0.45); }
-    td { border-bottom-color: $rule-l; color: #1a1a1a; }
+  .swissBankLabel {
+    color: #1a1a1a;
   }
 
-  .swissTotals        { border-top-color: $rule-strong-l; }
-  .swissTotalRow      { color: rgba(0, 0, 0, 0.55); }
-  .swissGrandTotal    { border-top-color: $accent; color: #1a1a1a; }
+  .swissTable {
+    th {
+      border-bottom-color: $rule-strong-l;
+      color: rgba(0, 0, 0, 0.45);
+    }
+    td {
+      border-bottom-color: $rule-l;
+      color: #1a1a1a;
+    }
+  }
 
-  .swissFooter        { border-top-color: $rule-l; }
-  .swissThankYou      { color: $accent; }
-  .swissSignatureLine { color: rgba(0, 0, 0, 0.40); }
-  .swissSignatureCaption { color: rgba(0, 0, 0, 0.40); }
+  .swissTotals {
+    border-top-color: $rule-strong-l;
+  }
+  .swissTotalRow {
+    color: rgba(0, 0, 0, 0.55);
+  }
+  .swissGrandTotal {
+    border-top-color: $accent;
+    color: #1a1a1a;
+  }
+
+  .swissFooter {
+    border-top-color: $rule-l;
+  }
+  .swissThankYou {
+    color: $accent;
+  }
+  .swissSignatureLine {
+    color: rgba(0, 0, 0, 0.4);
+  }
+  .swissSignatureCaption {
+    color: rgba(0, 0, 0, 0.4);
+  }
 }
-
-
 
 @media (max-width: 860px) {
   .swissInvoice {
@@ -371,10 +397,11 @@ $card-border-l: rgba(0, 0, 0, 0.10);
   }
 }
 
-
-
 @media print {
-  @page { size: A4; margin: 14mm 16mm; }
+  @page {
+    size: A4;
+    margin: 14mm 16mm;
+  }
 
   .swissInvoice {
     max-width: none !important;
@@ -394,44 +421,99 @@ $card-border-l: rgba(0, 0, 0, 0.10);
     grid-template-columns: 1fr auto !important;
     border-bottom-color: $accent !important;
   }
-  .swissInvoiceLabel { text-align: right !important; }
-  .swissBrandName    { color: #111 !important; }
-  .swissBrandSub     { color: #555 !important; opacity: 1 !important; }
-  .swissInvoiceLabel h1 { color: #111 !important; }
-  .swissInvoiceNumber { color: #555 !important; opacity: 1 !important; }
+  .swissInvoiceLabel {
+    text-align: right !important;
+  }
+  .swissBrandName {
+    color: #111 !important;
+  }
+  .swissBrandSub {
+    color: #555 !important;
+    opacity: 1 !important;
+  }
+  .swissInvoiceLabel h1 {
+    color: #111 !important;
+  }
+  .swissInvoiceNumber {
+    color: #555 !important;
+    opacity: 1 !important;
+  }
 
   .swissMeta {
     grid-template-columns: repeat(3, auto) !important;
     border-bottom-color: $rule-print !important;
   }
-  .swissMetaLabel    { color: #555 !important; opacity: 1 !important; }
-  .swissMetaValue    { color: #111 !important; }
+  .swissMetaLabel {
+    color: #555 !important;
+    opacity: 1 !important;
+  }
+  .swissMetaValue {
+    color: #111 !important;
+  }
 
-  .swissParties      { grid-template-columns: 1.2fr 1fr !important; }
-  .swissPartyLabel   { color: $accent !important; }
-  .swissPartyLine    { color: #555 !important; opacity: 1 !important; }
-  .swissPartyLineStrong { color: #111 !important; opacity: 1 !important; }
+  .swissParties {
+    grid-template-columns: 1.2fr 1fr !important;
+  }
+  .swissPartyLabel {
+    color: $accent !important;
+  }
+  .swissPartyLine {
+    color: #555 !important;
+    opacity: 1 !important;
+  }
+  .swissPartyLineStrong {
+    color: #111 !important;
+    opacity: 1 !important;
+  }
 
   .swissBankCard {
     border-color: $rule-print !important;
     border-radius: 8px !important;
     background: #f8f8f8 !important;
   }
-  .swissBankLabel    { color: #111 !important; }
-
-  .swissTable {
-    th { border-bottom-color: #b0b0b0 !important; color: #555 !important; opacity: 1 !important; }
-    td { border-bottom-color: #e0e0e0 !important; color: #111 !important; }
+  .swissBankLabel {
+    color: #111 !important;
   }
 
-  .swissTotals       { border-top-color: #b0b0b0 !important; }
-  .swissTotalRow     { color: #555 !important; opacity: 1 !important; }
-  .swissGrandTotal   { border-top-color: $accent !important; color: #111 !important; opacity: 1 !important; }
+  .swissTable {
+    th {
+      border-bottom-color: #b0b0b0 !important;
+      color: #555 !important;
+      opacity: 1 !important;
+    }
+    td {
+      border-bottom-color: #e0e0e0 !important;
+      color: #111 !important;
+    }
+  }
 
-  .swissFooter       { border-top-color: #d8d8d8 !important; }
-  .swissThankYou     { color: $accent !important; }
-  .swissSignatureLine { color: #888 !important; opacity: 1 !important; }
-  .swissSignatureCaption { color: #888 !important; opacity: 1 !important; }
+  .swissTotals {
+    border-top-color: #b0b0b0 !important;
+  }
+  .swissTotalRow {
+    color: #555 !important;
+    opacity: 1 !important;
+  }
+  .swissGrandTotal {
+    border-top-color: $accent !important;
+    color: #111 !important;
+    opacity: 1 !important;
+  }
+
+  .swissFooter {
+    border-top-color: #d8d8d8 !important;
+  }
+  .swissThankYou {
+    color: $accent !important;
+  }
+  .swissSignatureLine {
+    color: #888 !important;
+    opacity: 1 !important;
+  }
+  .swissSignatureCaption {
+    color: #888 !important;
+    opacity: 1 !important;
+  }
 
   .swissParties,
   .swissTable tr,
