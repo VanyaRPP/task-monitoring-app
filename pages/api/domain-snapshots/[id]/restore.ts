@@ -37,9 +37,7 @@ async function restoreSnapshotHandler(
 
   const domain = await Domain.findById(snapshot.domainId)
   if (!domain) {
-    return res
-      .status(404)
-      .json({ success: false, message: 'domain not found' })
+    return res.status(404).json({ success: false, message: 'domain not found' })
   }
 
   domain.customServices = snapshot.groups.map((g) => ({

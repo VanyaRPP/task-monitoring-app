@@ -26,7 +26,7 @@ export default async function handler(
 
     const encryptionService = new EncryptionService(secretKey)
 
-    obj.domainBankToken = obj.domainBankToken.map(item => ({
+    obj.domainBankToken = obj.domainBankToken.map((item) => ({
       ...item,
       token: item.token || encryptionService.encrypt(item.shortToken),
       shortToken: hidePercentCharacters(item.shortToken),
@@ -55,12 +55,11 @@ export default async function handler(
           })
 
           if (!domain) {
-            return res
-              .status(403)
-              .json({
-                success: false,
-                message: 'Access denied: domain not found or you are not an admin of this domain',
-              })
+            return res.status(403).json({
+              success: false,
+              message:
+                'Access denied: domain not found or you are not an admin of this domain',
+            })
           }
         }
 
@@ -94,7 +93,10 @@ export default async function handler(
           if (!Array.isArray(incomingEmails) || !isValidEmail(incomingEmails)) {
             return res
               .status(400)
-              .json({ success: false, message: 'Invalid email address in adminEmails' })
+              .json({
+                success: false,
+                message: 'Invalid email address in adminEmails',
+              })
           }
         }
 
@@ -105,16 +107,18 @@ export default async function handler(
           })
 
           if (!domain) {
-            return res
-              .status(403)
-              .json({
-                success: false,
-                message: 'Access denied: domain not found or you are not an admin of this domain',
-              })
+            return res.status(403).json({
+              success: false,
+              message:
+                'Access denied: domain not found or you are not an admin of this domain',
+            })
           }
 
           const updatedObj = encryptDomainBankTokens(req.body, SECURE_TOKEN)
-          if (!updatedObj.adminEmails || !Array.isArray(updatedObj.adminEmails)) {
+          if (
+            !updatedObj.adminEmails ||
+            !Array.isArray(updatedObj.adminEmails)
+          ) {
             updatedObj.adminEmails = []
           }
           if (!updatedObj.adminEmails.includes(user.email)) {
@@ -155,12 +159,11 @@ export default async function handler(
           })
 
           if (!domain) {
-            return res
-              .status(403)
-              .json({
-                success: false,
-                message: 'Access denied: domain not found or you are not an admin of this domain',
-              })
+            return res.status(403).json({
+              success: false,
+              message:
+                'Access denied: domain not found or you are not an admin of this domain',
+            })
           }
 
           return res.status(200).json({ success: true, data: domain })

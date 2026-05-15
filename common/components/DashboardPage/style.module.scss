@@ -1,8 +1,8 @@
 .gridItem {
   position: relative;
-} 
+}
 .gridItem:hover::after {
-  content: "";
+  content: '';
   position: absolute;
   inset: 0;
   z-index: 1;
@@ -64,4 +64,3 @@
   margin-right: 25px;
   margin-top: 5px;
 }
-

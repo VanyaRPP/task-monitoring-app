@@ -1,20 +1,20 @@
-$navy:          #6b8cbe;
-$navy-dark:     #4a6fa5;
-$navy-dim:      rgba(74, 111, 165, 0.14);
-$navy-border:   rgba(74, 111, 165, 0.30);
+$navy: #6b8cbe;
+$navy-dark: #4a6fa5;
+$navy-dim: rgba(74, 111, 165, 0.14);
+$navy-border: rgba(74, 111, 165, 0.3);
 
-$ink:           rgba(255, 255, 255, 0.90);
-$ink-muted:     rgba(255, 255, 255, 0.50);
+$ink: rgba(255, 255, 255, 0.9);
+$ink-muted: rgba(255, 255, 255, 0.5);
 
-$rule:          rgba(255, 255, 255, 0.10);
-$rule-strong:   rgba(255, 255, 255, 0.20);
-$rule-accent:   rgba(74, 111, 165, 0.40);
+$rule: rgba(255, 255, 255, 0.1);
+$rule-strong: rgba(255, 255, 255, 0.2);
+$rule-accent: rgba(74, 111, 165, 0.4);
 
-$surface:       rgba(255, 255, 255, 0.02);
-$surface-card:  rgba(255, 255, 255, 0.04);
+$surface: rgba(255, 255, 255, 0.02);
+$surface-card: rgba(255, 255, 255, 0.04);
 
-$serif:  'Georgia', 'Cambria', 'Times New Roman', serif;
-$sans:   'Inter', 'Helvetica Neue', Arial, sans-serif;
+$serif: 'Georgia', 'Cambria', 'Times New Roman', serif;
+$sans: 'Inter', 'Helvetica Neue', Arial, sans-serif;
 
 .edInvoice {
   font-family: $sans;
@@ -113,10 +113,6 @@ $sans:   'Inter', 'Helvetica Neue', Arial, sans-serif;
   letter-spacing: -0.01em;
 }
 
-
-
-
-
 .edParties {
   display: grid;
   grid-template-columns: 1.2fr 1fr;
@@ -182,10 +178,6 @@ $sans:   'Inter', 'Helvetica Neue', Arial, sans-serif;
   color: $ink;
 }
 
-
-
-
-
 .edTable {
   width: 100%;
   border-collapse: collapse;
@@ -218,21 +210,28 @@ $sans:   'Inter', 'Helvetica Neue', Arial, sans-serif;
 
   tbody tr {
     transition: background 0.12s;
-    &:hover { background: $surface-card; }
-    &:last-child td { border-bottom: none; }
+    &:hover {
+      background: $surface-card;
+    }
+    &:last-child td {
+      border-bottom: none;
+    }
   }
 
-  th:nth-child(2), td:nth-child(2) {
+  th:nth-child(2),
+  td:nth-child(2) {
     width: 14%;
     text-align: right;
     font-variant-numeric: tabular-nums;
   }
-  th:nth-child(3), td:nth-child(3) {
+  th:nth-child(3),
+  td:nth-child(3) {
     width: 9%;
     text-align: right;
     font-variant-numeric: tabular-nums;
   }
-  th:nth-child(4), td:nth-child(4) {
+  th:nth-child(4),
+  td:nth-child(4) {
     width: 20%;
     text-align: right;
     white-space: nowrap;
@@ -240,10 +239,6 @@ $sans:   'Inter', 'Helvetica Neue', Arial, sans-serif;
     font-weight: 600;
   }
 }
-
-
-
-
 
 .edTotalsArea {
   display: flex;
@@ -293,8 +288,13 @@ $sans:   'Inter', 'Helvetica Neue', Arial, sans-serif;
   font-size: 0.85rem;
   border-bottom: 1px solid $rule;
 
-  span { color: $ink-muted; letter-spacing: 0.03em; }
-  &:last-of-type { border-bottom: none; }
+  span {
+    color: $ink-muted;
+    letter-spacing: 0.03em;
+  }
+  &:last-of-type {
+    border-bottom: none;
+  }
 }
 
 .edGrandTotal {
@@ -320,10 +320,6 @@ $sans:   'Inter', 'Helvetica Neue', Arial, sans-serif;
     color: $ink;
   }
 }
-
-
-
-
 
 .edFooter {
   margin-top: 3rem;
@@ -364,16 +360,12 @@ $sans:   'Inter', 'Helvetica Neue', Arial, sans-serif;
   color: $ink-muted;
 }
 
-
-
-
-
-$navy-l:         #3a5a8a;
-$navy-border-l:  rgba(58, 90, 138, 0.35);
-$rule-l:         rgba(0, 0, 0, 0.10);
-$rule-strong-l:  rgba(0, 0, 0, 0.18);
-$rule-accent-l:  rgba(58, 90, 138, 0.35);
-$surface-l:      rgba(0, 0, 0, 0.012);
+$navy-l: #3a5a8a;
+$navy-border-l: rgba(58, 90, 138, 0.35);
+$rule-l: rgba(0, 0, 0, 0.1);
+$rule-strong-l: rgba(0, 0, 0, 0.18);
+$rule-accent-l: rgba(58, 90, 138, 0.35);
+$surface-l: rgba(0, 0, 0, 0.012);
 $surface-card-l: rgba(0, 0, 0, 0.025);
 
 :global(:root[data-theme='light']) {
@@ -383,63 +375,115 @@ $surface-card-l: rgba(0, 0, 0, 0.025);
     color: #1a1a1a;
   }
 
-  .edHeader       { border-bottom-color: $rule-accent-l; }
-  .edBrandName    { color: #1a1a1a; }
-  .edBrandSub     { color: $navy-l; }
-  .edInvoiceTitle h1 { color: $navy-l; }
-  .edInvoiceNum   { color: rgba(0, 0, 0, 0.50); }
+  .edHeader {
+    border-bottom-color: $rule-accent-l;
+  }
+  .edBrandName {
+    color: #1a1a1a;
+  }
+  .edBrandSub {
+    color: $navy-l;
+  }
+  .edInvoiceTitle h1 {
+    color: $navy-l;
+  }
+  .edInvoiceNum {
+    color: rgba(0, 0, 0, 0.5);
+  }
 
-  .edMeta         { border-bottom-color: $rule-l; }
-  .edMetaLabel    { color: $navy-l; }
-  .edMetaValue    { color: #1a1a1a; }
+  .edMeta {
+    border-bottom-color: $rule-l;
+  }
+  .edMetaLabel {
+    color: $navy-l;
+  }
+  .edMetaValue {
+    color: #1a1a1a;
+  }
 
-  .edPartyLabel   { color: $navy-l; border-bottom-color: $rule-accent-l; }
-  .edPartyName    { color: #1a1a1a; }
-  .edPartyLine    { color: rgba(0, 0, 0, 0.55); }
+  .edPartyLabel {
+    color: $navy-l;
+    border-bottom-color: $rule-accent-l;
+  }
+  .edPartyName {
+    color: #1a1a1a;
+  }
+  .edPartyLine {
+    color: rgba(0, 0, 0, 0.55);
+  }
 
   .edBankBlock {
     border-color: $rule-l;
     border-left-color: $rule-accent-l;
     background: $surface-card-l;
   }
-  .edBankLine      { color: rgba(0, 0, 0, 0.55); }
-  .edBankLineLabel { color: #1a1a1a; }
+  .edBankLine {
+    color: rgba(0, 0, 0, 0.55);
+  }
+  .edBankLineLabel {
+    color: #1a1a1a;
+  }
 
   .edTable {
     thead tr {
       border-top-color: $rule-accent-l;
       border-bottom-color: $rule-accent-l;
     }
-    th  { color: $navy-l; }
-    td  { border-bottom-color: $rule-l; color: #1a1a1a; }
-    tbody tr:hover { background: $surface-card-l; }
+    th {
+      color: $navy-l;
+    }
+    td {
+      border-bottom-color: $rule-l;
+      color: #1a1a1a;
+    }
+    tbody tr:hover {
+      background: $surface-card-l;
+    }
   }
 
-  .edTotalsArea       { border-top-color: $rule-accent-l; }
-  .edPaymentNoteLabel { color: $navy-l; }
-  .edPaymentNoteText  { color: rgba(0, 0, 0, 0.55); }
+  .edTotalsArea {
+    border-top-color: $rule-accent-l;
+  }
+  .edPaymentNoteLabel {
+    color: $navy-l;
+  }
+  .edPaymentNoteText {
+    color: rgba(0, 0, 0, 0.55);
+  }
   .edTotalRow {
     border-bottom-color: $rule-l;
-    span { color: rgba(0, 0, 0, 0.50); }
+    span {
+      color: rgba(0, 0, 0, 0.5);
+    }
   }
   .edGrandTotal {
     border-top-color: $rule-accent-l !important;
-    span   { color: $navy-l; }
-    strong { color: #1a1a1a; }
+    span {
+      color: $navy-l;
+    }
+    strong {
+      color: #1a1a1a;
+    }
   }
 
-  .edFooter          { border-top-color: $rule-l; }
-  .edFooterNote      { color: $navy-l; }
-  .edSignatureLine   { color: rgba(0, 0, 0, 0.45); }
-  .edSignatureCaption { color: rgba(0, 0, 0, 0.45); }
+  .edFooter {
+    border-top-color: $rule-l;
+  }
+  .edFooterNote {
+    color: $navy-l;
+  }
+  .edSignatureLine {
+    color: rgba(0, 0, 0, 0.45);
+  }
+  .edSignatureCaption {
+    color: rgba(0, 0, 0, 0.45);
+  }
 }
 
-
-
-
-
 @media (max-width: 860px) {
-  .edInvoice { padding: 1.6rem 1.2rem; }
+  .edInvoice {
+    padding: 1.6rem 1.2rem;
+  }
 
   .edHeader {
     flex-direction: column;
@@ -447,14 +491,25 @@ $surface-card-l: rgba(0, 0, 0, 0.025);
     gap: 0.8rem;
   }
 
-  .edInvoiceTitle { text-align: left; }
-  .edInvoiceNum   { text-align: left; }
+  .edInvoiceTitle {
+    text-align: left;
+  }
+  .edInvoiceNum {
+    text-align: left;
+  }
 
-  .edMeta { flex-wrap: wrap; gap: 1.2rem; }
+  .edMeta {
+    flex-wrap: wrap;
+    gap: 1.2rem;
+  }
 
-  .edParties { grid-template-columns: 1fr; }
+  .edParties {
+    grid-template-columns: 1fr;
+  }
 
-  .edTotalsArea { flex-direction: column; }
+  .edTotalsArea {
+    flex-direction: column;
+  }
 
   .edTotalsBlock,
   .edPaymentNote {
@@ -463,12 +518,11 @@ $surface-card-l: rgba(0, 0, 0, 0.025);
   }
 }
 
-
-
-
-
 @media print {
-  @page { size: A4; margin: 14mm 16mm; }
+  @page {
+    size: A4;
+    margin: 14mm 16mm;
+  }
 
   .edInvoice {
     max-width: none !important;
@@ -489,23 +543,47 @@ $surface-card-l: rgba(0, 0, 0, 0.025);
     align-items: flex-end !important;
     border-bottom-color: #3a5a8a !important;
   }
-  .edInvoiceTitle { text-align: right !important; }
-  .edBrandName    { color: #111 !important; }
-  .edInvoiceTitle h1 { color: #3a5a8a !important; }
-  .edInvoiceNum   { color: #555 !important; text-align: right !important; }
-  .edBrandSub     { color: #3a5a8a !important; }
+  .edInvoiceTitle {
+    text-align: right !important;
+  }
+  .edBrandName {
+    color: #111 !important;
+  }
+  .edInvoiceTitle h1 {
+    color: #3a5a8a !important;
+  }
+  .edInvoiceNum {
+    color: #555 !important;
+    text-align: right !important;
+  }
+  .edBrandSub {
+    color: #3a5a8a !important;
+  }
 
   .edMeta {
     flex-wrap: nowrap !important;
     border-bottom-color: #d8d8d8 !important;
   }
-  .edMetaLabel    { color: #3a5a8a !important; }
-  .edMetaValue    { color: #111 !important; }
+  .edMetaLabel {
+    color: #3a5a8a !important;
+  }
+  .edMetaValue {
+    color: #111 !important;
+  }
 
-  .edParties      { grid-template-columns: 1.2fr 1fr !important; }
-  .edPartyLabel   { color: #3a5a8a !important; border-bottom-color: rgba(58,90,138,0.35) !important; }
-  .edPartyName    { color: #111 !important; }
-  .edPartyLine    { color: #555 !important; }
+  .edParties {
+    grid-template-columns: 1.2fr 1fr !important;
+  }
+  .edPartyLabel {
+    color: #3a5a8a !important;
+    border-bottom-color: rgba(58, 90, 138, 0.35) !important;
+  }
+  .edPartyName {
+    color: #111 !important;
+  }
+  .edPartyLine {
+    color: #555 !important;
+  }
 
   .edBankBlock {
     background: #f6f6f6 !important;
@@ -513,38 +591,73 @@ $surface-card-l: rgba(0, 0, 0, 0.025);
     border-left-color: #3a5a8a !important;
     border-radius: 6px !important;
   }
-  .edBankLine      { color: #555 !important; }
-  .edBankLineLabel { color: #111 !important; }
+  .edBankLine {
+    color: #555 !important;
+  }
+  .edBankLineLabel {
+    color: #111 !important;
+  }
 
   .edTable {
-    thead tr { border-color: #3a5a8a !important; }
-    th       { color: #3a5a8a !important; }
-    td       { border-bottom-color: #e0e0e0 !important; color: #111 !important; }
-    tbody tr:hover { background: transparent !important; }
+    thead tr {
+      border-color: #3a5a8a !important;
+    }
+    th {
+      color: #3a5a8a !important;
+    }
+    td {
+      border-bottom-color: #e0e0e0 !important;
+      color: #111 !important;
+    }
+    tbody tr:hover {
+      background: transparent !important;
+    }
   }
 
   .edTotalsArea {
     flex-direction: row !important;
     border-top-color: #3a5a8a !important;
   }
-  .edTotalsBlock     { min-width: 260px !important; }
-  .edPaymentNote     { max-width: 380px !important; }
-  .edPaymentNoteLabel { color: #3a5a8a !important; }
-  .edPaymentNoteText { color: #555 !important; }
+  .edTotalsBlock {
+    min-width: 260px !important;
+  }
+  .edPaymentNote {
+    max-width: 380px !important;
+  }
+  .edPaymentNoteLabel {
+    color: #3a5a8a !important;
+  }
+  .edPaymentNoteText {
+    color: #555 !important;
+  }
   .edTotalRow {
     border-bottom-color: #e0e0e0 !important;
-    span { color: #555 !important; }
+    span {
+      color: #555 !important;
+    }
   }
   .edGrandTotal {
     border-top-color: #3a5a8a !important;
-    span   { color: #3a5a8a !important; }
-    strong { color: #111 !important; }
+    span {
+      color: #3a5a8a !important;
+    }
+    strong {
+      color: #111 !important;
+    }
   }
 
-  .edFooter       { border-top-color: #d8d8d8 !important; }
-  .edFooterNote   { color: #3a5a8a !important; }
-  .edSignatureLine { color: #888 !important; }
-  .edSignatureCaption { color: #888 !important; }
+  .edFooter {
+    border-top-color: #d8d8d8 !important;
+  }
+  .edFooterNote {
+    color: #3a5a8a !important;
+  }
+  .edSignatureLine {
+    color: #888 !important;
+  }
+  .edSignatureCaption {
+    color: #888 !important;
+  }
 
   .edParties,
   .edTable tbody tr,

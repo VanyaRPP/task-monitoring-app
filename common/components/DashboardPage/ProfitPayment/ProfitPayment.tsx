@@ -26,8 +26,6 @@ const ProfitPayment: React.FC = () => {
     setIsModalOpen(false)
   }
 
-
-
   const { data: profitPayment, isLoading } = useGetCostPaymentQuery()
 
   const columns = [

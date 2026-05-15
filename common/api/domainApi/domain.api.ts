@@ -122,14 +122,15 @@ export const domainApi = createApi({
         data: IDomainTypeTemplate[]
       }) => response.data ?? [],
     }),
-    getDomainTypeTemplateById: builder.query<IDomainTypeTemplateWithUsage, string>({
+    getDomainTypeTemplateById: builder.query<
+      IDomainTypeTemplateWithUsage,
+      string
+    >({
       query: (id) => ({
         url: `domain-type-templates/${id}`,
         method: 'GET',
       }),
-      providesTags: (result, error, id) => [
-        { type: 'DomainTypeTemplate', id },
-      ],
+      providesTags: (result, error, id) => [{ type: 'DomainTypeTemplate', id }],
       transformResponse: (response: {
         success: boolean
         data: IDomainTypeTemplateWithUsage

@@ -1,6 +1,6 @@
 import { usePaymentContext } from '@components/AddPaymentModal'
 import { EditInvoicesTable_unstable } from '@components/Tables/EditInvoiceTable'
-import { IService } from '@common/api/serviceApi/service.api.types' 
+import { IService } from '@common/api/serviceApi/service.api.types'
 import { useEffect } from 'react'
 
 export interface PaymentPricesTableProps {

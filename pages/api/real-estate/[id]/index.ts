@@ -52,9 +52,7 @@ export default async function handler(
             const adminDomains = await Domain.find({
               adminEmails: { $in: [user.email] },
             })
-            const adminDomainIds = adminDomains?.map((d) =>
-              d._id.toString()
-            )
+            const adminDomainIds = adminDomains?.map((d) => d._id.toString())
 
             const currentRealEstate = await RealEstate.findById(req.query.id)
             if (!currentRealEstate) {

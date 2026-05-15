@@ -16,7 +16,9 @@ export const DOMAIN_TYPE_TEMPLATE_CATEGORY_OPTIONS: {
   value: DomainTypeTemplateCategory
   label: string
 }[] = (
-  Object.keys(DOMAIN_TYPE_TEMPLATE_CATEGORY_LABELS) as DomainTypeTemplateCategory[]
+  Object.keys(
+    DOMAIN_TYPE_TEMPLATE_CATEGORY_LABELS
+  ) as DomainTypeTemplateCategory[]
 ).map((value) => ({
   value,
   label: DOMAIN_TYPE_TEMPLATE_CATEGORY_LABELS[value],

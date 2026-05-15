@@ -1,6 +1,9 @@
 import { validateField } from '@assets/features/validators'
 import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
-import { useGetAllUsersQuery, useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+import {
+  useGetAllUsersQuery,
+  useGetCurrentUserQuery,
+} from '@common/api/userApi/user.api'
 import { Avatar, Form, Select, Tooltip } from 'antd'
 import type { CustomTagProps } from 'rc-select/lib/BaseSelect'
 import { useMemo } from 'react'
@@ -133,9 +136,7 @@ export default function EmailSelect({
     )
     if (isSelf) {
       return (
-        <Tooltip title="Неможливо видалити самого себе">
-          {tagContent}
-        </Tooltip>
+        <Tooltip title="Неможливо видалити самого себе">{tagContent}</Tooltip>
       )
     }
     return tagContent

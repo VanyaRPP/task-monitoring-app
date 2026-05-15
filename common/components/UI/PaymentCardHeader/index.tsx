@@ -48,7 +48,10 @@ import { shouldOpenModal } from '@utils/shouldOpenModal'
 import PaymentCardLabel from './PaymentCardLabel'
 import styles from './styles.module.scss'
 import ImportInvoicesModal from './ImportInvoices/ImportInvoicesModal'
-import { resolvePreselectedCompany, resolvePreselectedDomain } from './preselect'
+import {
+  resolvePreselectedCompany,
+  resolvePreselectedDomain,
+} from './preselect'
 const { useBreakpoint } = Grid
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 
@@ -118,8 +121,12 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
   const [deletePayment] = useDeleteMultiplePaymentsMutation()
   const [generateExcel] = useGenerateExcelMutation()
   const [htmlToPdfZip] = useHtmlToPdfZipMutation()
-  const [bulkPaymentsToRender, setBulkPaymentsToRender] = useState<IExtendedPayment[]>([])
-  const capturedHtmlMapRef = React.useRef<Map<string, { html: string; fileName: string }>>(new Map())
+  const [bulkPaymentsToRender, setBulkPaymentsToRender] = useState<
+    IExtendedPayment[]
+  >([])
+  const capturedHtmlMapRef = React.useRef<
+    Map<string, { html: string; fileName: string }>
+  >(new Map())
   const { token } = theme.useToken()
 
   const buildBulkFileName = (payment: IExtendedPayment): string => {
@@ -172,7 +179,11 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
     }
   }
 
-  const handleBulkCapture = (paymentId: string, fileName: string, html: string) => {
+  const handleBulkCapture = (
+    paymentId: string,
+    fileName: string,
+    html: string
+  ) => {
     capturedHtmlMapRef.current.set(paymentId, { html, fileName })
     if (capturedHtmlMapRef.current.size === bulkPaymentsToRender.length) {
       const items = bulkPaymentsToRender.map((p) => {
@@ -195,8 +206,6 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
     }
   }
 
- 
-
   const handleGeneratePdf = () => {
     if (!selectedPayments || selectedPayments.length === 0) return
     capturedHtmlMapRef.current = new Map()
@@ -204,16 +213,18 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
   }
 
   const menuActions: Record<string, () => void> = {
-    export:       handleExportExcel,
-    import:       () => setIsImportModalOpen(true),
-    invoices:     () => router.push(AppRoutes.PAYMENT_BULK),
-    add:          () => setIsModalOpen(true),
-    download:     handleGeneratePdf,
-    delete:       onDeleteClick,
-    bulkMarkPaid: () => onBulkMarkPaid?.(selectedPayments as IExtendedPayment[]),
+    export: handleExportExcel,
+    import: () => setIsImportModalOpen(true),
+    invoices: () => router.push(AppRoutes.PAYMENT_BULK),
+    add: () => setIsModalOpen(true),
+    download: handleGeneratePdf,
+    delete: onDeleteClick,
+    bulkMarkPaid: () =>
+      onBulkMarkPaid?.(selectedPayments as IExtendedPayment[]),
   }
 
-  const handleMenuClick: MenuProps['onClick'] = ({ key }) => menuActions[key]?.()
+  const handleMenuClick: MenuProps['onClick'] = ({ key }) =>
+    menuActions[key]?.()
 
   const selectedCompany = useMemo(
     () => resolvePreselectedCompany(filters?.company, realEstatesFilter),
@@ -242,15 +253,15 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
   )
 
   const allowedServices = useMemo(() => {
-  if (!payments?.data?.length) return undefined
-  const types = new Set<string>()
-  payments.data.forEach((payment: IExtendedPayment) => {
-    payment.invoice?.forEach((field) => {
-      if (field.type) types.add(field.type)
+    if (!payments?.data?.length) return undefined
+    const types = new Set<string>()
+    payments.data.forEach((payment: IExtendedPayment) => {
+      payment.invoice?.forEach((field) => {
+        if (field.type) types.add(field.type)
+      })
     })
-  })
-  return types
-}, [payments])
+    return types
+  }, [payments])
 
   const { preview, edit } = paymentActions
 
@@ -282,14 +293,56 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
   }
 
   const items: MenuProps['items'] = [
-    ...(infoTooltip ? [{ key: 'info', label: infoTooltip, icon: <InfoCircleOutlined />, disabled: true }] : []),
-    ...(isAdmin && pathname === AppRoutes.PAYMENT && selectedPayments.length > 0 ? [{ key: 'export', label: 'Export to Excel', icon: <ExportOutlined /> }] : []),
-    ...(isAdmin ? [{ key: 'import', label: 'Імпорт', icon: <ImportOutlined /> }] : []),
-    ...(isAdmin ? [{ key: 'invoices', label: 'Інвойси', icon: <SelectOutlined /> }] : []),
-    ...(isAdmin ? [{ key: 'add', label: 'Додати', icon: <PlusOutlined /> }] : []),
-    ...(isAdmin && pathname === AppRoutes.PAYMENT && selectedPayments.length > 0 ? [{ key: 'download', label: 'Завантажити рахунки', icon: <DownloadOutlined /> }] : []),
-    ...(isAdmin && pathname === AppRoutes.PAYMENT && canBulkMarkPaid ? [{ key: 'bulkMarkPaid', label: 'Позначити оплати', icon: <CheckOutlined /> }] : []),
-    ...(isAdmin && pathname === AppRoutes.PAYMENT && selectedPayments.length > 0 ? [{ key: 'delete', label: 'Видалити', icon: <DeleteOutlined />, danger: true }] : []),
+    ...(infoTooltip
+      ? [
+          {
+            key: 'info',
+            label: infoTooltip,
+            icon: <InfoCircleOutlined />,
+            disabled: true,
+          },
+        ]
+      : []),
+    ...(isAdmin && pathname === AppRoutes.PAYMENT && selectedPayments.length > 0
+      ? [{ key: 'export', label: 'Export to Excel', icon: <ExportOutlined /> }]
+      : []),
+    ...(isAdmin
+      ? [{ key: 'import', label: 'Імпорт', icon: <ImportOutlined /> }]
+      : []),
+    ...(isAdmin
+      ? [{ key: 'invoices', label: 'Інвойси', icon: <SelectOutlined /> }]
+      : []),
+    ...(isAdmin
+      ? [{ key: 'add', label: 'Додати', icon: <PlusOutlined /> }]
+      : []),
+    ...(isAdmin && pathname === AppRoutes.PAYMENT && selectedPayments.length > 0
+      ? [
+          {
+            key: 'download',
+            label: 'Завантажити рахунки',
+            icon: <DownloadOutlined />,
+          },
+        ]
+      : []),
+    ...(isAdmin && pathname === AppRoutes.PAYMENT && canBulkMarkPaid
+      ? [
+          {
+            key: 'bulkMarkPaid',
+            label: 'Позначити оплати',
+            icon: <CheckOutlined />,
+          },
+        ]
+      : []),
+    ...(isAdmin && pathname === AppRoutes.PAYMENT && selectedPayments.length > 0
+      ? [
+          {
+            key: 'delete',
+            label: 'Видалити',
+            icon: <DeleteOutlined />,
+            danger: true,
+          },
+        ]
+      : []),
   ]
 
   const dashboardItems: MenuProps['items'] = [
@@ -301,7 +354,11 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
   if (isDashboard) {
     return (
       <>
-        <Flex justify="space-between" align="center" style={{ margin: 0, width: '100%' }}>
+        <Flex
+          justify="space-between"
+          align="center"
+          style={{ margin: 0, width: '100%' }}
+        >
           <Button type="link" onClick={() => router.push(AppRoutes.PAYMENT)}>
             Платежі
             <SelectOutlined />
@@ -315,7 +372,11 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
             <Tooltip title="Додаткові дії">
               <Button
                 type="text"
-                icon={<MoreOutlined style={{ color: token.colorText, fontSize: 18 }} />}
+                icon={
+                  <MoreOutlined
+                    style={{ color: token.colorText, fontSize: 18 }}
+                  />
+                }
                 style={{
                   padding: 8,
                   minWidth: 40,
@@ -344,7 +405,11 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
 
   return (
     <>
-      <Flex justify="space-between" align="center" style={{ marginBottom: 10, marginTop: 10, width: '100%' }}>
+      <Flex
+        justify="space-between"
+        align="center"
+        style={{ marginBottom: 10, marginTop: 10, width: '100%' }}
+      >
         <div style={{ flex: 1, minWidth: 0 }}>
           <PaymentCardLabel
             enablePaymentsButton={enablePaymentsButton}
@@ -370,7 +435,11 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
             <Tooltip title="Додаткові дії">
               <Button
                 type="text"
-                icon={<MoreOutlined style={{ color: token.colorText, fontSize: 18 }} />}
+                icon={
+                  <MoreOutlined
+                    style={{ color: token.colorText, fontSize: 18 }}
+                  />
+                }
                 style={{
                   padding: 8,
                   minWidth: 40,
@@ -385,19 +454,25 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
       </Flex>
       {shouldOpenModal(isModalOpen, currentPayment, paymentActions) && (
         <AddPaymentModal
-          paymentActions={!isAdmin ? { edit: false, preview: true } : paymentActions}
+          paymentActions={
+            !isAdmin ? { edit: false, preview: true } : paymentActions
+          }
           paymentData={currentPayment}
           preselectedCompany={selectedCompany}
           preselectedDomain={selectedDomain}
           closeModal={closeModal}
         />
       )}
-      {isImportModalOpen && <ImportInvoicesModal closeModal={() => setIsImportModalOpen(false)} />}
+      {isImportModalOpen && (
+        <ImportInvoicesModal closeModal={() => setIsImportModalOpen(false)} />
+      )}
       {bulkPaymentsToRender.map((p) => (
         <HeadlessReceiptRenderer
           key={p._id}
           payment={p}
-          onCapture={(html) => handleBulkCapture(p._id, buildBulkFileName(p), html)}
+          onCapture={(html) =>
+            handleBulkCapture(p._id, buildBulkFileName(p), html)
+          }
           onError={(err) => {
             // eslint-disable-next-line no-console
             console.error('Bulk render failed for', p._id, err)
@@ -416,7 +491,11 @@ interface ColumnSelectProps {
   allowedServices?: Set<string>
 }
 
-const ColumnSelect: React.FC<ColumnSelectProps> = ({ onSelect, allowedServices, ...props }) => {
+const ColumnSelect: React.FC<ColumnSelectProps> = ({
+  onSelect,
+  allowedServices,
+  ...props
+}) => {
   const [selected, setSelected] = useState<string[]>([])
   const [filterByAvailable, setFilterByAvailable] = useState(true)
 
@@ -434,8 +513,10 @@ const ColumnSelect: React.FC<ColumnSelectProps> = ({ onSelect, allowedServices, 
 
   const handleCheckAll = () => {
     const allFiltered = filteredEntries.map(([value]) => value)
-    if (selected.length === allFiltered.length &&
-        allFiltered.every(v => selected.includes(v))) {
+    if (
+      selected.length === allFiltered.length &&
+      allFiltered.every((v) => selected.includes(v))
+    ) {
       setSelected([])
       localStorage.setItem('payments_columns', JSON.stringify([]))
     } else {
@@ -446,7 +527,7 @@ const ColumnSelect: React.FC<ColumnSelectProps> = ({ onSelect, allowedServices, 
 
   useEffect(() => {
     if (filterByAvailable && allowedServices) {
-      const filtered = selected.filter(s => allowedServices.has(s))
+      const filtered = selected.filter((s) => allowedServices.has(s))
       if (filtered.length !== selected.length) {
         setSelected(filtered)
         localStorage.setItem('payments_columns', JSON.stringify(filtered))
@@ -455,15 +536,15 @@ const ColumnSelect: React.FC<ColumnSelectProps> = ({ onSelect, allowedServices, 
   }, [filterByAvailable, allowedServices])
 
   useEffect(() => {
-  if (!allowedServices || !filterByAvailable) return
-  
-  const allAvailable = Object.entries(ServiceName)
-    .filter(([value]) => allowedServices.has(value))
-    .map(([value]) => value)
+    if (!allowedServices || !filterByAvailable) return
 
-  setSelected(allAvailable)
-  localStorage.setItem('payments_columns', JSON.stringify(allAvailable))
-}, [allowedServices])
+    const allAvailable = Object.entries(ServiceName)
+      .filter(([value]) => allowedServices.has(value))
+      .map(([value]) => value)
+
+    setSelected(allAvailable)
+    localStorage.setItem('payments_columns', JSON.stringify(allAvailable))
+  }, [allowedServices])
 
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem('payments_columns') ?? '[]')
@@ -475,37 +556,38 @@ const ColumnSelect: React.FC<ColumnSelectProps> = ({ onSelect, allowedServices, 
   }, [])
 
   useEffect(() => {
-  if (!allowedServices || !filterByAvailable) return
+    if (!allowedServices || !filterByAvailable) return
 
-  const saved = JSON.parse(localStorage.getItem('payments_columns') ?? '[]')
+    const saved = JSON.parse(localStorage.getItem('payments_columns') ?? '[]')
 
-  if (saved.length > 0) return
+    if (saved.length > 0) return
 
-  const allAvailable = Object.entries(ServiceName)
-    .filter(([value]) => allowedServices.has(value))
-    .map(([value]) => value)
+    const allAvailable = Object.entries(ServiceName)
+      .filter(([value]) => allowedServices.has(value))
+      .map(([value]) => value)
 
-  setSelected(allAvailable)
-  localStorage.setItem('payments_columns', JSON.stringify(allAvailable))
-}, [allowedServices])
+    setSelected(allAvailable)
+    localStorage.setItem('payments_columns', JSON.stringify(allAvailable))
+  }, [allowedServices])
 
   useEffect(() => {
     onSelect?.(selected)
   }, [onSelect, selected])
 
   const allFiltered = filteredEntries.map(([value]) => value)
-  const isAllChecked = allFiltered.length > 0 &&
-    allFiltered.every(v => selected.includes(v))
-  const isIndeterminate = selected.some(s => allFiltered.includes(s)) && !isAllChecked
+  const isAllChecked =
+    allFiltered.length > 0 && allFiltered.every((v) => selected.includes(v))
+  const isIndeterminate =
+    selected.some((s) => allFiltered.includes(s)) && !isAllChecked
 
   const options: SelectProps['options'] = [
     {
       label: (
         <div>
-        <Checkbox
-          checked={filterByAvailable}
-          onChange={(e) => setFilterByAvailable(e.target.checked)}
-          onClick={(e) => e.stopPropagation()}
+          <Checkbox
+            checked={filterByAvailable}
+            onChange={(e) => setFilterByAvailable(e.target.checked)}
+            onClick={(e) => e.stopPropagation()}
           >
             <Typography.Text type="secondary">Доступні сервіси</Typography.Text>
           </Checkbox>
@@ -518,11 +600,11 @@ const ColumnSelect: React.FC<ColumnSelectProps> = ({ onSelect, allowedServices, 
             indeterminate={isIndeterminate}
             checked={isAllChecked}
           >
-          <Typography.Text type="secondary">Комунальні</Typography.Text>
-        </Checkbox>
+            <Typography.Text type="secondary">Комунальні</Typography.Text>
+          </Checkbox>
         </div>
       ),
-      options: filteredEntries.map(([value, label]) => ({ 
+      options: filteredEntries.map(([value, label]) => ({
         value,
         label,
       })),

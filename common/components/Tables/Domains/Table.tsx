@@ -113,14 +113,16 @@ const getDefaultColumns = (
     title: 'Опис',
     dataIndex: 'description',
     width: 100,
-     render: (text) => (
-    <Tooltip
-      title={<div style={{ whiteSpace: 'pre-line', maxWidth: 300 }}>{text}</div>}
-      overlayStyle={{ maxWidth: 800 }}
-    >
-      <QuestionCircleOutlined />
-    </Tooltip>
-  ),
+    render: (text) => (
+      <Tooltip
+        title={
+          <div style={{ whiteSpace: 'pre-line', maxWidth: 300 }}>{text}</div>
+        }
+        overlayStyle={{ maxWidth: 800 }}
+      >
+        <QuestionCircleOutlined />
+      </Tooltip>
+    ),
   },
   {
     align: 'center',

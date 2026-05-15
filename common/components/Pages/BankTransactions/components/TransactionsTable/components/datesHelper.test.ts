@@ -1,9 +1,18 @@
 import dayjs from 'dayjs'
-import { getRollingServices, formatDate, toDate, parseDate } from './datesHelper'
+import {
+  getRollingServices,
+  formatDate,
+  toDate,
+  parseDate,
+} from './datesHelper'
 
-jest.mock('@common/components/Forms/AddPaymentForm/month-service-placeholder', () => ({
-  buildMonthServicePlaceholder: (date: any) => `placeholder-${date.format('YYYY-MM')}`,
-}))
+jest.mock(
+  '@common/components/Forms/AddPaymentForm/month-service-placeholder',
+  () => ({
+    buildMonthServicePlaceholder: (date: any) =>
+      `placeholder-${date.format('YYYY-MM')}`,
+  })
+)
 
 describe('getRollingServices', () => {
   beforeAll(() => {
@@ -16,9 +25,9 @@ describe('getRollingServices', () => {
 
   it('should return existing services and fill gaps with placeholders', () => {
     const existingServices = [
-      { _id: 'svc-march', date: '2024-03-01T00:00:00.000Z' }
+      { _id: 'svc-march', date: '2024-03-01T00:00:00.000Z' },
     ]
-    
+
     const result = getRollingServices(existingServices, 2)
 
     expect(result).toHaveLength(3)
@@ -29,7 +38,7 @@ describe('getRollingServices', () => {
 
   it('should prioritize real services over placeholders for the same month', () => {
     const existingServices = [
-      { _id: 'real-id', date: '2024-03-10T10:00:00.000Z' }
+      { _id: 'real-id', date: '2024-03-10T10:00:00.000Z' },
     ]
     const result = getRollingServices(existingServices, 1)
     expect(result[0]._id).toBe('real-id')
@@ -38,7 +47,7 @@ describe('getRollingServices', () => {
   it('should sort services in descending order by date', () => {
     const services = [
       { _id: 'old', date: '2024-01-01T00:00:00.000Z' },
-      { _id: 'new', date: '2024-03-01T00:00:00.000Z' }
+      { _id: 'new', date: '2024-03-01T00:00:00.000Z' },
     ]
     const result = getRollingServices(services, 0)
     expect(result[0]._id).toBe('new')

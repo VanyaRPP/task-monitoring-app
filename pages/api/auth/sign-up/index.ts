@@ -12,7 +12,9 @@ export default async function handler(
   res: NextApiResponse<Data>
 ) {
   if (req.method !== 'POST') {
-    return res.status(405).json({ success: false, message: 'Method not allowed' })
+    return res
+      .status(405)
+      .json({ success: false, message: 'Method not allowed' })
   }
 
   const { name, email, password } = req.body as {
@@ -55,6 +57,9 @@ export default async function handler(
   } catch (error) {
     return res
       .status(400)
-      .json({ success: false, message: (error as Error)?.message ?? 'Sign-up failed' })
+      .json({
+        success: false,
+        message: (error as Error)?.message ?? 'Sign-up failed',
+      })
   }
 }

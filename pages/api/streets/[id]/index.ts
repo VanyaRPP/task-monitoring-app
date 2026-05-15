@@ -17,7 +17,9 @@ export default async function handler(
   )
 
   if (!isAdmin) {
-    return res.status(403).json({ success: false, message: 'Access denied: not an admin' })
+    return res
+      .status(403)
+      .json({ success: false, message: 'Access denied: not an admin' })
   }
 
   switch (req.method) {
@@ -31,12 +33,11 @@ export default async function handler(
           })
 
           if (!adminDomains.length) {
-            return res
-              .status(403)
-              .json({
-                success: false,
-                message: 'Access denied: street not found or you are not an admin of this street',
-              })
+            return res.status(403).json({
+              success: false,
+              message:
+                'Access denied: street not found or you are not an admin of this street',
+            })
           }
         }
 
@@ -66,12 +67,11 @@ export default async function handler(
           })
 
           if (!adminDomains.length) {
-            return res
-              .status(403)
-              .json({
-                success: false,
-                message: 'Access denied: street not found or you are not an admin of this street',
-              })
+            return res.status(403).json({
+              success: false,
+              message:
+                'Access denied: street not found or you are not an admin of this street',
+            })
           }
         }
 

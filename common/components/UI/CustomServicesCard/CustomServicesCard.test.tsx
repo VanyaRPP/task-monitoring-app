@@ -13,7 +13,8 @@ jest.mock('@utils/helpers', () => ({
   inputNumberParser: jest.fn((v) => v),
 }))
 
-const mockUseGetCurrentUserQuery = require('@common/api/userApi/user.api').useGetCurrentUserQuery as jest.Mock
+const mockUseGetCurrentUserQuery = require('@common/api/userApi/user.api')
+  .useGetCurrentUserQuery as jest.Mock
 const useWatchSpy = jest.spyOn(Form, 'useWatch')
 
 const ALL_CUSTOM_SERVICES = [

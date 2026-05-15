@@ -1,9 +1,9 @@
-import { useEffect } from "react"
+import { useEffect } from 'react'
 import { Form, InputNumber } from 'antd'
-import { ServiceType } from "@utils/constants"
-import { useInvoicesPaymentContext } from "@components/DashboardPage/blocks/paymentsBulk"
-import validator from "@utils/validator"
-import { toRoundFixed, inputNumberParser } from "@utils/helpers"
+import { ServiceType } from '@utils/constants'
+import { useInvoicesPaymentContext } from '@components/DashboardPage/blocks/paymentsBulk'
+import validator from '@utils/validator'
+import { toRoundFixed, inputNumberParser } from '@utils/helpers'
 
 export const Discount: React.FC<{ name: number }> = ({ name }) => {
   const { form } = useInvoicesPaymentContext()

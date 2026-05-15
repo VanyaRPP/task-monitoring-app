@@ -28,5 +28,4 @@ describe('formatDebt', () => {
   test('throws error when amount is undefined', () => {
     expect(() => formatDebt(undefined as any)).toThrow()
   })
-
 })

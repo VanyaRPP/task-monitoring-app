@@ -34,7 +34,12 @@ describe('usePermissions', () => {
       isLoading: true,
     })
 
-    const dummyUser = { name: 'dummy', email: 'a@a.com', roles: [], isWorker: true }
+    const dummyUser = {
+      name: 'dummy',
+      email: 'a@a.com',
+      roles: [],
+      isWorker: true,
+    }
 
     const result = usePermissions(dummyUser as any)
 
@@ -65,7 +70,12 @@ describe('usePermissions', () => {
       isLoading: false,
     })
 
-    const dummyUser = { name: 'dummy', email: 'b@b.com', roles: [], isWorker: true }
+    const dummyUser = {
+      name: 'dummy',
+      email: 'b@b.com',
+      roles: [],
+      isWorker: true,
+    }
 
     const result = usePermissions(dummyUser as any)
 

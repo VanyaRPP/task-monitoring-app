@@ -113,9 +113,11 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
     currUserRoles,
   } = statusProps
 
-  const { filters, setFilters, domainsFilter, companiesFilter, dateFilters } = filterProps
+  const { filters, setFilters, domainsFilter, companiesFilter, dateFilters } =
+    filterProps
   const { pageData, handlePagination } = paginationProps
-  const { onViewClick, onEditClick, onDelete, onMarkPaid, deleteLoading } = actionProps
+  const { onViewClick, onEditClick, onDelete, onMarkPaid, deleteLoading } =
+    actionProps
   const { debtorCompanies } = debtProps
   const { selectedColumns } = columnSelectionProps
   const { handleTableChange } = tableEventProps
@@ -145,7 +147,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
   })
 
   const visibleColumns = (allColumns as ColumnType<IExtendedPayment>[]).filter(
-    col => !(col as any).hidden
+    (col) => !(col as any).hidden
   )
 
   const hasRowSelection =
@@ -156,17 +158,19 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
     return <Alert message="Помилка" type="error" showIcon closable />
   }
 
-const rowSelection = hasRowSelection
+  const rowSelection = hasRowSelection
     ? {
         columnWidth: 28,
-        selectedRowKeys: selectedPayments.map(i => i._id),
+        selectedRowKeys: selectedPayments.map((i) => i._id),
         preserveSelectedRowKeys: true,
         onChange: (_keys: React.Key[], rows: IExtendedPayment[]) => {
           onSelectPayments(rows)
           onSetDeleteItems(
-            rows.map(item => ({
+            rows.map((item) => ({
               id: item._id,
-              date: item.invoiceCreationDate ? String(item.invoiceCreationDate) : '',
+              date: item.invoiceCreationDate
+                ? String(item.invoiceCreationDate)
+                : '',
               domain: (item.domain as any)?.name || '',
               company: (item.company as any)?.companyName || '',
             }))
@@ -179,14 +183,20 @@ const rowSelection = hasRowSelection
               ...paymentsDeleteItems,
               {
                 id: record._id,
-                date: record.invoiceCreationDate ? String(record.invoiceCreationDate) : '',
+                date: record.invoiceCreationDate
+                  ? String(record.invoiceCreationDate)
+                  : '',
                 domain: (record.domain as any)?.name || '',
                 company: (record.company as any)?.companyName || '',
               },
             ])
           } else {
-            onSelectPayments(selectedPayments.filter(p => p._id !== record._id))
-            onSetDeleteItems(paymentsDeleteItems.filter(i => i.id !== record._id))
+            onSelectPayments(
+              selectedPayments.filter((p) => p._id !== record._id)
+            )
+            onSetDeleteItems(
+              paymentsDeleteItems.filter((i) => i.id !== record._id)
+            )
           }
         },
       }
@@ -213,7 +223,9 @@ const rowSelection = hasRowSelection
       }
       scroll={{
         x:
-          (pathname === AppRoutes.PAYMENT ? 1300 + selectedColumns.length * 132 : 1300) -
+          (pathname === AppRoutes.PAYMENT
+            ? 1300 + selectedColumns.length * 132
+            : 1300) -
           (payments?.domainsFilter?.length <= 1 ? 200 : 0) -
           (payments?.realEstatesFilter?.length <= 1 ? 200 : 0),
       }}
@@ -226,7 +238,12 @@ const rowSelection = hasRowSelection
       )}
       bordered
       locale={{ emptyText: <Empty description="No Data" /> }}
-      loading={currUserLoading || currUserFetching || paymentsLoading || paymentsFetching}
+      loading={
+        currUserLoading ||
+        currUserFetching ||
+        paymentsLoading ||
+        paymentsFetching
+      }
     />
   )
 }

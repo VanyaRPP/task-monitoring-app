@@ -5,11 +5,7 @@ import {
   useGetDomainTypeTemplatesQuery,
 } from '@common/api/domainApi/domain.api'
 import { IDomainTypeTemplate } from '@common/api/domainApi/domain.api.types'
-import {
-  DeleteOutlined,
-  EditOutlined,
-  PlusOutlined,
-} from '@ant-design/icons'
+import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons'
 import {
   Button,
   Flex,

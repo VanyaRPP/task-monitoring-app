@@ -37,10 +37,7 @@ const MonthServiceSelect: React.FC<MonthServiceSelectProps> = ({
   )
 
   const options = useMemo(() => {
-    const byMonthKey = new Map<
-      string,
-      { value: string; label: string }
-    >()
+    const byMonthKey = new Map<string, { value: string; label: string }>()
 
     for (const svc of services ?? []) {
       const key = dayjs(svc.date).startOf('month').format('YYYY-MM')
@@ -97,11 +94,7 @@ const MonthServiceSelect: React.FC<MonthServiceSelectProps> = ({
         placeholder="Місяць"
         status={isServicesError ? 'error' : undefined}
         loading={isServicesLoading}
-        disabled={
-          isServicesLoading || 
-          !streetId || 
-          !domainId
-        }
+        disabled={isServicesLoading || !streetId || !domainId}
         allowClear
         showSearch
       />

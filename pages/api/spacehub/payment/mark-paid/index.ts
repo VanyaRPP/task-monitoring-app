@@ -78,10 +78,7 @@ export default async function handler(
         skippedIds.push(source._id.toString())
         continue
       }
-      if (
-        allowedDomainIds &&
-        !allowedDomainIds.has(source.domain.toString())
-      ) {
+      if (allowedDomainIds && !allowedDomainIds.has(source.domain.toString())) {
         skippedIds.push(source._id.toString())
         continue
       }

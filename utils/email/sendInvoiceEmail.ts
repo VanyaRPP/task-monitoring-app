@@ -21,8 +21,7 @@ export interface InvoiceEmailPayment {
 
 function isEmailDebugEnabled() {
   return (
-    process.env.EMAIL_DEBUG === 'true' ||
-    process.env.NODE_ENV === 'development'
+    process.env.EMAIL_DEBUG === 'true' || process.env.NODE_ENV === 'development'
   )
 }
 

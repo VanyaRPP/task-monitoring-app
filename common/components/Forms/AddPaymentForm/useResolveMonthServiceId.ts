@@ -1,4 +1,7 @@
-import { serviceApi, useAddServiceMutation } from '@common/api/serviceApi/service.api'
+import {
+  serviceApi,
+  useAddServiceMutation,
+} from '@common/api/serviceApi/service.api'
 import {
   isMonthServicePlaceholder,
   parseMonthServicePlaceholder,

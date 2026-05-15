@@ -6,17 +6,17 @@ import Head from 'next/head'
 export default function TablesPage() {
   return (
     <>
-    <Head>
-      <title>Всі таблиці</title>
-    </Head>
-    <MainLayout
-      path={[
-        { title: 'Панель управління', path: AppRoutes.INDEX },
-        { title: 'Всі таблиці', path: AppRoutes.TABLES },
-      ]}
-    >
-      <DashboardPage />
-    </MainLayout>
+      <Head>
+        <title>Всі таблиці</title>
+      </Head>
+      <MainLayout
+        path={[
+          { title: 'Панель управління', path: AppRoutes.INDEX },
+          { title: 'Всі таблиці', path: AppRoutes.TABLES },
+        ]}
+      >
+        <DashboardPage />
+      </MainLayout>
     </>
   )
 }

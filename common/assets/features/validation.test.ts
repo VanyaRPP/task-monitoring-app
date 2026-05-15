@@ -68,6 +68,8 @@ describe('isValidEmail', () => {
   test('validates an array of emails', () => {
     expect(isValidEmail(['a@x.com', 'b@y.io'])).toBeTruthy()
     expect(isValidEmail(['a@x.com', 'broken'])).toBeFalsy()
-    expect(isValidEmail(['a@x.com', undefined as unknown as string])).toBeFalsy()
+    expect(
+      isValidEmail(['a@x.com', undefined as unknown as string])
+    ).toBeFalsy()
   })
 })

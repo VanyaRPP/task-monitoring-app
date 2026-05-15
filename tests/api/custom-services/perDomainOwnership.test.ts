@@ -196,7 +196,8 @@ describe('GET /api/custom-services — per-domain filter', () => {
     expect(filter.$or).toBeDefined()
     expect(Array.isArray(filter.$or)).toBe(true)
     const ownedClause = filter.$or.find(
-      (clause: any) => clause.domain && !clause.domain.$in && !clause.domain.$exists
+      (clause: any) =>
+        clause.domain && !clause.domain.$in && !clause.domain.$exists
     )
     expect(ownedClause).toBeDefined()
     expect(String(ownedClause.domain)).toBe(VALID_DOMAIN)

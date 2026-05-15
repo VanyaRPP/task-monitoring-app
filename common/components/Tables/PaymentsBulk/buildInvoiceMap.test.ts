@@ -51,8 +51,9 @@ const allowedServices = [
   { _id: customKompot._id, fieldName: 'kompot', name: 'Компот' },
 ]
 
-
-const simulateBulkSavedInvoice = (invoiceMap: Record<string, IPaymentField>) => {
+const simulateBulkSavedInvoice = (
+  invoiceMap: Record<string, IPaymentField>
+) => {
   const list = Object.values(invoiceMap).filter(({ sum }) => sum)
   return invoiceCSFilter(list)
 }
@@ -70,7 +71,10 @@ const simulateSingleSavedInvoice = (
 
 describe('buildBulkInvoiceMap', () => {
   it('does not duplicate custom services under both name and fieldName', () => {
-    const all = getInvoices({ company: baseCompany as any, service: baseService as any })
+    const all = getInvoices({
+      company: baseCompany as any,
+      service: baseService as any,
+    })
     const filtered = serviceFilter(all, allowedServices as any)
 
     const map = buildBulkInvoiceMap(all, filtered)
@@ -116,10 +120,15 @@ describe('buildBulkInvoiceMap', () => {
 
 describe('bulk vs single saved invoice equivalence', () => {
   it('produces the same custom-service rows as the single-invoice modal', () => {
-    const all = getInvoices({ company: baseCompany as any, service: baseService as any })
+    const all = getInvoices({
+      company: baseCompany as any,
+      service: baseService as any,
+    })
     const filtered = serviceFilter(all, allowedServices as any)
 
-    const bulkSaved = simulateBulkSavedInvoice(buildBulkInvoiceMap(all, filtered))
+    const bulkSaved = simulateBulkSavedInvoice(
+      buildBulkInvoiceMap(all, filtered)
+    )
     const singleSaved = simulateSingleSavedInvoice(baseCompany, baseService)
 
     const stripById = (rows: IPaymentField[]) =>
@@ -138,10 +147,15 @@ describe('bulk vs single saved invoice equivalence', () => {
   })
 
   it('regression: total of saved invoices does not double for custom services', () => {
-    const all = getInvoices({ company: baseCompany as any, service: baseService as any })
+    const all = getInvoices({
+      company: baseCompany as any,
+      service: baseService as any,
+    })
     const filtered = serviceFilter(all, allowedServices as any)
 
-    const bulkSaved = simulateBulkSavedInvoice(buildBulkInvoiceMap(all, filtered))
+    const bulkSaved = simulateBulkSavedInvoice(
+      buildBulkInvoiceMap(all, filtered)
+    )
     const total = bulkSaved.reduce((acc, inv) => acc + (+inv.sum || 0), 0)
 
     expect(total).toBe(15)

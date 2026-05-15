@@ -23,8 +23,7 @@ import ProfitService from '@common/services/profitService/profit.service'
 
 function isEmailDebugEnabled() {
   return (
-    process.env.EMAIL_DEBUG === 'true' ||
-    process.env.NODE_ENV === 'development'
+    process.env.EMAIL_DEBUG === 'true' || process.env.NODE_ENV === 'development'
   )
 }
 
@@ -280,10 +279,9 @@ export async function createPayment(body: any, isAdmin: boolean) {
         domainId: payment.domain?.toString?.() || 'unknown',
       })
 
-      const paymentSnapshot =
-        (typeof payment.toObject === 'function'
-          ? payment.toObject()
-          : payment) as InvoiceEmailPayment
+      const paymentSnapshot = (
+        typeof payment.toObject === 'function' ? payment.toObject() : payment
+      ) as InvoiceEmailPayment
       const currentReceiver = paymentSnapshot.reciever || {}
       const shouldLoadDomainData =
         !currentReceiver.companyName ||
@@ -298,10 +296,9 @@ export async function createPayment(body: any, isAdmin: boolean) {
 
       paymentSnapshot.reciever = {
         companyName: currentReceiver.companyName || domain?.name || 'invoice',
-        adminEmails:
-          currentReceiver.adminEmails?.length
-            ? currentReceiver.adminEmails
-            : domain?.adminEmails || [],
+        adminEmails: currentReceiver.adminEmails?.length
+          ? currentReceiver.adminEmails
+          : domain?.adminEmails || [],
         description: currentReceiver.description || domain?.description || '',
       }
 

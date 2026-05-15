@@ -181,9 +181,7 @@ export const InvoiceSelector: React.FC<{
   excludeKeys?: string[]
   onSelect?: (payload: IInvoiceLineAddPayload) => void
 }> = ({ service, excludeKeys, onSelect }) => {
-  const domainId = service?.domain?._id
-    ? String(service.domain._id)
-    : undefined
+  const domainId = service?.domain?._id ? String(service.domain._id) : undefined
 
   const { data: catalogRes, isLoading } = useGetCustomServicesByDomainQuery(
     { domainId: domainId ? [domainId] : undefined },
@@ -194,9 +192,9 @@ export const InvoiceSelector: React.FC<{
     if (!domainId) return []
     const groups = catalogRes?.data ?? []
     const rows = flattenDomainCatalogServices(groups)
-    const catalogOptions = rows.map(catalogRowToSelectOption).filter(
-      (opt) => !excludeKeys?.includes(opt.value)
-    )
+    const catalogOptions = rows
+      .map(catalogRowToSelectOption)
+      .filter((opt) => !excludeKeys?.includes(opt.value))
     const customOption = {
       value: ServiceType.Custom,
       label: 'Власне',
@@ -236,9 +234,7 @@ export const InvoiceSelector: React.FC<{
       showSearch
       optionFilterProp="label"
       notFoundContent={
-        domainId && !isLoading
-          ? 'У групах домену немає послуг'
-          : undefined
+        domainId && !isLoading ? 'У групах домену немає послуг' : undefined
       }
     />
   )
@@ -286,9 +282,13 @@ const COLUMN_TO_SLOT: Record<ColumnKey, 'Name' | 'Amount' | 'Price' | 'Sum'> = {
   sum: 'Sum',
 }
 
-const Component: React.FC<
-  InvoiceComponentProps & { type: ColumnKey }
-> = ({ form, name, type, record, ...props }) => {
+const Component: React.FC<InvoiceComponentProps & { type: ColumnKey }> = ({
+  form,
+  name,
+  type,
+  record,
+  ...props
+}) => {
   if (!record) return null
 
   const components =
