@@ -24,13 +24,17 @@ type PropsType = {
   csrfToken: string | undefined
 }
 
-const SignUpPage: React.FC<PropsType> = ({ providers, csrfToken }) => {
+const SignUpPage: React.FC<PropsType> = ({ providers }) => {
   const { error } = useRouter().query
   const [customError, setCustomError] = useState('')
 
   useEffect(() => {
     setCustomError(error && (errors[`${error}`] ?? errors.default))
   }, [error])
+
+  const oauthProviders: ClientSafeProvider[] = providers
+    ? Object.values(providers).filter((p) => p.id !== 'credentials')
+    : []
 
   return (
     <>
@@ -46,25 +50,11 @@ const SignUpPage: React.FC<PropsType> = ({ providers, csrfToken }) => {
 
       <h2 className={s.Header}>{config.titles.signUpTitle}</h2>
 
-      {process.env.NODE_ENV === 'development' ? (
-        <div className={s.Container}>
-          {Object.values(providers)?.map(
-            (provider: any) =>
-              provider?.name === 'GitHub' && (
-                <SignInButton key={provider?.name} provider={provider} />
-              )
-          )}
-        </div>
-      ) : (
-        <div className={s.Container}>
-          {Object.values(providers).map(
-            (provider: any) =>
-              provider?.name === 'Google' && (
-                <SignInButton key={provider?.name} provider={provider} />
-              )
-          )}
-        </div>
-      )}
+      <div className={s.Container}>
+        {oauthProviders.map((provider) => (
+          <SignInButton key={provider.id} provider={provider} />
+        ))}
+      </div>
     </>
   )
 }

@@ -49,18 +49,15 @@ describe('AreaCalculationCard Component', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-
     ;(useGetAreasQuery as jest.Mock).mockReturnValue({
       data: mockAreasData,
       isLoading: false,
       isFetching: false,
       refetch: mockRefetch,
     })
-
     ;(useGetAllRealEstateQuery as jest.Mock).mockReturnValue({
       data: mockAllRealEstate,
     })
-
     ;(Form.useWatch as jest.Mock).mockImplementation((name) => {
       if (name === 'companiesAreas')
         return mockAreasData.companies.map((c) => ({
