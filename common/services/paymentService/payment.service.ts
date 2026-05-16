@@ -20,11 +20,10 @@ import {
 import { getStreetsPipeline } from '@utils/pipelines'
 import { FilterQuery } from 'mongoose'
 import ProfitService from '@common/services/profitService/profit.service'
+import { isDev } from '@utils/env'
 
 function isEmailDebugEnabled() {
-  return (
-    process.env.EMAIL_DEBUG === 'true' || process.env.NODE_ENV === 'development'
-  )
+  return process.env.EMAIL_DEBUG === 'true' || isDev
 }
 
 function maskEmail(email?: string) {

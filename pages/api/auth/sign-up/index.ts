@@ -55,11 +55,9 @@ export default async function handler(
 
     return res.status(201).json({ success: true })
   } catch (error) {
-    return res
-      .status(400)
-      .json({
-        success: false,
-        message: (error as Error)?.message ?? 'Sign-up failed',
-      })
+    return res.status(400).json({
+      success: false,
+      message: (error as Error)?.message ?? 'Sign-up failed',
+    })
   }
 }

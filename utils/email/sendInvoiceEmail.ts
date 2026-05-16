@@ -1,4 +1,5 @@
 import { IPayment } from '@common/api/paymentApi/payment.api.types'
+import { isDev } from '@utils/env'
 import nodemailer from 'nodemailer'
 
 const REQUIRED_EMAIL_ENV_VARS = [
@@ -20,9 +21,7 @@ export interface InvoiceEmailPayment {
 }
 
 function isEmailDebugEnabled() {
-  return (
-    process.env.EMAIL_DEBUG === 'true' || process.env.NODE_ENV === 'development'
-  )
+  return process.env.EMAIL_DEBUG === 'true' || isDev
 }
 
 function maskEmail(email?: string) {

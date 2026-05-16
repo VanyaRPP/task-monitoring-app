@@ -33,7 +33,6 @@ describe('usePrevPayment hook', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-
     ;(useInvoicesPaymentContext as jest.Mock).mockReturnValue({
       form: {},
       prevPayments: mockPrevPayments,
@@ -55,7 +54,6 @@ describe('usePrevPayment hook', () => {
       prevPayments: mockPrevPayments,
       prevService: { ...mockPrevService, street: { _id: 'DIFFERENT_STREET' } },
     })
-
     ;(Form.useWatch as jest.Mock).mockReturnValue('comp_1')
 
     const { result } = renderHook(() => usePrevPayment(0))

@@ -7,11 +7,9 @@ import { buildMonthServicePlaceholder } from '@common/components/Forms/AddPaymen
 const mockAddPayment = jest
   .fn()
   .mockReturnValue({ unwrap: jest.fn().mockResolvedValue({ data: {} }) })
-const mockAddService = jest
-  .fn()
-  .mockReturnValue({
-    unwrap: jest.fn().mockResolvedValue({ data: { _id: 'service_123' } }),
-  })
+const mockAddService = jest.fn().mockReturnValue({
+  unwrap: jest.fn().mockResolvedValue({ data: { _id: 'service_123' } }),
+})
 const mockPostMessage = jest.fn()
 const mockClose = jest.fn()
 
