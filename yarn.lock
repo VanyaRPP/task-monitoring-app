@@ -3163,13 +3163,12 @@
     "@smithy/util-buffer-from" "^4.0.0"
     tslib "^2.6.2"
 
-"@sparticuz/chromium@^127.0.0":
-  version "127.0.0"
-  resolved "https://registry.yarnpkg.com/@sparticuz/chromium/-/chromium-127.0.0.tgz#7f93f2e67c3fa5c83b63e9b54b225f4a6db34a35"
-  integrity sha512-3YdElfXb6kqcFtlgaArNZohhZ1gWAiWg5kPYIZbaoHFau7dHZvbYg3EEjeE30bYi6cfOnB8wVpluuasF8Y3QyQ==
+"@sparticuz/chromium@^148.0.0":
+  version "148.0.0"
+  resolved "https://registry.yarnpkg.com/@sparticuz/chromium/-/chromium-148.0.0.tgz#df1b1b21703ec431ada5dab147e286271d0b2d01"
+  integrity sha512-na5beDSZkrlcEWEMt+eHu4Xe+MLUgCtHBjHaXGsNaQu5tJWwXE+McxAcMtyumEM/JzXrxGpkO5vAPD9TWhil3g==
   dependencies:
-    follow-redirects "^1.15.6"
-    tar-fs "^3.0.6"
+    tar-fs "^3.1.2"
 
 "@standard-schema/spec@^1.0.0":
   version "1.0.0"
@@ -11291,6 +11290,17 @@ tar-fs@^3.0.6:
   version "3.0.10"
   resolved "https://registry.npmjs.org/tar-fs/-/tar-fs-3.0.10.tgz"
   integrity sha512-C1SwlQGNLe/jPNqapK8epDsXME7CAJR5RL3GcE6KWx1d9OUByzoHVcbu1VPI8tevg9H8Alae0AApHHFGzrD5zA==
+  dependencies:
+    pump "^3.0.0"
+    tar-stream "^3.1.5"
+  optionalDependencies:
+    bare-fs "^4.0.1"
+    bare-path "^3.0.0"
+
+tar-fs@^3.1.2:
+  version "3.1.2"
+  resolved "https://registry.yarnpkg.com/tar-fs/-/tar-fs-3.1.2.tgz#114b012f54796f31e62f3e57792820a80b83ae6e"
+  integrity sha512-QGxxTxxyleAdyM3kpFs14ymbYmNFrfY+pHj7Z8FgtbZ7w2//VAgLMac7sT6nRpIHjppXO2AwwEOg0bPFVRcmXw==
   dependencies:
     pump "^3.0.0"
     tar-stream "^3.1.5"
