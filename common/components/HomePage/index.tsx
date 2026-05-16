@@ -2,10 +2,8 @@ import LottieAnimation from '@components/UI/LottieAnimation'
 import SplashCursor from '@components/UI/SplashCursor'
 import HomePageTitle from '@assets/svg/homePageTitle'
 import { AppRoutes } from '@utils/constants'
-import { isProd } from '@utils/env'
 import { LogoIcon } from '@assets/icon/Logo'
 import { Button, Typography } from 'antd'
-import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/router'
 import CardPage from '@components/CardSwapper'
 import ScrollFactoryAnimation from '@components/ScrollFactoryAnimation'
@@ -27,11 +25,7 @@ const HomePage: React.FC = () => {
             <Button
               type="primary"
               onClick={() => {
-                if (isProd) {
-                  signIn('google')
-                } else {
-                  router.push(AppRoutes.AUTH_SIGN_IN)
-                }
+                router.push(AppRoutes.AUTH_SIGN_IN)
               }}
             >
               Увійти

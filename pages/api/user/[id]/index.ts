@@ -4,7 +4,6 @@ import start from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { Roles } from '@utils/constants'
-import { isDev } from '@utils/env'
 
 start()
 
@@ -41,7 +40,11 @@ export default async function handler(
             .json({ success: false, message: 'not allowed' })
         }
 
-        if (!isDev && isRoleUpdate && !isGlobalAdmin) {
+        if (
+          process.env.NODE_ENV !== 'development' &&
+          isRoleUpdate &&
+          !isGlobalAdmin
+        ) {
           return res.status(403).json({
             success: false,
             message: "sorry, u can't change roles",

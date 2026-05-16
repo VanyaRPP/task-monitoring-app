@@ -4,7 +4,6 @@ import {
 } from '@common/api/userApi/user.api'
 import useDebounce from '@modules/hooks/useDebounce'
 import { Roles } from '@utils/constants'
-import { isDev } from '@utils/env'
 import { isEqual } from '@utils/helpers'
 import { message, Select, SelectProps, Tag } from 'antd'
 import { useCallback, useEffect, useState } from 'react'
@@ -35,7 +34,7 @@ export const RolesSelector: React.FC<RolesSelectorProps> = ({
 
   const handleUpdate = useCallback(
     (roles: Roles[]) => {
-      if (!isDev) {
+      if (process.env.NODE_ENV !== 'development') {
         return message.error('Only for developers!')
       }
 
@@ -64,7 +63,7 @@ export const RolesSelector: React.FC<RolesSelectorProps> = ({
     handleUpdate(debouncedValue)
   }, [debouncedValue, handleUpdate])
 
-  if (!isDev) {
+  if (process.env.NODE_ENV !== 'development') {
     return null
   }
 

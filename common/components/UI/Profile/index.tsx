@@ -6,7 +6,6 @@ import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { RolesSelector } from '@components/UI/RolesSelector'
 import { Tags } from '@components/UI/Tags'
 import { AppRoutes, Roles } from '@utils/constants'
-import { isDev } from '@utils/env'
 import {
   useGetDomainFiltersQuery,
   useGetRealEstateFiltersQuery,
@@ -78,7 +77,7 @@ export const Profile: React.FC = () => {
                 {session?.user?.name}
               </Typography.Text>
 
-              {isDev ? (
+              {process.env.NODE_ENV === 'development' ? (
                 <RolesSelector style={{ minWidth: 100 }} />
               ) : (
                 <Tags
