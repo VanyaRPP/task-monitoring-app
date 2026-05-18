@@ -131,9 +131,9 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
           return message.error('Виникла помилка при оновленні даних площ')
         }
       }
-      
+
       closeModal()
-      setIsValueChanged(false);
+      setIsValueChanged(false)
       form.resetFields()
       message.success(currentDomain ? 'Збережено' : 'Додано')
     } else {

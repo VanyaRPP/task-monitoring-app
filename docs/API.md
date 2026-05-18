@@ -77,17 +77,20 @@ Base path: `/api/spacehub/payment`.
 ### Domains, real estate, services, categories
 
 - **Domains**
+
   - `GET/POST /api/domain` – list/create domains.
   - `GET/PATCH/DELETE /api/domain/[id]` – CRUD for a domain.
   - `GET /api/domain/admin` – domains for current admin.
   - `GET /api/domain/areas/[id]` – domain coverage areas.
 
 - **Real estate**
+
   - `GET/POST /api/real-estate` – list/create real‑estate objects.
   - `GET/PATCH/DELETE /api/real-estate/[id]` – CRUD for a single object.
   - `GET /api/real-estate/my` – real‑estate assigned to current user/domain.
 
 - **Services**
+
   - `GET/POST /api/service` – list/create services.
   - `GET/PATCH/DELETE /api/service/[id]` – CRUD.
   - `GET /api/service/address` – helper for service‑address mapping.
@@ -156,6 +159,7 @@ All routes live under Next.js API folder `pages/api/**` and are mounted under `/
 ### Authentication
 
 - **`POST /api/auth/sign-up`**
+
   - **Purpose**: register a new user.
   - **Body (example)**: `{ email, password, name, ... }`
   - **Response**: created user or error description.
@@ -169,22 +173,28 @@ All routes live under Next.js API folder `pages/api/**` and are mounted under `/
 ### Users & Profile
 
 - **`GET /api/user/current`**
+
   - **Purpose**: get current authenticated user data and roles.
   - **Response (example)**: `{ id, email, name, roles: [ 'USER', 'DOMAIN_ADMIN', ... ], domainId, ... }`
 
 - **`GET /api/user`**
+
   - **Purpose**: list users (admin‑only).
 
 - **`GET /api/user/[id]`**
+
   - **Purpose**: get a specific user by id.
 
 - **`PATCH /api/user/[id]`**
+
   - **Purpose**: update user fields (admin or owner, depending on logic).
 
 - **`POST /api/user/[id]/feedback`**
+
   - **Purpose**: submit feedback linked to a user.
 
 - **`GET /api/user/email/[email]`**
+
   - **Purpose**: lookup user by email (admin or internal usage).
 
 - **`POST /api/updateprofile`**
@@ -195,9 +205,11 @@ All routes live under Next.js API folder `pages/api/**` and are mounted under `/
 ### Feature Flags
 
 - **`GET /api/feature-flags`**
+
   - **Purpose**: list feature flags (for admin UI and client gating).
 
 - **`GET /api/feature-flags/by-name/[name]`**
+
   - **Purpose**: fetch a single feature flag by name.
 
 - **`GET /api/feature-flags/[id]` / `PATCH /api/feature-flags/[id]`**
@@ -208,10 +220,12 @@ All routes live under Next.js API folder `pages/api/**` and are mounted under `/
 ### Tasks
 
 - **`GET /api/task`**
+
   - **Purpose**: list tasks with filters (domain, executor, status, date range, etc.).
   - **Query (examples)**: `?status=OPEN&domainId=...&executorId=...`
 
 - **`POST /api/task`**
+
   - **Purpose**: create a new task.
   - **Body (example)**:
     ```json
@@ -227,22 +241,28 @@ All routes live under Next.js API folder `pages/api/**` and are mounted under `/
     ```
 
 - **`GET /api/task/[id]`**
+
   - **Purpose**: get task details by id (including comments, executors, history).
 
 - **`PATCH /api/task/[id]/edit-task`**
+
   - **Purpose**: update task fields (title, description, category, dates, etc.).
 
 - **`POST /api/task/[id]/change-status-task`**
+
   - **Purpose**: change task status (e.g., OPEN → IN_PROGRESS → DONE).
   - **Body**: `{ status: 'NEW_STATUS', comment?: 'Optional status change comment' }`
 
 - **`POST /api/task/[id]/apply`**
+
   - **Purpose**: apply for a task / mark interest (depending on business rules).
 
 - **`POST /api/task/[id]/accept`**
+
   - **Purpose**: accept a task assignment or result (domain‑admin/manager).
 
 - **`POST /api/task/[id]/comment`**
+
   - **Purpose**: add a comment to a task.
   - **Body**: `{ text: 'Comment text', files?: [fileId, ...] }`
 
@@ -257,6 +277,7 @@ All routes live under Next.js API folder `pages/api/**` and are mounted under `/
 All payments APIs live under `/api/spacehub/payment`.
 
 - **`GET /api/spacehub/payment`**
+
   - **Purpose**: list payments with rich filters and aggregated totals.
   - **Common query params**:
     - `from`, `to` – date range.
@@ -281,6 +302,7 @@ All payments APIs live under `/api/spacehub/payment`.
     ```
 
 - **`POST /api/spacehub/payment`**
+
   - **Purpose**: create a new payment record.
   - **Body (example)**:
     ```json
@@ -301,24 +323,31 @@ All payments APIs live under `/api/spacehub/payment`.
     - for debit payments may trigger invoice PDF generation and email sending.
 
 - **`GET /api/spacehub/payment/[id]`**
+
   - **Purpose**: get single payment details (including relations, logs).
 
 - **`PATCH /api/spacehub/payment/[id]`**
+
   - **Purpose**: update payment (amount, description, links, etc.) if allowed.
 
 - **`GET /api/spacehub/payment/[id]/change-log`**
+
   - **Purpose**: retrieve audit/change log for a payment.
 
 - **`POST /api/spacehub/payment/multiple`**
+
   - **Purpose**: bulk operations on payments (create/update multiple at once).
 
 - **`GET /api/spacehub/payment/number`**
+
   - **Purpose**: get next invoice/payment number (auto‑increment logic).
 
 - **`POST /api/spacehub/payment/generatePdf`**
+
   - **Purpose**: generate invoice PDF for one or more payments.
 
 - **`POST /api/spacehub/payment/generateExcel`**
+
   - **Purpose**: export payments to Excel.
 
 - **`GET /api/spacehub/payment/pipelines`** (internal module)
@@ -329,21 +358,27 @@ All payments APIs live under `/api/spacehub/payment`.
 ### Profits
 
 - **`GET /api/profits`**
+
   - **Purpose**: list profits, optionally filtered by domain, date, etc.
 
 - **`POST /api/profits`**
+
   - **Purpose**: create a profit record (usually done indirectly via payment creation).
 
 - **`GET /api/profits/[id]`**
+
   - **Purpose**: get single profit entry.
 
 - **`GET /api/profits/domain/[domainId]`**
+
   - **Purpose**: profits for a specific domain, often grouped by month.
 
 - **`GET /api/profits/balance/[domainId]`**
+
   - **Purpose**: compute balance (profit/loss) for a domain.
 
 - **`POST /api/profits/bulk`**
+
   - **Purpose**: bulk upsert or adjust profit records (used by admin tools).
 
 - **`GET /api/profit`**
@@ -354,15 +389,19 @@ All payments APIs live under `/api/spacehub/payment`.
 ### Domains
 
 - **`GET /api/domain`**
+
   - **Purpose**: list all domains (service providers).
 
 - **`POST /api/domain`**
+
   - **Purpose**: create a new domain (admin only).
 
 - **`GET /api/domain/[id]` / `PATCH /api/domain/[id]` / `DELETE /api/domain/[id]`**
+
   - **Purpose**: get, update or delete a specific domain.
 
 - **`GET /api/domain/admin`**
+
   - **Purpose**: domains accessible to the current domain admin.
 
 - **`GET /api/domain/areas/[id]`**
@@ -374,12 +413,15 @@ All payments APIs live under `/api/spacehub/payment`.
 ### Real Estate (Companies / Objects)
 
 - **`GET /api/real-estate`**
+
   - **Purpose**: list real‑estate objects/companies with filters.
 
 - **`POST /api/real-estate`**
+
   - **Purpose**: create a new real‑estate record.
 
 - **`GET /api/real-estate/[id]` / `PATCH /api/real-estate/[id]` / `DELETE /api/real-estate/[id]`**
+
   - **Purpose**: CRUD operations for a specific real‑estate entity.
 
 - **`GET /api/real-estate/my`**
@@ -390,12 +432,15 @@ All payments APIs live under `/api/spacehub/payment`.
 ### Services
 
 - **`GET /api/service` / `POST /api/service`**
+
   - **Purpose**: list or create services (e.g., electricity, heating, water).
 
 - **`GET /api/service/[id]` / `PATCH /api/service/[id]` / `DELETE /api/service/[id]`**
+
   - **Purpose**: CRUD operations for a service.
 
 - **`GET /api/service/address`**
+
   - **Purpose**: helper endpoint to resolve addresses linked to services.
 
 - **`/api/custom-services/*`**
@@ -406,9 +451,11 @@ All payments APIs live under `/api/spacehub/payment`.
 ### Streets & Addresses
 
 - **`GET /api/streets` / `POST /api/streets`**
+
   - **Purpose**: list all streets or create a new street.
 
 - **`GET /api/streets/[id]` / `PATCH /api/streets/[id]` / `DELETE /api/streets/[id]`**
+
   - **Purpose**: CRUD operations for a street record.
 
 - **`GET /api/streets/search`**
@@ -419,6 +466,7 @@ All payments APIs live under `/api/spacehub/payment`.
 ### Categories
 
 - **`GET /api/categories` / `POST /api/categories`**
+
   - **Purpose**: list or create task/expense categories.
 
 - **`GET /api/categories/[id]` / `PATCH /api/categories/[id]` / `DELETE /api/categories/[id]`**
@@ -431,16 +479,20 @@ All payments APIs live under `/api/spacehub/payment`.
 Under `/api/bankapi/*`.
 
 - **`GET /api/bankapi/transactions`**
+
   - **Purpose**: list bank transactions (possibly merged from several imports).
   - **Filters**: date range, account, status, domain, etc.
 
 - **`GET /api/bankapi/transactions/interim`**
+
   - **Purpose**: interim (work‑in‑progress) transactions.
 
 - **`GET /api/bankapi/transactions/final`**
+
   - **Purpose**: finalized transactions used for reconciliation.
 
 - **`GET /api/bankapi/balances`**
+
   - **Purpose**: get bank balances by account/domain.
 
 - **`GET /api/bankapi/date`**
@@ -453,6 +505,7 @@ Under `/api/bankapi/*`.
 ### Notifications & Callbacks
 
 - **`POST /api/notify` / `POST /api/notify/[id]`**
+
   - **Purpose**: send or update notifications (email/other channels) for entities like tasks or payments.
 
 - **`POST /api/callback`**
@@ -463,15 +516,19 @@ Under `/api/bankapi/*`.
 ### Debtors & Filtering Helpers
 
 - **`GET /api/debtors`**
+
   - **Purpose**: list debtors (companies/domains/entities with outstanding balance).
 
 - **`GET /api/filter/date`**
+
   - **Purpose**: helper for date filter presets (e.g., last month, quarter).
 
 - **`GET /api/filter/domain`**
+
   - **Purpose**: helper to filter by domain (for dropdowns, etc.).
 
 - **`GET /api/filter/real-estate`**
+
   - **Purpose**: helper to filter by real‑estate.
 
 - **`GET /api/filter/street`**
@@ -484,12 +541,15 @@ Under `/api/bankapi/*`.
 Under `/api/sceduled/*`.
 
 - **`GET /api/sceduled/daily`**
+
   - **Purpose**: run daily job(s) – e.g., recalculate aggregates, send summaries.
 
 - **`GET /api/sceduled/hourly`**
+
   - **Purpose**: run hourly tasks (short‑term calculations, cleanups).
 
 - **`GET /api/sceduled/threeTimesDaily`**
+
   - **Purpose**: run jobs three times a day.
 
 - **`GET /api/sceduled/quater`**
@@ -502,9 +562,10 @@ Under `/api/sceduled/*`.
 ### Testing & Docs Helpers
 
 - **`GET /api/doc`**
+
   - **Purpose**: internal documentation helper (used by `/docs` UI page).
 
-- **`/api/**.test.ts`**
+- **`/api/**.test.ts`\*\*
   - Jest test files are colocated with API routes (e.g., `spacehub/payment/payment.test.ts`) and are **not** exposed as HTTP endpoints.
 
 ---
@@ -512,12 +573,14 @@ Under `/api/sceduled/*`.
 ### Conventions & Notes
 
 - **HTTP Methods**
+
   - `GET` – read/list resources.
   - `POST` – create or trigger an action.
   - `PATCH` – partial update.
   - `DELETE` – deletion (where supported).
 
 - **Error Handling**
+
   - Non‑2xx responses contain an error payload, typically:
     ```json
     {
@@ -527,10 +590,10 @@ Under `/api/sceduled/*`.
     ```
 
 - **Authorization**
+
   - Most routes:
     - reject unauthenticated requests with `401`,
     - enforce roles/domain restrictions, returning `403` when access is denied.
 
 - **Id fields**
   - MongoDB ObjectIds are used (`_id` / `id`), usually serialized as strings in JSON.
-

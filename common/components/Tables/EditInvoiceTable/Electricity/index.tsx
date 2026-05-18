@@ -2,7 +2,12 @@ import { dateToMonthYear } from '@assets/features/formatDate'
 import { usePaymentContext } from '@components/AddPaymentModal'
 import { InvoiceComponentProps } from '@components/Tables/EditInvoiceTable'
 import { DividedSpace } from '@components/UI/DividedSpace'
-import { currencyWithUnit, toArray, toFirstUpperCase, toRoundFixed } from '@utils/helpers'
+import {
+  currencyWithUnit,
+  toArray,
+  toFirstUpperCase,
+  toRoundFixed,
+} from '@utils/helpers'
 import validator from '@utils/validator'
 import { ExclamationCircleOutlined } from '@ant-design/icons'
 import { Form, Input, Space, Typography, Tooltip } from 'antd'
@@ -65,7 +70,7 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
                 {toRoundFixed(lastAmount)} → {toRoundFixed(amount)}
               </div>
               <div>
-                <strong>Втрати:</strong> {(losses).toFixed(2)}%
+                <strong>Втрати:</strong> {losses.toFixed(2)}%
               </div>
               <div>
                 <strong>З втратами:</strong> {withLosses} кВт
@@ -124,7 +129,7 @@ export const Price: React.FC<InvoiceComponentProps> = ({
 }) => {
   const name = useMemo(() => toArray<string>(_name), [_name])
   const price = Form.useWatch(['invoice', ...name, 'price'], form)
-  const {  company } = usePaymentContext()
+  const { company } = usePaymentContext()
 
   if (!editable) {
     return <span>{currencyWithUnit(toRoundFixed(price), company, 'кВт')}</span>

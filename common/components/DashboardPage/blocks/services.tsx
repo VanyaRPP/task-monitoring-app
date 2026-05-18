@@ -99,44 +99,44 @@ const ServicesBlock: React.FC<ServiceBlockProps> = ({ sepDomainID }) => {
   })
 
   return (
-  <>
-    <TableCard
-      title={
-        <ServicesHeader
-          showAddButton={isAdminCheck(user?.roles)}
-          currentService={currentService}
+    <>
+      <TableCard
+        title={
+          <ServicesHeader
+            showAddButton={isAdminCheck(user?.roles)}
+            currentService={currentService}
+            setCurrentService={setCurrentService}
+            serviceActions={serviceActions}
+            setServiceActions={setServiceActions}
+            filter={filter}
+            setFilter={setFilter}
+            services={servicesData}
+            enableServiceButton={sepDomainID ? false : true}
+            handleDeleteServices={() => setDeleteModalOpen(true)}
+            selectedServices={selectedServices}
+            user={user}
+            domainsFilter={domainsFilter}
+            streetsFilter={streetsFilter}
+          />
+        }
+      >
+        <ServicesTable
           setCurrentService={setCurrentService}
-          serviceActions={serviceActions}
           setServiceActions={setServiceActions}
+          serviceActions={serviceActions}
+          services={servicesData}
+          customServices={customServicesData?.data}
+          isLoading={isLoading}
+          isError={isError}
           filter={filter}
           setFilter={setFilter}
-          services={servicesData}
-          enableServiceButton={sepDomainID ? false : true}
-          handleDeleteServices={() => setDeleteModalOpen(true)}
-          selectedServices={selectedServices}
+          setSelectedServices={setSelectedServices}
           user={user}
           domainsFilter={domainsFilter}
           streetsFilter={streetsFilter}
+          dateFilters={dateFilters}
         />
-      }
-    >
-      <ServicesTable
-        setCurrentService={setCurrentService}
-        setServiceActions={setServiceActions}
-        serviceActions={serviceActions}
-        services={servicesData}
-        customServices={customServicesData?.data}
-        isLoading={isLoading}
-        isError={isError}
-        filter={filter}
-        setFilter={setFilter}
-        setSelectedServices={setSelectedServices}
-        user={user}
-        domainsFilter={domainsFilter}
-        streetsFilter={streetsFilter}
-        dateFilters={dateFilters}
-      />
-    </TableCard>
+      </TableCard>
       <ModalDelete
         open={deleteModalOpen}
         onCancel={() => setDeleteModalOpen(false)}

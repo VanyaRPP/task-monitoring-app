@@ -13,6 +13,7 @@ export default async function handler(
     return res.status(405).json({ message: 'Method not allowed' })
   }
   return res.status(501).json({
-    error: 'Telegram PDF sending temporarily unavailable after template refactor.',
+    error:
+      'Telegram PDF sending temporarily unavailable after template refactor.',
   })
 }

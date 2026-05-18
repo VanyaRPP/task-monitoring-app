@@ -36,9 +36,9 @@ export async function backfillUtilityServiceTypes(
       log(`[backfill] skip invalid id ${id}`)
       continue
     }
-    const existing = (await CustomService.findById(id).lean()) as
-      | { serviceType?: string }
-      | null
+    const existing = (await CustomService.findById(id).lean()) as {
+      serviceType?: string
+    } | null
     if (!existing) {
       report.missing.push(id)
       log(`[backfill] not found in DB: ${id}`)

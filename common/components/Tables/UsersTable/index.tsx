@@ -1,5 +1,14 @@
 import { useMemo, useState } from 'react'
-import { Avatar, Card, Table, Select, message, Input, Button, Popconfirm } from 'antd'
+import {
+  Avatar,
+  Card,
+  Table,
+  Select,
+  message,
+  Input,
+  Button,
+  Popconfirm,
+} from 'antd'
 import { SearchOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import type { SelectProps } from 'antd'
@@ -107,13 +116,17 @@ interface Props {
   isDomainAdmin?: boolean
 }
 
-export const UsersTable: React.FC<Props> = ({domains = [],isDomainAdmin = false, }) => {
+export const UsersTable: React.FC<Props> = ({
+  domains = [],
+  isDomainAdmin = false,
+}) => {
   const { data: currentUser } = useGetCurrentUserQuery()
   const { data: users = [], isLoading } = useGetAllUsersQuery()
-  const [updateUser, { isLoading: isUpdatingUser }] =
-    useUpdateUserMutation()
+  const [updateUser, { isLoading: isUpdatingUser }] = useUpdateUserMutation()
 
-  const [updatingUserId, setUpdatingUserId] = useState<IUser['_id'] | null>(null)
+  const [updatingUserId, setUpdatingUserId] = useState<IUser['_id'] | null>(
+    null
+  )
   const [searchName, setSearchName] = useState('')
   const [searchEmail, setSearchEmail] = useState('')
   const [searchRole, setSearchRole] = useState<string>('all')
@@ -121,14 +134,17 @@ export const UsersTable: React.FC<Props> = ({domains = [],isDomainAdmin = false,
 
   const domainAdminEmails = useMemo(() => {
     if (!isDomainAdmin) return null
-    return domains.flatMap(d => d.adminEmails)
+    return domains.flatMap((d) => d.adminEmails)
   }, [domains, isDomainAdmin])
 
   const filteredUsers = useMemo(
     () =>
       users.filter((user) => {
-        const name =
-          ((user as any)?.name || (user as any)?.fullName || '').toLowerCase()
+        const name = (
+          (user as any)?.name ||
+          (user as any)?.fullName ||
+          ''
+        ).toLowerCase()
         const email = ((user as any)?.email || '').toLowerCase()
         const userRole = getUserRoleValue(user)
         const matchesName = name.includes(searchName.toLowerCase())
@@ -136,12 +152,18 @@ export const UsersTable: React.FC<Props> = ({domains = [],isDomainAdmin = false,
         const matchesRole = searchRole === 'all' || userRole === searchRole
 
         const matchesDomain =
-          !isDomainAdmin ||
-          domainAdminEmails?.includes(user.email)
+          !isDomainAdmin || domainAdminEmails?.includes(user.email)
 
         return matchesName && matchesEmail && matchesRole && matchesDomain
       }),
-    [users, searchName, searchEmail, searchRole, isDomainAdmin, domainAdminEmails]
+    [
+      users,
+      searchName,
+      searchEmail,
+      searchRole,
+      isDomainAdmin,
+      domainAdminEmails,
+    ]
   )
 
   const columns = useMemo<ColumnsType<IUser>>(
@@ -167,7 +189,7 @@ export const UsersTable: React.FC<Props> = ({domains = [],isDomainAdmin = false,
                       background: getAvatarGradient(name),
                       color: '#fff',
                       fontWeight: 600,
-                      fontSize: 18,                    
+                      fontSize: 18,
                     }
                   : undefined
               }
@@ -215,23 +237,23 @@ export const UsersTable: React.FC<Props> = ({domains = [],isDomainAdmin = false,
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             Роль
             {!isDomainAdmin && (
-            <Select
-              placeholder="Пошук по ролям"
-              value={searchRole}
-              onChange={(value) => setSearchRole(value)}
-              options={ROLE_FILTER_OPTIONS}
-              style={{ width: 170 }}
-              allowClear
-              onClear={() => setSearchRole('all')}
-            />
-              )}
+              <Select
+                placeholder="Пошук по ролям"
+                value={searchRole}
+                onChange={(value) => setSearchRole(value)}
+                options={ROLE_FILTER_OPTIONS}
+                style={{ width: 170 }}
+                allowClear
+                onClear={() => setSearchRole('all')}
+              />
+            )}
           </div>
         ),
         render: (_, user) => {
           const currentRole = getUserRoleValue(user)
-           if (isDomainAdmin) {
-    return currentRole
-  }
+          if (isDomainAdmin) {
+            return currentRole
+          }
           const isSelf = currentUser?._id?.toString() === user?._id?.toString()
           const isGlobalAdminUser = currentRole === Roles.GLOBAL_ADMIN
           if (isSelf && isGlobalAdminUser) {
@@ -287,13 +309,17 @@ export const UsersTable: React.FC<Props> = ({domains = [],isDomainAdmin = false,
         render: (_: any, user) => {
           const userId = (user as any)?._id?.toString()
           const isSelf = currentUser?._id?.toString() === userId
-          const isTargetGlobalAdmin = getUserRoleValue(user) === Roles.GLOBAL_ADMIN
+          const isTargetGlobalAdmin =
+            getUserRoleValue(user) === Roles.GLOBAL_ADMIN
           const notInDomain =
             isDomainAdmin && !domainAdminEmails?.includes(user.email)
           return (
             <div style={{ display: 'flex', gap: 4 }}>
               <EditUserButton userId={userId} />
-              <DeleteUserButton userId={userId} disabled={isSelf || isTargetGlobalAdmin || notInDomain} />
+              <DeleteUserButton
+                userId={userId}
+                disabled={isSelf || isTargetGlobalAdmin || notInDomain}
+              />
             </div>
           )
         },
@@ -313,19 +339,19 @@ export const UsersTable: React.FC<Props> = ({domains = [],isDomainAdmin = false,
   )
 
   return (
-      <Table<IUser>
-        rowKey="_id"
-        loading={isLoading}
-        columns={columns}
-        dataSource={filteredUsers}
-        pagination={{
-          pageSize,
-          showSizeChanger: true,
-          pageSizeOptions: [10, 20, 50, 100],
-          position: ['bottomCenter'],
-          onShowSizeChange: (_, size) => setPageSize(size),
-        }}
-        scroll={{ x: 900 }}
-      />
+    <Table<IUser>
+      rowKey="_id"
+      loading={isLoading}
+      columns={columns}
+      dataSource={filteredUsers}
+      pagination={{
+        pageSize,
+        showSizeChanger: true,
+        pageSizeOptions: [10, 20, 50, 100],
+        position: ['bottomCenter'],
+        onShowSizeChange: (_, size) => setPageSize(size),
+      }}
+      scroll={{ x: 900 }}
+    />
   )
 }

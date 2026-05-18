@@ -5,8 +5,16 @@ describe('bulk vs single template resolution', () => {
     const company = { defaultTemplate: undefined } as any
     const domain = { defaultTemplate: 'ledger' } as any
 
-    const single = resolveTemplate(undefined, company.defaultTemplate, domain.defaultTemplate)
-    const bulk = resolveTemplate(undefined, company.defaultTemplate, domain.defaultTemplate)
+    const single = resolveTemplate(
+      undefined,
+      company.defaultTemplate,
+      domain.defaultTemplate
+    )
+    const bulk = resolveTemplate(
+      undefined,
+      company.defaultTemplate,
+      domain.defaultTemplate
+    )
 
     expect(bulk).toBe('ledger')
     expect(bulk).toBe(single)
@@ -17,7 +25,11 @@ describe('bulk vs single template resolution', () => {
     const domain = { defaultTemplate: 'ledger' } as any
 
     expect(
-      resolveTemplate(undefined, company.defaultTemplate, domain.defaultTemplate)
+      resolveTemplate(
+        undefined,
+        company.defaultTemplate,
+        domain.defaultTemplate
+      )
     ).toBe('olimp')
   })
 
@@ -26,7 +38,11 @@ describe('bulk vs single template resolution', () => {
     const domain = { defaultTemplate: 'ledger' } as any
 
     expect(
-      resolveTemplate(undefined, company.defaultTemplate, domain.defaultTemplate)
+      resolveTemplate(
+        undefined,
+        company.defaultTemplate,
+        domain.defaultTemplate
+      )
     ).not.toBe('classic')
   })
 })

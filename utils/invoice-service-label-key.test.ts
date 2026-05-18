@@ -3,7 +3,9 @@ import { getInvoiceServiceLabelKey } from './invoice-service-label-key'
 
 describe('getInvoiceServiceLabelKey', () => {
   it('maps maintenancePrice', () => {
-    expect(getInvoiceServiceLabelKey(ServiceType.Maintenance)).toBe('maintenance')
+    expect(getInvoiceServiceLabelKey(ServiceType.Maintenance)).toBe(
+      'maintenance'
+    )
   })
 
   it('maps rentPrice to placing', () => {

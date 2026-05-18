@@ -1,11 +1,4 @@
-import {
-  FC,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import s from './style.module.scss'
 
 const FRAME_COUNT = 193
@@ -225,7 +218,9 @@ const ScrollFactoryAnimation: FC<Props> = ({
       const displayed = displayedProgressRef.current
       const diff = target - displayed
       const newDisplayed =
-        Math.abs(diff) < SETTLE_THRESHOLD ? target : displayed + diff * LERP_RATE
+        Math.abs(diff) < SETTLE_THRESHOLD
+          ? target
+          : displayed + diff * LERP_RATE
       displayedProgressRef.current = newDisplayed
 
       setScrollProgress(newDisplayed)

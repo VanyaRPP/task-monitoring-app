@@ -14,10 +14,13 @@ jest.mock('antd', () => {
   const React = require('react')
   const original = jest.requireActual('antd')
 
-  const mockTable = jest.fn(({ children }) => React.createElement('div', { 'data-testid': 'table' }, children)) as any
+  const mockTable = jest.fn(({ children }) =>
+    React.createElement('div', { 'data-testid': 'table' }, children)
+  ) as any
   mockTable.displayName = 'Table'
 
-  const Summary = ({ children }: any) => React.createElement('div', { 'data-testid': 'table-summary' }, children)
+  const Summary = ({ children }: any) =>
+    React.createElement('div', { 'data-testid': 'table-summary' }, children)
   Summary.displayName = 'Table.Summary'
 
   const Row = ({ children }: any) => React.createElement('div', null, children)
@@ -30,10 +33,12 @@ jest.mock('antd', () => {
   mockTable.Summary.Row = Row
   mockTable.Summary.Cell = Cell
 
-  const Tooltip = ({ children }: any) => React.createElement(React.Fragment, null, children)
+  const Tooltip = ({ children }: any) =>
+    React.createElement(React.Fragment, null, children)
   Tooltip.displayName = 'Tooltip'
 
-  const Badge = ({ children }: any) => React.createElement(React.Fragment, null, children)
+  const Badge = ({ children }: any) =>
+    React.createElement(React.Fragment, null, children)
   Badge.displayName = 'Badge'
 
   return {
@@ -98,7 +103,9 @@ const mockPaymentsTableFullProps = {
 
 describe('PaymentsTable — filters visibility', () => {
   const wrapper = (extraProps = {}) =>
-    render(<PaymentsTable {...(mockPaymentsTableFullProps as any)} {...extraProps} />)
+    render(
+      <PaymentsTable {...(mockPaymentsTableFullProps as any)} {...extraProps} />
+    )
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -119,9 +126,7 @@ describe('PaymentsTable — filters visibility', () => {
       { text: 'Domain1', value: 'd1' },
       { text: 'Domain2', value: 'd2' },
     ]
-    const companies = [
-      { text: 'Company1', value: 'c1' },
-    ]
+    const companies = [{ text: 'Company1', value: 'c1' }]
 
     wrapper({
       filterProps: {
@@ -134,7 +139,9 @@ describe('PaymentsTable — filters visibility', () => {
     const tableCalls = (Table as unknown as jest.Mock).mock.calls
     const lastCallProps = tableCalls[tableCalls.length - 1][0]
 
-    const domainColumn = lastCallProps.columns.find((c: any) => c.dataIndex === 'domain')
+    const domainColumn = lastCallProps.columns.find(
+      (c: any) => c.dataIndex === 'domain'
+    )
     if (domainColumn) {
       expect(domainColumn.filters).toHaveLength(2)
       expect(domainColumn.filters[0].text).toBe('Domain1')

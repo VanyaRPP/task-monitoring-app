@@ -7,10 +7,7 @@ import s from '../style.module.scss'
 import type { TabProps } from './types'
 
 /** Auto-rebuild description from IBAN/РНОКПП/МФО while keeping custom lines. */
-const useAutoSyncDescription = (
-  form: TabProps['form'],
-  editable: boolean
-) => {
+const useAutoSyncDescription = (form: TabProps['form'], editable: boolean) => {
   const ieName = Form.useWatch('IEName', form)
   const iban = Form.useWatch('iban', form)
   const rnokpp = Form.useWatch('rnokpp', form)

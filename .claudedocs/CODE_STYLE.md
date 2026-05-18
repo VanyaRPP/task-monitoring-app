@@ -30,15 +30,15 @@ Config: `.eslintrc.json` extends `next/core-web-vitals`, `plugin:@typescript-esl
 
 Config: `.prettierrc.json`.
 
-| Setting          | Value     |
-| ---              | ---       |
-| `semi`           | `false`   |
-| `singleQuote`    | `true`    |
-| `trailingComma`  | `'es5'`   |
-| `tabWidth`       | `2`       |
-| `useTabs`        | `false`   |
-| `printWidth`     | `80`      |
-| `endOfLine`      | `'auto'`  |
+| Setting         | Value    |
+| --------------- | -------- |
+| `semi`          | `false`  |
+| `singleQuote`   | `true`   |
+| `trailingComma` | `'es5'`  |
+| `tabWidth`      | `2`      |
+| `useTabs`       | `false`  |
+| `printWidth`    | `80`     |
+| `endOfLine`     | `'auto'` |
 
 **No semicolons. Single quotes. 2-space indent. 80 chars.** Run `npm run prettier:fix` to normalize.
 
@@ -71,16 +71,16 @@ Pages Router renders both. Be explicit:
 
 Framework: Jest 29 + Testing Library. Config: `jest.config.ts`, setup: `jest.setup.ts`.
 
-| Tool                              | Use for                                            |
-| ---                               | ---                                                |
-| `@testing-library/react`          | Rendering components                               |
-| `@testing-library/jest-dom`       | DOM matchers (`toBeInTheDocument`, etc.)           |
-| `@testing-library/user-event`     | User interactions (prefer over `fireEvent`)        |
-| `mockingoose`                     | Mocking Mongoose models                            |
-| `mongodb-memory-server`           | Integration tests against a real in-memory Mongo   |
-| `msw`                             | Mocking HTTP requests                              |
-| `identity-obj-proxy`              | CSS module mocks (configured)                      |
-| `whatwg-fetch`                    | `fetch` polyfill in test env                       |
+| Tool                          | Use for                                          |
+| ----------------------------- | ------------------------------------------------ |
+| `@testing-library/react`      | Rendering components                             |
+| `@testing-library/jest-dom`   | DOM matchers (`toBeInTheDocument`, etc.)         |
+| `@testing-library/user-event` | User interactions (prefer over `fireEvent`)      |
+| `mockingoose`                 | Mocking Mongoose models                          |
+| `mongodb-memory-server`       | Integration tests against a real in-memory Mongo |
+| `msw`                         | Mocking HTTP requests                            |
+| `identity-obj-proxy`          | CSS module mocks (configured)                    |
+| `whatwg-fetch`                | `fetch` polyfill in test env                     |
 
 **Conventions:**
 

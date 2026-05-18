@@ -38,7 +38,7 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
       >
         <span>
           {toRoundFixed(company.waterPart)}% від{' '}
-          {currencyWithUnit(toRoundFixed(service.waterPriceTotal), company)} = {' '}
+          {currencyWithUnit(toRoundFixed(service.waterPriceTotal), company)} ={' '}
         </span>
       </Space>
     )

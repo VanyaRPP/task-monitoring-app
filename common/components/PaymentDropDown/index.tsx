@@ -1,4 +1,11 @@
-import { CheckOutlined, DeleteOutlined, EditOutlined, EyeOutlined, MoreOutlined, DownloadOutlined } from '@ant-design/icons'
+import {
+  CheckOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  EyeOutlined,
+  MoreOutlined,
+  DownloadOutlined,
+} from '@ant-design/icons'
 import { Button, Dropdown, MenuProps, Modal, message } from 'antd'
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { Operations } from '@utils/constants'
@@ -37,67 +44,72 @@ const PaymentDropdown: React.FC<Props> = ({
   onMarkPaid,
   deleteLoading,
 }) => {
+  const [htmlToPdf, { isLoading: pdfLoading }] = useHtmlToPdfMutation()
+  const [isCapturing, setIsCapturing] = useState(false)
 
-const [htmlToPdf, { isLoading: pdfLoading }] = useHtmlToPdfMutation()
-const [isCapturing, setIsCapturing] = useState(false)
+  const handleDownloadPdf = () => {
+    if (isCapturing || pdfLoading) return
+    setIsCapturing(true)
+  }
 
-const handleDownloadPdf = () => {
-  if (isCapturing || pdfLoading) return
-  setIsCapturing(true)
-}
+  const handleCapture = async (html: string) => {
+    try {
+      const fileName = buildPaymentFileName(payment)
+      const response = await htmlToPdf({ html, fileName })
 
-const handleCapture = async (html: string) => {
-  try {
-    const fileName = buildPaymentFileName(payment)
-    const response = await htmlToPdf({ html, fileName })
-
-    if ('data' in response) {
-      const { data } = response
-      if (data) {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        //@ts-ignore
-        const buffer = Buffer.from(data.buffer)
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        //@ts-ignore
-        const blob = new Blob([buffer], {
-          type: `application/${data.fileExtension}`,
-        })
-        saveAs(blob, `${data.fileName}.${data.fileExtension}`)
+      if ('data' in response) {
+        const { data } = response
+        if (data) {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          //@ts-ignore
+          const buffer = Buffer.from(data.buffer)
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          //@ts-ignore
+          const blob = new Blob([buffer], {
+            type: `application/${data.fileExtension}`,
+          })
+          saveAs(blob, `${data.fileName}.${data.fileExtension}`)
+        }
+      } else {
+        // eslint-disable-next-line no-console
+        console.error('htmlToPdf failed:', response.error)
+        const serverMsg = (response.error as { data?: { error?: string } })
+          ?.data?.error
+        message.error(
+          serverMsg
+            ? `PDF: ${serverMsg}`
+            : 'Сталася помилка під час генерації PDF'
+        )
       }
-    } else {
+    } catch (error) {
       // eslint-disable-next-line no-console
-      console.error('htmlToPdf failed:', response.error)
-      const serverMsg = (response.error as { data?: { error?: string } })?.data
-        ?.error
+      console.error('htmlToPdf threw:', error)
       message.error(
-        serverMsg
-          ? `PDF: ${serverMsg}`
-          : 'Сталася помилка під час генерації PDF'
+        `PDF: ${(error as Error)?.message ?? 'несподівана помилка'}`
       )
+    } finally {
+      setIsCapturing(false)
     }
-  } catch (error) {
+  }
+
+  const handleCaptureError = (error: Error) => {
     // eslint-disable-next-line no-console
-    console.error('htmlToPdf threw:', error)
-    message.error(
-      `PDF: ${(error as Error)?.message ?? 'несподівана помилка'}`
-    )
-  } finally {
+    console.error('HeadlessReceiptRenderer failed:', error)
+    message.error('Не вдалося згенерувати макет PDF')
     setIsCapturing(false)
   }
-}
-
-const handleCaptureError = (error: Error) => {
-  // eslint-disable-next-line no-console
-  console.error('HeadlessReceiptRenderer failed:', error)
-  message.error('Не вдалося згенерувати макет PDF')
-  setIsCapturing(false)
-}
 
   const adminItems: MenuProps['items'] = isAdmin
     ? [
         { key: 'edit', label: 'Редагувати', icon: <EditOutlined /> },
         ...(payment.type !== Operations.Credit
-          ? [{ key: 'mark', label: 'Позначити оплату', icon: <CheckOutlined /> }]
+          ? [
+              {
+                key: 'mark',
+                label: 'Позначити оплату',
+                icon: <CheckOutlined />,
+              },
+            ]
           : []),
       ]
     : []
@@ -134,7 +146,9 @@ const handleCaptureError = (error: Error) => {
     if (key === 'download') handleDownloadPdf()
     if (key === 'delete') {
       Modal.confirm({
-        title: `Видалити оплату від ${dateToDefaultFormat(payment.invoiceCreationDate as unknown as string)}?`,
+        title: `Видалити оплату від ${dateToDefaultFormat(
+          payment.invoiceCreationDate as unknown as string
+        )}?`,
         okText: 'Так',
         cancelText: 'Відміна',
         okType: 'danger',

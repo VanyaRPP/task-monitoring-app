@@ -35,7 +35,8 @@ export default async function handler(
     }
 
     const invalidItem = items.find(
-      (it) => !it || typeof it.html !== 'string' || typeof it.fileName !== 'string'
+      (it) =>
+        !it || typeof it.html !== 'string' || typeof it.fileName !== 'string'
     )
     if (invalidItem) {
       res.status(400).json({ error: 'Each item must have html and fileName' })

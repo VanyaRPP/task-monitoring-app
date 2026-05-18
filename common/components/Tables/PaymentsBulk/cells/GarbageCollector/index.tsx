@@ -20,7 +20,9 @@ export const GarbageCollectorSumTitle: React.FC = () => {
   )
 }
 
-export const GarbageCollectorAmount: React.FC<{ name: number }> = ({ name }) => {
+export const GarbageCollectorAmount: React.FC<{ name: number }> = ({
+  name,
+}) => {
   const { form } = useInvoicesPaymentContext()
 
   const garbageCollector: boolean =

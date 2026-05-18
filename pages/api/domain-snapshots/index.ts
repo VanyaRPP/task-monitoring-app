@@ -99,9 +99,7 @@ async function domainSnapshotsHandler(
       if (hasExplicitGroups) {
         const parsed = parseGroupsInput(req.body.groups)
         if (parsed.error) {
-          return res
-            .status(400)
-            .json({ success: false, message: parsed.error })
+          return res.status(400).json({ success: false, message: parsed.error })
         }
         groups = parsed.groups
       } else {
@@ -135,7 +133,8 @@ async function domainSnapshotsHandler(
         }
         templateId = new mongoose.Types.ObjectId(rawTemplateId)
       } else {
-        templateId = (domain.domainTypeTemplateId as mongoose.Types.ObjectId) ?? null
+        templateId =
+          (domain.domainTypeTemplateId as mongoose.Types.ObjectId) ?? null
       }
 
       let templateName: string | null = null

@@ -48,7 +48,10 @@ describe('domain-invoice-selector', () => {
           { _id: '1', name: 'One', fieldName: 'one' },
         ],
       },
-      { groupName: 'B', services: [{ _id: '1', name: 'One', fieldName: 'one' }] },
+      {
+        groupName: 'B',
+        services: [{ _id: '1', name: 'One', fieldName: 'one' }],
+      },
     ])
     expect(rows).toHaveLength(1)
     expect(rows[0].groupName).toBe('A')

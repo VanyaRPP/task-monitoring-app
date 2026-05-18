@@ -74,9 +74,7 @@ export default async function handler(
         const stillThere = (await Payment.find({
           _id: { $in: allowedIds },
         }).select('_id')) as Array<{ _id: { toString(): string } }>
-        const stillThereIds = new Set(
-          stillThere.map((p) => p._id.toString())
-        )
+        const stillThereIds = new Set(stillThere.map((p) => p._id.toString()))
         deletedIds = allowedIds.filter((id) => !stillThereIds.has(id))
       }
 

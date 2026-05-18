@@ -302,7 +302,7 @@ describe('RealEstate API - GET', () => {
     expect(response.status).toHaveBeenCalledWith(200)
 
     const received = parseReceived(response.data)
-    const expected: any[] = [] 
+    const expected: any[] = []
 
     expect(received).toEqual(expected)
   })
