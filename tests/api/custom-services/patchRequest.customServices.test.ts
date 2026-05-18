@@ -1,8 +1,9 @@
 import CustomService from '@modules/models/CustomService'
+import Domain from '@modules/models/Domain'
 import handler from '@pages/api/custom-services'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import { setupTestEnvironment } from '@utils/setupTestEnvironment'
-import { domains } from '@utils/testData'
+import { domains, users } from '@utils/testData'
 
 jest.mock('@pages/api/api.config', () => jest.fn())
 jest.mock('@utils/getCurrentUser', () => ({
@@ -10,187 +11,306 @@ jest.mock('@utils/getCurrentUser', () => ({
     isGlobalAdmin: false,
     isDomainAdmin: false,
     isUser: false,
-    email: '',
+    user: { email: '' },
   }),
 }))
 
 setupTestEnvironment()
+
+const ownDomainId = domains[0]._id
+const otherDomainId = domains[6]._id
+
+const mockUser = (overrides: Partial<{
+  isGlobalAdmin: boolean
+  isDomainAdmin: boolean
+  isUser: boolean
+  email: string
+}> = {}) =>
+  (getCurrentUser as jest.Mock).mockResolvedValueOnce({
+    isGlobalAdmin: false,
+    isDomainAdmin: false,
+    isUser: false,
+    user: { email: overrides.email ?? '' },
+    ...overrides,
+  })
+
+const mockRes = () =>
+  ({
+    status: jest.fn().mockReturnThis(),
+    json: jest.fn().mockReturnThis(),
+  } as any)
+
+const createService = (overrides: Record<string, unknown> = {}) =>
+  CustomService.create({
+    name: 'Old Service Name',
+    fieldName: 'oldServiceName',
+    ...overrides,
+  })
 
 describe('API Route - PATCH Method', () => {
   beforeEach(async () => {
     await CustomService.deleteMany({})
   })
 
-  const mockServiceCreation = async (domainId: string) => {
-    return CustomService.create({
-      name: 'Old Service Name',
-      fieldName: 'oldServiceName',
-      domain: domainId,
-    })
-  }
-
   it('should block regular users', async () => {
-    ;(getCurrentUser as jest.Mock).mockResolvedValueOnce({
-      isGlobalAdmin: false,
-      isDomainAdmin: false,
-      isUser: true,
-      email: 'user@example.com',
-    })
+    mockUser({ isUser: true, email: users.user.email })
+    const service = await createService({ domain: ownDomainId })
 
-    const service = await mockServiceCreation(domains[0]._id)
-
-    const mockRequest = {
+    const req = {
       method: 'PATCH',
-      query: { id: service._id },
+      query: { id: service._id, domainId: ownDomainId },
       body: { name: 'New Name' },
     } as any
+    const res = mockRes()
 
-    const mockResponse = {
-      status: jest.fn(() => mockResponse),
-      json: jest.fn(),
-    } as any
+    await handler(req, res)
 
-    await handler(mockRequest, mockResponse)
-
-    expect(mockResponse.status).toHaveBeenCalledWith(403)
+    expect(res.status).toHaveBeenCalledWith(403)
   })
 
-  it('should allow GlobalAdmin to edit service', async () => {
-    ;(getCurrentUser as jest.Mock).mockResolvedValueOnce({
-      isGlobalAdmin: true,
-      isDomainAdmin: false,
-      isUser: false,
-      email: 'admin@example.com',
-    })
+  it('should return 400 if DomainAdmin omits domainId', async () => {
+    mockUser({ isDomainAdmin: true, email: users.domainAdmin.email })
+    const service = await createService({ domain: ownDomainId })
 
-    const service = await mockServiceCreation(domains[0]._id)
+    const req = {
+      method: 'PATCH',
+      query: { id: service._id },
+      body: { name: 'X' },
+    } as any
+    const res = mockRes()
 
-    const mockRequest = {
+    await handler(req, res)
+
+    expect(res.status).toHaveBeenCalledWith(400)
+  })
+
+  it('should allow GlobalAdmin to edit service without domainId', async () => {
+    mockUser({ isGlobalAdmin: true, email: users.globalAdmin.email })
+    const service = await createService({ domain: ownDomainId })
+
+    const req = {
       method: 'PATCH',
       query: { id: service._id },
       body: { name: 'New Service Name' },
     } as any
+    const res = mockRes()
 
-    const mockResponse = {
-      status: jest.fn(() => mockResponse),
-      json: jest.fn(),
-    } as any
-
-    await handler(mockRequest, mockResponse)
+    await handler(req, res)
 
     const updated = await CustomService.findById(service._id)
-
-    expect(mockResponse.status).toHaveBeenCalledWith(200)
+    expect(res.status).toHaveBeenCalledWith(200)
     expect(updated?.name).toBe('New Service Name')
   })
 
-  it('should allow DomainAdmin to edit service', async () => {
-    ;(getCurrentUser as jest.Mock).mockResolvedValueOnce({
-      isGlobalAdmin: false,
-      isDomainAdmin: true,
-      isUser: false,
-      email: 'domainadmin@example.com',
-    })
+  it('should let GlobalAdmin rename a per-domain service from any domain', async () => {
+    mockUser({ isGlobalAdmin: true, email: users.globalAdmin.email })
+    const foreign = await createService({ domain: otherDomainId })
 
-    const service = await mockServiceCreation(domains[0]._id)
-
-    const mockRequest = {
+    const req = {
       method: 'PATCH',
-      query: { id: service._id },
+      query: { id: foreign._id, domainId: ownDomainId },
+      body: { name: 'Renamed' },
+    } as any
+    const res = mockRes()
+
+    await handler(req, res)
+
+    const updated = await CustomService.findById(foreign._id)
+    expect(res.status).toHaveBeenCalledWith(200)
+    expect(updated?.name).toBe('Renamed')
+  })
+
+  it('should let GlobalAdmin rename a legacy service in place without cloning', async () => {
+    mockUser({ isGlobalAdmin: true, email: users.globalAdmin.email })
+    const legacy = await createService({ name: 'Legacy', fieldName: 'legacy' })
+
+    const req = {
+      method: 'PATCH',
+      query: { id: legacy._id },
+      body: { name: 'Legacy Renamed' },
+    } as any
+    const res = mockRes()
+
+    await handler(req, res)
+
+    expect(res.status).toHaveBeenCalledWith(200)
+    const original = await CustomService.findById(legacy._id)
+    expect(original?.name).toBe('Legacy Renamed')
+    const renamed = await CustomService.find({ name: 'Legacy Renamed' }).lean()
+    expect(renamed).toHaveLength(1)
+  })
+
+  it('should allow DomainAdmin to edit service of own domain', async () => {
+    mockUser({ isDomainAdmin: true, email: users.domainAdmin.email })
+    const service = await createService({ domain: ownDomainId })
+
+    const req = {
+      method: 'PATCH',
+      query: { id: service._id, domainId: ownDomainId },
       body: { name: 'Renamed By DomainAdmin' },
     } as any
+    const res = mockRes()
 
-    const mockResponse = {
-      status: jest.fn(() => mockResponse),
-      json: jest.fn(),
-    } as any
-
-    await handler(mockRequest, mockResponse)
+    await handler(req, res)
 
     const updated = await CustomService.findById(service._id)
-
-    expect(mockResponse.status).toHaveBeenCalledWith(200)
+    expect(res.status).toHaveBeenCalledWith(200)
     expect(updated?.name).toBe('Renamed By DomainAdmin')
   })
 
-  it('should return 400 when name is empty', async () => {
-    ;(getCurrentUser as jest.Mock).mockResolvedValueOnce({
-      isGlobalAdmin: false,
-      isDomainAdmin: true,
-      isUser: false,
-      email: 'domainadmin@example.com',
-    })
+  it('should return 403 when DomainAdmin acts in a domain they do not own', async () => {
+    mockUser({ isDomainAdmin: true, email: users.domainAdmin.email })
+    const service = await createService({ domain: otherDomainId })
 
-    const service = await mockServiceCreation(domains[0]._id)
-
-    const mockRequest = {
+    const req = {
       method: 'PATCH',
-      query: { id: service._id },
-      body: { name: '   ' },
+      query: { id: service._id, domainId: otherDomainId },
+      body: { name: 'Hacked' },
     } as any
+    const res = mockRes()
 
-    const mockResponse = {
-      status: jest.fn(() => mockResponse),
-      json: jest.fn(),
-    } as any
+    await handler(req, res)
 
-    await handler(mockRequest, mockResponse)
-
-    expect(mockResponse.status).toHaveBeenCalledWith(400)
+    const unchanged = await CustomService.findById(service._id)
+    expect(res.status).toHaveBeenCalledWith(403)
+    expect(unchanged?.name).toBe('Old Service Name')
   })
 
-  it('should return 409 if service name already exists', async () => {
-    ;(getCurrentUser as jest.Mock).mockResolvedValueOnce({
-      isGlobalAdmin: false,
-      isDomainAdmin: true,
-      isUser: false,
-      email: 'domainadmin@example.com',
+  it('should clone-on-rename when DomainAdmin edits a legacy service', async () => {
+    mockUser({ isDomainAdmin: true, email: users.domainAdmin.email })
+    const legacy = await createService({
+      name: 'Legacy',
+      fieldName: 'legacy',
     })
 
-    await CustomService.create({
-      name: 'Existing Service',
-      fieldName: 'existingService',
-      domain: domains[0]._id,
-    })
-    const service = await mockServiceCreation(domains[0]._id)
+    await Domain.updateOne(
+      { _id: ownDomainId },
+      {
+        $set: {
+          customServices: [
+            { groupName: 'Default', services: [String(legacy._id)] },
+          ],
+        },
+      }
+    )
+    await Domain.updateOne(
+      { _id: otherDomainId },
+      {
+        $set: {
+          customServices: [
+            { groupName: 'Default', services: [String(legacy._id)] },
+          ],
+        },
+      }
+    )
 
-    const mockRequest = {
+    const req = {
       method: 'PATCH',
-      query: { id: service._id },
-      body: { name: 'Existing Service' },
+      query: { id: legacy._id, domainId: ownDomainId },
+      body: { name: 'Legacy Renamed' },
     } as any
+    const res = mockRes()
 
-    const mockResponse = {
-      status: jest.fn(() => mockResponse),
-      json: jest.fn(),
+    await handler(req, res)
+
+    expect(res.status).toHaveBeenCalledWith(200)
+    const original = await CustomService.findById(legacy._id)
+    expect(original?.name).toBe('Legacy')
+
+    const clones = await CustomService.find({
+      name: 'Legacy Renamed',
+      domain: ownDomainId,
+    }).lean()
+    expect(clones).toHaveLength(1)
+    const cloneId = String(clones[0]._id)
+
+    const ownDomain = await Domain.findById(ownDomainId).lean()
+    const otherDomain = await Domain.findById(otherDomainId).lean()
+    expect(ownDomain.customServices[0].services).toContain(cloneId)
+    expect(ownDomain.customServices[0].services).not.toContain(String(legacy._id))
+    expect(otherDomain.customServices[0].services).toContain(String(legacy._id))
+  })
+
+  it('should enforce per-domain uniqueness, not global', async () => {
+    mockUser({ isDomainAdmin: true, email: users.domainAdmin.email })
+    await CustomService.create({
+      name: 'Foo',
+      fieldName: 'foo',
+      domain: ownDomainId,
+    })
+    await CustomService.create({
+      name: 'Foo',
+      fieldName: 'foo',
+      domain: otherDomainId,
+    })
+    const ownTarget = await createService({ domain: ownDomainId })
+
+    const req = {
+      method: 'PATCH',
+      query: { id: ownTarget._id, domainId: ownDomainId },
+      body: { name: 'Foo' },
     } as any
+    const res = mockRes()
 
-    await handler(mockRequest, mockResponse)
+    await handler(req, res)
 
-    expect(mockResponse.status).toHaveBeenCalledWith(409)
+    expect(res.status).toHaveBeenCalledWith(409)
+  })
+
+  it('should allow same name in another domain', async () => {
+    mockUser({ isGlobalAdmin: true, email: users.globalAdmin.email })
+    await CustomService.create({
+      name: 'Foo',
+      fieldName: 'foo',
+      domain: ownDomainId,
+    })
+    const otherTarget = await createService({ domain: otherDomainId })
+
+    const req = {
+      method: 'PATCH',
+      query: { id: otherTarget._id, domainId: otherDomainId },
+      body: { name: 'Foo' },
+    } as any
+    const res = mockRes()
+
+    await handler(req, res)
+
+    expect(res.status).toHaveBeenCalledWith(200)
+    const updated = await CustomService.findById(otherTarget._id)
+    expect(updated?.name).toBe('Foo')
+  })
+
+  it('should return 400 when name is empty', async () => {
+    mockUser({ isDomainAdmin: true, email: users.domainAdmin.email })
+    const service = await createService({ domain: ownDomainId })
+
+    const req = {
+      method: 'PATCH',
+      query: { id: service._id, domainId: ownDomainId },
+      body: { name: '   ' },
+    } as any
+    const res = mockRes()
+
+    await handler(req, res)
+
+    expect(res.status).toHaveBeenCalledWith(400)
   })
 
   it('should return 404 if service not found', async () => {
-    ;(getCurrentUser as jest.Mock).mockResolvedValueOnce({
-      isGlobalAdmin: false,
-      isDomainAdmin: true,
-      isUser: false,
-      email: 'domainadmin@example.com',
-    })
+    mockUser({ isDomainAdmin: true, email: users.domainAdmin.email })
 
-    const mockRequest = {
+    const req = {
       method: 'PATCH',
-      query: { id: '507f191e810c19729de860ea' },
+      query: {
+        id: '507f191e810c19729de860ea',
+        domainId: ownDomainId,
+      },
       body: { name: 'Any Name' },
     } as any
+    const res = mockRes()
 
-    const mockResponse = {
-      status: jest.fn(() => mockResponse),
-      json: jest.fn(),
-    } as any
+    await handler(req, res)
 
-    await handler(mockRequest, mockResponse)
-
-    expect(mockResponse.status).toHaveBeenCalledWith(404)
+    expect(res.status).toHaveBeenCalledWith(404)
   })
 })

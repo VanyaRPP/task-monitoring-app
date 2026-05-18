@@ -8,6 +8,7 @@ import {
   ICreateCustomServiceResponse,
   IDeleteCustomServiceResponse,
   IDeleteCustomServiceRequest,
+  IEditCustomServiceRequest,
   IExtendedCustomService,
 } from './customServices.api.types'
 
@@ -55,21 +56,21 @@ export const customServicesApi = createApi({
       IDeleteCustomServiceResponse,
       IDeleteCustomServiceRequest
     >({
-      query: ({ id }) => ({
+      query: ({ id, domainId }) => ({
         url: 'custom-services',
         method: 'DELETE',
-        params: { id },
+        params: { id, domainId },
       }),
       invalidatesTags: ['CustomService'],
     }),
     editCustomService: builder.mutation<
       IExtendedCustomService,
-      Partial<IExtendedCustomService>
+      IEditCustomServiceRequest
     >({
-      query: ({ _id, ...body }) => ({
+      query: ({ _id, domainId, ...body }) => ({
         url: 'custom-services',
         method: 'PATCH',
-        params: { id: _id },
+        params: { id: _id, domainId },
         body,
       }),
       invalidatesTags: ['CustomService'],

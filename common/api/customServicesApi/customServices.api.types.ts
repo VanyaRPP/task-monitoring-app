@@ -45,6 +45,14 @@ export interface ICreateCustomServiceResponse {
 
 export interface IDeleteCustomServiceRequest {
   id: string
+  domainId?: string
+}
+
+export interface IEditCustomServiceRequest {
+  _id: string
+  domainId?: string
+  name?: string
+  serviceType?: string | null
 }
 
 export interface IDeleteCustomServiceResponse {

@@ -53,6 +53,7 @@ interface Props {
   onDeleteCustomService?: (serviceKey: string) => void
   onUpdateCustomService?: (id: string, newTitle: string) => Promise<void>
   isGlobalAdmin?: boolean
+  domainId?: string
 }
 
 const DomainModal: FC<Props> = ({
@@ -65,6 +66,7 @@ const DomainModal: FC<Props> = ({
   onDeleteCustomService,
   onUpdateCustomService,
   isGlobalAdmin,
+  domainId,
 }) => {
   const [targetKeys, setTargetKeys] = useState<Record<string, string[]>>({})
   const [localServiceGroups, setLocalServiceGroups] = useState<ServiceGroup[]>(
@@ -117,6 +119,7 @@ const DomainModal: FC<Props> = ({
     try {
       const result = await deleteCustomService({
         id: serviceKey,
+        ...(domainId ? { domainId } : {}),
       }).unwrap()
 
       message.success(result.data || 'Сервіс успішно видалено')
@@ -185,6 +188,7 @@ const DomainModal: FC<Props> = ({
       await editCustomService({
         _id: item.key,
         name: tempTitle.trim(),
+        ...(domainId ? { domainId } : {}),
       }).unwrap()
 
       setLocalData((prev) =>
@@ -312,7 +316,7 @@ const DomainModal: FC<Props> = ({
               )}
 
               <Space size="small">
-                {isCustom && isAdmin && (
+                {isCustom && isAdmin && (isGlobalAdmin || !!domainId) && (
                   <>
                     {isEditing ? (
                       <>
