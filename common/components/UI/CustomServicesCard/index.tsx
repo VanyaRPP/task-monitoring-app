@@ -1,8 +1,8 @@
-import React, { useMemo } from 'react'
-import { InputNumber, Space, Button, Form, Dropdown, Menu, Tooltip } from 'antd'
+import React, { useMemo, useRef, useState } from 'react'
+import { InputNumber, Space, Button, Form, Select, Tooltip } from 'antd'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { inputNumberParser } from '@utils/helpers'
-import { CloseOutlined, PlusOutlined } from '@ant-design/icons'
+import { CloseOutlined, CheckOutlined } from '@ant-design/icons'
 import { Roles } from '@utils/constants'
 
 type CustomServicesCardProps = {
@@ -29,22 +29,74 @@ const CustomServicesCard: React.FC<CustomServicesCardProps> = ({
   )
 
   const customServices = Form.useWatch('customServices', form) || []
+  const selectedIds: string[] = customServices.map((s: any) => s._id)
 
-  const selectedIds = customServices.map((s: any) => s._id)
-  const dropdownOptions = allCustomServices.filter(
-    (service) => !selectedIds.includes(service?._id)
-  )
+  const [lastClickedId, setLastClickedId] = useState<string | null>(null)
+  const shiftPressedRef = useRef(false)
 
-  const handleAddService = (service) => {
-    if (customServices.find((s: any) => s._id === service.value)) return
-    const newEntry = {
-      _id: service?._id,
-      label: service?.label,
-      fieldName: service?.fieldName,
-      price: 0,
-    }
-    form.setFieldsValue({ customServices: [...customServices, newEntry] })
+  const buildEntry = (service: any) => ({
+    _id: service?._id,
+    label: service?.label,
+    fieldName: service?.fieldName,
+    price: 0,
+  })
+
+  const applyIds = (ids: string[]) => {
+    const uniqueIds = Array.from(new Set(ids))
+    const next = uniqueIds.map((id) => {
+      const existing = customServices.find((s: any) => s._id === id)
+      if (existing) return existing
+      const source = allCustomServices.find((s) => s?._id === id)
+      return buildEntry(source)
+    })
+    form.setFieldsValue({ customServices: next })
   }
+
+  const handleSelectChange = (ids: string[]) => {
+    if (shiftPressedRef.current && lastClickedId) {
+      const added = ids.find((id) => !selectedIds.includes(id))
+      if (added) {
+        const fromIdx = allCustomServices.findIndex(
+          (s) => s?._id === lastClickedId
+        )
+        const toIdx = allCustomServices.findIndex((s) => s?._id === added)
+        if (fromIdx !== -1 && toIdx !== -1) {
+          const [start, end] = [
+            Math.min(fromIdx, toIdx),
+            Math.max(fromIdx, toIdx),
+          ]
+          const rangeIds = allCustomServices
+            .slice(start, end + 1)
+            .map((s) => s?._id)
+          applyIds([...selectedIds, ...rangeIds])
+          setLastClickedId(added)
+          return
+        }
+      }
+    }
+
+    const added = ids.find((id) => !selectedIds.includes(id))
+    if (added) setLastClickedId(added)
+    applyIds(ids)
+  }
+
+  const allSelected =
+    allCustomServices.length > 0 &&
+    selectedIds.length === allCustomServices.length
+
+  const handleToggleAll = () => {
+    if (allSelected) {
+      applyIds([])
+      setLastClickedId(null)
+    } else {
+      applyIds(allCustomServices.map((s) => s?._id))
+    }
+  }
+
+  const selectOptions = allCustomServices.map((s) => ({
+    value: s?._id,
+    label: s?.label,
+  }))
 
   const handleRemoveService = (index: number) => {
     const updated = [...customServices]
@@ -56,27 +108,43 @@ const CustomServicesCard: React.FC<CustomServicesCardProps> = ({
     <div>
       {!disabled && !isServiceForm && (
         <Tooltip
-          title={dropdownOptions.length === 0 ? 'У обраного домена відсутні послуги' : ''}
+          title={allCustomServices.length === 0 ? 'У обраного домена відсутні послуги' : ''}
           placement="top"
         >
-          <Dropdown
-            menu={{
-              items: dropdownOptions.map((option) => ({
-                key: option.value,
-                label: option.label,
-                onClick: () => handleAddService(option),
-              })),
+          <Select
+            mode="multiple"
+            placeholder="Індивідуальні послуги"
+            value={selectedIds}
+            onChange={handleSelectChange}
+            options={selectOptions}
+            disabled={allCustomServices.length === 0}
+            style={{ width: '100%', marginBottom: 16 }}
+            maxTagCount="responsive"
+            optionFilterProp="label"
+            onKeyDown={(e) => {
+              shiftPressedRef.current = e.shiftKey
             }}
-            trigger={['click']}
-          >
-            <Button
-              style={{ width: '100%', height: 40, marginBottom: 16 }}
-              type="dashed"
-              icon={<PlusOutlined />}
-            >
-              Індивідуальні послуги
-            </Button>
-          </Dropdown>
+            onKeyUp={(e) => {
+              shiftPressedRef.current = e.shiftKey
+            }}
+            onMouseDown={(e) => {
+              shiftPressedRef.current = e.shiftKey
+            }}
+            popupRender={(menu) => (
+              <>
+                <Button
+                  type="text"
+                  block
+                  icon={allSelected ? <CheckOutlined /> : null}
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={handleToggleAll}
+                >
+                  {allSelected ? 'Скасувати вибір' : 'Обрати всі'}
+                </Button>
+                {menu}
+              </>
+            )}
+          />
         </Tooltip>
       )}
 
