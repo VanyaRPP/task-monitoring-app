@@ -196,7 +196,7 @@ const getDefaultColumns = (
       title: 'Рік',
       dataIndex: 'year',
       width: 120,
-      filters: isOnPage ? [...(yearFilter || [])].sort((a, b) => Number(b.value) - Number(a.value)) : null,
+      filters: isOnPage ? yearFilter : null,
       filteredValue: filter?.year || null,
       render: (_, record: IService) => dateToYear(record.date),
       filterSearch: true,
