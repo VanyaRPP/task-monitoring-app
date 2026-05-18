@@ -3,16 +3,30 @@ import { usePaymentContext } from '@components/AddPaymentModal'
 import { InvoiceComponentProps } from '@components/Tables/EditInvoiceTable'
 import { currencyWithUnit, toArray, toFirstUpperCase, toRoundFixed } from '@utils/helpers'
 import validator from '@utils/validator'
-import { Form, Input, Space, Typography } from 'antd'
-import { useMemo } from 'react'
+import { Form, Input, InputProps, Space, Typography } from 'antd'
+import { useEffect, useMemo } from 'react'
 import useSyncSum from '../useSyncSum'
 import { UpdateInvoiceButton } from './UpdateInvoiceButton'
+
+const LabelInput: React.FC<InputProps & { defaultLabel?: string }> = ({
+  defaultLabel,
+  value,
+  onChange,
+  disabled,
+}) => (
+  <Input
+    value={value !== undefined && value !== null ? value : defaultLabel}
+    onChange={onChange}
+    disabled={disabled}
+  />
+)
 
 export const Name: React.FC<InvoiceComponentProps> = ({
   form,
   name: _name,
   editable,
   disabled,
+  record,
 }) => {
   const name = useMemo(() => toArray<string>(_name), [_name])
 
@@ -24,20 +38,29 @@ export const Name: React.FC<InvoiceComponentProps> = ({
     form
   )
 
-const { service, company } = usePaymentContext()
-const currentPrice = Form.useWatch(['invoice', ...name, 'price'], form)
+  const { service, company } = usePaymentContext()
+  const currentPrice = Form.useWatch(['invoice', ...name, 'price'], form)
+  const defaultLabel = value || type || ''
 
-const defaultPrice = useMemo(() => {
-  if (!fieldName) return undefined
+  useEffect(() => {
+    if (!editable || !form || !name.length) return
+    const current = form.getFieldValue(['invoice', ...name, 'description'])
+    if (current === undefined || current === null || current === '') {
+      form.setFieldValue(['invoice', ...name, 'description'], defaultLabel)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
-  return company?.customServices?.find(s => s.fieldName === fieldName)?.price
-      ?? service?.customServices?.find(s => s.fieldName === fieldName)?.price
-}, [company?.customServices, service?.customServices, fieldName])
+  const defaultPrice = useMemo(() => {
+    if (!fieldName) return undefined
+    return company?.customServices?.find(s => s.fieldName === fieldName)?.price
+        ?? service?.customServices?.find(s => s.fieldName === fieldName)?.price
+  }, [company?.customServices, service?.customServices, fieldName])
 
   if (!editable || type !== 'custom') {
     return (
       <Space direction="vertical" size={0}>
-        <Typography.Text>{value || type}</Typography.Text>
+        <Typography.Text>{record?.description || value || type}</Typography.Text>
         <Typography.Text type="secondary" style={{ fontSize: '0.75rem' }}>
           {toFirstUpperCase(dateToMonthYear(service?.date))}
         </Typography.Text>
@@ -46,26 +69,28 @@ const defaultPrice = useMemo(() => {
   }
 
   return (
-  <Space
+    <Space
       direction="horizontal"
       style={{ justifyContent: 'space-between', width: '100%' }}
-      >
-    <Form.Item
-      name={[...name, 'name']}
-      rules={[validator.required()]}
-      style={{ margin: 0 }}
     >
-      {isCustomService ? (
-        <Space direction="vertical" size={0}>
-          <Typography.Text>{value || 'Назва...'}</Typography.Text>
-          <Typography.Text type="secondary" style={{ fontSize: '0.75rem' }}>
-            {toFirstUpperCase(dateToMonthYear(service?.date))}
-          </Typography.Text>
-        </Space>
-      ) : (
-        <Input placeholder="Назва..." disabled={disabled} />
-      )}
-    </Form.Item>
+      <Space direction="vertical" size={0}>
+        {isCustomService ? (
+          <Form.Item name={[...name, 'description']} style={{ margin: 0 }}>
+            <LabelInput defaultLabel={defaultLabel} disabled={disabled} />
+          </Form.Item>
+        ) : (
+          <Form.Item
+            name={[...name, 'name']}
+            rules={[validator.required()]}
+            style={{ margin: 0 }}
+          >
+            <Input placeholder="Назва..." disabled={disabled} />
+          </Form.Item>
+        )}
+        <Typography.Text type="secondary" style={{ fontSize: '0.75rem' }}>
+          {toFirstUpperCase(dateToMonthYear(service?.date))}
+        </Typography.Text>
+      </Space>
       <UpdateInvoiceButton
         currentPrice={currentPrice}
         defaultPrice={defaultPrice}

@@ -15,7 +15,7 @@ import {
   CheckOutlined,
   TableOutlined,
 } from '@ant-design/icons'
-import { Dropdown, Tooltip, message, MenuProps } from 'antd'
+import { Dropdown, Form, Tooltip, message, MenuProps } from 'antd'
 import s from './style.module.scss'
 import { templateMap } from './templateMap'
 
@@ -38,6 +38,7 @@ const GroupedReceiptForm: FC<Props> = ({
   paymentActions: _paymentActions,
 }) => {
   const {
+    form,
     template,
     setTemplate,
     setTemplateScope,
@@ -46,8 +47,12 @@ const GroupedReceiptForm: FC<Props> = ({
     setShowQuantityInPreview,
   } = usePaymentContext()
   const [editPayment] = useEditPaymentMutation()
+  const liveInvoice = Form.useWatch('invoice', form)
   const rawData = currPayment ?? paymentData ?? null
-  const data = rawData as any
+  const resolvedInvoice = (liveInvoice ?? rawData?.invoice ?? []).map(
+    (item: any) => ({ ...item, description: item?.description || item?.name })
+  )
+  const data = rawData ? { ...rawData, invoice: resolvedInvoice } : rawData
 
   const receiptProps = useReceiptTemplateProps({
     data,
@@ -76,7 +81,9 @@ const GroupedReceiptForm: FC<Props> = ({
   const componentRef = useRef<HTMLDivElement | null>(null)
 
   const printCompanyName =
-    data?.company?.companyName ?? data?.reciever?.companyName ?? ''
+    (typeof data?.company === 'string'
+      ? data.company
+      : data?.company?.companyName) ?? data?.reciever?.companyName ?? ''
 
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,

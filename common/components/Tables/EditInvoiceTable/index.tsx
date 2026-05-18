@@ -93,7 +93,7 @@ export const EditInvoicesTable_unstable: React.FC<EditInvoicesTableProps> = ({
           },
           {
             title: 'Кількість',
-            width: 500,
+            width: 250,
             render: (_: any, { name }: { name: number }) => (
               <Amount
                 form={form}
@@ -298,5 +298,5 @@ const Component: React.FC<
   const C = components?.[COLUMN_TO_SLOT[type]]
   if (!C) return null
 
-  return <C form={form} name={name} {...props} />
+  return <C form={form} name={name} record={record} {...props} />
 }

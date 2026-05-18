@@ -1,14 +1,30 @@
 import { dateToMonthYear } from '@assets/features/formatDate'
 import { usePaymentContext } from '@components/AddPaymentModal'
+import { InvoiceType } from '@components/Tables/EditInvoiceTable'
 import { ServiceType } from '@utils/constants'
-import { toFirstUpperCase } from '@utils/helpers'
-import { FormInstance, Space, Typography } from 'antd'
-import { ReactNode } from 'react'
+import { toArray, toFirstUpperCase } from '@utils/helpers'
+import { Form, FormInstance, Input, InputProps, Space, Typography } from 'antd'
+import { ReactNode, useEffect, useMemo } from 'react'
 import UpdateInvoiceButton from './UpdateInvoiceButton'
+
+// Показує defaultLabel як value коли form ще не має значення для цього поля.
+const LabelInput: React.FC<InputProps & { defaultLabel?: string }> = ({
+  defaultLabel,
+  value,
+  onChange,
+  disabled,
+}) => (
+  <Input
+    value={value !== undefined && value !== null ? value : defaultLabel}
+    onChange={onChange}
+    disabled={disabled}
+  />
+)
 
 export interface InvoiceRowNameProps {
   form?: FormInstance
   name?: string | string[] | number | number[]
+  record?: InvoiceType
   serviceType: ServiceType
   editable?: boolean
   disabled?: boolean
@@ -20,6 +36,7 @@ export interface InvoiceRowNameProps {
 const InvoiceRowName: React.FC<InvoiceRowNameProps> = ({
   form,
   name,
+  record,
   serviceType,
   editable,
   disabled,
@@ -29,6 +46,19 @@ const InvoiceRowName: React.FC<InvoiceRowNameProps> = ({
 }) => {
   const { service } = usePaymentContext()
   const defaultSubtitle = toFirstUpperCase(dateToMonthYear(service?.date))
+  const nameArr = useMemo(
+    () => (name !== undefined ? toArray<string>(name) : []),
+    [name]
+  )
+
+  useEffect(() => {
+    if (!editable || !form || !nameArr.length || typeof label !== 'string') return
+    const current = form.getFieldValue(['invoice', ...nameArr, 'description'])
+    if (current === undefined || current === null || current === '') {
+      form.setFieldValue(['invoice', ...nameArr, 'description'], label)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return (
     <Space
@@ -36,7 +66,18 @@ const InvoiceRowName: React.FC<InvoiceRowNameProps> = ({
       style={{ justifyContent: 'space-between', width: '100%' }}
     >
       <Space direction="vertical" size={0}>
-        <Typography.Text>{label}</Typography.Text>
+        {editable && nameArr.length > 0 ? (
+          <Form.Item name={[...nameArr, 'description']} style={{ margin: 0 }}>
+            <LabelInput
+              defaultLabel={typeof label === 'string' ? label : undefined}
+              disabled={disabled}
+            />
+          </Form.Item>
+        ) : (
+          <Typography.Text>
+            {record?.description || label}
+          </Typography.Text>
+        )}
         {middle ? (
           <Typography.Text type="secondary" style={{ fontSize: '0.9rem' }}>
             {middle}

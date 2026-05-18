@@ -1,4 +1,5 @@
 import { FC, useEffect, useRef, useState } from 'react'
+import { Form } from 'antd'
 import { useReactToPrint } from 'react-to-print'
 import { PrinterOutlined, TableOutlined } from '@ant-design/icons'
 import { Tooltip } from 'antd'
@@ -36,8 +37,14 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
   const isEnglish = normalizeCurrency(currency) !== 'UAH'
   const currencyNames = getCurrencyNames(currency, isEnglish)
 
-  const { company, showQuantityInPreview, setShowQuantityInPreview } =
+  const { form, company, showQuantityInPreview, setShowQuantityInPreview } =
     usePaymentContext()
+
+  const liveInvoice = Form.useWatch('invoice', form)
+
+  useEffect(() => {
+    if (liveInvoice) setPayment((prev) => ({ ...prev, invoice: liveInvoice }))
+  }, [liveInvoice])
 
   const domainNameFromContext =
     typeof company?.domain === 'object' && company?.domain !== null
@@ -215,7 +222,7 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
               usePreviewQuantityToggle
               domainId={payment?.domain?._id}
               currency={currency}
-              invoices={payment.invoice}
+              invoices={liveInvoice ?? payment.invoice}
             />
           </div>
 

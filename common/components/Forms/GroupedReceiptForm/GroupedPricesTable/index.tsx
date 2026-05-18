@@ -115,9 +115,8 @@ const assignInvoicesToGroupsFirstWin = (
 }
 
 function resolveInvoiceLabel(inv: any, t: TFunction<'groupedReceipt'>): string {
-  if (inv?.name) return inv.name
-  const key = getInvoiceServiceLabelKey(inv.type)
-  return t(`services.${key}`)
+  if (inv?.description) return inv.description
+  return inv?.name ?? t(`services.${getInvoiceServiceLabelKey(inv.type)}`)
 }
 
 const getColumns = (
@@ -297,7 +296,7 @@ const GroupedPricesTable: React.FC<PaymentPricesTableProps> = ({
     if (discountInvoice) {
       rows.push({
         key: rows.length + 1,
-        name: tInvoice('services.discount'),
+        name: resolveInvoiceLabel(discountInvoice, tInvoice),
         sum: discountInvoice.sum,
       })
     }
