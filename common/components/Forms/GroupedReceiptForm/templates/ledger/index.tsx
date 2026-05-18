@@ -8,9 +8,21 @@ import {
 import lg from './ledger.module.scss'
 
 const LedgerTemplate: FC<TemplateProps> = ({
-  data, componentRef, isEnglish, currencyLabel, modernInvoiceNumber, domainName,
-  rows, getQty, subtotal, taxPercent, taxAmount, total,
-  paymentInfoLines, issuedToLines, normalizedBankDetailsLines,
+  data,
+  componentRef,
+  isEnglish,
+  currencyLabel,
+  modernInvoiceNumber,
+  domainName,
+  rows,
+  getQty,
+  subtotal,
+  taxPercent,
+  taxAmount,
+  total,
+  paymentInfoLines,
+  issuedToLines,
+  normalizedBankDetailsLines,
 }) => {
   const { heading: paymentHeading, bodyLines: paymentBodyLines } =
     getBillFromHeadingAndBodyLines(data, paymentInfoLines)
@@ -40,23 +52,31 @@ const LedgerTemplate: FC<TemplateProps> = ({
 
       <div className={lg.lgMeta}>
         <div className={lg.lgMetaCell}>
-          <div className={lg.lgMetaCellLabel}>{isEnglish ? 'Issue date' : 'Дата'}</div>
+          <div className={lg.lgMetaCellLabel}>
+            {isEnglish ? 'Issue date' : 'Дата'}
+          </div>
           <div className={lg.lgMetaCellValue}>
             {dayjs(data?.invoiceCreationDate)?.format?.('DD.MM.YYYY')}
           </div>
         </div>
         <div className={lg.lgMetaCell}>
-          <div className={lg.lgMetaCellLabel}>{isEnglish ? 'Due date' : 'Строк оплати'}</div>
+          <div className={lg.lgMetaCellLabel}>
+            {isEnglish ? 'Due date' : 'Строк оплати'}
+          </div>
           <div className={lg.lgMetaCellValue}>
             {dayjs(data?.invoiceCreationDate).add(5, 'd').format('DD.MM.YYYY')}
           </div>
         </div>
         <div className={lg.lgMetaCell}>
-          <div className={lg.lgMetaCellLabel}>{isEnglish ? 'Invoice №' : 'Рахунок №'}</div>
+          <div className={lg.lgMetaCellLabel}>
+            {isEnglish ? 'Invoice №' : 'Рахунок №'}
+          </div>
           <div className={lg.lgMetaCellValue}>{modernInvoiceNumber}</div>
         </div>
         <div className={lg.lgMetaCell}>
-          <div className={lg.lgMetaCellLabel}>{isEnglish ? 'Currency' : 'Валюта'}</div>
+          <div className={lg.lgMetaCellLabel}>
+            {isEnglish ? 'Currency' : 'Валюта'}
+          </div>
           <div className={lg.lgMetaCellValue}>{currencyLabel}</div>
         </div>
       </div>
@@ -85,11 +105,17 @@ const LedgerTemplate: FC<TemplateProps> = ({
                 {normalizedBankDetailsLines.map((line: string, idx: number) => {
                   const sep = line.indexOf(':')
                   if (sep < 0) {
-                    return <div className={lg.lgBankLine} key={`bk-${idx}`}>{line}</div>
+                    return (
+                      <div className={lg.lgBankLine} key={`bk-${idx}`}>
+                        {line}
+                      </div>
+                    )
                   }
                   return (
                     <div className={lg.lgBankLine} key={`bk-${idx}`}>
-                      <span className={lg.lgBankLineLabel}>{line.slice(0, sep + 1)}</span>
+                      <span className={lg.lgBankLineLabel}>
+                        {line.slice(0, sep + 1)}
+                      </span>
                       {line.slice(sep + 1)}
                     </div>
                   )
@@ -143,7 +169,9 @@ const LedgerTemplate: FC<TemplateProps> = ({
                   <td>{item?.name || item?.type || '—'}</td>
                   <td>{rate.toFixed(2)}</td>
                   <td>{qty}</td>
-                  <td>{Number(item?.sum || 0).toFixed(2)}&nbsp;{currencyLabel}</td>
+                  <td>
+                    {Number(item?.sum || 0).toFixed(2)}&nbsp;{currencyLabel}
+                  </td>
                 </tr>
               )
             })}
@@ -153,17 +181,21 @@ const LedgerTemplate: FC<TemplateProps> = ({
 
       <div className={lg.lgSummary}>
         <div className={lg.lgDates}>
-          <div className={lg.lgDatesHeader}>
-            {isEnglish ? 'Dates' : 'Дати'}
-          </div>
+          <div className={lg.lgDatesHeader}>{isEnglish ? 'Dates' : 'Дати'}</div>
           <div className={lg.lgDatesBody}>
             <div className={lg.lgDateRow}>
               <span>{isEnglish ? 'Issued' : 'Дата'}</span>
-              <strong>{dayjs(data?.invoiceCreationDate)?.format?.('DD.MM.YYYY')}</strong>
+              <strong>
+                {dayjs(data?.invoiceCreationDate)?.format?.('DD.MM.YYYY')}
+              </strong>
             </div>
             <div className={lg.lgDateRow}>
               <span>{isEnglish ? 'Due' : 'Строк'}</span>
-              <strong>{dayjs(data?.invoiceCreationDate).add(5, 'd').format('DD.MM.YYYY')}</strong>
+              <strong>
+                {dayjs(data?.invoiceCreationDate)
+                  .add(5, 'd')
+                  .format('DD.MM.YYYY')}
+              </strong>
             </div>
           </div>
         </div>
@@ -176,18 +208,23 @@ const LedgerTemplate: FC<TemplateProps> = ({
               <>
                 <div className={lg.lgTotalRow}>
                   <span>{isEnglish ? 'Subtotal' : 'Підсумок'}</span>
-                  <strong>{subtotal.toFixed(2)}&nbsp;{currencyLabel}</strong>
+                  <strong>
+                    {subtotal.toFixed(2)}&nbsp;{currencyLabel}
+                  </strong>
                 </div>
                 <div className={lg.lgTotalRow}>
                   <span>VAT {taxPercent}%</span>
-                  <strong>{taxAmount.toFixed(2)}&nbsp;{currencyLabel}</strong>
+                  <strong>
+                    {taxAmount.toFixed(2)}&nbsp;{currencyLabel}
+                  </strong>
                 </div>
               </>
             )}
             <div className={`${lg.lgTotalRow} ${lg.lgGrandTotal}`}>
               <span>{isEnglish ? 'Total due' : 'До сплати'}</span>
               <strong>
-                {(+data?.generalSum || +data?.debit || total).toFixed(2)}&nbsp;{currencyLabel}
+                {(+data?.generalSum || +data?.debit || total).toFixed(2)}&nbsp;
+                {currencyLabel}
               </strong>
             </div>
           </div>

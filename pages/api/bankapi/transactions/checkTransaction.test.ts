@@ -8,15 +8,23 @@ jest.mock('@utils/getCurrentUser', () => ({
   getCurrentUser: jest.fn(),
 }))
 
-jest.mock('pages/api/auth/[...nextauth]', () => ({
-  __esModule: true,
-  default: jest.fn(),
-}), { virtual: true })
+jest.mock(
+  'pages/api/auth/[...nextauth]',
+  () => ({
+    __esModule: true,
+    default: jest.fn(),
+  }),
+  { virtual: true }
+)
 
-jest.mock('common/lib/mongodb', () => ({
-  __esModule: true,
-  default: jest.fn().mockResolvedValue({}),
-}), { virtual: true })
+jest.mock(
+  'common/lib/mongodb',
+  () => ({
+    __esModule: true,
+    default: jest.fn().mockResolvedValue({}),
+  }),
+  { virtual: true }
+)
 
 jest.mock('@utils/helpers', () => ({
   toRoundFixed: jest.fn((val) => parseFloat(val).toFixed(2)),
@@ -76,7 +84,9 @@ describe('checkTransaction', () => {
 
     expect(mockedFind).toHaveBeenCalledTimes(1)
     expect(mockedFind).toHaveBeenCalledWith({
-      'transaction.TECHNICAL_TRANSACTION_ID': { $in: ['tx_001_online', 'tx_001'] },
+      'transaction.TECHNICAL_TRANSACTION_ID': {
+        $in: ['tx_001_online', 'tx_001'],
+      },
     })
   })
 
@@ -262,7 +272,8 @@ describe('checkTransaction', () => {
       },
     })
     expect(mockedFindOne).toHaveBeenCalledWith({
-      'transaction.OSND': 'Сплата за послуги знідно рахунку, Чорна Марина Євгеніївна',
+      'transaction.OSND':
+        'Сплата за послуги знідно рахунку, Чорна Марина Євгеніївна',
     })
     expect(result).toEqual({
       isMatchingPayment: false,

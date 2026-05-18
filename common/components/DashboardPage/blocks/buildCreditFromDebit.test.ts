@@ -49,8 +49,12 @@ describe('buildCreditFromDebit', () => {
     const before = new Date()
     const result = buildCreditFromDebit(baseSource, 1)
     const after = new Date()
-    expect(result.invoiceCreationDate.getTime()).toBeGreaterThanOrEqual(before.getTime())
-    expect(result.invoiceCreationDate.getTime()).toBeLessThanOrEqual(after.getTime())
+    expect(result.invoiceCreationDate.getTime()).toBeGreaterThanOrEqual(
+      before.getTime()
+    )
+    expect(result.invoiceCreationDate.getTime()).toBeLessThanOrEqual(
+      after.getTime()
+    )
   })
 
   it('returns empty invoice array', () => {
@@ -59,7 +63,10 @@ describe('buildCreditFromDebit', () => {
   })
 
   it('resolves monthService when it is a string', () => {
-    const result = buildCreditFromDebit({ ...baseSource, monthService: 'ms-string' }, 1)
+    const result = buildCreditFromDebit(
+      { ...baseSource, monthService: 'ms-string' },
+      1
+    )
     expect(result.monthService).toBe('ms-string')
   })
 

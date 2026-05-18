@@ -41,7 +41,10 @@ describe('calculatePermissions (pure logic)', () => {
   })
 
   it('user with role DomainAdmin', () => {
-    const result = calculatePermissions(users.domainAdmin as any, users.domainAdmin as any)
+    const result = calculatePermissions(
+      users.domainAdmin as any,
+      users.domainAdmin as any
+    )
 
     expect(result).toEqual({
       isGlobalAdmin: false,
@@ -52,7 +55,10 @@ describe('calculatePermissions (pure logic)', () => {
   })
 
   it('user with role GlobalAdmin', () => {
-    const result = calculatePermissions(users.globalAdmin as any, users.globalAdmin as any)
+    const result = calculatePermissions(
+      users.globalAdmin as any,
+      users.globalAdmin as any
+    )
 
     expect(result).toEqual({
       isGlobalAdmin: true,

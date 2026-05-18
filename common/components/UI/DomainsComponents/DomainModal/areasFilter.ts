@@ -13,18 +13,14 @@ export interface CompanyAreaRow {
   _initialRentPart?: number
 }
 
-const sameNumber = (a: unknown, b: unknown): boolean =>
-  Number(a) === Number(b)
+const sameNumber = (a: unknown, b: unknown): boolean => Number(a) === Number(b)
 
 /** True when the row has explicit initial values AND `area` or `rentPart`
  *  diverges from them. Rows without initial values (i.e. not seeded from the
  *  API) are treated as unchanged — the modal should not blindly fire updates
  *  for them. */
 export const isCompanyAreaChanged = (row: CompanyAreaRow): boolean => {
-  if (
-    row._initialArea === undefined &&
-    row._initialRentPart === undefined
-  ) {
+  if (row._initialArea === undefined && row._initialRentPart === undefined) {
     return false
   }
   return (

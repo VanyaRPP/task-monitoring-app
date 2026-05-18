@@ -24,7 +24,7 @@ const PaymentCardLabel = ({
   domainFilter,
   realEstatesFilter,
   isAdmin,
-  allowedServices
+  allowedServices,
 }: any) => {
   const router = useRouter()
   const { pathname } = router

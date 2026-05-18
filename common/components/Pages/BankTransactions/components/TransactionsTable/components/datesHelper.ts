@@ -6,10 +6,15 @@ import { buildMonthServicePlaceholder } from '@common/components/Forms/AddPaymen
 dayjs.extend(customParseFormat)
 dayjs.locale('uk')
 
-export const getRollingServices = (allServices: any[], rollingMonthCount: number) => {
+export const getRollingServices = (
+  allServices: any[],
+  rollingMonthCount: number
+) => {
   const byMonthKey = new Map<string, any>()
 
-  let earliestDate = dayjs().subtract(rollingMonthCount, 'month').startOf('month')
+  let earliestDate = dayjs()
+    .subtract(rollingMonthCount, 'month')
+    .startOf('month')
 
   for (const svc of allServices) {
     const svcDate = dayjs(svc.date).startOf('month')
@@ -22,24 +27,30 @@ export const getRollingServices = (allServices: any[], rollingMonthCount: number
   }
 
   let current = dayjs().startOf('month')
-  
-  while (current.isAfter(earliestDate) || current.isSame(earliestDate, 'month')) {
+
+  while (
+    current.isAfter(earliestDate) ||
+    current.isSame(earliestDate, 'month')
+  ) {
     const key = current.format('YYYY-MM')
     if (!byMonthKey.has(key)) {
-      byMonthKey.set(key, { 
-        _id: buildMonthServicePlaceholder(current), 
-        date: current.toISOString() 
+      byMonthKey.set(key, {
+        _id: buildMonthServicePlaceholder(current),
+        date: current.toISOString(),
       })
     }
     current = current.subtract(1, 'month')
   }
 
-  return [...byMonthKey.values()].sort((a, b) => 
-    dayjs(b.date).valueOf() - dayjs(a.date).valueOf()
+  return [...byMonthKey.values()].sort(
+    (a, b) => dayjs(b.date).valueOf() - dayjs(a.date).valueOf()
   )
 }
 
-export const formatDate = (date: string | Date | dayjs.Dayjs, format: string) => {
+export const formatDate = (
+  date: string | Date | dayjs.Dayjs,
+  format: string
+) => {
   return dayjs(date).format(format)
 }
 

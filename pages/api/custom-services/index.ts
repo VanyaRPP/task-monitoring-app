@@ -62,7 +62,11 @@ export default async function handler(
 
         let domainObjectId: mongoose.Types.ObjectId | undefined
         const rawDomainId = req.body?.domainId
-        if (rawDomainId !== undefined && rawDomainId !== null && rawDomainId !== '') {
+        if (
+          rawDomainId !== undefined &&
+          rawDomainId !== null &&
+          rawDomainId !== ''
+        ) {
           if (!mongoose.Types.ObjectId.isValid(String(rawDomainId))) {
             return res.status(400).json({
               success: false,
@@ -144,7 +148,7 @@ export default async function handler(
             message: 'Сервіс не знайдений',
           })
         }
-        
+
         return res.status(200).json({
           success: true,
           data: 'Сервіс успішно видалено',
@@ -276,8 +280,7 @@ export default async function handler(
           ]
         }
 
-        const hasExplicitIds =
-          _id !== undefined && _id !== null && _id !== ''
+        const hasExplicitIds = _id !== undefined && _id !== null && _id !== ''
 
         let customServices
         if (!hasExplicitIds) {

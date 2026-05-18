@@ -101,11 +101,16 @@ const OlimpTemplate: FC<TemplateProps> = ({
         <div className={s.brandBlock}>
           <div className={s.brandText}>
             <span className={s.dateOlimp}>
-              {isEnglish ? 'Note:' : 'Примітка:'} {dayjs(data?.monthService?.date)?.locale?.(isEnglish ? 'en' : 'uk')?.format?.('MMMM YYYY')}
+              {isEnglish ? 'Note:' : 'Примітка:'}{' '}
+              {dayjs(data?.monthService?.date)
+                ?.locale?.(isEnglish ? 'en' : 'uk')
+                ?.format?.('MMMM YYYY')}
             </span>
           </div>
         </div>
-        <h1>{isEnglish ? 'INVOICE' : 'РАХУНОК'} №{modernInvoiceNumber}</h1>
+        <h1>
+          {isEnglish ? 'INVOICE' : 'РАХУНОК'} №{modernInvoiceNumber}
+        </h1>
       </div>
 
       <div className={s.invoiceInfoCard}>
@@ -129,9 +134,7 @@ const OlimpTemplate: FC<TemplateProps> = ({
                 return (
                   <div
                     className={
-                      accent
-                        ? `${s.infoLine} ${s.infoLineAccent}`
-                        : s.infoLine
+                      accent ? `${s.infoLine} ${s.infoLineAccent}` : s.infoLine
                     }
                     key={`${line}-${idx}`}
                   >
@@ -143,13 +146,12 @@ const OlimpTemplate: FC<TemplateProps> = ({
           </div>
 
           {!!normalizedBankDetailsLines.length && (
-            <div className={`${s.infoColumn} ${s.infoCard} ${s.bankDetailsCard}`}>
+            <div
+              className={`${s.infoColumn} ${s.infoCard} ${s.bankDetailsCard}`}
+            >
               <div className={s.infoList}>
                 {normalizedBankDetailsLines.map((line: string, idx: number) => (
-                  <div
-                    className={s.infoLine}
-                    key={`${line}-${idx}`}
-                  >
+                  <div className={s.infoLine} key={`${line}-${idx}`}>
                     {renderBankDetailsLine(line)}
                   </div>
                 ))}
@@ -161,7 +163,9 @@ const OlimpTemplate: FC<TemplateProps> = ({
         <div
           className={`${s.infoColumn} ${s.infoCard} ${s.topInfoCard} ${s.issuedToCard}`}
           style={
-            topInfoCardHeight > 0 ? { height: `${topInfoCardHeight}px` } : undefined
+            topInfoCardHeight > 0
+              ? { height: `${topInfoCardHeight}px` }
+              : undefined
           }
         >
           <h4>{isEnglish ? 'ISSUED TO:' : 'ОТРИМУВАЧ:'}</h4>
@@ -223,11 +227,17 @@ const OlimpTemplate: FC<TemplateProps> = ({
         <div className={s.invoiceDates}>
           <div className={s.infoRow}>
             <span>{isEnglish ? 'DATE:' : 'ДАТА:'}</span>
-            <strong>{dayjs(data?.invoiceCreationDate)?.format?.('DD.MM.YYYY')}</strong>
+            <strong>
+              {dayjs(data?.invoiceCreationDate)?.format?.('DD.MM.YYYY')}
+            </strong>
           </div>
           <div className={s.infoRow}>
             <span>{isEnglish ? 'DUE DATE:' : 'СТРОК ОПЛАТИ:'}</span>
-            <strong>{dayjs(data?.invoiceCreationDate).add(5, 'd').format('DD.MM.YYYY')}</strong>
+            <strong>
+              {dayjs(data?.invoiceCreationDate)
+                .add(5, 'd')
+                .format('DD.MM.YYYY')}
+            </strong>
           </div>
         </div>
 

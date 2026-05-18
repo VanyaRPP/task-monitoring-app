@@ -31,15 +31,14 @@ body {
     }
   }
 
-
   &.light {
     background-color: rgba(255, 255, 255, 0.65);
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
 
-    border: 1px solid rgba(20, 20, 40, 0.10);
+    border: 1px solid rgba(20, 20, 40, 0.1);
     border-radius: 6px;
-    box-shadow: 0 12px 35px rgba(20, 20, 40, 0.10);
+    box-shadow: 0 12px 35px rgba(20, 20, 40, 0.1);
 
     transition: background-color 0.3s ease, backdrop-filter 0.3s ease;
 

@@ -75,13 +75,16 @@ const ServicesSelect: React.FC<ServicesSelectProps> = ({
 
   const options = useMemo(() => {
     if (!services || services.length === 0) return []
-    
+
     const validServices = services.filter((service) => {
       const hasId = service?._id !== undefined && service?._id !== null
-      const hasName = service?.name !== undefined && service?.name !== null && service?.name !== ''
+      const hasName =
+        service?.name !== undefined &&
+        service?.name !== null &&
+        service?.name !== ''
       return hasId && hasName
     })
-    
+
     return validServices.map((service) => {
       const serviceId = String(service._id)
       const serviceName = service.name?.trim() || serviceId

@@ -31,12 +31,11 @@ describe('POST /api/auth/sign-up', () => {
   afterEach(() => {
     jest.clearAllMocks()
   })
-  
 
   it('Should create new user', async () => {
     ;(User.findOne as jest.Mock).mockResolvedValue(null)
-    ;(bcrypt.hash as jest.Mock).mockImplementation(
-      (_p, _s, cb) => cb(null, 'hashed-password')
+    ;(bcrypt.hash as jest.Mock).mockImplementation((_p, _s, cb) =>
+      cb(null, 'hashed-password')
     )
     ;(User.create as jest.Mock).mockResolvedValue({})
 

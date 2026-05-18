@@ -2,12 +2,7 @@ import handler from '@pages/api/debtors/index'
 import Payment from '@modules/models/Payment'
 import RealEstate from '@modules/models/RealEstate'
 import { mockLoginAs } from '@utils/mockLoginAs'
-import {
-  users,
-  paymentsCredit,
-  realEstates,
-  domains,
-} from '@utils/testData'
+import { users, paymentsCredit, realEstates, domains } from '@utils/testData'
 import { setupTestEnvironment } from '@utils/setupTestEnvironment'
 import { expect } from '@jest/globals'
 

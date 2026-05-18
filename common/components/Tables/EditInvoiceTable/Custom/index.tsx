@@ -1,7 +1,12 @@
 import { dateToMonthYear } from '@assets/features/formatDate'
 import { usePaymentContext } from '@components/AddPaymentModal'
 import { InvoiceComponentProps } from '@components/Tables/EditInvoiceTable'
-import { currencyWithUnit, toArray, toFirstUpperCase, toRoundFixed } from '@utils/helpers'
+import {
+  currencyWithUnit,
+  toArray,
+  toFirstUpperCase,
+  toRoundFixed,
+} from '@utils/helpers'
 import validator from '@utils/validator'
 import { Form, Input, InputProps, Space, Typography } from 'antd'
 import { useEffect, useMemo } from 'react'
@@ -127,11 +132,7 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
       rules={[validator.required(), validator.min(1)]}
       style={{ margin: 0 }}
     >
-      <Input
-        type="number"
-        placeholder="К-сть..."
-        disabled={disabled}
-      />
+      <Input type="number" placeholder="К-сть..." disabled={disabled} />
     </Form.Item>
   )
 }

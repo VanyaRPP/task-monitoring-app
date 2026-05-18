@@ -32,11 +32,7 @@ export function shouldShowInvoiceQuantityAndPriceColumns(
   usePreviewQuantityToggle?: boolean,
   showQuantityInPreview?: boolean
 ): boolean {
-  return (
-    !preview ||
-    !usePreviewQuantityToggle ||
-    !!showQuantityInPreview
-  )
+  return !preview || !usePreviewQuantityToggle || !!showQuantityInPreview
 }
 
 export function shouldUseGroupedByDomainPreviewLayout(
@@ -310,12 +306,7 @@ const GroupedPricesTable: React.FC<PaymentPricesTableProps> = ({
     })
 
     return rows
-  }, [
-    invoices,
-    tInvoice,
-    useGroupedByDomainLayout,
-    customDomainServices?.data,
-  ])
+  }, [invoices, tInvoice, useGroupedByDomainLayout, customDomainServices?.data])
 
   return (
     <Table<IPriceTableRow>

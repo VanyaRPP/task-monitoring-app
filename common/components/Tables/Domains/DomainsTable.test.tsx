@@ -1,8 +1,7 @@
 import React from 'react'
 import { render, screen } from '@testing-library/react'
-import  DomainsTable  from './Table'
+import DomainsTable from './Table'
 import '@testing-library/jest-dom'
-
 
 jest.mock('next/router', () => ({
   useRouter: () => ({
@@ -19,7 +18,6 @@ import {
   useGetDomainsQuery,
   useDeleteDomainMutation,
 } from '@common/api/domainApi/domain.api'
-
 
 const mockDomains = [
   {
@@ -39,18 +37,17 @@ const mockDomains = [
 const renderComponent = (props = {}) =>
   render(
     <DomainsTable
-        domainId={null}
-        setCurrentDomain={jest.fn()}
-        setDomainActions={jest.fn()}
-        setDomainsLength={jest.fn()}
-        domainActions={{ edit: false }}
+      domainId={null}
+      setCurrentDomain={jest.fn()}
+      setDomainActions={jest.fn()}
+      setDomainsLength={jest.fn()}
+      domainActions={{ edit: false }}
       {...props}
     />
   )
 
 beforeEach(() => {
   jest.clearAllMocks()
-  
   ;(useDeleteDomainMutation as jest.Mock).mockReturnValue([
     jest.fn(),
     { isLoading: false },
@@ -101,7 +98,6 @@ it('shows error alert when request fails', () => {
   expect(screen.getByText('Помилка')).toBeInTheDocument()
 })
 
-
 it('hides "Надавачі послуг" column when only one company in filter', () => {
   const singleCompany = [
     {
@@ -123,4 +119,3 @@ it('hides "Надавачі послуг" column when only one company in filter
 
   expect(screen.queryByText('Надавачі послуг')).not.toBeInTheDocument()
 })
-

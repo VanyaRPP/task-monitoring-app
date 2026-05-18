@@ -14,7 +14,6 @@ export interface AddressesSelectProps {
   onStreetHasServiceChange?: (hasService: boolean) => void
 }
 
-
 const AddressesSelect: React.FC<AddressesSelectProps> = ({
   form,
   edit,
@@ -67,46 +66,45 @@ const AddressesSelect: React.FC<AddressesSelectProps> = ({
 
   const selectedStreet = options.find((option) => option.value === streetId)
   const showNoServiceTooltip = !!selectedStreet && !selectedStreet.hasService
-  const showNoAddressesTooltip = !!domainId && !isStreetsLoading && options.length === 0
+  const showNoAddressesTooltip =
+    !!domainId && !isStreetsLoading && options.length === 0
   const tooltipContent = showNoAddressesTooltip ? (
-  <span>
-    За вибраним Надавачем послуг немає жодної адреси. Будь ласка,{' '}
-    <Link href={AppRoutes.STREETS}>додайте адресу</Link>.
-  </span>
-    ) : showNoServiceTooltip ? (
-  <span>
-    Послуг за даною адресою не знайдено! Будь ласка, оберіть іншу адресу або{' '}
-    <Link href={AppRoutes.SERVICE}>
-      додайте нову послугу за цією адресою
-    </Link>
-    .
-  </span>
-    ) : null
+    <span>
+      За вибраним Надавачем послуг немає жодної адреси. Будь ласка,{' '}
+      <Link href={AppRoutes.STREETS}>додайте адресу</Link>.
+    </span>
+  ) : showNoServiceTooltip ? (
+    <span>
+      Послуг за даною адресою не знайдено! Будь ласка, оберіть іншу адресу або{' '}
+      <Link href={AppRoutes.SERVICE}>додайте нову послугу за цією адресою</Link>
+      .
+    </span>
+  ) : null
 
   return (
-<Tooltip
-  title={tooltipContent}
-  visible={showNoAddressesTooltip || showNoServiceTooltip}
-  placement="top"
->
-  <Form.Item name="street" label="Адреса" rules={validateField('required')}>
-    <Select
-      options={options}
-      optionFilterProp="label"
-      placeholder="Пошук адреси"
-      status={isStreetsError && 'error'}
-      loading={isStreetsLoading}
-      disabled={isStreetsLoading || streets.length === 1 || !domainId}
-      dropdownStyle={dropdownStyle}
-      allowClear
-      showSearch
-      onChange={(value) => {
-        const selected = options.find((option) => option.value === value)
-        onStreetHasServiceChange?.(selected?.hasService || false)
-      }}
-    />
-  </Form.Item>
-</Tooltip>
+    <Tooltip
+      title={tooltipContent}
+      visible={showNoAddressesTooltip || showNoServiceTooltip}
+      placement="top"
+    >
+      <Form.Item name="street" label="Адреса" rules={validateField('required')}>
+        <Select
+          options={options}
+          optionFilterProp="label"
+          placeholder="Пошук адреси"
+          status={isStreetsError && 'error'}
+          loading={isStreetsLoading}
+          disabled={isStreetsLoading || streets.length === 1 || !domainId}
+          dropdownStyle={dropdownStyle}
+          allowClear
+          showSearch
+          onChange={(value) => {
+            const selected = options.find((option) => option.value === value)
+            onStreetHasServiceChange?.(selected?.hasService || false)
+          }}
+        />
+      </Form.Item>
+    </Tooltip>
   )
 }
 

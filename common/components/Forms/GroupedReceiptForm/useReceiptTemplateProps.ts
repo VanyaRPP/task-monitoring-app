@@ -96,8 +96,9 @@ export function useReceiptTemplateProps({
     ...(domainDescription?.trim()?.split('\n') || []),
   ].filter(Boolean)
 
-  const receiverDescriptionLines = (data?.reciever?.description?.split('\n') ||
-    [])
+  const receiverDescriptionLines = (
+    data?.reciever?.description?.split('\n') || []
+  )
     .map((line: string) => line?.trim())
     .filter(Boolean)
 

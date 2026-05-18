@@ -73,12 +73,19 @@ export default async function handler(
             adminEmails: user.email,
           }).select('streets')
 
-          const adminStreetIds = adminDomains.flatMap((domain) => domain.streets)
+          const adminStreetIds = adminDomains.flatMap(
+            (domain) => domain.streets
+          )
 
           const allDomains = await Domain.find({}).select('streets')
-          const allUsedStreetIds = allDomains.flatMap((domain) => domain.streets)
+          const allUsedStreetIds = allDomains.flatMap(
+            (domain) => domain.streets
+          )
           const otherAdminsStreetIds = allUsedStreetIds.filter(
-            (id) => !adminStreetIds.some((adminId) => adminId.toString() === id.toString())
+            (id) =>
+              !adminStreetIds.some(
+                (adminId) => adminId.toString() === id.toString()
+              )
           )
 
           let streets

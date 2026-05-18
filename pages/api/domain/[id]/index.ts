@@ -3,6 +3,7 @@
 import Domain from '@modules/models/Domain'
 import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
+import { isValidEmail } from '@common/assets/features/validators'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import EncryptionService from '@utils/encryptionService'
 import { hidePercentCharacters } from '@utils/hidePercentCharacters/hidePercentCharacters'
@@ -25,7 +26,7 @@ export default async function handler(
 
     const encryptionService = new EncryptionService(secretKey)
 
-    obj.domainBankToken = obj.domainBankToken.map(item => ({
+    obj.domainBankToken = obj.domainBankToken.map((item) => ({
       ...item,
       token: item.token || encryptionService.encrypt(item.shortToken),
       shortToken: hidePercentCharacters(item.shortToken),
@@ -54,12 +55,11 @@ export default async function handler(
           })
 
           if (!domain) {
-            return res
-              .status(403)
-              .json({
-                success: false,
-                message: 'Access denied: domain not found or you are not an admin of this domain',
-              })
+            return res.status(403).json({
+              success: false,
+              message:
+                'Access denied: domain not found or you are not an admin of this domain',
+            })
           }
         }
 
@@ -88,6 +88,16 @@ export default async function handler(
             .json({ success: false, message: 'Access denied: not an admin' })
         }
 
+        const incomingEmails = req.body?.adminEmails
+        if (incomingEmails !== undefined) {
+          if (!Array.isArray(incomingEmails) || !isValidEmail(incomingEmails)) {
+            return res.status(400).json({
+              success: false,
+              message: 'Invalid email address in adminEmails',
+            })
+          }
+        }
+
         if (isDomainAdmin && !isGlobalAdmin) {
           const domain = await Domain.findOne({
             _id: req.query.id,
@@ -95,16 +105,18 @@ export default async function handler(
           })
 
           if (!domain) {
-            return res
-              .status(403)
-              .json({
-                success: false,
-                message: 'Access denied: domain not found or you are not an admin of this domain',
-              })
+            return res.status(403).json({
+              success: false,
+              message:
+                'Access denied: domain not found or you are not an admin of this domain',
+            })
           }
 
           const updatedObj = encryptDomainBankTokens(req.body, SECURE_TOKEN)
-          if (!updatedObj.adminEmails || !Array.isArray(updatedObj.adminEmails)) {
+          if (
+            !updatedObj.adminEmails ||
+            !Array.isArray(updatedObj.adminEmails)
+          ) {
             updatedObj.adminEmails = []
           }
           if (!updatedObj.adminEmails.includes(user.email)) {
@@ -145,12 +157,11 @@ export default async function handler(
           })
 
           if (!domain) {
-            return res
-              .status(403)
-              .json({
-                success: false,
-                message: 'Access denied: domain not found or you are not an admin of this domain',
-              })
+            return res.status(403).json({
+              success: false,
+              message:
+                'Access denied: domain not found or you are not an admin of this domain',
+            })
           }
 
           return res.status(200).json({ success: true, data: domain })

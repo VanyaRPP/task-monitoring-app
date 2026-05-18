@@ -197,7 +197,9 @@ export const getPlacingInvoice = ({
     const price =
       (prevPlacing?.sum ||
         company.totalArea * (company.pricePerMeter || service?.rentPrice)) *
-      (((prevService?.inflicionPrice || 100) / 100) < 1 ? 1 : ((prevService?.inflicionPrice || 100) / 100))
+      ((prevService?.inflicionPrice || 100) / 100 < 1
+        ? 1
+        : (prevService?.inflicionPrice || 100) / 100)
 
     return {
       type: ServiceType.Placing,
@@ -543,7 +545,10 @@ export const getCustomServiceInvoices = ({
   })
 
   companyCustoms.forEach((companyItem) => {
-    if (!companyItem?.fieldName || customByFieldName.has(companyItem.fieldName)) {
+    if (
+      !companyItem?.fieldName ||
+      customByFieldName.has(companyItem.fieldName)
+    ) {
       return
     }
 
@@ -584,35 +589,31 @@ export const getSingleCustomServiceInvoice = ({
   service,
   fieldName,
 }: IGetSingleCustomServiceInvoiceProps): IPaymentField | undefined => {
-    if (!fieldName) return
-    
-    const serviceCustom = Array.isArray(service?.customServices)
+  if (!fieldName) return
+
+  const serviceCustom = Array.isArray(service?.customServices)
     ? service.customServices
     : []
 
-    const companyCustom = Array.isArray(company?.customServices)
+  const companyCustom = Array.isArray(company?.customServices)
     ? company.customServices
     : []
 
-    const serviceItem = serviceCustom.find(
-      (item) => item.fieldName === fieldName
-    )
+  const serviceItem = serviceCustom.find((item) => item.fieldName === fieldName)
 
-    if (!serviceItem) return
+  if (!serviceItem) return
 
-    const companyItem = companyCustom.find(
-      (item) => item.fieldName === fieldName
-    )
+  const companyItem = companyCustom.find((item) => item.fieldName === fieldName)
 
-    const price = +toRoundFixed(companyItem?.price ?? serviceItem?.price ?? 0)
+  const price = +toRoundFixed(companyItem?.price ?? serviceItem?.price ?? 0)
 
-    return {
-      name: serviceItem?.label || 'Невідома послуга',
-      type: ServiceType.Custom,
-      fieldName: serviceItem.fieldName,
-      serviceId: String(serviceItem?._id || ''),
-      amount: 1,
-      price,
-      sum:price
-    }
+  return {
+    name: serviceItem?.label || 'Невідома послуга',
+    type: ServiceType.Custom,
+    fieldName: serviceItem.fieldName,
+    serviceId: String(serviceItem?._id || ''),
+    amount: 1,
+    price,
+    sum: price,
+  }
 }

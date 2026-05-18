@@ -55,7 +55,9 @@ const DomainsSelect: React.FC<DomainsSelectProps> = ({
         placeholder="Пошук надавача послуг"
         status={isDomainsError && 'error'}
         loading={isDomainsLoading}
-        disabled={disabled ?? (isDomainsLoading || (domains.length <= 1 && !edit))}
+        disabled={
+          disabled ?? (isDomainsLoading || (domains.length <= 1 && !edit))
+        }
         allowClear
         showSearch
       />

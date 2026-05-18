@@ -12,7 +12,9 @@ export default async function handler(
       try {
         const { domainId, meta, authTag } = req.body
 
-        return res.status(201).json({ success: true, data: { domainId, meta, authTag } })
+        return res
+          .status(201)
+          .json({ success: true, data: { domainId, meta, authTag } })
       } catch (error) {
         return res.status(400).json({ success: false, error: error })
       }

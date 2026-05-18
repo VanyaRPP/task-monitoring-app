@@ -91,7 +91,11 @@ export const Price: React.FC<InvoiceComponentProps> = ({
   const { company } = usePaymentContext()
 
   if (!editable) {
-    return <span>{toRoundFixed(price)} {currencyWithUnit('', company)}</span>
+    return (
+      <span>
+        {toRoundFixed(price)} {currencyWithUnit('', company)}
+      </span>
+    )
   }
 
   return (

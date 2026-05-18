@@ -1,6 +1,9 @@
 import { Table } from 'antd'
 import { ColumnType } from 'antd/es/table'
-import { IExtendedPayment, IGetPaymentResponse } from '@common/api/paymentApi/payment.api.types'
+import {
+  IExtendedPayment,
+  IGetPaymentResponse,
+} from '@common/api/paymentApi/payment.api.types'
 import { ServiceType } from '@utils/constants'
 import { renderCurrency, toRoundFixed } from '@utils/helpers'
 
@@ -10,13 +13,19 @@ function getSummaryColumns(
 ): Array<{ column: ColumnType<IExtendedPayment>; index: number }> {
   let count = index
   return columns.reduce(
-    (cells: Array<{ column: ColumnType<IExtendedPayment>; index: number }>, column) => {
+    (
+      cells: Array<{ column: ColumnType<IExtendedPayment>; index: number }>,
+      column
+    ) => {
       if ((column as any).children) {
         const nested = getSummaryColumns((column as any).children, count)
         count += (column as any).children.length
         return [...cells, ...nested]
       }
-      return [...cells, { column: column as ColumnType<IExtendedPayment>, index: count++ }]
+      return [
+        ...cells,
+        { column: column as ColumnType<IExtendedPayment>, index: count++ },
+      ]
     },
     []
   )
@@ -28,7 +37,11 @@ interface Props {
   hasRowSelection: boolean
 }
 
-const PaymentTableSummary: React.FC<Props> = ({ payments, visibleColumns, hasRowSelection }) => {
+const PaymentTableSummary: React.FC<Props> = ({
+  payments,
+  visibleColumns,
+  hasRowSelection,
+}) => {
   if (!payments?.data?.length) return null
 
   const totalPayments = payments.totalPayments
@@ -55,12 +68,16 @@ const PaymentTableSummary: React.FC<Props> = ({ payments, visibleColumns, hasRow
               </Table.Summary.Cell>
             )
           }
-          if (Object.values(ServiceType).includes(column.dataIndex as ServiceType)) {
+          if (
+            Object.values(ServiceType).includes(column.dataIndex as ServiceType)
+          ) {
             return (
               <Table.Summary.Cell key={idx} index={idx}>
                 {renderCurrency(
                   toRoundFixed(
-                    totalPayments[column.dataIndex as keyof typeof totalPayments] || 0
+                    totalPayments[
+                      column.dataIndex as keyof typeof totalPayments
+                    ] || 0
                   )
                 )}
               </Table.Summary.Cell>
@@ -75,10 +92,16 @@ const PaymentTableSummary: React.FC<Props> = ({ payments, visibleColumns, hasRow
           const idx = index + offset
           if (column.dataIndex === 'debit') {
             return (
-              <Table.Summary.Cell key={idx} index={idx} colSpan={2} align="center">
+              <Table.Summary.Cell
+                key={idx}
+                index={idx}
+                colSpan={2}
+                align="center"
+              >
                 {renderCurrency(
                   toRoundFixed(
-                    Number(totalPayments.debit || 0) - Number(totalPayments.credit || 0)
+                    Number(totalPayments.debit || 0) -
+                      Number(totalPayments.credit || 0)
                   )
                 )}
               </Table.Summary.Cell>

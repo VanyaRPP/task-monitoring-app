@@ -35,12 +35,7 @@ const renderSumWithWatched = (
       return watched[key as string] as any
     })
 
-  render(
-    <Component
-      form={{ setFieldValue } as any}
-      name={0}
-    />
-  )
+  render(<Component form={{ setFieldValue } as any} name={0} />)
 
   return { setFieldValue, useWatchSpy }
 }

@@ -79,8 +79,7 @@ const DomainsServices: FC<Props> = ({
     const groups = form.getFieldValue('customServices') ?? []
     return groups.some(
       (g: { groupName?: string; services?: string[] }) =>
-        (g?.groupName ?? '').trim() !== '' ||
-        (g?.services ?? []).length > 0
+        (g?.groupName ?? '').trim() !== '' || (g?.services ?? []).length > 0
     )
   }
 
@@ -209,7 +208,11 @@ const DomainsServices: FC<Props> = ({
       {renderSnapshotsList && (
         <DomainSnapshotsList domainId={domainId} onRestored={handleRestored} />
       )}
-      <Button style={{ marginBottom: 10 }} block onClick={() => setIsModalOpen(true)}>
+      <Button
+        style={{ marginBottom: 10 }}
+        block
+        onClick={() => setIsModalOpen(true)}
+      >
         Мої Послуги
       </Button>
       <DomainModal

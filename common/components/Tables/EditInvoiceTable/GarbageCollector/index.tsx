@@ -28,7 +28,8 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
     return (
       <span>
         {toRoundFixed(company.rentPart)}% від{' '}
-        {currencyWithUnit(toRoundFixed(service.garbageCollectorPrice), company)} ={' '}
+        {currencyWithUnit(toRoundFixed(service.garbageCollectorPrice), company)}{' '}
+        ={' '}
       </span>
     )
   }

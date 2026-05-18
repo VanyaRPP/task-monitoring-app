@@ -12,7 +12,14 @@ export const deleteExtraWhitespace = (value: string): string =>
     .trimStart()
 
 export const emailRegex =
-  /^(?!\.)[a-zA-Z0-9_.]{6,64}@(?!.*\d)[a-zA-Z][a-zA-Z0-9.-]+\.[a-zA-Z]{2,3}$/i
+  /^(?!\.)(?!.*\.\.)[a-zA-Z0-9_.+-]{1,64}@[a-zA-Z0-9][a-zA-Z0-9.-]*\.[a-zA-Z]{2,}$/i
+
+export const isValidEmail = (value: unknown): boolean => {
+  const emails = Array.isArray(value) ? value : [value]
+  if (emails.length === 0) return false
+  return emails.every((e) => typeof e === 'string' && emailRegex.test(e.trim()))
+}
+
 //Validators
 
 export const validateField = (name: string): Rule[] => {
@@ -23,20 +30,12 @@ export const validateField = (name: string): Rule[] => {
 
   const email: Rule = {
     validator(_, value) {
-      // TODO: fix tests
-      // emailRegex.test(value) fix case mykola.ext@gmail.com
       if (!value) {
-        return Promise.resolve() // Allow empty value
+        return Promise.resolve()
       }
-
-      const emails = Array.isArray(value) ? value : [value]
-      const invalidEmails = emails.filter((email) => !emailRegex.test(email))
-
-      if (invalidEmails.length > 0) {
-        return Promise.reject(new Error('Введіть правильну електронну адресу!'))
-      }
-
-      return Promise.resolve()
+      return isValidEmail(value)
+        ? Promise.resolve()
+        : Promise.reject(new Error('Введіть правильну електронну адресу!'))
     },
   }
 

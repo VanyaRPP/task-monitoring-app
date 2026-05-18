@@ -16,5 +16,8 @@ export function resolveTemplate(
   companyDefaultTemplate: string | undefined,
   domainDefaultTemplate: string | undefined
 ): TemplateKey {
-  return (paymentTemplate || companyDefaultTemplate || domainDefaultTemplate || DEFAULT_TEMPLATE) as TemplateKey
+  return (paymentTemplate ||
+    companyDefaultTemplate ||
+    domainDefaultTemplate ||
+    DEFAULT_TEMPLATE) as TemplateKey
 }

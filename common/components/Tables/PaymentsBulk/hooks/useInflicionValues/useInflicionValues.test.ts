@@ -14,9 +14,12 @@ jest.mock('antd', () => ({
 jest.mock('@common/components/DashboardPage/blocks/paymentsBulk', () => ({
   useInvoicesPaymentContext: jest.fn(),
 }))
-jest.mock('@common/components/Tables/PaymentsBulk/hooks/usePrevPayment/usePrevPayment', () => ({
-  usePrevPayment: jest.fn(),
-}))
+jest.mock(
+  '@common/components/Tables/PaymentsBulk/hooks/usePrevPayment/usePrevPayment',
+  () => ({
+    usePrevPayment: jest.fn(),
+  })
+)
 
 describe('useInflicionValues', () => {
   beforeEach(() => {

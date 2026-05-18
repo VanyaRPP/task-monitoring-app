@@ -53,7 +53,9 @@ describe('getStreetId', () => {
   })
 
   it('returns street._id when street is an object', () => {
-    const company = makeCompany({ street: { _id: 'street-42', name: 'Main St' } as any })
+    const company = makeCompany({
+      street: { _id: 'street-42', name: 'Main St' } as any,
+    })
     expect(getStreetId(company)).toBe('street-42')
   })
 
@@ -70,7 +72,9 @@ describe('getStreetId', () => {
 
 describe('buildTransactionPayload', () => {
   it('copies AUT_CNTR_ACC from transaction', () => {
-    const tx = makeTransaction({ AUT_CNTR_ACC: 'UA300000000000000000000000002' })
+    const tx = makeTransaction({
+      AUT_CNTR_ACC: 'UA300000000000000000000000002',
+    })
     const result = buildTransactionPayload(tx, [])
     expect(result.AUT_CNTR_ACC).toBe('UA300000000000000000000000002')
   })
@@ -116,8 +120,13 @@ describe('buildTransactionPayload', () => {
   })
 
   it('sets Description to OSND when no account match', () => {
-    const tx = makeTransaction({ OSND: 'Service fee', AUT_CNTR_ACC: 'UA300000000000000000000000099' })
-    const companies: IRealestate[] = [makeCompany({ account: 'UA300000000000000000000000002' })]
+    const tx = makeTransaction({
+      OSND: 'Service fee',
+      AUT_CNTR_ACC: 'UA300000000000000000000000099',
+    })
+    const companies: IRealestate[] = [
+      makeCompany({ account: 'UA300000000000000000000000002' }),
+    ]
     const result = buildTransactionPayload(tx, companies)
     expect(result.Description).toBe('Service fee')
   })
@@ -127,7 +136,9 @@ describe('buildTransactionPayload', () => {
       AUT_CNTR_ACC: 'UA300000000000000000000000002',
       OSND: 'Service fee',
     })
-    const companies: IRealestate[] = [makeCompany({ account: 'UA300000000000000000000000002' })]
+    const companies: IRealestate[] = [
+      makeCompany({ account: 'UA300000000000000000000000002' }),
+    ]
     const result = buildTransactionPayload(tx, companies)
     expect(result.Description).toBe('UA300000000000000000000000002')
   })
