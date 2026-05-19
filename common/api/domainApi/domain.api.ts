@@ -23,13 +23,13 @@ export const domainApi = createApi({
   endpoints: (builder) => ({
     getDomains: builder.query<
       IExtendedDomain[],
-      { limit?: number; streetId?: string; domainId?: string }
+      { limit?: number; streetId?: string; domainId?: string; archived?: boolean; }
     >({
-      query: ({ limit, streetId, domainId }) => {
+      query: ({ limit, streetId, domainId, archived }) => {
         return {
           url: `domain`,
           method: 'GET',
-          params: { limit, streetId, domainId },
+          params: { limit, streetId, domainId, archived },
         }
       },
       providesTags: (response) =>
