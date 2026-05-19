@@ -176,33 +176,12 @@ describe('API Route - PATCH Method', () => {
     expect(unchanged?.name).toBe('Old Service Name')
   })
 
-  it('should clone-on-rename when DomainAdmin edits a legacy service', async () => {
+  it('should let DomainAdmin rename a legacy service in place without cloning', async () => {
     mockUser({ isDomainAdmin: true, email: users.domainAdmin.email })
     const legacy = await createService({
       name: 'Legacy',
       fieldName: 'legacy',
     })
-
-    await Domain.updateOne(
-      { _id: ownDomainId },
-      {
-        $set: {
-          customServices: [
-            { groupName: 'Default', services: [String(legacy._id)] },
-          ],
-        },
-      }
-    )
-    await Domain.updateOne(
-      { _id: otherDomainId },
-      {
-        $set: {
-          customServices: [
-            { groupName: 'Default', services: [String(legacy._id)] },
-          ],
-        },
-      }
-    )
 
     const req = {
       method: 'PATCH',
@@ -215,20 +194,10 @@ describe('API Route - PATCH Method', () => {
 
     expect(res.status).toHaveBeenCalledWith(200)
     const original = await CustomService.findById(legacy._id)
-    expect(original?.name).toBe('Legacy')
+    expect(original?.name).toBe('Legacy Renamed')
 
-    const clones = await CustomService.find({
-      name: 'Legacy Renamed',
-      domain: ownDomainId,
-    }).lean()
-    expect(clones).toHaveLength(1)
-    const cloneId = String(clones[0]._id)
-
-    const ownDomain = await Domain.findById(ownDomainId).lean()
-    const otherDomain = await Domain.findById(otherDomainId).lean()
-    expect(ownDomain.customServices[0].services).toContain(cloneId)
-    expect(ownDomain.customServices[0].services).not.toContain(String(legacy._id))
-    expect(otherDomain.customServices[0].services).toContain(String(legacy._id))
+    const all = await CustomService.find({ name: 'Legacy Renamed' }).lean()
+    expect(all).toHaveLength(1)
   })
 
   it('should enforce per-domain uniqueness, not global', async () => {

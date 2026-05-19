@@ -193,16 +193,14 @@ describe('updateCustomService', () => {
     expect(asMock(CustomService.findByIdAndUpdate)).toHaveBeenCalled()
   })
 
-  it('DomainAdmin clones legacy on rename and rewrites domain reference', async () => {
+  it('DomainAdmin updates a legacy service in place without cloning', async () => {
     asMock(CustomService.findById).mockResolvedValueOnce({
       _id: serviceId,
       domain: undefined,
     })
     asMock(CustomService.findOne).mockResolvedValueOnce(null)
-    const newId = new mongoose.Types.ObjectId()
-    asMock(CustomService.create).mockResolvedValueOnce({
-      _id: newId,
-      toObject: () => ({ _id: newId, name: 'Renamed', domain: ownDomainId }),
+    asMock(CustomService.findByIdAndUpdate).mockResolvedValueOnce({
+      toObject: () => ({ _id: serviceId, name: 'Renamed' }),
     })
 
     const result = await updateCustomService(
@@ -212,15 +210,10 @@ describe('updateCustomService', () => {
     )
 
     expect(result.ok).toBe(true)
-    expect(asMock(CustomService.findByIdAndUpdate)).not.toHaveBeenCalled()
-    expect(asMock(CustomService.create)).toHaveBeenCalledWith(
-      expect.objectContaining({ name: 'Renamed' })
-    )
-    expect(asMock(Domain.updateOne)).toHaveBeenCalledWith(
-      expect.objectContaining({ _id: expect.anything() }),
-      expect.objectContaining({ $set: expect.any(Object) }),
-      expect.objectContaining({ arrayFilters: expect.any(Array) })
-    )
+    expect(asMock(CustomService.findByIdAndUpdate)).toHaveBeenCalled()
+    expect(asMock(CustomService.create)).not.toHaveBeenCalled()
+    const uniqFilter = asMock(CustomService.findOne).mock.calls[0][0]
+    expect(uniqFilter.$or).toBeDefined()
   })
 
   it('GlobalAdmin updates a per-domain service in place, ignoring domainId', async () => {
@@ -319,11 +312,12 @@ describe('deleteCustomService', () => {
     )
   })
 
-  it('DomainAdmin unlinks legacy service without deleting the document', async () => {
+  it('DomainAdmin deletes a legacy service outright (no unlink)', async () => {
     asMock(CustomService.findById).mockResolvedValueOnce({
       _id: serviceId,
       domain: undefined,
     })
+    asMock(CustomService.findByIdAndDelete).mockResolvedValueOnce({})
 
     const result = await deleteCustomService(
       String(serviceId),
@@ -331,11 +325,10 @@ describe('deleteCustomService', () => {
       ctxDomain
     )
     expect(result.ok).toBe(true)
-    expect(asMock(CustomService.findByIdAndDelete)).not.toHaveBeenCalled()
-    expect(asMock(Domain.updateOne)).toHaveBeenCalledWith(
-      expect.objectContaining({ _id: expect.anything() }),
-      expect.objectContaining({ $pull: expect.any(Object) })
+    expect(asMock(CustomService.findByIdAndDelete)).toHaveBeenCalledWith(
+      String(serviceId)
     )
+    expect(asMock(Domain.updateOne)).not.toHaveBeenCalled()
   })
 
   it('GlobalAdmin deletes a per-domain service from any domain', async () => {

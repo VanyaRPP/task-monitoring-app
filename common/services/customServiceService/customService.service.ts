@@ -266,42 +266,28 @@ export async function updateCustomService(
     return err('forbidden', 'Сервіс не належить вашому домену')
   }
 
-  if (serviceDomain && domainId.equals(serviceDomain)) {
-    const duplicate = await findDuplicateInDomain(name, domainId, idStr)
-    if (duplicate) {
-      return err('conflict', 'Послуга з такою назвою вже існує')
-    }
-    const updated = await CustomService.findByIdAndUpdate(idStr, update, {
-      new: true,
-    })
-    return ok(updated.toObject())
+  // Own-domain or legacy → edit the original document. Uniqueness namespace:
+  // per-domain (when service has its own domain) or global (when legacy).
+  const uniquenessFilter: Record<string, unknown> = {
+    name: { $regex: `^${escapeRegexForMongo(name)}$`, $options: 'i' },
+    _id: { $ne: idStr },
   }
-
-  // Legacy service for DomainAdmin — clone-on-rename:
-  // create per-domain copy, swap the reference in this domain's customServices.
-  const duplicate = await findDuplicateInDomain(name, domainId)
+  if (serviceDomain) {
+    uniquenessFilter.domain = serviceDomain
+  } else {
+    uniquenessFilter.$or = [
+      { domain: null },
+      { domain: { $exists: false } },
+    ]
+  }
+  const duplicate = await CustomService.findOne(uniquenessFilter)
   if (duplicate) {
     return err('conflict', 'Послуга з такою назвою вже існує')
   }
-
-  const cloned = await CustomService.create({
-    name,
-    fieldName: transliterateAndCamelCase(name),
-    domain: domainId,
-    ...(parsedType.value ? { serviceType: parsedType.value } : {}),
+  const updated = await CustomService.findByIdAndUpdate(idStr, update, {
+    new: true,
   })
-
-  await Domain.updateOne(
-    { _id: domainId },
-    {
-      $set: { 'customServices.$[g].services.$[s]': String(cloned._id) },
-    },
-    {
-      arrayFilters: [{ 'g.services': idStr }, { s: idStr }],
-    }
-  )
-
-  return ok(cloned.toObject())
+  return ok(updated.toObject())
 }
 
 export async function deleteCustomService(
@@ -343,15 +329,7 @@ export async function deleteCustomService(
     return err('forbidden', 'Сервіс не належить вашому домену')
   }
 
-  if (serviceDomain && domainId.equals(serviceDomain)) {
-    await CustomService.findByIdAndDelete(idStr)
-    return ok('Сервіс успішно видалено')
-  }
-
-  // Legacy service for DomainAdmin — unlink from caller domain only.
-  await Domain.updateOne(
-    { _id: domainId },
-    { $pull: { 'customServices.$[].services': idStr } }
-  )
-  return ok('Послуга прибрана з цього домену')
+  // Own-domain or legacy → delete the original document.
+  await CustomService.findByIdAndDelete(idStr)
+  return ok('Сервіс успішно видалено')
 }

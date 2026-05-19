@@ -210,33 +210,12 @@ describe('API Route - DELETE Method', () => {
     expect(await CustomService.findById(otherDomainCopy._id)).not.toBeNull()
   })
 
-  it('should unlink a legacy (no-domain) service from caller domain only, leaving the document intact', async () => {
+  it('should let DomainAdmin delete a legacy (no-domain) service outright', async () => {
     mockUser({ isDomainAdmin: true, email: users.domainAdmin.email })
     const legacy = await createService({
       name: 'Legacy',
       fieldName: 'legacy',
     })
-
-    await Domain.updateOne(
-      { _id: ownDomainId },
-      {
-        $set: {
-          customServices: [
-            { groupName: 'Default', services: [String(legacy._id)] },
-          ],
-        },
-      }
-    )
-    await Domain.updateOne(
-      { _id: otherDomainId },
-      {
-        $set: {
-          customServices: [
-            { groupName: 'Default', services: [String(legacy._id)] },
-          ],
-        },
-      }
-    )
 
     const req = {
       method: 'DELETE',
@@ -249,14 +228,9 @@ describe('API Route - DELETE Method', () => {
     expect(res.status).toHaveBeenCalledWith(200)
     expect(res.json).toHaveBeenCalledWith({
       success: true,
-      data: 'Послуга прибрана з цього домену',
+      data: 'Сервіс успішно видалено',
     })
-    expect(await CustomService.findById(legacy._id)).not.toBeNull()
-
-    const ownDomain = await Domain.findById(ownDomainId).lean()
-    const otherDomain = await Domain.findById(otherDomainId).lean()
-    expect(ownDomain.customServices[0].services).not.toContain(String(legacy._id))
-    expect(otherDomain.customServices[0].services).toContain(String(legacy._id))
+    expect(await CustomService.findById(legacy._id)).toBeNull()
   })
 
   it('should return 404 if service not found', async () => {
