@@ -1,5 +1,7 @@
 import CustomService from '@modules/models/CustomService'
 import Domain from '@modules/models/Domain'
+import { DomainTypeTemplateCategory } from '@modules/models/domain-type-template'
+import { getDefaultServiceIdsForCategory } from '@common/services/domainTypeTemplateService/domainTypeTemplate.service'
 import { ServiceType } from '@utils/constants'
 import { escapeRegexForMongo } from '@utils/escape-regex/escape-regex'
 import { defaultServicesSet } from '@utils/helpers'
@@ -332,4 +334,105 @@ export async function deleteCustomService(
   // Own-domain or legacy → delete the original document.
   await CustomService.findByIdAndDelete(idStr)
   return ok('Сервіс успішно видалено')
+}
+
+export interface ListCustomServicesQuery {
+  domainId?: unknown
+  ids?: unknown
+  templateCategory?: unknown
+}
+
+const TEMPLATE_CATEGORY_VALUES: ReadonlySet<string> = new Set([
+  'utility',
+  'it',
+  'edu',
+  'auto',
+  'real-estate',
+  'other',
+])
+
+function parseTemplateCategory(
+  raw: unknown
+): DomainTypeTemplateCategory | undefined {
+  if (raw === undefined || raw === null || raw === '') return undefined
+  const v = String(raw)
+  if (!TEMPLATE_CATEGORY_VALUES.has(v)) return undefined
+  return v as DomainTypeTemplateCategory
+}
+
+function parseIds(raw: unknown): string[] | null {
+  if (raw === undefined || raw === null || raw === '') return null
+  const rawIds: string[] = Array.isArray(raw)
+    ? raw.flatMap((value) => String(value).split(','))
+    : String(raw).split(',')
+  return rawIds
+    .map((id) => id.trim())
+    .filter((id) => mongoose.Types.ObjectId.isValid(id))
+}
+
+/**
+ * Lists CustomServices visible to the caller in a given UI context.
+ *
+ * - User callers → forbidden.
+ * - `domainId` scopes to per-domain services. Combined with `templateCategory`
+ *   the response is `(own-domain) ∪ (defaults for this category)`. Without
+ *   `templateCategory`, falls back to legacy behavior `(own-domain) ∪ (all
+ *   legacy)` for back-compat.
+ * - Without `domainId`, returns the global pool (legacy + per-domain), gated
+ *   only by role.
+ * - `ids` further restricts the result to a list of explicit `_id`s.
+ */
+export async function listCustomServicesForDomain(
+  query: ListCustomServicesQuery,
+  ctx: UserContext
+): Promise<ServiceResult<unknown[]>> {
+  if (ctx.isUser) {
+    // Match legacy contract: User-level access returns 400 with 'Не дозволено'.
+    return err('invalid', 'Не дозволено')
+  }
+
+  const filter: Record<string, unknown> = {}
+
+  if (
+    query.domainId !== undefined &&
+    query.domainId !== null &&
+    query.domainId !== ''
+  ) {
+    const domainIdStr = Array.isArray(query.domainId)
+      ? String(query.domainId[0])
+      : String(query.domainId)
+    if (!mongoose.Types.ObjectId.isValid(domainIdStr)) {
+      return err('invalid', 'Невалідний domainId')
+    }
+    const domainObjectId = new mongoose.Types.ObjectId(domainIdStr)
+
+    const category = parseTemplateCategory(query.templateCategory)
+    if (category) {
+      const defaultIds = await getDefaultServiceIdsForCategory(category)
+      const defaultObjectIds = defaultIds
+        .filter((id) => mongoose.Types.ObjectId.isValid(id))
+        .map((id) => new mongoose.Types.ObjectId(id))
+      filter.$or = [
+        { domain: domainObjectId },
+        ...(defaultObjectIds.length
+          ? [{ _id: { $in: defaultObjectIds } }]
+          : []),
+      ]
+    } else {
+      filter.$or = [
+        { domain: domainObjectId },
+        { domain: { $in: [null, undefined] } },
+        { domain: { $exists: false } },
+      ]
+    }
+  }
+
+  const validIds = parseIds(query.ids)
+  if (validIds !== null) {
+    if (validIds.length === 0) return ok([])
+    filter._id = { $in: validIds }
+  }
+
+  const services = await CustomService.find(filter).lean()
+  return ok(services)
 }

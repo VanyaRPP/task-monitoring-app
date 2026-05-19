@@ -42,11 +42,19 @@ const DomainsServices: FC<Props> = ({
 }) => {
   const [createCustomService] = useCreateCustomServiceMutation()
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const { data: customServicesData } = useGetCustomServicesQuery({
-    ...(domainId ? { domainId } : {}),
-  })
   const { data: templates = [] } = useGetDomainTypeTemplatesQuery(undefined, {
     skip: !editable,
+  })
+  const watchedTemplateId = Form.useWatch('domainTypeTemplateId', form) as
+    | string
+    | null
+    | undefined
+  const currentCategory = templates.find(
+    (t) => String(t._id) === String(watchedTemplateId)
+  )?.category
+  const { data: customServicesData } = useGetCustomServicesQuery({
+    ...(domainId ? { domainId } : {}),
+    ...(currentCategory ? { templateCategory: currentCategory } : {}),
   })
   const [createSnapshot] = useCreateDomainSnapshotMutation()
   const [cloneTemplate] = useCloneDomainTypeTemplateForDomainMutation()
@@ -85,10 +93,6 @@ const DomainsServices: FC<Props> = ({
 
   const lastAppliedTemplateIdRef = useRef<string | null>(null)
   const seededRef = useRef(false)
-  const watchedTemplateId = Form.useWatch('domainTypeTemplateId', form) as
-    | string
-    | null
-    | undefined
 
   useEffect(() => {
     if (seededRef.current) return

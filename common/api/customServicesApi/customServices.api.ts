@@ -21,12 +21,13 @@ export const customServicesApi = createApi({
       IGetCustomServicesResponse,
       IGetCustomServicesRequest
     >({
-      query: ({ _id, domainId }) => ({
+      query: ({ _id, domainId, templateCategory }) => ({
         url: 'custom-services',
         method: 'GET',
         params: {
           ...(_id ? { _id } : {}),
           ...(domainId ? { domainId } : {}),
+          ...(templateCategory ? { templateCategory } : {}),
         },
       }),
       providesTags: ['CustomService'],

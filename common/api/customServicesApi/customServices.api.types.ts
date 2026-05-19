@@ -1,4 +1,5 @@
 import { ObjectId } from 'mongoose'
+import { DomainTypeTemplateCategory } from '@modules/models/domain-type-template'
 
 export interface ICustomService {
   _id: string
@@ -20,6 +21,7 @@ export interface ICustomDomainService {
 export interface IGetCustomServicesRequest {
   _id?: string[]
   domainId?: string
+  templateCategory?: DomainTypeTemplateCategory
 }
 
 export interface IGetCustomServicesByDomainRequest {

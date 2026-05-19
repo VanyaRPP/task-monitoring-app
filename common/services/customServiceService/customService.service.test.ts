@@ -3,6 +3,7 @@ import {
   createCustomService,
   deleteCustomService,
   isServiceErr,
+  listCustomServicesForDomain,
   updateCustomService,
   UserContext,
 } from './customService.service'
@@ -15,6 +16,7 @@ jest.mock('@modules/models/CustomService', () => ({
     findByIdAndUpdate: jest.fn(),
     findByIdAndDelete: jest.fn(),
     create: jest.fn(),
+    find: jest.fn(),
   },
 }))
 
@@ -26,8 +28,16 @@ jest.mock('@modules/models/Domain', () => ({
   },
 }))
 
+jest.mock(
+  '@common/services/domainTypeTemplateService/domainTypeTemplate.service',
+  () => ({
+    getDefaultServiceIdsForCategory: jest.fn().mockResolvedValue([]),
+  })
+)
+
 import CustomService from '@modules/models/CustomService'
 import Domain from '@modules/models/Domain'
+import { getDefaultServiceIdsForCategory } from '@common/services/domainTypeTemplateService/domainTypeTemplate.service'
 
 const ownDomainId = new mongoose.Types.ObjectId()
 const otherDomainId = new mongoose.Types.ObjectId()
@@ -369,5 +379,109 @@ describe('deleteCustomService', () => {
       String(serviceId)
     )
     expect(asMock(Domain.updateOne)).not.toHaveBeenCalled()
+  })
+})
+
+describe('listCustomServicesForDomain', () => {
+  const findMock = () => {
+    const lean = jest.fn().mockResolvedValue([{ _id: 'a' }])
+    asMock(CustomService.find).mockReturnValueOnce({ lean })
+    return lean
+  }
+
+  it('rejects user callers with 400 invalid', async () => {
+    const result = await listCustomServicesForDomain(
+      { domainId: String(ownDomainId) },
+      ctxUser
+    )
+    expect(result.ok).toBe(false)
+    if (isServiceErr(result)) {
+      expect(result.code).toBe('invalid')
+      expect(result.message).toBe('Не дозволено')
+    }
+  })
+
+  it('returns everything for admin without domainId', async () => {
+    findMock()
+    const result = await listCustomServicesForDomain({}, ctxGlobal)
+    expect(result.ok).toBe(true)
+    expect(asMock(CustomService.find)).toHaveBeenCalledWith({})
+  })
+
+  it('returns own-domain + all legacy when domainId given without templateCategory', async () => {
+    findMock()
+    await listCustomServicesForDomain(
+      { domainId: String(ownDomainId) },
+      ctxGlobal
+    )
+    const filter = asMock(CustomService.find).mock.calls[0][0]
+    expect(Array.isArray(filter.$or)).toBe(true)
+    expect(filter.$or).toHaveLength(3)
+    expect(asMock(getDefaultServiceIdsForCategory)).not.toHaveBeenCalled()
+  })
+
+  it('returns own-domain + category defaults when templateCategory given', async () => {
+    const defaultId = new mongoose.Types.ObjectId()
+    asMock(getDefaultServiceIdsForCategory).mockResolvedValueOnce([
+      String(defaultId),
+    ])
+    findMock()
+
+    await listCustomServicesForDomain(
+      { domainId: String(ownDomainId), templateCategory: 'utility' },
+      ctxGlobal
+    )
+
+    expect(asMock(getDefaultServiceIdsForCategory)).toHaveBeenCalledWith(
+      'utility'
+    )
+    const filter = asMock(CustomService.find).mock.calls[0][0]
+    expect(filter.$or).toHaveLength(2)
+    expect(filter.$or[0]).toEqual({ domain: expect.anything() })
+    expect(filter.$or[1].$in).toBeUndefined() // wrapped in _id: { $in }
+    expect(filter.$or[1]).toEqual({ _id: { $in: expect.any(Array) } })
+  })
+
+  it('omits the defaults clause when category has no built-in templates', async () => {
+    asMock(getDefaultServiceIdsForCategory).mockResolvedValueOnce([])
+    findMock()
+    await listCustomServicesForDomain(
+      { domainId: String(ownDomainId), templateCategory: 'it' },
+      ctxGlobal
+    )
+    const filter = asMock(CustomService.find).mock.calls[0][0]
+    expect(filter.$or).toHaveLength(1)
+    expect(filter.$or[0]).toEqual({ domain: expect.anything() })
+  })
+
+  it('rejects invalid domainId', async () => {
+    const result = await listCustomServicesForDomain(
+      { domainId: 'not-an-objectid' },
+      ctxGlobal
+    )
+    expect(result.ok).toBe(false)
+    if (isServiceErr(result)) expect(result.code).toBe('invalid')
+    expect(asMock(CustomService.find)).not.toHaveBeenCalled()
+  })
+
+  it('combines explicit ids with the domain filter', async () => {
+    findMock()
+    const validId = new mongoose.Types.ObjectId().toString()
+    await listCustomServicesForDomain(
+      { domainId: String(ownDomainId), ids: validId },
+      ctxGlobal
+    )
+    const filter = asMock(CustomService.find).mock.calls[0][0]
+    expect(filter._id).toEqual({ $in: [validId] })
+  })
+
+  it('returns empty array if all explicit ids are invalid', async () => {
+    const result = await listCustomServicesForDomain(
+      { ids: 'foo,bar' },
+      ctxGlobal
+    )
+    expect(result.ok).toBe(true)
+    if (result.ok) expect(result.data).toEqual([])
+    expect(asMock(CustomService.find)).not.toHaveBeenCalled()
   })
 })

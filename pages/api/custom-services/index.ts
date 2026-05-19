@@ -2,15 +2,14 @@ import {
   createCustomService,
   deleteCustomService,
   isServiceErr,
+  listCustomServicesForDomain,
   ServiceErrorCode,
   ServiceResult,
   updateCustomService,
   UserContext,
 } from '@common/services/customServiceService/customService.service'
-import CustomService from '@modules/models/CustomService'
 import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
-import mongoose from 'mongoose'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 start()
@@ -102,62 +101,18 @@ export default async function handler(
 
     case 'GET':
       try {
-        const { _id, domainId: rawDomainId } = req.query
-
-        if (ctx.isUser) {
-          return res.status(400).json({
-            success: false,
-            message: 'Не дозволено',
-          })
-        }
-
-        const filter: Record<string, unknown> = {}
-        if (
-          rawDomainId !== undefined &&
-          rawDomainId !== null &&
-          rawDomainId !== ''
-        ) {
-          const domainIdStr = Array.isArray(rawDomainId)
-            ? String(rawDomainId[0])
-            : String(rawDomainId)
-          if (!mongoose.Types.ObjectId.isValid(domainIdStr)) {
-            return res.status(400).json({
-              success: false,
-              message: 'Невалідний domainId',
-            })
-          }
-          filter.$or = [
-            { domain: new mongoose.Types.ObjectId(domainIdStr) },
-            { domain: { $in: [null, undefined] } },
-            { domain: { $exists: false } },
-          ]
-        }
-
-        const hasExplicitIds = _id !== undefined && _id !== null && _id !== ''
-
-        let customServices
-        if (!hasExplicitIds) {
-          customServices = await CustomService.find(filter).lean()
-        } else {
-          const rawIds: string[] = Array.isArray(_id)
-            ? _id.flatMap((value) => String(value).split(','))
-            : String(_id).split(',')
-          const validIds = rawIds
-            .map((id) => id.trim())
-            .filter((id) => mongoose.Types.ObjectId.isValid(id))
-
-          customServices = validIds.length
-            ? await CustomService.find({
-                ...filter,
-                _id: { $in: validIds },
-              }).lean()
-            : []
-        }
-
-        return res.status(200).json({
-          success: true,
-          data: customServices,
-        })
+        return respond(
+          res,
+          await listCustomServicesForDomain(
+            {
+              domainId: req.query.domainId,
+              ids: req.query._id,
+              templateCategory: req.query.templateCategory,
+            },
+            ctx
+          ),
+          200
+        )
       } catch (error: any) {
         return res.status(500).json({
           success: false,
