@@ -438,7 +438,7 @@ export async function getDistinctStreets({
   const distinctDomains = await model.aggregate(domainsPipeline)
   const streetsPipeline = getStreetsPipeline(
     isGlobalAdmin,
-    distinctDomains.map((domain) => domain._id),
+    user.email,
     filteredCompanys,
     filteredDomains
   )
