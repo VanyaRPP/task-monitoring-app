@@ -32,24 +32,22 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({
     useGetRealEstateFiltersQuery({})
 
   const [updateUser, { isLoading: isUpdating }] = useUpdateUserMutation()
+
+  const getSelectValue = (item: any) => item?.value ?? item?._id ?? item
+  
   useEffect(() => {
     if (user) {
       form.setFieldsValue({
         name: user.name,
         email: user.email,
-        adminDomains:
-          'adminDomains' in user
-            ? (user as any).adminDomains.map((d: any) => d._id)
-            : [],
-        adminCompanies:
-          'adminCompanies' in user
-            ? (user as any).adminCompanies.map((c: any) => c._id)
-            : [],
+        adminDomains: (user as any).adminDomains?.map(getSelectValue) ?? [],
+        adminCompanies: (user as any).adminCompanies?.map(getSelectValue) ?? [],
       })
     }
   }, [user, form])
 
   const handleSubmit = async (values: any) => {
+    if (!user?._id) return
     try {
       const response = await updateUser({ _id: user?._id, ...values })
       if ('error' in response) {
