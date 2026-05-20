@@ -8,6 +8,7 @@ import CredentialsProvider from 'next-auth/providers/credentials'
 import User from '@modules/models/User'
 import bcrypt from 'bcrypt'
 import { saltRounds } from '@utils/constants'
+import { isProd } from '@utils/env'
 
 function html({ url, host, email }) {
   const escapedEmail = `${email.replace(/\./g, '&#8203;.')}`
@@ -87,7 +88,7 @@ const providers: NextAuthOptions['providers'] = [
         }),
       ]
     : []),
-  ...(githubId && githubSecret
+  ...(githubId && githubSecret && !isProd
     ? [
         GithubProvider({
           allowDangerousEmailAccountLinking: true,
