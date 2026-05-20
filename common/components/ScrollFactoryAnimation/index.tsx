@@ -16,12 +16,55 @@ type Annotation = {
 }
 
 const ANNOTATIONS: Annotation[] = [
-  { start: 0.07, peak: 0.17, end: 0.27, number: '01', title: 'Імпорт з банку', body: 'Bank API сам підтягує транзакції та баланс — без ручної звірки оплат.' },
-  { start: 0.27, peak: 0.35, end: 0.43, number: '02', title: 'Авто-розрахунок', body: 'Формули, валюти, м² — система рахує сама за конфігурацією послуг.' },
-  { start: 0.43, peak: 0.51, end: 0.59, number: '03', title: 'Bulk-генерація', body: 'Один клік — десятки персоналізованих інвойсів за секунди.', hero: true },
-  { start: 0.59, peak: 0.66, end: 0.74, number: '04', title: 'Розумна маршрутизація', body: 'Кожен інвойс знаходить свого клієнта — за каналом, мовою, валютою.' },
-  { start: 0.74, peak: 0.82, end: 0.9, number: '05', title: 'Multi-channel доставка', body: 'Telegram, Email і PDF — одночасно, як зручніше клієнту.' },
-  { start: 0.9, peak: 0.95, end: 1.0, number: '06', title: 'Real-time аналітика', body: 'Дашборд з прибутком, балансом і боржниками — наживо.' },
+  {
+    start: 0.07,
+    peak: 0.17,
+    end: 0.27,
+    number: '01',
+    title: 'Імпорт з банку',
+    body: 'Bank API сам підтягує транзакції та баланс — без ручної звірки оплат.',
+  },
+  {
+    start: 0.27,
+    peak: 0.35,
+    end: 0.43,
+    number: '02',
+    title: 'Авто-розрахунок',
+    body: 'Формули, валюти, м² — система рахує сама за конфігурацією послуг.',
+  },
+  {
+    start: 0.43,
+    peak: 0.51,
+    end: 0.59,
+    number: '03',
+    title: 'Bulk-генерація',
+    body: 'Один клік — десятки персоналізованих інвойсів за секунди.',
+    hero: true,
+  },
+  {
+    start: 0.59,
+    peak: 0.66,
+    end: 0.74,
+    number: '04',
+    title: 'Розумна маршрутизація',
+    body: 'Кожен інвойс знаходить свого клієнта — за каналом, мовою, валютою.',
+  },
+  {
+    start: 0.74,
+    peak: 0.82,
+    end: 0.9,
+    number: '05',
+    title: 'Multi-channel доставка',
+    body: 'Telegram, Email і PDF — одночасно, як зручніше клієнту.',
+  },
+  {
+    start: 0.9,
+    peak: 0.95,
+    end: 1.0,
+    number: '06',
+    title: 'Real-time аналітика',
+    body: 'Дашборд з прибутком, балансом і боржниками — наживо.',
+  },
 ]
 
 const smoothstep = (t: number) => t * t * (3 - 2 * t)
@@ -84,7 +127,9 @@ const ScrollFactoryAnimation: FC<Props> = ({
     const canvas = canvasRef.current
     if (!canvas) return
     const dpr = window.devicePixelRatio || 1
-    const rect = canvas.parentElement?.getBoundingClientRect() || canvas.getBoundingClientRect()
+    const rect =
+      canvas.parentElement?.getBoundingClientRect() ||
+      canvas.getBoundingClientRect()
     const w = rect.width || window.innerWidth / 2
     const h = rect.height || window.innerHeight
     canvas.width = Math.round(w * dpr)
@@ -110,7 +155,7 @@ const ScrollFactoryAnimation: FC<Props> = ({
     const ch = canvas.height
     const iw = img.naturalWidth
     const ih = img.naturalHeight
-    const scale = Math.min(cw / iw, ch / ih) * 1.02;
+    const scale = Math.min(cw / iw, ch / ih) * 1.02
     const dw = iw * scale
     const dh = ih * scale
     const dx = (cw - dw) / 2
@@ -174,7 +219,10 @@ const ScrollFactoryAnimation: FC<Props> = ({
 
     kick()
     window.addEventListener('scroll', onScroll, { passive: true })
-    document.addEventListener('scroll', onScroll, { passive: true, capture: true })
+    document.addEventListener('scroll', onScroll, {
+      passive: true,
+      capture: true,
+    })
 
     return () => {
       window.removeEventListener('scroll', onScroll)
@@ -203,7 +251,8 @@ const ScrollFactoryAnimation: FC<Props> = ({
       if (!container) return
       const rect = container.getBoundingClientRect()
       const total = container.offsetHeight - window.innerHeight
-      const progress = total > 0 ? Math.max(0, Math.min(1, -rect.top / total)) : 0
+      const progress =
+        total > 0 ? Math.max(0, Math.min(1, -rect.top / total)) : 0
       const frameIndex = Math.min(
         FRAME_COUNT - 1,
         Math.max(0, Math.floor(progress * FRAME_COUNT))
@@ -233,11 +282,15 @@ const ScrollFactoryAnimation: FC<Props> = ({
       <div className={s.stickyWrapper}>
         <div className={s.leftContent}>
           <h1 className={s.heroTitle}>
-            Ласкаво просимо до <br /> {/* Додали переніс рядка для кращої композиції */}
+            Ласкаво просимо до <br />{' '}
+            {/* Додали переніс рядка для кращої композиції */}
             <span className={s.textAccent}>E-ORENDA!</span>
           </h1>
           <p className={s.heroSubtitle}>
-            Керуйте процесом надання послуг нерухомості та систематизуйте відносини між користувачами за допомогою нашого сайту! Ресурс допоможе з автоматичним розрахунком платежів та своєчасним формуванням та виставленням рахунків.
+            Керуйте процесом надання послуг нерухомості та систематизуйте
+            відносини між користувачами за допомогою нашого сайту! Ресурс
+            допоможе з автоматичним розрахунком платежів та своєчасним
+            формуванням та виставленням рахунків.
           </p>
         </div>
 
@@ -258,7 +311,6 @@ const ScrollFactoryAnimation: FC<Props> = ({
                 }}
                 aria-hidden={opacity < 0.5}
               >
-
                 <div className={s.cardNumber}>{card.number}</div>
                 <h3 className={s.cardTitle}>{card.title}</h3>
                 <p className={s.cardBody}>{card.body}</p>

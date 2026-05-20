@@ -14,7 +14,9 @@ $surface-2: rgba(255, 255, 255, 0.08);
 $border: rgba(255, 255, 255, 0.1);
 $border-hi: rgba(255, 255, 255, 0.16);
 
-$shadow: 0 2px 12px rgba(0, 0, 0, 0.22), 0 1px 3px rgba(0, 0, 0, 0.12);
+$shadow:
+  0 2px 12px rgba(0, 0, 0, 0.22),
+  0 1px 3px rgba(0, 0, 0, 0.12);
 
 $font: 'Inter', 'Helvetica Neue', Arial, sans-serif;
 $radius: 12px;
@@ -458,7 +460,9 @@ $surface-1-l: rgba(0, 0, 0, 0.025);
 $surface-2-l: rgba(0, 0, 0, 0.045);
 $border-l: rgba(0, 0, 0, 0.1);
 $border-hi-l: rgba(0, 0, 0, 0.14);
-$shadow-l: 0 2px 12px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+$shadow-l:
+  0 2px 12px rgba(0, 0, 0, 0.06),
+  0 1px 3px rgba(0, 0, 0, 0.04);
 
 :global(:root[data-theme='light']) {
   .azInvoice {

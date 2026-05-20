@@ -64,7 +64,6 @@ describe('CustomServices API', () => {
   })
 
   describe('DELETE /api/custom-services (Access Control)', () => {
-    
     it('should return 400 when admin omits domainId', async () => {
       await mockLoginAs(users.domainAdmin)
       const { req, res } = createMocks('DELETE', { query: { id: 'some-id' } })

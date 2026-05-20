@@ -20,10 +20,10 @@ const AdminPageClients: React.FC = () => {
         active === '1'
           ? s.Users
           : active === '2'
-          ? s.Workers
-          : active === '3'
-          ? s.Premium
-          : ''
+            ? s.Workers
+            : active === '3'
+              ? s.Premium
+              : ''
       }`}
     >
       <TabPane tab="Замовники" key="1" className={s.Users}>

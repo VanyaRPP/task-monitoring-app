@@ -31,8 +31,8 @@ const Inflicion: React.FC<{
           {+service?.inflicionPrice < 100
             ? 'Спостерігається дефляція'
             : +service?.inflicionPrice > 100
-            ? 'Донарахування'
-            : 'Значення незмінне'}
+              ? 'Донарахування'
+              : 'Значення незмінне'}
         </span>
       )}
     </div>

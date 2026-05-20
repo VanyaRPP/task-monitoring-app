@@ -2,8 +2,10 @@ import { LeftOutlined } from '@ant-design/icons'
 import { Button, Flex, FlexProps, Tag, Tooltip } from 'antd'
 import { useCallback, useMemo, useState } from 'react'
 
-export interface TagsProps<T = unknown>
-  extends Omit<FlexProps, 'children' | 'title'> {
+export interface TagsProps<T = unknown> extends Omit<
+  FlexProps,
+  'children' | 'title'
+> {
   /**
    * The array of items to be displayed as tags.
    */

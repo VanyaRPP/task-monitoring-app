@@ -153,8 +153,8 @@ const MonolineTemplate: FC<TemplateProps> = ({
             const rate = Number.isFinite(Number(item?.price))
               ? Number(item.price)
               : qty
-              ? Number(item?.sum || 0) / qty
-              : Number(item?.sum || 0)
+                ? Number(item?.sum || 0) / qty
+                : Number(item?.sum || 0)
             return (
               <tr key={`${item?.type || item?.name}-${index}`}>
                 <td>{item?.name || item?.type || '—'}</td>

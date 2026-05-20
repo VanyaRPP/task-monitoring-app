@@ -99,7 +99,10 @@
       font-size: 14px;
       line-height: 1.4;
       color: var(--textColor);
-      transition: color 0.5s, background-color 0.5s, border-color 0.5s;
+      transition:
+        color 0.5s,
+        background-color 0.5s,
+        border-color 0.5s;
       padding: 8px 12px;
       background-color: var(--backgroundColorPrimary);
       border: 1px solid rgba(136, 136, 136, 0.2);
@@ -119,7 +122,10 @@
       font-size: 14px;
       line-height: 1.4;
       color: var(--textColor);
-      transition: color 0.5s, background-color 0.5s, border-color 0.5s;
+      transition:
+        color 0.5s,
+        background-color 0.5s,
+        border-color 0.5s;
       padding: 8px 12px;
       background-color: var(--backgroundColorPrimary);
       border: 1px solid rgba(136, 136, 136, 0.2);
@@ -148,7 +154,10 @@
     .payFixed {
       display: flex;
       color: var(--textColor);
-      transition: color 0.5s, background-color 0.5s, border-color 0.5s;
+      transition:
+        color 0.5s,
+        background-color 0.5s,
+        border-color 0.5s;
       padding: 12px 16px;
       background-color: var(--backgroundColorPrimary);
       border: 2px solid var(--primaryColor);

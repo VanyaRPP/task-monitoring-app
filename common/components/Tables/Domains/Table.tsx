@@ -6,7 +6,16 @@ import {
   InboxOutlined,
   MoreOutlined,
 } from '@ant-design/icons'
-import { Alert, Button, Popconfirm, Table, Tag, Tooltip, message, Dropdown } from 'antd'
+import {
+  Alert,
+  Button,
+  Popconfirm,
+  Table,
+  Tag,
+  Tooltip,
+  message,
+  Dropdown,
+} from 'antd'
 import { ColumnType } from 'antd/lib/table'
 import { useRouter } from 'next/router'
 import { useEffect, useMemo } from 'react'
@@ -47,7 +56,7 @@ const DomainsTable: React.FC<Props> = ({
 
   const filteredData = useMemo(() => {
     if (!data) return []
-    return data.filter((domain) => 
+    return data.filter((domain) =>
       isArchive ? domain.archived === true : !domain.archived
     )
   }, [data, isArchive])
@@ -143,7 +152,9 @@ const getDefaultColumns = ({
     width: 100,
     render: (text) => (
       <Tooltip
-        title={<div style={{ whiteSpace: 'pre-line', maxWidth: 300 }}>{text}</div>}
+        title={
+          <div style={{ whiteSpace: 'pre-line', maxWidth: 300 }}>{text}</div>
+        }
         overlayStyle={{ maxWidth: 800 }}
       >
         <QuestionCircleOutlined />
@@ -156,7 +167,14 @@ const getDefaultColumns = ({
     title: '',
     width: 150,
     render: (_, domain: IExtendedDomain) => (
-      <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', alignItems: 'center' }}>
+      <div
+        style={{
+          display: 'flex',
+          gap: '8px',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
         <Button
           style={{ padding: 0 }}
           type="link"
@@ -199,7 +217,8 @@ const getDefaultColumns = ({
                     <Button
                       type="text"
                       icon={<InboxOutlined />}
-                      onClick={(e) => e.stopPropagation()}                   style={{
+                      onClick={(e) => e.stopPropagation()}
+                      style={{
                         padding: '4px 8px',
                         color: domain.archived ? '#722ed1' : '#ff4d4f',
                       }}
@@ -223,9 +242,9 @@ const getDefaultColumns = ({
                     okText="Видалити"
                     cancelText="Ні"
                   >
-                    <Button 
-                      type="text" 
-                      icon={<DeleteOutlined />} 
+                    <Button
+                      type="text"
+                      icon={<DeleteOutlined />}
                       onClick={(e) => e.stopPropagation()}
                       style={{ padding: '4px 8px', color: '#ff4d4f' }}
                     >

@@ -8,7 +8,7 @@ const makeCompany = (overrides: Partial<IRealestate> = {}): IRealestate =>
     companyName: 'Test Company',
     street: { _id: 'street-1', name: 'Test Street' },
     ...overrides,
-  } as IRealestate)
+  }) as IRealestate
 
 const makeTransaction = (overrides: Partial<ITransaction> = {}): ITransaction =>
   ({
@@ -45,7 +45,7 @@ const makeTransaction = (overrides: Partial<ITransaction> = {}): ITransaction =>
     isMatchingPayment: false,
     previousCompanyId: null,
     ...overrides,
-  } as ITransaction)
+  }) as ITransaction
 
 describe('getStreetId', () => {
   it('returns undefined when company is undefined', () => {
