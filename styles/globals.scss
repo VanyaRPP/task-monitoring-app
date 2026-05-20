@@ -80,6 +80,10 @@ body {
   background-color: rgba(0, 0, 0, 0.5);
 }
 
+.ant-transfer-list-content-item-text {
+  min-width: 0;
+}
+
 @media print {
   html,
   body {
