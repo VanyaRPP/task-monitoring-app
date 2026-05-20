@@ -10,7 +10,10 @@
   margin: 0 auto;
   max-width: 350px;
   min-width: 250px;
-  transition: background 0.5s, box-shadow 0.5s, opacity 0.2s;
+  transition:
+    background 0.5s,
+    box-shadow 0.5s,
+    opacity 0.2s;
   box-shadow: 5px 5px 10px 1px var(--primaryColor);
   background: var(--backgroundColorElements) !important;
 
@@ -18,7 +21,9 @@
 
   > * {
     border-color: var(--primaryColor);
-    transition: background 0.5s, color 0.5s;
+    transition:
+      background 0.5s,
+      color 0.5s;
     color: var(--textColor);
 
     &:first-of-type {

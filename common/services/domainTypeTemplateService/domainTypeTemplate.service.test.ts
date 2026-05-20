@@ -36,10 +36,7 @@ describe('getDefaultServiceIdsForCategory', () => {
       select: jest.fn().mockReturnValue({
         lean: jest.fn().mockResolvedValue([
           {
-            groups: [
-              { serviceIds: ['a', 'b'] },
-              { serviceIds: ['c'] },
-            ],
+            groups: [{ serviceIds: ['a', 'b'] }, { serviceIds: ['c'] }],
           },
           { groups: [{ serviceIds: ['b', 'd'] }] },
         ]),
@@ -58,12 +55,14 @@ describe('getDefaultServiceIdsForCategory', () => {
   it('tolerates templates with missing groups or serviceIds', async () => {
     findMock.mockReturnValueOnce({
       select: jest.fn().mockReturnValue({
-        lean: jest.fn().mockResolvedValue([
-          { groups: null },
-          { groups: [{}] },
-          { groups: [{ serviceIds: null }] },
-          { groups: [{ serviceIds: ['x'] }] },
-        ]),
+        lean: jest
+          .fn()
+          .mockResolvedValue([
+            { groups: null },
+            { groups: [{}] },
+            { groups: [{ serviceIds: null }] },
+            { groups: [{ serviceIds: ['x'] }] },
+          ]),
       }),
     })
     const ids = await getDefaultServiceIdsForCategory('it' as any)

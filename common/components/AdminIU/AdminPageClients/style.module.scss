@@ -11,7 +11,10 @@
     border-color: #88888830;
     opacity: 0.5;
     background: var(--backgroundColorElements);
-    transition: background 0.2s, opacity 0.2s, border-bottom-color 0.5s;
+    transition:
+      background 0.2s,
+      opacity 0.2s,
+      border-bottom-color 0.5s;
   }
 
   &.Users {
@@ -65,7 +68,10 @@
       margin-bottom: 2px;
       position: relative;
 
-      transition: background 0.5s, color 0.2s, opacity 0.5s;
+      transition:
+        background 0.5s,
+        color 0.2s,
+        opacity 0.5s;
       background: var(--backgroundColorElements);
       opacity: 0.5;
       color: var(--textColor);

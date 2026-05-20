@@ -22,7 +22,7 @@ const createMockRequest = (overrides: Partial<any> = {}) =>
     method: 'GET',
     query: {},
     ...overrides,
-  } as any)
+  }) as any
 
 const createMockResponse = () => {
   const res: any = {}
