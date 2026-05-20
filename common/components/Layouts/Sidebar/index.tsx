@@ -22,7 +22,11 @@ export const Sidebar: React.FC<Omit<SiderProps, 'children'>> = (props) => {
       onCollapse={() => toggleCollapsed()}
       {...props}
     >
-      <Link href={AppRoutes.INDEX} className={styles.Logo} onClick={handleNavigateHome}>
+      <Link
+        href={AppRoutes.INDEX}
+        className={styles.Logo}
+        onClick={handleNavigateHome}
+      >
         <LogoIcon style={{ fontSize: 40, color: token.colorPrimary }} />
         {!collapsed && (
           <Typography.Title level={4} style={{ margin: 0, textWrap: 'nowrap' }}>

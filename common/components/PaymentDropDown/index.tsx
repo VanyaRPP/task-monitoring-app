@@ -1,10 +1,20 @@
-import { CheckOutlined, DeleteOutlined, EditOutlined, EyeOutlined, MoreOutlined, DownloadOutlined } from '@ant-design/icons'
+import {
+  CheckOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  EyeOutlined,
+  MoreOutlined,
+  DownloadOutlined,
+} from '@ant-design/icons'
 import { Button, Dropdown, MenuProps, Modal, message } from 'antd'
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { Operations } from '@utils/constants'
 import { dateToDefaultFormat } from '@assets/features/formatDate'
-import { useGeneratePdfMutation } from '@common/api/paymentApi/payment.api'
+import { useHtmlToPdfMutation } from '@common/api/paymentApi/payment.api'
+import HeadlessReceiptRenderer from '@components/Forms/GroupedReceiptForm/HeadlessReceiptRenderer'
 import { saveAs } from 'file-saver'
+import { useState } from 'react'
+import dayjs from 'dayjs'
 
 interface Props {
   payment: IExtendedPayment
@@ -16,6 +26,15 @@ interface Props {
   deleteLoading: boolean
 }
 
+function buildPaymentFileName(payment: IExtendedPayment): string {
+  const companyName = (payment as any)?.reciever?.companyName ?? 'invoice'
+  const datePrefix = dayjs((payment as any)?.invoiceCreationDate).isValid()
+    ? dayjs((payment as any)?.invoiceCreationDate).format('DDMMYY')
+    : ''
+  const slug = `${datePrefix}${(payment as any)?.invoiceNumber ?? ''}`
+  return `${companyName} inv ${slug}`.trim()
+}
+
 const PaymentDropdown: React.FC<Props> = ({
   payment,
   isAdmin,
@@ -25,53 +44,72 @@ const PaymentDropdown: React.FC<Props> = ({
   onMarkPaid,
   deleteLoading,
 }) => {
+  const [htmlToPdf, { isLoading: pdfLoading }] = useHtmlToPdfMutation()
+  const [isCapturing, setIsCapturing] = useState(false)
 
-const [generatePdf, { isLoading: pdfLoading }] = useGeneratePdfMutation()
-
-const handleDownloadPdf = async () => {
-  try {
-    const response = await generatePdf({ payments: [payment] })
-    if ('data' in response) {
-      const { data } = response
-      if (data) {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        //@ts-ignore
-        const buffer = Buffer.from(data.buffer)
-
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        //@ts-ignore
-        const blob = new Blob([buffer], {
-          type: `application/${data.fileExtension}`,
-        })
-
-        saveAs(blob, `${data.fileName}.${data.fileExtension}`)
-      }
-    } else {
-      // TEMP: surface real server error to debug PDF generation issue.
-      // eslint-disable-next-line no-console
-      console.error('generatePdf failed:', response.error)
-      const serverMsg = (response.error as { data?: { error?: string } })?.data
-        ?.error
-      message.error(
-        serverMsg
-          ? `PDF: ${serverMsg}`
-          : 'Сталася помилка під час генерації PDF'
-      )
-    }
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('generatePdf threw:', error)
-    message.error(
-      `PDF: ${(error as Error)?.message ?? 'несподівана помилка'}`
-    )
+  const handleDownloadPdf = () => {
+    if (isCapturing || pdfLoading) return
+    setIsCapturing(true)
   }
-}
+
+  const handleCapture = async (html: string) => {
+    try {
+      const fileName = buildPaymentFileName(payment)
+      const response = await htmlToPdf({ html, fileName })
+
+      if ('data' in response) {
+        const { data } = response
+        if (data) {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          //@ts-ignore
+          const buffer = Buffer.from(data.buffer)
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          //@ts-ignore
+          const blob = new Blob([buffer], {
+            type: `application/${data.fileExtension}`,
+          })
+          saveAs(blob, `${data.fileName}.${data.fileExtension}`)
+        }
+      } else {
+        // eslint-disable-next-line no-console
+        console.error('htmlToPdf failed:', response.error)
+        const serverMsg = (response.error as { data?: { error?: string } })
+          ?.data?.error
+        message.error(
+          serverMsg
+            ? `PDF: ${serverMsg}`
+            : 'Сталася помилка під час генерації PDF'
+        )
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('htmlToPdf threw:', error)
+      message.error(
+        `PDF: ${(error as Error)?.message ?? 'несподівана помилка'}`
+      )
+    } finally {
+      setIsCapturing(false)
+    }
+  }
+
+  const handleCaptureError = (error: Error) => {
+    // eslint-disable-next-line no-console
+    console.error('HeadlessReceiptRenderer failed:', error)
+    message.error('Не вдалося згенерувати макет PDF')
+    setIsCapturing(false)
+  }
 
   const adminItems: MenuProps['items'] = isAdmin
     ? [
         { key: 'edit', label: 'Редагувати', icon: <EditOutlined /> },
         ...(payment.type !== Operations.Credit
-          ? [{ key: 'mark', label: 'Позначити оплату', icon: <CheckOutlined /> }]
+          ? [
+              {
+                key: 'mark',
+                label: 'Позначити оплату',
+                icon: <CheckOutlined />,
+              },
+            ]
           : []),
       ]
     : []
@@ -96,7 +134,7 @@ const handleDownloadPdf = async () => {
       key: 'download',
       label: 'Завантажити рахунок',
       icon: <DownloadOutlined />,
-      disabled: pdfLoading,
+      disabled: pdfLoading || isCapturing,
     },
     ...adminDeleteItems,
   ]
@@ -108,7 +146,9 @@ const handleDownloadPdf = async () => {
     if (key === 'download') handleDownloadPdf()
     if (key === 'delete') {
       Modal.confirm({
-        title: `Видалити оплату від ${dateToDefaultFormat(payment.invoiceCreationDate as unknown as string)}?`,
+        title: `Видалити оплату від ${dateToDefaultFormat(
+          payment.invoiceCreationDate as unknown as string
+        )}?`,
         okText: 'Так',
         cancelText: 'Відміна',
         okType: 'danger',
@@ -118,14 +158,23 @@ const handleDownloadPdf = async () => {
   }
 
   return (
-    <Dropdown
-      menu={{ items, onClick: handleMenuClick }}
-      trigger={['click']}
-      placement="bottomRight"
-      overlayStyle={{ minWidth: 190 }}
-    >
-      <Button type="text" icon={<MoreOutlined />} style={{ padding: 0 }} />
-    </Dropdown>
+    <>
+      <Dropdown
+        menu={{ items, onClick: handleMenuClick }}
+        trigger={['click']}
+        placement="bottomRight"
+        overlayStyle={{ minWidth: 190 }}
+      >
+        <Button type="text" icon={<MoreOutlined />} style={{ padding: 0 }} />
+      </Dropdown>
+      {isCapturing && (
+        <HeadlessReceiptRenderer
+          payment={payment}
+          onCapture={handleCapture}
+          onError={handleCaptureError}
+        />
+      )}
+    </>
   )
 }
 

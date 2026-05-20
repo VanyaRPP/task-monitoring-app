@@ -149,7 +149,7 @@ export const Menu: React.FC<MenuProps> = (props) => {
             key: AppRoutes.ADMIN_PANEL,
             type: 'item',
             label: <Link href={AppRoutes.ADMIN_PANEL}>Адмін панель</Link>,
-            hidden: !isGlobalAdmin,
+            hidden: !isGlobalAdmin && !isDomainAdmin,
           },
         ].filter(({ hidden }) => !hidden),
       },
@@ -165,4 +165,4 @@ export const Menu: React.FC<MenuProps> = (props) => {
       style={{ paddingBottom: '50px' }}
     />
   )
-} 
+}

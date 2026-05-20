@@ -47,10 +47,12 @@ The application is a **monolithic Next.js app** that contains:
 ### 3. State management & data fetching
 
 - **Redux Toolkit (RTK)**:
+
   - Global store defined in shared modules (under `common`).
   - Used for UI state such as filters, widget layouts, feature flags, etc.
 
 - **RTK Query**:
+
   - API slices under `common/api/**`:
     - `taskApi`, `paymentApi`, `domainApi`, `realEstateApi`, `serviceApi`, `bankApi`, etc.
   - Responsibilities:
@@ -71,6 +73,7 @@ The application is a **monolithic Next.js app** that contains:
 
 - **Location**: `pages/api/**`.
 - **Pattern**:
+
   - Each file exports a handler function (`(req, res) => { ... }`).
   - Most handlers:
     - call a shared `start()` from `pages/api/api.config.ts` to ensure MongoDB connection,
@@ -95,11 +98,13 @@ The application is a **monolithic Next.js app** that contains:
 ### 5. Data layer (MongoDB & Mongoose)
 
 - **Connection**:
+
   - Centralized in `pages/api/api.config.ts`, which:
     - connects to MongoDB using `MONGODB_URI`,
     - ensures models are registered once in the Mongoose connection.
 
 - **Models** (under `common/modules/models/**`):
+
   - `Task` – tasks with domain, real‑estate, executors, comments, files and status.
   - `Payment` – payments (debit/credit) with links to domain, real‑estate, company, service.
   - `Profit` – profit records linked to payments and domains.
@@ -121,6 +126,7 @@ The application is a **monolithic Next.js app** that contains:
 
 - **Location**: `common/services/**`.
 - **Examples**:
+
   - `paymentService/payment.service.ts`:
     - builds Mongoose filters based on query params and user roles,
     - fetches payments with populated references,
@@ -142,10 +148,12 @@ The application is a **monolithic Next.js app** that contains:
 
 - **Framework**: NextAuth.
 - **Config**: `pages/api/auth/[...nextauth].ts`.
+
   - Uses MongoDB adapter for persisting sessions.
   - Supports credentials‑based auth and possibly email magic links (depending on config).
 
 - **Session usage**:
+
   - Server‑side:
     - `getServerSession` in `getServerSideProps` protects pages like `/payment`, `/profit`, etc.
   - API routes:
@@ -161,11 +169,13 @@ The application is a **monolithic Next.js app** that contains:
 ### 8. Email & PDF subsystem
 
 - **Email sending**:
+
   - Implemented in `utils/email/sendInvoiceEmail.ts` using `nodemailer`.
   - Reads SMTP configuration from environment variables.
   - Sends out invoice PDFs to domain/company recipients.
 
 - **PDF generation**:
+
   - Uses helpers under `utils/pdf/bufferGenerators` (or similar) to:
     - take extended payment data (`IExtendedPayment`),
     - generate a PDF buffer (often via `puppeteer`/headless Chrome).
@@ -179,11 +189,13 @@ The application is a **monolithic Next.js app** that contains:
 ### 9. Bank integration
 
 - **API routes**: `pages/api/bankapi/**`
+
   - `transactions` – list/import transactions.
   - `balances` – compute balances per account/domain.
   - `date` – available transaction dates.
 
 - **Internal utilities**:
+
   - Located under `pages/api/bankapi/**/utils/**`, encapsulating:
     - parsing bank statements,
     - merging transactions,
@@ -198,6 +210,7 @@ The application is a **monolithic Next.js app** that contains:
 
 - **Location**: `pages/api/sceduled/*`.
 - **Endpoints**:
+
   - `daily`, `hourly`, `threeTimesDaily`, `quater`.
 
 - **Usage**:
@@ -215,6 +228,7 @@ The application is a **monolithic Next.js app** that contains:
 ### 11. Internationalization & PWA
 
 - **i18n**:
+
   - Uses `next-i18next` and related libs.
   - Config file: `next-i18next.config.js`.
   - Initialization in `common/lib/i18n.ts` and applied in `_app.tsx`.
@@ -230,6 +244,7 @@ The application is a **monolithic Next.js app** that contains:
 ### 12. Testing
 
 - **Unit / integration tests**:
+
   - Jest and Testing Library.
   - Tests often colocated with code:
     - e.g. `pages/api/**.test.ts`, `common/components/**.test.ts`.
@@ -256,4 +271,3 @@ The application is a **monolithic Next.js app** that contains:
    - serializes data to JSON and sends HTTP response.
 6. RTK Query:
    - caches the response and updates the React components.
-

@@ -35,7 +35,8 @@ const Modal: React.FC<Props> = ({
   okButtonProps,
   open = true,
   preview,
-  destroyOnHidden = false, ...props
+  destroyOnHidden = false,
+  ...props
 }) => {
   const [modal, context] = AntModal.useModal()
 

@@ -30,9 +30,7 @@ describe('Domain API - POST', () => {
     } as any
 
     ;(getCurrentUser as any).mockResolvedValueOnce({ isGlobalAdmin: true })
-
     ;(Domain.findOne as jest.Mock).mockResolvedValueOnce(null)
-
     ;(Domain.create as jest.Mock).mockResolvedValueOnce({
       _id: 'test123',
       ...mockReq.body,
@@ -71,7 +69,6 @@ describe('Domain API - POST', () => {
     } as any
 
     ;(getCurrentUser as any).mockResolvedValueOnce({ isGlobalAdmin: true })
-
     ;(Domain.findOne as jest.Mock).mockResolvedValueOnce({
       name: 'domain 0',
       errors: ['Домен з такими даними вже існує'],

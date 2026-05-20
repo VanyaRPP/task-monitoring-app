@@ -36,7 +36,6 @@ export const Price: React.FC<InvoiceComponentProps> = ({
   const price = Form.useWatch(['invoice', ...name, 'price'], form)
   const { company } = usePaymentContext()
 
-
   if (!editable) {
     return <span>{currencyWithUnit(toRoundFixed(price), company)}</span>
   }

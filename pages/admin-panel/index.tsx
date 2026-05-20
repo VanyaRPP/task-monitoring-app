@@ -13,7 +13,9 @@ export default withAuthRedirect(() => {
       <Head>
         <title>Адмін панель</title>
       </Head>
-      <MainLayout path={[{ title: 'Адмін панель', path: AppRoutes.ADMIN_PANEL }]}>
+      <MainLayout
+        path={[{ title: 'Адмін панель', path: AppRoutes.ADMIN_PANEL }]}
+      >
         <AdminPanelPage />
       </MainLayout>
     </>

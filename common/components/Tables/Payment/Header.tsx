@@ -54,7 +54,7 @@ const PaymentsHeader: React.FC<PaymentsHeaderProps> = ({
   domainFilter,
   realEstatesFilter,
   isDashboard,
-  onDeleteClick
+  onDeleteClick,
 }) => {
   return (
     <PaymentCardHeader

@@ -52,9 +52,7 @@ describe('filterChangedCompaniesAreas', () => {
   })
 
   it('returns [] when nothing changed (rename-only case)', () => {
-    expect(filterChangedCompaniesAreas([row(), row({ _id: 'r2' })])).toEqual(
-      []
-    )
+    expect(filterChangedCompaniesAreas([row(), row({ _id: 'r2' })])).toEqual([])
   })
 
   it('returns only the changed rows when one of many is edited', () => {
@@ -67,9 +65,7 @@ describe('filterChangedCompaniesAreas', () => {
 
   it('skips rows without _id even if values changed', () => {
     expect(
-      filterChangedCompaniesAreas([
-        row({ _id: undefined, area: 999 }),
-      ])
+      filterChangedCompaniesAreas([row({ _id: undefined, area: 999 })])
     ).toEqual([])
   })
 

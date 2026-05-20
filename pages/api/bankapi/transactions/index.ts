@@ -88,11 +88,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  const {
-    isGlobalAdmin,
-    isDomainAdmin,
-    user,
-  } = await getCurrentUser(req, res)
+  const { isGlobalAdmin, isDomainAdmin, user } = await getCurrentUser(req, res)
 
   if (!user) {
     return res.status(401).json({
@@ -107,8 +103,14 @@ export default async function handler(
       message: 'Forbidden',
     })
   }
-  const { token: tokenQuery, startDate, limit, followId, acc, domainId } =
-    req.query
+  const {
+    token: tokenQuery,
+    startDate,
+    limit,
+    followId,
+    acc,
+    domainId,
+  } = req.query
 
   const { token: tokenHeader } = req.headers
 
@@ -157,7 +159,11 @@ export default async function handler(
               })
               return { ...transaction, ...matchResult }
             } catch (error) {
-              return { ...transaction, isMatchingPayment: false, previousCompanyId: null }
+              return {
+                ...transaction,
+                isMatchingPayment: false,
+                previousCompanyId: null,
+              }
             }
           })
         )
@@ -180,6 +186,8 @@ export default async function handler(
         .json({ success: false, message: 'not implemented' })
 
     case 'DELETE':
-      return res.status(501).json({ success: false, message: 'not implemented' })
+      return res
+        .status(501)
+        .json({ success: false, message: 'not implemented' })
   }
 }

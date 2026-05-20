@@ -15,9 +15,13 @@ export interface TransactionPayload {
   TECHNICAL_TRANSACTION_ID: string
 }
 
-export function getStreetId(company: IRealestate | undefined): string | undefined {
+export function getStreetId(
+  company: IRealestate | undefined
+): string | undefined {
   if (!company) return undefined
-  return typeof company.street === 'object' ? company.street._id : company.street
+  return typeof company.street === 'object'
+    ? company.street._id
+    : company.street
 }
 
 export function buildTransactionPayload(

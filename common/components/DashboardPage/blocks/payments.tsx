@@ -326,9 +326,10 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     },
     {
       title: 'Дата',
-      dataIndex: 'date', 
+      dataIndex: 'date',
       key: 'date',
-      render: (date) => (date && date !== 'undefined') ? dateToDefaultFormat(date) : '-',
+      render: (date) =>
+        date && date !== 'undefined' ? dateToDefaultFormat(date) : '-',
     },
   ]
 
@@ -415,7 +416,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     onEditClick: handleEdit,
     onDelete: handleDeletePayment,
     deleteLoading,
-    onMarkPaid: handleMarkPaid
+    onMarkPaid: handleMarkPaid,
   }
   const debtProps = {
     debtorCompanies,
@@ -458,27 +459,27 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
 
   return (
     <>
-    <TableCard title={<PaymentsHeader {...headerProps} />}>
-      <PaymentsTable
-        sepDomainID={sepDomainID}
-        payments={payments}
-        statusProps={statusProps}
-        tableEventProps={tableEventProps}
-        filterProps={filterProps}
-        paginationProps={paginationProps}
-        actionProps={actionProps}
-        debtProps={debtProps}
-        columnSelectionProps={columnSelectionProps}
-        paymentsDeleteItems={paymentsDeleteItems}
-        selectedPayments={selectedPayments}
-        onSelectPayments={(rows: IExtendedPayment[]) =>
-          dispatch(setSelectedPayments(rows))
-        }
-        onSetDeleteItems={(items: PaymentDeleteItem[]) =>
-          dispatch(setPaymentsDeleteItems(items))
-        }
-      />
-    </TableCard>
+      <TableCard title={<PaymentsHeader {...headerProps} />}>
+        <PaymentsTable
+          sepDomainID={sepDomainID}
+          payments={payments}
+          statusProps={statusProps}
+          tableEventProps={tableEventProps}
+          filterProps={filterProps}
+          paginationProps={paginationProps}
+          actionProps={actionProps}
+          debtProps={debtProps}
+          columnSelectionProps={columnSelectionProps}
+          paymentsDeleteItems={paymentsDeleteItems}
+          selectedPayments={selectedPayments}
+          onSelectPayments={(rows: IExtendedPayment[]) =>
+            dispatch(setSelectedPayments(rows))
+          }
+          onSetDeleteItems={(items: PaymentDeleteItem[]) =>
+            dispatch(setPaymentsDeleteItems(items))
+          }
+        />
+      </TableCard>
       <ModalDelete
         open={deleteModalOpen}
         onCancel={() => setDeleteModalOpen(false)}

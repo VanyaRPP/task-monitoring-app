@@ -13,7 +13,7 @@ const DateFilterDropdown: React.FC<Props> = ({
   clearFilters,
 }) => {
   const currentYear = new Date().getFullYear()
-  const currentYearData = data.find(d => d.value === String(currentYear))
+  const currentYearData = data.find((d) => d.value === String(currentYear))
   const [expandedKeys, setExpandedKeys] = useState<string[]>(() => {
     return currentYearData ? [currentYearData.value] : []
   })

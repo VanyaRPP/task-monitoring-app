@@ -5,7 +5,6 @@ import { getSingleCustomServiceInvoice } from '@utils/getInvoices'
 import { IService } from '@common/api/serviceApi/service.api.types'
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 
-
 type ServiceCustomItem = NonNullable<IService['customServices']>[number]
 type CompanyCustomItem = NonNullable<IRealestate['customServices']>[number]
 
@@ -48,15 +47,11 @@ describe('getSingleCustomServiceInvoice', () => {
   describe('service custom not found', () => {
     it('should return undefined when service has no matching custom service', () => {
       const service: Partial<IService> = {
-        customServices: [
-          mockServiceCustom({ fieldName: 'anotherField' }),
-        ],
+        customServices: [mockServiceCustom({ fieldName: 'anotherField' })],
       }
 
       const company: Partial<IRealestate> = {
-        customServices: [
-          mockCompanyCustom(),
-        ],
+        customServices: [mockCompanyCustom()],
       }
 
       const result = getSingleCustomServiceInvoice({
@@ -72,15 +67,11 @@ describe('getSingleCustomServiceInvoice', () => {
   describe('price resolving', () => {
     it('should take price from company custom service if exists', () => {
       const service: Partial<IService> = {
-        customServices: [
-          mockServiceCustom({ price: 100 }),
-        ],
+        customServices: [mockServiceCustom({ price: 100 })],
       }
 
       const company: Partial<IRealestate> = {
-        customServices: [
-          mockCompanyCustom({ price: 200 }),
-        ],
+        customServices: [mockCompanyCustom({ price: 200 })],
       }
 
       const result = getSingleCustomServiceInvoice({
@@ -102,9 +93,7 @@ describe('getSingleCustomServiceInvoice', () => {
 
     it('should fallback to service price when company custom not found', () => {
       const service: Partial<IService> = {
-        customServices: [
-          mockServiceCustom({ price: 120 }),
-        ],
+        customServices: [mockServiceCustom({ price: 120 })],
       }
 
       const company: Partial<IRealestate> = {
@@ -123,15 +112,11 @@ describe('getSingleCustomServiceInvoice', () => {
 
     it('should allow price = 0', () => {
       const service: Partial<IService> = {
-        customServices: [
-          mockServiceCustom({ price: 50 }),
-        ],
+        customServices: [mockServiceCustom({ price: 50 })],
       }
 
       const company: Partial<IRealestate> = {
-        customServices: [
-          mockCompanyCustom({ price: 0 }),
-        ],
+        customServices: [mockCompanyCustom({ price: 0 })],
       }
 
       const result = getSingleCustomServiceInvoice({

@@ -6,6 +6,7 @@ const TEMPLATE_OPTIONS = [
   { value: 'classic', label: 'Класичний шаблон' },
   { value: 'olimp', label: 'OLIMP DIGITAL OÜ' },
   { value: 'ledger', label: 'Formal Ledger' },
+  { value: 'official', label: 'Official Invoice' },
 ]
 
 interface Props {

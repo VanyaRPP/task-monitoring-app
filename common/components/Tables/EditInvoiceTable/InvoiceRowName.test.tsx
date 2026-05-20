@@ -48,11 +48,7 @@ describe('<InvoiceRowName>', () => {
 
   it('uses the override subtitle when provided', () => {
     render(
-      <InvoiceRowName
-        {...baseProps}
-        label="Інфляція"
-        subtitle="Лютий 2026"
-      />
+      <InvoiceRowName {...baseProps} label="Інфляція" subtitle="Лютий 2026" />
     )
     expect(screen.queryByText('Лютий 2026')).not.toBeNull()
   })

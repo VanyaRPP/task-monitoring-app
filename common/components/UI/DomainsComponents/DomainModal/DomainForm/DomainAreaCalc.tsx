@@ -1,5 +1,15 @@
 import React, { useMemo, useEffect } from 'react'
-import { Card, Table, InputNumber, Spin, Form, Empty, Tooltip, Button, Collapse } from 'antd'
+import {
+  Card,
+  Table,
+  InputNumber,
+  Spin,
+  Form,
+  Empty,
+  Tooltip,
+  Button,
+  Collapse,
+} from 'antd'
 import { ReloadOutlined } from '@ant-design/icons'
 import { useGetAreasQuery } from '@common/api/domainApi/domain.api'
 import ChartComponent from '@components/Chart'
@@ -13,26 +23,45 @@ interface Props {
   setIsValueChanged?: (value: boolean) => void
 }
 
-const AreaCalculationCard: React.FC<Props> = ({ domainId, editable, form, setIsValueChanged}) => {
-  const { data: areasData, isLoading, isFetching, refetch } = useGetAreasQuery(
+const AreaCalculationCard: React.FC<Props> = ({
+  domainId,
+  editable,
+  form,
+  setIsValueChanged,
+}) => {
+  const {
+    data: areasData,
+    isLoading,
+    isFetching,
+    refetch,
+  } = useGetAreasQuery(
     { domainId },
     { skip: !domainId, refetchOnMountOrArgChange: true }
   )
 
-  const { data: allRealEstate } = useGetAllRealEstateQuery({});
+  const { data: allRealEstate } = useGetAllRealEstateQuery({})
 
   const watchedCompanies = Form.useWatch('companiesAreas', form)
   const showTable = Form.useWatch('showAreaDetails', form)
 
-  const formCompanies = useMemo(() => watchedCompanies || [], [watchedCompanies])
+  const formCompanies = useMemo(
+    () => watchedCompanies || [],
+    [watchedCompanies]
+  )
   const hasPlacementService = formCompanies.length > 0
 
   const totalRentWeight = useMemo(() => {
-    return formCompanies.reduce((acc: number, curr: any) => acc + (Number(curr.rentPart) || 0), 0)
+    return formCompanies.reduce(
+      (acc: number, curr: any) => acc + (Number(curr.rentPart) || 0),
+      0
+    )
   }, [formCompanies])
 
   const currentTotalArea = useMemo(() => {
-    return formCompanies.reduce((acc: number, curr: any) => acc + (Number(curr.area) || 0), 0)
+    return formCompanies.reduce(
+      (acc: number, curr: any) => acc + (Number(curr.area) || 0),
+      0
+    )
   }, [formCompanies])
 
   const dataSource = useMemo(() => {
@@ -63,9 +92,9 @@ const AreaCalculationCard: React.FC<Props> = ({ domainId, editable, form, setIsV
 
   useEffect(() => {
     if (domainId) {
-      refetch();
+      refetch()
     }
-  }, [domainId, refetch]);
+  }, [domainId, refetch])
 
   useEffect(() => {
     if (areasData?.companies && !isFetching && !isLoading) {
@@ -91,14 +120,20 @@ const AreaCalculationCard: React.FC<Props> = ({ domainId, editable, form, setIsV
 
   const handleUpdate = (index: number, changedFields: { area?: number }) => {
     const updatedCompanies = [...formCompanies]
-    const newArea = changedFields.area !== undefined ? changedFields.area : updatedCompanies[index].area
-    
-    const newTotalArea = updatedCompanies.reduce((acc: number, c: any, i: number) => {
-      return acc + (i === index ? newArea : (Number(c.area) || 0))
-    }, 0)
+    const newArea =
+      changedFields.area !== undefined
+        ? changedFields.area
+        : updatedCompanies[index].area
+
+    const newTotalArea = updatedCompanies.reduce(
+      (acc: number, c: any, i: number) => {
+        return acc + (i === index ? newArea : Number(c.area) || 0)
+      },
+      0
+    )
 
     const finalData = updatedCompanies.map((c: any, i: number) => {
-      const area = i === index ? newArea : (Number(c.area) || 0)
+      const area = i === index ? newArea : Number(c.area) || 0
       const rentPart = newTotalArea > 0 ? (area / newTotalArea) * 100 : 0
       return { ...c, area, rentPart }
     })
@@ -140,14 +175,20 @@ const AreaCalculationCard: React.FC<Props> = ({ domainId, editable, form, setIsV
 
   return (
     <div className={s.wrapper}>
-      <Form.Item name="companiesAreas" hidden noStyle><div /></Form.Item>
-      <Form.Item name="showAreaDetails" hidden noStyle><div /></Form.Item>
+      <Form.Item name="companiesAreas" hidden noStyle>
+        <div />
+      </Form.Item>
+      <Form.Item name="showAreaDetails" hidden noStyle>
+        <div />
+      </Form.Item>
 
       <Card size="small" className={s.card} title={null}>
         <Collapse
           ghost
           activeKey={showTable ? ['1'] : []}
-          onChange={(keys) => form.setFieldValue('showAreaDetails', keys.length > 0)}
+          onChange={(keys) =>
+            form.setFieldValue('showAreaDetails', keys.length > 0)
+          }
           items={[
             {
               key: '1',
@@ -155,20 +196,20 @@ const AreaCalculationCard: React.FC<Props> = ({ domainId, editable, form, setIsV
               label: (
                 <div className={s.header}>
                   <span className={s.title}>Розрахунок площі по компаніях</span>
-                    <Tooltip title="Оновити дані (скинути зміни)">
+                  <Tooltip title="Оновити дані (скинути зміни)">
                     <Button
                       data-testid="reload-button"
                       type="text"
                       shape="circle"
                       icon={<ReloadOutlined spin={isFetching} />}
                       onClick={(e) => {
-                        e.stopPropagation();
-                        form.setFieldValue('companiesAreas', []); 
-                        
+                        e.stopPropagation()
+                        form.setFieldValue('companiesAreas', [])
+
                         if (setIsValueChanged) {
-                          setIsValueChanged(false);
+                          setIsValueChanged(false)
                         }
-                        refetch();
+                        refetch()
                       }}
                       disabled={isLoading || isFetching}
                     />
@@ -178,7 +219,9 @@ const AreaCalculationCard: React.FC<Props> = ({ domainId, editable, form, setIsV
               children: (
                 <div className={s.content}>
                   {isLoading || isFetching ? (
-                    <div className={s.center}><Spin size="large" /></div>
+                    <div className={s.center}>
+                      <Spin size="large" />
+                    </div>
                   ) : hasPlacementService && currentTotalArea > 0 ? (
                     <>
                       <Table
@@ -189,9 +232,15 @@ const AreaCalculationCard: React.FC<Props> = ({ domainId, editable, form, setIsV
                         bordered
                         summary={() => (
                           <Table.Summary.Row>
-                            <Table.Summary.Cell index={0}><b>Всього</b></Table.Summary.Cell>
-                            <Table.Summary.Cell index={1}><b>{currentTotalArea.toFixed(2)} м²</b></Table.Summary.Cell>
-                            <Table.Summary.Cell index={2}><b>100%</b></Table.Summary.Cell>
+                            <Table.Summary.Cell index={0}>
+                              <b>Всього</b>
+                            </Table.Summary.Cell>
+                            <Table.Summary.Cell index={1}>
+                              <b>{currentTotalArea.toFixed(2)} м²</b>
+                            </Table.Summary.Cell>
+                            <Table.Summary.Cell index={2}>
+                              <b>100%</b>
+                            </Table.Summary.Cell>
                           </Table.Summary.Row>
                         )}
                       />
@@ -205,7 +254,13 @@ const AreaCalculationCard: React.FC<Props> = ({ domainId, editable, form, setIsV
                     </>
                   ) : (
                     <div className={s.empty}>
-                      <Empty description={!hasPlacementService ? "Дані відсутні" : "Усі площі дорівнюють нулю"} />
+                      <Empty
+                        description={
+                          !hasPlacementService
+                            ? 'Дані відсутні'
+                            : 'Усі площі дорівнюють нулю'
+                        }
+                      />
                     </div>
                   )}
                 </div>

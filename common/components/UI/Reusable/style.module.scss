@@ -42,7 +42,9 @@
   padding: 4px 0;
 }
 
-:global([data-theme='dark']) .customSegmented :global(.ant-segmented-item-selected) {
+:global([data-theme='dark'])
+  .customSegmented
+  :global(.ant-segmented-item-selected) {
   background-color: rgba(255, 255, 255, 0.15) !important;
 }
 

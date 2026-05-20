@@ -65,7 +65,9 @@ async function domainTypeTemplatesHandler(
       }
       const includeArchived = req.query.includeArchived === 'true'
       const filter = includeArchived ? {} : { archivedAt: null }
-      const list = await DomainTypeTemplate.find(filter).sort({ name: 1 }).lean()
+      const list = await DomainTypeTemplate.find(filter)
+        .sort({ name: 1 })
+        .lean()
       return res.status(200).json({ success: true, data: list })
     }
 

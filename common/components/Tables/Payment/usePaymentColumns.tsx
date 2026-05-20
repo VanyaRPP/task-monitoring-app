@@ -62,17 +62,21 @@ function widenFilterDropdown(w = 240) {
   return (open: boolean) => {
     if (!open) return
     requestAnimationFrame(() => {
-      document.querySelectorAll<HTMLElement>('.ant-table-filter-dropdown').forEach(el => {
-        el.style.width = `${w}px`
-        el.style.maxWidth = '90vw'
-        el.querySelectorAll<HTMLElement>('.ant-checkbox + span').forEach(span => {
-          span.style.whiteSpace = 'normal'
-          span.style.wordBreak = 'break-word'
-          span.style.lineHeight = '1.2'
-          span.style.display = 'inline-block'
-          span.style.maxWidth = '100%'
+      document
+        .querySelectorAll<HTMLElement>('.ant-table-filter-dropdown')
+        .forEach((el) => {
+          el.style.width = `${w}px`
+          el.style.maxWidth = '90vw'
+          el.querySelectorAll<HTMLElement>('.ant-checkbox + span').forEach(
+            (span) => {
+              span.style.whiteSpace = 'normal'
+              span.style.wordBreak = 'break-word'
+              span.style.lineHeight = '1.2'
+              span.style.display = 'inline-block'
+              span.style.maxWidth = '100%'
+            }
+          )
         })
-      })
     })
   }
 }
@@ -136,13 +140,17 @@ export function usePaymentColumns({
           ) : (
             <Tooltip title="Додати в фільтри">
               <Typography.Link
-                onClick={() => setFilters({ ...filters, domain: [domain?._id] })}
+                onClick={() =>
+                  setFilters({ ...filters, domain: [domain?._id] })
+                }
               >
                 {domain?.name}
               </Typography.Link>
             </Tooltip>
           ),
-        hidden: isDomainAdmin ? isSingleCompanyByData && !filters?.company : false,
+        hidden: isDomainAdmin
+          ? isSingleCompanyByData && !filters?.company
+          : false,
       },
       {
         title: 'Компанія',
@@ -159,17 +167,21 @@ export function usePaymentColumns({
         ) => {
           const companyName = company.companyName
           const companyId = company._id
-          const debtor = debtorCompanies.find(d => d.companyName === companyName)
+          const debtor = debtorCompanies.find(
+            (d) => d.companyName === companyName
+          )
           const isFirstOccurrence =
             payments?.data?.findIndex(
-              item =>
+              (item) =>
                 typeof item.company === 'object' &&
                 (item.company as any).companyName === companyName
             ) === index
 
           const companyLabel = (
             <Tooltip title="Додати в фільтри">
-              <Typography.Link onClick={() => setFilters({ ...filters, company: [companyId] })}>
+              <Typography.Link
+                onClick={() => setFilters({ ...filters, company: [companyId] })}
+              >
                 {companyName}
               </Typography.Link>
             </Tooltip>
@@ -191,7 +203,9 @@ export function usePaymentColumns({
           }
           return companyLabel
         },
-        hidden: isDomainAdmin ? isSingleCompanyByData && !filters?.domain : false,
+        hidden: isDomainAdmin
+          ? isSingleCompanyByData && !filters?.domain
+          : false,
       },
       {
         title: 'Дата створення',
@@ -202,8 +216,8 @@ export function usePaymentColumns({
           !sepDomainID && dateFilters
             ? (() => {
                 const monthItems = (dateFilters.monthFilter ?? [])
-                  .filter(f => f.value != null)
-                  .map(f => ({
+                  .filter((f) => f.value != null)
+                  .map((f) => ({
                     num: Number(f.value),
                     label: toFirstUpperCase(
                       dateToMonth(new Date(2000, Number(f.value) - 1))
@@ -213,8 +227,8 @@ export function usePaymentColumns({
                 const MIN_YEAR = 2025
                 const currentYear = new Date().getFullYear()
                 const backendYears: number[] = (dateFilters.yearFilter ?? [])
-                  .filter(y => y?.value != null)
-                  .map(y => Number(y.value))
+                  .filter((y) => y?.value != null)
+                  .map((y) => Number(y.value))
 
                 const years = Array.from(
                   new Set([
@@ -226,10 +240,10 @@ export function usePaymentColumns({
                   ])
                 ).sort((a, b) => b - a)
 
-                return years.map(y => ({
+                return years.map((y) => ({
                   text: String(y),
                   value: String(y),
-                  children: monthItems.map(m => ({
+                  children: monthItems.map((m) => ({
                     text: m.label,
                     value: `${y}-month-${m.num}`,
                   })),
@@ -237,8 +251,11 @@ export function usePaymentColumns({
               })()
             : [],
         filteredValue: filters?.invoiceCreationDate || null,
-        filterDropdown: ddProps => (
-          <DateFilterDropdown data={(ddProps.filters as any) ?? []} {...ddProps} />
+        filterDropdown: (ddProps) => (
+          <DateFilterDropdown
+            data={(ddProps.filters as any) ?? []}
+            {...ddProps}
+          />
         ),
       },
       {
@@ -300,8 +317,8 @@ export function usePaymentColumns({
           const rawDate =
             typeof monthService === 'string'
               ? (payment.invoiceCreationDate as unknown as string)
-              : ((monthService as any)?.date ??
-                (payment.invoiceCreationDate as unknown as string))
+              : (monthService as any)?.date ??
+                (payment.invoiceCreationDate as unknown as string)
 
           const formatted = toFirstUpperCase(dateToMonthYear(rawDate))
 
@@ -309,14 +326,32 @@ export function usePaymentColumns({
             <List
               size="small"
               dataSource={[
-                { label: ServiceName.maintenancePrice, value: (monthService as any)?.rentPrice },
-                { label: ServiceName.electricityPrice, value: (monthService as any)?.electricityPrice },
-                { label: ServiceName.waterPrice, value: (monthService as any)?.waterPrice },
-                { label: ServiceName.waterPart, value: (monthService as any)?.waterPriceTotal },
-                { label: ServiceName.garbageCollectorPrice, value: (monthService as any)?.garbageCollectorPrice },
-                { label: ServiceName.inflicionPrice, value: (monthService as any)?.inflicionPrice },
+                {
+                  label: ServiceName.maintenancePrice,
+                  value: (monthService as any)?.rentPrice,
+                },
+                {
+                  label: ServiceName.electricityPrice,
+                  value: (monthService as any)?.electricityPrice,
+                },
+                {
+                  label: ServiceName.waterPrice,
+                  value: (monthService as any)?.waterPrice,
+                },
+                {
+                  label: ServiceName.waterPart,
+                  value: (monthService as any)?.waterPriceTotal,
+                },
+                {
+                  label: ServiceName.garbageCollectorPrice,
+                  value: (monthService as any)?.garbageCollectorPrice,
+                },
+                {
+                  label: ServiceName.inflicionPrice,
+                  value: (monthService as any)?.inflicionPrice,
+                },
               ]}
-              renderItem={item =>
+              renderItem={(item) =>
                 !isEmpty(item.value) && (
                   <List.Item>
                     <div
@@ -345,7 +380,10 @@ export function usePaymentColumns({
             <Button
               disabled={isEmpty(monthService)}
               block
-              style={{ border: 'none', backgroundColor: token.colorFillSecondary }}
+              style={{
+                border: 'none',
+                backgroundColor: token.colorFillSecondary,
+              }}
             >
               {formatted}
             </Button>
@@ -357,7 +395,9 @@ export function usePaymentColumns({
             <Tooltip
               key={themeKey}
               color={token.colorBgElevated}
-              title={<div style={{ color: token.colorText }}>{popoverContent}</div>}
+              title={
+                <div style={{ color: token.colorText }}>{popoverContent}</div>
+              }
               placement="top"
             >
               {btn}
@@ -365,20 +405,20 @@ export function usePaymentColumns({
           )
         },
       },
-      ...(selectedColumns.map(value => ({
+      ...(selectedColumns.map((value) => ({
         title: ServiceName[value],
         dataIndex: value,
         width: 132,
         ellipsis: true,
         render: (_value, payment: IExtendedPayment) => {
-          const item = payment.invoice.find(i => i.type === value)
+          const item = payment.invoice.find((i) => i.type === value)
           const sum = +(item?.sum || item?.price || 0)
           return <span>{renderCurrency(sum.toFixed(2))}</span>
         },
         hidden: Boolean(sepDomainID),
         sorter: (a: IExtendedPayment, b: IExtendedPayment) =>
-          (a.invoice.find(i => i.type === value)?.sum || 0) -
-          (b.invoice.find(i => i.type === value)?.sum || 0),
+          (a.invoice.find((i) => i.type === value)?.sum || 0) -
+          (b.invoice.find((i) => i.type === value)?.sum || 0),
       })) as ColumnType<IExtendedPayment>[]),
       {
         align: 'center',

@@ -22,7 +22,11 @@ const normalizeComparableValue = (value: unknown) => {
     return Number.isNaN(value) ? value : +toRoundFixed(value)
   }
 
-  if (typeof value === 'string' && value.trim() !== '' && !Number.isNaN(+value)) {
+  if (
+    typeof value === 'string' &&
+    value.trim() !== '' &&
+    !Number.isNaN(+value)
+  ) {
     return +toRoundFixed(+value)
   }
 
@@ -198,4 +202,3 @@ export default function UpdateInvoiceButton({
     </Tooltip>
   )
 }
-

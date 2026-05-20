@@ -1,8 +1,8 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import AddServiceModal from './index'
-import { 
-  useAddServiceMutation, 
-  useEditServiceMutation 
+import {
+  useAddServiceMutation,
+  useEditServiceMutation,
 } from '@common/api/serviceApi/service.api'
 
 jest.mock('@common/api/serviceApi/service.api')
@@ -29,14 +29,13 @@ describe('AddServiceModal Sync', () => {
   beforeEach(() => {
     jest.useFakeTimers()
     jest.clearAllMocks()
-
     ;(useAddServiceMutation as jest.Mock).mockReturnValue([
-      mockAddService, 
-      { isLoading: false }
+      mockAddService,
+      { isLoading: false },
     ])
     ;(useEditServiceMutation as jest.Mock).mockReturnValue([
-      mockEditService, 
-      { isLoading: false }
+      mockEditService,
+      { isLoading: false },
     ])
   })
 
@@ -48,9 +47,9 @@ describe('AddServiceModal Sync', () => {
     mockAddService.mockResolvedValue({ data: { success: true } })
 
     render(
-      <AddServiceModal 
-        closeModal={jest.fn()} 
-        serviceActions={{ edit: false, preview: false }} 
+      <AddServiceModal
+        closeModal={jest.fn()}
+        serviceActions={{ edit: false, preview: false }}
       />
     )
 

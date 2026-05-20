@@ -18,7 +18,6 @@ jest.mock('@components/AddPaymentModal', () => ({
     setShowQuantityInPreview: jest.fn(),
   }),
 }))
-
 ;(global as any).ResizeObserver = class {
   observe = jest.fn()
   unobserve = jest.fn()
@@ -84,14 +83,15 @@ describe('OLIMP template', () => {
     renderOlimp()
     expect(screen.getAllByText('Test Domain').length).toBeGreaterThan(0)
     expect(screen.getByText('Development services')).toBeInTheDocument()
-    expect(screen.getAllByText((c) => c.includes('100.00'))[0]).toBeInTheDocument()
+    expect(
+      screen.getAllByText((c) => c.includes('100.00'))[0]
+    ).toBeInTheDocument()
   })
 
   test('service act is hidden', () => {
     renderOlimp()
     expect(screen.queryByText(/акт надання послуг/i)).not.toBeInTheDocument()
   })
-
 
   test('показує РАХУНОК № для UAH валюти', () => {
     renderOlimp()
@@ -125,7 +125,6 @@ describe('OLIMP template', () => {
     expect(screen.getByText(/ISSUED TO/i)).toBeInTheDocument()
   })
 
-
   test('відображає дату у форматі DD.MM.YYYY', () => {
     renderOlimp()
     expect(screen.getByText(/01\.01\.2024/)).toBeInTheDocument()
@@ -136,7 +135,6 @@ describe('OLIMP template', () => {
     expect(screen.getByText(/06\.01\.2024/)).toBeInTheDocument()
   })
 
-
   // TODO: Write a real test for provider data
   // once OLIMP template starts rendering provider info explicitly.
   test.todo('OLIMP template: displays provider data when implemented')
@@ -146,10 +144,12 @@ describe('OLIMP template', () => {
     expect(screen.getByText('test@gmail.com')).toBeInTheDocument()
   })
 
-
   test('повертає null якщо paymentData відсутній', () => {
     const { container } = render(
-      <GroupedReceiptForm paymentData={null} paymentActions={{ preview: true, edit: true }} />
+      <GroupedReceiptForm
+        paymentData={null}
+        paymentActions={{ preview: true, edit: true }}
+      />
     )
     expect(container).toBeEmptyDOMElement()
   })
@@ -194,7 +194,10 @@ describe('Classic template', () => {
 
   test('повертає null якщо paymentData відсутній', () => {
     const { container } = render(
-      <GroupedReceiptForm paymentData={null} paymentActions={{ preview: true, edit: true }} />
+      <GroupedReceiptForm
+        paymentData={null}
+        paymentActions={{ preview: true, edit: true }}
+      />
     )
     expect(container).toBeEmptyDOMElement()
   })

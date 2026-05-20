@@ -31,9 +31,10 @@ export const CustomServicesTable: React.FC<Props> = ({ services = [] }) => {
       onChange={(nextTargetKeys: React.Key[], _direction: TransferDirection) =>
         setTargetKeys(nextTargetKeys)
       }
-      onSelectChange={(sourceSelectedKeys: React.Key[], targetSelectedKeys: React.Key[]) =>
-        setSelectedKeys([...sourceSelectedKeys, ...targetSelectedKeys])
-      }
+      onSelectChange={(
+        sourceSelectedKeys: React.Key[],
+        targetSelectedKeys: React.Key[]
+      ) => setSelectedKeys([...sourceSelectedKeys, ...targetSelectedKeys])}
       render={(item) => item.title}
       showSearch={false}
       listStyle={{

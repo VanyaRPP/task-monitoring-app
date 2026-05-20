@@ -145,9 +145,9 @@ describe('getRecipientCompanyHeading', () => {
   })
 
   it('falls back to reciever.name when companyName absent', () => {
-    expect(getRecipientCompanyHeading({ reciever: { name: 'PersonName' } })).toBe(
-      'PersonName'
-    )
+    expect(
+      getRecipientCompanyHeading({ reciever: { name: 'PersonName' } })
+    ).toBe('PersonName')
   })
 
   it('uses company.companyName when reciever data is missing', () => {
@@ -169,9 +169,9 @@ describe('getRecipientCompanyHeading', () => {
     expect(
       getRecipientCompanyHeading({ sender: { companyName: 'sender' } })
     ).toBe('sender')
-    expect(
-      getRecipientCompanyHeading({ client: { name: 'clientName' } })
-    ).toBe('clientName')
+    expect(getRecipientCompanyHeading({ client: { name: 'clientName' } })).toBe(
+      'clientName'
+    )
     expect(
       getRecipientCompanyHeading({ issuedTo: { companyName: 'issued' } })
     ).toBe('issued')

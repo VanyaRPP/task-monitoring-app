@@ -8,9 +8,21 @@ import {
 import ts from './techstudio.module.scss'
 
 const TechstudioTemplate: FC<TemplateProps> = ({
-  data, componentRef, isEnglish, currencyLabel, modernInvoiceNumber, domainName,
-  rows, getQty, subtotal, taxPercent, taxAmount, total,
-  paymentInfoLines, issuedToLines, normalizedBankDetailsLines,
+  data,
+  componentRef,
+  isEnglish,
+  currencyLabel,
+  modernInvoiceNumber,
+  domainName,
+  rows,
+  getQty,
+  subtotal,
+  taxPercent,
+  taxAmount,
+  total,
+  paymentInfoLines,
+  issuedToLines,
+  normalizedBankDetailsLines,
 }) => {
   const { heading: paymentHeading, bodyLines: paymentBodyLines } =
     getBillFromHeadingAndBodyLines(data, paymentInfoLines)
@@ -30,11 +42,10 @@ const TechstudioTemplate: FC<TemplateProps> = ({
           <div className={ts.tsDot} />
         </div>
         <div className={ts.tsFilePath}>
-          ~/invoices/{isEnglish ? 'invoice' : 'rakhunok'}_{modernInvoiceNumber}.pdf
+          ~/invoices/{isEnglish ? 'invoice' : 'rakhunok'}_{modernInvoiceNumber}
+          .pdf
         </div>
-        <div className={ts.tsBadge}>
-          {isEnglish ? 'PENDING' : 'ОЧІКУЄ'}
-        </div>
+        <div className={ts.tsBadge}>{isEnglish ? 'PENDING' : 'ОЧІКУЄ'}</div>
       </div>
 
       <div className={ts.tsHeader}>
@@ -88,9 +99,7 @@ const TechstudioTemplate: FC<TemplateProps> = ({
             <div
               key={`pi-${idx}`}
               className={
-                !paymentHeading && idx === 0
-                  ? ts.tsPartyName
-                  : ts.tsPartyLine
+                !paymentHeading && idx === 0 ? ts.tsPartyName : ts.tsPartyLine
               }
             >
               {line}
@@ -102,11 +111,17 @@ const TechstudioTemplate: FC<TemplateProps> = ({
               {normalizedBankDetailsLines.map((line: string, idx: number) => {
                 const sep = line.indexOf(':')
                 if (sep < 0) {
-                  return <div className={ts.tsBankLine} key={`bk-${idx}`}>{line}</div>
+                  return (
+                    <div className={ts.tsBankLine} key={`bk-${idx}`}>
+                      {line}
+                    </div>
+                  )
                 }
                 return (
                   <div className={ts.tsBankLine} key={`bk-${idx}`}>
-                    <span className={ts.tsBankLineLabel}>{line.slice(0, sep + 1)}</span>
+                    <span className={ts.tsBankLineLabel}>
+                      {line.slice(0, sep + 1)}
+                    </span>
                     {line.slice(sep + 1)}
                   </div>
                 )
@@ -126,9 +141,7 @@ const TechstudioTemplate: FC<TemplateProps> = ({
             <div
               key={`it-${idx}`}
               className={
-                !issuedHeading && idx === 0
-                  ? ts.tsPartyName
-                  : ts.tsPartyLine
+                !issuedHeading && idx === 0 ? ts.tsPartyName : ts.tsPartyLine
               }
             >
               {line}
@@ -160,7 +173,9 @@ const TechstudioTemplate: FC<TemplateProps> = ({
                   <td>{item?.name || item?.type || '—'}</td>
                   <td>{rate.toFixed(2)}</td>
                   <td>{qty}</td>
-                  <td>{Number(item?.sum || 0).toFixed(2)}&nbsp;{currencyLabel}</td>
+                  <td>
+                    {Number(item?.sum || 0).toFixed(2)}&nbsp;{currencyLabel}
+                  </td>
                 </tr>
               )
             })}
@@ -172,11 +187,17 @@ const TechstudioTemplate: FC<TemplateProps> = ({
         <div className={ts.tsDates}>
           <div className={ts.tsDateRow}>
             <span>{isEnglish ? 'issued' : 'дата'}</span>
-            <strong>{dayjs(data?.invoiceCreationDate)?.format?.('DD.MM.YYYY')}</strong>
+            <strong>
+              {dayjs(data?.invoiceCreationDate)?.format?.('DD.MM.YYYY')}
+            </strong>
           </div>
           <div className={ts.tsDateRow}>
             <span>{isEnglish ? 'due' : 'строк'}</span>
-            <strong>{dayjs(data?.invoiceCreationDate).add(5, 'd').format('DD.MM.YYYY')}</strong>
+            <strong>
+              {dayjs(data?.invoiceCreationDate)
+                .add(5, 'd')
+                .format('DD.MM.YYYY')}
+            </strong>
           </div>
         </div>
 
@@ -185,18 +206,23 @@ const TechstudioTemplate: FC<TemplateProps> = ({
             <>
               <div className={ts.tsTotalRow}>
                 <span>{isEnglish ? 'subtotal' : 'підсумок'}</span>
-                <strong>{subtotal.toFixed(2)}&nbsp;{currencyLabel}</strong>
+                <strong>
+                  {subtotal.toFixed(2)}&nbsp;{currencyLabel}
+                </strong>
               </div>
               <div className={ts.tsTotalRow}>
                 <span>vat_{taxPercent}%</span>
-                <strong>{taxAmount.toFixed(2)}&nbsp;{currencyLabel}</strong>
+                <strong>
+                  {taxAmount.toFixed(2)}&nbsp;{currencyLabel}
+                </strong>
               </div>
             </>
           )}
           <div className={`${ts.tsTotalRow} ${ts.tsGrandTotal}`}>
             <span>{isEnglish ? 'TOTAL_DUE' : 'ДО_СПЛАТИ'}</span>
             <strong>
-              {(+data?.generalSum || +data?.debit || total).toFixed(2)}&nbsp;{currencyLabel}
+              {(+data?.generalSum || +data?.debit || total).toFixed(2)}&nbsp;
+              {currencyLabel}
             </strong>
           </div>
         </div>

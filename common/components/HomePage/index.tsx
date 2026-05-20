@@ -11,22 +11,23 @@ import s from './style.module.scss'
 const HomePage: React.FC = () => {
   const router = useRouter()
   return (
-    <>
+    <div className={s.HomePage}>
       <SplashCursor />
-      <LottieAnimation
-        src="/animations/WaveForBG.json"
-        loop
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: 'auto',
-          height: '100%',
-          objectFit: 'cover',
-          transform: 'rotate(180deg)',
-        }}
-      />
-      <div className={s.HomePage}>
+
+      <div style={{ position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none', overflow: 'hidden' }}>
+        <LottieAnimation
+          src="/animations/WaveForBG.json"
+          loop
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            transform: 'rotate(180deg) scale(1.05)', 
+          }}
+        />
+      </div>
+
+      <div style={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', flex: 1 }}>
         <div className={s.Header}>
           <div className={s.Logo}>
             <LogoIcon style={{ fontSize: '100px', color: 'white' }} />
@@ -59,10 +60,10 @@ const HomePage: React.FC = () => {
         <div className={s.Container}>
           <div className={s.HalfBlock}>
             <div className={s.TextGlassCard}>
-              <Typography.Title level={2} style={{ fontSize: '2rem' }}>
+              <Typography.Title level={2} style={{ fontSize: '2rem', color: 'white' }}>
                 Ласкаво просимо до E-ORENDA!
               </Typography.Title>
-              <Typography.Paragraph style={{ fontSize: '1.3rem' }}>
+              <Typography.Paragraph style={{ fontSize: '1.3rem', color: 'rgba(255,255,255,0.85)' }}>
                 Керуйте процесом надання послуг нерухомості та систематизуйте
                 відносини між користувачами за допомогою нашого сайту! Ресурс
                 допоможе з автоматичним розрахунком платежів та своєчасним
@@ -80,7 +81,7 @@ const HomePage: React.FC = () => {
           </div>
         </div>
       </div>
-    </>
+    </div>
   )
 }
 

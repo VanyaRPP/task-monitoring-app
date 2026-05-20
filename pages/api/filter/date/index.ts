@@ -40,11 +40,13 @@ export default async function handler(
 
       const distinctYears = await (type === 'payment' ? Payment : Service)
         .distinct(dateField, options)
-        .then((dates) => [
-          ...new Set(
-            dates.map((date) => new Date(date).getFullYear()).filter(Boolean)
-          ),
-        ])
+        .then((dates) =>
+          [
+            ...new Set(
+              dates.map((date) => new Date(date).getFullYear()).filter(Boolean)
+            ),
+          ].sort((a, b) => b - a)
+        )
 
       const distinctMonths = await (type === 'payment' ? Payment : Service)
         .aggregate([

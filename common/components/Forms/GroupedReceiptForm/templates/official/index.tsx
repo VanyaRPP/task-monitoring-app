@@ -1,5 +1,9 @@
 import { FC } from 'react'
-import { dateToMonthYearEn, formatInvoiceDateUs, formatInvoiceDueDateUs } from '@assets/features/formatDate'
+import {
+  dateToMonthYearEn,
+  formatInvoiceDateUs,
+  formatInvoiceDueDateUs,
+} from '@assets/features/formatDate'
 import { resolveServiceMonth } from './resolveServiceMonth'
 import { TemplateProps } from '../types'
 import {
@@ -27,7 +31,10 @@ const OfficialTemplate: FC<TemplateProps> = ({
   const domainLabel = getDomainHeading(data, domainNameFromProps)
   const clientCompany = getRecipientCompanyHeading(data, companyLabelFromProps)
 
-  const serviceMonth = resolveServiceMonth(data?.monthService, data?.invoiceCreationDate)
+  const serviceMonth = resolveServiceMonth(
+    data?.monthService,
+    data?.invoiceCreationDate
+  )
 
   const subjectText =
     data?.notes ||
@@ -104,7 +111,9 @@ const OfficialTemplate: FC<TemplateProps> = ({
                 : Number(item?.sum || 0)
               return (
                 <tr key={`${item?.type || item?.name}-${index}`}>
-                  <td>{item?.name || item?.description || item?.type || '—'}</td>
+                  <td>
+                    {item?.name || item?.description || item?.type || '—'}
+                  </td>
                   <td>{qty?.toFixed?.(2) ?? qty}</td>
                   <td>{rate.toFixed(2)}</td>
                   <td>{Number(item?.sum || 0).toFixed(2)}</td>
@@ -121,18 +130,23 @@ const OfficialTemplate: FC<TemplateProps> = ({
             <>
               <div className={cl.clTotalRow}>
                 <span>Subtotal</span>
-                <strong>{currencyLabel}&nbsp;{subtotal.toFixed(2)}</strong>
+                <strong>
+                  {currencyLabel}&nbsp;{subtotal.toFixed(2)}
+                </strong>
               </div>
               <div className={cl.clTotalRow}>
                 <span>VAT {taxPercent}%</span>
-                <strong>{currencyLabel}&nbsp;{taxAmount.toFixed(2)}</strong>
+                <strong>
+                  {currencyLabel}&nbsp;{taxAmount.toFixed(2)}
+                </strong>
               </div>
             </>
           )}
           <div className={`${cl.clTotalRow} ${cl.clGrandTotal}`}>
             <span>Total Due</span>
             <strong>
-              {currencyLabel}&nbsp;{(+data?.generalSum || +data?.debit || total).toFixed(2)}
+              {currencyLabel}&nbsp;
+              {(+data?.generalSum || +data?.debit || total).toFixed(2)}
             </strong>
           </div>
         </div>

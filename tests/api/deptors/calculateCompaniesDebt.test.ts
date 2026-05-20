@@ -38,7 +38,6 @@ describe('Debtors API - Debt Calculation Logic', () => {
 
   it('should correctly calculate totalDebt when debit > credit', async () => {
     await mockLoginAs(users.globalAdmin)
-
     ;(Payment.find as jest.Mock).mockResolvedValue([
       {
         _id: 'payment1',
@@ -55,7 +54,6 @@ describe('Debtors API - Debt Calculation Logic', () => {
         monthService: 'service1',
       },
     ])
-
     ;(RealEstate.find as jest.Mock).mockResolvedValue([
       {
         _id: 'company1',
@@ -93,7 +91,6 @@ describe('Debtors API - Debt Calculation Logic', () => {
 
   it('should not include company when debit = credit (totalDebt = 0)', async () => {
     await mockLoginAs(users.globalAdmin)
-
     ;(Payment.find as jest.Mock).mockResolvedValue([
       {
         _id: 'payment1',
@@ -110,7 +107,6 @@ describe('Debtors API - Debt Calculation Logic', () => {
         monthService: 'service1',
       },
     ])
-
     ;(RealEstate.find as jest.Mock).mockResolvedValue([
       {
         _id: 'company1',
@@ -142,7 +138,6 @@ describe('Debtors API - Debt Calculation Logic', () => {
 
   it('should not include company when credit > debit (totalDebt < 0)', async () => {
     await mockLoginAs(users.globalAdmin)
-
     ;(Payment.find as jest.Mock).mockResolvedValue([
       {
         _id: 'payment1',
@@ -159,7 +154,6 @@ describe('Debtors API - Debt Calculation Logic', () => {
         monthService: 'service1',
       },
     ])
-
     ;(RealEstate.find as jest.Mock).mockResolvedValue([
       {
         _id: 'company1',
@@ -191,7 +185,6 @@ describe('Debtors API - Debt Calculation Logic', () => {
 
   it('should correctly sum debits and credits across multiple monthServices', async () => {
     await mockLoginAs(users.globalAdmin)
-
     ;(Payment.find as jest.Mock).mockResolvedValue([
       {
         _id: 'payment1',
@@ -222,7 +215,6 @@ describe('Debtors API - Debt Calculation Logic', () => {
         monthService: 'service2',
       },
     ])
-
     ;(RealEstate.find as jest.Mock).mockResolvedValue([
       {
         _id: 'company1',
@@ -260,7 +252,6 @@ describe('Debtors API - Debt Calculation Logic', () => {
 
   it('should handle multiple companies with different debt amounts', async () => {
     await mockLoginAs(users.globalAdmin)
-
     ;(Payment.find as jest.Mock).mockResolvedValue([
       {
         _id: 'payment1',
@@ -305,7 +296,6 @@ describe('Debtors API - Debt Calculation Logic', () => {
         monthService: 'service1',
       },
     ])
-
     ;(RealEstate.find as jest.Mock).mockResolvedValue([
       {
         _id: 'company1',
@@ -367,7 +357,6 @@ describe('Debtors API - Debt Calculation Logic', () => {
 
   it('should handle company with only debit payments', async () => {
     await mockLoginAs(users.globalAdmin)
-
     ;(Payment.find as jest.Mock).mockResolvedValue([
       {
         _id: 'payment1',
@@ -384,7 +373,6 @@ describe('Debtors API - Debt Calculation Logic', () => {
         monthService: 'service2',
       },
     ])
-
     ;(RealEstate.find as jest.Mock).mockResolvedValue([
       {
         _id: 'company1',
@@ -422,7 +410,6 @@ describe('Debtors API - Debt Calculation Logic', () => {
 
   it('should handle company with only credit payments', async () => {
     await mockLoginAs(users.globalAdmin)
-
     ;(Payment.find as jest.Mock).mockResolvedValue([
       {
         _id: 'payment1',
@@ -439,7 +426,6 @@ describe('Debtors API - Debt Calculation Logic', () => {
         monthService: 'service2',
       },
     ])
-
     ;(RealEstate.find as jest.Mock).mockResolvedValue([
       {
         _id: 'company1',
