@@ -31,7 +31,8 @@ export const getDefaultColumns = (
   remove: (index: number) => void,
   _allowedServices: any,
   losses?: number,
-  extraColumns: TableColumnsType = []
+  extraColumns: TableColumnsType = [],
+  service?: any
 ): TableColumnsType =>
   [
     {
@@ -86,7 +87,7 @@ export const getDefaultColumns = (
       width: 200,
       render: (_, { name }: { name: number }) => <InflicionSum name={name} />,
     },
-    _allowedServices.some((inv) => inv?.fieldName === 'electricityPrice') && {
+_allowedServices.some((inv) => inv?.fieldName === 'electricityPrice' || inv?.name?.toLowerCase().includes('електро')) && {
       title: losses
         ? `Електропостачання + Втрати ${losses}%`
         : 'Електропостачання',
