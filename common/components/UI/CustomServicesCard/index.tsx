@@ -109,7 +109,7 @@ const CustomServicesCard: React.FC<CustomServicesCardProps> = ({
       {!disabled && !isServiceForm && (
         <Tooltip
           title={
-            dropdownOptions.length === 0
+            allCustomServices.length === 0
               ? 'У обраного домена відсутні послуги'
               : ''
           }
