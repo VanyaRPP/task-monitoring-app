@@ -1,5 +1,16 @@
 import React, { FC, useEffect, useState } from 'react'
-import {Modal,Transfer,Typography,Button,Card,Space,Input,message,Collapse,Popconfirm} from 'antd'
+import {
+  Modal,
+  Transfer,
+  Typography,
+  Button,
+  Card,
+  Space,
+  Input,
+  message,
+  Collapse,
+  Popconfirm,
+} from 'antd'
 import type { CollapseProps } from 'antd'
 import {
   DeleteOutlined,
@@ -13,7 +24,7 @@ import {
 } from '@common/api/customServicesApi/customServices.api'
 import { Roles } from '@utils/constants'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
-import { isProtectedService } from '@utils/helpers'
+import { isAdminCheck, isProtectedService } from '@utils/helpers'
 
 const { Text } = Typography
 
@@ -42,6 +53,7 @@ interface Props {
   onDeleteCustomService?: (serviceKey: string) => void
   onUpdateCustomService?: (id: string, newTitle: string) => Promise<void>
   isGlobalAdmin?: boolean
+  domainId?: string
 }
 
 const DomainModal: FC<Props> = ({
@@ -54,9 +66,12 @@ const DomainModal: FC<Props> = ({
   onDeleteCustomService,
   onUpdateCustomService,
   isGlobalAdmin,
+  domainId,
 }) => {
   const [targetKeys, setTargetKeys] = useState<Record<string, string[]>>({})
-  const [localServiceGroups, setLocalServiceGroups] = useState<ServiceGroup[]>([])
+  const [localServiceGroups, setLocalServiceGroups] = useState<ServiceGroup[]>(
+    []
+  )
   const [localData, setLocalData] = useState<ServiceItem[]>([])
   const [newGroupName, setNewGroupName] = useState('')
   const [editingKey, setEditingKey] = useState<string | null>(null)
@@ -65,11 +80,12 @@ const DomainModal: FC<Props> = ({
   const [activePanel, setActivePanel] = useState<string | string[]>([])
   const { data: user } = useGetCurrentUserQuery()
   isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
+  const isAdmin = isAdminCheck(user?.roles)
 
   useEffect(() => {
     const initialTargets: Record<string, string[]> = {}
 
-    serviceGroups.forEach(g => {
+    serviceGroups.forEach((g) => {
       initialTargets[g.groupName] = (g.services || []).map(String)
     })
 
@@ -83,10 +99,10 @@ const DomainModal: FC<Props> = ({
     keys: (string | number | bigint)[]
   ) => {
     const stringKeys = keys.map(String)
-    setTargetKeys(prev => ({ ...prev, [groupName]: stringKeys }))
-    setLocalServiceGroups(prev => 
-      prev.map(group => 
-        group.groupName === groupName 
+    setTargetKeys((prev) => ({ ...prev, [groupName]: stringKeys }))
+    setLocalServiceGroups((prev) =>
+      prev.map((group) =>
+        group.groupName === groupName
           ? { ...group, services: stringKeys }
           : group
       )
@@ -101,32 +117,33 @@ const DomainModal: FC<Props> = ({
 
   const handleDeleteService = async (serviceKey: string) => {
     try {
-      const result = await deleteCustomService({ 
-        id: serviceKey, 
+      const result = await deleteCustomService({
+        id: serviceKey,
+        ...(domainId ? { domainId } : {}),
       }).unwrap()
 
       message.success(result.data || 'Сервіс успішно видалено')
 
-      setTargetKeys(prev => {
+      setTargetKeys((prev) => {
         const updated: Record<string, string[]> = {}
         Object.entries(prev).forEach(([group, keys]) => {
-          updated[group] = keys.filter(k => k !== serviceKey)
+          updated[group] = keys.filter((k) => k !== serviceKey)
         })
         return updated
       })
 
-      setLocalServiceGroups(prev =>
-        prev.map(group => ({
+      setLocalServiceGroups((prev) =>
+        prev.map((group) => ({
           ...group,
-          services: group.services.filter(s => s !== serviceKey),
+          services: group.services.filter((s) => s !== serviceKey),
         }))
       )
 
-      setLocalData(prev => prev.filter(item => item.key !== serviceKey))
+      setLocalData((prev) => prev.filter((item) => item.key !== serviceKey))
 
       onDeleteCustomService?.(serviceKey)
     } catch (error) {
-        message.error(error?.data?.message || 'Помилка при видаленні')
+      message.error(error?.data?.message || 'Помилка при видаленні')
     }
   }
 
@@ -135,12 +152,12 @@ const DomainModal: FC<Props> = ({
 
     Object.entries(targetKeys).forEach(([gName, keys]) => {
       if (gName !== groupName) {
-        keys.forEach(k => usedKeys.add(k))
+        keys.forEach((k) => usedKeys.add(k))
       }
     })
 
     return localData.filter(
-      item =>
+      (item) =>
         !usedKeys.has(item.key) ||
         (targetKeys[groupName] || []).includes(item.key)
     )
@@ -171,10 +188,13 @@ const DomainModal: FC<Props> = ({
       await editCustomService({
         _id: item.key,
         name: tempTitle.trim(),
+        ...(domainId ? { domainId } : {}),
       }).unwrap()
 
       setLocalData((prev) =>
-        prev.map((s) => (s.key === item.key ? { ...s, title: tempTitle.trim() } : s))
+        prev.map((s) =>
+          s.key === item.key ? { ...s, title: tempTitle.trim() } : s
+        )
       )
       message.success('Назву послуги оновлено')
       handleCancelEdit()
@@ -188,22 +208,22 @@ const DomainModal: FC<Props> = ({
       message.warning('Введіть назву групи')
       return
     }
-    if (localServiceGroups.some(group => group.groupName === newGroupName)) {
+    if (localServiceGroups.some((group) => group.groupName === newGroupName)) {
       message.warning('Група з такою назвою вже існує')
       return
     }
 
     const newGroup: ServiceGroup = {
       groupName: newGroupName,
-      services: []
+      services: [],
     }
 
     const updatedGroups = [...localServiceGroups, newGroup]
     setLocalServiceGroups(updatedGroups)
-    
+
     const newTargetKeys = { ...targetKeys, [newGroupName]: [] }
     setTargetKeys(newTargetKeys)
-    
+
     setNewGroupName('')
     setActivePanel([])
   }
@@ -246,9 +266,11 @@ const DomainModal: FC<Props> = ({
   }
 
   const handleRemoveGroup = (groupName: string) => {
-    const updatedGroups = localServiceGroups.filter(g => g.groupName !== groupName)
+    const updatedGroups = localServiceGroups.filter(
+      (g) => g.groupName !== groupName
+    )
     setLocalServiceGroups(updatedGroups)
-    
+
     const newTargetKeys = { ...targetKeys }
     delete newTargetKeys[groupName]
     setTargetKeys(newTargetKeys)
@@ -260,11 +282,11 @@ const DomainModal: FC<Props> = ({
         dataSource={getFilteredData(groupName)}
         titles={['Доступні послуги', 'Обрані послуги']}
         targetKeys={targetKeys[groupName] || []}
-        onChange={keys => handleChange(groupName, keys)}
-        listStyle={{ 
-          width: '55%', 
+        onChange={(keys) => handleChange(groupName, keys)}
+        listStyle={{
+          width: '55%',
           height: 300,
-          overflow: 'auto'
+          overflow: 'auto',
         }}
         render={(item) => {
           const isEditing = editingKey === item.key
@@ -294,33 +316,36 @@ const DomainModal: FC<Props> = ({
               )}
 
               <Space size="small">
-                {isCustom && isGlobalAdmin && (
+                {isCustom && isAdmin && (isGlobalAdmin || !!domainId) && (
                   <>
                     {isEditing ? (
                       <>
                         <Button
                           type="text"
                           size="small"
-                        icon={
-                          <CheckOutlined
-                            style={{
-                              color: '#642AB5',
-                              stroke: '#642AB5',
-                              strokeWidth: 60,
-                            }}
-                          />
-                        }
+                          icon={
+                            <CheckOutlined
+                              style={{
+                                color: '#642AB5',
+                                stroke: '#642AB5',
+                                strokeWidth: 60,
+                              }}
+                            />
+                          }
                           onClick={() => handleSaveEdit(item)}
                           loading={isUpdating}
                         />
                         <Button
                           type="text"
                           size="small"
-                        icon={
-                          <CloseOutlined
-                            style={{ stroke: 'currentColor', strokeWidth: 60 }}
-                          />
-                        }
+                          icon={
+                            <CloseOutlined
+                              style={{
+                                stroke: 'currentColor',
+                                strokeWidth: 60,
+                              }}
+                            />
+                          }
                           onClick={handleCancelEdit}
                           disabled={isUpdating}
                         />
@@ -342,7 +367,10 @@ const DomainModal: FC<Props> = ({
                       disabled={isDeleting || isUpdating}
                     >
                       <DeleteOutlined
-                        style={{ color: (isDeleting || isUpdating) ? '#ccc' : 'red', cursor: 'pointer' }}
+                        style={{
+                          color: isDeleting || isUpdating ? '#ccc' : 'red',
+                          cursor: 'pointer',
+                        }}
                       />
                     </Popconfirm>
                   </>
@@ -367,7 +395,10 @@ const DomainModal: FC<Props> = ({
 
   const handlePanelChange = (keys: string | string[]) => {
     setActivePanel(keys)
-    if (keys.length === 0 || !keys.includes('new-group') && !keys.includes('new-service')) {
+    if (
+      keys.length === 0 ||
+      (!keys.includes('new-group') && !keys.includes('new-service'))
+    ) {
       if (!keys.includes('new-group')) {
         setNewGroupName('')
       }
@@ -391,13 +422,8 @@ const DomainModal: FC<Props> = ({
               autoFocus
               style={{ flex: 1 }}
             />
-            <Button onClick={handleCancelNewGroup}>
-              Скасувати
-            </Button>
-            <Button 
-              type="primary" 
-              onClick={handleSaveNewGroup}
-            >
+            <Button onClick={handleCancelNewGroup}>Скасувати</Button>
+            <Button type="primary" onClick={handleSaveNewGroup}>
               Зберегти групу
             </Button>
           </div>
@@ -417,13 +443,8 @@ const DomainModal: FC<Props> = ({
               autoFocus
               style={{ flex: 1 }}
             />
-            <Button onClick={handleCancelNewService}>
-              Скасувати
-            </Button>
-            <Button 
-              type="primary" 
-              onClick={handleSaveNewService}
-            >
+            <Button onClick={handleCancelNewService}>Скасувати</Button>
+            <Button type="primary" onClick={handleSaveNewService}>
               Зберегти послугу
             </Button>
           </div>
@@ -446,51 +467,55 @@ const DomainModal: FC<Props> = ({
           Зберегти
         </Button>,
       ]}
-      style={{ 
-        maxHeight: '80vh', 
+      style={{
+        maxHeight: '80vh',
         overflowY: 'auto',
-        paddingRight: '8px'
+        paddingRight: '8px',
       }}
     >
       <Space direction="vertical" style={{ width: '100%' }} size="large">
-        <Collapse 
+        <Collapse
           items={collapseItems}
           activeKey={activePanel}
           onChange={handlePanelChange}
         />
 
         <div style={{ maxHeight: 'calc(70vh - 150px)', overflowY: 'auto' }}>
-          {localServiceGroups.length > 0 ? (
-            localServiceGroups.map(g => (
-              <Card
-                key={g.groupName}
-                title={
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span>Група: {g.groupName}</span>
-                    {isGlobalAdmin && ( 
-                      <Button
-                      type="text"
-                      danger
-                      onClick={() => handleRemoveGroup(g.groupName)}
+          {localServiceGroups.length > 0
+            ? localServiceGroups.map((g) => (
+                <Card
+                  key={g.groupName}
+                  title={
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                      }}
                     >
-                      Видалити групу послуг
-                    </Button> 
-                    )}
-                  </div>
-                }
-                size="small"
-                style={{ marginBottom: 16 }}
-              >
-                {renderTransfer(g.groupName)}
-              </Card>
-            ))
-          ) : (
-            activePanel.length === 0 && (
-              <Card title="Загальні послуги" size="small">
-                {renderTransfer('default')}
-              </Card>
-            )
-          )}
+                      <span>Група: {g.groupName}</span>
+                      {isGlobalAdmin && (
+                        <Button
+                          type="text"
+                          danger
+                          onClick={() => handleRemoveGroup(g.groupName)}
+                        >
+                          Видалити групу послуг
+                        </Button>
+                      )}
+                    </div>
+                  }
+                  size="small"
+                  style={{ marginBottom: 16 }}
+                >
+                  {renderTransfer(g.groupName)}
+                </Card>
+              ))
+            : activePanel.length === 0 && (
+                <Card title="Загальні послуги" size="small">
+                  {renderTransfer('default')}
+                </Card>
+              )}
         </div>
       </Space>
     </Modal>

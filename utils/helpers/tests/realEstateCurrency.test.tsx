@@ -122,7 +122,7 @@ describe('renderCurrency', () => {
     expect(renderCurrency(0)).toBe('0')
   })
 
-  it('форматує від\'ємне число', () => {
+  it("форматує від'ємне число", () => {
     expect(renderCurrency(-100)).toBe('-100')
   })
 
@@ -186,7 +186,7 @@ describe('PriceCell — цінові колонки таблиці', () => {
     expect(getByTestId('cell')).toHaveTextContent('-')
   })
 
-  it('відображає від\'ємний discount (бекенд зберігає зі знаком «-»)', () => {
+  it("відображає від'ємний discount (бекенд зберігає зі знаком «-»)", () => {
     const { getByTestId } = render(<PriceCell value={-10} />)
     expect(getByTestId('cell')).toHaveTextContent('-10')
   })

@@ -256,4 +256,3 @@ The application is a **monolithic Next.js app** that contains:
    - serializes data to JSON and sends HTTP response.
 6. RTK Query:
    - caches the response and updates the React components.
-

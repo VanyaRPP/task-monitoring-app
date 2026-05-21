@@ -11,6 +11,7 @@ export interface IDomainModel {
   customServices: ICustomService[]
   domainTypeTemplateId?: string
   defaultTemplate?: string
+  archived?: boolean
 }
 
 export type DomainTypeTemplateCategory =

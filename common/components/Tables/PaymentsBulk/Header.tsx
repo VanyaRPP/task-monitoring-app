@@ -58,7 +58,11 @@ const InvoicesHeader = () => {
 
     let monthServiceId: string
     try {
-      monthServiceId = await resolveMonthServiceId(service?._id, domainId, streetId)
+      monthServiceId = await resolveMonthServiceId(
+        service?._id,
+        domainId,
+        streetId
+      )
     } catch (e) {
       console.error('resolveMonthServiceId failed', e)
       message.error('Не вдалося підготувати місяць послуг')
@@ -69,12 +73,13 @@ const InvoicesHeader = () => {
       const matchedCompany = companies?.find(
         ({ _id }) => payment.company?._id === _id
       )
-      const { provider, reciever } = getPaymentProviderAndReciever(matchedCompany)
+      const { provider, reciever } =
+        getPaymentProviderAndReciever(matchedCompany)
 
       const invoice = Object.values(payment.invoice || {}).filter(
         ({ sum }) => sum
       )
-      const filteredInvoice = invoiceCSFilter(invoice);
+      const filteredInvoice = invoiceCSFilter(invoice)
 
       const generalSum = filteredInvoice.reduce(
         (acc: number, invoice: IPaymentField) => {

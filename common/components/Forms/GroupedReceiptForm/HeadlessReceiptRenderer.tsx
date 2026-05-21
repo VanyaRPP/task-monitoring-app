@@ -81,7 +81,9 @@ const HeadlessReceiptRenderer: FC<Props> = ({
       try {
         const node = componentRef.current
         if (!node) {
-          throw new Error('HeadlessReceiptRenderer: nothing rendered to capture')
+          throw new Error(
+            'HeadlessReceiptRenderer: nothing rendered to capture'
+          )
         }
         const html = buildStandaloneHtml(node.outerHTML, collectAppCss())
         capturedRef.current = true

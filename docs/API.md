@@ -504,7 +504,7 @@ Under `/api/sceduled/*`.
 - **`GET /api/doc`**
   - **Purpose**: internal documentation helper (used by `/docs` UI page).
 
-- **`/api/**.test.ts`**
+- **`/api/**.test.ts`\*\*
   - Jest test files are colocated with API routes (e.g., `spacehub/payment/payment.test.ts`) and are **not** exposed as HTTP endpoints.
 
 ---
@@ -533,4 +533,3 @@ Under `/api/sceduled/*`.
 
 - **Id fields**
   - MongoDB ObjectIds are used (`_id` / `id`), usually serialized as strings in JSON.
-

@@ -2,7 +2,12 @@ import { dateToMonthYear } from '@assets/features/formatDate'
 import { usePaymentContext } from '@components/AddPaymentModal'
 import { InvoiceComponentProps } from '@components/Tables/EditInvoiceTable'
 import { ServiceType } from '@utils/constants'
-import { currencyWithUnit, toArray, toFirstUpperCase, toRoundFixed } from '@utils/helpers'
+import {
+  currencyWithUnit,
+  toArray,
+  toFirstUpperCase,
+  toRoundFixed,
+} from '@utils/helpers'
 import validator from '@utils/validator'
 import { Form, Input, Typography } from 'antd'
 import { useMemo } from 'react'

@@ -5,7 +5,6 @@ import { ServiceType } from '@utils/constants'
 import { inputNumberParser, toRoundFixed } from '@utils/helpers'
 import validator from '@utils/validator'
 
-
 export const LossElectricitySum: React.FC<{ name: number }> = ({ name }) => {
   const { form, service } = useInvoicesPaymentContext()
   const lastAmount: number =

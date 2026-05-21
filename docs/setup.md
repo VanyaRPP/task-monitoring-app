@@ -146,4 +146,3 @@ HMR (hot module reload) is enabled, so changes to pages and components are refle
 - `yarn lint` – run ESLint.
 - `yarn prettier` – run Prettier checks/fixes.
 - `yarn types:check` – run TypeScript type checking.
-

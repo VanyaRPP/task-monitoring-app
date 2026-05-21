@@ -6,18 +6,17 @@ jest.mock('@utils/helpers', () => ({
 }))
 
 jest.mock('@utils/getCurrentUser', () => ({
-  getCurrentUser: () => Promise.resolve({ isGlobalAdmin: true, user: { _id: '1' } }),
+  getCurrentUser: () =>
+    Promise.resolve({ isGlobalAdmin: true, user: { _id: '1' } }),
 }))
 
 jest.mock('@pages/api/api.config', () => jest.fn())
 
 describe('API Filter Domains Handler (Manual Mocks)', () => {
   it('має повертати відфільтровані домени на основі переданих вулиць', async () => {
-    const mockDomains = [
-      { domainDetails: { name: 'Водоканал', _id: 'dom_1' } }
-    ];
-    (getDistinctCompanyAndDomain as jest.Mock).mockResolvedValue({
-      distinctDomains: mockDomains
+    const mockDomains = [{ domainDetails: { name: 'Водоканал', _id: 'dom_1' } }]
+    ;(getDistinctCompanyAndDomain as jest.Mock).mockResolvedValue({
+      distinctDomains: mockDomains,
     })
 
     const req = {
@@ -35,13 +34,13 @@ describe('API Filter Domains Handler (Manual Mocks)', () => {
     await handler(req as any, res as any)
 
     expect(res.status).toHaveBeenCalledWith(200)
-    
+
     expect(res.json).toHaveBeenCalledWith(
       expect.objectContaining({
         success: true,
         domainsFilter: expect.arrayContaining([
-          { text: 'Водоканал', value: 'dom_1' }
-        ])
+          { text: 'Водоканал', value: 'dom_1' },
+        ]),
       })
     )
 
@@ -49,7 +48,7 @@ describe('API Filter Domains Handler (Manual Mocks)', () => {
       expect.objectContaining({
         filters: expect.objectContaining({
           filteredStreets: [expect.any(Object)],
-        })
+        }),
       })
     )
   })

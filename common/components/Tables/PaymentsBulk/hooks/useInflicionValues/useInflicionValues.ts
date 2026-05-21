@@ -22,8 +22,10 @@ export const useInflicionValues = (
 
   const previousPlacingPrice = useMemo(() => {
     return (
-      prevPayment?.invoice?.find((item) => item.type === ServiceType.Placing)?.sum ||
-      (company?.totalArea || 0) * ((company?.pricePerMeter || 0) || (service?.rentPrice || 0))
+      prevPayment?.invoice?.find((item) => item.type === ServiceType.Placing)
+        ?.sum ||
+      (company?.totalArea || 0) *
+        (company?.pricePerMeter || 0 || service?.rentPrice || 0)
     )
   }, [prevPayment, company, service])
 

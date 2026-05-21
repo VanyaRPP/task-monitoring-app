@@ -23,13 +23,18 @@ export const domainApi = createApi({
   endpoints: (builder) => ({
     getDomains: builder.query<
       IExtendedDomain[],
-      { limit?: number; streetId?: string; domainId?: string }
+      {
+        limit?: number
+        streetId?: string
+        domainId?: string
+        archived?: boolean
+      }
     >({
-      query: ({ limit, streetId, domainId }) => {
+      query: ({ limit, streetId, domainId, archived }) => {
         return {
           url: `domain`,
           method: 'GET',
-          params: { limit, streetId, domainId },
+          params: { limit, streetId, domainId, archived },
         }
       },
       providesTags: (response) =>
@@ -122,14 +127,15 @@ export const domainApi = createApi({
         data: IDomainTypeTemplate[]
       }) => response.data ?? [],
     }),
-    getDomainTypeTemplateById: builder.query<IDomainTypeTemplateWithUsage, string>({
+    getDomainTypeTemplateById: builder.query<
+      IDomainTypeTemplateWithUsage,
+      string
+    >({
       query: (id) => ({
         url: `domain-type-templates/${id}`,
         method: 'GET',
       }),
-      providesTags: (result, error, id) => [
-        { type: 'DomainTypeTemplate', id },
-      ],
+      providesTags: (result, error, id) => [{ type: 'DomainTypeTemplate', id }],
       transformResponse: (response: {
         success: boolean
         data: IDomainTypeTemplateWithUsage

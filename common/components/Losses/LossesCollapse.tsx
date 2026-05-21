@@ -88,7 +88,7 @@ export const LossesCollapse: React.FC<LossesCollapseProps> = (props) => {
     form.setFieldValue(name, Number(lossesPercent.toFixed(2)))
   }, [form, name, lossesPercent, hasElectricityService])
 
-   // якщо немає послуги з ціною електроенергії, то не виводимо втрати
+  // якщо немає послуги з ціною електроенергії, то не виводимо втрати
   if (!hasElectricityService) {
     return null
   }

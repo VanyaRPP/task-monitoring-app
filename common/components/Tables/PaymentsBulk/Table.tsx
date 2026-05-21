@@ -70,7 +70,8 @@ const InvoicesTable: React.FC = () => {
         domainId: prevService?.domain?._id,
       })
 
-      const validPrevPayment = prevPayment?.type === Operations.Debit ? prevPayment : undefined
+      const validPrevPayment =
+        prevPayment?.type === Operations.Debit ? prevPayment : undefined
 
       const allinvoice = getInvoices({
         company,

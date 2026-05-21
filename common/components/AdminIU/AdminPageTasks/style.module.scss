@@ -44,7 +44,10 @@
       margin-bottom: 2px;
       position: relative;
       cursor: pointer;
-      transition: background 0.5s, color 0.2s, opacity 0.5s;
+      transition:
+        background 0.5s,
+        color 0.2s,
+        opacity 0.5s;
       background: var(--backgroundColorElements);
       opacity: 0.5;
       color: var(--textColor);

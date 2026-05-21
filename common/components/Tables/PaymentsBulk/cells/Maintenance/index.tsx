@@ -6,7 +6,6 @@ import { ServiceType } from '@utils/constants'
 import { inputNumberParser, toRoundFixed } from '@utils/helpers'
 import { QuestionCircleOutlined } from '@ant-design/icons'
 
-
 export const MaintenancePrice: React.FC<{ name: number }> = ({ name }) => {
   const { form } = useInvoicesPaymentContext()
 

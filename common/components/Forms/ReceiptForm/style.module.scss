@@ -146,11 +146,15 @@
       border-top: none !important;
     }
 
-    :global(.ant-table-tbody > tr > td:nth-child(2) .ant-typography:first-child) {
+    :global(
+      .ant-table-tbody > tr > td:nth-child(2) .ant-typography:first-child
+    ) {
       white-space: nowrap !important;
     }
 
-    :global(.ant-table-tbody > tr > td:nth-child(2) .ant-typography:nth-child(2)) {
+    :global(
+      .ant-table-tbody > tr > td:nth-child(2) .ant-typography:nth-child(2)
+    ) {
       white-space: nowrap !important;
     }
   }

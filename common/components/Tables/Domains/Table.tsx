@@ -3,32 +3,39 @@ import {
   EditOutlined,
   EyeOutlined,
   QuestionCircleOutlined,
+  InboxOutlined,
+  MoreOutlined,
 } from '@ant-design/icons'
-import { Alert, Button, Popconfirm, Table, Tag, Tooltip, message } from 'antd'
+import {
+  Alert,
+  Button,
+  Popconfirm,
+  Table,
+  Tag,
+  Tooltip,
+  message,
+  Dropdown,
+} from 'antd'
 import { ColumnType } from 'antd/lib/table'
 import { useRouter } from 'next/router'
+import { useEffect, useMemo } from 'react'
 
 import {
   useDeleteDomainMutation,
   useGetDomainsQuery,
+  useEditDomainMutation,
 } from '@common/api/domainApi/domain.api'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 import StreetsBlock from '@components/DashboardPage/blocks/streets'
 import { AppRoutes } from '@utils/constants'
-import { useEffect } from 'react'
 
 export interface Props {
   domainId?: string
   setCurrentDomain?: (domain: IExtendedDomain) => void
-  setDomainActions: React.Dispatch<
-    React.SetStateAction<{
-      edit: boolean
-    }>
-  >
-  domainActions: {
-    edit: boolean
-  }
-  setDomainsLength: React.Dispatch<React.SetStateAction<number | null>>
+  setDomainActions?: React.Dispatch<React.SetStateAction<{ edit: boolean }>>
+  domainActions?: { edit: boolean }
+  setDomainsLength?: React.Dispatch<React.SetStateAction<number | null>>
+  isArchive: boolean
 }
 
 const DomainsTable: React.FC<Props> = ({
@@ -36,6 +43,7 @@ const DomainsTable: React.FC<Props> = ({
   setCurrentDomain,
   setDomainActions,
   setDomainsLength,
+  isArchive,
 }) => {
   const router = useRouter()
   const isOnPage = router.pathname === AppRoutes.DOMAIN
@@ -43,15 +51,24 @@ const DomainsTable: React.FC<Props> = ({
   const { data, isLoading, isError } = useGetDomainsQuery({
     domainId,
     limit: isOnPage ? 0 : 5,
+    archived: isArchive,
   })
 
+  const filteredData = useMemo(() => {
+    if (!data) return []
+    return data.filter((domain) =>
+      isArchive ? domain.archived === true : !domain.archived
+    )
+  }, [data, isArchive])
+
   useEffect(() => {
-    if (!isLoading) {
-      setDomainsLength(data?.length)
+    if (!isLoading && setDomainsLength) {
+      setDomainsLength(filteredData.length)
     }
-  }, [data, isLoading])
+  }, [filteredData, isLoading, setDomainsLength])
 
   const [deleteDomain, { isLoading: deleteLoading }] = useDeleteDomainMutation()
+  const [updateDomain, { isLoading: archiveLoading }] = useEditDomainMutation()
 
   const handleDelete = async (id: string) => {
     const response = await deleteDomain(id)
@@ -62,6 +79,19 @@ const DomainsTable: React.FC<Props> = ({
     }
   }
 
+  const handleArchive = async (id: string, archived: boolean) => {
+    try {
+      const response = await updateDomain({ _id: id, archived })
+      if ('data' in response) {
+        message.success(archived ? 'Домен архівовано' : 'Домен розархівовано')
+      } else {
+        message.error('Помилка при зміні статусу')
+      }
+    } catch (error) {
+      message.error('Виникла помилка')
+    }
+  }
+
   if (isError) return <Alert message="Помилка" type="error" showIcon closable />
 
   return (
@@ -69,33 +99,40 @@ const DomainsTable: React.FC<Props> = ({
       rowKey="_id"
       pagination={false}
       loading={isLoading}
-      columns={getDefaultColumns(
+      columns={getDefaultColumns({
         handleDelete,
         deleteLoading,
         setCurrentDomain,
-        setDomainActions
-      )}
+        setDomainActions,
+        handleArchive,
+        archiveLoading,
+      })}
       expandable={{
         expandedRowRender: ({ _id: domainId }) => (
           <StreetsBlock domainId={domainId} />
         ),
       }}
-      dataSource={data}
+      dataSource={filteredData}
       scroll={{ x: 600 }}
     />
   )
 }
 
-const getDefaultColumns = (
-  handleDelete?: (...args: any) => void,
-  deleteLoading?: boolean,
-  setCurrentDomain?: (domain: IExtendedDomain) => void,
-  setDomainActions?: React.Dispatch<
-    React.SetStateAction<{
-      edit: boolean
-    }>
-  >
-): ColumnType<any>[] => [
+const getDefaultColumns = ({
+  handleDelete,
+  deleteLoading,
+  setCurrentDomain,
+  setDomainActions,
+  handleArchive,
+  archiveLoading,
+}: {
+  handleDelete: (id: string) => void
+  deleteLoading: boolean
+  setCurrentDomain?: (domain: IExtendedDomain) => void
+  setDomainActions?: React.Dispatch<React.SetStateAction<{ edit: boolean }>>
+  handleArchive: (id: string, archived: boolean) => void
+  archiveLoading: boolean
+}): ColumnType<any>[] => [
   {
     fixed: 'left',
     title: 'Назва',
@@ -105,76 +142,126 @@ const getDefaultColumns = (
   {
     title: 'Адміністратори',
     dataIndex: 'adminEmails',
-    render: (adminEmails) =>
-      adminEmails.map((email) => <Tag key={email}>{email}</Tag>),
+    render: (adminEmails: string[]) =>
+      adminEmails?.map((email) => <Tag key={email}>{email}</Tag>),
   },
   {
     align: 'center',
     title: 'Опис',
     dataIndex: 'description',
     width: 100,
-     render: (text) => (
-    <Tooltip
-      title={<div style={{ whiteSpace: 'pre-line', maxWidth: 300 }}>{text}</div>}
-      overlayStyle={{ maxWidth: 800 }}
-    >
-      <QuestionCircleOutlined />
-    </Tooltip>
-  ),
-  },
-  {
-    align: 'center',
-    fixed: 'right',
-    title: '',
-    width: 50,
-    render: (_, domain: IExtendedDomain) => (
-      <Button
-        style={{ padding: 0 }}
-        type="link"
-        onClick={() => {
-          setCurrentDomain(domain)
-          setDomainActions({ edit: false })
-        }}
+    render: (text) => (
+      <Tooltip
+        title={
+          <div style={{ whiteSpace: 'pre-line', maxWidth: 300 }}>{text}</div>
+        }
+        overlayStyle={{ maxWidth: 800 }}
       >
-        <EyeOutlined />
-      </Button>
+        <QuestionCircleOutlined />
+      </Tooltip>
     ),
   },
   {
     align: 'center',
     fixed: 'right',
     title: '',
-    width: 50,
+    width: 150,
     render: (_, domain: IExtendedDomain) => (
-      <Button
-        style={{ padding: 0 }}
-        type="link"
-        onClick={() => {
-          setCurrentDomain(domain)
-          setDomainActions({ edit: true })
+      <div
+        style={{
+          display: 'flex',
+          gap: '8px',
+          justifyContent: 'center',
+          alignItems: 'center',
         }}
       >
-        <EditOutlined />
-      </Button>
-    ),
-  },
-  {
-    align: 'center',
-    fixed: 'right',
-    title: '',
-    dataIndex: '',
-    width: 50,
-    render: (_, domain: IExtendedDomain) => (
-      <Popconfirm
-        title={`Ви впевнені що хочете видалити ${
-          domain.name ?? 'цей надавач послуг'
-        }?`}
-        onConfirm={() => handleDelete(domain?._id)}
-        cancelText="Відміна"
-        disabled={deleteLoading}
-      >
-        <DeleteOutlined />
-      </Popconfirm>
+        <Button
+          style={{ padding: 0 }}
+          type="link"
+          onClick={() => {
+            if (setCurrentDomain) setCurrentDomain(domain)
+            if (setDomainActions) setDomainActions({ edit: false })
+          }}
+        >
+          <EyeOutlined />
+        </Button>
+        <Button
+          style={{ padding: 0 }}
+          type="link"
+          onClick={() => {
+            if (setCurrentDomain) setCurrentDomain(domain)
+            if (setDomainActions) setDomainActions({ edit: true })
+          }}
+        >
+          <EditOutlined />
+        </Button>
+        <Dropdown
+          menu={{
+            items: [
+              {
+                key: 'archive',
+                label: (
+                  <Popconfirm
+                    title={`Ви впевнені, що хочете ${
+                      domain.archived ? 'розархівувати' : 'архівувати'
+                    } цей домен?`}
+                    onConfirm={(e) => {
+                      e?.stopPropagation()
+                      handleArchive(domain._id, !domain.archived)
+                    }}
+                    onCancel={(e) => e?.stopPropagation()}
+                    disabled={archiveLoading}
+                    okText={domain.archived ? 'Розархівувати' : 'Архівувати'}
+                    cancelText="Ні"
+                  >
+                    <Button
+                      type="text"
+                      icon={<InboxOutlined />}
+                      onClick={(e) => e.stopPropagation()}
+                      style={{
+                        padding: '4px 8px',
+                        color: domain.archived ? '#722ed1' : '#ff4d4f',
+                      }}
+                    >
+                      {domain.archived ? 'Розархівувати' : 'Архівувати'}
+                    </Button>
+                  </Popconfirm>
+                ),
+              },
+              {
+                key: 'delete',
+                label: (
+                  <Popconfirm
+                    title="Ви впевнені, що хочете видалити домен?"
+                    onConfirm={(e) => {
+                      e?.stopPropagation()
+                      handleDelete(domain._id)
+                    }}
+                    onCancel={(e) => e?.stopPropagation()}
+                    disabled={deleteLoading}
+                    okText="Видалити"
+                    cancelText="Ні"
+                  >
+                    <Button
+                      type="text"
+                      icon={<DeleteOutlined />}
+                      onClick={(e) => e.stopPropagation()}
+                      style={{ padding: '4px 8px', color: '#ff4d4f' }}
+                    >
+                      Видалити
+                    </Button>
+                  </Popconfirm>
+                ),
+              },
+            ],
+          }}
+          placement="bottomRight"
+        >
+          <Button style={{ padding: 0 }} type="link">
+            <MoreOutlined />
+          </Button>
+        </Dropdown>
+      </div>
     ),
   },
 ]

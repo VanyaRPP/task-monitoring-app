@@ -2,7 +2,6 @@ import { Tag, Tooltip } from 'antd'
 import { useState } from 'react'
 import { LeftOutlined } from '@ant-design/icons'
 
-
 interface CollapsedTagsProps {
   items: string[]
   maxVisible?: number
@@ -20,9 +19,7 @@ const CollapsedTags: React.FC<CollapsedTagsProps> = ({
   return (
     <>
       {visibleItems.map((item) => (
-        <Tag key={item} >
-          {item}
-        </Tag>
+        <Tag key={item}>{item}</Tag>
       ))}
       {!expanded && hiddenItems.length > 0 && (
         <Tooltip title={hiddenItems.join(', ')}>
@@ -36,7 +33,6 @@ const CollapsedTags: React.FC<CollapsedTagsProps> = ({
           <LeftOutlined />
         </Tag>
       )}
-
     </>
   )
 }

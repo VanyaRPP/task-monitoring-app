@@ -13,29 +13,31 @@ setupTestEnvironment()
 
 // Helper function to process expected data to match the output of parseReceived
 function processExpected(data: any[]) {
-  return sortById(data.map(item => {
-    const company = item._doc || item
-    const {
-      __v,
-      _id,
-      street,
-      domain,
-      account,
-      cleaning,
-      currency,
-      customServices,
-      services,
-      ...rest
-    } = company;
+  return sortById(
+    data.map((item) => {
+      const company = item._doc || item
+      const {
+        __v,
+        _id,
+        street,
+        domain,
+        account,
+        cleaning,
+        currency,
+        customServices,
+        services,
+        ...rest
+      } = company
 
-    return {
-      ...rest,
-      _id: _id.toString(),
-      street: (street?._id || street)?.toString(),
-      domain: (domain?._id || domain)?.toString(),
-      rnokpp: '',
-    };
-  }));
+      return {
+        ...rest,
+        _id: _id.toString(),
+        street: (street?._id || street)?.toString(),
+        domain: (domain?._id || domain)?.toString(),
+        rnokpp: '',
+      }
+    })
+  )
 }
 
 describe('Company API - GET', () => {
@@ -57,7 +59,10 @@ describe('Company API - GET', () => {
     activeRealEstates.filter(
       ({ domain, adminEmails }) =>
         adminEmails.includes(users.domainAdmin.email) ||
-        domains.some(d => d._id === domain && d.adminEmails.includes(users.domainAdmin.email))
+        domains.some(
+          (d) =>
+            d._id === domain && d.adminEmails.includes(users.domainAdmin.email)
+        )
     )
   )
 
@@ -65,7 +70,10 @@ describe('Company API - GET', () => {
     activeRealEstates.filter(
       ({ domain, adminEmails }) =>
         !adminEmails.includes(users.domainAdmin.email) &&
-        !domains.some(d => d._id === domain && d.adminEmails.includes(users.domainAdmin.email))
+        !domains.some(
+          (d) =>
+            d._id === domain && d.adminEmails.includes(users.domainAdmin.email)
+        )
     )
   )
 
@@ -105,7 +113,9 @@ describe('Company API - GET', () => {
       })
 
       expect(response.status).toHaveBeenCalledWith(200)
-      expect(response.data).toEqual(processExpected(activeRealEstates.slice(0, 3)))
+      expect(response.data).toEqual(
+        processExpected(activeRealEstates.slice(0, 3))
+      )
     })
     it('should load Companies with limit as DomainAdmin', async () => {
       await mockLoginAs(users.domainAdmin)
@@ -115,7 +125,9 @@ describe('Company API - GET', () => {
       })
 
       expect(response.status).toHaveBeenCalledWith(200)
-      expect(response.data).toEqual(processExpected(domainAdminCompanies.slice(0, 3)))
+      expect(response.data).toEqual(
+        processExpected(domainAdminCompanies.slice(0, 3))
+      )
     })
     it('should load Companies with limit as User', async () => {
       await mockLoginAs(users.user)
@@ -320,9 +332,11 @@ describe('Company API - GET', () => {
       })
 
       expect(response.status).toHaveBeenCalledWith(200)
-      expect(response.data).toEqual(processExpected(
-        activeRealEstates.filter(({ domain }) => domain === targetDomain)
-      ))
+      expect(response.data).toEqual(
+        processExpected(
+          activeRealEstates.filter(({ domain }) => domain === targetDomain)
+        )
+      )
     })
     it('should load Companies with domainId as DomainAdmin if domainId is related to user', async () => {
       if (!domainAdminCompanies.length) return
@@ -334,9 +348,11 @@ describe('Company API - GET', () => {
       })
 
       expect(response.status).toHaveBeenCalledWith(200)
-      expect(response.data).toEqual(processExpected(
-        domainAdminCompanies.filter(({ domain }) => domain === targetDomain)
-      ))
+      expect(response.data).toEqual(
+        processExpected(
+          domainAdminCompanies.filter(({ domain }) => domain === targetDomain)
+        )
+      )
     })
     it('should load Companies with domainId as User if domainId is related to user company', async () => {
       if (!userCompanies.length) return
@@ -348,9 +364,11 @@ describe('Company API - GET', () => {
       })
 
       expect(response.status).toHaveBeenCalledWith(200)
-      expect(response.data).toEqual(processExpected(
-        userCompanies.filter(({ domain }) => domain === targetDomain)
-      ))
+      expect(response.data).toEqual(
+        processExpected(
+          userCompanies.filter(({ domain }) => domain === targetDomain)
+        )
+      )
     })
     it('should NOT load Companies with domainId as DomainAdmin if domainId is NOT related to user', async () => {
       if (!notDomainAdminCompanies.length) return
@@ -377,16 +395,22 @@ describe('Company API - GET', () => {
     it("should load Companies with domainId's as GlobalAdmin", async () => {
       await mockLoginAs(users.globalAdmin)
 
-      const targetDomains = activeRealEstates.slice(0, 3).map(({ domain }) => domain)
+      const targetDomains = activeRealEstates
+        .slice(0, 3)
+        .map(({ domain }) => domain)
 
       const response = await getRealEstatesQuery({
         domainId: targetDomains,
       })
 
       expect(response.status).toHaveBeenCalledWith(200)
-      expect(response.data).toEqual(processExpected(
-        activeRealEstates.filter(({ domain }) => targetDomains.includes(domain))
-      ))
+      expect(response.data).toEqual(
+        processExpected(
+          activeRealEstates.filter(({ domain }) =>
+            targetDomains.includes(domain)
+          )
+        )
+      )
     })
     it("should load Companies with domainId's as DomainAdmin", async () => {
       if (!domainAdminCompanies.length) return
@@ -401,10 +425,12 @@ describe('Company API - GET', () => {
       })
 
       expect(response.status).toHaveBeenCalledWith(200)
-      expect(response.data).toEqual(processExpected(
-        domainAdminCompanies.filter(({ domain }) =>
-          targetDomains.includes(domain)
-        ))
+      expect(response.data).toEqual(
+        processExpected(
+          domainAdminCompanies.filter(({ domain }) =>
+            targetDomains.includes(domain)
+          )
+        )
       )
     })
     it("should load Companies with domainId's as User", async () => {
@@ -419,8 +445,10 @@ describe('Company API - GET', () => {
       })
 
       expect(response.status).toHaveBeenCalledWith(200)
-      expect(response.data).toEqual(processExpected(
-        userCompanies.filter(({ domain }) => targetDomains.includes(domain)))
+      expect(response.data).toEqual(
+        processExpected(
+          userCompanies.filter(({ domain }) => targetDomains.includes(domain))
+        )
       )
     })
     it("should NOT load Companies with domainId's as DomainAdmin if domainId is NOT related to user", async () => {
@@ -461,9 +489,11 @@ describe('Company API - GET', () => {
       })
 
       expect(response.status).toHaveBeenCalledWith(200)
-      expect(response.data).toEqual(processExpected(
-        activeRealEstates.filter(({ street }) => street === targetStreet)
-      ))
+      expect(response.data).toEqual(
+        processExpected(
+          activeRealEstates.filter(({ street }) => street === targetStreet)
+        )
+      )
     })
     it('should load Companies with streetId as DomainAdmin if streetId is related to user', async () => {
       if (!domainAdminCompanies.length) return
@@ -475,9 +505,11 @@ describe('Company API - GET', () => {
       })
 
       expect(response.status).toHaveBeenCalledWith(200)
-      expect(response.data).toEqual(processExpected(
-        domainAdminCompanies.filter(({ street }) => street === targetStreet)
-      ))
+      expect(response.data).toEqual(
+        processExpected(
+          domainAdminCompanies.filter(({ street }) => street === targetStreet)
+        )
+      )
     })
     it('should load Companies with streetId as User if streetId is related to user company', async () => {
       if (!userCompanies.length) return
@@ -489,9 +521,11 @@ describe('Company API - GET', () => {
       })
 
       expect(response.status).toHaveBeenCalledWith(200)
-      expect(response.data).toEqual(processExpected(
-        userCompanies.filter(({ street }) => street === targetStreet)
-      ))
+      expect(response.data).toEqual(
+        processExpected(
+          userCompanies.filter(({ street }) => street === targetStreet)
+        )
+      )
     })
   })
 
@@ -499,16 +533,22 @@ describe('Company API - GET', () => {
     it("should load Companies with streetId's as GlobalAdmin", async () => {
       await mockLoginAs(users.globalAdmin)
 
-      const targetStreets = activeRealEstates.slice(0, 3).map(({ street }) => street)
+      const targetStreets = activeRealEstates
+        .slice(0, 3)
+        .map(({ street }) => street)
 
       const response = await getRealEstatesQuery({
         streetId: targetStreets,
       })
 
       expect(response.status).toHaveBeenCalledWith(200)
-      expect(response.data).toEqual(processExpected(
-        activeRealEstates.filter(({ street }) => targetStreets.includes(street))
-      ))
+      expect(response.data).toEqual(
+        processExpected(
+          activeRealEstates.filter(({ street }) =>
+            targetStreets.includes(street)
+          )
+        )
+      )
     })
     it("should load Companies with streetId's as DomainAdmin", async () => {
       if (!domainAdminCompanies.length) return
@@ -523,10 +563,12 @@ describe('Company API - GET', () => {
       })
 
       expect(response.status).toHaveBeenCalledWith(200)
-      expect(response.data).toEqual(processExpected(
-        domainAdminCompanies.filter(({ street }) =>
-          targetStreets.includes(street)
-        ))
+      expect(response.data).toEqual(
+        processExpected(
+          domainAdminCompanies.filter(({ street }) =>
+            targetStreets.includes(street)
+          )
+        )
       )
     })
     it("should load Companies with streetId's as User", async () => {
@@ -541,9 +583,11 @@ describe('Company API - GET', () => {
       })
 
       expect(response.status).toHaveBeenCalledWith(200)
-      expect(response.data).toEqual(processExpected(
-        userCompanies.filter(({ street }) => targetStreets.includes(street))
-      ))
+      expect(response.data).toEqual(
+        processExpected(
+          userCompanies.filter(({ street }) => targetStreets.includes(street))
+        )
+      )
     })
   })
 })
@@ -567,7 +611,16 @@ function parseReceived(data: any) {
   return data?.map((item: any) => {
     const company = item._doc || item
     const {
-      __v, _id, street, domain, account, cleaning, currency, customServices, services, ...rest
+      __v,
+      _id,
+      street,
+      domain,
+      account,
+      cleaning,
+      currency,
+      customServices,
+      services,
+      ...rest
     } = company
 
     return {

@@ -67,7 +67,7 @@ const RealEstateForm: FC<Props> = ({
 
       form.setFieldsValue({
         services: servicesWithEnabled,
-       // discount: currentRealEstate?.discount || 0,
+        // discount: currentRealEstate?.discount || 0,
       })
     }
   }, [services, currentRealEstate, form])
@@ -123,21 +123,13 @@ const RealEstateForm: FC<Props> = ({
         currency: currentRealEstate?.currency || Currency.UAH,
       }}
     >
-      <DomainsSelect
-  form={form}
-  edit={!!currentRealEstate}
-      />
+      <DomainsSelect form={form} edit={!!currentRealEstate} />
       <Form.Item name="street" hidden>
         <Input />
       </Form.Item>
       {currentRealEstate ? (
         <Form.Item label="Адреса">
-          <Input
-            disabled
-            value={
-              currentRealEstate?.street?.address || ''
-            }
-          />
+          <Input disabled value={currentRealEstate?.street?.address || ''} />
         </Form.Item>
       ) : (
         <AddressesSelect form={form} key={domainId} />
@@ -194,7 +186,7 @@ const RealEstateForm: FC<Props> = ({
         />
       </Form.Item>
       */}
-      
+
       {isMeterBasedServiceExist && (
         <>
           <Form.Item

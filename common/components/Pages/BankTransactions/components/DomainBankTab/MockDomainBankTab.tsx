@@ -1,4 +1,8 @@
-import { MOCK_BALANCES, MOCK_DOMAIN, MOCK_TRANSACTIONS } from '@common/api/bankApi/mockBank.api'
+import {
+  MOCK_BALANCES,
+  MOCK_DOMAIN,
+  MOCK_TRANSACTIONS,
+} from '@common/api/bankApi/mockBank.api'
 import { useAppDispatch } from '@modules/store/hooks'
 import { useEffect } from 'react'
 import { Card } from 'antd'

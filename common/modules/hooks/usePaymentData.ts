@@ -186,9 +186,7 @@ export function usePaymentFormData(
   const service = serviceById ?? serviceByMonth ?? null
 
   const anchorDate =
-    service?.date != null
-      ? dayjs(service.date)
-      : placeholderAnchor ?? null
+    service?.date != null ? dayjs(service.date) : (placeholderAnchor ?? null)
   const hasAnchor = anchorDate != null && anchorDate.isValid()
   const prevMonthMongo = !hasAnchor
     ? 0

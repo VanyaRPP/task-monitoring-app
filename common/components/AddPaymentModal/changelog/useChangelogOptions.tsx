@@ -24,7 +24,14 @@ export function useChangelogOptions(
         value: log._id,
         shortLabel: dateLabel,
         label: (
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              width: '100%',
+            }}
+          >
             <Tooltip
               placement="right"
               title={

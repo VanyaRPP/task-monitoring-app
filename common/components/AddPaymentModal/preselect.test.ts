@@ -2,8 +2,11 @@ describe('company reset on domain change', () => {
   const makeForm = () => {
     const fields: Record<string, any> = {}
     return {
-      resetFields: jest.fn((keys: string[]) => keys.forEach((k) => delete fields[k])),
-      setFieldsValue: (vals: Record<string, any>) => Object.assign(fields, vals),
+      resetFields: jest.fn((keys: string[]) =>
+        keys.forEach((k) => delete fields[k])
+      ),
+      setFieldsValue: (vals: Record<string, any>) =>
+        Object.assign(fields, vals),
       getFieldValue: (key: string) => fields[key],
       _fields: fields,
     }

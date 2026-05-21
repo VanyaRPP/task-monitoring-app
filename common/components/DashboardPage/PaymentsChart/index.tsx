@@ -67,11 +67,7 @@ const PaymentsChart: React.FC<{
   const chartConfig: any = usePaymentsChartConfig()
 
   const isValid = useMemo(() => {
-    return (
-    payments?.length > 0 &&
-    !!companyId &&
-    !isError
-  )
+    return payments?.length > 0 && !!companyId && !isError
   }, [companyId, payments, isError])
 
   return (
@@ -115,8 +111,8 @@ const PaymentsChart: React.FC<{
               isFetching
                 ? 'Завантаження...'
                 : !companyId
-                ? 'Оберіть компанію'
-                : 'Неможливо відобразити графік'
+                  ? 'Оберіть компанію'
+                  : 'Неможливо відобразити графік'
             }
           />
         ) : (

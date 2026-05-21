@@ -2,8 +2,14 @@ import { useCallback, useState, useMemo } from 'react'
 import { message } from 'antd'
 import { ITransaction } from './transactionTypes'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
-import { useGetAllServicesQuery, useAddServiceMutation } from '@common/api/serviceApi/service.api'
-import { useAddPaymentMutation, useGetPaymentNumberQuery } from '@common/api/paymentApi/payment.api'
+import {
+  useGetAllServicesQuery,
+  useAddServiceMutation,
+} from '@common/api/serviceApi/service.api'
+import {
+  useAddPaymentMutation,
+  useGetPaymentNumberQuery,
+} from '@common/api/paymentApi/payment.api'
 import { getPaymentProviderAndReciever } from '@utils/helpers'
 import { getResolvedDescription } from './bankHelper'
 import { Operations } from '@utils/constants'
@@ -66,10 +72,11 @@ export const useQuickSend = ({
     [addService, domain._id, streetId]
   )
 
-  const { data: servicesData, isLoading: isServicesLoading } = useGetAllServicesQuery(
-    { domainId: domain._id, streetId },
-    { skip: !domain._id || !streetId }
-  )
+  const { data: servicesData, isLoading: isServicesLoading } =
+    useGetAllServicesQuery(
+      { domainId: domain._id, streetId },
+      { skip: !domain._id || !streetId }
+    )
 
   const services = useMemo(() => {
     const fetchedServices = servicesData?.data || []
@@ -92,7 +99,9 @@ export const useQuickSend = ({
       }
     }
 
-    return [...byMonthKey.values()].sort((a, b) => b.date.valueOf() - a.date.valueOf())
+    return [...byMonthKey.values()].sort(
+      (a, b) => b.date.valueOf() - a.date.valueOf()
+    )
   }, [servicesData])
 
   const handleQuickSend = useCallback(
@@ -133,7 +142,12 @@ export const useQuickSend = ({
           transaction: buildTransactionPayload(transaction, relatedCompanies),
         }).unwrap()
 
-        message.success(`Рахунок за ${formatDate(service.date, 'MMMM YYYY')} успішно створено!`)
+        message.success(
+          `Рахунок за ${formatDate(
+            service.date,
+            'MMMM YYYY'
+          )} успішно створено!`
+        )
 
         onSuccess?.()
 
@@ -147,7 +161,17 @@ export const useQuickSend = ({
         setLoading(false)
       }
     },
-    [selectedCompanyId, relatedCompanies, domain, addPayment, transaction, company, onSuccess, nextInvoiceNumber, resolveMonthServiceId]
+    [
+      selectedCompanyId,
+      relatedCompanies,
+      domain,
+      addPayment,
+      transaction,
+      company,
+      onSuccess,
+      nextInvoiceNumber,
+      resolveMonthServiceId,
+    ]
   )
 
   return {

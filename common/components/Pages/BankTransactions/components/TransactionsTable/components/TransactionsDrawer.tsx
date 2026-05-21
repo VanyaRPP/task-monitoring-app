@@ -1,4 +1,12 @@
-import { Badge, Button, Select, Space, Dropdown, message, type MenuProps } from 'antd'
+import {
+  Badge,
+  Button,
+  Select,
+  Space,
+  Dropdown,
+  message,
+  type MenuProps,
+} from 'antd'
 import React, { FC, useEffect, useMemo, useState } from 'react'
 import { ITransaction } from './transactionTypes'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
@@ -6,7 +14,10 @@ import AddPaymentModal from '@components/AddPaymentModal'
 import { SendOutlined, DownOutlined, CalendarOutlined } from '@ant-design/icons'
 import { matchCompany, MatchType, getResolvedDescription } from './bankHelper'
 import { formatDate, parseDate } from './datesHelper'
-import { useGetAllRealEstateQuery, useEditRealEstateMutation } from '@common/api/realestateApi/realestate.api'
+import {
+  useGetAllRealEstateQuery,
+  useEditRealEstateMutation,
+} from '@common/api/realestateApi/realestate.api'
 import { useQuickSend } from './useQuicksend'
 import { buildTransactionPayload } from './quickSendHelpers'
 import styles from './style.module.scss'
@@ -20,7 +31,7 @@ interface TransactionDrawerProps {
 const TransactionDrawer: FC<TransactionDrawerProps> = ({
   transaction,
   domain,
-  refetchTransactions
+  refetchTransactions,
 }) => {
   const [selectedCompany, setSelectedCompany] = useState<string | null>(null)
   const [modalVisible, setModalVisible] = useState(false)
@@ -29,7 +40,9 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
 
   const transactionAmount = parseFloat(transaction.SUM as string)
 
-  const { data: realEstatesData } = useGetAllRealEstateQuery({ domainId: domain._id })
+  const { data: realEstatesData } = useGetAllRealEstateQuery({
+    domainId: domain._id,
+  })
   const [editRealEstate] = useEditRealEstateMutation()
 
   const relatedCompanies = useMemo(
@@ -37,7 +50,11 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
     [realEstatesData]
   )
 
-  const { handleQuickSend, services, loading: quickSendLoading } = useQuickSend({
+  const {
+    handleQuickSend,
+    services,
+    loading: quickSendLoading,
+  } = useQuickSend({
     transaction,
     domain,
     selectedCompanyId: selectedCompany,
@@ -48,10 +65,7 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
   useEffect(() => {
     if (!relatedCompanies.length) return
 
-    const { companyId, matchedBy } = matchCompany(
-      transaction,
-      relatedCompanies
-    )
+    const { companyId, matchedBy } = matchCompany(transaction, relatedCompanies)
 
     setSelectedCompany(companyId)
     setIsAccountMatched(matchedBy === MatchType.ACCOUNT)
@@ -98,7 +112,10 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
     },
   ]
 
-  const transactionPayload = buildTransactionPayload(transaction, relatedCompanies)
+  const transactionPayload = buildTransactionPayload(
+    transaction,
+    relatedCompanies
+  )
 
   const quickSendMenuItems: MenuProps['items'] = services.map((service) => ({
     key: service._id,
@@ -122,7 +139,7 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
             placeholder="Select a related company"
             onChange={handleCompanyChange}
             value={selectedCompany ?? undefined}
-            style={{ width: 'calc(100% - 80px)',maxWidth: 300}}
+            style={{ width: 'calc(100% - 80px)', maxWidth: 300 }}
           >
             {relatedCompanies.map((company) => (
               <Select.Option key={company._id} value={company._id}>
@@ -133,8 +150,8 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
           {isAccountMatched ? (
             <>
               <Dropdown menu={{ items: dropdownItems }} trigger={['click']}>
-                <Button 
-                  type="primary" 
+                <Button
+                  type="primary"
                   loading={loading || quickSendLoading}
                   icon={<DownOutlined style={{ fontSize: '12px' }} />}
                   iconPosition="end"
@@ -190,7 +207,9 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
         <AddPaymentModal
           closeModal={closeModal}
           paymentData={{
-            ...relatedCompanies.find((company) => company._id === selectedCompany),
+            ...relatedCompanies.find(
+              (company) => company._id === selectedCompany
+            ),
             generalSum: transactionAmount,
             description: getResolvedDescription(transaction, relatedCompanies),
             invoiceCreationDate: parseDate(transaction.DAT_OD, 'DD.MM.YYYY'),

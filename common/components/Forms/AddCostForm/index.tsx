@@ -97,8 +97,8 @@ const AddCostForm: React.FC<Props> = ({
               isDebit
                 ? t('profitPage:form.amountDebit')
                 : isCredit
-                ? t('profitPage:form.amountCredit')
-                : t('profitPage:form.amount')
+                  ? t('profitPage:form.amountCredit')
+                  : t('profitPage:form.amount')
             }
           >
             <Input
@@ -134,10 +134,7 @@ const AddCostForm: React.FC<Props> = ({
             disabled={disabled}
           />
         </Form.Item>
-        <Form.Item
-          name="categories"
-          label={t('profitPage:form.category')}
-        >
+        <Form.Item name="categories" label={t('profitPage:form.category')}>
           {isPreview ? (
             <Input
               value={

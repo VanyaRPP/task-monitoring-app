@@ -8,9 +8,21 @@ import {
 import sc from './softcard.module.scss'
 
 const SoftcardTemplate: FC<TemplateProps> = ({
-  data, componentRef, isEnglish, currencyLabel, modernInvoiceNumber, domainName,
-  rows, getQty, subtotal, taxPercent, taxAmount, total,
-  paymentInfoLines, issuedToLines, normalizedBankDetailsLines,
+  data,
+  componentRef,
+  isEnglish,
+  currencyLabel,
+  modernInvoiceNumber,
+  domainName,
+  rows,
+  getQty,
+  subtotal,
+  taxPercent,
+  taxAmount,
+  total,
+  paymentInfoLines,
+  issuedToLines,
+  normalizedBankDetailsLines,
 }) => {
   const { heading: paymentHeading, bodyLines: paymentBodyLines } =
     getBillFromHeadingAndBodyLines(data, paymentInfoLines)
@@ -32,7 +44,9 @@ const SoftcardTemplate: FC<TemplateProps> = ({
         </div>
         <div className={sc.scInvoiceTitle}>
           <h1>{isEnglish ? 'INVOICE' : 'РАХУНОК'}</h1>
-          <span className={sc.scInvoiceNum}>№&thinsp;{modernInvoiceNumber}</span>
+          <span className={sc.scInvoiceNum}>
+            №&thinsp;{modernInvoiceNumber}
+          </span>
         </div>
       </div>
 
@@ -44,17 +58,23 @@ const SoftcardTemplate: FC<TemplateProps> = ({
           </span>
         </div>
         <div className={sc.scMetaItem}>
-          <span className={sc.scMetaLabel}>{isEnglish ? 'Due date' : 'Строк оплати'}</span>
+          <span className={sc.scMetaLabel}>
+            {isEnglish ? 'Due date' : 'Строк оплати'}
+          </span>
           <span className={sc.scMetaValue}>
             {dayjs(data?.invoiceCreationDate).add(5, 'd').format('DD.MM.YYYY')}
           </span>
         </div>
         <div className={sc.scMetaItem}>
-          <span className={sc.scMetaLabel}>{isEnglish ? 'Invoice №' : 'Рахунок №'}</span>
+          <span className={sc.scMetaLabel}>
+            {isEnglish ? 'Invoice №' : 'Рахунок №'}
+          </span>
           <span className={sc.scMetaValue}>{modernInvoiceNumber}</span>
         </div>
         <div className={sc.scMetaItem}>
-          <span className={sc.scMetaLabel}>{isEnglish ? 'Currency' : 'Валюта'}</span>
+          <span className={sc.scMetaLabel}>
+            {isEnglish ? 'Currency' : 'Валюта'}
+          </span>
           <span className={sc.scMetaValue}>{currencyLabel}</span>
         </div>
       </div>
@@ -72,9 +92,7 @@ const SoftcardTemplate: FC<TemplateProps> = ({
               <div
                 key={`pi-${idx}`}
                 className={
-                  !paymentHeading && idx === 0
-                    ? sc.scPartyName
-                    : sc.scPartyLine
+                  !paymentHeading && idx === 0 ? sc.scPartyName : sc.scPartyLine
                 }
               >
                 {line}
@@ -94,7 +112,9 @@ const SoftcardTemplate: FC<TemplateProps> = ({
                   }
                   return (
                     <div className={sc.scBankLine} key={`bk-${idx}`}>
-                      <span className={sc.scBankLineLabel}>{line.slice(0, sep + 1)}</span>
+                      <span className={sc.scBankLineLabel}>
+                        {line.slice(0, sep + 1)}
+                      </span>
                       {line.slice(sep + 1)}
                     </div>
                   )
@@ -140,8 +160,8 @@ const SoftcardTemplate: FC<TemplateProps> = ({
               const rate = Number.isFinite(Number(item?.price))
                 ? Number(item.price)
                 : qty
-                ? Number(item?.sum || 0) / qty
-                : Number(item?.sum || 0)
+                  ? Number(item?.sum || 0) / qty
+                  : Number(item?.sum || 0)
               return (
                 <tr key={`${item?.type || item?.name}-${index}`}>
                   <td>{item?.name || item?.type || '—'}</td>
@@ -161,12 +181,16 @@ const SoftcardTemplate: FC<TemplateProps> = ({
         <div className={sc.scDates}>
           <div className={sc.scDateRow}>
             <span>{isEnglish ? 'Date' : 'Дата'}</span>
-            <strong>{dayjs(data?.invoiceCreationDate)?.format?.('DD.MM.YYYY')}</strong>
+            <strong>
+              {dayjs(data?.invoiceCreationDate)?.format?.('DD.MM.YYYY')}
+            </strong>
           </div>
           <div className={sc.scDateRow}>
             <span>{isEnglish ? 'Due date' : 'Строк оплати'}</span>
             <strong>
-              {dayjs(data?.invoiceCreationDate).add(5, 'd').format('DD.MM.YYYY')}
+              {dayjs(data?.invoiceCreationDate)
+                .add(5, 'd')
+                .format('DD.MM.YYYY')}
             </strong>
           </div>
         </div>
@@ -176,18 +200,23 @@ const SoftcardTemplate: FC<TemplateProps> = ({
             <>
               <div className={sc.scTotalRow}>
                 <span>{isEnglish ? 'Subtotal' : 'Підсумок'}</span>
-                <strong>{subtotal.toFixed(2)}&nbsp;{currencyLabel}</strong>
+                <strong>
+                  {subtotal.toFixed(2)}&nbsp;{currencyLabel}
+                </strong>
               </div>
               <div className={sc.scTotalRow}>
                 <span>VAT {taxPercent}%</span>
-                <strong>{taxAmount.toFixed(2)}&nbsp;{currencyLabel}</strong>
+                <strong>
+                  {taxAmount.toFixed(2)}&nbsp;{currencyLabel}
+                </strong>
               </div>
             </>
           )}
           <div className={`${sc.scTotalRow} ${sc.scGrandTotal}`}>
             <span>{isEnglish ? 'Total due' : 'До сплати'}</span>
             <strong>
-              {(+data?.generalSum || +data?.debit || total).toFixed(2)}&nbsp;{currencyLabel}
+              {(+data?.generalSum || +data?.debit || total).toFixed(2)}&nbsp;
+              {currencyLabel}
             </strong>
           </div>
         </div>
