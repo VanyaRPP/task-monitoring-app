@@ -169,10 +169,7 @@ export async function createCustomService(
   if (domainObjectId) {
     uniquenessFilter.domain = domainObjectId
   } else {
-    uniquenessFilter.$or = [
-      { domain: null },
-      { domain: { $exists: false } },
-    ]
+    uniquenessFilter.$or = [{ domain: null }, { domain: { $exists: false } }]
   }
 
   const duplicate = await CustomService.findOne(uniquenessFilter)
@@ -244,10 +241,7 @@ export async function updateCustomService(
     if (serviceDomain) {
       uniquenessFilter.domain = serviceDomain
     } else {
-      uniquenessFilter.$or = [
-        { domain: null },
-        { domain: { $exists: false } },
-      ]
+      uniquenessFilter.$or = [{ domain: null }, { domain: { $exists: false } }]
     }
     const duplicate = await CustomService.findOne(uniquenessFilter)
     if (duplicate) {
@@ -277,10 +271,7 @@ export async function updateCustomService(
   if (serviceDomain) {
     uniquenessFilter.domain = serviceDomain
   } else {
-    uniquenessFilter.$or = [
-      { domain: null },
-      { domain: { $exists: false } },
-    ]
+    uniquenessFilter.$or = [{ domain: null }, { domain: { $exists: false } }]
   }
   const duplicate = await CustomService.findOne(uniquenessFilter)
   if (duplicate) {

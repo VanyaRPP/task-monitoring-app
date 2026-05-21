@@ -123,7 +123,7 @@ export function getRealEstatesPipeline({
 
 export function getStreetsPipeline(
   isGlobalAdmin,
-  email, 
+  email,
   filteredCompanys = null,
   filteredDomains = null
 ) {
@@ -150,7 +150,7 @@ export function getStreetsPipeline(
         },
       },
     },
-    
+
     {
       $match: {
         $expr: {

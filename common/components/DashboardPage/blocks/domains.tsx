@@ -3,14 +3,16 @@ import DomainsHeader from '@components/Tables/Domains/Header'
 import DomainsTable from '@components/Tables/Domains/Table'
 import TableCard from '@components/UI/TableCard'
 import { useState } from 'react'
-import { Radio } from 'antd' 
+import { Radio } from 'antd'
 
 export interface Props {
   domainId?: string
 }
 
 const DomainsBlock: React.FC<Props> = ({ domainId }) => {
-  const [currentDomain, setCurrentDomain] = useState<IExtendedDomain | null>(null)
+  const [currentDomain, setCurrentDomain] = useState<IExtendedDomain | null>(
+    null
+  )
   const [domainActions, setDomainActions] = useState({
     edit: false,
   })

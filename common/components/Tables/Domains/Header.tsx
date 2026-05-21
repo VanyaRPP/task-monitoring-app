@@ -23,7 +23,7 @@ export interface Props {
   domainActions: {
     edit: boolean
   }
-  children?: React.ReactNode 
+  children?: React.ReactNode
 }
 
 const DomainsHeader: React.FC<Props> = ({
@@ -32,7 +32,6 @@ const DomainsHeader: React.FC<Props> = ({
   domainActions,
   setDomainActions,
   children,
-
 }) => {
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -56,8 +55,14 @@ const DomainsHeader: React.FC<Props> = ({
   }
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-      
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        width: '100%',
+      }}
+    >
       <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
         <Button type="link" onClick={() => router.push(AppRoutes.DOMAIN)}>
           Надавачі послуг
@@ -66,8 +71,8 @@ const DomainsHeader: React.FC<Props> = ({
             <QuestionCircleOutlined />
           </Tooltip>
         </Button>
-        
-        {children} 
+
+        {children}
       </div>
 
       <div>

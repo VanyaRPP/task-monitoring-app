@@ -7,7 +7,9 @@
   overflow: hidden;
   position: relative;
 
-  transition: background 0.5s, box-shadow 0.5s;
+  transition:
+    background 0.5s,
+    box-shadow 0.5s;
   box-shadow: 0 2px 10px -4px var(--shadowColor);
   background: var(--backgroundColor) !important;
 
@@ -20,7 +22,9 @@
   }
 
   > * {
-    transition: background 0.5s, color 0.2s;
+    transition:
+      background 0.5s,
+      color 0.2s;
     color: var(--textColor);
 
     &:first-of-type {
@@ -29,7 +33,9 @@
   }
 
   ul {
-    transition: background 0.5s, color 0.5s;
+    transition:
+      background 0.5s,
+      color 0.5s;
     color: var(--textColor);
     background: var(--backgroundColorPrimary) !important;
 
