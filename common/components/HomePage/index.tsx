@@ -2,8 +2,10 @@ import LottieAnimation from '@components/UI/LottieAnimation'
 import SplashCursor from '@components/UI/SplashCursor'
 import HomePageTitle from '@assets/svg/homePageTitle'
 import { AppRoutes } from '@utils/constants'
+import { isProd } from '@utils/env'
 import { LogoIcon } from '@assets/icon/Logo'
 import { Button, Typography } from 'antd'
+import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/router'
 import CardPage from '@components/CardSwapper'
 import s from './style.module.scss'
@@ -14,7 +16,15 @@ const HomePage: React.FC = () => {
     <div className={s.HomePage}>
       <SplashCursor />
 
-      <div style={{ position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none', overflow: 'hidden' }}>
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          zIndex: 0,
+          pointerEvents: 'none',
+          overflow: 'hidden',
+        }}
+      >
         <LottieAnimation
           src="/animations/WaveForBG.json"
           loop
@@ -22,12 +32,20 @@ const HomePage: React.FC = () => {
             width: '100%',
             height: '100%',
             objectFit: 'cover',
-            transform: 'rotate(180deg) scale(1.05)', 
+            transform: 'rotate(180deg) scale(1.05)',
           }}
         />
       </div>
 
-      <div style={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', flex: 1 }}>
+      <div
+        style={{
+          position: 'relative',
+          zIndex: 10,
+          display: 'flex',
+          flexDirection: 'column',
+          flex: 1,
+        }}
+      >
         <div className={s.Header}>
           <div className={s.Logo}>
             <LogoIcon style={{ fontSize: '100px', color: 'white' }} />
@@ -38,7 +56,11 @@ const HomePage: React.FC = () => {
             <Button
               type="primary"
               onClick={() => {
-                router.push(AppRoutes.AUTH_SIGN_IN)
+                if (isProd) {
+                  signIn('google')
+                } else {
+                  router.push(AppRoutes.AUTH_SIGN_IN)
+                }
               }}
             >
               Увійти
@@ -60,10 +82,15 @@ const HomePage: React.FC = () => {
         <div className={s.Container}>
           <div className={s.HalfBlock}>
             <div className={s.TextGlassCard}>
-              <Typography.Title level={2} style={{ fontSize: '2rem', color: 'white' }}>
+              <Typography.Title
+                level={2}
+                style={{ fontSize: '2rem', color: 'white' }}
+              >
                 Ласкаво просимо до E-ORENDA!
               </Typography.Title>
-              <Typography.Paragraph style={{ fontSize: '1.3rem', color: 'rgba(255,255,255,0.85)' }}>
+              <Typography.Paragraph
+                style={{ fontSize: '1.3rem', color: 'rgba(255,255,255,0.85)' }}
+              >
                 Керуйте процесом надання послуг нерухомості та систематизуйте
                 відносини між користувачами за допомогою нашого сайту! Ресурс
                 допоможе з автоматичним розрахунком платежів та своєчасним

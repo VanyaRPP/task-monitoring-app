@@ -91,8 +91,8 @@ const ChartComponent: React.FC<ChartComponentProps> = ({
               isFetching
                 ? 'Завантаження...'
                 : !companyId
-                ? placeholder
-                : 'Неможливо відобразити графік'
+                  ? placeholder
+                  : 'Неможливо відобразити графік'
             }
           />
         ) : (

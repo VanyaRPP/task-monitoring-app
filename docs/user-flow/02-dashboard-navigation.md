@@ -17,25 +17,21 @@ The navigation items are rendered based on the user's role. Detailed description
 ### Core Modules (Available to All)
 
 1.  **Payments** (`/payment`)
-
     - _Label_: "Платежі"
     - _Description_: "Сторінка для виставлення рахунку компанії за послуги в місяць."
     - _Function_: Access to the billing, invoice generation, and payment history module.
 
 2.  **Companies (Real Estate)** (`/real-estate`)
-
     - _Label_: "Компанії"
     - _Description_: "Сторінка компаній, для перегляду інформації про компанію користувача."
     - _Function_: Management of tenants, buildings, and physical objects.
 
 3.  **Service Providers (Domains)** (`/domain`)
-
     - _Label_: "Надавачі послуг"
     - _Description_: "Сторінка для перегляду інформації про домен який надає ряд особистих послуг."
     - _Function_: Configuration of the service provider entities (the organizations issuing invoices).
 
 4.  **Services** (`/service`)
-
     - _Label_: "Послуги"
     - _Description_: "Сторінка для виставлення цін за послуги в місяць."
     - _Function_: Setting up tariffs (Rent, Electricity, Water) for specific months.
@@ -50,7 +46,6 @@ The navigation items are rendered based on the user's role. Detailed description
 Visible only if `isAdminCheck(userRoles)` returns `true` (Roles: `GLOBAL_ADMIN`, `DOMAIN_ADMIN`).
 
 6.  **Bank** (`/bank`)
-
     - _Label_: "Банк"
     - _Description_: "Сторінка для перегляду вхідних платежів до особистого рахунку у банку."
     - _Function_: Bank reconciliation and transaction monitoring.

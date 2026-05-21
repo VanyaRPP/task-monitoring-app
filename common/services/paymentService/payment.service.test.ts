@@ -18,6 +18,7 @@ jest.mock('@modules/models/Payment', () => ({
     find: findMock,
     aggregate: jest.fn().mockResolvedValue([]),
     countDocuments: jest.fn().mockResolvedValue(0),
+    distinct: jest.fn().mockResolvedValue([]),
   },
 }))
 

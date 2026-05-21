@@ -41,11 +41,9 @@ Create a `.env.local` file in the project root (Next.js will automatically load 
 Minimal recommended variables:
 
 - **Database**
-
   - `MONGODB_URI` – connection string to your MongoDB database.
 
 - **NextAuth**
-
   - `NEXTAUTH_URL` – base URL of the app (e.g. `http://localhost:3000`).
   - `NEXTAUTH_SECRET` – random secret string used for session/token signing.
 
@@ -122,17 +120,14 @@ HMR (hot module reload) is enabled, so changes to pages and components are refle
 ### 6. Common troubleshooting
 
 - **Cannot connect to MongoDB**
-
   - Verify `MONGODB_URI` in `.env.local`.
   - Check that MongoDB is running (for local instances).
 
 - **Auth issues (login not working)**
-
   - Ensure `NEXTAUTH_URL` matches the URL you are using in the browser.
   - Regenerate `NEXTAUTH_SECRET` if you changed domains/ports.
 
 - **Email / invoice sending fails**
-
   - Check SMTP credentials (`EMAIL_SERVER_*`, `EMAIL_FROM`).
   - Enable `EMAIL_DEBUG=true` in `.env.local` and inspect logs.
 

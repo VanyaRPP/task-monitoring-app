@@ -7,16 +7,13 @@ This document gives a short description of the main user‑facing pages (Next.js
 ### Main & informational pages
 
 - **`/` (home / dashboard)**
-
   - For authenticated users, shows the dashboard with widgets for tasks, payments, profits, domains, companies, etc.
   - For unauthenticated users, shows a landing/promo page.
 
 - **`/docs` (in‑app documentation)**
-
   - Page with embedded documentation and a high‑level description of app capabilities.
 
 - **`/contacts` (contacts)**
-
   - Informational page with contact details / feedback options.
 
 - **`/404` (not found)**
@@ -27,15 +24,12 @@ This document gives a short description of the main user‑facing pages (Next.js
 ### Authentication & profile
 
 - **`/auth/signin` (sign in)**
-
   - User login form. Uses NextAuth for authentication.
 
 - **`/auth/signup` (sign up)**
-
   - User registration page (if enabled). Uses API `pages/api/auth/sign-up`.
 
 - **`/auth/verify-request` (email verification info)**
-
   - Informational page shown when the user must verify their email (NextAuth flow).
 
 - **`/profile` (user profile)**
@@ -65,7 +59,6 @@ This document gives a short description of the main user‑facing pages (Next.js
 ### Payments, profit & finance
 
 - **`/payment` (payments list)**
-
   - Main page for working with payments:
     - filtering by domains, companies, streets, services, dates,
     - viewing debit and credit operations,
@@ -76,17 +69,14 @@ This document gives a short description of the main user‑facing pages (Next.js
     - helper endpoints for PDF/Excel export and invoice number generation.
 
 - **`/payment/chart` (payment charts)**
-
   - Visualizations for payments (charts, graphs, trends).
   - Supports filters similar to `/payment`.
 
 - **`/payment/bulk` (bulk payments)**
-
   - Page for bulk processing / uploading / editing multiple payments.
   - Uses APIs `pages/api/spacehub/payment/multiple/index.ts` and `pages/api/profits/bulk.ts` (if exposed in the UI).
 
 - **`/payment/profit` (profit from payments)**
-
   - Connects payments with profit records.
   - Shows how payments affect final profit.
 
@@ -102,7 +92,6 @@ This document gives a short description of the main user‑facing pages (Next.js
 ### Real estate, domains, services & streets
 
 - **`/domain` (domains / providers)**
-
   - Manage domains (service providers), their settings, tariffs, coverage areas.
   - Integrates with APIs:
     - `pages/api/domain/index.ts`,
@@ -111,17 +100,14 @@ This document gives a short description of the main user‑facing pages (Next.js
     - `pages/api/domain/areas/[id]/index.ts`.
 
 - **`/real-estate` (real estate / companies)**
-
   - List of companies/real‑estate objects linked to domains and services.
   - Uses APIs `pages/api/real-estate/*` (including `/my` and id‑based endpoints).
 
 - **`/service` (services)**
-
   - Directory of provided services (utility/service types).
   - Uses APIs `pages/api/service/index.ts` and `pages/api/custom-services/*`.
 
 - **`/streets` (streets & addresses)**
-
   - Manage streets/addresses used in payments and tasks.
   - Uses APIs `pages/api/streets/index.ts`, `pages/api/streets/[id]/index.ts`, `pages/api/streets/search.ts`.
 
@@ -148,7 +134,6 @@ This document gives a short description of the main user‑facing pages (Next.js
 ### Administration & premium features
 
 - **`/admin-panel` (admin panel)**
-
   - Accessible only to admin/global‑admin users.
   - May include:
     - user and role management,
@@ -163,7 +148,6 @@ This document gives a short description of the main user‑facing pages (Next.js
 ### Additional technical/utility pages
 
 - **`/dashboard/tables`**
-
   - Technical/utility page with dashboard‑related tables and widgets (may be used for debugging or as an alternate data view).
 
 - **`/_app` and `/_document`**

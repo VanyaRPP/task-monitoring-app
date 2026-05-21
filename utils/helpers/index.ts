@@ -169,12 +169,15 @@ export const omit = (
   obj: Record<string, any>,
   props: string[]
 ): Record<string, any> => {
-  return Object.keys(obj).reduce((result, key) => {
-    if (!props.includes(key)) {
-      result[key] = obj[key]
-    }
-    return result
-  }, {} as Record<string, any>)
+  return Object.keys(obj).reduce(
+    (result, key) => {
+      if (!props.includes(key)) {
+        result[key] = obj[key]
+      }
+      return result
+    },
+    {} as Record<string, any>
+  )
 }
 
 /**

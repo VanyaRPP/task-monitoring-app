@@ -26,7 +26,11 @@
     padding-top: 110px;
   }
 
-  transition: flex 0.2s, width 0.2s, max-width 0.2s, min-width 0.2s,
+  transition:
+    flex 0.2s,
+    width 0.2s,
+    max-width 0.2s,
+    min-width 0.2s,
     background 0.5s;
   background: var(--backgroundColorPrimary);
 }

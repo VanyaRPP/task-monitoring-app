@@ -20,12 +20,14 @@ setupTestEnvironment()
 const ownDomainId = domains[0]._id
 const otherDomainId = domains[6]._id
 
-const mockUser = (overrides: Partial<{
-  isGlobalAdmin: boolean
-  isDomainAdmin: boolean
-  isUser: boolean
-  email: string
-}> = {}) =>
+const mockUser = (
+  overrides: Partial<{
+    isGlobalAdmin: boolean
+    isDomainAdmin: boolean
+    isUser: boolean
+    email: string
+  }> = {}
+) =>
   (getCurrentUser as jest.Mock).mockResolvedValueOnce({
     isGlobalAdmin: false,
     isDomainAdmin: false,
@@ -38,7 +40,7 @@ const mockRes = () =>
   ({
     status: jest.fn().mockReturnThis(),
     json: jest.fn().mockReturnThis(),
-  } as any)
+  }) as any
 
 const createService = (overrides: Record<string, unknown> = {}) =>
   CustomService.create({
