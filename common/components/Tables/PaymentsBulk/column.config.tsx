@@ -2,8 +2,6 @@ import { CloseCircleOutlined } from '@ant-design/icons'
 import TotalArea from './cells/TotalArea'
 import CompanyName from './cells/CompanyName'
 import { Popconfirm, TableColumnsType } from 'antd'
-import { ServiceType } from '@utils/constants'
-import { Amount } from './cells/Amount'
 
 import {
   ElectricityAmount,
@@ -58,13 +56,6 @@ export const getDefaultColumns = (
           ),
         },
         {
-          title: 'Кількість',
-          width: 140,
-          render: (_, { name }: { name: number }) => (
-            <Amount name={name} fieldName={ServiceType.Maintenance} />
-          ),
-        },
-        {
           title: 'Загальне',
           width: 200,
           render: (_, { name }: { name: number }) => (
@@ -84,13 +75,6 @@ export const getDefaultColumns = (
           ),
         },
         {
-          title: 'Кількість',
-          width: 140,
-          render: (_, { name }: { name: number }) => (
-            <Amount name={name} fieldName={ServiceType.Placing} />
-          ),
-        },
-        {
           title: 'Загальне',
           width: 200,
           render: (_, { name }: { name: number }) => <PlacingSum name={name} />,
@@ -99,21 +83,9 @@ export const getDefaultColumns = (
     },
     _allowedServices.some((inv) => inv?.fieldName === 'inflicionPrice') && {
       title: <InflicionTitle />,
-      children: [
-        {
-          title: 'Кількість',
-          width: 140,
-          render: (_, { name }: { name: number }) => (
-            <Amount name={name} fieldName={ServiceType.Inflicion} />
-          ),
-        },
-    {
       width: 200,
       render: (_, { name }: { name: number }) => <InflicionSum name={name} />,
     },
-  ],
-},
-
     _allowedServices.some((inv) => inv?.fieldName === 'electricityPrice') && {
       title: losses
         ? `Електропостачання + Втрати ${losses}%`
@@ -148,13 +120,6 @@ export const getDefaultColumns = (
           ),
         },
         {
-          title: 'Кількість',
-          width: 140,
-          render: (_, { name }: { name: number }) => (
-            <Amount name={name} fieldName={ServiceType.Electricity} />
-          ),
-        },
-        {
           title: <ElectricitySumTitle />,
           width: 200,
           render: (_, { name }: { name: number }) => (
@@ -181,13 +146,6 @@ export const getDefaultColumns = (
           ),
         },
         {
-          title: 'Кількість',
-          width: 140,
-          render: (_, { name }: { name: number }) => (
-            <Amount name={name} fieldName={ServiceType.Water} />
-          ),
-        },
-        {
           title: <WaterSumTitle />,
           width: 200,
           render: (_, { name }: { name: number }) => <WaterSum name={name} />,
@@ -202,13 +160,6 @@ export const getDefaultColumns = (
           width: 160,
           render: (_, { name }: { name: number }) => (
             <WaterPartAmount name={name} />
-          ),
-        },
-        {
-          title: 'Кількість',
-          width: 140,
-          render: (_, { name }: { name: number }) => (
-            <Amount name={name} fieldName={ServiceType.WaterPart} />
           ),
         },
         {
