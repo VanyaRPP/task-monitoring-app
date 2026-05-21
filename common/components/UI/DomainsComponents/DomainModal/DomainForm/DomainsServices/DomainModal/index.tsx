@@ -92,7 +92,7 @@ const DomainModal: FC<Props> = ({
     setTargetKeys(initialTargets)
     setLocalServiceGroups(serviceGroups)
     setLocalData(data)
-  }, [serviceGroups, data])
+  }, [open])
 
   const handleChange = (
     groupName: string,
