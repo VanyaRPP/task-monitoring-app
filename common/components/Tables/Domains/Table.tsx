@@ -54,12 +54,7 @@ const DomainsTable: React.FC<Props> = ({
     archived: isArchive,
   })
 
-  const filteredData = useMemo(() => {
-    if (!data) return []
-    return data.filter((domain) =>
-      isArchive ? domain.archived === true : !domain.archived
-    )
-  }, [data, isArchive])
+  const filteredData = data ?? []
 
   useEffect(() => {
     if (!isLoading && setDomainsLength) {

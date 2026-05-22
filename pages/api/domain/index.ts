@@ -36,16 +36,18 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
-        const { limit = 0, domainId = [], streetId = [] } = req.query
+        const { limit = 0, domainId = [], streetId = [], archived } = req.query
 
         const domainIds = typeof domainId === 'string' ? [domainId] : domainId
         const streetIds = typeof streetId === 'string' ? [streetId] : streetId
-
         const options: any = {}
 
         if (!isDomainAdmin && !isGlobalAdmin) {
           return res.status(200).json({ success: true, data: [] })
         }
+
+        const isArchived = archived ? archived === 'true' : undefined
+        options.archived = isArchived !== undefined ? isArchived : false
 
         if (isDomainAdmin) {
           options.adminEmails = user.email
@@ -96,7 +98,7 @@ export default async function handler(
         }
 
         const updatedObj = encryptDomainBankTokens(req.body, SECURE_TOKEN)
-
+        updatedObj.archived = false
         if (isDomainAdmin && !isGlobalAdmin) {
           if (
             !updatedObj.adminEmails ||

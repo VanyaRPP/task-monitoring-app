@@ -154,6 +154,7 @@ export default async function handler(
           const domain = await Domain.findOne({
             _id: req.query.id,
             adminEmails: user.email,
+            archived: false,
           })
 
           if (!domain) {
@@ -166,7 +167,10 @@ export default async function handler(
 
           return res.status(200).json({ success: true, data: domain })
         } else {
-          const response = await Domain.findById({ _id: req.query.id })
+          const response = await Domain.findOne({
+            _id: req.query.id,
+            archived: false, 
+          })
           return res.status(200).json({ success: true, data: response })
         }
       } catch (error) {

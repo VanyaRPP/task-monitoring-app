@@ -39,8 +39,11 @@ export const domainApi = createApi({
       },
       providesTags: (response) =>
         response
-          ? response.map((item) => ({ type: 'Domain', id: item._id }))
-          : [],
+    ? [
+        ...response.map((item) => ({ type: 'Domain' as const, id: item._id })),
+        { type: 'Domain' as const, id: 'LIST' },
+      ]
+    : [{ type: 'Domain' as const, id: 'LIST' }],
       transformResponse: (response: IGetDomainResponse) => response.data,
     }),
     getDomainsByAdmin: builder.query<IExtendedDomain[], void>({
@@ -50,8 +53,11 @@ export const domainApi = createApi({
       }),
       providesTags: (response) =>
         response
-          ? response.map((item) => ({ type: 'Domain', id: item._id }))
-          : [],
+    ? [
+        ...response.map((item) => ({ type: 'Domain' as const, id: item._id })),
+        { type: 'Domain' as const, id: 'LIST' },
+      ]
+    : [{ type: 'Domain' as const, id: 'LIST' }],
       transformResponse: (response: IGetDomainResponse) => response.data,
     }),
     addDomain: builder.mutation<IAddDomainResponse, IDomainModel>({
@@ -76,7 +82,8 @@ export const domainApi = createApi({
           method: 'DELETE',
         }
       },
-      invalidatesTags: (response) => (response ? ['Domain'] : []),
+      invalidatesTags: (response) =>
+        response ? ['Domain', { type: 'Domain', id: 'LIST' }] : [],
     }),
     editDomain: builder.mutation<IExtendedDomain, Partial<IExtendedDomain>>({
       query(data) {
@@ -87,7 +94,8 @@ export const domainApi = createApi({
           body: body,
         }
       },
-      invalidatesTags: (response) => (response ? ['Domain'] : []),
+      invalidatesTags: (response) =>
+        response ? ['Domain', { type: 'Domain', id: 'LIST' }] : [],
     }),
     getAreas: builder.query<IExtendedAreas, { domainId?: string }>({
       query: ({ domainId }) => ({
