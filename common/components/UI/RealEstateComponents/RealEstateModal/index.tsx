@@ -90,21 +90,21 @@ const RealEstateModal: FC<Props> = ({
       cleaning: currentRealEstate?.cleaning || 0,
       services: currentRealEstate?.services || [],
       customServices:
-        currentRealEstate?.customServices?.length > 0
-          ? currentRealEstate.customServices
-          : [],
+  currentRealEstate?.customServices?.length > 0
+    ? currentRealEstate.customServices
+    : domainCustomServices,
     })
 
     initializedRef.current = true
-  }, [currentDomainId, chosenRealEstate?.domain, currentRealEstate, form])
+  }, [currentDomainId, chosenRealEstate?.domain, currentRealEstate, form, domainCustomServices])
 
   const handleSubmit = async () => {
     const formData: IRealestate = await form.validateFields()
 
     const filteredCustomServices =
-      formData.customServices?.filter(
-        (s) => typeof s.price === 'number' && s.price > 0
-      ) || []
+  formData.customServices?.filter(
+    (s) => typeof s.price === 'number' && s.price >= 0
+  ) || []
 
     const realEstateData = {
       domain: getEntityId(formData.domain),

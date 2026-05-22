@@ -1,8 +1,8 @@
-import React, { useMemo, useRef, useState } from 'react'
-import { InputNumber, Space, Button, Form, Select, Tooltip } from 'antd'
+import React, { useMemo } from 'react'
+import { InputNumber, Space, Button, Form, Dropdown, Menu, Tooltip } from 'antd'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { inputNumberParser } from '@utils/helpers'
-import { CloseOutlined, CheckOutlined } from '@ant-design/icons'
+import { CloseOutlined, PlusOutlined } from '@ant-design/icons'
 import { Roles } from '@utils/constants'
 
 type CustomServicesCardProps = {
@@ -29,127 +29,77 @@ const CustomServicesCard: React.FC<CustomServicesCardProps> = ({
   )
 
   const customServices = Form.useWatch('customServices', form) || []
-  const selectedIds: string[] = customServices.map((s: any) => s._id)
 
-  const [lastClickedId, setLastClickedId] = useState<string | null>(null)
-  const shiftPressedRef = useRef(false)
+  const selectedIds = customServices.map((s: any) => s._id)
+  const dropdownOptions = allCustomServices.filter(
+    (service) => !selectedIds.includes(service?._id)
+  )
 
-  const buildEntry = (service: any) => ({
-    _id: service?._id,
-    label: service?.label,
-    fieldName: service?.fieldName,
-    price: 0,
-  })
-
-  const applyIds = (ids: string[]) => {
-    const uniqueIds = Array.from(new Set(ids))
-    const next = uniqueIds.map((id) => {
-      const existing = customServices.find((s: any) => s._id === id)
-      if (existing) return existing
-      const source = allCustomServices.find((s) => s?._id === id)
-      return buildEntry(source)
-    })
-    form.setFieldsValue({ customServices: next })
-  }
-
-  const handleSelectChange = (ids: string[]) => {
-    if (shiftPressedRef.current && lastClickedId) {
-      const added = ids.find((id) => !selectedIds.includes(id))
-      if (added) {
-        const fromIdx = allCustomServices.findIndex(
-          (s) => s?._id === lastClickedId
-        )
-        const toIdx = allCustomServices.findIndex((s) => s?._id === added)
-        if (fromIdx !== -1 && toIdx !== -1) {
-          const [start, end] = [
-            Math.min(fromIdx, toIdx),
-            Math.max(fromIdx, toIdx),
-          ]
-          const rangeIds = allCustomServices
-            .slice(start, end + 1)
-            .map((s) => s?._id)
-          applyIds([...selectedIds, ...rangeIds])
-          setLastClickedId(added)
-          return
-        }
-      }
+  const handleAddService = (service) => {
+    if (customServices.find((s: any) => s._id === service.value)) return
+    const newEntry = {
+      _id: service?._id,
+      label: service?.label,
+      fieldName: service?.fieldName,
+      price: 0,
     }
-
-    const added = ids.find((id) => !selectedIds.includes(id))
-    if (added) setLastClickedId(added)
-    applyIds(ids)
+    form.setFieldsValue({ customServices: [...customServices, newEntry] })
   }
-
-  const allSelected =
-    allCustomServices.length > 0 &&
-    selectedIds.length === allCustomServices.length
-
-  const handleToggleAll = () => {
-    if (allSelected) {
-      applyIds([])
-      setLastClickedId(null)
-    } else {
-      applyIds(allCustomServices.map((s) => s?._id))
-    }
-  }
-
-  const selectOptions = allCustomServices.map((s) => ({
-    value: s?._id,
-    label: s?.label,
-  }))
 
   const handleRemoveService = (index: number) => {
     const updated = [...customServices]
     updated.splice(index, 1)
     form.setFieldsValue({ customServices: updated })
   }
+
+React.useEffect(() => {
+    if (allCustomServices.length > 0 && customServices.length === 0 && !disabled) {
+      const autoEntries = allCustomServices.map((service) => ({
+        _id: service?._id || service?.value,
+        label: service?.label,
+        fieldName: service?.fieldName,
+        price: 0,
+      }))
+      
+      form.setFieldsValue({ customServices: autoEntries })
+    }
+  }, [allCustomServices, form, disabled, customServices.length])
+
+
   const dashIfEmpty = (v: any) => (v === 0 || v ? v : '-')
   return (
     <div>
       {!disabled && !isServiceForm && (
         <Tooltip
-          title={
-            allCustomServices.length === 0
-              ? 'У обраного домена відсутні послуги'
-              : ''
-          }
-          placement="top"
-        >
-          <Select
-            mode="multiple"
-            placeholder="Індивідуальні послуги"
-            value={selectedIds}
-            onChange={handleSelectChange}
-            options={selectOptions}
-            disabled={allCustomServices.length === 0}
-            style={{ width: '100%', marginBottom: 16 }}
-            maxTagCount="responsive"
-            optionFilterProp="label"
-            onKeyDown={(e) => {
-              shiftPressedRef.current = e.shiftKey
-            }}
-            onKeyUp={(e) => {
-              shiftPressedRef.current = e.shiftKey
-            }}
-            onMouseDown={(e) => {
-              shiftPressedRef.current = e.shiftKey
-            }}
-            popupRender={(menu) => (
-              <>
-                <Button
-                  type="text"
-                  block
-                  icon={allSelected ? <CheckOutlined /> : null}
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={handleToggleAll}
-                >
-                  {allSelected ? 'Скасувати вибір' : 'Обрати всі'}
-                </Button>
-                {menu}
-              </>
-            )}
-          />
-        </Tooltip>
+  title={
+    allCustomServices.length === 0
+      ? 'У обраного домена відсутні послуги'
+      : dropdownOptions.length === 0
+      ? 'Усі послуги домена вже додано'
+      : ''
+  }
+  placement="top"
+>
+  <Dropdown
+    menu={{
+      items: dropdownOptions.map((option) => ({
+        key: option.value,
+        label: option.label,
+        onClick: () => handleAddService(option),
+      })),
+    }}
+    trigger={dropdownOptions.length > 0 ? ['click'] : []}
+  >
+    <Button
+  style={{ width: '100%', height: 40, marginBottom: 16 }}
+  type="dashed"
+  icon={<PlusOutlined />}
+  disabled={allCustomServices.length > 0 && dropdownOptions.length === 0} 
+>
+  Індивідуальні послуги
+</Button>
+  </Dropdown>
+</Tooltip>
       )}
 
       <Form.List name="customServices">
