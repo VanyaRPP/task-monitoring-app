@@ -8,6 +8,9 @@ const withPWA = require('next-pwa')({
 const nextConfig = {
   reactStrictMode: true,
   i18n,
+  experimental: {
+    serverComponentsExternalPackages: ['@sparticuz/chromium', 'puppeteer-core'],
+  },
   images: {
     remotePatterns: [
       {

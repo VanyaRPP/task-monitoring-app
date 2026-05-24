@@ -49,6 +49,12 @@ import ImportInvoicesModal from './ImportInvoices/ImportInvoicesModal'
 import { resolvePreselectedCompany, resolvePreselectedDomain } from './preselect'
 const { useBreakpoint } = Grid
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
+import { useGetCustomServicesQuery } from '@common/api/customServicesApi/customServices.api'
+import {
+  ICustomServiceItem,
+  extractDomainsFromRealEstates,
+  getVisibleServices,
+} from '@utils/servicesVisibility'
 
 export interface PaymentCardHeaderProps {
   onDeleteClick?: () => void
@@ -104,6 +110,11 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
   const screens = useBreakpoint()
 
   const { data: currUser } = useGetCurrentUserQuery()
+  const { data: customServicesData } = useGetCustomServicesQuery({})
+  const allCustomServices = useMemo(
+    () => (customServicesData?.data ?? []) as ICustomServiceItem[],
+    [customServicesData?.data]
+  )
   const { pathname } = router
 
   const closeModal = () => {
@@ -210,15 +221,27 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
   )
 
   const allowedServices = useMemo(() => {
-  if (!payments?.data?.length) return undefined
-  const types = new Set<string>()
-  payments.data.forEach((payment: IExtendedPayment) => {
-    payment.invoice?.forEach((field) => {
-      if (field.type) types.add(field.type)
+    if (!payments?.data?.length) return undefined
+    const types = new Set<string>()
+    payments.data.forEach((payment: IExtendedPayment) => {
+      payment.invoice?.forEach((field) => {
+        if (field.type) types.add(field.type)
+      })
     })
-  })
-  return types
-}, [payments])
+    return types
+  }, [payments])
+
+  const visibleDomains = useMemo(
+    () => extractDomainsFromRealEstates(
+      payments?.data?.map((p) => ({ domain: p.domain })) ?? []
+    ),
+    [payments?.data]
+  )
+
+  const visibleCustomServices = useMemo(
+    () => getVisibleServices(currUser?.roles, visibleDomains, allCustomServices),
+    [currUser?.roles, visibleDomains, allCustomServices]
+  )
 
   const { preview, edit } = paymentActions
 
@@ -236,6 +259,7 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
             domainFilter={domainFilter}
             realEstatesFilter={realEstatesFilter}
             isAdmin={false}
+            visibleCustomServices={visibleCustomServices}
           />
         </div>
         {preview && currentPayment && (
@@ -326,6 +350,7 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
             isAdmin={isAdmin}
             className={styles.select}
             allowedServices={allowedServices}
+            visibleCustomServices={visibleCustomServices}
           />
         </div>
         <div style={{ marginLeft: 12 }}>
@@ -370,9 +395,10 @@ interface ColumnSelectProps {
   style?: React.CSSProperties
   className?: string
   allowedServices?: Set<string>
+  visibleCustomServices?: ICustomServiceItem[]
 }
 
-const ColumnSelect: React.FC<ColumnSelectProps> = ({ onSelect, allowedServices, ...props }) => {
+const ColumnSelect: React.FC<ColumnSelectProps> = ({ onSelect, allowedServices, visibleCustomServices, ...props }) => {
   const [selected, setSelected] = useState<string[]>([])
   const [filterByAvailable, setFilterByAvailable] = useState(true)
 
@@ -383,13 +409,21 @@ const ColumnSelect: React.FC<ColumnSelectProps> = ({ onSelect, allowedServices, 
     })
   }, [filterByAvailable, allowedServices])
 
+  const customEntries = useMemo(
+    () => (visibleCustomServices ?? []).map(s => ({ value: s._id, label: s.name })),
+    [visibleCustomServices]
+  )
+
   const handleSelect = (value: string[]) => {
     setSelected(value)
     localStorage.setItem('payments_columns', JSON.stringify(value))
   }
 
   const handleCheckAll = () => {
-    const allFiltered = filteredEntries.map(([value]) => value)
+    const allFiltered = [
+      ...filteredEntries.map(([value]) => value),
+      ...customEntries.map(e => e.value),
+    ]
     if (selected.length === allFiltered.length &&
         allFiltered.every(v => selected.includes(v))) {
       setSelected([])
@@ -411,15 +445,15 @@ const ColumnSelect: React.FC<ColumnSelectProps> = ({ onSelect, allowedServices, 
   }, [filterByAvailable, allowedServices])
 
   useEffect(() => {
-  if (!allowedServices || !filterByAvailable) return
-  
-  const allAvailable = Object.entries(ServiceName)
-    .filter(([value]) => allowedServices.has(value))
-    .map(([value]) => value)
+    if (!allowedServices || !filterByAvailable) return
 
-  setSelected(allAvailable)
-  localStorage.setItem('payments_columns', JSON.stringify(allAvailable))
-}, [allowedServices])
+    const allAvailable = Object.entries(ServiceName)
+      .filter(([value]) => allowedServices.has(value))
+      .map(([value]) => value)
+
+    setSelected(allAvailable)
+    localStorage.setItem('payments_columns', JSON.stringify(allAvailable))
+  }, [allowedServices, filterByAvailable])
 
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem('payments_columns') ?? '[]')
@@ -431,25 +465,28 @@ const ColumnSelect: React.FC<ColumnSelectProps> = ({ onSelect, allowedServices, 
   }, [])
 
   useEffect(() => {
-  if (!allowedServices || !filterByAvailable) return
+    if (!allowedServices || !filterByAvailable) return
 
-  const saved = JSON.parse(localStorage.getItem('payments_columns') ?? '[]')
+    const saved = JSON.parse(localStorage.getItem('payments_columns') ?? '[]')
 
-  if (saved.length > 0) return
+    if (saved.length > 0) return
 
-  const allAvailable = Object.entries(ServiceName)
-    .filter(([value]) => allowedServices.has(value))
-    .map(([value]) => value)
+    const allAvailable = Object.entries(ServiceName)
+      .filter(([value]) => allowedServices.has(value))
+      .map(([value]) => value)
 
-  setSelected(allAvailable)
-  localStorage.setItem('payments_columns', JSON.stringify(allAvailable))
-}, [allowedServices])
+    setSelected(allAvailable)
+    localStorage.setItem('payments_columns', JSON.stringify(allAvailable))
+  }, [allowedServices, filterByAvailable])
 
   useEffect(() => {
     onSelect?.(selected)
   }, [onSelect, selected])
 
-  const allFiltered = filteredEntries.map(([value]) => value)
+  const allFiltered = [
+    ...filteredEntries.map(([value]) => value),
+    ...customEntries.map(e => e.value),
+  ]
   const isAllChecked = allFiltered.length > 0 &&
     allFiltered.every(v => selected.includes(v))
   const isIndeterminate = selected.some(s => allFiltered.includes(s)) && !isAllChecked
@@ -458,10 +495,10 @@ const ColumnSelect: React.FC<ColumnSelectProps> = ({ onSelect, allowedServices, 
     {
       label: (
         <div>
-        <Checkbox
-          checked={filterByAvailable}
-          onChange={(e) => setFilterByAvailable(e.target.checked)}
-          onClick={(e) => e.stopPropagation()}
+          <Checkbox
+            checked={filterByAvailable}
+            onChange={(e) => setFilterByAvailable(e.target.checked)}
+            onClick={(e) => e.stopPropagation()}
           >
             <Typography.Text type="secondary">Доступні сервіси</Typography.Text>
           </Checkbox>
@@ -474,14 +511,14 @@ const ColumnSelect: React.FC<ColumnSelectProps> = ({ onSelect, allowedServices, 
             indeterminate={isIndeterminate}
             checked={isAllChecked}
           >
-          <Typography.Text type="secondary">Комунальні</Typography.Text>
-        </Checkbox>
+            <Typography.Text type="secondary">Послуги</Typography.Text>
+          </Checkbox>
         </div>
       ),
-      options: filteredEntries.map(([value, label]) => ({ 
-        value,
-        label,
-      })),
+      options: [
+        ...filteredEntries.map(([value, label]) => ({ value, label })),
+        ...customEntries,
+      ],
     },
   ]
 
