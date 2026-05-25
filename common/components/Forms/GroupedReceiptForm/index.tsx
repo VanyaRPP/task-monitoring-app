@@ -49,10 +49,12 @@ const GroupedReceiptForm: FC<Props> = ({
   const [editPayment] = useEditPaymentMutation()
   const liveInvoice = Form.useWatch('invoice', form)
   const rawData = currPayment ?? paymentData ?? null
-  const resolvedInvoice = (liveInvoice ?? rawData?.invoice ?? []).map(
-    (item: any) => ({ ...item, description: item?.description || item?.name })
-  )
-  const data = rawData ? { ...rawData, invoice: resolvedInvoice } : rawData
+  // useReceiptTemplateProps maps `name = description || name` for template
+  // rows, and GroupedPricesTable resolves description-first via
+  // resolveInvoiceLabel — so we only need to swap in the live invoice here.
+  const data = rawData
+    ? { ...rawData, invoice: liveInvoice ?? rawData.invoice }
+    : rawData
 
   const receiptProps = useReceiptTemplateProps({
     data,
@@ -81,9 +83,9 @@ const GroupedReceiptForm: FC<Props> = ({
   const componentRef = useRef<HTMLDivElement | null>(null)
 
   const printCompanyName =
-    (typeof data?.company === 'string'
-      ? data.company
-      : data?.company?.companyName) ?? data?.reciever?.companyName ?? ''
+    (typeof data?.company === 'object'
+      ? data.company?.companyName
+      : undefined) ?? data?.reciever?.companyName ?? ''
 
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,

@@ -3,23 +3,10 @@ import { usePaymentContext } from '@components/AddPaymentModal'
 import { InvoiceType } from '@components/Tables/EditInvoiceTable'
 import { ServiceType } from '@utils/constants'
 import { toArray, toFirstUpperCase } from '@utils/helpers'
-import { Form, FormInstance, Input, InputProps, Space, Typography } from 'antd'
+import { Form, FormInstance, Space, Typography } from 'antd'
 import { ReactNode, useEffect, useMemo } from 'react'
+import { LabelInput } from './LabelInput'
 import UpdateInvoiceButton from './UpdateInvoiceButton'
-
-// Показує defaultLabel як value коли form ще не має значення для цього поля.
-const LabelInput: React.FC<InputProps & { defaultLabel?: string }> = ({
-  defaultLabel,
-  value,
-  onChange,
-  disabled,
-}) => (
-  <Input
-    value={value !== undefined && value !== null ? value : defaultLabel}
-    onChange={onChange}
-    disabled={disabled}
-  />
-)
 
 export interface InvoiceRowNameProps {
   form?: FormInstance
@@ -51,14 +38,16 @@ const InvoiceRowName: React.FC<InvoiceRowNameProps> = ({
     [name]
   )
 
+  // Seed `description` with the visible label when the row first appears
+  // and only if the form does not already carry a value for that field.
   useEffect(() => {
-    if (!editable || !form || !nameArr.length || typeof label !== 'string') return
+    if (!editable || !form || !nameArr.length || typeof label !== 'string')
+      return
     const current = form.getFieldValue(['invoice', ...nameArr, 'description'])
-    if (current === undefined || current === null || current === '') {
+    if (!current) {
       form.setFieldValue(['invoice', ...nameArr, 'description'], label)
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [label, editable, form, nameArr])
 
   return (
     <Space

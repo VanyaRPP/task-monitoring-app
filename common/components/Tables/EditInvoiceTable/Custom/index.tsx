@@ -9,23 +9,11 @@ import {
   toRoundFixed,
 } from '@utils/helpers'
 import validator from '@utils/validator'
-import { Form, Input, InputProps, Space, Typography } from 'antd'
+import { Form, Input, Space, Typography } from 'antd'
 import { useEffect, useMemo } from 'react'
 import useSyncSum from '../useSyncSum'
+import { LabelInput } from '../LabelInput'
 import { UpdateInvoiceButton } from './UpdateInvoiceButton'
-
-const LabelInput: React.FC<InputProps & { defaultLabel?: string }> = ({
-  defaultLabel,
-  value,
-  onChange,
-  disabled,
-}) => (
-  <Input
-    value={value !== undefined && value !== null ? value : defaultLabel}
-    onChange={onChange}
-    disabled={disabled}
-  />
-)
 
 export const Name: React.FC<InvoiceComponentProps> = ({
   form,
@@ -48,14 +36,17 @@ export const Name: React.FC<InvoiceComponentProps> = ({
   const currentPrice = Form.useWatch(['invoice', ...name, 'price'], form)
   const defaultLabel = value || type || ''
 
+  // Seed `description` once defaultLabel is known. defaultLabel is derived
+  // from useWatch-backed `value`/`type`, which are undefined on first render
+  // and become available a tick later — so we run on every defaultLabel
+  // change and only write when the field is still blank.
   useEffect(() => {
-    if (!editable || !form || !name.length) return
+    if (!editable || !form || !name.length || !defaultLabel) return
     const current = form.getFieldValue(['invoice', ...name, 'description'])
-    if (current === undefined || current === null || current === '') {
+    if (!current) {
       form.setFieldValue(['invoice', ...name, 'description'], defaultLabel)
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [defaultLabel, editable, form, name])
 
   const defaultPrice = useMemo(
     () =>
