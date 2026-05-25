@@ -1,5 +1,6 @@
 import User from '@modules/models/User'
 import Domain from '@modules/models/Domain'
+import RealEstate from '@modules/models/RealEstate'
 import start from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
@@ -22,10 +23,32 @@ export default async function handler(
     case 'GET':
       try {
         const user = await User.findById(req.query.id)
-        return res.status(200).json({ success: true, data: user })
-      } catch (error) {
-        return res.status(400).json({ success: false })
-      }
+
+        if (!user) {
+          return res
+            .status(404)
+            .json({ success: false, message: 'User not found' })
+        }
+
+        const adminDomains = await Domain.find({
+          adminEmails: user.email,
+        })
+
+        const adminCompanies = await RealEstate.find({
+          adminEmails: user.email,
+        })
+
+        return res.status(200).json({
+          success: true,
+          data: {
+            ...user.toObject(),
+            adminDomains,
+            adminCompanies,
+          },
+        })
+        } catch (error: any) {
+          return res.status(400).json({ success: false, message: error?.message })
+        }
 
     case 'PATCH':
       try {
@@ -67,7 +90,46 @@ export default async function handler(
           }
         }
 
-        const updatedUser = await User.updateOne({ _id: targetId }, req.body)
+        const targetUser = await User.findById(targetId)
+
+          if (!targetUser) {
+            return res.status(404).json({ success: false, message: 'User not found' })
+          }
+
+        const { adminDomains, adminCompanies, ...userBody } = req.body
+        const targetEmail = targetUser.email
+
+        if (Array.isArray(adminDomains)) {
+          await Domain.updateMany(
+            {
+              adminEmails: targetEmail,
+              _id: { $nin: adminDomains },
+            },
+              { $pull: { adminEmails: targetEmail } }
+          )
+
+          await Domain.updateMany(
+              { _id: { $in: adminDomains } },
+              { $addToSet: { adminEmails: targetEmail } }
+            )
+        }
+
+        if (Array.isArray(adminCompanies)) {
+          await RealEstate.updateMany(
+            {
+              adminEmails: targetEmail,
+              _id: { $nin: adminCompanies },
+            },
+             { $pull: { adminEmails: targetEmail } }
+          )
+            
+          await RealEstate.updateMany(
+            { _id: { $in: adminCompanies } },
+            { $addToSet: { adminEmails: targetEmail } }
+          )
+        }
+
+        const updatedUser = await User.updateOne({ _id: targetId }, userBody)
 
         return res.status(200).json({
           data: updatedUser,

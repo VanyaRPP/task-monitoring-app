@@ -101,8 +101,8 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
                 ? 'Hide quantity and price in act table'
                 : 'Приховати кількість і ціну в акті'
               : isEnglish
-              ? 'Show quantity and price in act table'
-              : 'Показати кількість і ціну в акті'
+                ? 'Show quantity and price in act table'
+                : 'Показати кількість і ціну в акті'
           }
           aria-pressed={showQuantityInPreview}
           className={`${styles.tableDetailsToggle} ${

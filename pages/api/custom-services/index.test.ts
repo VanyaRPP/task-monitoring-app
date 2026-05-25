@@ -64,13 +64,13 @@ describe('CustomServices API', () => {
   })
 
   describe('DELETE /api/custom-services (Access Control)', () => {
-    it('should strictly deny access for DomainAdmin (403)', async () => {
+    it('should return 400 when admin omits domainId', async () => {
       await mockLoginAs(users.domainAdmin)
       const { req, res } = createMocks('DELETE', { query: { id: 'some-id' } })
 
       await handler(req, res)
 
-      expect(res.status).toHaveBeenCalledWith(403)
+      expect(res.status).toHaveBeenCalledWith(400)
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({ success: false })
       )

@@ -9,7 +9,6 @@
 - **URL**: `/`
 - **Component**: `HomePage` / `DashboardLanding`
 - **Visual Experience**:
-
   - **Background**: A dynamic "Wave" Lottie animation (`/animations/WaveForBG.json`) rotates and loops in the background.
   - **Interactive Elements**: A `SplashCursor` component adds a fluid visual effect following the mouse pointer.
   - **Hero Section**: Displays the "E-ORENDA" welcome title and a descriptive text about property management services.

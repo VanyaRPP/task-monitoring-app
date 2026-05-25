@@ -169,12 +169,15 @@ export const omit = (
   obj: Record<string, any>,
   props: string[]
 ): Record<string, any> => {
-  return Object.keys(obj).reduce((result, key) => {
-    if (!props.includes(key)) {
-      result[key] = obj[key]
-    }
-    return result
-  }, {} as Record<string, any>)
+  return Object.keys(obj).reduce(
+    (result, key) => {
+      if (!props.includes(key)) {
+        result[key] = obj[key]
+      }
+      return result
+    },
+    {} as Record<string, any>
+  )
 }
 
 /**
@@ -438,7 +441,7 @@ export async function getDistinctStreets({
   const distinctDomains = await model.aggregate(domainsPipeline)
   const streetsPipeline = getStreetsPipeline(
     isGlobalAdmin,
-    distinctDomains.map((domain) => domain._id),
+    user.email,
     filteredCompanys,
     filteredDomains
   )

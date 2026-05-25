@@ -1,6 +1,7 @@
 import { dateToMonthYear } from '@assets/features/formatDate'
 import { usePaymentContext } from '@components/AddPaymentModal'
 import { InvoiceComponentProps } from '@components/Tables/EditInvoiceTable'
+import { resolveCustomServicePrice } from '@utils/domain/domain-invoice-selector'
 import {
   currencyWithUnit,
   toArray,
@@ -43,7 +44,7 @@ export const Name: React.FC<InvoiceComponentProps> = ({
     form
   )
 
-  const { service, company } = usePaymentContext()
+  const { service, company, prevPayment } = usePaymentContext()
   const currentPrice = Form.useWatch(['invoice', ...name, 'price'], form)
   const defaultLabel = value || type || ''
 
@@ -56,11 +57,11 @@ export const Name: React.FC<InvoiceComponentProps> = ({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const defaultPrice = useMemo(() => {
-    if (!fieldName) return undefined
-    return company?.customServices?.find(s => s.fieldName === fieldName)?.price
-        ?? service?.customServices?.find(s => s.fieldName === fieldName)?.price
-  }, [company?.customServices, service?.customServices, fieldName])
+  const defaultPrice = useMemo(
+    () =>
+      resolveCustomServicePrice(fieldName, { company, service, prevPayment }),
+    [company, service, prevPayment, fieldName]
+  )
 
   if (!editable || type !== 'custom') {
     return (

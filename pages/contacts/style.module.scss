@@ -197,7 +197,9 @@
 
   input,
   textarea {
-    transition: color 0.2s, border 0.2s;
+    transition:
+      color 0.2s,
+      border 0.2s;
     color: var(--textColor);
     border-color: #88888830;
     background: transparent !important;
@@ -262,7 +264,9 @@
   align-items: center;
 
   > a {
-    transition: color 0.2s, opacity 0.2s;
+    transition:
+      color 0.2s,
+      opacity 0.2s;
     color: var(--textColor);
     opacity: 0.5;
   }
@@ -332,7 +336,8 @@
 .icon-btn__back,
 .icon-btn__front,
 .icon-btn__label {
-  transition: opacity 0.3s cubic-bezier(0.83, 0, 0.17, 1),
+  transition:
+    opacity 0.3s cubic-bezier(0.83, 0, 0.17, 1),
     transform 0.3s cubic-bezier(0.83, 0, 0.17, 1);
 }
 

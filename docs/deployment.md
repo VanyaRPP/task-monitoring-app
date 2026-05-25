@@ -28,16 +28,13 @@ The build output is managed by Next.js (typically `.next/` directory).
 At minimum, configure the following variables in your deployment environment:
 
 - **Database**
-
   - `MONGODB_URI` – connection string to your production MongoDB cluster.
 
 - **NextAuth**
-
   - `NEXTAUTH_URL` – public base URL of your app (e.g. `https://app.example.com`).
   - `NEXTAUTH_SECRET` – long, random secret string (keep it private).
 
 - **SMTP / Email (for invoices & notifications)**
-
   - `EMAIL_SERVER_HOST`
   - `EMAIL_SERVER_PORT`
   - `EMAIL_SERVER_USER`
@@ -72,26 +69,22 @@ The examples below are platform‑agnostic; adapt commands to your provider.
 ### 4. Generic Node/Next.js deployment steps
 
 1. **Prepare environment**
-
    - Ensure Node.js is installed (same major version as in development).
    - Set all required environment variables.
 
 2. **Install dependencies**
-
    - On the server/CI:
      ```bash
      yarn install --immutable
      ```
 
 3. **Build the app**
-
    - Run:
      ```bash
      yarn build
      ```
 
 4. **Start the app**
-
    - Use:
      ```bash
      yarn start
@@ -147,7 +140,6 @@ If using Heroku (or a similar PaaS):
    ```
 
 3. **Configure build and start commands**
-
    - Heroku by default runs npm scripts, but you can configure it to use yarn. Ensure commands map to:
      - `yarn install`
      - `yarn build`

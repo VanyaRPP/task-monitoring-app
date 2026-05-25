@@ -21,11 +21,9 @@
 The user must define the "who, where, and when" of the bill. Each selection filters the options for the next, ensuring data integrity.
 
 1.  **Select Domain**: The user chooses the Service Provider from a dropdown list.
-
     - _API Interaction_: The dropdown is populated by a call to `GET /api/domain/admin`.
 
 2.  **Select Street**: After selecting a Domain, this dropdown is populated with associated streets.
-
     - _API Interaction_: `GET /api/filter/street?domainId=[selected_domain_id]`.
 
 3.  **Select Month**: The user picks the billing month and year from a date picker (e.g., "March 2026").
@@ -38,7 +36,6 @@ The user must define the "who, where, and when" of the bill. Each selection filt
 Once the full context is set, the system performs several background actions before the user can proceed:
 
 - **Tariff Verification**: The system makes a call to `GET /api/service` filtered by the selected Domain and Month.
-
   - **Success**: If a `Service` record is found, its tariff data (prices for electricity, water, rent, etc.) is loaded into the form's state.
   - **Failure**: If no `Service` record exists, the form remains disabled, and a tooltip or message prompts the user: "Please create a tariff sheet for this month first."
 
@@ -51,7 +48,6 @@ Once the full context is set, the system performs several background actions bef
 The form is now enabled, displaying a list of billable services.
 
 1.  **Variable Services (e.g., Electricity, Water)**:
-
     - **UI**: Each service has a read-only field for **"Last Amount"** and an input field for **"Current Amount"**.
     - **User Action**: The user enters the latest meter reading into the "Current Amount" field.
     - **Live Calculation**: The frontend instantly calculates:
@@ -60,7 +56,6 @@ The form is now enabled, displaying a list of billable services.
       - The `Consumption` and `Cost` fields are updated in real-time.
 
 2.  **Fixed Services (e.g., Rent, Maintenance, Garbage)**:
-
     - **UI**: These fields are automatically pre-filled.
     - **Calculation**: The cost is derived from the tenant's properties (e.g., `RealEstate.area`) multiplied by the tariff from the `Service` record (e.g., `Price per m²`).
 

@@ -10,7 +10,9 @@ $surface-2: rgba(255, 255, 255, 0.09);
 $border-soft: rgba(255, 255, 255, 0.1);
 $border-gold: rgba(201, 168, 76, 0.3);
 
-$shadow-card: 0 4px 24px rgba(0, 0, 0, 0.28), 0 1px 4px rgba(0, 0, 0, 0.18);
+$shadow-card:
+  0 4px 24px rgba(0, 0, 0, 0.28),
+  0 1px 4px rgba(0, 0, 0, 0.18);
 $shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.18);
 
 $radius-xl: 20px;
@@ -395,7 +397,9 @@ $surface-1-l: rgba(0, 0, 0, 0.03);
 $surface-2-l: rgba(0, 0, 0, 0.05);
 $border-soft-l: rgba(0, 0, 0, 0.1);
 $border-gold-l: rgba(154, 122, 46, 0.3);
-$shadow-card-l: 0 4px 24px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.06);
+$shadow-card-l:
+  0 4px 24px rgba(0, 0, 0, 0.08),
+  0 1px 4px rgba(0, 0, 0, 0.06);
 $shadow-sm-l: 0 2px 10px rgba(0, 0, 0, 0.06);
 
 :global(:root[data-theme='light']) {

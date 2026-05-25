@@ -10,14 +10,9 @@ import {
 } from '@pages/api/spacehub/payment/pipelines'
 import { quarters, SortOrder } from '@utils/constants'
 import {
-  getDistinctCompanyAndDomain,
-  getFilterForAddress,
-} from '@utils/helpers'
-import {
   sendInvoiceEmail,
   type InvoiceEmailPayment,
 } from '@utils/email/sendInvoiceEmail'
-import { getStreetsPipeline } from '@utils/pipelines'
 import { FilterQuery } from 'mongoose'
 import ProfitService from '@common/services/profitService/profit.service'
 import { isDev } from '@utils/env'
@@ -48,7 +43,7 @@ function logPaymentEmailDebug(stage: string, details: Record<string, unknown>) {
   if (!isEmailDebugEnabled()) {
     return
   }
-
+  // eslint-disable-next-line no-console
   console.info(`[payment-email] ${stage}`, details)
 }
 
@@ -198,21 +193,12 @@ export async function getPayments(
     .populate('domain')
     .populate('monthService')
 
-  const streetsPipeline = getStreetsPipeline(isGlobalAdmin, options.domain)
-
-  const streets = await Payment.aggregate(streetsPipeline)
-  const addressFilter = getFilterForAddress(streets)
-
   const total = await Payment.countDocuments(options)
 
-  const { distinctDomains, distinctCompanies } =
-    await getDistinctCompanyAndDomain({
-      isGlobalAdmin,
-      user,
-      companyGroup: 'company',
-      model: Payment,
-      filters: {},
-    })
+  const [distinctDomainIds, distinctCompanyIds] = await Promise.all([
+    Payment.distinct('domain', options),
+    Payment.distinct('company', options),
+  ])
 
   const creditDebitPipeline = getCreditDebitPipeline(options)
   const totalPayments = await Payment.aggregate(creditDebitPipeline)
@@ -229,8 +215,8 @@ export async function getPayments(
     ...totalGeneralSum,
   ]
   return {
-    currentCompaniesCount: distinctCompanies.length,
-    currentDomainsCount: distinctDomains.length,
+    currentCompaniesCount: distinctCompanyIds.length,
+    currentDomainsCount: distinctDomainIds.length,
     data: payments,
     totalPayments: totalPaymentsData.reduce((acc, item) => {
       acc[item._id] = item.totalSum

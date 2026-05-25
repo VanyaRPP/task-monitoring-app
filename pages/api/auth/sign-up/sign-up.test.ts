@@ -59,19 +59,21 @@ describe('POST /api/auth/sign-up', () => {
     expect(res.status).toHaveBeenCalledWith(409)
     expect(res.json).toHaveBeenCalledWith({
       success: false,
-      error: 'User already exists!',
+      message: 'User already exists!',
     })
   })
 
-  it('Should return 400 on error', async () => {
-    ;(User.findOne as jest.Mock).mockRejectedValue(new Error('database error'))
+  it('Should return 400 on message', async () => {
+    ;(User.findOne as jest.Mock).mockRejectedValue(
+      new Error('database message')
+    )
 
     await handler(req, res)
 
     expect(res.status).toHaveBeenCalledWith(400)
     expect(res.json).toHaveBeenCalledWith({
       success: false,
-      error: expect.anything(),
+      message: expect.anything(),
     })
   })
 })

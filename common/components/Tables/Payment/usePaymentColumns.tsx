@@ -317,8 +317,8 @@ export function usePaymentColumns({
           const rawDate =
             typeof monthService === 'string'
               ? (payment.invoiceCreationDate as unknown as string)
-              : (monthService as any)?.date ??
-                (payment.invoiceCreationDate as unknown as string)
+              : ((monthService as any)?.date ??
+                (payment.invoiceCreationDate as unknown as string))
 
           const formatted = toFirstUpperCase(dateToMonthYear(rawDate))
 

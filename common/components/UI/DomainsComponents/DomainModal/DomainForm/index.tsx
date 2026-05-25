@@ -32,6 +32,7 @@ const DomainForm: FC<Props> = ({
     >
       <Tabs
         defaultActiveKey="general"
+        destroyInactiveTabPane={false}
         items={[
           {
             key: 'general',

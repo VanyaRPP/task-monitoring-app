@@ -11,6 +11,7 @@
  * MONGODB_URI at module-load time, which happens BEFORE any in-script
  * dotenv.config() call (ES-module imports are hoisted).
  */
+/* eslint-disable no-console */
 import dbConnect from '../utils/dbConnect'
 import DomainTypeTemplate from '../common/modules/models/domain-type-template'
 import { defaultServices } from '../utils/constants'
@@ -40,6 +41,7 @@ export interface ISeedReport {
 
 export async function seedDomainTypeTemplates(
   templates: IBuiltInTemplate[] = BUILT_IN_TEMPLATES,
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   log: (msg: string) => void = () => {}
 ): Promise<ISeedReport> {
   const report: ISeedReport = { created: [], skipped: [] }

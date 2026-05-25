@@ -57,8 +57,8 @@ export const matchByAccount = (
   const company = companies.find(
     (c) => c.account && c.account === transaction.AUT_CNTR_ACC
   )
-  return company
-    ? { companyId: company._id!, matchedBy: MatchType.ACCOUNT }
+  return company?._id
+    ? { companyId: company._id, matchedBy: MatchType.ACCOUNT }
     : null
 }
 
@@ -71,8 +71,8 @@ export const matchByRnokpp = (
   const company = companies.find(
     (c) => (c.rnokpp && c.rnokpp === nceo) || c.description?.includes(nceo)
   )
-  return company
-    ? { companyId: company._id!, matchedBy: MatchType.RNOKPP }
+  return company?._id
+    ? { companyId: company._id, matchedBy: MatchType.RNOKPP }
     : null
 }
 

@@ -138,7 +138,8 @@ describe('Dashboard — basic behaviors', () => {
 
     const raw = localStorage.getItem('dashboard-layout-user-123')
     expect(raw).not.toBeNull()
-    const saved = JSON.parse(raw!)
+    if (raw === null) throw new Error('localStorage value missing')
+    const saved = JSON.parse(raw)
     expect(Array.isArray(saved.layout)).toBe(true)
     expect(saved.layout[0]).not.toBe('payments')
   })
@@ -151,7 +152,8 @@ describe('Dashboard — basic behaviors', () => {
 
     const raw = localStorage.getItem('dashboard-layout-user-123')
     expect(raw).not.toBeNull()
-    const saved = JSON.parse(raw!)
+    if (raw === null) throw new Error('localStorage value missing')
+    const saved = JSON.parse(raw)
     expect(saved).toHaveProperty('layout')
     expect(saved).toHaveProperty('hidden')
     expect(saved.hidden).toContain('streets')

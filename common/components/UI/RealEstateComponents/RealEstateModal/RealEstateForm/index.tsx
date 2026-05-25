@@ -215,12 +215,13 @@ const RealEstateForm: FC<Props> = ({
           </Form.Item>
         </>
       )}
+    <Form.Item label="Індивідуальні послуги">
       <CustomServicesCard
         form={form}
         disabled={!editable}
         allCustomServices={customServices}
       />
-
+    </Form.Item>
       {/*<Form.Item
         valuePropName="checked"
         name="garbageCollector"

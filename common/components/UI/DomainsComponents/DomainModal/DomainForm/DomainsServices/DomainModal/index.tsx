@@ -24,7 +24,7 @@ import {
 } from '@common/api/customServicesApi/customServices.api'
 import { Roles } from '@utils/constants'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
-import { isProtectedService } from '@utils/helpers'
+import { isAdminCheck, isProtectedService } from '@utils/helpers'
 
 const { Text } = Typography
 
@@ -53,6 +53,7 @@ interface Props {
   onDeleteCustomService?: (serviceKey: string) => void
   onUpdateCustomService?: (id: string, newTitle: string) => Promise<void>
   isGlobalAdmin?: boolean
+  domainId?: string
 }
 
 const DomainModal: FC<Props> = ({
@@ -65,6 +66,7 @@ const DomainModal: FC<Props> = ({
   onDeleteCustomService,
   onUpdateCustomService,
   isGlobalAdmin,
+  domainId,
 }) => {
   const [targetKeys, setTargetKeys] = useState<Record<string, string[]>>({})
   const [localServiceGroups, setLocalServiceGroups] = useState<ServiceGroup[]>(
@@ -78,6 +80,7 @@ const DomainModal: FC<Props> = ({
   const [activePanel, setActivePanel] = useState<string | string[]>([])
   const { data: user } = useGetCurrentUserQuery()
   isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
+  const isAdmin = isAdminCheck(user?.roles)
 
   useEffect(() => {
     const initialTargets: Record<string, string[]> = {}
@@ -89,7 +92,7 @@ const DomainModal: FC<Props> = ({
     setTargetKeys(initialTargets)
     setLocalServiceGroups(serviceGroups)
     setLocalData(data)
-  }, [serviceGroups, data])
+  }, [open])
 
   const handleChange = (
     groupName: string,
@@ -116,6 +119,7 @@ const DomainModal: FC<Props> = ({
     try {
       const result = await deleteCustomService({
         id: serviceKey,
+        ...(domainId ? { domainId } : {}),
       }).unwrap()
 
       message.success(result.data || 'Сервіс успішно видалено')
@@ -184,6 +188,7 @@ const DomainModal: FC<Props> = ({
       await editCustomService({
         _id: item.key,
         name: tempTitle.trim(),
+        ...(domainId ? { domainId } : {}),
       }).unwrap()
 
       setLocalData((prev) =>
@@ -288,11 +293,13 @@ const DomainModal: FC<Props> = ({
           const isCustom = !isProtectedService(item.key)
 
           return (
-            <Space
+            <div
               style={{
                 display: 'flex',
                 justifyContent: 'space-between',
+                alignItems: 'center',
                 width: '100%',
+                gap: 4,
               }}
             >
               {isEditing ? (
@@ -305,13 +312,20 @@ const DomainModal: FC<Props> = ({
                     if (e.key === 'Escape') handleCancelEdit()
                   }}
                   autoFocus
+                  style={{ flex: 1 }}
                 />
               ) : (
-                <Text strong>{item.title}</Text>
+                <Text
+                  strong
+                  ellipsis={{ tooltip: { title: item.title, placement: 'top' } }}
+                  style={{ display: 'block', flex: 1, minWidth: 0 }}
+                >
+                  {item.title}
+                </Text>
               )}
 
               <Space size="small">
-                {isCustom && isGlobalAdmin && (
+                {isCustom && isAdmin && (isGlobalAdmin || !!domainId) && (
                   <>
                     {isEditing ? (
                       <>
@@ -371,7 +385,7 @@ const DomainModal: FC<Props> = ({
                   </>
                 )}
               </Space>
-            </Space>
+            </div>
           )
         }}
         locale={{ itemUnit: 'послуга', itemsUnit: 'послуг' }}
