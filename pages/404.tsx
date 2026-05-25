@@ -3,11 +3,11 @@ import dynamic from 'next/dynamic'
 import Router from 'next/router'
 import s from './404.module.scss'
 
-const Result = dynamic(() => import('antd').then(mod => mod.Result), {
+const Result = dynamic(() => import('antd').then((mod) => mod.Result), {
   ssr: false,
 })
 
-const Button = dynamic(() => import('antd').then(mod => mod.Button), {
+const Button = dynamic(() => import('antd').then((mod) => mod.Button), {
   ssr: false,
 })
 

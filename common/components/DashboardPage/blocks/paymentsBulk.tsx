@@ -68,7 +68,8 @@ const PaymentBulkBlock: React.FC = () => {
   )
 
   const placeholderService = useMemo<IService | null>(() => {
-    if (!isPlaceholder || !placeholderDate || !domainId || !streetId) return null
+    if (!isPlaceholder || !placeholderDate || !domainId || !streetId)
+      return null
     return {
       _id: serviceId,
       date: placeholderDate.toDate(),

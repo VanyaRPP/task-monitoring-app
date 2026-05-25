@@ -322,4 +322,205 @@ describe('getInvoices - CUSTOM', () => {
       )
     })
   })
+
+  // Fallback to the same custom-service row of the previous month's payment
+  // when neither company nor service defines a price. Lets the user carry
+  // over an established price into a new month without re-entering it.
+  describe('prevPayment fallback for missing custom-service price', () => {
+    const prevWithInternet: Partial<IPayment> = {
+      invoice: [
+        {
+          type: ServiceType.Custom,
+          name: 'Інтернет',
+          fieldName: 'internetPrice',
+          price: 250,
+          sum: 250,
+        },
+      ],
+    }
+
+    it('loads a Custom row from prevPayment when service is null and company is null', () => {
+      const invoices = getInvoices({
+        service: null,
+        company: null,
+        prevPayment: prevWithInternet,
+      })
+
+      expect(invoices).toContainEqual(
+        expect.objectContaining({
+          type: ServiceType.Custom,
+          fieldName: 'internetPrice',
+          price: 250,
+          sum: 250,
+        })
+      )
+    })
+
+    it('loads a Custom row from prevPayment when service.customServices=[] and company.customServices=[]', () => {
+      const invoices = getInvoices({
+        service: { customServices: [] },
+        company: { customServices: [] },
+        prevPayment: prevWithInternet,
+      })
+
+      expect(invoices).toContainEqual(
+        expect.objectContaining({
+          type: ServiceType.Custom,
+          fieldName: 'internetPrice',
+          price: 250,
+          sum: 250,
+        })
+      )
+    })
+
+    it('prefers company over service over prev (company wins)', () => {
+      const invoices = getInvoices({
+        service: {
+          customServices: [
+            {
+              _id: '65b8a9f4a35a75f7da9f1011' as any,
+              label: 'Інтернет',
+              fieldName: 'internetPrice',
+              price: 200,
+            },
+          ],
+        },
+        company: {
+          customServices: [
+            {
+              _id: '65b8a9f4a35a75f7da9f1011' as any,
+              label: 'Інтернет',
+              fieldName: 'internetPrice',
+              price: 300,
+            },
+          ],
+        },
+        prevPayment: prevWithInternet,
+      })
+
+      expect(invoices).toContainEqual(
+        expect.objectContaining({
+          type: ServiceType.Custom,
+          fieldName: 'internetPrice',
+          price: 300,
+        })
+      )
+    })
+
+    it('prefers service over prev when company has no override', () => {
+      const invoices = getInvoices({
+        service: {
+          customServices: [
+            {
+              _id: '65b8a9f4a35a75f7da9f1011' as any,
+              label: 'Інтернет',
+              fieldName: 'internetPrice',
+              price: 200,
+            },
+          ],
+        },
+        company: null,
+        prevPayment: prevWithInternet,
+      })
+
+      expect(invoices).toContainEqual(
+        expect.objectContaining({
+          type: ServiceType.Custom,
+          fieldName: 'internetPrice',
+          price: 200,
+        })
+      )
+    })
+
+    it('merges Custom rows from different sources by fieldName', () => {
+      const invoices = getInvoices({
+        service: {
+          customServices: [
+            {
+              _id: 'aa' as any,
+              label: 'Прибирання',
+              fieldName: 'cleaningCustom',
+              price: 50,
+            },
+          ],
+        },
+        company: null,
+        prevPayment: {
+          invoice: [
+            {
+              type: ServiceType.Custom,
+              name: 'Інтернет',
+              fieldName: 'internetPrice',
+              price: 250,
+              sum: 250,
+            },
+          ],
+        },
+      })
+
+      expect(invoices).toContainEqual(
+        expect.objectContaining({
+          type: ServiceType.Custom,
+          fieldName: 'cleaningCustom',
+          price: 50,
+        })
+      )
+      expect(invoices).toContainEqual(
+        expect.objectContaining({
+          type: ServiceType.Custom,
+          fieldName: 'internetPrice',
+          price: 250,
+        })
+      )
+    })
+
+    it('does not pick up prev invoice rows of a non-Custom type with matching fieldName', () => {
+      const invoices = getInvoices({
+        service: null,
+        company: null,
+        prevPayment: {
+          invoice: [
+            {
+              type: ServiceType.Electricity,
+              fieldName: 'internetPrice',
+              price: 999,
+              sum: 999,
+            },
+          ],
+        },
+      })
+
+      expect(invoices).not.toContainEqual(
+        expect.objectContaining({ type: ServiceType.Custom })
+      )
+    })
+
+    it('uses prev row name and serviceId when service/company are missing', () => {
+      const invoices = getInvoices({
+        service: null,
+        company: null,
+        prevPayment: {
+          invoice: [
+            {
+              type: ServiceType.Custom,
+              name: 'Інтернет',
+              fieldName: 'internetPrice',
+              price: 250,
+              sum: 250,
+              serviceId: 'svc-xyz',
+            },
+          ],
+        },
+      })
+
+      expect(invoices).toContainEqual(
+        expect.objectContaining({
+          type: ServiceType.Custom,
+          fieldName: 'internetPrice',
+          name: 'Інтернет',
+          serviceId: 'svc-xyz',
+        })
+      )
+    })
+  })
 })

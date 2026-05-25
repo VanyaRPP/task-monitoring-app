@@ -4,7 +4,10 @@ import TemplateTab from './TemplateTab'
 
 jest.mock('../style.module.scss', () => ({ templateItem: 'templateItem' }))
 
-const renderInForm = (initialValues?: { defaultTemplate?: string }, editable = true) =>
+const renderInForm = (
+  initialValues?: { defaultTemplate?: string },
+  editable = true
+) =>
   render(
     <Form initialValues={initialValues}>
       <TemplateTab editable={editable} />

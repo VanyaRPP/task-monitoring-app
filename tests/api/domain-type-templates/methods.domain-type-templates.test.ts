@@ -58,7 +58,9 @@ describe('API /api/domain-type-templates', () => {
 
     it('returns sorted list for admin', async () => {
       asAdmin()
-      const sort = jest.fn(() => ({ lean: jest.fn().mockResolvedValue([{ name: 'A' }]) }))
+      const sort = jest.fn(() => ({
+        lean: jest.fn().mockResolvedValue([{ name: 'A' }]),
+      }))
       ;(DomainTypeTemplate.find as jest.Mock).mockReturnValue({ sort })
 
       const req = { method: 'GET', body: {}, query: {} } as any

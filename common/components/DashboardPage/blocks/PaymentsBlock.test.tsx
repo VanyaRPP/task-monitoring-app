@@ -29,7 +29,10 @@ jest.mock('@common/api/paymentApi/payment.api', () => ({
   },
   useGetAllPaymentsQuery: jest.fn(),
   useDeletePaymentMutation: jest.fn(() => [jest.fn(), { isLoading: false }]),
-  useDeleteMultiplePaymentsMutation: jest.fn(() => [jest.fn(), { isLoading: false }]),
+  useDeleteMultiplePaymentsMutation: jest.fn(() => [
+    jest.fn(),
+    { isLoading: false },
+  ]),
   useEditPaymentMutation: jest.fn(() => [jest.fn()]),
   useMarkPaymentsPaidMutation: jest.fn(() => [jest.fn()]),
   useAddPaymentMutation: jest.fn(() => [jest.fn()]),
@@ -52,7 +55,9 @@ jest.mock('@common/api/filterApi/filter.api', () => ({
 }))
 
 jest.mock('@components/UI/TableCard', () => {
-  const MockTableCard = ({ children }: any) => <div data-testid="table-card">{children}</div>
+  const MockTableCard = ({ children }: any) => (
+    <div data-testid="table-card">{children}</div>
+  )
   MockTableCard.displayName = 'TableCard'
   return MockTableCard
 })
@@ -91,7 +96,6 @@ describe('PaymentsBlock Sync Logic', () => {
   beforeEach(() => {
     mockDispatch = jest.fn()
     ;(useDispatch as unknown as jest.Mock).mockReturnValue(mockDispatch)
-    
     ;(useRouter as jest.Mock).mockReturnValue({
       pathname: '/',
       query: {},
@@ -100,7 +104,9 @@ describe('PaymentsBlock Sync Logic', () => {
 
     const defaultResponse = { data: [], isLoading: false, isError: false }
     ;(useGetDebtorsQuery as jest.Mock).mockReturnValue(defaultResponse)
-    ;(useGetCurrentUserQuery as jest.Mock).mockReturnValue({ data: { roles: [] } })
+    ;(useGetCurrentUserQuery as jest.Mock).mockReturnValue({
+      data: { roles: [] },
+    })
     ;(useGetAllPaymentsQuery as jest.Mock).mockReturnValue(defaultResponse)
 
     jest.clearAllMocks()

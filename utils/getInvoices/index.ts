@@ -23,6 +23,7 @@ export interface IGetInvoiceByTypeProps {
   company?: Partial<IRealestate>
   service?: Partial<IService>
   prevService?: Partial<IService>
+  prevPayment?: Partial<IPayment>
   currInvoicesCollection: InvoicesCollection
   prevInvoicesCollection: InvoicesCollection
 }
@@ -54,9 +55,16 @@ export const getInvoices = ({
   prevService,
   prevPayment,
 }: IGetInvoiceProps): Array<IPaymentField> => {
+  // Bypass the missing-context guard when the previous payment has Custom
+  // items — they can seed a Custom row even without service/company/payment.
+  // Other per-type getters keep their own null-safety guards.
+  const hasPrevCustomItems = !!prevPayment?.invoice?.some(
+    (inv) => inv?.type === ServiceType.Custom && !!inv?.fieldName
+  )
   if (
     (isEmpty(company) || isEmpty(service)) &&
-    (isEmpty(payment) || isEmpty(payment?.invoice))
+    (isEmpty(payment) || isEmpty(payment?.invoice)) &&
+    !hasPrevCustomItems
   ) {
     return []
   }
@@ -106,6 +114,7 @@ export const getInvoices = ({
       company,
       service,
       prevService,
+      prevPayment,
       currInvoicesCollection,
       prevInvoicesCollection,
     }),
@@ -197,7 +206,9 @@ export const getPlacingInvoice = ({
     const price =
       (prevPlacing?.sum ||
         company.totalArea * (company.pricePerMeter || service?.rentPrice)) *
-      (((prevService?.inflicionPrice || 100) / 100) < 1 ? 1 : ((prevService?.inflicionPrice || 100) / 100))
+      ((prevService?.inflicionPrice || 100) / 100 < 1
+        ? 1
+        : (prevService?.inflicionPrice || 100) / 100)
 
     return {
       type: ServiceType.Placing,
@@ -506,13 +517,11 @@ export const getCustomServiceInvoices = ({
   company,
   service,
   prevService,
+  prevPayment,
   currInvoicesCollection,
   prevInvoicesCollection,
 }: IGetInvoiceByTypeProps): Array<IPaymentField> => {
-  if (
-    (!service?.customServices && !company?.customServices) ||
-    Object.keys(currInvoicesCollection).length > 0
-  ) {
+  if (Object.keys(currInvoicesCollection).length > 0) {
     return []
   }
 
@@ -522,12 +531,24 @@ export const getCustomServiceInvoices = ({
   const companyCustoms = Array.isArray(company?.customServices)
     ? company.customServices
     : []
+  const prevCustomItems = (prevPayment?.invoice ?? []).filter(
+    (inv) => inv?.type === ServiceType.Custom && !!inv?.fieldName
+  )
+
+  if (
+    serviceCustoms.length === 0 &&
+    companyCustoms.length === 0 &&
+    prevCustomItems.length === 0
+  ) {
+    return []
+  }
 
   const customByFieldName = new Map<
     string,
     {
       serviceItem?: (typeof serviceCustoms)[number]
       companyItem?: (typeof companyCustoms)[number]
+      prevItem?: (typeof prevCustomItems)[number]
     }
   >()
 
@@ -539,11 +560,17 @@ export const getCustomServiceInvoices = ({
       companyItem: companyCustoms.find(
         (companyItem) => companyItem?.fieldName === serviceItem.fieldName
       ),
+      prevItem: prevCustomItems.find(
+        (prevItem) => prevItem.fieldName === serviceItem.fieldName
+      ),
     })
   })
 
   companyCustoms.forEach((companyItem) => {
-    if (!companyItem?.fieldName || customByFieldName.has(companyItem.fieldName)) {
+    if (
+      !companyItem?.fieldName ||
+      customByFieldName.has(companyItem.fieldName)
+    ) {
       return
     }
 
@@ -552,21 +579,37 @@ export const getCustomServiceInvoices = ({
         (serviceItem) => serviceItem?.fieldName === companyItem.fieldName
       ),
       companyItem,
+      prevItem: prevCustomItems.find(
+        (prevItem) => prevItem.fieldName === companyItem.fieldName
+      ),
     })
   })
 
+  prevCustomItems.forEach((prevItem) => {
+    if (customByFieldName.has(prevItem.fieldName!)) return
+    customByFieldName.set(prevItem.fieldName!, { prevItem })
+  })
+
   return Array.from(customByFieldName.entries()).map(
-    ([fieldName, { serviceItem, companyItem }]) => {
-      const price = +toRoundFixed(companyItem?.price ?? serviceItem?.price ?? 0)
+    ([fieldName, { serviceItem, companyItem, prevItem }]) => {
+      const price = +toRoundFixed(
+        companyItem?.price ?? serviceItem?.price ?? prevItem?.price ?? 0
+      )
 
       return {
-        name: serviceItem?.label || companyItem?.label || 'Невідома послуга',
+        name:
+          serviceItem?.label ||
+          companyItem?.label ||
+          prevItem?.name ||
+          'Невідома послуга',
         amount: 1,
         price,
         sum: price,
         type: ServiceType.Custom,
         fieldName,
-        serviceId: String(serviceItem?._id || companyItem?._id || ''),
+        serviceId: String(
+          serviceItem?._id || companyItem?._id || prevItem?.serviceId || ''
+        ),
         customService: true,
       }
     }
@@ -584,35 +627,31 @@ export const getSingleCustomServiceInvoice = ({
   service,
   fieldName,
 }: IGetSingleCustomServiceInvoiceProps): IPaymentField | undefined => {
-    if (!fieldName) return
-    
-    const serviceCustom = Array.isArray(service?.customServices)
+  if (!fieldName) return
+
+  const serviceCustom = Array.isArray(service?.customServices)
     ? service.customServices
     : []
 
-    const companyCustom = Array.isArray(company?.customServices)
+  const companyCustom = Array.isArray(company?.customServices)
     ? company.customServices
     : []
 
-    const serviceItem = serviceCustom.find(
-      (item) => item.fieldName === fieldName
-    )
+  const serviceItem = serviceCustom.find((item) => item.fieldName === fieldName)
 
-    if (!serviceItem) return
+  if (!serviceItem) return
 
-    const companyItem = companyCustom.find(
-      (item) => item.fieldName === fieldName
-    )
+  const companyItem = companyCustom.find((item) => item.fieldName === fieldName)
 
-    const price = +toRoundFixed(companyItem?.price ?? serviceItem?.price ?? 0)
+  const price = +toRoundFixed(companyItem?.price ?? serviceItem?.price ?? 0)
 
-    return {
-      name: serviceItem?.label || 'Невідома послуга',
-      type: ServiceType.Custom,
-      fieldName: serviceItem.fieldName,
-      serviceId: String(serviceItem?._id || ''),
-      amount: 1,
-      price,
-      sum:price
-    }
+  return {
+    name: serviceItem?.label || 'Невідома послуга',
+    type: ServiceType.Custom,
+    fieldName: serviceItem.fieldName,
+    serviceId: String(serviceItem?._id || ''),
+    amount: 1,
+    price,
+    sum: price,
+  }
 }

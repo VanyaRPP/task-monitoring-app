@@ -131,8 +131,8 @@ const AddCostModal: FC<Props> = ({
         isPreview
           ? t('profitPage:modal.previewTitle')
           : isEdit
-          ? t('profitPage:modal.editTitle')
-          : t('profitPage:modal.addTitle')
+            ? t('profitPage:modal.editTitle')
+            : t('profitPage:modal.addTitle')
       }
       onOk={handleSubmit}
       onCancel={() => {
@@ -145,8 +145,8 @@ const AddCostModal: FC<Props> = ({
         isPreview
           ? undefined
           : isEdit
-          ? t('profitPage:modal.editOkText')
-          : t('profitPage:modal.okText')
+            ? t('profitPage:modal.editOkText')
+            : t('profitPage:modal.okText')
       }
       cancelText={
         isPreview

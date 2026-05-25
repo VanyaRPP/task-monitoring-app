@@ -1,6 +1,7 @@
 import { usePaymentContext } from '@components/AddPaymentModal'
 import { EditInvoicesTable_unstable } from '@components/Tables/EditInvoiceTable'
-import { IService } from '@common/api/serviceApi/service.api.types' 
+import { IService } from '@common/api/serviceApi/service.api.types'
+import { Form } from 'antd'
 import { useEffect } from 'react'
 
 export interface PaymentPricesTableProps {
@@ -17,7 +18,8 @@ const PaymentPricesTable: React.FC<PaymentPricesTableProps> = ({
   preview,
   loading,
 }) => {
-  const { form, service } = usePaymentContext()
+  const { form, service, company, prevPayment } = usePaymentContext()
+  const domainId = Form.useWatch('domain', form)
   const invoices = form.getFieldValue('invoice')
 
   useEffect(() => {
@@ -43,6 +45,9 @@ const PaymentPricesTable: React.FC<PaymentPricesTableProps> = ({
       editable={!preview}
       loading={loading}
       service={service}
+      company={company}
+      prevPayment={prevPayment}
+      domainId={domainId}
     />
   )
 }

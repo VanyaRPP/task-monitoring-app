@@ -63,7 +63,9 @@
     color: var(--textColor);
   }
 
-  transition: background 0.5s, border 0.5s;
+  transition:
+    background 0.5s,
+    border 0.5s;
 
   button {
     margin-top: 1rem;

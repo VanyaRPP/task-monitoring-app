@@ -7,7 +7,13 @@ import Big from 'big.js'
 import dayjs from 'dayjs'
 import 'dayjs/locale/uk'
 import mongoose, { ObjectId } from 'mongoose'
-import { CURRENCY_MAP, Currency, Roles, defaultServices, ServiceType } from '../constants'
+import {
+  CURRENCY_MAP,
+  Currency,
+  Roles,
+  defaultServices,
+  ServiceType,
+} from '../constants'
 import {
   getDomainsPipeline,
   getRealEstatesPipeline,
@@ -163,12 +169,15 @@ export const omit = (
   obj: Record<string, any>,
   props: string[]
 ): Record<string, any> => {
-  return Object.keys(obj).reduce((result, key) => {
-    if (!props.includes(key)) {
-      result[key] = obj[key]
-    }
-    return result
-  }, {} as Record<string, any>)
+  return Object.keys(obj).reduce(
+    (result, key) => {
+      if (!props.includes(key)) {
+        result[key] = obj[key]
+      }
+      return result
+    },
+    {} as Record<string, any>
+  )
 }
 
 /**
@@ -353,7 +362,10 @@ export function currencyWithUnit(
 export const normalizeCurrency = (currency?: string): Currency => {
   const normalizedCurrency = currency?.toUpperCase()
 
-  if (normalizedCurrency === Currency.USD || normalizedCurrency === Currency.EUR) {
+  if (
+    normalizedCurrency === Currency.USD ||
+    normalizedCurrency === Currency.EUR
+  ) {
     return normalizedCurrency
   }
 
@@ -429,7 +441,7 @@ export async function getDistinctStreets({
   const distinctDomains = await model.aggregate(domainsPipeline)
   const streetsPipeline = getStreetsPipeline(
     isGlobalAdmin,
-    distinctDomains.map((domain) => domain._id),
+    user.email,
     filteredCompanys,
     filteredDomains
   )
@@ -811,7 +823,7 @@ export function usePermissions(user?: IUser): IPermissions | null {
 export function calculatePermissions(userDate: any, user: IUser) {
   const isGlobalAdminUser = isGlobalAdmin(user)
   const isDomainAdminUser = user?.roles.includes('DomainAdmin')
-  
+
   const isAdmin = isGlobalAdminUser || isDomainAdminUser
 
   if (!userDate) {
@@ -822,7 +834,7 @@ export function calculatePermissions(userDate: any, user: IUser) {
       isAdmin: false,
     }
   }
-  
+
   return {
     isGlobalAdmin: isGlobalAdminUser,
     isDomainAdmin: isDomainAdminUser,
@@ -834,7 +846,7 @@ export function calculatePermissions(userDate: any, user: IUser) {
 export function formatDebt(amount: number): string {
   if (amount === 0) return '0.00'
   if (amount > 0 && amount < 0.01) {
-    const roundedUp = Math.ceil(amount * 10000) / 10000 * 100
+    const roundedUp = (Math.ceil(amount * 10000) / 10000) * 100
     return roundedUp.toFixed(2)
   }
   return amount.toFixed(2)
@@ -855,7 +867,6 @@ export const getDebtorTooltipColor = (debtor: {
 export const defaultServicesSet = new Set(defaultServices)
 
 export const isProtectedService = (id?: string): boolean => {
-
   if (!id) return false
   return defaultServicesSet.has(id)
 }

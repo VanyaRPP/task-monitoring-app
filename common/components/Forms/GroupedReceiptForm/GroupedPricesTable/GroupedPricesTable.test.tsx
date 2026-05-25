@@ -20,7 +20,6 @@ jest.mock('@common/api/customServicesApi/customServices.api', () => ({
   useGetCustomServicesByDomainQuery: (...args: unknown[]) =>
     mockUseGetCustomServicesByDomainQuery(...args),
 }))
-
 ;(global as any).ResizeObserver = class {
   observe = jest.fn()
   unobserve = jest.fn()
@@ -29,30 +28,30 @@ jest.mock('@common/api/customServicesApi/customServices.api', () => ({
 
 describe('preview quantity checkbox / detail columns flags', () => {
   test('shows qty & price columns when details checkbox is on', () => {
-    expect(
-      shouldShowInvoiceQuantityAndPriceColumns(true, true, true)
-    ).toBe(true)
+    expect(shouldShowInvoiceQuantityAndPriceColumns(true, true, true)).toBe(
+      true
+    )
   })
 
   test('hides qty & price in compact preview (toggle on, checkbox off)', () => {
-    expect(
-      shouldShowInvoiceQuantityAndPriceColumns(true, true, false)
-    ).toBe(false)
+    expect(shouldShowInvoiceQuantityAndPriceColumns(true, true, false)).toBe(
+      false
+    )
   })
 
   test('shows qty & price when usePreviewQuantityToggle is off (Акт / без toggle)', () => {
     expect(
       shouldShowInvoiceQuantityAndPriceColumns(true, undefined, false)
     ).toBe(true)
-    expect(
-      shouldShowInvoiceQuantityAndPriceColumns(true, false, false)
-    ).toBe(true)
+    expect(shouldShowInvoiceQuantityAndPriceColumns(true, false, false)).toBe(
+      true
+    )
   })
 
   test('shows qty & price when not preview mode', () => {
-    expect(
-      shouldShowInvoiceQuantityAndPriceColumns(false, true, false)
-    ).toBe(true)
+    expect(shouldShowInvoiceQuantityAndPriceColumns(false, true, false)).toBe(
+      true
+    )
   })
 
   test('grouped layout only in compact preview with domain and groups', () => {
@@ -96,7 +95,9 @@ describe('GroupedPricesTable', () => {
     })
   })
 
-  const renderTable = (props: Partial<React.ComponentProps<typeof GroupedPricesTable>> = {}) =>
+  const renderTable = (
+    props: Partial<React.ComponentProps<typeof GroupedPricesTable>> = {}
+  ) =>
     render(
       <I18nextProvider i18n={i18n}>
         <GroupedPricesTable

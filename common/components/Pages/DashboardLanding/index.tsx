@@ -1,62 +1,61 @@
 'use client'
 
-import dynamic from 'next/dynamic'
-import { useEffect, useState } from 'react'
+import React from 'react'
+import ScrollFactoryAnimation from '@components/ScrollFactoryAnimation'
+import { Header } from '@components/Layouts/Header'
+import { Footer } from '@components/Layouts/Footer'
 import s from './DashboardLanding.module.scss'
 
-const Lottie = dynamic(() => import('lottie-react'), { ssr: false })
-
-type LottieData = Record<string, any>
-
 const DashboardLanding = () => {
-  const [animationData, setAnimationData] = useState<LottieData | null>(null)
-
-  useEffect(() => {
-    let alive = true
-
-    fetch('/animations/AnimationCity.json')
-      .then((r) => r.json())
-      .then((data) => {
-        if (alive) setAnimationData(data)
-      })
-      .catch(console.error)
-
-    return () => {
-      alive = false
-    }
-  }, [])
-
   return (
-    <section className={s.section}>
-      <div className={s.bgLines} />
-      <div className={s.blob} />
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: '100vh',
+        margin: '-24px',
+        position: 'relative',
+      }}
+    >
+      <div style={{ position: 'sticky', top: 0, zIndex: 1000, width: '100%' }}>
+        <Header
+          path={[{ title: 'Головна', path: '/' }]}
+          style={{
+            backdropFilter: 'blur(10px)',
+            borderBottom: '1px solid rgba(118, 12, 206, 0.1)',
+          }}
+        />
+      </div>
 
-      <div className={s.panel}>
-        <div className={s.grid}>
-          <div className={s.heroCard}>
-            <h1 className={s.title}>Ласкаво просимо до E-ORENDA!</h1>
-            <p className={s.text}>
-              Керуйте процесом надання послуг нерухомості та систематизуйте відносини між
-              користувачами за допомогою нашого сайту! Ресурс допоможе з автоматичним
-              розрахунком платежів та своєчасним формуванням та виставленням рахунків...
-            </p>
-          </div>
+      <section
+        className={s.section}
+        style={{
+          flex: 1,
+          position: 'relative',
+          height: 'auto',
+          overflow: 'visible',
+        }}
+      >
+        <div className={s.bgLines} />
+        <div className={s.blob} />
 
-          <div className={s.visual}>
-            <div className={s.lottieWrap}>
-              {animationData && (
-                <Lottie
-                  animationData={animationData}
-                  loop
-                  autoplay
-                  style={{ width: '100%', height: '100%' }}
-                />
-              )}
-            </div>
+        <div
+          className={s.panel}
+          style={{ height: 'auto', overflow: 'visible' }}
+        >
+          <div
+            className={s.grid}
+            style={{ height: 'auto', overflow: 'visible', display: 'block' }}
+          >
+            <ScrollFactoryAnimation />
           </div>
         </div>
+      </section>
+
+      <div style={{ position: 'relative', zIndex: 10, width: '100%' }}>
+        <Footer style={{ borderTop: '1px solid rgba(118, 12, 206, 0.1)' }} />
       </div>
-    </section>
+    </div>
   )
 }
 

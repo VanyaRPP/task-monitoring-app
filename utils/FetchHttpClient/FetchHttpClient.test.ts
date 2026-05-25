@@ -1,7 +1,10 @@
 import FetchHttpClient from './FetchHttpClient'
 
 class MockResponse {
-  constructor(private body: string, private status: number = 200) {}
+  constructor(
+    private body: string,
+    private status: number = 200
+  ) {}
 
   json(): Promise<unknown> {
     return Promise.resolve(JSON.parse(this.body))

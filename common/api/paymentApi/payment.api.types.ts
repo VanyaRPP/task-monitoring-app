@@ -6,6 +6,9 @@ import { ServiceType } from '@utils/constants'
 import { ObjectId } from 'mongoose'
 import { IRealestate } from '../realestateApi/realestate.api.types'
 
+export type TemplateScope = 'company' | 'domain' | 'payment'
+export type TemplateScopeTarget = Exclude<TemplateScope, 'payment'>
+
 export interface IPaymentField {
   type: ServiceType | string
   name?: string
@@ -47,7 +50,7 @@ export interface IPayment {
   transaction?: IPaymentTransactions
   losses?: number
   template?: string
-  _templateScope?: string
+  _templateScope?: TemplateScopeTarget
 }
 
 export interface IExtendedPayment extends IPayment {
@@ -118,11 +121,28 @@ export interface IGetPaymentNumberResponse {
   data: number
 }
 
-export interface IGeneratePaymentPDF {
-  payments: IExtendedPayment[]
+export interface IHtmlToPdfRequest {
+  html: string
+  fileName?: string
 }
 
-export interface IGeneratePaymentPDFResponce {
+export interface IHtmlToPdfResponse {
+  buffer: Buffer
+  fileName: string
+  fileExtension: string
+}
+
+export interface IHtmlToPdfItem {
+  html: string
+  fileName: string
+}
+
+export interface IHtmlToPdfZipRequest {
+  items: IHtmlToPdfItem[]
+  zipName?: string
+}
+
+export interface IHtmlToPdfZipResponse {
   buffer: Buffer
   fileName: string
   fileExtension: string

@@ -90,9 +90,9 @@ describe('UpdateInvoiceButton', () => {
       }
     mockGetElectricityInvoice.mockReturnValue({
       type: ServiceType.Electricity,
-      amount: 30553,    // would-reset to prevAmount, but must NOT be written
+      amount: 30553, // would-reset to prevAmount, but must NOT be written
       lastAmount: 30553,
-      price: 11,        // service price changed
+      price: 11, // service price changed
       losses: 6.84,
       sum: 0,
     })
@@ -102,7 +102,7 @@ describe('UpdateInvoiceButton', () => {
     const getFieldValue = jest.fn().mockReturnValue([
       {
         type: ServiceType.Electricity,
-        amount: 32097,    // user's saved reading
+        amount: 32097, // user's saved reading
         lastAmount: 30553,
         price: 14.99,
       },
@@ -131,10 +131,7 @@ describe('UpdateInvoiceButton', () => {
       ['invoice', 0, 'lastAmount'],
       30553
     )
-    expect(setFieldValue).toHaveBeenCalledWith(
-      ['invoice', 0, 'losses'],
-      6.84
-    )
+    expect(setFieldValue).toHaveBeenCalledWith(['invoice', 0, 'losses'], 6.84)
     // The whole point of the regression: meter reading must survive a refresh.
     expect(setFieldValue).not.toHaveBeenCalledWith(
       ['invoice', 0, 'amount'],
@@ -155,10 +152,7 @@ describe('UpdateInvoiceButton', () => {
   // fields (amount for electricity/water) and derived fields (sum) must be
   // ignored in this comparison.
 
-  const renderButton = (
-    serviceType: ServiceType,
-    currentInvoice: any
-  ) => {
+  const renderButton = (serviceType: ServiceType, currentInvoice: any) => {
     const useWatchSpy = jest.spyOn(Form, 'useWatch')
     const setFieldValue = jest.fn()
     const getFieldValue = jest.fn().mockReturnValue([currentInvoice])
@@ -191,10 +185,11 @@ describe('UpdateInvoiceButton', () => {
   })
 
   it('shows when service-driven `price` diverges (Inflicion)', () => {
-    const { getInflicionInvoice: mockGetInflicionInvoice } =
-      jest.requireMock('@utils/getInvoices') as {
-        getInflicionInvoice: jest.Mock
-      }
+    const { getInflicionInvoice: mockGetInflicionInvoice } = jest.requireMock(
+      '@utils/getInvoices'
+    ) as {
+      getInflicionInvoice: jest.Mock
+    }
     mockGetInflicionInvoice.mockReturnValue({
       type: ServiceType.Inflicion,
       price: 200, // service updated
@@ -302,10 +297,11 @@ describe('UpdateInvoiceButton', () => {
   })
 
   it('shows for Placing when service-driven `price` diverges (e.g. rent updated)', () => {
-    const { getPlacingInvoice: mockGetPlacingInvoice } =
-      jest.requireMock('@utils/getInvoices') as {
-        getPlacingInvoice: jest.Mock
-      }
+    const { getPlacingInvoice: mockGetPlacingInvoice } = jest.requireMock(
+      '@utils/getInvoices'
+    ) as {
+      getPlacingInvoice: jest.Mock
+    }
     mockGetPlacingInvoice.mockReturnValue({
       type: ServiceType.Placing,
       amount: 109.2,

@@ -25,8 +25,6 @@ import TransactionDrawer from './TransactionsDrawer'
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { getResolvedDescription } from './bankHelper'
 
-
-
 const { RangePicker } = DatePicker
 
 // Utility function to return column search props
@@ -267,13 +265,13 @@ export const generateColumns = (
       key: 'DAT_OD',
       ...getDateColumnProps('DAT_OD'),
     },
-      {
+    {
       title: 'Description',
       dataIndex: 'OSND',
       key: 'OSND',
       width: 300,
       render: (text: string, record: ITransaction) => {
-        return getResolvedDescription(record, companies);
+        return getResolvedDescription(record, companies)
       },
     },
     { title: 'Amount', dataIndex: 'SUM', key: 'SUM', width: '10%' },
@@ -324,7 +322,11 @@ export const generateColumns = (
       dataIndex: 'OPTIONS',
       key: 'OPTIONS',
       render: (text: string, record: ITransaction) => (
-        <TransactionDrawer transaction={record} domain={domain} refetchTransactions={refetchTransactions} />
+        <TransactionDrawer
+          transaction={record}
+          domain={domain}
+          refetchTransactions={refetchTransactions}
+        />
       ),
     },
   ].filter(

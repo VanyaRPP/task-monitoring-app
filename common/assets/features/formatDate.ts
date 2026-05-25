@@ -51,7 +51,10 @@ export const formatInvoiceDate = (date?: Date | string | null): string => {
   return d.isValid() ? d.format('DD.MM.YYYY') : ''
 }
 
-export const formatInvoiceDueDate = (date?: Date | string | null, days = 5): string => {
+export const formatInvoiceDueDate = (
+  date?: Date | string | null,
+  days = 5
+): string => {
   if (!date) return ''
   const d = dayjs(date)
   return d.isValid() ? d.add(days, 'd').format('DD.MM.YYYY') : ''
@@ -63,7 +66,10 @@ export const formatInvoiceDateUs = (date?: Date | string | null): string => {
   return d.isValid() ? d.format('MM/DD/YYYY') : ''
 }
 
-export const formatInvoiceDueDateUs = (date?: Date | string | null, days = 5): string => {
+export const formatInvoiceDueDateUs = (
+  date?: Date | string | null,
+  days = 5
+): string => {
   if (!date) return ''
   const d = dayjs(date)
   return d.isValid() ? d.add(days, 'd').format('MM/DD/YYYY') : ''

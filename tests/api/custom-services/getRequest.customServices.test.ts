@@ -69,9 +69,9 @@ describe('API Route - GET Method', () => {
         email: 'user@example.com',
       })
 
-      const mockRequest = { 
+      const mockRequest = {
         method: 'GET',
-        query: {} 
+        query: {},
       } as any
       const mockResponse = {
         status: jest.fn(() => mockResponse),
@@ -98,7 +98,7 @@ describe('API Route - GET Method', () => {
 
       const mockRequest = {
         method: 'GET',
-        query: {} 
+        query: {},
       } as any
       const mockResponse = {
         status: jest.fn(() => mockResponse),
@@ -122,7 +122,7 @@ describe('API Route - GET Method', () => {
 
       const mockRequest = {
         method: 'GET',
-        query: {}
+        query: {},
       } as any
       const mockResponse = {
         status: jest.fn(() => mockResponse),

@@ -17,8 +17,16 @@ jest.mock('@assets/features/formatDate', () => ({
 }))
 
 jest.mock('@common/api/paymentApi/payment.api', () => ({
-  useGeneratePdfMutation: () => [jest.fn(), { isLoading: false }],
+  useHtmlToPdfMutation: () => [jest.fn(), { isLoading: false }],
 }))
+
+jest.mock(
+  '@components/Forms/GroupedReceiptForm/HeadlessReceiptRenderer',
+  () => ({
+    __esModule: true,
+    default: () => null,
+  })
+)
 
 const modalConfirmMock = Modal.confirm as jest.Mock
 

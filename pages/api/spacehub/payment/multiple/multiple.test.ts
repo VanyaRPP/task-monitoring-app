@@ -83,7 +83,9 @@ describe('Payment API Endpoint - bulk delete', () => {
       debitPayments[1]._id.toString(),
     ])
     expect(Payment.deleteMany).toHaveBeenCalledWith({
-      _id: { $in: [debitPayments[0]._id.toString(), debitPayments[1]._id.toString()] },
+      _id: {
+        $in: [debitPayments[0]._id.toString(), debitPayments[1]._id.toString()],
+      },
     })
     expect(ProfitService.deleteByIdPayment).toHaveBeenCalledTimes(2)
   })
@@ -256,7 +258,9 @@ describe('Payment API Endpoint - bulk delete', () => {
     const json = (res.json as jest.Mock).mock.calls[0][0]
     expect(json.data.deletedIds).toEqual([a._id.toString()])
     expect(ProfitService.deleteByIdPayment).toHaveBeenCalledTimes(1)
-    expect(ProfitService.deleteByIdPayment).toHaveBeenCalledWith(a._id.toString())
+    expect(ProfitService.deleteByIdPayment).toHaveBeenCalledWith(
+      a._id.toString()
+    )
   })
 
   it('skips payments with null domain when caller is domain admin', async () => {

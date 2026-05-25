@@ -1,9 +1,13 @@
+import { IPayment } from '@common/api/paymentApi/payment.api.types'
+import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
+import { IService } from '@common/api/serviceApi/service.api.types'
 import { defaultServices, ServiceType } from '../constants'
 import {
   buildInvoiceAddPayloadFromCatalogRow,
   catalogRowToSelectOption,
   flattenDomainCatalogServices,
   invoiceLineExcludeKey,
+  resolveCustomServicePrice,
 } from './domain-invoice-selector'
 
 describe('domain-invoice-selector', () => {
@@ -48,7 +52,10 @@ describe('domain-invoice-selector', () => {
           { _id: '1', name: 'One', fieldName: 'one' },
         ],
       },
-      { groupName: 'B', services: [{ _id: '1', name: 'One', fieldName: 'one' }] },
+      {
+        groupName: 'B',
+        services: [{ _id: '1', name: 'One', fieldName: 'one' }],
+      },
     ])
     expect(rows).toHaveLength(1)
     expect(rows[0].groupName).toBe('A')
@@ -169,5 +176,262 @@ describe('domain-invoice-selector', () => {
       serviceId: aOpt.payload.serviceId,
     })
     expect(bOpt.value).not.toBe(aLineKey)
+  })
+})
+
+describe('resolveCustomServicePrice', () => {
+  const companyWithInternet: Partial<IRealestate> = {
+    customServices: [
+      {
+        _id: '65b8a9f4a35a75f7da9f1010' as any,
+        label: 'Інтернет',
+        fieldName: 'internetPrice',
+        price: 300,
+      },
+    ],
+  }
+  const serviceWithInternet: Partial<IService> = {
+    customServices: [
+      {
+        _id: '65b8a9f4a35a75f7da9f1010' as any,
+        label: 'Інтернет',
+        fieldName: 'internetPrice',
+        price: 200,
+      },
+    ],
+  }
+  const prevWithInternet: Partial<IPayment> = {
+    invoice: [
+      {
+        type: ServiceType.Custom,
+        name: 'Інтернет',
+        fieldName: 'internetPrice',
+        price: 100,
+        sum: 100,
+      },
+    ],
+  }
+
+  it('returns undefined when fieldName is missing', () => {
+    expect(
+      resolveCustomServicePrice(undefined, { company: companyWithInternet })
+    ).toBeUndefined()
+  })
+
+  it('uses company.customServices price when matched', () => {
+    expect(
+      resolveCustomServicePrice('internetPrice', {
+        company: companyWithInternet,
+      })
+    ).toBe(300)
+  })
+
+  it('uses service.customServices price when company has no match', () => {
+    expect(
+      resolveCustomServicePrice('internetPrice', {
+        service: serviceWithInternet,
+      })
+    ).toBe(200)
+  })
+
+  // New fallback path — this is the feature being added.
+  it('falls back to prevPayment custom-invoice price when company and service have no price', () => {
+    expect(
+      resolveCustomServicePrice('internetPrice', {
+        prevPayment: prevWithInternet,
+      })
+    ).toBe(100)
+  })
+
+  it('prefers company over service and prev when all three match', () => {
+    expect(
+      resolveCustomServicePrice('internetPrice', {
+        company: companyWithInternet,
+        service: serviceWithInternet,
+        prevPayment: prevWithInternet,
+      })
+    ).toBe(300)
+  })
+
+  it('prefers service over prev when company is missing', () => {
+    expect(
+      resolveCustomServicePrice('internetPrice', {
+        service: serviceWithInternet,
+        prevPayment: prevWithInternet,
+      })
+    ).toBe(200)
+  })
+
+  it('ignores prev invoice rows whose type is not Custom', () => {
+    const prev: Partial<IPayment> = {
+      invoice: [
+        {
+          type: ServiceType.Electricity,
+          fieldName: 'internetPrice',
+          price: 999,
+          sum: 999,
+        },
+      ],
+    }
+    expect(
+      resolveCustomServicePrice('internetPrice', { prevPayment: prev })
+    ).toBeUndefined()
+  })
+
+  it('ignores prev invoice rows with different fieldName', () => {
+    const prev: Partial<IPayment> = {
+      invoice: [
+        {
+          type: ServiceType.Custom,
+          fieldName: 'cleaningPrice',
+          price: 555,
+          sum: 555,
+        },
+      ],
+    }
+    expect(
+      resolveCustomServicePrice('internetPrice', { prevPayment: prev })
+    ).toBeUndefined()
+  })
+
+  it('returns explicit 0 from company when set, not undefined', () => {
+    const company: Partial<IRealestate> = {
+      customServices: [
+        {
+          _id: 'x' as any,
+          label: 'Free',
+          fieldName: 'freebie',
+          price: 0,
+        },
+      ],
+    }
+    expect(resolveCustomServicePrice('freebie', { company })).toBe(0)
+  })
+})
+
+describe('buildInvoiceAddPayloadFromCatalogRow with context', () => {
+  it('still returns price: 0 for an unknown-id row when no context provided (backward compat)', () => {
+    const p = buildInvoiceAddPayloadFromCatalogRow({
+      _id: 'aaaaaaaaaaaaaaaaaaaaaaaa',
+      name: 'Інтернет',
+      fieldName: 'internetPrice',
+    })
+    expect(p.type).toBe(ServiceType.Custom)
+    expect(p.price).toBe(0)
+    expect(p.sum).toBe(0)
+  })
+
+  // New behavior: when context has a prev-payment match, the catalog→payload
+  // conversion seeds price/sum from it instead of defaulting to 0.
+  it('seeds price/sum from prevPayment custom invoice when service & company are empty', () => {
+    const p = buildInvoiceAddPayloadFromCatalogRow(
+      {
+        _id: 'aaaaaaaaaaaaaaaaaaaaaaaa',
+        name: 'Інтернет',
+        fieldName: 'internetPrice',
+      },
+      {
+        prevPayment: {
+          invoice: [
+            {
+              type: ServiceType.Custom,
+              name: 'Інтернет',
+              fieldName: 'internetPrice',
+              price: 250,
+              sum: 250,
+            },
+          ],
+        },
+      }
+    )
+    expect(p.type).toBe(ServiceType.Custom)
+    expect(p.price).toBe(250)
+    expect(p.sum).toBe(250)
+  })
+
+  it('prefers company over prevPayment when both are present', () => {
+    const p = buildInvoiceAddPayloadFromCatalogRow(
+      {
+        _id: 'aaaaaaaaaaaaaaaaaaaaaaaa',
+        name: 'Інтернет',
+        fieldName: 'internetPrice',
+      },
+      {
+        company: {
+          customServices: [
+            {
+              _id: 'cc' as any,
+              label: 'Інтернет',
+              fieldName: 'internetPrice',
+              price: 333,
+            },
+          ],
+        },
+        prevPayment: {
+          invoice: [
+            {
+              type: ServiceType.Custom,
+              fieldName: 'internetPrice',
+              price: 100,
+              sum: 100,
+            },
+          ],
+        },
+      }
+    )
+    expect(p.price).toBe(333)
+  })
+
+  // Out-of-scope guard: utility (non-Custom) catalog rows should not be
+  // touched by the new price-resolution path even when context is given.
+  it('does not attach a price to utility-type rows even when context has data', () => {
+    const id = defaultServices[1] // maps to ServiceType.Electricity
+    const p = buildInvoiceAddPayloadFromCatalogRow(
+      {
+        _id: id,
+        name: 'Електроенергія',
+        fieldName: 'electricityPrice',
+      },
+      {
+        prevPayment: {
+          invoice: [
+            {
+              type: ServiceType.Custom,
+              fieldName: 'electricityPrice',
+              price: 999,
+              sum: 999,
+            },
+          ],
+        },
+      }
+    )
+    expect(p.type).toBe(ServiceType.Electricity)
+    expect(p.price).toBeUndefined()
+    expect(p.sum).toBeUndefined()
+  })
+
+  it('catalogRowToSelectOption threads context through to the payload', () => {
+    const opt = catalogRowToSelectOption(
+      {
+        _id: 'bbbbbbbbbbbbbbbbbbbbbbbb',
+        name: 'Прибирання',
+        fieldName: 'cleaningCustom',
+        groupName: 'Group',
+      },
+      {
+        prevPayment: {
+          invoice: [
+            {
+              type: ServiceType.Custom,
+              fieldName: 'cleaningCustom',
+              price: 75,
+              sum: 75,
+            },
+          ],
+        },
+      }
+    )
+    expect(opt.payload.price).toBe(75)
+    expect(opt.payload.sum).toBe(75)
   })
 })

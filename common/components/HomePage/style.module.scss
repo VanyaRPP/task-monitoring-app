@@ -1,3 +1,13 @@
+.HomePage {
+  position: relative;
+  min-height: calc(100vh + 48px);
+  margin: -24px;
+  background-color: #1a0b2e;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
 .Header {
   margin: 2rem 2rem 1rem;
   padding: 2rem;
@@ -6,11 +16,10 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  flex-direction: row; // default for desktop
+  flex-direction: row;
 
   z-index: 60;
 
-  // Glassmorphism effect
   background: rgba(100, 42, 181, 0.28);
   border-radius: 50px;
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
@@ -35,7 +44,7 @@
   .Menu {
     display: flex;
     align-items: center;
-    gap: 1rem; // optional spacing between Logo and Menu
+    gap: 1rem;
     font-size: calc(12px + (11.5 + 11.5 * 0.7) * ((100vw - 320px) / 1440));
     color: var(--primaryColor);
     transition: color 0.5s;
@@ -47,11 +56,10 @@
     }
   }
 
-  // Responsive change
   @media (max-width: 768px) {
     flex-direction: column;
-    gap: 1rem; // optional spacing between Logo and Menu
-    align-items: flex-start; // or center if you'd like it centered
+    gap: 1rem;
+    align-items: flex-start;
   }
 }
 
@@ -74,6 +82,7 @@
 }
 
 .Container {
+  flex: 1;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -123,7 +132,6 @@
   padding: 22px;
   margin-top: -2em;
   font-weight: 200;
-  // font-size: calc(14px + (7 + 7 * 0.7) * ((100vw - 320px) / 1440));
   font-size: 20px;
 
   @media (min-width: 600px) {
@@ -212,7 +220,6 @@
 }
 
 .TextGlassCard {
-  // Glassmorphism effect
   background: rgba(100, 42, 181, 0.28);
   border-radius: 50px;
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);

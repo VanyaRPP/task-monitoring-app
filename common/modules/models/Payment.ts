@@ -42,10 +42,10 @@ export const PaymentSchema = new Schema<IPaymentModel>({
   currency: { type: String, required: false, default: Currency.UAH },
   transaction: { type: Object },
   losses: { type: Number },
-   template: { 
-    type: String, 
+  template: {
+    type: String,
     default: 'classic',
-  }
+  },
 })
 
 const Payment =

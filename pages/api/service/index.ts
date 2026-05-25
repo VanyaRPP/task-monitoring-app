@@ -190,12 +190,11 @@ export default async function handler(
             })
 
             if (!adminDomain) {
-              return res
-                .status(403)
-                .json({
-                  success: false,
-                  message: 'Access denied: domain not found or you are not an admin of this domain',
-                })
+              return res.status(403).json({
+                success: false,
+                message:
+                  'Access denied: domain not found or you are not an admin of this domain',
+              })
             }
           }
 

@@ -144,7 +144,7 @@ const CompaniesHeader: React.FC<Props> = ({
           mode="multiple"
           allowClear
           placeholder="Фільтр послуг"
-          style={{ width: "250px", minWidth: "150px" }}
+          style={{ width: '250px', minWidth: '150px' }}
           value={filters?.services || []}
           onChange={handleServicesChange}
           maxTagCount="responsive"

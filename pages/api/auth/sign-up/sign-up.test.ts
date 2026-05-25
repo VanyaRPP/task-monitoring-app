@@ -31,12 +31,11 @@ describe('POST /api/auth/sign-up', () => {
   afterEach(() => {
     jest.clearAllMocks()
   })
-  
 
   it('Should create new user', async () => {
     ;(User.findOne as jest.Mock).mockResolvedValue(null)
-    ;(bcrypt.hash as jest.Mock).mockImplementation(
-      (_p, _s, cb) => cb(null, 'hashed-password')
+    ;(bcrypt.hash as jest.Mock).mockImplementation((_p, _s, cb) =>
+      cb(null, 'hashed-password')
     )
     ;(User.create as jest.Mock).mockResolvedValue({})
 
@@ -60,19 +59,21 @@ describe('POST /api/auth/sign-up', () => {
     expect(res.status).toHaveBeenCalledWith(409)
     expect(res.json).toHaveBeenCalledWith({
       success: false,
-      error: 'User already exists!',
+      message: 'User already exists!',
     })
   })
 
-  it('Should return 400 on error', async () => {
-    ;(User.findOne as jest.Mock).mockRejectedValue(new Error('database error'))
+  it('Should return 400 on message', async () => {
+    ;(User.findOne as jest.Mock).mockRejectedValue(
+      new Error('database message')
+    )
 
     await handler(req, res)
 
     expect(res.status).toHaveBeenCalledWith(400)
     expect(res.json).toHaveBeenCalledWith({
       success: false,
-      error: expect.anything(),
+      message: expect.anything(),
     })
   })
 })

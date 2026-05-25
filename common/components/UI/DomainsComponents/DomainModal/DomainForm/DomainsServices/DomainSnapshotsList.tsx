@@ -44,8 +44,8 @@ const DomainSnapshotsList: FC<Props> = ({ domainId, onRestored }) => {
     )
       ? (catalogResponse as any).data
       : Array.isArray(catalogResponse)
-      ? (catalogResponse as any)
-      : []
+        ? (catalogResponse as any)
+        : []
     const map = new Map<string, string>()
     for (const s of list) map.set(String(s._id), s.name)
     return map

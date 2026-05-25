@@ -13,7 +13,6 @@ jest.mock('@modules/models/CustomService')
 setupTestEnvironment()
 
 describe('CustomServices API', () => {
-  
   const createMocks = (method: string, { body = {}, query = {} } = {}) => {
     const req = { method, body, query } as any
     const res = {
@@ -24,7 +23,6 @@ describe('CustomServices API', () => {
   }
 
   describe('POST /api/custom-services (Validation & Safety)', () => {
-    
     test.each([
       ['undefined', {}],
       ['null', { name: null }],
@@ -38,7 +36,9 @@ describe('CustomServices API', () => {
 
       expect(res.status).toHaveBeenCalledWith(400)
       expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({ message: 'Назва послуги не може бути порожньою' })
+        expect.objectContaining({
+          message: 'Назва послуги не може бути порожньою',
+        })
       )
     })
 
@@ -50,7 +50,7 @@ describe('CustomServices API', () => {
       ;(CustomService.findOne as jest.Mock).mockResolvedValue(null)
       ;(CustomService.create as jest.Mock).mockResolvedValue({
         name: spicyName,
-        toObject: () => ({ name: spicyName })
+        toObject: () => ({ name: spicyName }),
       })
 
       await handler(req, res)
@@ -64,14 +64,13 @@ describe('CustomServices API', () => {
   })
 
   describe('DELETE /api/custom-services (Access Control)', () => {
-    
-    it('should strictly deny access for DomainAdmin (403)', async () => {
+    it('should return 400 when admin omits domainId', async () => {
       await mockLoginAs(users.domainAdmin)
       const { req, res } = createMocks('DELETE', { query: { id: 'some-id' } })
 
       await handler(req, res)
 
-      expect(res.status).toHaveBeenCalledWith(403)
+      expect(res.status).toHaveBeenCalledWith(400)
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({ success: false })
       )
@@ -79,7 +78,9 @@ describe('CustomServices API', () => {
 
     it('should return 400 for malformed or missing IDs', async () => {
       await mockLoginAs(users.globalAdmin)
-      const { req, res } = createMocks('DELETE', { query: { id: ['', 'array'] } as any })
+      const { req, res } = createMocks('DELETE', {
+        query: { id: ['', 'array'] } as any,
+      })
 
       await handler(req, res)
 
@@ -88,7 +89,6 @@ describe('CustomServices API', () => {
   })
 
   describe('GET /api/custom-services (Data Retrieval)', () => {
-    
     it('should return 400 for regular Users (No access allowed)', async () => {
       await mockLoginAs(users.user)
       const { req, res } = createMocks('GET')
@@ -101,22 +101,24 @@ describe('CustomServices API', () => {
       )
     })
 
-it('should handle multi-ID filtering via query string', async () => {
+    it('should handle multi-ID filtering via query string', async () => {
       await mockLoginAs(users.domainAdmin)
       const ids = '64d68421d9ba2fc8fea79d14,64d68421d9ba2fc8fea79d15'
       const { req, res } = createMocks('GET', { query: { _id: ids } })
 
       const mockFindChain = {
-        lean: jest.fn().mockResolvedValue([{ name: 'Service 1' }, { name: 'Service 2' }])
-      };
-      (CustomService.find as jest.Mock).mockReturnValue(mockFindChain);
+        lean: jest
+          .fn()
+          .mockResolvedValue([{ name: 'Service 1' }, { name: 'Service 2' }]),
+      }
+      ;(CustomService.find as jest.Mock).mockReturnValue(mockFindChain)
 
       await handler(req, res)
 
       expect(res.status).toHaveBeenCalledWith(200)
-      
+
       expect(CustomService.find).toHaveBeenCalledWith({
-        _id: { $in: ['64d68421d9ba2fc8fea79d14', '64d68421d9ba2fc8fea79d15'] }
+        _id: { $in: ['64d68421d9ba2fc8fea79d14', '64d68421d9ba2fc8fea79d15'] },
       })
     })
   })

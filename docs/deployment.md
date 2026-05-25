@@ -124,11 +124,13 @@ The app runs as a serverless/edge mix depending on your Next.js config and usage
 If using Heroku (or a similar PaaS):
 
 1. **Create app**:
+
    ```bash
    heroku create your-app-name
    ```
 
 2. **Set environment variables**:
+
    ```bash
    heroku config:set MONGODB_URI=...
    heroku config:set NEXTAUTH_URL=...
@@ -144,6 +146,7 @@ If using Heroku (or a similar PaaS):
      - `yarn start`
 
 4. **Deploy**
+
    ```bash
    git push heroku main
    ```
@@ -226,4 +229,3 @@ In your CI pipeline, it is recommended to:
    - push built artifacts or trigger platform‑specific deployment step.
 
 Fail the pipeline if tests or checks fail, to avoid deploying broken builds.
-

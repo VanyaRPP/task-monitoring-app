@@ -9,9 +9,9 @@ jest.mock('@utils/helpers', () => ({
 }))
 
 jest.mock('@utils/getCurrentUser', () => ({
-  getCurrentUser: jest.fn().mockResolvedValue({ 
-    isGlobalAdmin: true, 
-    user: { _id: '65f1234567890abcdef12345' } 
+  getCurrentUser: jest.fn().mockResolvedValue({
+    isGlobalAdmin: true,
+    user: { _id: '65f1234567890abcdef12345' },
   }),
 }))
 
@@ -24,15 +24,15 @@ describe('API Filter Street Handler', () => {
 
   it('має повертати відфільтровані вулиці на основі переданих доменів та компаній', async () => {
     const mockStreetId = new mongoose.Types.ObjectId()
-    
+
     ;(helpers.getDistinctStreets as jest.Mock).mockResolvedValue([
       {
         streetData: {
           _id: mockStreetId,
           address: 'вул. Тестова, 1',
-          city: 'Київ'
-        }
-      }
+          city: 'Київ',
+        },
+      },
     ])
 
     const domainId = new mongoose.Types.ObjectId().toString()
@@ -42,7 +42,7 @@ describe('API Filter Street Handler', () => {
       method: 'GET',
       query: {
         domains: domainId,
-        realEstates: companyId
+        realEstates: companyId,
       },
     }
 
@@ -59,8 +59,8 @@ describe('API Filter Street Handler', () => {
       expect.objectContaining({
         filters: {
           filteredDomains: [expect.any(mongoose.Types.ObjectId)],
-          filteredCompanys: [expect.any(mongoose.Types.ObjectId)]
-        }
+          filteredCompanys: [expect.any(mongoose.Types.ObjectId)],
+        },
       })
     )
 

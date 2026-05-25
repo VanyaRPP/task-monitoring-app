@@ -17,7 +17,12 @@ import {
 } from '@common/api/realestateApi/realestate.api.types'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { AppRoutes, Roles } from '@utils/constants'
-import { formatDebt, isAdminCheck, renderCurrency, renderPrice } from '@utils/helpers'
+import {
+  formatDebt,
+  isAdminCheck,
+  renderCurrency,
+  renderPrice,
+} from '@utils/helpers'
 import { getDebtorTooltipColor } from '@utils/helpers'
 import s from './style.module.scss'
 import {
@@ -379,7 +384,9 @@ const getDefaultColumns = ({
       width: 120,
       align: 'center',
       sorter: isOnPage ? (a, b) => a.pricePerMeter - b.pricePerMeter : null,
-      render: (value) => <span className={s.currency}>{renderPrice(value)}</span>,
+      render: (value) => (
+        <span className={s.currency}>{renderPrice(value)}</span>
+      ),
     },
     shouldShowService('servicePricePerMeter') && {
       title: 'Індивідуальне утримання (грн/м²)',
@@ -572,7 +579,6 @@ const getDefaultColumns = ({
   }
 
   const domainColumn: any = {
-    
     fixed: 'left',
     title: 'Назва компанії',
     dataIndex: 'companyName',
@@ -588,7 +594,9 @@ const getDefaultColumns = ({
 
       const tooltipDebtor = (
         <div>
-          <p><b>Компанія боржник</b></p>
+          <p>
+            <b>Компанія боржник</b>
+          </p>
           <p>Назва компанії: {i}</p>
           <p>Сума боргу: {formatDebt(debtor.totalDebt)}</p>
         </div>
@@ -611,7 +619,7 @@ const getDefaultColumns = ({
       )
     },
   }
-const companyColumn: any = {
+  const companyColumn: any = {
     title: 'Надавач послуг',
     dataIndex: 'domain',
     width: 200,

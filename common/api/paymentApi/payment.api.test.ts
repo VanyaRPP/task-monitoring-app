@@ -12,7 +12,11 @@ describe('paymentApi endpoints', () => {
     expect(paymentApi.endpoints.getPaymentNumber.name).toBe('getPaymentNumber')
 
     // Verify it has query methods (not mutation)
-    expect(typeof paymentApi.endpoints.getPaymentNumber.useQuery).toBe('function')
-    expect(typeof paymentApi.endpoints.getPaymentNumber.useLazyQuery).toBe('function')
+    expect(typeof paymentApi.endpoints.getPaymentNumber.useQuery).toBe(
+      'function'
+    )
+    expect(typeof paymentApi.endpoints.getPaymentNumber.useLazyQuery).toBe(
+      'function'
+    )
   })
 })

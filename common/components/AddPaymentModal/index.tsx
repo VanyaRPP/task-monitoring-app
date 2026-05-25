@@ -8,11 +8,12 @@ import {
 } from '@common/api/paymentApi/payment.api'
 import {
   useGetPaymentChangeLogsQuery,
-  useDeletePaymentChangeLogMutation
+  useDeletePaymentChangeLogMutation,
 } from '@common/api/changelogApi/changelog.api'
 import {
   IExtendedPayment,
   IPayment,
+  TemplateScopeTarget,
 } from '@common/api/paymentApi/payment.api.types'
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
@@ -69,6 +70,8 @@ export interface IPaymentContext {
   form: FormInstance
   template: TemplateKey
   setTemplate: (t: TemplateKey) => void
+  templateScope?: TemplateScopeTarget
+  setTemplateScope: (scope: TemplateScopeTarget | undefined) => void
   showQuantityInPreview: boolean
   setShowQuantityInPreview: (value: boolean) => void
 }
@@ -82,6 +85,8 @@ export const PaymentContext = createContext<IPaymentContext>({
   form: null,
   template: 'classic',
   setTemplate: () => void 0,
+  templateScope: undefined,
+  setTemplateScope: () => void 0,
   showQuantityInPreview: false,
   setShowQuantityInPreview: () => void 0,
 })
@@ -124,14 +129,22 @@ const AddPaymentModal: FC<Props> = ({
   const paymentDomainId =
     typeof paymentData?.domain === 'object'
       ? paymentData.domain?._id
-      : (paymentData?.domain || preselectedDomain || undefined)
+      : paymentData?.domain || preselectedDomain || undefined
   const domainDefaultTemplate =
     typeof paymentData?.domain === 'object'
       ? (paymentData.domain as any)?.defaultTemplate
       : undefined
   const [template, setTemplate] = useState<TemplateKey>(
-    resolveTemplate(paymentData?.template, companyDefaultTemplate, domainDefaultTemplate)
+    resolveTemplate(
+      paymentData?.template,
+      companyDefaultTemplate,
+      domainDefaultTemplate
+    )
   )
+  const [templateScope, setTemplateScope] = useState<
+    TemplateScopeTarget | undefined
+  >()
+
   const [showQuantityInPreview, setShowQuantityInPreviewState] = useState(false)
   const [activeTabKey, setActiveTabKey] = useState(preview ? '2' : '1')
 
@@ -184,7 +197,10 @@ const AddPaymentModal: FC<Props> = ({
     }
   }
 
-  const changelogOptions = useChangelogOptions(changelogRes, handleDeleteChangeLog)
+  const changelogOptions = useChangelogOptions(
+    changelogRes,
+    handleDeleteChangeLog
+  )
 
   // `usePaymentFormData` currently returns paymentData unchanged as `payment`,
   // so we destructure only the actual derived fields and use `paymentData`
@@ -200,7 +216,9 @@ const AddPaymentModal: FC<Props> = ({
     AUT_CNTR_NAM: paymentData?.transaction?.AUT_CNTR_NAM || '',
     AUT_CNTR_MFO: paymentData?.transaction?.AUT_CNTR_MFO || '',
     Description: paymentData?.transaction?.Description || '',
-    TECHNICAL_TRANSACTION_ID: normalizeTechnicalTransactionId(paymentData?.transaction?.TECHNICAL_TRANSACTION_ID),
+    TECHNICAL_TRANSACTION_ID: normalizeTechnicalTransactionId(
+      paymentData?.transaction?.TECHNICAL_TRANSACTION_ID
+    ),
   }
 
   useEffect(() => {
@@ -234,7 +252,9 @@ const AddPaymentModal: FC<Props> = ({
     const allowedServices = groups.flatMap((group) => group.services)
 
     const serviceFilteredInvoices = serviceFilter(allInvoices, allowedServices)
-    const hasDiscount = serviceFilteredInvoices.some((inv) => inv.type === 'discount')
+    const hasDiscount = serviceFilteredInvoices.some(
+      (inv) => inv.type === 'discount'
+    )
 
     if (!hasDiscount && company?.discount) {
       serviceFilteredInvoices.push({
@@ -323,7 +343,11 @@ const AddPaymentModal: FC<Props> = ({
     })
   }
 
-  if (paymentData && paymentData?.type !== Operations.Credit && template !== 'olimp') {
+  if (
+    paymentData &&
+    paymentData?.type !== Operations.Credit &&
+    template !== 'olimp'
+  ) {
     items.push({
       key: '3',
       label: 'Акт',
@@ -423,12 +447,16 @@ const AddPaymentModal: FC<Props> = ({
       template,
     })
 
+    const finalPayload = templateScope
+      ? { ...payment, _templateScope: templateScope }
+      : payment
+
     const response = edit
       ? await editPayment({
-        _id: paymentData?._id,
-        ...payment,
-      })
-      : await addPayment(payment)
+          _id: paymentData?._id,
+          ...finalPayload,
+        })
+      : await addPayment(finalPayload)
 
     if ('data' in response) {
       const action = edit ? 'Збережено' : 'Додано'
@@ -485,6 +513,8 @@ const AddPaymentModal: FC<Props> = ({
         form,
         template,
         setTemplate,
+        templateScope,
+        setTemplateScope,
         showQuantityInPreview,
         setShowQuantityInPreview,
       }}

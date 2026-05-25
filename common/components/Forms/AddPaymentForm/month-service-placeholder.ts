@@ -17,7 +17,7 @@ export function buildMonthServicePlaceholder(month: Dayjs): string {
 }
 
 export function parseMonthServicePlaceholder(value: string): Dayjs {
-  return dayjs(
-    value.slice(MONTH_SERVICE_PLACEHOLDER_PREFIX.length)
-  ).startOf('month')
+  return dayjs(value.slice(MONTH_SERVICE_PLACEHOLDER_PREFIX.length)).startOf(
+    'month'
+  )
 }

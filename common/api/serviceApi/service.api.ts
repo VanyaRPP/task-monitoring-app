@@ -43,7 +43,10 @@ export const serviceApi = createApi({
       providesTags: (response: IGetServiceResponse) => [
         'Service',
         ...(response?.data
-          ? response.data.map((item) => ({ type: 'Service' as const, id: item._id }))
+          ? response.data.map((item) => ({
+              type: 'Service' as const,
+              id: item._id,
+            }))
           : []),
       ],
     }),
@@ -95,7 +98,8 @@ export const serviceApi = createApi({
           body: body,
         }
       },
-      invalidatesTags: (result) => result ? [{ type: 'Service', id: result._id }] : [],
+      invalidatesTags: (result) =>
+        result ? [{ type: 'Service', id: result._id }] : [],
     }),
   }),
 })

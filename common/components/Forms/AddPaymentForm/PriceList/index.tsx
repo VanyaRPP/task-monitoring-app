@@ -30,9 +30,14 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
     setTotalFractionSum(Number(fraction))
   }, [payment])
 
-  const paymentCompany = payment?.company as { currency?: string } | string | undefined
-  const companyCurrency = typeof paymentCompany === 'object' ? paymentCompany?.currency : undefined
-  const currency = payment?.currency || companyCurrency || payment?.domain?.currency 
+  const paymentCompany = payment?.company as
+    | { currency?: string }
+    | string
+    | undefined
+  const companyCurrency =
+    typeof paymentCompany === 'object' ? paymentCompany?.currency : undefined
+  const currency =
+    payment?.currency || companyCurrency || payment?.domain?.currency
   const isEnglish = normalizeCurrency(currency) !== 'UAH'
   const currencyNames = getCurrencyNames(currency, isEnglish)
 
@@ -170,7 +175,9 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
 
           <div className={styles.titleSection}>
             <h1>
-              <b>{isEnglish ? 'SERVICE ACCEPTANCE ACT' : 'АКТ надання послуг'}</b>
+              <b>
+                {isEnglish ? 'SERVICE ACCEPTANCE ACT' : 'АКТ надання послуг'}
+              </b>
             </h1>
             <p>
               <b>
@@ -189,21 +196,18 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
               {isEnglish ? (
                 <>
                   We, the undersigned, the representative of the Customer{' '}
-                  {introCustomerText}
-                  , on one side, and the representative of the Provider{' '}
-                  {introProviderText}
-                  , on the other side, have executed this Act confirming that,
-                  under the agreement, the Provider performed the following
-                  services:
+                  {introCustomerText}, on one side, and the representative of
+                  the Provider {introProviderText}, on the other side, have
+                  executed this Act confirming that, under the agreement, the
+                  Provider performed the following services:
                 </>
               ) : (
                 <>
                   Ми, що нижче підписалися, представник Замовника{' '}
-                  {introCustomerText}
-                  , з одного боку, і представник Виконавця {introProviderText},
-                  з іншого боку, склали цей акт про те, що на підставі
-                  договору, Виконавцем були виконані наступні роботи (надані
-                  такі послуги):
+                  {introCustomerText}, з одного боку, і представник Виконавця{' '}
+                  {introProviderText}, з іншого боку, склали цей акт про те, що
+                  на підставі договору, Виконавцем були виконані наступні роботи
+                  (надані такі послуги):
                 </>
               )}
             </p>

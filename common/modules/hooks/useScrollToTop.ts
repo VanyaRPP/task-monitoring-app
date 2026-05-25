@@ -21,7 +21,9 @@ export const useScrollToTop = () => {
       }
       cur = cur.parentElement
     }
-    return (document.scrollingElement as HTMLElement) || document.documentElement
+    return (
+      (document.scrollingElement as HTMLElement) || document.documentElement
+    )
   }
 
   const scrollToTop = (e?: MouseEvent) => {

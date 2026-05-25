@@ -55,7 +55,9 @@ describe('buildSnapshotPayloadOnTemplateSwitch', () => {
     const payload = buildSnapshotPayloadOnTemplateSwitch({
       previousTemplateId: 'tpl-it',
       templates: TEMPLATES,
-      currentGroups: [{ groupName: 'G', services: [123, 'abc', { toString: () => 'x' }] }],
+      currentGroups: [
+        { groupName: 'G', services: [123, 'abc', { toString: () => 'x' }] },
+      ],
     })
     expect(payload.groups[0].services).toEqual(['123', 'abc', 'x'])
   })

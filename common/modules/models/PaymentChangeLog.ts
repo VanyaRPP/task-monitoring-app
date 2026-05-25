@@ -1,4 +1,3 @@
-
 import mongoose, { Schema, ObjectId } from 'mongoose'
 import {
   IPaymentField,
@@ -70,7 +69,8 @@ const PaymentChangeLogSchema = new Schema<IPaymentChangeLogModel>(
 )
 
 const PaymentChangeLog =
-  (mongoose.models.PaymentChangeLog as mongoose.Model<IPaymentChangeLogModel>) ||
+  (mongoose.models
+    .PaymentChangeLog as mongoose.Model<IPaymentChangeLogModel>) ||
   mongoose.model('PaymentChangeLog', PaymentChangeLogSchema)
 
 export default PaymentChangeLog

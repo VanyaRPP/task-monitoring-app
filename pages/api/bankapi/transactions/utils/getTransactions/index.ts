@@ -52,9 +52,8 @@ export async function getInterimTransactions(
     token: token,
   })
   try {
-    const finalTransactions = await apiPrivatAdapter.getInterimTransactions(
-      limit
-    )
+    const finalTransactions =
+      await apiPrivatAdapter.getInterimTransactions(limit)
     return finalTransactions
   } catch (error) {
     throw new Error(`Error in fetch ${error}`)
