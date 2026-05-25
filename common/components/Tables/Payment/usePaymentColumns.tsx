@@ -13,6 +13,7 @@ import {
   dateToMonthYear,
 } from '@assets/features/formatDate'
 import { Operations, ServiceName, ServiceType } from '@utils/constants'
+import { ICustomServiceItem } from '@utils/servicesVisibility'
 import {
   formatDebt,
   getDebtorTooltipColor,
@@ -56,6 +57,7 @@ interface Params {
   onDelete: (id: string) => void
   onMarkPaid: (p: IExtendedPayment) => void
   deleteLoading: boolean
+  visibleCustomServices?: ICustomServiceItem[]
 }
 
 function widenFilterDropdown(w = 240) {
@@ -99,6 +101,7 @@ export function usePaymentColumns({
   onDelete,
   onMarkPaid,
   deleteLoading,
+  visibleCustomServices,
 }: Params): ColumnsType<IExtendedPayment> {
   const { token } = theme.useToken()
 
@@ -405,21 +408,30 @@ export function usePaymentColumns({
           )
         },
       },
-      ...(selectedColumns.map((value) => ({
-        title: ServiceName[value],
-        dataIndex: value,
-        width: 132,
-        ellipsis: true,
-        render: (_value, payment: IExtendedPayment) => {
-          const item = payment.invoice.find((i) => i.type === value)
-          const sum = +(item?.sum || item?.price || 0)
-          return <span>{renderCurrency(sum.toFixed(2))}</span>
-        },
-        hidden: Boolean(sepDomainID),
-        sorter: (a: IExtendedPayment, b: IExtendedPayment) =>
-          (a.invoice.find((i) => i.type === value)?.sum || 0) -
-          (b.invoice.find((i) => i.type === value)?.sum || 0),
-      })) as ColumnType<IExtendedPayment>[]),
+      ...(selectedColumns.map((value) => {
+        const customService = visibleCustomServices?.find(
+          (s) => s._id === value
+        )
+        const isCustom = !!customService
+        const findItem = (payment: IExtendedPayment) =>
+          isCustom
+            ? payment.invoice.find((i) => i.serviceId === value)
+            : payment.invoice.find((i) => i.type === value)
+        return {
+          title: isCustom ? customService.name : ServiceName[value],
+          dataIndex: value,
+          width: 132,
+          ellipsis: true,
+          render: (_value, payment: IExtendedPayment) => {
+            const item = findItem(payment)
+            const sum = +(item?.sum || item?.price || 0)
+            return <span>{renderCurrency(sum.toFixed(2))}</span>
+          },
+          hidden: Boolean(sepDomainID),
+          sorter: (a: IExtendedPayment, b: IExtendedPayment) =>
+            (findItem(a)?.sum || 0) - (findItem(b)?.sum || 0),
+        }
+      }) as ColumnType<IExtendedPayment>[]),
       {
         align: 'center',
         fixed: 'right',
