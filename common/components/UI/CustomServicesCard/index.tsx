@@ -51,15 +51,32 @@ const CustomServicesCard: React.FC<CustomServicesCardProps> = ({
     updated.splice(index, 1)
     form.setFieldsValue({ customServices: updated })
   }
+
+  React.useEffect(() => {
+    if (allCustomServices.length > 0 && customServices.length === 0 && !disabled) {
+      const autoEntries = allCustomServices.map((service) => ({
+        _id: service?._id || service?.value,
+        label: service?.label,
+        fieldName: service?.fieldName,
+        price: 0,
+      }))
+
+      form.setFieldsValue({ customServices: autoEntries })
+    }
+  }, [allCustomServices, form, disabled, customServices.length])
+
+
   const dashIfEmpty = (v: any) => (v === 0 || v ? v : '-')
   return (
     <div>
       {!disabled && !isServiceForm && (
         <Tooltip
           title={
-            dropdownOptions.length === 0
+            allCustomServices.length === 0
               ? 'У обраного домена відсутні послуги'
-              : ''
+              : dropdownOptions.length === 0
+                ? 'Усі послуги домена вже додано'
+                : ''
           }
           placement="top"
         >
@@ -71,12 +88,13 @@ const CustomServicesCard: React.FC<CustomServicesCardProps> = ({
                 onClick: () => handleAddService(option),
               })),
             }}
-            trigger={['click']}
+            trigger={dropdownOptions.length > 0 ? ['click'] : []}
           >
             <Button
               style={{ width: '100%', height: 40, marginBottom: 16 }}
               type="dashed"
               icon={<PlusOutlined />}
+              disabled={allCustomServices.length > 0 && dropdownOptions.length === 0}
             >
               Індивідуальні послуги
             </Button>
