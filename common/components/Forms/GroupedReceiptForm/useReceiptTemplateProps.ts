@@ -64,9 +64,9 @@ export function useReceiptTemplateProps({
       ? contextCompany?.domain?.name
       : '')
 
-  const rows = (data?.invoice || []).filter(
-    (item: any) => Number(item?.sum) !== 0
-  )
+  const rows = (data?.invoice || [])
+    .filter((item: any) => Number(item?.sum) !== 0)
+    .map((item: any) => ({ ...item, name: item?.description || item?.name }))
 
   const getQty = (item: any): number => {
     if (Number.isFinite(Number(item?.amount))) {

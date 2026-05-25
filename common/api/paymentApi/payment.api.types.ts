@@ -12,6 +12,7 @@ export type TemplateScopeTarget = Exclude<TemplateScope, 'payment'>
 export interface IPaymentField {
   type: ServiceType | string
   name?: string
+  description?: string
   customService?: boolean
   isIndividual?: boolean
   serviceId?: string

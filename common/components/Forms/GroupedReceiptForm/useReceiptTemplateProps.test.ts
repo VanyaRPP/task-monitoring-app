@@ -91,6 +91,75 @@ describe('useReceiptTemplateProps', () => {
     expect(props.rows.map((r: any) => r.type)).toEqual(['a', 'c'])
   })
 
+  describe('rows description → name mapping', () => {
+    it('replaces row.name with description when description is present', () => {
+      const props = useReceiptTemplateProps({
+        data: {
+          ...basePayment,
+          invoice: [
+            {
+              type: 'maintenance',
+              name: 'Service A',
+              description: 'Custom A',
+              sum: 100,
+            },
+          ],
+        },
+      })
+      expect(props.rows[0].name).toBe('Custom A')
+    })
+
+    it('keeps row.name when description is missing', () => {
+      const props = useReceiptTemplateProps({
+        data: {
+          ...basePayment,
+          invoice: [{ type: 'maintenance', name: 'Service A', sum: 100 }],
+        },
+      })
+      expect(props.rows[0].name).toBe('Service A')
+    })
+
+    it('keeps row.name when description is empty string (falsy)', () => {
+      const props = useReceiptTemplateProps({
+        data: {
+          ...basePayment,
+          invoice: [
+            {
+              type: 'maintenance',
+              name: 'Service A',
+              description: '',
+              sum: 100,
+            },
+          ],
+        },
+      })
+      expect(props.rows[0].name).toBe('Service A')
+    })
+
+    it('preserves other fields (sum, type, amount) untouched', () => {
+      const props = useReceiptTemplateProps({
+        data: {
+          ...basePayment,
+          invoice: [
+            {
+              type: 'maintenance',
+              name: 'Service A',
+              description: 'Custom A',
+              sum: 123,
+              amount: 7,
+            },
+          ],
+        },
+      })
+      expect(props.rows[0]).toMatchObject({
+        type: 'maintenance',
+        sum: 123,
+        amount: 7,
+        name: 'Custom A',
+      })
+    })
+  })
+
   describe('getQty', () => {
     const { getQty } = useReceiptTemplateProps({ data: basePayment })
 

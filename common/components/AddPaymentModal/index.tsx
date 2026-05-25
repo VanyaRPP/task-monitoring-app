@@ -352,7 +352,7 @@ const AddPaymentModal: FC<Props> = ({
       key: '3',
       label: 'Акт',
       disabled: !shouldTabsEnabled,
-      children: <PriceList data={paymentData} />,
+      children: <PriceList data={currPayment ?? paymentData} />,
     })
   }
 
