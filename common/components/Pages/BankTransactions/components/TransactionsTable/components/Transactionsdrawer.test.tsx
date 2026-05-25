@@ -492,7 +492,9 @@ describe('saveAccountToCompany after successful payment creation', () => {
 
     await waitFor(() => expect(getDropdownSendButton()).toBeTruthy())
 
-    await userEvent.click(getDropdownSendButton()!)
+    const sendBtn = getDropdownSendButton()
+    if (!sendBtn) throw new Error('Send button not found')
+    await userEvent.click(sendBtn)
     await userEvent.click(await screen.findByText('Швидке створення'))
     await userEvent.click(await screen.findByText('Confirm'))
 
@@ -551,7 +553,9 @@ describe('refetchTransactions', () => {
     )
 
     await waitFor(() => expect(getDropdownSendButton()).toBeTruthy())
-    await userEvent.click(getDropdownSendButton()!)
+    const sendBtn = getDropdownSendButton()
+    if (!sendBtn) throw new Error('Send button not found')
+    await userEvent.click(sendBtn)
     await userEvent.click(await screen.findByText('Швидке створення'))
     await userEvent.click(await screen.findByText('Confirm'))
 
@@ -571,7 +575,9 @@ describe('refetchTransactions', () => {
     )
 
     await waitFor(() => expect(getDropdownSendButton()).toBeTruthy())
-    await userEvent.click(getDropdownSendButton()!)
+    const sendBtn = getDropdownSendButton()
+    if (!sendBtn) throw new Error('Send button not found')
+    await userEvent.click(sendBtn)
     await userEvent.click(await screen.findByText('Швидке створення'))
     await userEvent.click(await screen.findByText('Cancel'))
 

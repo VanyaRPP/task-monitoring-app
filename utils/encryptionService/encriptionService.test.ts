@@ -6,6 +6,7 @@ describe('EncryptionService', () => {
 
   let errorSpy: jest.SpyInstance
   beforeAll(() => {
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
   })
   afterAll(() => {
