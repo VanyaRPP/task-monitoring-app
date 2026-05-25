@@ -39,7 +39,7 @@ export const CustomServicesTable: React.FC<Props> = ({ services = [] }) => {
       showSearch={false}
       listStyle={{
         width: '100%',
-        height: 340,
+        height: 100,
       }}
       locale={{ itemUnit: 'послуга', itemsUnit: 'послуг' }}
     />

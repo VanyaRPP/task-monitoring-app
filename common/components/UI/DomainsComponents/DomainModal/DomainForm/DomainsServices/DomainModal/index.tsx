@@ -293,11 +293,13 @@ const DomainModal: FC<Props> = ({
           const isCustom = !isProtectedService(item.key)
 
           return (
-            <Space
+            <div
               style={{
                 display: 'flex',
                 justifyContent: 'space-between',
+                alignItems: 'center',
                 width: '100%',
+                gap: 4,
               }}
             >
               {isEditing ? (
@@ -310,9 +312,16 @@ const DomainModal: FC<Props> = ({
                     if (e.key === 'Escape') handleCancelEdit()
                   }}
                   autoFocus
+                  style={{ flex: 1 }}
                 />
               ) : (
-                <Text strong>{item.title}</Text>
+                <Text
+                  strong
+                  ellipsis={{ tooltip: { title: item.title, placement: 'top' } }}
+                  style={{ display: 'block', flex: 1, minWidth: 0 }}
+                >
+                  {item.title}
+                </Text>
               )}
 
               <Space size="small">
@@ -376,7 +385,7 @@ const DomainModal: FC<Props> = ({
                   </>
                 )}
               </Space>
-            </Space>
+            </div>
           )
         }}
         locale={{ itemUnit: 'послуга', itemsUnit: 'послуг' }}
