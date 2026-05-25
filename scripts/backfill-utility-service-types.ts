@@ -11,6 +11,7 @@
  * MONGODB_URI at module-load time, which happens BEFORE any in-script
  * dotenv.config() call (ES-module imports are hoisted).
  */
+/* eslint-disable no-console */
 import dbConnect from '../utils/dbConnect'
 import CustomService from '../common/modules/models/CustomService'
 import { UTILITY_SERVICE_ID_TO_TYPE } from '../utils/constants'
@@ -26,6 +27,7 @@ export async function backfillUtilityServiceTypes(
   mapping: Readonly<
     Partial<Record<string, string>>
   > = UTILITY_SERVICE_ID_TO_TYPE,
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   log: (msg: string) => void = () => {}
 ): Promise<IBackfillReport> {
   const report: IBackfillReport = { updated: [], unchanged: [], missing: [] }

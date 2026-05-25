@@ -1,4 +1,9 @@
-import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
+import {
+  IPayment,
+  IPaymentField,
+} from '@common/api/paymentApi/payment.api.types'
+import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
+import { IService } from '@common/api/serviceApi/service.api.types'
 import { ServiceType } from '../constants'
 import { resolveServiceType } from './resolve-service-type'
 
@@ -22,6 +27,12 @@ export interface IDomainCatalogGroup {
     fieldName: string
     serviceType?: string | null
   }[]
+}
+
+export interface IInvoicePriceContext {
+  company?: Partial<IRealestate> | null
+  service?: Partial<IService> | null
+  prevPayment?: Partial<IPayment> | null
 }
 
 export function flattenDomainCatalogServices(
@@ -59,11 +70,30 @@ export function invoiceLineExcludeKey(
   return `stype:${t}`
 }
 
+export function resolveCustomServicePrice(
+  fieldName: string | undefined,
+  ctx: IInvoicePriceContext
+): number | undefined {
+  if (!fieldName) return undefined
+  const fromCompany = ctx.company?.customServices?.find(
+    (s) => s.fieldName === fieldName
+  )?.price
+  if (fromCompany != null) return fromCompany
+  const fromService = ctx.service?.customServices?.find(
+    (s) => s.fieldName === fieldName
+  )?.price
+  if (fromService != null) return fromService
+  return ctx.prevPayment?.invoice?.find(
+    (inv) => inv.type === ServiceType.Custom && inv.fieldName === fieldName
+  )?.price
+}
+
 export function buildInvoiceAddPayloadFromCatalogRow(
   row: Pick<
     IDomainCatalogServiceRow,
     '_id' | 'name' | 'fieldName' | 'serviceType'
-  >
+  >,
+  context: IInvoicePriceContext = {}
 ): IInvoiceLineAddPayload {
   const id = String(row._id)
   const resolved = resolveServiceType({
@@ -74,6 +104,7 @@ export function buildInvoiceAddPayloadFromCatalogRow(
   if (resolved) {
     return { type: resolved, serviceId: id }
   }
+  const price = resolveCustomServicePrice(row.fieldName, context) ?? 0
   return {
     type: ServiceType.Custom,
     name: row.name,
@@ -81,17 +112,20 @@ export function buildInvoiceAddPayloadFromCatalogRow(
     serviceId: id,
     customService: true,
     amount: 1,
-    price: 0,
-    sum: 0,
+    price,
+    sum: price,
   }
 }
 
-export function catalogRowToSelectOption(row: IDomainCatalogServiceRow): {
+export function catalogRowToSelectOption(
+  row: IDomainCatalogServiceRow,
+  context: IInvoicePriceContext = {}
+): {
   value: string
   label: string
   payload: IInvoiceLineAddPayload
 } {
-  const payload = buildInvoiceAddPayloadFromCatalogRow(row)
+  const payload = buildInvoiceAddPayloadFromCatalogRow(row, context)
   const excludeKey = invoiceLineExcludeKey({
     type: payload.type,
     fieldName: payload.fieldName,

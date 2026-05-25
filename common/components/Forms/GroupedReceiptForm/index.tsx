@@ -15,7 +15,7 @@ import {
   CheckOutlined,
   TableOutlined,
 } from '@ant-design/icons'
-import { Dropdown, Tooltip, message, MenuProps } from 'antd'
+import { Dropdown, Form, Tooltip, message, MenuProps } from 'antd'
 import s from './style.module.scss'
 import { templateMap } from './templateMap'
 
@@ -38,6 +38,7 @@ const GroupedReceiptForm: FC<Props> = ({
   paymentActions: _paymentActions,
 }) => {
   const {
+    form,
     template,
     setTemplate,
     setTemplateScope,
@@ -46,8 +47,14 @@ const GroupedReceiptForm: FC<Props> = ({
     setShowQuantityInPreview,
   } = usePaymentContext()
   const [editPayment] = useEditPaymentMutation()
+  const liveInvoice = Form.useWatch('invoice', form)
   const rawData = currPayment ?? paymentData ?? null
-  const data = rawData as any
+  // useReceiptTemplateProps maps `name = description || name` for template
+  // rows, and GroupedPricesTable resolves description-first via
+  // resolveInvoiceLabel — so we only need to swap in the live invoice here.
+  const data = rawData
+    ? { ...rawData, invoice: liveInvoice ?? rawData.invoice }
+    : rawData
 
   const receiptProps = useReceiptTemplateProps({
     data,
@@ -76,7 +83,9 @@ const GroupedReceiptForm: FC<Props> = ({
   const componentRef = useRef<HTMLDivElement | null>(null)
 
   const printCompanyName =
-    data?.company?.companyName ?? data?.reciever?.companyName ?? ''
+    (typeof data?.company === 'object'
+      ? data.company?.companyName
+      : undefined) ?? data?.reciever?.companyName ?? ''
 
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,

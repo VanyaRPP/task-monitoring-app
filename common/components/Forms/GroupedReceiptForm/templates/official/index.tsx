@@ -111,9 +111,7 @@ const OfficialTemplate: FC<TemplateProps> = ({
                   : Number(item?.sum || 0)
               return (
                 <tr key={`${item?.type || item?.name}-${index}`}>
-                  <td>
-                    {item?.name || item?.description || item?.type || '—'}
-                  </td>
+                  <td>{item?.name || item?.type || '—'}</td>
                   <td>{qty?.toFixed?.(2) ?? qty}</td>
                   <td>{rate.toFixed(2)}</td>
                   <td>{Number(item?.sum || 0).toFixed(2)}</td>

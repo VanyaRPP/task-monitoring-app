@@ -331,6 +331,7 @@ const Dashboard: React.FC = () => {
                     rowHeight={1.3}
                     marginY={MARGIN_Y}
                     isEditMode={isEditMode}
+                    // eslint-disable-next-line @typescript-eslint/no-empty-function
                     onHeightChange={() => {}}
                   >
                     <div className={s.filterWrapper}>{widgetMap[key]}</div>

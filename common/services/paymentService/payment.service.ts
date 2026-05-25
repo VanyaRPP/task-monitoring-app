@@ -43,7 +43,7 @@ function logPaymentEmailDebug(stage: string, details: Record<string, unknown>) {
   if (!isEmailDebugEnabled()) {
     return
   }
-
+  // eslint-disable-next-line no-console
   console.info(`[payment-email] ${stage}`, details)
 }
 

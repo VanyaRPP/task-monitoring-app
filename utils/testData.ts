@@ -78,6 +78,7 @@ export const domains = [
     customServices: [],
     domainBankToken: [],
     domainServices: [],
+    archived: false,
   },
   {
     _id: '64d68421d9ba2fc8fea79d12',
@@ -88,6 +89,7 @@ export const domains = [
     customServices: [],
     domainBankToken: [],
     domainServices: [],
+    archived: false,
   },
   {
     _id: '64d68421d9ba2fc8fea79d13',
@@ -98,6 +100,7 @@ export const domains = [
     customServices: [],
     domainBankToken: [],
     domainServices: [],
+    archived: false,
   },
   {
     _id: '64d68421d9ba2fc8fea79d14',
@@ -108,6 +111,7 @@ export const domains = [
     customServices: [],
     domainBankToken: [],
     domainServices: [],
+    archived: false,
   },
   {
     _id: '64d68421d9ba2fc8fea79d15',
@@ -118,6 +122,7 @@ export const domains = [
     customServices: [],
     domainBankToken: [],
     domainServices: [],
+    archived: false,
   },
   {
     _id: '64d68421d9ba2fc8fea79d16',
@@ -128,6 +133,7 @@ export const domains = [
     customServices: [],
     domainBankToken: [],
     domainServices: [],
+    archived: false,
   },
   {
     _id: '64e725c7a62fdf2d22b84c4a',
@@ -138,6 +144,7 @@ export const domains = [
     customServices: [],
     domainBankToken: [],
     domainServices: [],
+    archived: true,
   },
 ]
 

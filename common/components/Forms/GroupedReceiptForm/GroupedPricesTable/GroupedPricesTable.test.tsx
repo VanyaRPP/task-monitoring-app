@@ -174,4 +174,112 @@ describe('GroupedPricesTable', () => {
     const headers = screen.getAllByRole('columnheader')
     expect(headers.length).toBe(3)
   })
+
+  // ── description-aware label resolution (commit 3e9533fe) ──
+  describe('resolveInvoiceLabel priority', () => {
+    test('uses description when present (highest priority)', () => {
+      renderTable({
+        usePreviewQuantityToggle: true,
+        invoices: [
+          { ...baseInvoice, name: 'Service name', description: 'Custom desc' },
+        ],
+      })
+      expect(screen.getByText('Custom desc')).toBeInTheDocument()
+      expect(screen.queryByText('Service name')).not.toBeInTheDocument()
+      expect(screen.queryByText('Утримання')).not.toBeInTheDocument()
+    })
+
+    test('falls back to name when description is missing', () => {
+      renderTable({
+        usePreviewQuantityToggle: true,
+        invoices: [{ ...baseInvoice, name: 'Custom name' }],
+      })
+      expect(screen.getByText('Custom name')).toBeInTheDocument()
+      expect(screen.queryByText('Утримання')).not.toBeInTheDocument()
+    })
+
+    test('falls back to t(services.<type>) when neither description nor name present', () => {
+      renderTable({
+        usePreviewQuantityToggle: true,
+        invoices: [{ ...baseInvoice, name: undefined, description: undefined }],
+      })
+      expect(screen.getByText('Утримання')).toBeInTheDocument()
+    })
+  })
+
+  describe('discount row label', () => {
+    test('uses discount.description when present (not the translation key)', () => {
+      renderTable({
+        usePreviewQuantityToggle: true,
+        invoices: [
+          baseInvoice,
+          {
+            type: 'discount',
+            sum: -100,
+            description: 'Знижка постійного клієнта',
+          },
+        ],
+      })
+      expect(
+        screen.getByText('Знижка постійного клієнта')
+      ).toBeInTheDocument()
+      // The legacy hard-coded "Знижка" (services.discount) must NOT appear
+      // for this row, only the user-provided description.
+      expect(screen.queryByText('Знижка')).not.toBeInTheDocument()
+    })
+
+    test('uses discount.name when no description', () => {
+      renderTable({
+        usePreviewQuantityToggle: true,
+        invoices: [
+          baseInvoice,
+          { type: 'discount', sum: -100, name: 'Спец-знижка' },
+        ],
+      })
+      expect(screen.getByText('Спец-знижка')).toBeInTheDocument()
+    })
+
+    test('falls back to services.discount translation when name/description missing', () => {
+      renderTable({
+        usePreviewQuantityToggle: true,
+        invoices: [baseInvoice, { type: 'discount', sum: -100 }],
+      })
+      expect(screen.getByText('Знижка')).toBeInTheDocument()
+    })
+
+    test('description resolution works inside grouped-by-domain layout for unmatched rows', () => {
+      mockUseGetCustomServicesByDomainQuery.mockReturnValue({
+        data: {
+          data: [
+            {
+              groupName: 'Група тест',
+              services: [
+                { name: 'x', fieldName: ServiceType.Maintenance, _id: 's1' },
+              ],
+            },
+          ],
+        },
+        isLoading: false,
+      })
+
+      renderTable({
+        usePreviewQuantityToggle: true,
+        invoices: [
+          baseInvoice, // matches the group
+          {
+            type: 'unmatched',
+            sum: 50,
+            name: 'raw name',
+            description: 'pretty desc',
+          },
+        ],
+      })
+
+      expect(screen.getByText('Група тест')).toBeInTheDocument()
+      // Unmatched row should render through resolveInvoiceLabel and prefer
+      // description over name.
+      expect(screen.getByText('pretty desc')).toBeInTheDocument()
+      expect(screen.queryByText('raw name')).not.toBeInTheDocument()
+    })
+  })
 })

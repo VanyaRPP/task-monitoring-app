@@ -38,7 +38,9 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
 
   const paths = useMemo(() => {
     return (
-      normalizedPath.map((item) => ({
+      normalizedPath.map((item) => {
+        const path = item.path
+        return {
         title: item.title,
         ...(item.path && {
           onClick: () => {
@@ -46,7 +48,8 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
             else router.push(item.path!)
           },
         }),
-      })) ?? []
+      }
+      }) ?? []
     )
   }, [router, normalizedPath, onPathClick])
 

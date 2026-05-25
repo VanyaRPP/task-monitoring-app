@@ -1,4 +1,5 @@
-import { FC, useEffect, useRef, useState } from 'react'
+import { FC, useMemo, useRef } from 'react'
+import { Form } from 'antd'
 import { useReactToPrint } from 'react-to-print'
 import { PrinterOutlined, TableOutlined } from '@ant-design/icons'
 import { Tooltip } from 'antd'
@@ -14,21 +15,26 @@ import {
 } from '@common/components/Forms/GroupedReceiptForm/templates/invoice-party-headings'
 
 const PriceList: FC<{ data: IPayment }> = ({ data }) => {
-  const [payment, setPayment] = useState(data)
-  const [totalSum, setTotalSum] = useState(0)
-  const [totalFractionSum, setTotalFractionSum] = useState(0)
+  const { form, company, showQuantityInPreview, setShowQuantityInPreview } =
+    usePaymentContext()
 
-  useEffect(() => {
-    setPayment(data)
-  }, [data])
+  const liveInvoice = Form.useWatch('invoice', form)
 
-  useEffect(() => {
-    const sum = payment.invoice.reduce((acc, item) => acc + Number(item.sum), 0)
-    setTotalSum(sum)
+  // Single source of truth: live form values when present, otherwise the
+  // payment snapshot from props.
+  const payment = useMemo(
+    () => (liveInvoice ? { ...data, invoice: liveInvoice } : data),
+    [data, liveInvoice]
+  )
 
+  const { totalSum, totalFractionSum } = useMemo(() => {
+    const sum = payment.invoice.reduce(
+      (acc, item) => acc + Number(item.sum),
+      0
+    )
     const [, fraction] = sum.toFixed(2).split('.')
-    setTotalFractionSum(Number(fraction))
-  }, [payment])
+    return { totalSum: sum, totalFractionSum: Number(fraction) }
+  }, [payment.invoice])
 
   const paymentCompany = payment?.company as
     | { currency?: string }
@@ -40,9 +46,6 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
     payment?.currency || companyCurrency || payment?.domain?.currency
   const isEnglish = normalizeCurrency(currency) !== 'UAH'
   const currencyNames = getCurrencyNames(currency, isEnglish)
-
-  const { company, showQuantityInPreview, setShowQuantityInPreview } =
-    usePaymentContext()
 
   const domainNameFromContext =
     typeof company?.domain === 'object' && company?.domain !== null
