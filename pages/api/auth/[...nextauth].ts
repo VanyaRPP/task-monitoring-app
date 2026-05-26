@@ -110,7 +110,9 @@ export const authOptions: NextAuthOptions = {
       return jwt.sign(token as any, secret)
     },
     decode: async ({ secret, token }) => {
-      return jwt.verify(token as string, secret) as any
+      return jwt.verify(token as string, secret, {
+        algorithms: ['HS256'],
+      }) as any
     },
   },
   providers,

@@ -64,7 +64,9 @@ describe('POST /api/auth/sign-up', () => {
   })
 
   it('Should return 400 on message', async () => {
-    ;(User.findOne as jest.Mock).mockRejectedValue(new Error('database message'))
+    ;(User.findOne as jest.Mock).mockRejectedValue(
+      new Error('database message')
+    )
 
     await handler(req, res)
 

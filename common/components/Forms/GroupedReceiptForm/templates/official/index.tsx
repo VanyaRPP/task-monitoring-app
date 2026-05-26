@@ -107,13 +107,11 @@ const OfficialTemplate: FC<TemplateProps> = ({
               const rate = Number.isFinite(Number(item?.price))
                 ? Number(item.price)
                 : qty
-                ? Number(item?.sum || 0) / qty
-                : Number(item?.sum || 0)
+                  ? Number(item?.sum || 0) / qty
+                  : Number(item?.sum || 0)
               return (
                 <tr key={`${item?.type || item?.name}-${index}`}>
-                  <td>
-                    {item?.name || item?.description || item?.type || '—'}
-                  </td>
+                  <td>{item?.name || item?.type || '—'}</td>
                   <td>{qty?.toFixed?.(2) ?? qty}</td>
                   <td>{rate.toFixed(2)}</td>
                   <td>{Number(item?.sum || 0).toFixed(2)}</td>

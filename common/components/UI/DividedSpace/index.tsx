@@ -54,10 +54,10 @@ export const DividedSpace: React.FC<DividedSpaceProps> = ({
           size === 'small'
             ? 4
             : size === 'middle'
-            ? 8
-            : size === 'large'
-            ? 16
-            : size,
+              ? 8
+              : size === 'large'
+                ? 16
+                : size,
         ...style,
       }}
     >

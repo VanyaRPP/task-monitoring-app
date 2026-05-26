@@ -48,11 +48,7 @@ export default async function handler(
   switch (req.method) {
     case 'POST':
       try {
-        return respond(
-          res,
-          await createCustomService(req.body, ctx),
-          201
-        )
+        return respond(res, await createCustomService(req.body, ctx), 201)
       } catch (error: any) {
         return res.status(500).json({
           success: false,
