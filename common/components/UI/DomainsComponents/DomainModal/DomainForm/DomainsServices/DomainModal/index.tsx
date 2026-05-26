@@ -235,8 +235,18 @@ const DomainModal: FC<Props> = ({
     }
 
     try {
-      await onCreateCustomService(newServiceName)
+      const res = await onCreateCustomService(newServiceName)
       message.success('Кастомна послуга додана')
+      const createdService = res?.data || res
+      const newKey = createdService?._id || createdService?.id || createdService?.key
+      const newTitle = createdService?.name || createdService?.title || newServiceName
+      if (newKey) {
+        setLocalData((prev) => [
+          ...prev,
+          { key: String(newKey), title: newTitle },
+        ])
+      }
+
       setNewServiceName('')
       setActivePanel([])
     } catch (err: any) {
