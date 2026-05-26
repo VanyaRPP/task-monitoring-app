@@ -15,6 +15,7 @@ import { CustomServicesTable } from '@common/components/Tables/CustomService/Tab
 import { DomainTypeTemplatesTable } from '@common/components/Tables/DomainTypeTemplates'
 import { useGetDomainsByAdminQuery } from '@common/api/domainApi/domain.api'
 
+import { LogsConsole } from '@components/Tables/LogConsoleTable/Table'
 export const AdminPanelPage: React.FC = () => {
   const { data: user } = useGetCurrentUserQuery()
   const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
@@ -99,6 +100,20 @@ export const AdminPanelPage: React.FC = () => {
                     label: 'Шаблони типів',
                     children: <DomainTypeTemplatesTable />,
                   },
+                  {
+                    key: 'logs',
+                    label: 'Логування',
+                    children: (
+                    <>
+                    <Flex justify="space-between" align="center" style={{ marginBottom: 16 }}>
+                      <Typography.Title level={4} style={{ margin: 0 }}>
+                        Логування
+                        </Typography.Title>
+                        </Flex>
+                        <LogsConsole />
+                        </>
+                      ),
+                    },
                 ]
               : []),
           ]}
