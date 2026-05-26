@@ -6,37 +6,34 @@ import { ArrowDownOutlined, ArrowUpOutlined } from '@ant-design/icons'
 import { Column, Pie } from '@ant-design/plots'
 import { useTranslation } from 'next-i18next'
 import dayjs from 'dayjs'
-import 'dayjs/locale/uk' 
+import 'dayjs/locale/uk'
 
 dayjs.locale('uk')
 
 const { Text } = Typography
-const { useToken } = theme // Хук для отримання кольорів поточної теми
+const { useToken } = theme
 
 interface ProfitDashboardProps {
-  dataSource: any[] 
+  dataSource: any[]
 }
 
 const ProfitDashboard: React.FC<ProfitDashboardProps> = ({ dataSource }) => {
   const { t } = useTranslation()
   const [periodType, setPeriodType] = useState('Quarter')
   const [selectedPeriod, setSelectedPeriod] = useState<string | null>(null)
-  
-  // Отримуємо поточні токени (кольори)
+
   const { token } = useToken()
-  
-  // Визначаємо, чи активна темна тема (якщо фон чорний або текст містить білий відтінок)
+
   const isDarkMode = token.colorBgBase === '#000' || token.colorBgLayout === '#141414' || String(token.colorText).includes('255');
 
-  // --- 0. ДИНАМІЧНІ ФІЛЬТРИ ---
   const periodOptions = useMemo(() => {
     const options = new Set<string>()
     const sortedData = [...dataSource].sort((a, b) => dayjs(b.month).unix() - dayjs(a.month).unix())
-    
+
     sortedData.forEach(item => {
       const d = dayjs(item.month)
       if (!d.isValid()) return
-      
+
       if (periodType === 'Month') {
         const monthStr = d.format('MMMM YYYY')
         options.add(monthStr.charAt(0).toUpperCase() + monthStr.slice(1))
@@ -61,11 +58,11 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({ dataSource }) => {
 
   const filteredData = useMemo(() => {
     if (!selectedPeriod) return []
-    
+
     return dataSource.filter(item => {
       const d = dayjs(item.month)
       if (!d.isValid()) return false
-      
+
       if (periodType === 'Month') {
         const monthStr = d.format('MMMM YYYY')
         return (monthStr.charAt(0).toUpperCase() + monthStr.slice(1)) === selectedPeriod
@@ -79,11 +76,10 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({ dataSource }) => {
     })
   }, [dataSource, periodType, selectedPeriod])
 
-  // --- 1. Агрегація та мок-дані для KPI ---
   const aggregatedData = useMemo(() => {
     let actualProfit = 0
     let actualExpense = 0
-    
+
     filteredData.forEach(item => {
       actualProfit += item.credit || 0
       actualExpense += item.debit || 0
@@ -98,17 +94,16 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({ dataSource }) => {
     return { actualProfit, actualExpense, plannedProfit, plannedExpense, profitDiff, expenseDiff }
   }, [filteredData])
 
-  // --- 2. Дані для Column Chart (Динаміка) ---
   const columnData = useMemo(() => {
     const data: any[] = []
     const chartData = [...filteredData].sort((a, b) => dayjs(a.month).unix() - dayjs(b.month).unix())
-    
+
     chartData.forEach(item => {
       const d = dayjs(item.month)
       const monthName = d.isValid() ? d.format('MMM') : item.month
       const actProfit = item.credit || 0
       const actExpense = item.debit || 0
-      
+
       data.push({ period: monthName, type: t('profitPage:dashboard.plannedProfit'), value: actProfit * 1.05 })
       data.push({ period: monthName, type: t('profitPage:dashboard.actualProfit'), value: actProfit })
       data.push({ period: monthName, type: t('profitPage:dashboard.plannedExpense'), value: actExpense * 0.95 })
@@ -117,15 +112,14 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({ dataSource }) => {
     return data
   }, [filteredData, t])
 
-  // --- 3. Дані для Pie Chart (Розумна категоризація) ---
   const pieData = useMemo(() => {
     const categoriesMap: Record<string, number> = {}
-    
+
     filteredData.forEach(month => {
       month.transactions?.forEach((tr: any) => {
         if (tr.type === 'credit') {
           let cat = tr.categories?.[0]
-          
+
           if (!cat) {
             const desc = (tr.description || '').toLowerCase()
             if (desc.includes('коворкінг')) cat = 'Коворкінг'
@@ -142,29 +136,28 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({ dataSource }) => {
     return Object.entries(categoriesMap).map(([type, value]) => ({ type, value }))
   }, [filteredData])
 
-  // --- ДИНАМІЧНІ КОНФІГИ ГРАФІКІВ (v2) ---
   const columnConfig = {
     data: columnData,
     xField: 'period',
     yField: 'value',
-    colorField: 'type', 
-    isGroup: true, 
+    colorField: 'type',
+    isGroup: true,
     color: ['#1890ff', '#13c2c2', '#fa8c16', '#b37feb'],
-    theme: isDarkMode ? 'dark' : 'light', // Вмикає вбудовану темну тему
+    theme: isDarkMode ? 'dark' : 'light',
     axis: {
-      x: { 
-        labelFill: token.colorTextSecondary, // Адаптивний колір підписів осі X
+      x: {
+        labelFill: token.colorTextSecondary,
         tickStroke: token.colorSplit,
       },
-      y: { 
-        labelFill: token.colorTextSecondary, // Адаптивний колір підписів осі Y
+      y: {
+        labelFill: token.colorTextSecondary,
         gridStroke: token.colorSplit,
       },
     },
-    legend: { 
+    legend: {
       color: {
         position: 'bottom',
-        itemLabelFill: token.colorText, // Адаптивний колір легенди
+        itemLabelFill: token.colorText,
       }
     },
   }
@@ -175,31 +168,30 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({ dataSource }) => {
     colorField: 'type',
     radius: 1,
     innerRadius: 0.6,
-    theme: isDarkMode ? 'dark' : 'light', // Вмикає темну тему для легенди та тултипів
-    label: { 
-      text: 'value', 
+    theme: isDarkMode ? 'dark' : 'light',
+    label: {
+      text: 'value',
       style: {
-        fill: '#fff', // Текст всередині кольорового кільця завжди білий
+        fill: '#fff',
         textAlign: 'center',
         fontWeight: 'bold'
       }
     },
-    legend: { 
+    legend: {
       color: {
         position: 'left',
-        itemLabelFill: token.colorText, // Адаптивний колір легенди
+        itemLabelFill: token.colorText,
       }
     },
   }
 
   return (
     <div style={{ marginBottom: 24, display: 'flex', flexDirection: 'column', gap: '16px' }}>
-      
-      {/* Фільтри періоду */}
+
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Space>
-          <Select 
-            value={periodType} 
+          <Select
+            value={periodType}
             onChange={setPeriodType}
             options={[
               { value: 'Month', label: t('profitPage:dashboard.periodMonth') },
@@ -208,17 +200,16 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({ dataSource }) => {
             ]}
             style={{ width: 120 }}
           />
-          <Select 
-            value={selectedPeriod} 
+          <Select
+            value={selectedPeriod}
             onChange={setSelectedPeriod}
-            options={periodOptions} 
+            options={periodOptions}
             style={{ width: 150 }}
             disabled={periodOptions.length === 0}
           />
         </Space>
       </div>
 
-      {/* KPI Картки */}
       <Row gutter={[16, 16]}>
         <Col span={6}>
           <Card size="small">
@@ -230,10 +221,10 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({ dataSource }) => {
         <Col span={6}>
           <Card size="small">
             <Text type="secondary">{t('profitPage:dashboard.actualProfit')}</Text>
-            <Statistic 
-              value={aggregatedData.actualProfit} 
-              precision={2} 
-              suffix="грн" 
+            <Statistic
+              value={aggregatedData.actualProfit}
+              precision={2}
+              suffix="грн"
               valueStyle={{ color: aggregatedData.profitDiff >= 0 ? '#3f8600' : '#cf1322' }}
               prefix={aggregatedData.profitDiff >= 0 ? <ArrowUpOutlined /> : <ArrowDownOutlined />}
             />
@@ -252,11 +243,11 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({ dataSource }) => {
         <Col span={6}>
           <Card size="small">
             <Text type="secondary">{t('profitPage:dashboard.actualExpense')}</Text>
-            <Statistic 
-              value={aggregatedData.actualExpense} 
-              precision={2} 
-              suffix="грн" 
-              valueStyle={{ color: aggregatedData.expenseDiff <= 0 ? '#3f8600' : '#cf1322' }} 
+            <Statistic
+              value={aggregatedData.actualExpense}
+              precision={2}
+              suffix="грн"
+              valueStyle={{ color: aggregatedData.expenseDiff <= 0 ? '#3f8600' : '#cf1322' }}
               prefix={aggregatedData.expenseDiff <= 0 ? <ArrowDownOutlined /> : <ArrowUpOutlined />}
             />
             <Text type="secondary" style={{ fontSize: '12px' }}>
@@ -266,7 +257,6 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({ dataSource }) => {
         </Col>
       </Row>
 
-      {/* Графіки */}
       <Row gutter={[16, 16]}>
         <Col span={14}>
           <Card title={t('profitPage:dashboard.trendTitle')} size="small" style={{ height: '100%' }}>

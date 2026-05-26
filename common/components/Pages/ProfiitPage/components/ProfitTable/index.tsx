@@ -8,7 +8,7 @@ import { FC, useEffect, useMemo, useState, useCallback } from 'react'
 import { parentColumns, getChildColumns } from './tableConfig'
 import { Profit } from '@common/api/profitsApi/profits.type'
 import AddCostModal from '@components/AddCostModal'
-import ProfitDashboard from '../ProfitDashboard' // <-- ІМПОРТ ДАШБОРДУ
+import ProfitDashboard from '../ProfitDashboard'
 import { Table, Alert, Button, Space, Tooltip, message, Card } from 'antd'
 import { useTranslation } from 'react-i18next'
 import { useRouter } from 'next/router'
@@ -72,7 +72,7 @@ const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
   }, [profitsGrouped])
 
   const [expandedRowKeys, setExpandedRowKeys] = useState<string[]>([])
-  
+
   useEffect(() => {
     if (
       router.pathname === AppRoutes.PROFIT ||
@@ -130,7 +130,6 @@ const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
 
   return (
     <>
-      {/* --- ВСТАВЛЕНО ДАШБОРД --- */}
       <ProfitDashboard dataSource={dataSource} />
 
       <Card size="small" style={{ marginTop: 16 }}>
