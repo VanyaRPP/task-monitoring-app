@@ -28,17 +28,6 @@ export function getDomainsPipeline(
       },
     },
     {
-      $match: {
-        $expr: {
-          $cond: [
-            { $eq: [isGlobalAdmin, true] },
-            true,
-            { $in: [email, '$adminEmails'] },
-          ],
-        },
-      },
-    },
-    {
       $group: {
         _id: '$domain',
       },
@@ -53,6 +42,17 @@ export function getDomainsPipeline(
     },
     {
       $unwind: '$domainDetails',
+    },
+    {
+      $match: {
+        $expr: {
+          $cond: [
+            { $eq: [isGlobalAdmin, true] },
+            true,
+            { $in: [email, '$domainDetails.adminEmails'] },
+          ],
+        },
+      },
     },
     {
       $project: {
@@ -123,7 +123,7 @@ export function getRealEstatesPipeline({
 
 export function getStreetsPipeline(
   isGlobalAdmin,
-  email,
+  domains,
   filteredCompanys = null,
   filteredDomains = null
 ) {
@@ -146,18 +146,6 @@ export function getStreetsPipeline(
             { $eq: [filteredDomains, null] },
             true,
             { $in: ['$domain', filteredDomains] },
-          ],
-        },
-      },
-    },
-
-    {
-      $match: {
-        $expr: {
-          $cond: [
-            { $eq: [isGlobalAdmin, true] },
-            true,
-            { $in: [email, '$adminEmails'] },
           ],
         },
       },
