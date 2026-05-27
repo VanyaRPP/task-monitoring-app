@@ -77,9 +77,9 @@ async function seedPayment({
   invoiceNumber,
   date = new Date('2026-03-01'),
 }: {
-  domain: Types.ObjectId
-  street: Types.ObjectId
-  company: Types.ObjectId
+  domain: unknown
+  street: unknown
+  company: unknown
   invoiceNumber: number
   date?: Date
 }) {
