@@ -437,8 +437,6 @@ export async function getDistinctStreets({
 }): Promise<{ _id: mongoose.ObjectId; streetData: any }[] | undefined> {
   // TODO: group of user roles helpers maybe? Such as isGlobalAdmin(user: IUser): boolean
   const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
-  const domainsPipeline = getDomainsPipeline(isGlobalAdmin, user.email)
-  const distinctDomains = await model.aggregate(domainsPipeline)
   const streetsPipeline = getStreetsPipeline(
     isGlobalAdmin,
     user.email,
