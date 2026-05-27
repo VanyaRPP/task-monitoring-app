@@ -12,11 +12,13 @@ jest.mock('next/router', () => ({
 jest.mock('@common/api/domainApi/domain.api', () => ({
   useGetDomainsQuery: jest.fn(),
   useDeleteDomainMutation: jest.fn(),
+  useEditDomainMutation: jest.fn(),
 }))
 
 import {
   useGetDomainsQuery,
   useDeleteDomainMutation,
+  useEditDomainMutation,
 } from '@common/api/domainApi/domain.api'
 
 const mockDomains = [
@@ -42,6 +44,7 @@ const renderComponent = (props = {}) =>
       setDomainActions={jest.fn()}
       setDomainsLength={jest.fn()}
       domainActions={{ edit: false }}
+      isArchive={false}
       {...props}
     />
   )
@@ -49,6 +52,10 @@ const renderComponent = (props = {}) =>
 beforeEach(() => {
   jest.clearAllMocks()
   ;(useDeleteDomainMutation as jest.Mock).mockReturnValue([
+    jest.fn(),
+    { isLoading: false },
+  ])
+  ;(useEditDomainMutation as jest.Mock).mockReturnValue([
     jest.fn(),
     { isLoading: false },
   ])
