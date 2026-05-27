@@ -1,12 +1,13 @@
-name: Hourly cron job
+name: Hourly cron
 on:
   schedule:
-    - cron: '*/60 * * * *'
+    - cron: '0 * * * *' # top of every hour
+  workflow_dispatch:
 jobs:
   cron:
     runs-on: ubuntu-latest
     steps:
-      - name: Hourly cron job heroku
+      - name: Hit hourly scheduled endpoint
         run: |
-          curl --request GET \
-          --url 'https://taskmonitoringapp.herokuapp.com/api/sceduled/hourly' \
+          curl --fail --silent --show-error \
+            "${{ secrets.CRON_BASE_URL }}/api/sceduled/hourly"
