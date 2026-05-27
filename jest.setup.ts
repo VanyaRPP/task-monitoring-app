@@ -1,4 +1,5 @@
 import '@testing-library/jest-dom'
+import '@testing-library/jest-dom/jest-globals'
 import { TextEncoder, TextDecoder } from 'util'
 
 process.env.MONGODB_URI =
