@@ -13,6 +13,32 @@ jest.mock('@utils/helpers', () => ({
   inputNumberParser: jest.fn((v) => v),
 }))
 
+// antd Select's virtualised popup doesn't open in jsdom; stub it with a flat
+// list of buttons so we can drive onChange via real clicks.
+jest.mock('antd', () => {
+  const actual = jest.requireActual('antd')
+  const React = require('react')
+  const MockSelect = ({ options = [], value = [], onChange, placeholder }: any) =>
+    React.createElement(
+      'div',
+      { 'data-testid': 'mock-select' },
+      placeholder &&
+        React.createElement('span', { 'data-testid': 'placeholder' }, placeholder),
+      options.map((o: any) =>
+        React.createElement(
+          'button',
+          {
+            key: o.value,
+            type: 'button',
+            onClick: () => onChange?.([...value, o.value]),
+          },
+          o.label
+        )
+      )
+    )
+  return { ...actual, Select: MockSelect }
+})
+
 const mockUseGetCurrentUserQuery = require('@common/api/userApi/user.api')
   .useGetCurrentUserQuery as jest.Mock
 const useWatchSpy = jest.spyOn(Form, 'useWatch')

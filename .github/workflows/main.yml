@@ -2,49 +2,74 @@ name: Sync PR with Asana
 
 on:
   pull_request:
-    types: [В процесі, Code review, Testing]
+    types: [opened, reopened, closed, labeled]
 
 jobs:
-  update-asana:
+  sync:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Extract Asana Task ID from PR title
-        id: extract
+      - name: Check Asana token
+        id: token
+        env:
+          ASANA_TOKEN: ${{ secrets.ASANA_TOKEN }}
         run: |
-          TITLE="${{ github.event.pull_request.title }}"
-          TASK_ID=$(echo "$TITLE" | grep -oE '[0-9]{8,}' | head -n 1)
-          echo "task_id=$TASK_ID" >> $GITHUB_OUTPUT
-
-      - name: Debug
-        run: echo "Task ID = ${{ steps.extract.outputs.task_id }}"
-
-      - name: Move task in Asana
-        if: steps.extract.outputs.task_id != ''
-        run: |
-          ACTION="${{ github.event.action }}"
-
-          if [ "$ACTION" == "В процесі" ]; then
-            SECTION_ID="REVIEW_SECTION_ID"
-          elif [ "$ACTION" == "Code review" ]; then
-            SECTION_ID="REVIEW_SECTION_ID"
-          elif [ "$ACTION" == "Testing" ]; then
-            SECTION_ID="TESTING_SECTION_ID"
-          elif [ "$ACTION" == "closed" ]; then
-            if [ "${{ github.event.pull_request.merged }}" == "true" ]; then
-              SECTION_ID="DONE_SECTION_ID"
-            else
-              SECTION_ID="TODO_SECTION_ID"
-            fi
-          elif [ "$ACTION" == "reopened" ]; then
-            SECTION_ID="IN_PROGRESS_SECTION_ID"
+          if [ -z "$ASANA_TOKEN" ]; then
+            echo "ASANA_TOKEN secret is not set — skipping Asana sync."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
           fi
 
-          curl -X POST "https://app.asana.com/api/1.0/sections/$SECTION_ID/addTask" \
-          -H "Authorization: Bearer ${{ secrets.ASANA_TOKEN }}" \
-          -H "Content-Type: application/json" \
-          -d '{
-            "data": {
-              "task": "'"${{ steps.extract.outputs.task_id }}"'"
-            }
-          }'
+      - name: Extract Asana task ID from PR title
+        id: extract
+        if: steps.token.outputs.ready == 'true'
+        run: |
+          TASK_ID=$(echo "${{ github.event.pull_request.title }}" | grep -oE '[0-9]{8,}' | head -n 1)
+          echo "task_id=${TASK_ID}" >> "$GITHUB_OUTPUT"
+
+      - name: Decide target Asana section
+        id: section
+        if: steps.token.outputs.ready == 'true' && steps.extract.outputs.task_id != ''
+        env:
+          ACTION: ${{ github.event.action }}
+          MERGED: ${{ github.event.pull_request.merged }}
+          LABEL: ${{ github.event.label.name }}
+          REVIEW_SECTION_ID: ${{ secrets.ASANA_REVIEW_SECTION_ID }}
+          TESTING_SECTION_ID: ${{ secrets.ASANA_TESTING_SECTION_ID }}
+          DONE_SECTION_ID: ${{ secrets.ASANA_DONE_SECTION_ID }}
+          TODO_SECTION_ID: ${{ secrets.ASANA_TODO_SECTION_ID }}
+          IN_PROGRESS_SECTION_ID: ${{ secrets.ASANA_IN_PROGRESS_SECTION_ID }}
+        run: |
+          SECTION_ID=""
+          case "$ACTION" in
+            opened|reopened)
+              SECTION_ID="$IN_PROGRESS_SECTION_ID"
+              ;;
+            closed)
+              if [ "$MERGED" = "true" ]; then
+                SECTION_ID="$DONE_SECTION_ID"
+              else
+                SECTION_ID="$TODO_SECTION_ID"
+              fi
+              ;;
+            labeled)
+              case "$LABEL" in
+                "Code review"|"code-review"|"review")
+                  SECTION_ID="$REVIEW_SECTION_ID"
+                  ;;
+                "Testing"|"testing"|"QA")
+                  SECTION_ID="$TESTING_SECTION_ID"
+                  ;;
+              esac
+              ;;
+          esac
+          echo "section_id=${SECTION_ID}" >> "$GITHUB_OUTPUT"
+
+      - name: Move task in Asana
+        if: steps.extract.outputs.task_id != '' && steps.section.outputs.section_id != ''
+        run: |
+          curl --fail --silent --show-error \
+            -X POST "https://app.asana.com/api/1.0/sections/${{ steps.section.outputs.section_id }}/addTask" \
+            -H "Authorization: Bearer ${{ secrets.ASANA_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"data\":{\"task\":\"${{ steps.extract.outputs.task_id }}\"}}"
