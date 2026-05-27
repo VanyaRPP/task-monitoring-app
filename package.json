@@ -19,7 +19,7 @@
     "types:check": "tsc --noEmit"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "dependencies": {
     "@ant-design/compatible": "^5.1.3",
