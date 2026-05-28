@@ -208,8 +208,11 @@ const AddPaymentModal: FC<Props> = ({
     const logs = changelogRes?.data
     if (!logs?.length) return
 
+    const latestManualLog = logs.find((log) => log.reason === 'manual')
+    if (!latestManualLog) return
+
     autoSelectedChangelogRef.current = true
-    form.setFieldsValue({ changelogId: logs[0]._id })
+    form.setFieldsValue({ changelogId: latestManualLog._id })
   }, [changelogRes?.data, form])
 
   // `usePaymentFormData` currently returns paymentData unchanged as `payment`,
