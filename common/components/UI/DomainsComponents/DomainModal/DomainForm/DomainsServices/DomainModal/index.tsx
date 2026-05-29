@@ -512,7 +512,7 @@ const DomainModal: FC<Props> = ({
                       }}
                     >
                       <span>Група: {g.groupName}</span>
-                      {isGlobalAdmin && (
+                      {editable && isGlobalAdmin && (
                         <Button
                           type="text"
                           danger
