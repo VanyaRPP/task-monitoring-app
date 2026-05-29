@@ -104,6 +104,19 @@ const CustomServicesCard: React.FC<CustomServicesCardProps> = ({
     form.setFieldsValue({ customServices: updated })
   }
   const dashIfEmpty = (v: any) => (v === 0 || v ? v : '-')
+
+  React.useEffect(() => {
+    if (allCustomServices.length > 0 && customServices.length === 0 && !disabled) {
+      const autoEntries = allCustomServices.map((service: any) => ({
+        _id: service?._id || service?.value,
+        label: service?.label,
+        fieldName: service?.fieldName,
+        price: 0,
+      }))
+      form.setFieldsValue({ customServices: autoEntries })
+    }
+  }, [allCustomServices, form, disabled, customServices.length])
+
   return (
     <div>
       {!disabled && !isServiceForm && (
