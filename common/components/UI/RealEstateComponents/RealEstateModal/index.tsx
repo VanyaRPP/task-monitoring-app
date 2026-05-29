@@ -51,11 +51,11 @@ const RealEstateModal: FC<Props> = ({
       customDomainServices?.data?.flatMap((group) =>
         Array.isArray(group?.services)
           ? group.services.map((s) => ({
-              _id: s._id,
-              label: s.name,
-              fieldName: s.fieldName,
-              price: 0,
-            }))
+            _id: s._id,
+            label: s.name,
+            fieldName: s.fieldName,
+            price: 0,
+          }))
           : []
       ) || []
     )
@@ -143,9 +143,9 @@ const RealEstateModal: FC<Props> = ({
 
     const response = currentRealEstate
       ? await editRealEstate({
-          _id: currentRealEstate?._id,
-          ...realEstateData,
-        } as any)
+        _id: currentRealEstate?._id,
+        ...realEstateData,
+      } as any)
       : await addRealEstate(realEstateData as any)
 
     if ('data' in response) {
