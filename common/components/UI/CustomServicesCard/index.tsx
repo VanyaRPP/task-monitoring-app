@@ -207,18 +207,16 @@ const CustomServicesCard: FC<CustomServicesCardProps> = ({
                       disabled={disabled}
                     />
                   </Form.Item>
-                  {!disabled &&
-                    isAdmin &&
-                    !isServiceForm && (
-                      <Button
-                        type="text"
-                        icon={<CloseOutlined />}
-                        aria-label={`remove-${service?.label}`}
-                        data-testid={`remove-${service?.label}`}
-                        onClick={() => handleRemoveService(index)}
-                        style={{ marginTop: 6 }}
-                      />
-                    )}
+                  {!disabled && isAdmin && !isServiceForm && (
+                    <Button
+                      type="text"
+                      icon={<CloseOutlined />}
+                      aria-label={`remove-${service?.label}`}
+                      data-testid={`remove-${service?.label}`}
+                      onClick={() => handleRemoveService(index)}
+                      style={{ marginTop: 6 }}
+                    />
+                  )}
                 </Space>
               )
             })}

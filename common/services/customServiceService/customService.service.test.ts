@@ -28,6 +28,13 @@ jest.mock('@modules/models/Domain', () => ({
   },
 }))
 
+jest.mock('@modules/models/RealEstate', () => ({
+  __esModule: true,
+  default: {
+    updateMany: jest.fn(),
+  },
+}))
+
 jest.mock(
   '@common/services/domainTypeTemplateService/domainTypeTemplate.service',
   () => ({
@@ -37,6 +44,7 @@ jest.mock(
 
 import CustomService from '@modules/models/CustomService'
 import Domain from '@modules/models/Domain'
+import RealEstate from '@modules/models/RealEstate'
 import { getDefaultServiceIdsForCategory } from '@common/services/domainTypeTemplateService/domainTypeTemplate.service'
 
 const ownDomainId = new mongoose.Types.ObjectId()
@@ -69,7 +77,11 @@ const asMock = <T>(fn: T) => fn as unknown as jest.Mock
 beforeEach(() => {
   jest.clearAllMocks()
   asMock(Domain.exists).mockResolvedValue({ _id: ownDomainId })
-  asMock(Domain.updateOne).mockResolvedValue({ acknowledged: true })
+  asMock(Domain.updateOne).mockResolvedValue({
+    acknowledged: true,
+    matchedCount: 1,
+  })
+  asMock(RealEstate.updateMany).mockResolvedValue({ acknowledged: true })
 })
 
 describe('access gating', () => {
@@ -139,7 +151,16 @@ describe('createCustomService', () => {
   it('creates a per-domain service when no duplicate', async () => {
     asMock(CustomService.findOne).mockResolvedValueOnce(null)
     asMock(CustomService.create).mockResolvedValueOnce({
-      toObject: () => ({ _id: 'new', name: 'Foo', domain: ownDomainId }),
+      _id: serviceId,
+      name: 'Foo',
+      fieldName: 'foo',
+      domain: ownDomainId,
+      toObject: () => ({
+        _id: serviceId,
+        name: 'Foo',
+        fieldName: 'foo',
+        domain: ownDomainId,
+      }),
     })
 
     const result = await createCustomService(
@@ -153,6 +174,113 @@ describe('createCustomService', () => {
         name: 'Foo',
         domain: expect.anything(),
       })
+    )
+  })
+
+  it('auto-attaches new service to default domain group when creating', async () => {
+    asMock(CustomService.findOne).mockResolvedValueOnce(null)
+    asMock(CustomService.create).mockResolvedValueOnce({
+      _id: serviceId,
+      name: 'Foo',
+      fieldName: 'foo',
+      domain: ownDomainId,
+      toObject: () => ({
+        _id: serviceId,
+        name: 'Foo',
+        fieldName: 'foo',
+      }),
+    })
+    // First call attempts to add to existing default group — pretend it exists.
+    asMock(Domain.updateOne).mockResolvedValueOnce({
+      acknowledged: true,
+      matchedCount: 1,
+    })
+
+    await createCustomService(
+      { name: 'Foo', domainId: String(ownDomainId) },
+      ctxGlobal
+    )
+
+    expect(asMock(Domain.updateOne)).toHaveBeenCalledWith(
+      { _id: expect.anything(), 'customServices.groupName': 'Загальні' },
+      expect.objectContaining({
+        $addToSet: { 'customServices.$[group].services': serviceId },
+      }),
+      expect.objectContaining({
+        arrayFilters: [{ 'group.groupName': 'Загальні' }],
+      })
+    )
+  })
+
+  it('creates default group when missing during auto-attach', async () => {
+    asMock(CustomService.findOne).mockResolvedValueOnce(null)
+    asMock(CustomService.create).mockResolvedValueOnce({
+      _id: serviceId,
+      name: 'Foo',
+      fieldName: 'foo',
+      domain: ownDomainId,
+      toObject: () => ({
+        _id: serviceId,
+        name: 'Foo',
+        fieldName: 'foo',
+      }),
+    })
+    // First call: no matching group (matchedCount: 0).
+    asMock(Domain.updateOne)
+      .mockResolvedValueOnce({ acknowledged: true, matchedCount: 0 })
+      .mockResolvedValueOnce({ acknowledged: true })
+
+    await createCustomService(
+      { name: 'Foo', domainId: String(ownDomainId) },
+      ctxGlobal
+    )
+
+    // Second call appends a new group entry.
+    expect(asMock(Domain.updateOne)).toHaveBeenNthCalledWith(
+      2,
+      { _id: expect.anything() },
+      {
+        $push: {
+          customServices: {
+            groupName: 'Загальні',
+            services: [serviceId],
+          },
+        },
+      }
+    )
+  })
+
+  it('cascades the new service to every active company of the domain', async () => {
+    asMock(CustomService.findOne).mockResolvedValueOnce(null)
+    asMock(CustomService.create).mockResolvedValueOnce({
+      _id: serviceId,
+      name: 'Foo',
+      fieldName: 'foo',
+      domain: ownDomainId,
+      toObject: () => ({
+        _id: serviceId,
+        name: 'Foo',
+        fieldName: 'foo',
+      }),
+    })
+
+    await createCustomService(
+      { name: 'Foo', domainId: String(ownDomainId) },
+      ctxGlobal
+    )
+
+    expect(asMock(RealEstate.updateMany)).toHaveBeenCalledWith(
+      { domain: expect.anything(), archived: { $ne: true } },
+      {
+        $push: {
+          customServices: {
+            _id: serviceId,
+            label: 'Foo',
+            fieldName: 'foo',
+            price: 0,
+          },
+        },
+      }
     )
   })
 })
@@ -358,7 +486,16 @@ describe('deleteCustomService', () => {
     expect(asMock(CustomService.findByIdAndDelete)).toHaveBeenCalledWith(
       String(serviceId)
     )
-    expect(asMock(Domain.updateOne)).not.toHaveBeenCalled()
+    // Cascade: detach service ID from the service's own domain groups
+    // and from every RealEstate of that domain.
+    expect(asMock(Domain.updateOne)).toHaveBeenCalledWith(
+      { _id: otherDomainId },
+      { $pull: { 'customServices.$[].services': String(serviceId) } }
+    )
+    expect(asMock(RealEstate.updateMany)).toHaveBeenCalledWith(
+      { domain: otherDomainId },
+      { $pull: { customServices: { _id: String(serviceId) } } }
+    )
   })
 
   it('GlobalAdmin deletes a legacy service outright, not unlink', async () => {

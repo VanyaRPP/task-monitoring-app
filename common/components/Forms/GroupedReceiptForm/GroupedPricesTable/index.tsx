@@ -55,10 +55,20 @@ function getInvoiceTableLng(currency?: string): 'en' | 'uk' {
   return normalizeCurrency(currency) === 'UAH' ? 'uk' : 'en'
 }
 
-const invoiceMatchesGroupService = (invoice: any, service: any): boolean =>
-  invoice?.name === service?.name ||
-  invoice?.type === service?.fieldName ||
-  (invoice?.type === 'maintenancePrice' && service?.fieldName === 'rentPrice')
+const invoiceMatchesGroupService = (invoice: any, service: any): boolean => {
+  if (!invoice || !service) return false
+  if (invoice.name && invoice.name === service.name) return true
+  if (invoice.fieldName && invoice.fieldName === service.fieldName) return true
+  if (invoice.type && invoice.type === service.fieldName) return true
+  const invoiceId = invoice.serviceId
+  if (invoiceId && String(invoiceId) === String(service._id)) return true
+  if (invoice.type === 'maintenancePrice' && service.fieldName === 'rentPrice')
+    return true
+  return false
+}
+
+const isCustomInvoice = (inv: any): boolean =>
+  inv?.type === 'custom' || inv?.customService === true
 
 const assignInvoicesToGroupsFirstWin = (
   invoices: any[] | undefined,
@@ -67,11 +77,21 @@ const assignInvoicesToGroupsFirstWin = (
   groupRows: Array<{ groupName: string; totalSum: string }>
   unmatchedInvoices: any[]
 } => {
-  if (!groups?.length || !invoices?.length) {
-    return { groupRows: [], unmatchedInvoices: invoices ?? [] }
+  if (!invoices?.length) {
+    return { groupRows: [], unmatchedInvoices: [] }
   }
 
-  const remaining = new Set(invoices.filter((inv) => inv?.type !== 'discount'))
+  // Standard services (Maintenance, Electricity, Water, etc.) always render as
+  // standalone rows — they're never absorbed into a custom group header.
+  const standardInvoices = invoices.filter(
+    (inv) => inv?.type !== 'discount' && !isCustomInvoice(inv)
+  )
+
+  if (!groups?.length) {
+    return { groupRows: [], unmatchedInvoices: standardInvoices }
+  }
+
+  const remaining = new Set(invoices.filter(isCustomInvoice))
   const groupRows: Array<{ groupName: string; totalSum: string }> = []
 
   for (const group of groups) {
@@ -107,7 +127,12 @@ const assignInvoicesToGroupsFirstWin = (
     })
   }
 
-  return { groupRows, unmatchedInvoices: [...remaining] }
+  return {
+    groupRows,
+    // Standard rows + any custom service that wasn't matched to a group fall
+    // through here. Renderer puts these as individual line items.
+    unmatchedInvoices: [...standardInvoices, ...remaining],
+  }
 }
 
 function resolveInvoiceLabel(inv: any, t: TFunction<'groupedReceipt'>): string {

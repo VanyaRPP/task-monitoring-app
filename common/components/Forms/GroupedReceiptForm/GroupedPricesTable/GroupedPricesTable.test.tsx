@@ -152,7 +152,43 @@ describe('GroupedPricesTable', () => {
     expect(screen.getAllByRole('columnheader').length).toBe(5)
   })
 
-  test('grouped preview: shows domain group name instead of line label', () => {
+  test('grouped preview: custom service rolled up under group header', () => {
+    mockUseGetCustomServicesByDomainQuery.mockReturnValue({
+      data: {
+        data: [
+          {
+            groupName: 'Група тест',
+            services: [{ name: 'Custom A', fieldName: 'customA', _id: 's1' }],
+          },
+        ],
+      },
+      isLoading: false,
+    })
+
+    const customInvoice = {
+      type: 'custom',
+      customService: true,
+      fieldName: 'customA',
+      name: 'Custom A',
+      sum: 250,
+    }
+
+    renderTable({
+      usePreviewQuantityToggle: true,
+      invoices: [customInvoice],
+    })
+
+    expect(screen.getByText('Група тест')).toBeInTheDocument()
+    // Individual custom name is replaced by the group header label.
+    expect(screen.queryByText('Custom A')).not.toBeInTheDocument()
+    const headers = screen.getAllByRole('columnheader')
+    expect(headers.length).toBe(3)
+  })
+
+  test('grouped preview: standard services stay as standalone rows', () => {
+    // Domain has a group containing a Maintenance-type entry, but standard
+    // invoices (type === ServiceType.Maintenance) must NOT be absorbed into
+    // the group — they always render as individual line items.
     mockUseGetCustomServicesByDomainQuery.mockReturnValue({
       data: {
         data: [
@@ -169,10 +205,8 @@ describe('GroupedPricesTable', () => {
 
     renderTable({ usePreviewQuantityToggle: true })
 
-    expect(screen.getByText('Група тест')).toBeInTheDocument()
-    expect(screen.queryByText('Утримання')).not.toBeInTheDocument()
-    const headers = screen.getAllByRole('columnheader')
-    expect(headers.length).toBe(3)
+    expect(screen.getByText('Утримання')).toBeInTheDocument()
+    expect(screen.queryByText('Група тест')).not.toBeInTheDocument()
   })
 
   // ── description-aware label resolution (commit 3e9533fe) ──
@@ -220,9 +254,7 @@ describe('GroupedPricesTable', () => {
           },
         ],
       })
-      expect(
-        screen.getByText('Знижка постійного клієнта')
-      ).toBeInTheDocument()
+      expect(screen.getByText('Знижка постійного клієнта')).toBeInTheDocument()
       // The legacy hard-coded "Знижка" (services.discount) must NOT appear
       // for this row, only the user-provided description.
       expect(screen.queryByText('Знижка')).not.toBeInTheDocument()
@@ -253,19 +285,25 @@ describe('GroupedPricesTable', () => {
           data: [
             {
               groupName: 'Група тест',
-              services: [
-                { name: 'x', fieldName: ServiceType.Maintenance, _id: 's1' },
-              ],
+              services: [{ name: 'A', fieldName: 'customA', _id: 's1' }],
             },
           ],
         },
         isLoading: false,
       })
 
+      const customMatched = {
+        type: 'custom',
+        customService: true,
+        fieldName: 'customA',
+        name: 'Custom A',
+        sum: 250,
+      }
+
       renderTable({
         usePreviewQuantityToggle: true,
         invoices: [
-          baseInvoice, // matches the group
+          customMatched, // matches the group → header row
           {
             type: 'unmatched',
             sum: 50,
