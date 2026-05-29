@@ -54,6 +54,7 @@ interface Props {
   onUpdateCustomService?: (id: string, newTitle: string) => Promise<void>
   isGlobalAdmin?: boolean
   domainId?: string
+  editable?: boolean
 }
 
 const DomainModal: FC<Props> = ({
@@ -67,6 +68,7 @@ const DomainModal: FC<Props> = ({
   onUpdateCustomService,
   isGlobalAdmin,
   domainId,
+  editable = true,
 }) => {
   const [targetKeys, setTargetKeys] = useState<Record<string, string[]>>({})
   const [localServiceGroups, setLocalServiceGroups] = useState<ServiceGroup[]>([])
@@ -279,6 +281,7 @@ const DomainModal: FC<Props> = ({
         titles={['Доступні послуги', 'Обрані послуги']}
         targetKeys={targetKeys[groupName] || []}
         onChange={(keys) => handleChange(groupName, keys)}
+        disabled={!editable}
         listStyle={{
           width: '55%',
           height: 300,
@@ -321,7 +324,7 @@ const DomainModal: FC<Props> = ({
               )}
 
               <Space size="small">
-                {isCustom && isAdmin && (isGlobalAdmin || !!domainId) && (
+                {editable && isCustom && isAdmin && (isGlobalAdmin || !!domainId) && (
                   <>
                     {isEditing ? (
                       <>
@@ -464,14 +467,22 @@ const DomainModal: FC<Props> = ({
       open={open}
       onCancel={onClose}
       width={1200}
-      footer={[
-        <Button key="cancel" onClick={onClose}>
-          Скасувати
-        </Button>,
-        <Button key="save" type="primary" onClick={handleSaveModal}>
-          Зберегти
-        </Button>,
-      ]}
+      footer={
+        editable
+          ? [
+              <Button key="cancel" onClick={onClose}>
+                Скасувати
+              </Button>,
+              <Button key="save" type="primary" onClick={handleSaveModal}>
+                Зберегти
+              </Button>,
+            ]
+          : [
+              <Button key="close" onClick={onClose}>
+                Закрити
+              </Button>,
+            ]
+      }
       style={{
         maxHeight: '80vh',
         overflowY: 'auto',
@@ -479,11 +490,13 @@ const DomainModal: FC<Props> = ({
       }}
     >
       <Space direction="vertical" style={{ width: '100%' }} size="large">
-        <Collapse
-          items={collapseItems}
-          activeKey={activePanel}
-          onChange={handlePanelChange}
-        />
+        {editable && (
+          <Collapse
+            items={collapseItems}
+            activeKey={activePanel}
+            onChange={handlePanelChange}
+          />
+        )}
 
         <div style={{ maxHeight: 'calc(70vh - 150px)', overflowY: 'auto' }}>
           {localServiceGroups.length > 0
