@@ -5,7 +5,7 @@ import { authOptions } from '@pages/api/auth/[...nextauth]'
 import { AppRoutes } from '@utils/constants'
 import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
-
+import Head from 'next/head'
 export default withAuthRedirect(() => {
   return (
     <MainLayout
@@ -15,6 +15,9 @@ export default withAuthRedirect(() => {
         { title: 'Графік платежів', path: AppRoutes.PAYMENT_CHART },
       ]}
     >
+      <Head>
+        <title>Графік платежів</title>
+      </Head>
       <PaymentsChart />
     </MainLayout>
   )
