@@ -16,7 +16,7 @@ import {
 
 export const domainApi = createApi({
   reducerPath: 'domainApi',
-  tagTypes: ['CustomService', 'Domain', 'IDomain', 'DomainTypeTemplate'],
+  tagTypes: ['Domain', 'IDomain', 'DomainTypeTemplate'],
   refetchOnFocus: true,
   refetchOnReconnect: true,
   baseQuery: fetchBaseQuery({ baseUrl: `/api/` }),
@@ -87,7 +87,7 @@ export const domainApi = createApi({
           body: body,
         }
       },
-      invalidatesTags: (response) => (response ? ['Domain', 'CustomService'] : []),
+      invalidatesTags: (response) => (response ? ['Domain'] : []),
     }),
     getAreas: builder.query<IExtendedAreas, { domainId?: string }>({
       query: ({ domainId }) => ({

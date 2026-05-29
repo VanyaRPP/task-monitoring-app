@@ -27,19 +27,11 @@ const InvoicesTable: React.FC = () => {
 
   const domainId = Form.useWatch('domain', form)
 
- const { data: customDomainServices, refetch } = useGetCustomServicesByDomainQuery(
-  { domainId },
-  { skip: !domainId }
-)
+  const { data: customDomainServices } = useGetCustomServicesByDomainQuery(
+    { domainId },
+    { skip: !domainId }
+  )
 
-useEffect(() => {
-  if (domainId) {
-    refetch()
-  }
-}, [domainId, refetch])
-
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const groups = customDomainServices?.data ?? []
 
   const allowedServices = useMemo(
@@ -87,9 +79,8 @@ useEffect(() => {
         prevPayment: validPrevPayment,
       })
 
-const filteredInvoice = allowedServices && allowedServices.length > 0 
-  ? serviceFilter(allinvoice, allowedServices)
-  : allinvoice.filter(inv => ['rentPrice', 'electricityPrice', 'waterPrice'].includes(inv.fieldName));
+      const filteredInvoice = serviceFilter(allinvoice, allowedServices)
+
       return {
         company,
         invoice: buildBulkInvoiceMap(allinvoice, filteredInvoice),
@@ -118,14 +109,13 @@ const filteredInvoice = allowedServices && allowedServices.length > 0
           loading={isLoading}
           tableLayout="fixed"
           columns={[
-  ...getDefaultColumns(
-    remove,
-    allowedServices,
-    service?.losses,
-    customServicesColumns,
-    service
-  ),
-]}
+            ...getDefaultColumns(
+              remove,
+              allowedServices,
+              service?.losses,
+              customServicesColumns
+            ),
+          ]}
           dataSource={fields}
           scroll={{ x: 1200 }}
           locale={{

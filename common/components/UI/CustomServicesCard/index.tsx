@@ -1,32 +1,26 @@
-import React, { useMemo, useRef, useState } from 'react'
+import { FC, useEffect, useMemo, useRef, useState } from 'react'
 import { InputNumber, Space, Button, Form, Select, Tooltip } from 'antd'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
-import { inputNumberParser } from '@utils/helpers'
+import { inputNumberParser, isAdminCheck } from '@utils/helpers'
 import { CloseOutlined, CheckOutlined } from '@ant-design/icons'
-import { Roles } from '@utils/constants'
 
 type CustomServicesCardProps = {
   form: any
   disabled?: boolean
   allCustomServices?: any[]
   isServiceForm?: boolean
+  skipAutoPopulate?: boolean
 }
 
-const CustomServicesCard: React.FC<CustomServicesCardProps> = ({
+const CustomServicesCard: FC<CustomServicesCardProps> = ({
   form,
   disabled = false,
   allCustomServices = [],
   isServiceForm = false,
+  skipAutoPopulate = false,
 }) => {
   const { data: user } = useGetCurrentUserQuery()
-  const isDomainAdmin = useMemo(
-    () => user?.roles?.includes(Roles.DOMAIN_ADMIN),
-    [user]
-  )
-  const isGlobalAdmin = useMemo(
-    () => user?.roles?.includes(Roles.GLOBAL_ADMIN),
-    [user]
-  )
+  const isAdmin = useMemo(() => isAdminCheck(user?.roles), [user])
 
   const customServices = Form.useWatch('customServices', form) || []
   const selectedIds: string[] = customServices.map((s: any) => s._id)
@@ -105,17 +99,29 @@ const CustomServicesCard: React.FC<CustomServicesCardProps> = ({
   }
   const dashIfEmpty = (v: any) => (v === 0 || v ? v : '-')
 
-  React.useEffect(() => {
-    if (allCustomServices.length > 0 && customServices.length === 0 && !disabled) {
-      const autoEntries = allCustomServices.map((service: any) => ({
-        _id: service?._id || service?.value,
-        label: service?.label,
-        fieldName: service?.fieldName,
-        price: 0,
-      }))
-      form.setFieldsValue({ customServices: autoEntries })
+  const autoPopulatedRef = useRef(false)
+
+  useEffect(() => {
+    if (skipAutoPopulate || disabled) return
+    if (autoPopulatedRef.current) return
+    if (allCustomServices.length === 0) return
+
+    if (customServices.length > 0) {
+      autoPopulatedRef.current = true
+      return
     }
-  }, [allCustomServices, form, disabled, customServices.length])
+
+    form.setFieldsValue({
+      customServices: allCustomServices.map(buildEntry),
+    })
+    autoPopulatedRef.current = true
+  }, [
+    allCustomServices,
+    customServices.length,
+    disabled,
+    form,
+    skipAutoPopulate,
+  ])
 
   return (
     <div>
@@ -202,7 +208,7 @@ const CustomServicesCard: React.FC<CustomServicesCardProps> = ({
                     />
                   </Form.Item>
                   {!disabled &&
-                    (isDomainAdmin || isGlobalAdmin) &&
+                    isAdmin &&
                     !isServiceForm && (
                       <Button
                         type="text"
