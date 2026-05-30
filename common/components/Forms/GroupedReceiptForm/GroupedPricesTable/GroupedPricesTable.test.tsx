@@ -396,10 +396,12 @@ describe('GroupedPricesTable', () => {
     expect(screen.queryByText('null')).not.toBeInTheDocument()
   })
 
-  test('grouped preview: standard services stay as standalone rows', () => {
-    // Domain has a group containing a Maintenance-type entry, but standard
-    // invoices (type === ServiceType.Maintenance) must NOT be absorbed into
-    // the group — they always render as individual line items.
+  test('grouped preview: standard service inside a user-defined group is rolled up under that group', () => {
+    // Maintenance (standard) is technically a CustomService doc with
+    // fieldName='maintenancePrice'. When a domain admin puts it on the RIGHT
+    // of a user-defined group's Transfer, the invoice rendering MUST show the
+    // group header — not the standalone "Утримання" label. Same rule as for
+    // truly custom services.
     mockUseGetCustomServicesByDomainQuery.mockReturnValue({
       data: {
         data: [
@@ -416,8 +418,32 @@ describe('GroupedPricesTable', () => {
 
     renderTable({ usePreviewQuantityToggle: true })
 
+    expect(screen.getByText('Група тест')).toBeInTheDocument()
+    expect(screen.queryByText('Утримання')).not.toBeInTheDocument()
+    const headers = screen.getAllByRole('columnheader')
+    expect(headers.length).toBe(3)
+  })
+
+  test('grouped preview: standard service that is NOT in any group renders standalone', () => {
+    // Same Maintenance invoice, but the domain has no groups containing it
+    // (only an unrelated group with a different service). The Maintenance row
+    // must render with its own label, NOT under "Інше" group.
+    mockUseGetCustomServicesByDomainQuery.mockReturnValue({
+      data: {
+        data: [
+          {
+            groupName: 'Інше',
+            services: [{ name: 'Y', fieldName: 'yyy', _id: 'sy' }],
+          },
+        ],
+      },
+      isLoading: false,
+    })
+
+    renderTable({ usePreviewQuantityToggle: true })
+
     expect(screen.getByText('Утримання')).toBeInTheDocument()
-    expect(screen.queryByText('Група тест')).not.toBeInTheDocument()
+    expect(screen.queryByText('Інше')).not.toBeInTheDocument()
   })
 
   // ── description-aware label resolution (commit 3e9533fe) ──

@@ -67,9 +67,6 @@ const invoiceMatchesGroupService = (invoice: any, service: any): boolean => {
   return false
 }
 
-const isCustomInvoice = (inv: any): boolean =>
-  inv?.type === 'custom' || inv?.customService === true
-
 const assignInvoicesToGroupsFirstWin = (
   invoices: any[] | undefined,
   groups: any[] | undefined
@@ -77,21 +74,17 @@ const assignInvoicesToGroupsFirstWin = (
   groupRows: Array<{ groupName: string; totalSum: string }>
   unmatchedInvoices: any[]
 } => {
-  if (!invoices?.length) {
-    return { groupRows: [], unmatchedInvoices: [] }
+  if (!groups?.length || !invoices?.length) {
+    return { groupRows: [], unmatchedInvoices: invoices ?? [] }
   }
 
-  // Standard services (Maintenance, Electricity, Water, etc.) always render as
-  // standalone rows — they're never absorbed into a custom group header.
-  const standardInvoices = invoices.filter(
-    (inv) => inv?.type !== 'discount' && !isCustomInvoice(inv)
-  )
-
-  if (!groups?.length) {
-    return { groupRows: [], unmatchedInvoices: standardInvoices }
-  }
-
-  const remaining = new Set(invoices.filter(isCustomInvoice))
+  // Whether a service is technically standard (Maintenance/Electricity/etc) or
+  // truly custom doesn't matter for grouping: if it's listed on the RIGHT of a
+  // user-defined group's Transfer, it gets rolled up under that group header.
+  // What renders standalone is everything that falls through to `remaining` —
+  // services that aren't in any user-defined group (the synthetic null bucket
+  // is skipped below) or that don't exist in the domain catalog at all.
+  const remaining = new Set(invoices.filter((inv) => inv?.type !== 'discount'))
   const groupRows: Array<{ groupName: string; totalSum: string }> = []
 
   for (const group of groups) {
@@ -131,12 +124,7 @@ const assignInvoicesToGroupsFirstWin = (
     })
   }
 
-  return {
-    groupRows,
-    // Standard rows + any custom service that wasn't matched to a group fall
-    // through here. Renderer puts these as individual line items.
-    unmatchedInvoices: [...standardInvoices, ...remaining],
-  }
+  return { groupRows, unmatchedInvoices: [...remaining] }
 }
 
 function resolveInvoiceLabel(inv: any, t: TFunction<'groupedReceipt'>): string {
