@@ -185,6 +185,40 @@ describe('GroupedPricesTable', () => {
     expect(headers.length).toBe(3)
   })
 
+  test('grouped preview: ungrouped custom services render as standalone rows', () => {
+    // Backend marks the "no group" bucket with groupName: null. Invoice render
+    // must NOT collapse those entries under a "null" header — they render as
+    // individual line items, by their own name.
+    mockUseGetCustomServicesByDomainQuery.mockReturnValue({
+      data: {
+        data: [
+          {
+            groupName: null,
+            services: [{ name: 'Loose A', fieldName: 'looseA', _id: 'u1' }],
+          },
+        ],
+      },
+      isLoading: false,
+    })
+
+    const ungroupedInvoice = {
+      type: 'custom',
+      customService: true,
+      fieldName: 'looseA',
+      name: 'Loose A',
+      sum: 75,
+    }
+
+    renderTable({
+      usePreviewQuantityToggle: true,
+      invoices: [ungroupedInvoice],
+    })
+
+    expect(screen.getByText('Loose A')).toBeInTheDocument()
+    // No "null" header smuggled into the table.
+    expect(screen.queryByText('null')).not.toBeInTheDocument()
+  })
+
   test('grouped preview: standard services stay as standalone rows', () => {
     // Domain has a group containing a Maintenance-type entry, but standard
     // invoices (type === ServiceType.Maintenance) must NOT be absorbed into

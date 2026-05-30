@@ -21,13 +21,6 @@ export default async function handler(
       try {
         const { domainId } = req.query
 
-        // if (isUser) {                    // Access for User
-        //   return res.status(400).json({
-        //     success: false,
-        //     message: 'access denied',
-        //   })
-        // }
-
         if (!domainId || Array.isArray(domainId)) {
           return res.status(400).json({
             success: false,
@@ -44,43 +37,26 @@ export default async function handler(
           })
         }
 
-        if (!domain.customServices || domain.customServices.length === 0) {
-          return res.status(200).json({
-            success: true,
-            data: [],
-          })
-        }
+        // All CustomServices that belong to this domain — the catalog.
+        // Includes services that are NOT referenced in any Domain.customServices
+        // group, which we expose as a synthetic "ungrouped" entry below so the
+        // rest of the system (Payment Bulk, RealEstateModal, invoice) can use
+        // them just like grouped ones.
+        const allDomainServices = await CustomService.find({
+          domain: domainId,
+        }).lean()
 
-        const domainGroups = domain.customServices.map((service, index) => {
-          return {
+        const domainGroups = (domain.customServices || []).map(
+          (service, index) => ({
             groupName: service?.groupName ?? `Група ${index + 1}`,
             services: service?.services || [],
-          }
-        })
-
-        const allServiceIds = domainGroups
-          .flatMap((group) => group.services || [])
-          .map(String)
-          .filter((id) => mongoose.Types.ObjectId.isValid(id))
-
-        if (allServiceIds.length === 0) {
-          return res.status(200).json({
-            success: true,
-            data: domainGroups.map((group, index) => ({
-              groupName: group.groupName ?? `Група ${index + 1}`,
-              services: [],
-            })),
           })
-        }
-
-        const customServices = await CustomService.find({
-          _id: { $in: allServiceIds },
-        }).lean()
+        )
 
         const groupedServices = domainGroups.map((group, index) => {
           const services = (group.services || [])
             .map((id) =>
-              customServices.find(
+              allDomainServices.find(
                 (service) => String(service._id) === String(id)
               )
             )
@@ -92,9 +68,32 @@ export default async function handler(
           }
         })
 
+        const groupedIds = new Set(
+          groupedServices.flatMap((group) =>
+            group.services.map((service) => String(service._id))
+          )
+        )
+        const ungroupedServices = allDomainServices.filter(
+          (service) => !groupedIds.has(String(service._id))
+        )
+
+        const responseData: Array<{
+          groupName: string | null
+          services: unknown[]
+        }> = [...groupedServices]
+
+        if (ungroupedServices.length > 0) {
+          // groupName: null is the marker for "not in any user-defined group".
+          // Invoice renderer skips it so these services show as standalone rows.
+          responseData.push({
+            groupName: null,
+            services: ungroupedServices,
+          })
+        }
+
         return res.status(200).json({
           success: true,
-          data: groupedServices,
+          data: responseData,
         })
       } catch (error: any) {
         return res.status(500).json({

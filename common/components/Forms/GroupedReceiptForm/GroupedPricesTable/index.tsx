@@ -95,6 +95,10 @@ const assignInvoicesToGroupsFirstWin = (
   const groupRows: Array<{ groupName: string; totalSum: string }> = []
 
   for (const group of groups) {
+    // Skip the synthetic "ungrouped" bucket (groupName: null) coming from the
+    // domain endpoint — services there render as individual line items, never
+    // collapsed under a header.
+    if (!group?.groupName) continue
     const groupInvoices: any[] = []
     for (const inv of [...remaining]) {
       if (
