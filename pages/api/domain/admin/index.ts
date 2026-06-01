@@ -32,7 +32,11 @@ export default async function handler(
         .status(403)
         .json({ success: false, message: 'Access denied: not an admin' })
     }
-    const archivedFilter = { archived: false }
+    const archivedParam = req.query.archived
+    const archivedFilter =
+      archivedParam === undefined
+        ? { archived: false }
+        : { archived: archivedParam === 'true' }
     const domains = isGlobalAdmin
       ? await Domain.find({ ...archivedFilter }).lean()
       : await Domain.find({ adminEmails: user.email, ...archivedFilter }).lean()

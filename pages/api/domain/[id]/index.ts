@@ -88,6 +88,10 @@ export default async function handler(
             .json({ success: false, message: 'Access denied: not an admin' })
         }
 
+        if ('archived' in req.body) {
+          delete req.body.archived
+        }
+
         const incomingEmails = req.body?.adminEmails
         if (incomingEmails !== undefined) {
           if (!Array.isArray(incomingEmails) || !isValidEmail(incomingEmails)) {
@@ -154,7 +158,6 @@ export default async function handler(
           const domain = await Domain.findOne({
             _id: req.query.id,
             adminEmails: user.email,
-            archived: false,
           })
 
           if (!domain) {
@@ -167,10 +170,7 @@ export default async function handler(
 
           return res.status(200).json({ success: true, data: domain })
         } else {
-          const response = await Domain.findOne({
-            _id: req.query.id,
-            archived: false, 
-          })
+          const response = await Domain.findOne({ _id: req.query.id })
           return res.status(200).json({ success: true, data: response })
         }
       } catch (error) {

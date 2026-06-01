@@ -1,5 +1,5 @@
 import { expect } from '@jest/globals'
-import handler from '@pages/api/domain/[id]/index'
+import handler from '@pages/api/domain/[id]/archive/index'
 import Domain from '@modules/models/Domain'
 import Street from '@modules/models/Street'
 

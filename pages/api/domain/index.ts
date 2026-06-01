@@ -98,7 +98,7 @@ export default async function handler(
         }
 
         const updatedObj = encryptDomainBankTokens(req.body, SECURE_TOKEN)
-        updatedObj.archived = false
+        delete updatedObj.archived
         if (isDomainAdmin && !isGlobalAdmin) {
           if (
             !updatedObj.adminEmails ||
