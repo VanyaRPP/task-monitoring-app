@@ -11,6 +11,10 @@ jest.mock('@common/api/userApi/user.api', () => ({
 
 jest.mock('@utils/helpers', () => ({
   inputNumberParser: jest.fn((v) => v),
+  isAdminCheck: jest.fn(
+    (roles?: string[]) =>
+      !!roles?.includes('GlobalAdmin') || !!roles?.includes('DomainAdmin')
+  ),
 }))
 
 // antd Select's virtualised popup doesn't open in jsdom; stub it with a flat

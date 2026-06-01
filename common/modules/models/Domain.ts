@@ -15,6 +15,7 @@ export interface IDomain {
   customServices: ICustomService[]
   domainTypeTemplateId?: Types.ObjectId
   defaultTemplate?: string
+  archived?: boolean
 }
 
 export interface ICustomService {
@@ -49,6 +50,7 @@ const DomainSchema = new Schema<IDomain>({
   IEName: { type: String, required: false },
   domainBankToken: { type: [Object] },
   domainServices: { type: [Object] },
+  archived: { type: Boolean, required: false, default: false },
   defaultTemplate: { type: String, required: false },
   customServices: [
     {
