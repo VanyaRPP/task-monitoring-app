@@ -37,6 +37,9 @@ describe('API GET custom-services/domain', () => {
       isDomainAdmin: false,
       isUser: false,
     })
+    // Default: no services in the domain catalog. Individual tests override
+    // when they care about the catalog response.
+    ;(CustomService.find as jest.Mock).mockReturnValue(mockLean([]))
   })
 
   it('returns 400 when domainId missing', async () => {

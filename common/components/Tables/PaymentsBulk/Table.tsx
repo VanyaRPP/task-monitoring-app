@@ -32,7 +32,6 @@ const InvoicesTable: React.FC = () => {
     { skip: !domainId }
   )
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const groups = customDomainServices?.data ?? []
 
   const allowedServices = useMemo(

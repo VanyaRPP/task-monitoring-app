@@ -18,12 +18,12 @@ import {
 } from 'antd'
 import { ColumnType } from 'antd/lib/table'
 import { useRouter } from 'next/router'
-import { useEffect, useMemo } from 'react'
+import { useEffect } from 'react'
 
 import {
   useDeleteDomainMutation,
   useGetDomainsQuery,
-  useEditDomainMutation,
+  useUpdateArchivedDomainMutation,
 } from '@common/api/domainApi/domain.api'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 import StreetsBlock from '@components/DashboardPage/blocks/streets'
@@ -54,21 +54,17 @@ const DomainsTable: React.FC<Props> = ({
     archived: isArchive,
   })
 
-  const filteredData = useMemo(() => {
-    if (!data) return []
-    return data.filter((domain) =>
-      isArchive ? domain.archived === true : !domain.archived
-    )
-  }, [data, isArchive])
+  const domains = data ?? []
 
   useEffect(() => {
     if (!isLoading && setDomainsLength) {
-      setDomainsLength(filteredData.length)
+      setDomainsLength(domains.length)
     }
-  }, [filteredData, isLoading, setDomainsLength])
+  }, [domains, isLoading, setDomainsLength])
 
   const [deleteDomain, { isLoading: deleteLoading }] = useDeleteDomainMutation()
-  const [updateDomain, { isLoading: archiveLoading }] = useEditDomainMutation()
+  const [updateArchivedDomain, { isLoading: archiveLoading }] =
+    useUpdateArchivedDomainMutation()
 
   const handleDelete = async (id: string) => {
     const response = await deleteDomain(id)
@@ -81,7 +77,7 @@ const DomainsTable: React.FC<Props> = ({
 
   const handleArchive = async (id: string, archived: boolean) => {
     try {
-      const response = await updateDomain({ _id: id, archived })
+      const response = await updateArchivedDomain({ _id: id, archived })
       if ('data' in response) {
         message.success(archived ? 'Домен архівовано' : 'Домен розархівовано')
       } else {
@@ -112,7 +108,7 @@ const DomainsTable: React.FC<Props> = ({
           <StreetsBlock domainId={domainId} />
         ),
       }}
-      dataSource={filteredData}
+      dataSource={domains}
       scroll={{ x: 600 }}
     />
   )

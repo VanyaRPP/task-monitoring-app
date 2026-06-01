@@ -66,6 +66,15 @@ export interface IExtendedDomain extends IDomainModel {
   _v: number
 }
 
+export interface IArchivedDomain {
+  _id?: string
+  archived?: boolean
+}
+
+export interface IExtendedArchivedDomain extends IArchivedDomain {
+  _id: string
+}
+
 export interface IAddDomainResponse {
   success: boolean
   data: IExtendedDomain
