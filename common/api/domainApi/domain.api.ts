@@ -3,6 +3,7 @@ import { customServicesApi } from '@common/api/customServicesApi/customServices.
 import {
   IDomainModel,
   IExtendedDomain,
+  IExtendedArchivedDomain,
   IDeleteDomainResponse,
   IAddDomainResponse,
   IGetDomainResponse,
@@ -17,7 +18,7 @@ import {
 
 export const domainApi = createApi({
   reducerPath: 'domainApi',
-  tagTypes: ['Domain', 'IDomain', 'DomainTypeTemplate'],
+  tagTypes: ['Domain', 'IDomain', 'DomainTypeTemplate', 'ArchivedDomain'],
   refetchOnFocus: true,
   refetchOnReconnect: true,
   baseQuery: fetchBaseQuery({ baseUrl: `/api/` }),
@@ -40,19 +41,36 @@ export const domainApi = createApi({
       },
       providesTags: (response) =>
         response
-          ? response.map((item) => ({ type: 'Domain', id: item._id }))
-          : [],
+          ? [
+              ...response.flatMap((item) => [
+                { type: 'Domain' as const, id: item._id },
+                { type: 'ArchivedDomain' as const, id: item._id },
+              ]),
+              { type: 'Domain' as const, id: 'LIST' },
+            ]
+          : [{ type: 'Domain' as const, id: 'LIST' }],
       transformResponse: (response: IGetDomainResponse) => response.data,
     }),
-    getDomainsByAdmin: builder.query<IExtendedDomain[], void>({
-      query: () => ({
+    getDomainsByAdmin: builder.query<
+      IExtendedDomain[],
+      { archived?: boolean } | void
+    >({
+      query: (arg) => ({
         url: `domain/admin`,
         method: 'GET',
+        params:
+          arg && arg.archived !== undefined ? { archived: arg.archived } : {},
       }),
       providesTags: (response) =>
         response
-          ? response.map((item) => ({ type: 'Domain', id: item._id }))
-          : [],
+          ? [
+              ...response.flatMap((item) => [
+                { type: 'Domain' as const, id: item._id },
+                { type: 'ArchivedDomain' as const, id: item._id },
+              ]),
+              { type: 'Domain' as const, id: 'LIST' },
+            ]
+          : [{ type: 'Domain' as const, id: 'LIST' }],
       transformResponse: (response: IGetDomainResponse) => response.data,
     }),
     addDomain: builder.mutation<IAddDomainResponse, IDomainModel>({
@@ -65,7 +83,8 @@ export const domainApi = createApi({
           body,
         }
       },
-      invalidatesTags: ['Domain'],
+      invalidatesTags: (response) =>
+        response ? [{ type: 'Domain', id: 'LIST' }] : [],
     }),
     deleteDomain: builder.mutation<
       IDeleteDomainResponse,
@@ -77,7 +96,13 @@ export const domainApi = createApi({
           method: 'DELETE',
         }
       },
-      invalidatesTags: (response) => (response ? ['Domain'] : []),
+      invalidatesTags: (response, error, id) =>
+        response
+          ? [
+              { type: 'Domain', id },
+              { type: 'Domain', id: 'LIST' },
+            ]
+          : [],
     }),
     editDomain: builder.mutation<IExtendedDomain, Partial<IExtendedDomain>>({
       query(data) {
@@ -88,8 +113,31 @@ export const domainApi = createApi({
           body: body,
         }
       },
-      invalidatesTags: (response) => (response ? ['Domain'] : []),
-      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+      invalidatesTags: (response, error, arg) =>
+        response
+          ? [
+              { type: 'Domain', id: arg._id },
+              { type: 'Domain', id: 'LIST' },
+            ]
+          : [],
+    }),
+    updateArchivedDomain: builder.mutation<
+      IExtendedDomain,
+      Partial<IExtendedArchivedDomain>
+    >({
+      query: ({ _id, ...body }) => ({
+        url: `domain/${_id}/archive`,
+        method: 'PATCH',
+        body,
+      }),
+      invalidatesTags: (response, error, arg) =>
+        response
+          ? [
+              { type: 'ArchivedDomain', id: arg._id },
+              { type: 'Domain', id: 'LIST' },
+            ]
+          : [],
+                async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         // Domain edits may reshape customServices groups; force the
         // customServicesApi cache to refresh so Payment Bulk + RealEstateModal
         // see the new structure without a manual reload.
@@ -244,6 +292,7 @@ export const {
   useAddDomainMutation,
   useDeleteDomainMutation,
   useEditDomainMutation,
+  useUpdateArchivedDomainMutation,
   useGetDomainByPkQuery,
   useGetDomainsByAdminQuery,
   useGetDomainTypeTemplatesQuery,
