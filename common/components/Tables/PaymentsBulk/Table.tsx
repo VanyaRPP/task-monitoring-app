@@ -10,6 +10,7 @@ import { useRouter } from 'next/router'
 import { useEffect, useMemo } from 'react'
 import { defaultServices } from '@utils/constants'
 import { findPrevPaymentMatch } from './hooks/usePrevPayment/usePrevPayment'
+import { Amount } from './cells/Amount'
 
 const InvoicesTable: React.FC = () => {
   const router = useRouter()
@@ -32,7 +33,6 @@ const InvoicesTable: React.FC = () => {
     { skip: !domainId }
   )
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const groups = customDomainServices?.data ?? []
 
   const allowedServices = useMemo(
@@ -46,6 +46,15 @@ const InvoicesTable: React.FC = () => {
         .filter((s) => !defaultServices.includes(s?._id.toString()))
         .map((s) => ({
           title: s.name,
+          children: [
+            {
+              title: 'Кількість',
+              width: 140,
+              render: (_: any, { name }: { name: number }) => (
+                <Amount name={name} fieldName={s.fieldName} />
+              ),
+            },
+            {
           width: 160,
           render: (_: any, { name }: { name: number }) => (
             <Form.Item
@@ -55,6 +64,8 @@ const InvoicesTable: React.FC = () => {
               <Input />
             </Form.Item>
           ),
+            },
+          ],
         })),
     [allowedServices]
   )
@@ -82,9 +93,23 @@ const InvoicesTable: React.FC = () => {
 
       const filteredInvoice = serviceFilter(allinvoice, allowedServices)
 
+      const invoice = buildBulkInvoiceMap(allinvoice, filteredInvoice)
+
+      for (const s of allowedServices) {
+        if (defaultServices.includes(s?._id?.toString())) continue
+        const key = s.fieldName
+        if (!key) continue
+        const existing = invoice[key]
+        const amount = existing?.amount
+        invoice[key] = {
+          ...(existing || { type: 'custom', fieldName: key, name: s.name }),
+          amount: amount === undefined || amount === null ? 1 : amount,
+        } as typeof invoice[string]
+      }
+
       return {
         company,
-        invoice: buildBulkInvoiceMap(allinvoice, filteredInvoice),
+        invoice,
       }
     })
   }, [companies, service, prevService, prevPayments, allowedServices])

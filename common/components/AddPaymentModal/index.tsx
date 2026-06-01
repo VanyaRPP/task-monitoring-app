@@ -118,6 +118,7 @@ const AddPaymentModal: FC<Props> = ({
   const [form] = Form.useForm()
   const firstRunRef = useRef(true)
   const restoringRef = useRef(false)
+  const autoSelectedChangelogRef = useRef(false)
   const lastLoadedCompanyId = useRef<string | null>(null)
   const [changed, setChanged] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -201,6 +202,18 @@ const AddPaymentModal: FC<Props> = ({
     changelogRes,
     handleDeleteChangeLog
   )
+
+  useEffect(() => {
+    if (autoSelectedChangelogRef.current) return
+    const logs = changelogRes?.data
+    if (!logs?.length) return
+
+    const latestManualLog = logs.find((log) => log.reason === 'manual')
+    if (!latestManualLog) return
+
+    autoSelectedChangelogRef.current = true
+    form.setFieldsValue({ changelogId: latestManualLog._id })
+  }, [changelogRes?.data, form])
 
   // `usePaymentFormData` currently returns paymentData unchanged as `payment`,
   // so we destructure only the actual derived fields and use `paymentData`

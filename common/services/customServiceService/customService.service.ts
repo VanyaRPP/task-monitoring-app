@@ -1,5 +1,6 @@
 import CustomService from '@modules/models/CustomService'
 import Domain from '@modules/models/Domain'
+import RealEstate from '@modules/models/RealEstate'
 import { DomainTypeTemplateCategory } from '@modules/models/domain-type-template'
 import { getDefaultServiceIdsForCategory } from '@common/services/domainTypeTemplateService/domainTypeTemplate.service'
 import { ServiceType } from '@utils/constants'
@@ -7,6 +8,8 @@ import { escapeRegexForMongo } from '@utils/escape-regex/escape-regex'
 import { defaultServicesSet } from '@utils/helpers'
 import { transliterateAndCamelCase } from '@utils/transliterateAndCamelCase'
 import mongoose from 'mongoose'
+
+const DEFAULT_GROUP_NAME = 'Загальні'
 
 export type ServiceErrorCode =
   | 'forbidden'
@@ -130,6 +133,79 @@ async function findDuplicateInDomain(
   return CustomService.findOne(filter)
 }
 
+async function attachServiceToDomainGroup(
+  domainId: mongoose.Types.ObjectId,
+  serviceId: mongoose.Types.ObjectId
+): Promise<void> {
+  // Try to push to existing default group; if it doesn't exist, append the group.
+  // arrayFilters lets us update the embedded group whose name matches.
+  const pushed = await Domain.updateOne(
+    { _id: domainId, 'customServices.groupName': DEFAULT_GROUP_NAME },
+    {
+      $addToSet: { 'customServices.$[group].services': serviceId },
+    },
+    {
+      arrayFilters: [{ 'group.groupName': DEFAULT_GROUP_NAME }],
+    }
+  )
+  if (pushed.matchedCount === 0) {
+    await Domain.updateOne(
+      { _id: domainId },
+      {
+        $push: {
+          customServices: {
+            groupName: DEFAULT_GROUP_NAME,
+            services: [serviceId],
+          },
+        },
+      }
+    )
+  }
+}
+
+async function detachServiceFromDomainGroups(
+  domainId: mongoose.Types.ObjectId,
+  serviceId: mongoose.Types.ObjectId | string
+): Promise<void> {
+  await Domain.updateOne(
+    { _id: domainId },
+    { $pull: { 'customServices.$[].services': serviceId } }
+  )
+}
+
+async function detachServiceFromDomainCompanies(
+  domainId: mongoose.Types.ObjectId,
+  serviceId: mongoose.Types.ObjectId | string
+): Promise<void> {
+  await RealEstate.updateMany(
+    { domain: domainId },
+    { $pull: { customServices: { _id: serviceId } } }
+  )
+}
+
+async function attachServiceToDomainCompanies(
+  domainId: mongoose.Types.ObjectId,
+  service: {
+    _id: mongoose.Types.ObjectId
+    name: string
+    fieldName: string
+  }
+): Promise<void> {
+  await RealEstate.updateMany(
+    { domain: domainId, archived: { $ne: true } },
+    {
+      $push: {
+        customServices: {
+          _id: service._id,
+          label: service.name,
+          fieldName: service.fieldName,
+          price: 0,
+        },
+      },
+    }
+  )
+}
+
 export async function createCustomService(
   input: CreateCustomServiceInput,
   ctx: UserContext
@@ -183,6 +259,26 @@ export async function createCustomService(
     ...(parsedType.value ? { serviceType: parsedType.value } : {}),
     ...(domainObjectId ? { domain: domainObjectId } : {}),
   })
+
+  if (domainObjectId) {
+    // Best-effort: make the new service visible immediately by attaching it to
+    // the domain's default group and to every active company under that domain
+    // with a price of 0. Failures are non-fatal — the service still exists.
+    try {
+      await attachServiceToDomainGroup(domainObjectId, created._id)
+    } catch (e) {
+      console.warn('attachServiceToDomainGroup failed', e)
+    }
+    try {
+      await attachServiceToDomainCompanies(domainObjectId, {
+        _id: created._id,
+        name: created.name,
+        fieldName: created.fieldName,
+      })
+    } catch (e) {
+      console.warn('attachServiceToDomainCompanies failed', e)
+    }
+  }
 
   return ok(created.toObject())
 }
@@ -306,8 +402,10 @@ export async function deleteCustomService(
     return err('not_found', 'Сервіс не знайдений')
   }
 
+  const serviceDomain = service.domain as mongoose.Types.ObjectId | undefined
+
   if (ctx.isGlobalAdmin) {
-    await CustomService.findByIdAndDelete(idStr)
+    await cascadeDeleteCustomService(idStr, serviceDomain)
     return ok('Сервіс успішно видалено')
   }
 
@@ -316,15 +414,36 @@ export async function deleteCustomService(
   if (isServiceErr(access)) return access
   const domainId = access.data
 
-  const serviceDomain = service.domain as mongoose.Types.ObjectId | undefined
-
   if (serviceDomain && !domainId.equals(serviceDomain)) {
     return err('forbidden', 'Сервіс не належить вашому домену')
   }
 
-  // Own-domain or legacy → delete the original document.
-  await CustomService.findByIdAndDelete(idStr)
+  // Legacy services (no domain ref) are never referenced in any
+  // Domain.customServices group, so cascade is a no-op — skip it.
+  await cascadeDeleteCustomService(idStr, serviceDomain)
   return ok('Сервіс успішно видалено')
+}
+
+async function cascadeDeleteCustomService(
+  serviceId: string,
+  domainId?: mongoose.Types.ObjectId
+): Promise<void> {
+  // Cascade order: pull refs from embedded structures first, then delete the
+  // catalog record. If the delete fails, the embeds are already cleaned — they
+  // would be orphaned anyway since the catalog record was about to be removed.
+  if (domainId) {
+    try {
+      await detachServiceFromDomainGroups(domainId, serviceId)
+    } catch (e) {
+      console.warn('detachServiceFromDomainGroups failed', e)
+    }
+    try {
+      await detachServiceFromDomainCompanies(domainId, serviceId)
+    } catch (e) {
+      console.warn('detachServiceFromDomainCompanies failed', e)
+    }
+  }
+  await CustomService.findByIdAndDelete(serviceId)
 }
 
 export interface ListCustomServicesQuery {

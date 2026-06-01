@@ -61,9 +61,9 @@ const DomainsHeader: React.FC<Props> = ({
         justifyContent: 'space-between',
         alignItems: 'center',
         width: '100%',
+        position: 'relative',
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
         <Button type="link" onClick={() => router.push(AppRoutes.DOMAIN)}>
           Надавачі послуг
           <SelectOutlined />
@@ -71,7 +71,12 @@ const DomainsHeader: React.FC<Props> = ({
             <QuestionCircleOutlined />
           </Tooltip>
         </Button>
-
+      <div
+        style={{
+          position: 'absolute',
+          left: '50%',
+          transform: 'translateX(-50%)',
+        }}>
         {children}
       </div>
 
