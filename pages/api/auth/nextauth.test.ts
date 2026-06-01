@@ -27,7 +27,7 @@ jest.mock('@modules/models/User', () => ({
   default: { findOne: jest.fn(), create: jest.fn() },
 }))
 
-jest.mock('bcrypt', () => ({ compare: jest.fn(), hash: jest.fn() }))
+jest.mock('bcryptjs', () => ({ compare: jest.fn(), hash: jest.fn() }))
 
 type AuthModule = typeof import('@pages/api/auth/[...nextauth]')
 

@@ -69,9 +69,7 @@ const DomainModal: FC<Props> = ({
   domainId,
 }) => {
   const [targetKeys, setTargetKeys] = useState<Record<string, string[]>>({})
-  const [localServiceGroups, setLocalServiceGroups] = useState<ServiceGroup[]>(
-    []
-  )
+  const [localServiceGroups, setLocalServiceGroups] = useState<ServiceGroup[]>([])
   const [localData, setLocalData] = useState<ServiceItem[]>([])
   const [newGroupName, setNewGroupName] = useState('')
   const [editingKey, setEditingKey] = useState<string | null>(null)
@@ -79,6 +77,7 @@ const DomainModal: FC<Props> = ({
   const [newServiceName, setNewServiceName] = useState('')
   const [activePanel, setActivePanel] = useState<string | string[]>([])
   const { data: user } = useGetCurrentUserQuery()
+  
   isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
   const isAdmin = isAdminCheck(user?.roles)
 
@@ -91,8 +90,11 @@ const DomainModal: FC<Props> = ({
 
     setTargetKeys(initialTargets)
     setLocalServiceGroups(serviceGroups)
-    setLocalData(data)
   }, [open])
+
+  useEffect(() => {
+    setLocalData(data)
+  }, [data])
 
   const handleChange = (
     groupName: string,
@@ -139,10 +141,8 @@ const DomainModal: FC<Props> = ({
         }))
       )
 
-      setLocalData((prev) => prev.filter((item) => item.key !== serviceKey))
-
       onDeleteCustomService?.(serviceKey)
-    } catch (error) {
+    } catch (error: any) {
       message.error(error?.data?.message || 'Помилка при видаленні')
     }
   }
@@ -191,14 +191,9 @@ const DomainModal: FC<Props> = ({
         ...(domainId ? { domainId } : {}),
       }).unwrap()
 
-      setLocalData((prev) =>
-        prev.map((s) =>
-          s.key === item.key ? { ...s, title: tempTitle.trim() } : s
-        )
-      )
       message.success('Назву послуги оновлено')
       handleCancelEdit()
-    } catch (error) {
+    } catch (error: any) {
       message.error(error?.data?.message || 'Не вдалося оновити назву')
     }
   }
@@ -237,6 +232,7 @@ const DomainModal: FC<Props> = ({
     try {
       await onCreateCustomService(newServiceName)
       message.success('Кастомна послуга додана')
+
       setNewServiceName('')
       setActivePanel([])
     } catch (err: any) {

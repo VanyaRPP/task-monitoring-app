@@ -1,12 +1,13 @@
-name: Hourly cron job
+name: Daily cron
 on:
   schedule:
-    - cron: '0 */24 * * *'
+    - cron: '0 0 * * *' # every day at 00:00 UTC
+  workflow_dispatch:
 jobs:
   cron:
     runs-on: ubuntu-latest
     steps:
-      - name: Hourly cron job heroku
+      - name: Hit daily scheduled endpoint
         run: |
-          curl --request GET \
-          --url 'https://taskmonitoringapp.herokuapp.com/api/sceduled/daily' \
+          curl --fail --silent --show-error \
+            "${{ secrets.CRON_BASE_URL }}/api/sceduled/daily"

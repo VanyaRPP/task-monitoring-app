@@ -2,11 +2,11 @@ import { expect } from '@jest/globals'
 import handler from '@pages/api/auth/sign-up'
 import { setupTestEnvironment } from '@utils/setupTestEnvironment'
 import User from '@modules/models/User'
-import bcrypt from 'bcrypt'
+import bcrypt from 'bcryptjs'
 
 jest.mock('@pages/api/api.config', () => jest.fn())
 jest.mock('@modules/models/User')
-jest.mock('bcrypt')
+jest.mock('bcryptjs')
 
 setupTestEnvironment()
 
