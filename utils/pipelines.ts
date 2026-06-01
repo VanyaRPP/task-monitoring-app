@@ -61,6 +61,13 @@ export function getDomainsPipeline(
       },
     },
     {
+      $match: {
+        $expr: {
+          $ne: ['$domainDetails.archived', true],
+        },
+      },
+    },
+    {
       $project: {
         'domainDetails.name': 1,
         'domainDetails._id': 1,
