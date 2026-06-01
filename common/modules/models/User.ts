@@ -22,6 +22,7 @@ export interface IUser {
   tel?: string
   address?: IAddress
   password?: string
+  isFirstLogin?: boolean
 }
 export interface IFeedback {
   id: string
@@ -139,6 +140,7 @@ const UserSchema = new mongoose.Schema<IUser>({
   tel: { type: String },
   address: { type: Object },
   password: { type: String },
+  isFirstLogin: { type: Boolean, default: true },
 })
 UserSchema.pre('validate', function (next) {
   this.roles = normalizeRoles(this.roles)

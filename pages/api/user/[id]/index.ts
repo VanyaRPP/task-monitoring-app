@@ -64,14 +64,17 @@ export default async function handler(
             .json({ success: false, message: 'not allowed' })
         }
 
-        if (!isDev && isRoleUpdate && !isGlobalAdmin) {
+        const isFirstLoginRoleUpdate =
+          isRoleUpdate && 'isFirstLogin' in req.body
+          
+        if (!isDev && isRoleUpdate && !isGlobalAdmin && !isFirstLoginRoleUpdate) {
           return res.status(403).json({
             success: false,
             message: "sorry, u can't change roles",
           })
         }
 
-        if (isSelf && isRoleUpdate && !isGlobalAdmin) {
+        if (isSelf && isRoleUpdate && !isGlobalAdmin && !isFirstLoginRoleUpdate) {
           return res
             .status(403)
             .json({ success: false, message: 'not allowed' })
