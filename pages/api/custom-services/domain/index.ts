@@ -77,11 +77,18 @@ export default async function handler(
           _id: { $in: allServiceIds },
         }).lean()
 
+        const seenServiceIds = new Set<string>()
         const groupedServices = domainGroups.map((group, index) => {
           const services = (group.services || [])
+            .map((id) => String(id))
+            .filter((id) => {
+              if (seenServiceIds.has(id)) return false
+              seenServiceIds.add(id)
+              return true
+            })
             .map((id) =>
               customServices.find(
-                (service) => String(service._id) === String(id)
+                (service) => String(service._id) === id
               )
             )
             .filter(Boolean)

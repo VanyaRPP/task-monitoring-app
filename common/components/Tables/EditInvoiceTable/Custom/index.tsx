@@ -10,7 +10,7 @@ import {
 } from '@utils/helpers'
 import validator from '@utils/validator'
 import { Form, Input, Space, Typography } from 'antd'
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import useSyncSum from '../useSyncSum'
 import { LabelInput } from '../LabelInput'
 import { UpdateInvoiceButton } from './UpdateInvoiceButton'
@@ -36,6 +36,17 @@ export const Name: React.FC<InvoiceComponentProps> = ({
   const currentPrice = Form.useWatch(['invoice', ...name, 'price'], form)
   const defaultLabel = value || type || ''
 
+  const adHocBindingRef = useRef<'name' | 'description' | null>(null)
+  if (
+    adHocBindingRef.current === null &&
+    type === 'custom' &&
+    !isCustomService
+  ) {
+    adHocBindingRef.current = record?.name ? 'description' : 'name'
+  }
+  const adHocBinding =
+    adHocBindingRef.current === 'description' ? 'description' : 'name'
+
   // Seed `description` once defaultLabel is known. defaultLabel is derived
   // from useWatch-backed `value`/`type`, which are undefined on first render
   // and become available a tick later — so we run on every defaultLabel
@@ -47,6 +58,14 @@ export const Name: React.FC<InvoiceComponentProps> = ({
       form.setFieldValue(['invoice', ...name, 'description'], defaultLabel)
     }
   }, [defaultLabel, editable, form, name])
+
+  useEffect(() => {
+    if (!editable || !form || !name.length) return
+    if (type !== 'custom' || isCustomService) return
+    if (adHocBindingRef.current !== 'name') return
+    if (value === undefined) return
+    form.setFieldValue(['invoice', ...name, 'description'], value || '')
+  }, [value, editable, form, name, type, isCustomService])
 
   const defaultPrice = useMemo(
     () =>
@@ -77,7 +96,7 @@ export const Name: React.FC<InvoiceComponentProps> = ({
           </Form.Item>
         ) : (
           <Form.Item
-            name={[...name, 'name']}
+            name={[...name, adHocBinding]}
             rules={[validator.required()]}
             style={{ margin: 0 }}
           >

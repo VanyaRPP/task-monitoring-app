@@ -269,6 +269,7 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
     payments.data.forEach((payment: IExtendedPayment) => {
       payment.invoice?.forEach((field) => {
         if (field.type) types.add(field.type)
+        if (field.serviceId) types.add(String(field.serviceId))
       })
     })
     return types
@@ -575,13 +576,17 @@ const ColumnSelect: React.FC<ColumnSelectProps> = ({
   useEffect(() => {
     if (!allowedServices || !filterByAvailable) return
 
-    const allAvailable = Object.entries(ServiceName)
-      .filter(([value]) => allowedServices.has(value))
+    const builtIn = Object.entries(ServiceName)
+      .filter(([value]) => value !== 'custom' && allowedServices.has(value))
       .map(([value]) => value)
+    const customs = (visibleCustomServices ?? [])
+      .map((s) => String(s._id))
+      .filter((id) => allowedServices.has(id))
+    const allAvailable = [...builtIn, ...customs]
 
     setSelected(allAvailable)
     localStorage.setItem('payments_columns', JSON.stringify(allAvailable))
-  }, [allowedServices, filterByAvailable])
+  }, [allowedServices, filterByAvailable, visibleCustomServices])
 
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem('payments_columns') ?? '[]')
@@ -599,13 +604,17 @@ const ColumnSelect: React.FC<ColumnSelectProps> = ({
 
     if (saved.length > 0) return
 
-    const allAvailable = Object.entries(ServiceName)
-      .filter(([value]) => allowedServices.has(value))
+    const builtIn = Object.entries(ServiceName)
+      .filter(([value]) => value !== 'custom' && allowedServices.has(value))
       .map(([value]) => value)
+    const customs = (visibleCustomServices ?? [])
+      .map((s) => String(s._id))
+      .filter((id) => allowedServices.has(id))
+    const allAvailable = [...builtIn, ...customs]
 
     setSelected(allAvailable)
     localStorage.setItem('payments_columns', JSON.stringify(allAvailable))
-  }, [allowedServices, filterByAvailable])
+  }, [allowedServices, filterByAvailable, visibleCustomServices])
 
   useEffect(() => {
     onSelect?.(selected)
