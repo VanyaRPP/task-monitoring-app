@@ -2,7 +2,7 @@ import User from '@modules/models/User'
 import start, { Data } from '@pages/api/api.config'
 import { saltRounds } from '@utils/constants'
 import { isValidEmail } from '@common/assets/features/validators'
-import bcrypt from 'bcrypt'
+import bcrypt from 'bcryptjs'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 start()
