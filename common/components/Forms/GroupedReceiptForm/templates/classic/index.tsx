@@ -49,12 +49,7 @@ const ClassicTemplate: FC<TemplateProps> = ({
           {isEnglish ? 'Provider' : 'Постачальник'}
         </div>
         <pre className={cs.preLabel}>
-          {!!providerDomainHeading && (
-            <>
-              <strong>{providerDomainHeading}</strong>
-              {'\n'}
-            </>
-          )}
+          
           {data?.provider?.description?.trim()} <br />
           <br />
         </pre>
@@ -63,12 +58,7 @@ const ClassicTemplate: FC<TemplateProps> = ({
       <div className={cs.receiverInfo}>
         <div className={cs.label}>{isEnglish ? 'Recipient' : 'Одержувач'}</div>
         <pre className={cs.preLabel}>
-          {!!recipientCompanyHeading && (
-            <>
-              <strong>{recipientCompanyHeading}</strong>
-              {'\n'}
-            </>
-          )}
+         
           {data?.reciever?.description?.trim()} <br />
           {data?.reciever?.adminEmails?.map((email: string) => (
             <div key={email}>
