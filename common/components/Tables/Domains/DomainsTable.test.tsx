@@ -13,12 +13,14 @@ jest.mock('@common/api/domainApi/domain.api', () => ({
   useGetDomainsQuery: jest.fn(),
   useDeleteDomainMutation: jest.fn(),
   useEditDomainMutation: jest.fn(),
+  useUpdateArchivedDomainMutation: jest.fn(),
 }))
 
 import {
   useGetDomainsQuery,
   useDeleteDomainMutation,
   useEditDomainMutation,
+  useUpdateArchivedDomainMutation,
 } from '@common/api/domainApi/domain.api'
 
 const mockDomains = [
@@ -56,6 +58,10 @@ beforeEach(() => {
     { isLoading: false },
   ])
   ;(useEditDomainMutation as jest.Mock).mockReturnValue([
+    jest.fn(),
+    { isLoading: false },
+  ])
+  ;(useUpdateArchivedDomainMutation as jest.Mock).mockReturnValue([
     jest.fn(),
     { isLoading: false },
   ])

@@ -21,9 +21,12 @@ export const AdminPanelPage: React.FC = () => {
   const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
   const isDomainAdmin = user?.roles?.includes(Roles.DOMAIN_ADMIN)
 
-  const { data: domains = [] } = useGetDomainsByAdminQuery(undefined, {
-    skip: !isDomainAdmin || isGlobalAdmin,
-  })
+  const { data: domains = [] } = useGetDomainsByAdminQuery(
+    { archived: false },
+    {
+      skip: !isDomainAdmin || isGlobalAdmin,
+    }
+  )
 
   const [modalOpen, setModalOpen] = useState(false)
   const [editingFlag, setEditingFlag] = useState(null)
