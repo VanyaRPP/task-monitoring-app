@@ -28,7 +28,7 @@ import {
   useGetDomainTypeTemplatesQuery,
 } from '@common/api/domainApi/domain.api'
 import type { DomainTypeTemplateCategory } from '@common/api/domainApi/domain.api.types'
-import { Roles, ServiceType } from '@utils/constants'
+import { defaultServices, Roles, ServiceType } from '@utils/constants'
 import {
   getVisibleServices,
   type IDomainForVisibility,
@@ -70,6 +70,18 @@ export const CustomServicesTable: React.FC = () => {
     return map
   }, [templates])
 
+  const serviceIdToCategoryMap = useMemo(() => {
+    const map = new Map<string, DomainTypeTemplateCategory>()
+    templates.forEach((t) => {
+      t.groups?.forEach((g) => {
+        g.serviceIds?.forEach((sid) => {
+          map.set(String(sid), t.category)
+        })
+      })
+    })
+    return map
+  }, [templates])
+
   const domainCategoryMap = useMemo(() => {
     const map = new Map<string, DomainTypeTemplateCategory>()
     domains.forEach((d: any) => {
@@ -91,8 +103,14 @@ export const CustomServicesTable: React.FC = () => {
     return allServices.filter((s) => visibleIds.has(s._id))
   }, [user?.roles, adminDomains, allServices])
 
+  const defaultServiceIds = useMemo(() => new Set(defaultServices), [])
+
   const resolveCategory = (s: ICustomService): DomainTypeTemplateCategory | string | undefined =>
-    s.category ?? (s.domain ? domainCategoryMap.get(s.domain) : undefined) ?? s.groupName
+    s.category
+    ?? serviceIdToCategoryMap.get(String(s._id))
+    ?? (s.domain ? domainCategoryMap.get(s.domain) : undefined)
+    ?? (defaultServiceIds.has(s._id) ? ('utility' as DomainTypeTemplateCategory) : undefined)
+    ?? s.groupName
 
   const [search, setSearch] = useState('')
   const [selectedDomain, setSelectedDomain] = useState<string | undefined>(undefined)
@@ -170,12 +188,12 @@ export const CustomServicesTable: React.FC = () => {
         resolveCategory(record) === value,
       render: (_: unknown, record: ICustomService) => {
         const cat = resolveCategory(record)
-        return cat ? (
-          <Tag color="blue">
-            {getDomainTypeTemplateCategoryLabel(cat as DomainTypeTemplateCategory)}
+        return (
+          <Tag color={cat ? 'blue' : 'default'}>
+            {cat
+              ? getDomainTypeTemplateCategoryLabel(cat as DomainTypeTemplateCategory)
+              : 'Інше'}
           </Tag>
-        ) : (
-          <Tag color="default">—</Tag>
         )
       },
     },
