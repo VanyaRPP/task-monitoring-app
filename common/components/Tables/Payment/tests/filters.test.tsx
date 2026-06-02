@@ -10,6 +10,10 @@ jest.mock('next/router', () => ({
   })),
 }))
 
+jest.mock('@common/api/customServicesApi/customServices.api', () => ({
+  useGetCustomServicesQuery: jest.fn(() => ({ data: { data: [] } })),
+}))
+
 jest.mock('antd', () => {
   const React = require('react')
   const original = jest.requireActual('antd')

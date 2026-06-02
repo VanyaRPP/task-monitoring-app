@@ -152,7 +152,256 @@ describe('GroupedPricesTable', () => {
     expect(screen.getAllByRole('columnheader').length).toBe(5)
   })
 
-  test('grouped preview: shows domain group name instead of line label', () => {
+  test('grouped preview: custom service rolled up under group header', () => {
+    mockUseGetCustomServicesByDomainQuery.mockReturnValue({
+      data: {
+        data: [
+          {
+            groupName: 'Група тест',
+            services: [{ name: 'Custom A', fieldName: 'customA', _id: 's1' }],
+          },
+        ],
+      },
+      isLoading: false,
+    })
+
+    const customInvoice = {
+      type: 'custom',
+      customService: true,
+      fieldName: 'customA',
+      name: 'Custom A',
+      sum: 250,
+    }
+
+    renderTable({
+      usePreviewQuantityToggle: true,
+      invoices: [customInvoice],
+    })
+
+    expect(screen.getByText('Група тест')).toBeInTheDocument()
+    // Individual custom name is replaced by the group header label.
+    expect(screen.queryByText('Custom A')).not.toBeInTheDocument()
+    const headers = screen.getAllByRole('columnheader')
+    expect(headers.length).toBe(3)
+  })
+
+  test('grouped preview: multiple custom services in one group roll up to a single row with summed total', () => {
+    // Three custom services in the same group → ONE row in the invoice with
+    // the group name and sum-of-all. Individual service names must NOT appear.
+    mockUseGetCustomServicesByDomainQuery.mockReturnValue({
+      data: {
+        data: [
+          {
+            groupName: 'Комунальні',
+            services: [
+              { name: 'A', fieldName: 'a', _id: 's1' },
+              { name: 'B', fieldName: 'b', _id: 's2' },
+              { name: 'C', fieldName: 'c', _id: 's3' },
+            ],
+          },
+        ],
+      },
+      isLoading: false,
+    })
+
+    const customInvoices = [
+      {
+        type: 'custom',
+        customService: true,
+        fieldName: 'a',
+        name: 'A',
+        sum: 100,
+      },
+      {
+        type: 'custom',
+        customService: true,
+        fieldName: 'b',
+        name: 'B',
+        sum: 200,
+      },
+      {
+        type: 'custom',
+        customService: true,
+        fieldName: 'c',
+        name: 'C',
+        sum: 50,
+      },
+    ]
+
+    renderTable({
+      usePreviewQuantityToggle: true,
+      invoices: customInvoices,
+    })
+
+    expect(screen.getByText('Комунальні')).toBeInTheDocument()
+    expect(screen.getByText('350.00')).toBeInTheDocument()
+    expect(screen.queryByText('A')).not.toBeInTheDocument()
+    expect(screen.queryByText('B')).not.toBeInTheDocument()
+    expect(screen.queryByText('C')).not.toBeInTheDocument()
+  })
+
+  test('grouped preview: two distinct groups produce two distinct rows', () => {
+    mockUseGetCustomServicesByDomainQuery.mockReturnValue({
+      data: {
+        data: [
+          {
+            groupName: 'Група X',
+            services: [{ name: 'X1', fieldName: 'x1', _id: 'sx1' }],
+          },
+          {
+            groupName: 'Група Y',
+            services: [
+              { name: 'Y1', fieldName: 'y1', _id: 'sy1' },
+              { name: 'Y2', fieldName: 'y2', _id: 'sy2' },
+            ],
+          },
+        ],
+      },
+      isLoading: false,
+    })
+
+    renderTable({
+      usePreviewQuantityToggle: true,
+      invoices: [
+        {
+          type: 'custom',
+          customService: true,
+          fieldName: 'x1',
+          name: 'X1',
+          sum: 60,
+        },
+        {
+          type: 'custom',
+          customService: true,
+          fieldName: 'y1',
+          name: 'Y1',
+          sum: 40,
+        },
+        {
+          type: 'custom',
+          customService: true,
+          fieldName: 'y2',
+          name: 'Y2',
+          sum: 10,
+        },
+      ],
+    })
+
+    expect(screen.getByText('Група X')).toBeInTheDocument()
+    expect(screen.getByText('Група Y')).toBeInTheDocument()
+    expect(screen.getByText('60.00')).toBeInTheDocument()
+    expect(screen.getByText('50.00')).toBeInTheDocument()
+  })
+
+  test('grouped preview: mixed standard + grouped custom + ungrouped + multiple-group renders correctly', () => {
+    // Combined scenario covering the full intent:
+    //   - one user-defined group with two services → one rolled-up row
+    //   - one ungrouped service → standalone row
+    //   - one standard service (Maintenance) → standalone row
+    mockUseGetCustomServicesByDomainQuery.mockReturnValue({
+      data: {
+        data: [
+          {
+            groupName: 'Комунальні',
+            services: [
+              { name: 'Газ', fieldName: 'gaz', _id: 'g1' },
+              { name: 'Опалення', fieldName: 'heat', _id: 'h1' },
+            ],
+          },
+          {
+            groupName: null,
+            services: [{ name: 'Окрема', fieldName: 'lone', _id: 'l1' }],
+          },
+        ],
+      },
+      isLoading: false,
+    })
+
+    renderTable({
+      usePreviewQuantityToggle: true,
+      invoices: [
+        // standard
+        { type: ServiceType.Maintenance, sum: 500, amount: 50, price: 10 },
+        // two grouped custom
+        {
+          type: 'custom',
+          customService: true,
+          fieldName: 'gaz',
+          name: 'Газ',
+          sum: 120,
+        },
+        {
+          type: 'custom',
+          customService: true,
+          fieldName: 'heat',
+          name: 'Опалення',
+          sum: 80,
+        },
+        // ungrouped custom
+        {
+          type: 'custom',
+          customService: true,
+          fieldName: 'lone',
+          name: 'Окрема',
+          sum: 30,
+        },
+      ],
+    })
+
+    // Group header with summed total replaces individual names.
+    expect(screen.getByText('Комунальні')).toBeInTheDocument()
+    expect(screen.getByText('200.00')).toBeInTheDocument()
+    expect(screen.queryByText('Газ')).not.toBeInTheDocument()
+    expect(screen.queryByText('Опалення')).not.toBeInTheDocument()
+
+    // Standalone rows for standard and ungrouped.
+    expect(screen.getByText('Утримання')).toBeInTheDocument()
+    expect(screen.getByText('Окрема')).toBeInTheDocument()
+
+    // No null header.
+    expect(screen.queryByText('null')).not.toBeInTheDocument()
+  })
+
+  test('grouped preview: ungrouped custom services render as standalone rows', () => {
+    // Backend marks the "no group" bucket with groupName: null. Invoice render
+    // must NOT collapse those entries under a "null" header — they render as
+    // individual line items, by their own name.
+    mockUseGetCustomServicesByDomainQuery.mockReturnValue({
+      data: {
+        data: [
+          {
+            groupName: null,
+            services: [{ name: 'Loose A', fieldName: 'looseA', _id: 'u1' }],
+          },
+        ],
+      },
+      isLoading: false,
+    })
+
+    const ungroupedInvoice = {
+      type: 'custom',
+      customService: true,
+      fieldName: 'looseA',
+      name: 'Loose A',
+      sum: 75,
+    }
+
+    renderTable({
+      usePreviewQuantityToggle: true,
+      invoices: [ungroupedInvoice],
+    })
+
+    expect(screen.getByText('Loose A')).toBeInTheDocument()
+    // No "null" header smuggled into the table.
+    expect(screen.queryByText('null')).not.toBeInTheDocument()
+  })
+
+  test('grouped preview: standard service inside a user-defined group is rolled up under that group', () => {
+    // Maintenance (standard) is technically a CustomService doc with
+    // fieldName='maintenancePrice'. When a domain admin puts it on the RIGHT
+    // of a user-defined group's Transfer, the invoice rendering MUST show the
+    // group header — not the standalone "Утримання" label. Same rule as for
+    // truly custom services.
     mockUseGetCustomServicesByDomainQuery.mockReturnValue({
       data: {
         data: [
@@ -173,6 +422,28 @@ describe('GroupedPricesTable', () => {
     expect(screen.queryByText('Утримання')).not.toBeInTheDocument()
     const headers = screen.getAllByRole('columnheader')
     expect(headers.length).toBe(3)
+  })
+
+  test('grouped preview: standard service that is NOT in any group renders standalone', () => {
+    // Same Maintenance invoice, but the domain has no groups containing it
+    // (only an unrelated group with a different service). The Maintenance row
+    // must render with its own label, NOT under "Інше" group.
+    mockUseGetCustomServicesByDomainQuery.mockReturnValue({
+      data: {
+        data: [
+          {
+            groupName: 'Інше',
+            services: [{ name: 'Y', fieldName: 'yyy', _id: 'sy' }],
+          },
+        ],
+      },
+      isLoading: false,
+    })
+
+    renderTable({ usePreviewQuantityToggle: true })
+
+    expect(screen.getByText('Утримання')).toBeInTheDocument()
+    expect(screen.queryByText('Інше')).not.toBeInTheDocument()
   })
 
   // ── description-aware label resolution (commit 3e9533fe) ──
@@ -220,9 +491,7 @@ describe('GroupedPricesTable', () => {
           },
         ],
       })
-      expect(
-        screen.getByText('Знижка постійного клієнта')
-      ).toBeInTheDocument()
+      expect(screen.getByText('Знижка постійного клієнта')).toBeInTheDocument()
       // The legacy hard-coded "Знижка" (services.discount) must NOT appear
       // for this row, only the user-provided description.
       expect(screen.queryByText('Знижка')).not.toBeInTheDocument()
@@ -253,19 +522,25 @@ describe('GroupedPricesTable', () => {
           data: [
             {
               groupName: 'Група тест',
-              services: [
-                { name: 'x', fieldName: ServiceType.Maintenance, _id: 's1' },
-              ],
+              services: [{ name: 'A', fieldName: 'customA', _id: 's1' }],
             },
           ],
         },
         isLoading: false,
       })
 
+      const customMatched = {
+        type: 'custom',
+        customService: true,
+        fieldName: 'customA',
+        name: 'Custom A',
+        sum: 250,
+      }
+
       renderTable({
         usePreviewQuantityToggle: true,
         invoices: [
-          baseInvoice, // matches the group
+          customMatched, // matches the group → header row
           {
             type: 'unmatched',
             sum: 50,
