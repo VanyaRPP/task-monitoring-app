@@ -22,7 +22,7 @@ const DomainsSelect: React.FC<DomainsSelectProps> = ({
     data: fetchedDomains = [],
     isLoading: isDomainsLoading,
     isError: isDomainsError,
-  } = useGetDomainsQuery({})
+  } = useGetDomainsQuery({ archived: false })
 
   useEffect(() => {
     if (fetchedDomains.length) {
