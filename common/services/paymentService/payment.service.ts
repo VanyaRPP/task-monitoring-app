@@ -234,8 +234,15 @@ export async function getNextInvoiceNumber(): Promise<number> {
   return (result[0]?.maxNumber ?? 0) + 1
 }
 
-export async function createPayment(body: any, isAdmin: boolean) {
+export async function createPayment(
+  body: any,
+  isAdmin: boolean,
+  options: { sendInvoiceEmail?: boolean } = {}
+) {
   if (!isAdmin) throw new Error('not allowed')
+
+  // Renamed locally to avoid shadowing the imported `sendInvoiceEmail` function.
+  const { sendInvoiceEmail: shouldSendInvoiceEmail = true } = options
 
   const payment = await Payment.create(body)
 
@@ -256,7 +263,7 @@ export async function createPayment(body: any, isAdmin: boolean) {
 
   await ProfitService.create(profitObject)
 
-  if (payment.type === 'debit') {
+  if (shouldSendInvoiceEmail && payment.type === 'debit') {
     try {
       logPaymentEmailDebug('prepare_started', {
         paymentId: payment.id?.toString?.() || 'unknown',
@@ -314,6 +321,94 @@ export async function createPayment(body: any, isAdmin: boolean) {
   }
 
   return payment
+}
+
+export interface DuplicatePaymentsPerms {
+  isGlobalAdmin: boolean
+  isDomainAdmin: boolean
+  user: { email: string }
+}
+
+export interface DuplicatePaymentsResult {
+  createdIds: string[]
+  skippedIds: string[]
+  totalRequested: number
+}
+
+// Fields that must NOT be carried over to a duplicate: identity/versioning
+// (`_id`, `__v`), values we re-generate (`invoiceNumber`, `invoiceCreationDate`),
+// and payment-specific state that a fresh copy should not inherit (`transaction`).
+// A denylist keeps duplication resilient to new schema fields.
+const NON_COPYABLE_PAYMENT_FIELDS = [
+  '_id',
+  '__v',
+  'invoiceNumber',
+  'invoiceCreationDate',
+  'transaction',
+] as const
+
+export async function duplicatePayments(
+  ids: string[],
+  perms: DuplicatePaymentsPerms
+): Promise<DuplicatePaymentsResult> {
+  const { isGlobalAdmin, user } = perms
+
+  const sources = await Payment.find({ _id: { $in: ids } })
+
+  // Non-global admins may only duplicate payments within domains they administer.
+  let allowedDomainIds: Set<string> | null = null
+  if (!isGlobalAdmin) {
+    const domains = await Domain.find({ adminEmails: user.email })
+    allowedDomainIds = new Set(domains.map((d) => d._id.toString()))
+  }
+
+  const createdIds: string[] = []
+  const skippedIds: string[] = []
+
+  // Resolve the next invoice number once and increment locally, instead of
+  // running a `$max` aggregation per payment inside the loop.
+  let nextInvoiceNumber = await getNextInvoiceNumber()
+
+  for (const source of sources) {
+    const domainId = source.domain ? source.domain.toString() : null
+    if (allowedDomainIds && (!domainId || !allowedDomainIds.has(domainId))) {
+      skippedIds.push(source._id.toString())
+      continue
+    }
+
+    const body = source.toObject() as Record<string, unknown>
+    for (const field of NON_COPYABLE_PAYMENT_FIELDS) {
+      delete body[field]
+    }
+    body.invoiceNumber = nextInvoiceNumber
+    body.invoiceCreationDate = new Date()
+
+    try {
+      const created = await createPayment(body, true, {
+        sendInvoiceEmail: false,
+      })
+      createdIds.push(created.id.toString())
+      // Only advance the counter once the payment actually persisted, so a
+      // failed create leaves the number free for the next duplicate.
+      nextInvoiceNumber += 1
+    } catch (error) {
+      console.error('[payment-duplicate] create_failed', {
+        sourceId: source._id.toString(),
+        message: (error as Error)?.message,
+      })
+      skippedIds.push(source._id.toString())
+    }
+  }
+
+  const notFoundIds = ids.filter(
+    (id) => !sources.some((p) => p._id.toString() === id)
+  )
+
+  return {
+    createdIds,
+    skippedIds: [...skippedIds, ...notFoundIds],
+    totalRequested: ids.length,
+  }
 }
 
 function filterPeriodOptions(args) {
