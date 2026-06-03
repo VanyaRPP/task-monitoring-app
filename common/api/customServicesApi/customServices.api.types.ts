@@ -6,6 +6,9 @@ export interface ICustomService {
   groupName?: string
   name: string
   services?: string
+  serviceType?: string
+  domain?: string
+  category?: string
 }
 
 export interface ICustomDomainService {
