@@ -42,9 +42,7 @@ const DomainsServices: FC<Props> = ({
 }) => {
   const [createCustomService] = useCreateCustomServiceMutation()
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const { data: templates = [] } = useGetDomainTypeTemplatesQuery(undefined, {
-    skip: !editable,
-  })
+  const { data: templates = [] } = useGetDomainTypeTemplatesQuery(undefined)
   const watchedTemplateId = Form.useWatch('domainTypeTemplateId', form) as
     | string
     | null
@@ -200,16 +198,18 @@ const DomainsServices: FC<Props> = ({
     lastAppliedTemplateIdRef.current = snap.templateId ?? null
   }
 
-  if (!editable) return null
+  const handleViewTemplateChange = (templateId: string | null) => {
+    form.setFieldsValue({ domainTypeTemplateId: templateId })
+  }
 
   return (
     <>
       <DomainModalType
         templates={templates}
         editable={editable}
-        onTemplateChange={handleTemplateChange}
+        onTemplateChange={editable ? handleTemplateChange : handleViewTemplateChange}
       />
-      {renderSnapshotsList && (
+      {editable && renderSnapshotsList && (
         <DomainSnapshotsList domainId={domainId} onRestored={handleRestored} />
       )}
       <Button
@@ -227,6 +227,7 @@ const DomainsServices: FC<Props> = ({
         onSave={handleSaveServices}
         onCreateCustomService={handleCreateCustomService}
         domainId={domainId}
+        editable={editable}
       />
     </>
   )

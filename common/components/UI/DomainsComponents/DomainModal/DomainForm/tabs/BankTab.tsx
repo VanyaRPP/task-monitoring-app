@@ -1,6 +1,6 @@
 import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
 import { CloseOutlined } from '@ant-design/icons'
-import { Button, Card, Form, Input, Select, Space } from 'antd'
+import { Button, Card, Form, Input, Popconfirm, Select, Space } from 'antd'
 import { FC, useMemo } from 'react'
 import s from '../style.module.scss'
 import type { TabProps } from './types'
@@ -31,9 +31,17 @@ const BankTab: FC<TabProps> = ({ form, editable }) => {
               aria-disabled={!editable}
               extra={
                 editable && (
-                  <Button type="link" onClick={() => remove(field.name)}>
-                    <CloseOutlined />
-                  </Button>
+                  <Popconfirm
+                    title="Видалити токен?"
+                    description="Інтеграція з банком для цього домена перестане працювати."
+                    okText="Так, видалити"
+                    cancelText="Скасувати"
+                    onConfirm={() => remove(field.name)}
+                  >
+                    <Button type="link">
+                      <CloseOutlined />
+                    </Button>
+                  </Popconfirm>
                 )
               }
             >
