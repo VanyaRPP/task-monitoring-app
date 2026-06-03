@@ -6,10 +6,16 @@ export interface ICustomService {
   groupName?: string
   name: string
   services?: string
+  serviceType?: string
+  domain?: string
+  category?: string
 }
 
 export interface ICustomDomainService {
-  groupName: string
+  // `null` marks the synthetic "ungrouped" bucket — services in the domain
+  // catalog that aren't assigned to any user-defined group. Renderers should
+  // treat these as standalone (no group header in invoices).
+  groupName: string | null
   services: {
     _id: ObjectId | string
     name: string
