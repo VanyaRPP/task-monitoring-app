@@ -530,10 +530,8 @@ export async function listCustomServicesForDomain(
       ]
     } else {
       filter.$or = [
-        { domain: domainObjectId },
-        { domain: { $in: [null, undefined] } },
-        { domain: { $exists: false } },
-      ]
+  { domain: domainObjectId },
+  ]
     }
   }
 

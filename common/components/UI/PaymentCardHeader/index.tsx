@@ -57,7 +57,6 @@ import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { useGetCustomServicesQuery } from '@common/api/customServicesApi/customServices.api'
 import {
   ICustomServiceItem,
-  extractDomainsFromRealEstates,
   getVisibleServices,
 } from '@utils/servicesVisibility'
 
@@ -275,19 +274,20 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
     return types
   }, [payments])
 
-  const visibleDomains = useMemo(
-    () =>
-      extractDomainsFromRealEstates(
-        payments?.data?.map((p) => ({ domain: p.domain })) ?? []
-      ),
-    [payments?.data]
-  )
-
-  const visibleCustomServices = useMemo(
-    () =>
-      getVisibleServices(currUser?.roles, visibleDomains, allCustomServices),
-    [currUser?.roles, visibleDomains, allCustomServices]
-  )
+  const selectedDomainId = useMemo(
+  () => filters?.domain?.[0] ?? null,
+  [filters?.domain]
+)
+const { data: domainCustomServicesData } = useGetCustomServicesQuery(
+  { domainId: selectedDomainId },
+  { skip: !selectedDomainId }
+)
+const visibleCustomServices = useMemo(() => {
+  if (!selectedDomainId) {
+    return isGlobalAdmin ? allCustomServices : []
+  }
+  return (domainCustomServicesData?.data ?? []) as ICustomServiceItem[]
+}, [isGlobalAdmin, selectedDomainId, domainCustomServicesData, allCustomServices])
 
   const { preview, edit } = paymentActions
 
