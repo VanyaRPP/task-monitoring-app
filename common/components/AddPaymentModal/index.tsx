@@ -74,6 +74,8 @@ export interface IPaymentContext {
   setTemplateScope: (scope: TemplateScopeTarget | undefined) => void
   showQuantityInPreview: boolean
   setShowQuantityInPreview: (value: boolean) => void
+  invoiceLang: 'en' | 'uk'
+  setInvoiceLang: (lang: 'en' | 'uk') => void
 }
 
 export const PaymentContext = createContext<IPaymentContext>({
@@ -89,6 +91,8 @@ export const PaymentContext = createContext<IPaymentContext>({
   setTemplateScope: () => void 0,
   showQuantityInPreview: false,
   setShowQuantityInPreview: () => void 0,
+  invoiceLang: 'uk',
+  setInvoiceLang: () => void 0,
 })
 
 export const usePaymentContext = () =>
@@ -148,6 +152,12 @@ const AddPaymentModal: FC<Props> = ({
 
   const [showQuantityInPreview, setShowQuantityInPreviewState] = useState(false)
   const [activeTabKey, setActiveTabKey] = useState(preview ? '2' : '1')
+  const [invoiceLang, setInvoiceLang] = useState<'en' | 'uk'>(
+    paymentData?.invoiceLang ??
+      (paymentData?.currency && paymentData.currency !== Currency.UAH
+        ? 'en'
+        : 'uk')
+  )
 
   const setShowQuantityInPreview = useCallback(
     (value: boolean) => {
@@ -458,6 +468,7 @@ const AddPaymentModal: FC<Props> = ({
       reciever,
       transaction,
       template,
+      invoiceLang,
     })
 
     const finalPayload = templateScope
@@ -530,6 +541,8 @@ const AddPaymentModal: FC<Props> = ({
         setTemplateScope,
         showQuantityInPreview,
         setShowQuantityInPreview,
+        invoiceLang,
+        setInvoiceLang,
       }}
     >
       <Modal

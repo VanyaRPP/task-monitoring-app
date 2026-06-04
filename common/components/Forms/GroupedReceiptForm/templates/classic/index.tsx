@@ -15,6 +15,7 @@ const ClassicTemplate: FC<TemplateProps> = ({
   data,
   componentRef,
   isEnglish,
+  invoiceLang,
   currencyLabel,
   currency,
   domainName,
@@ -91,6 +92,7 @@ const ClassicTemplate: FC<TemplateProps> = ({
           domainId={data?.domain?._id ?? data?.domain}
           currency={currency}
           invoices={data?.invoice ?? []}
+          invoiceLang={invoiceLang}
         />
       </div>
 
