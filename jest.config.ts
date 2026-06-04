@@ -5,7 +5,11 @@ import { compilerOptions } from './tsconfig.json'
 const config: Config = {
   preset: 'ts-jest',
   testMatch: ['**/*.test.ts', '**/*.test.tsx'],
-  testPathIgnorePatterns: ['/node_modules/', '/.next/'],
+  testPathIgnorePatterns: [
+    "/node_modules/",
+    '/.next/',
+    '/.tsx?$'
+  ],  
   testEnvironment: 'jsdom',
 
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
