@@ -30,10 +30,14 @@ export interface DomainPaymentData {
 
 interface DomainPaymentsChartProps {
   data: DomainPaymentData[]
+  isDarkMode?: boolean
+  textColor?: string
 }
 
 export const DomainPaymentsChart: React.FC<DomainPaymentsChartProps> = ({
   data,
+  isDarkMode = false,
+  textColor = '#8c8c8c', 
 }) => {
   const config = useMemo(() => {
     return {
@@ -43,14 +47,45 @@ export const DomainPaymentsChart: React.FC<DomainPaymentsChartProps> = ({
       colorField: 'companyName',
       seriesField: 'companyName',
       smooth: true,
+      theme: isDarkMode ? 'dark' : 'light', 
 
       legend: {
         color: {
           position: 'left',
           layout: 'vertical',
+          itemLabelFill: textColor, 
         },
         position: 'left',
         layout: 'vertical',
+        itemName: {
+          style: {
+            fill: textColor, 
+          },
+        },
+      },
+
+      xAxis: {
+        label: {
+          style: {
+            fill: textColor,
+          },
+        },
+      },
+
+      yAxis: {
+        label: {
+          style: {
+            fill: textColor,
+          },
+        },
+        grid: {
+          line: {
+            style: {
+              stroke: textColor,
+              strokeOpacity: 0.15,
+            },
+          },
+        },
       },
 
       tooltip: {
@@ -61,7 +96,7 @@ export const DomainPaymentsChart: React.FC<DomainPaymentsChartProps> = ({
         { type: 'legend-filter' },
       ],
     }
-  }, [data])
+  }, [data, isDarkMode, textColor])
 
   return <Line {...config} />
 }

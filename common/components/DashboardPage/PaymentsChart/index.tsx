@@ -27,8 +27,8 @@ interface IPaymentResponse {
   _id?: string
   invoiceCreationDate?: string
   generalSum?: number
-  reciever?: {
-    companyName?: string
+  reciever?: { 
+    companyName?: string 
   }
 }
 
@@ -116,7 +116,6 @@ const PaymentsChart: React.FC<{
       }
 
       const amount = Number(payment?.generalSum || 0)
-
       const companyName = payment?.reciever?.companyName || 'Невідома компанія'
 
       return {
@@ -126,6 +125,12 @@ const PaymentsChart: React.FC<{
       }
     })
   }, [domainPayments])
+
+  const isDarkModeActive = Boolean(
+    String(token.colorText).includes('255') || 
+    token.colorText === '#fff' || 
+    token.colorTextBase === '#fff'
+  )
 
   return (
     <Space direction="vertical" size="large" style={{ width: '100%' }}>
@@ -196,7 +201,11 @@ const PaymentsChart: React.FC<{
           {domainChartData.length === 0 && !isFetchingDomain ? (
             <Empty description="Немає даних по платежах домену" />
           ) : (
-            <DomainPaymentsChart data={domainChartData} />
+            <DomainPaymentsChart 
+              data={domainChartData} 
+              isDarkMode={isDarkModeActive}
+              textColor={token.colorTextSecondary} 
+            />
           )}
         </Spin>
       </Card>
@@ -254,11 +263,11 @@ const CompanySelector: React.FC<Omit<SelectProps, 'options' | 'mode'>> = ({
     const companies =
       data.length !== 0
         ? data?.map((company: IRealEstateCompany) => {
-          return {
-            text: company.companyName,
-            value: company._id,
-          }
-        })
+            return {
+              text: company.companyName,
+              value: company._id,
+            }
+          })
         : []
     return companies?.map((company: { text: string; value: string }) => ({
       label: company.text,
