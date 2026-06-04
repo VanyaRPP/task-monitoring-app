@@ -21,9 +21,12 @@ import PriceList from '@common/components/Forms/AddPaymentForm/PriceList'
 import { useResolveMonthServiceId } from '@common/components/Forms/AddPaymentForm/useResolveMonthServiceId'
 import Modal from '@components/UI/ModalWindow'
 import { usePaymentFormData } from '@modules/hooks/usePaymentData'
-import { Operations, Currency } from '@utils/constants'
+import { Operations } from '@utils/constants'
 import { getInvoices } from '@utils/getInvoices'
-import { getPaymentProviderAndReciever } from '@utils/helpers'
+import {
+  getPaymentProviderAndReciever,
+  normalizeCurrency,
+} from '@utils/helpers'
 import { Form, Tabs, TabsProps, message } from 'antd'
 import { FormInstance } from 'antd/es/form/Form'
 import { useChangelogOptions } from './changelog/useChangelogOptions'
@@ -493,6 +496,9 @@ const AddPaymentModal: FC<Props> = ({
     const isEditing = !!paymentId || edit
     if (isEditing) {
       lastLoadedCompanyId.current = company._id
+      if (!form.getFieldValue('currency')) {
+        form.setFieldValue('currency', normalizeCurrency(company.currency))
+      }
       return
     }
 
@@ -510,7 +516,7 @@ const AddPaymentModal: FC<Props> = ({
 
     const isNewCompanySelected = lastLoadedCompanyId.current !== company._id
     if (isNewCompanySelected) {
-      form.setFieldValue('currency', company.currency || Currency.UAH)
+      form.setFieldValue('currency', normalizeCurrency(company.currency))
       lastLoadedCompanyId.current = company._id
     }
   }, [company, filteredInvoices, paymentId, edit, activeTabKey, saved, form])
@@ -562,7 +568,9 @@ const AddPaymentModal: FC<Props> = ({
                 : filteredInvoices,
             description: paymentData?.description,
             generalSum: paymentData?.generalSum,
-            currency: paymentData?.currency || Currency.UAH,
+            currency: paymentData?.currency
+              ? normalizeCurrency(paymentData.currency)
+              : undefined,
             invoiceNumber: paymentData?.invoiceNumber,
             invoiceCreationDate: dayjs(paymentData?.invoiceCreationDate),
             operation: paymentData?.type || Operations.Debit,

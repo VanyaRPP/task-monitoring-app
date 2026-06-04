@@ -1,4 +1,5 @@
 import { usePaymentContext } from '@components/AddPaymentModal'
+import { useInvoiceCurrency } from '@modules/hooks/useInvoiceCurrency'
 import { InvoiceComponentProps } from '@components/Tables/EditInvoiceTable'
 import { currencyWithUnit, toArray, toRoundFixed } from '@utils/helpers'
 import validator from '@utils/validator'
@@ -23,6 +24,7 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
   disabled,
 }) => {
   const { service, company } = usePaymentContext()
+  const currency = useInvoiceCurrency()
   const name = useMemo(() => toArray<string>(_name), [_name])
   const waterPartPrice = +(
     (service?.waterPriceTotal * company?.waterPart) /
@@ -38,7 +40,7 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
       >
         <span>
           {toRoundFixed(company.waterPart)}% від{' '}
-          {currencyWithUnit(toRoundFixed(service.waterPriceTotal), company)}{' '}
+          {currencyWithUnit(toRoundFixed(service.waterPriceTotal), currency)}{' '}
           ={' '}
         </span>
       </Space>
@@ -55,10 +57,10 @@ export const Price: React.FC<InvoiceComponentProps> = ({
   const name = useMemo(() => toArray<string>(_name), [_name])
 
   const price = Form.useWatch(['invoice', ...name, 'price'], form)
-  const { company } = usePaymentContext()
+  const currency = useInvoiceCurrency()
 
   if (!editable) {
-    return <span>{currencyWithUnit(toRoundFixed(price), company)}</span>
+    return <span>{currencyWithUnit(toRoundFixed(price), currency)}</span>
   }
 
   return (
@@ -67,7 +69,7 @@ export const Price: React.FC<InvoiceComponentProps> = ({
         type="number"
         placeholder="Значення..."
         disabled={disabled}
-        suffix={currencyWithUnit('', company)}
+        suffix={currencyWithUnit('', currency)}
       />
     </Form.Item>
   )
@@ -78,11 +80,11 @@ export const Sum: React.FC<InvoiceComponentProps> = ({ form, name: _name }) => {
 
   const price = Form.useWatch(['invoice', ...name, 'price'], form)
   const sum = Form.useWatch(['invoice', ...name, 'sum'], form)
-  const { company } = usePaymentContext()
+  const currency = useInvoiceCurrency()
 
   useSyncSum(form!, name, +price || 0)
 
-  return <strong>{currencyWithUnit(toRoundFixed(sum), company)}</strong>
+  return <strong>{currencyWithUnit(toRoundFixed(sum), currency)}</strong>
 }
 
 const WaterPart = {
