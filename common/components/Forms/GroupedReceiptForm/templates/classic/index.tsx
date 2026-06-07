@@ -19,6 +19,7 @@ const ClassicTemplate: FC<TemplateProps> = ({
   currency,
   domainName,
   companyLabel,
+  showQuantityInPreview,
   rows,
   getQty,
   subtotal,
@@ -88,6 +89,7 @@ const ClassicTemplate: FC<TemplateProps> = ({
         <GroupedPricesTable
           preview
           usePreviewQuantityToggle
+          showQuantityInPreview={showQuantityInPreview}
           domainId={data?.domain?._id ?? data?.domain}
           currency={currency}
           invoices={data?.invoice ?? []}

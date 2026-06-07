@@ -5,11 +5,13 @@ import dayjs from 'dayjs'
 interface ReceiptTemplatePropsInput {
   data: any
   contextCompany?: any
+  showQuantityInPreview?: boolean
 }
 
 export interface ReceiptTemplateProps {
   data: any
   isEnglish: boolean
+  showQuantityInPreview: boolean
   currencyLabel: string
   currency?: string
   modernInvoiceNumber: string
@@ -43,6 +45,7 @@ const entrepreneurTitleRegex =
 export function useReceiptTemplateProps({
   data,
   contextCompany,
+  showQuantityInPreview = false,
 }: ReceiptTemplatePropsInput): ReceiptTemplateProps {
   const currency =
     data?.currency ||
@@ -173,6 +176,7 @@ export function useReceiptTemplateProps({
   return {
     data,
     isEnglish,
+    showQuantityInPreview,
     currencyLabel,
     currency,
     modernInvoiceNumber,

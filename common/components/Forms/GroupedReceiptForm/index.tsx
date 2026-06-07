@@ -59,6 +59,7 @@ const GroupedReceiptForm: FC<Props> = ({
   const receiptProps = useReceiptTemplateProps({
     data,
     contextCompany: company,
+    showQuantityInPreview,
   })
 
   const {
@@ -215,6 +216,7 @@ const GroupedReceiptForm: FC<Props> = ({
     data,
     componentRef,
     isEnglish,
+    showQuantityInPreview,
     currencyLabel,
     currency,
     modernInvoiceNumber,
