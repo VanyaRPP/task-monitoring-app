@@ -21,7 +21,7 @@ import PriceList from '@common/components/Forms/AddPaymentForm/PriceList'
 import { useResolveMonthServiceId } from '@common/components/Forms/AddPaymentForm/useResolveMonthServiceId'
 import Modal from '@components/UI/ModalWindow'
 import { usePaymentFormData } from '@modules/hooks/usePaymentData'
-import { Operations } from '@utils/constants'
+import { Currency, Operations } from '@utils/constants'
 import { getInvoices } from '@utils/getInvoices'
 import {
   getPaymentProviderAndReciever,
@@ -157,9 +157,9 @@ const AddPaymentModal: FC<Props> = ({
   const [activeTabKey, setActiveTabKey] = useState(preview ? '2' : '1')
   const [invoiceLang, setInvoiceLang] = useState<'en' | 'uk'>(
     paymentData?.invoiceLang ??
-      (paymentData?.currency && paymentData.currency !== Currency.UAH
-        ? 'en'
-        : 'uk')
+    (paymentData?.currency && paymentData.currency !== Currency.UAH
+      ? 'en'
+      : 'uk')
   )
 
   const setShowQuantityInPreview = useCallback(
@@ -480,9 +480,9 @@ const AddPaymentModal: FC<Props> = ({
 
     const response = edit
       ? await editPayment({
-          _id: paymentData?._id,
-          ...finalPayload,
-        })
+        _id: paymentData?._id,
+        ...finalPayload,
+      })
       : await addPayment(finalPayload)
 
     if ('data' in response) {
