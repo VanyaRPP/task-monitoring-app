@@ -52,6 +52,7 @@ export interface IPayment {
   losses?: number
   template?: string
   _templateScope?: TemplateScopeTarget
+  invoiceLang?: 'en' | 'uk'
 }
 
 export interface IExtendedPayment extends IPayment {

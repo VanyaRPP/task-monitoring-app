@@ -19,6 +19,7 @@ import {
 import { Dropdown, Form, Tooltip, message, MenuProps } from 'antd'
 import s from './style.module.scss'
 import { templateMap } from './templateMap'
+import InvoiceLanguageSelector from './InvoiceLanguageSelector'
 
 const templateItems = [
   { key: 'classic', label: 'Класичний шаблон' },
@@ -46,6 +47,8 @@ const GroupedReceiptForm: FC<Props> = ({
     company,
     showQuantityInPreview,
     setShowQuantityInPreview,
+    invoiceLang,
+    setInvoiceLang,
   } = usePaymentContext()
   const [editPayment] = useEditPaymentMutation()
   const invoiceCurrency = useInvoiceCurrency()
@@ -65,6 +68,7 @@ const GroupedReceiptForm: FC<Props> = ({
   const receiptProps = useReceiptTemplateProps({
     data,
     contextCompany: company,
+    lang: invoiceLang,
   })
 
   const {
@@ -138,6 +142,15 @@ const GroupedReceiptForm: FC<Props> = ({
       message.success(`Шаблон збережено для компанії (${companyLabel})`)
     } else if (scope === 'domain') {
       message.success(`Шаблон збережено для домену (${domainName})`)
+    }
+  }
+
+  const handleSaveLanguage = async (lang: 'en' | 'uk') => {
+    setInvoiceLang(lang)
+    if (!data?._id) return
+    const result = await editPayment({ _id: data._id, invoiceLang: lang })
+    if ('error' in result) {
+      message.error('Помилка збереження мови')
     }
   }
 
@@ -223,6 +236,7 @@ const GroupedReceiptForm: FC<Props> = ({
     data,
     componentRef,
     isEnglish,
+    invoiceLang,
     currencyLabel,
     currency,
     modernInvoiceNumber,
@@ -279,6 +293,10 @@ const GroupedReceiptForm: FC<Props> = ({
           }}
         />
       </Tooltip>
+
+      <span className={s.languageSelector}>
+        <InvoiceLanguageSelector lang={invoiceLang} onChange={handleSaveLanguage} />
+      </span>
 
       <TemplateComponent {...templateProps} />
     </>

@@ -16,6 +16,7 @@ export interface PaymentPricesTableProps {
   currency?: string
   loading?: boolean
   invoices?: any[]
+  invoiceLang?: 'en' | 'uk'
 }
 
 interface IPriceTableRow {
@@ -236,6 +237,7 @@ const GroupedPricesTable: React.FC<PaymentPricesTableProps> = ({
   preview,
   usePreviewQuantityToggle,
   domainId,
+  invoiceLang,
 }) => {
   const { form, company, showQuantityInPreview } = usePaymentContext()
   const { domain } = form?.getFieldsValue() ?? {}
@@ -252,7 +254,7 @@ const GroupedPricesTable: React.FC<PaymentPricesTableProps> = ({
   )
 
   const resolvedCurrency = currency || company?.currency || domain?.currency
-  const invoiceLng = getInvoiceTableLng(resolvedCurrency)
+  const invoiceLng = invoiceLang ?? getInvoiceTableLng(resolvedCurrency)
 
   const tInvoice = useMemo(
     () => i18n.getFixedT(invoiceLng, 'groupedReceipt'),
