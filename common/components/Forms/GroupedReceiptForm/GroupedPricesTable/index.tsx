@@ -238,7 +238,7 @@ const GroupedPricesTable: React.FC<PaymentPricesTableProps> = ({
   domainId,
 }) => {
   const { form, company, showQuantityInPreview } = usePaymentContext()
-  const { domain } = form.getFieldsValue()
+  const { domain } = form?.getFieldsValue() ?? {}
   const { i18n } = useTranslation('groupedReceipt')
 
   const resolvedDomainId =
