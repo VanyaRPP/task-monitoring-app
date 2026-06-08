@@ -9,7 +9,7 @@ import {
   toRoundFixed,
 } from '@utils/helpers'
 import validator from '@utils/validator'
-import { Form, Input, Space, Typography } from 'antd'
+import { Checkbox, Form, Input, Space, Tooltip, Typography } from 'antd'
 import { useEffect, useMemo, useRef } from 'react'
 import useSyncSum from '../useSyncSum'
 import { LabelInput } from '../LabelInput'
@@ -85,11 +85,12 @@ export const Name: React.FC<InvoiceComponentProps> = ({
   }
 
   return (
-    <Space
-      direction="horizontal"
-      style={{ justifyContent: 'space-between', width: '100%' }}
-    >
-      <Space direction="vertical" size={0}>
+  <Space
+    direction="horizontal"
+    style={{ justifyContent: 'space-between', width: '100%' }}
+  >
+    <Space direction="vertical" size={0}>
+      <Space direction="horizontal" size={8} align="center">
         {isCustomService ? (
           <Form.Item name={[...name, 'description']} style={{ margin: 0 }}>
             <LabelInput defaultLabel={defaultLabel} disabled={disabled} />
@@ -103,21 +104,33 @@ export const Name: React.FC<InvoiceComponentProps> = ({
             <Input placeholder="Назва..." disabled={disabled} />
           </Form.Item>
         )}
-        <Typography.Text type="secondary" style={{ fontSize: '0.75rem' }}>
-          {toFirstUpperCase(dateToMonthYear(service?.date))}
-        </Typography.Text>
+        {!isCustomService && (
+          <Tooltip title="Додати цю послугу в основні домену">
+            <Form.Item
+              name={[...name, 'saveToDomain']}
+              valuePropName="checked"
+              style={{ margin: 0 }}
+            >
+              <Checkbox />
+            </Form.Item>
+          </Tooltip>
+        )}
       </Space>
-      <UpdateInvoiceButton
-        currentPrice={currentPrice}
-        defaultPrice={defaultPrice}
-        editable={editable}
-        type={type}
-        onRestore={() =>
-          form.setFieldValue(['invoice', ...name, 'price'], defaultPrice)
-        }
-      />
+      <Typography.Text type="secondary" style={{ fontSize: '0.75rem' }}>
+        {toFirstUpperCase(dateToMonthYear(service?.date))}
+      </Typography.Text>
     </Space>
-  )
+    <UpdateInvoiceButton
+      currentPrice={currentPrice}
+      defaultPrice={defaultPrice}
+      editable={editable}
+      type={type}
+      onRestore={() =>
+        form.setFieldValue(['invoice', ...name, 'price'], defaultPrice)
+      }
+    />
+  </Space>
+)
 }
 
 export const Amount: React.FC<InvoiceComponentProps> = ({

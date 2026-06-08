@@ -428,6 +428,7 @@ const AddPaymentModal: FC<Props> = ({
         (inv) =>
           inv?.type === ServiceType.Custom &&
           !inv?.customService && 
+          inv?.saveToDomain === true &&
           (inv?.name || inv?.description) 
       )
 

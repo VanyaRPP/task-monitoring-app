@@ -137,18 +137,17 @@ async function attachServiceToDomainGroup(
   domainId: mongoose.Types.ObjectId,
   serviceId: mongoose.Types.ObjectId
 ): Promise<void> {
-  // Try to push to existing default group; if it doesn't exist, append the group.
-  // arrayFilters lets us update the embedded group whose name matches.
-  const pushed = await Domain.updateOne(
-    { _id: domainId, 'customServices.groupName': DEFAULT_GROUP_NAME },
-    {
-      $addToSet: { 'customServices.$[group].services': serviceId },
-    },
-    {
-      arrayFilters: [{ 'group.groupName': DEFAULT_GROUP_NAME }],
-    }
-  )
-  if (pushed.matchedCount === 0) {
+  const domain = await Domain.findById(domainId).select('customServices')
+  const existingGroups = domain?.customServices ?? []
+
+  if (existingGroups.length > 0) {
+    const firstGroupName = existingGroups[0].groupName
+    await Domain.updateOne(
+      { _id: domainId, 'customServices.groupName': firstGroupName },
+      { $addToSet: { 'customServices.$[group].services': serviceId } },
+      { arrayFilters: [{ 'group.groupName': firstGroupName }] }
+    )
+  } else {
     await Domain.updateOne(
       { _id: domainId },
       {
