@@ -4,6 +4,7 @@ import {
 } from '@common/api/paymentApi/payment.api.types'
 import { useEditPaymentMutation } from '@common/api/paymentApi/payment.api'
 import { usePaymentContext } from '@components/AddPaymentModal'
+import { useInvoiceCurrency } from '@modules/hooks/useInvoiceCurrency'
 import { TemplateKey } from '@components/AddPaymentModal/resolveTemplate'
 import { FC, useRef } from 'react'
 import { useReactToPrint } from 'react-to-print'
@@ -47,13 +48,18 @@ const GroupedReceiptForm: FC<Props> = ({
     setShowQuantityInPreview,
   } = usePaymentContext()
   const [editPayment] = useEditPaymentMutation()
+  const invoiceCurrency = useInvoiceCurrency()
   const liveInvoice = Form.useWatch('invoice', form)
   const rawData = currPayment ?? paymentData ?? null
   // useReceiptTemplateProps maps `name = description || name` for template
   // rows, and GroupedPricesTable resolves description-first via
   // resolveInvoiceLabel — so we only need to swap in the live invoice here.
   const data = rawData
-    ? { ...rawData, invoice: liveInvoice ?? rawData.invoice }
+    ? {
+        ...rawData,
+        invoice: liveInvoice ?? rawData.invoice,
+        currency: invoiceCurrency,
+      }
     : rawData
 
   const receiptProps = useReceiptTemplateProps({
@@ -85,7 +91,9 @@ const GroupedReceiptForm: FC<Props> = ({
   const printCompanyName =
     (typeof data?.company === 'object'
       ? data.company?.companyName
-      : undefined) ?? data?.reciever?.companyName ?? ''
+      : undefined) ??
+    data?.reciever?.companyName ??
+    ''
 
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
