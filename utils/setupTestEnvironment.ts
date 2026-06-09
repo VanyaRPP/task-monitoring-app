@@ -26,11 +26,11 @@ export const setupTestEnvironment = () => {
     await server.start()
 
     mongoose.set('strictQuery', false)
-    mongoose.connect(server.getUri(), {
+    await mongoose.connect(server.getUri(), {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     } as any)
-  })
+  }, 60000) // mongod binary may need to download/boot on a cold run
 
   beforeEach(async () => {
     await User.insertMany(Object.values(users))

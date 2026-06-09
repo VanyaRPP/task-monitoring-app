@@ -116,7 +116,9 @@ describe('CompaniesTable', () => {
     })
 
     render(<CompaniesTable {...mockProps} />)
-    expect(screen.getByText('Назва компанії')).toBeInTheDocument()
+    // Ant Design renders a fixed column's title twice (header + hidden
+    // measure cell), so assert on at least one match rather than exactly one.
+    expect(screen.getAllByText('Назва компанії').length).toBeGreaterThan(0)
   })
 
   test('should hide company column when only one company is available in filters', () => {

@@ -15,6 +15,7 @@ import {
   useDeleteMultiplePaymentsMutation,
   paymentApi,
   useMarkPaymentsPaidMutation,
+  useDuplicatePaymentsMutation,
 } from '@common/api/paymentApi/payment.api'
 import {
   debtorsApi,
@@ -180,6 +181,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     useDeletePaymentMutation()
   const [deleteMultiplePayments] = useDeleteMultiplePaymentsMutation()
   const [markPaymentsPaid] = useMarkPaymentsPaidMutation()
+  const [duplicatePayments] = useDuplicatePaymentsMutation()
   const patchDebtorsCache = useCallback(
     (changes: Array<{ companyId: string; debtDelta: number }>) => {
       if (!changes.length || !domainIds.length) return
@@ -282,6 +284,67 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
       }
     },
     [markPaymentsPaid, patchDebtorsCache]
+  )
+  const debtDeltaForAdded = (p: IExtendedPayment): number =>
+    -debtDeltaForRemoved(p)
+
+  const runDuplicate = useCallback(
+    async (targets: IExtendedPayment[], clearSelection: boolean) => {
+      if (targets.length < 1) {
+        message.info('Оберіть щонайменше один рахунок')
+        return
+      }
+
+      const response = await duplicatePayments(targets.map((p) => p._id))
+      if ('data' in response) {
+        const { createdIds, skippedIds, totalRequested } = response.data
+        const skipped = new Set(skippedIds)
+        const succeeded = targets.filter((p) => !skipped.has(p._id))
+        patchDebtorsCache(
+          succeeded.map((p) => ({
+            companyId: getCompanyId(p),
+            debtDelta: debtDeltaForAdded(p),
+          }))
+        )
+        if (clearSelection) {
+          dispatch(setSelectedPayments([]))
+          dispatch(setPaymentsDeleteItems([]))
+        }
+        const many = totalRequested > 1
+        if (createdIds.length === totalRequested) {
+          message.success(
+            many ? 'Рахунки продубльовано' : 'Рахунок продубльовано'
+          )
+        } else if (createdIds.length > 0) {
+          message.warning('Деякі рахунки були не продубльовані')
+        } else {
+          message.error(
+            many
+              ? 'Не вдалося продублювати обрані рахунки' : 'Не вдалося продублювати рахунок'
+          )
+        }
+      } else {
+        message.error('Не вдалося продублювати рахунки')
+      }
+    },
+    [duplicatePayments, patchDebtorsCache, dispatch]
+  )
+
+  const handleDuplicate = useCallback(
+    (source: IExtendedPayment) => {
+      const hasSelection = selectedPayments.length > 0
+      const targets = !hasSelection
+        ? [source]
+        : selectedPayments.some((p) => p._id === source._id)
+          ? selectedPayments
+          : [...selectedPayments, source]
+      return runDuplicate(targets, hasSelection)
+    },
+    [runDuplicate, selectedPayments]
+  )
+  const handleBulkDuplicate = useCallback(
+    (selected: IExtendedPayment[]) => runDuplicate(selected, true),
+    [runDuplicate]
   )
   const handleDeleteConfirm = async () => {
     const idsToDelete = paymentsDeleteItems.map((item) => item.id)
@@ -417,6 +480,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     onDelete: handleDeletePayment,
     deleteLoading,
     onMarkPaid: handleMarkPaid,
+    onDuplicate: handleDuplicate,
   }
   const debtProps = {
     debtorCompanies,
@@ -451,6 +515,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     onColumnsSelect: (cols: ServiceType[]) =>
       dispatch(setSelectedColumns(cols)),
     onBulkMarkPaid: handleBulkMarkPaid,
+    onBulkDuplicate: handleBulkDuplicate,
     domainFilter: filterProps.domainsFilter,
     realEstatesFilter: filterProps.companiesFilter,
     isDashboard: router.pathname === AppRoutes.INDEX,

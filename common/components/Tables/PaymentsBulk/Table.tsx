@@ -28,10 +28,12 @@ const InvoicesTable: React.FC = () => {
 
   const domainId = Form.useWatch('domain', form)
 
-  const { data: customDomainServices } = useGetCustomServicesByDomainQuery(
-    { domainId },
-    { skip: !domainId }
-  )
+  const {
+    data: customDomainServices,
+    isFetching: isServicesFetching,
+    isError: isServicesError,
+    error: servicesError,
+  } = useGetCustomServicesByDomainQuery({ domainId }, { skip: !domainId })
 
   const groups = customDomainServices?.data ?? []
 
@@ -39,6 +41,32 @@ const InvoicesTable: React.FC = () => {
     () => groups.flatMap((group) => group.services),
     [groups]
   )
+
+  // TEMP DIAGNOSTIC — remove after confirming communal columns render.
+  useEffect(() => {
+    console.warn('[PaymentsBulk] diag', {
+      domainId,
+      isServicesFetching,
+      isServicesError,
+      servicesError,
+      rawResponse: customDomainServices,
+      groupsCount: groups.length,
+      allowedServices: allowedServices.map((s) => ({
+        _id: String((s as { _id?: unknown })?._id),
+        name: (s as { name?: string })?.name,
+        fieldName: (s as { fieldName?: string })?.fieldName,
+        serviceType: (s as { serviceType?: string })?.serviceType,
+      })),
+    })
+  }, [
+    domainId,
+    isServicesFetching,
+    isServicesError,
+    servicesError,
+    customDomainServices,
+    groups.length,
+    allowedServices,
+  ])
 
   const customServicesColumns = useMemo(
     () =>
@@ -55,15 +83,15 @@ const InvoicesTable: React.FC = () => {
               ),
             },
             {
-          width: 160,
-          render: (_: any, { name }: { name: number }) => (
-            <Form.Item
-              name={[name, 'invoice', s.fieldName, 'sum']}
-              style={{ margin: 0 }}
-            >
-              <Input />
-            </Form.Item>
-          ),
+              width: 160,
+              render: (_: any, { name }: { name: number }) => (
+                <Form.Item
+                  name={[name, 'invoice', s.fieldName, 'sum']}
+                  style={{ margin: 0 }}
+                >
+                  <Input />
+                </Form.Item>
+              ),
             },
           ],
         })),
@@ -104,7 +132,7 @@ const InvoicesTable: React.FC = () => {
         invoice[key] = {
           ...(existing || { type: 'custom', fieldName: key, name: s.name }),
           amount: amount === undefined || amount === null ? 1 : amount,
-        } as typeof invoice[string]
+        } as (typeof invoice)[string]
       }
 
       return {

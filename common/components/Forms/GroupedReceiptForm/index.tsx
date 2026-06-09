@@ -4,6 +4,7 @@ import {
 } from '@common/api/paymentApi/payment.api.types'
 import { useEditPaymentMutation } from '@common/api/paymentApi/payment.api'
 import { usePaymentContext } from '@components/AddPaymentModal'
+import { useInvoiceCurrency } from '@modules/hooks/useInvoiceCurrency'
 import { TemplateKey } from '@components/AddPaymentModal/resolveTemplate'
 import { FC, useRef } from 'react'
 import { useReactToPrint } from 'react-to-print'
@@ -18,6 +19,7 @@ import {
 import { Dropdown, Form, Tooltip, message, MenuProps } from 'antd'
 import s from './style.module.scss'
 import { templateMap } from './templateMap'
+import InvoiceLanguageSelector from './InvoiceLanguageSelector'
 
 const templateItems = [
   { key: 'classic', label: 'Класичний шаблон' },
@@ -45,20 +47,28 @@ const GroupedReceiptForm: FC<Props> = ({
     company,
     showQuantityInPreview,
     setShowQuantityInPreview,
+    invoiceLang,
+    setInvoiceLang,
   } = usePaymentContext()
   const [editPayment] = useEditPaymentMutation()
+  const invoiceCurrency = useInvoiceCurrency()
   const liveInvoice = Form.useWatch('invoice', form)
   const rawData = currPayment ?? paymentData ?? null
   // useReceiptTemplateProps maps `name = description || name` for template
   // rows, and GroupedPricesTable resolves description-first via
   // resolveInvoiceLabel — so we only need to swap in the live invoice here.
   const data = rawData
-    ? { ...rawData, invoice: liveInvoice ?? rawData.invoice }
+    ? {
+        ...rawData,
+        invoice: liveInvoice ?? rawData.invoice,
+        currency: invoiceCurrency,
+      }
     : rawData
 
   const receiptProps = useReceiptTemplateProps({
     data,
     contextCompany: company,
+    lang: invoiceLang,
   })
 
   const {
@@ -85,7 +95,9 @@ const GroupedReceiptForm: FC<Props> = ({
   const printCompanyName =
     (typeof data?.company === 'object'
       ? data.company?.companyName
-      : undefined) ?? data?.reciever?.companyName ?? ''
+      : undefined) ??
+    data?.reciever?.companyName ??
+    ''
 
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
@@ -130,6 +142,15 @@ const GroupedReceiptForm: FC<Props> = ({
       message.success(`Шаблон збережено для компанії (${companyLabel})`)
     } else if (scope === 'domain') {
       message.success(`Шаблон збережено для домену (${domainName})`)
+    }
+  }
+
+  const handleSaveLanguage = async (lang: 'en' | 'uk') => {
+    setInvoiceLang(lang)
+    if (!data?._id) return
+    const result = await editPayment({ _id: data._id, invoiceLang: lang })
+    if ('error' in result) {
+      message.error('Помилка збереження мови')
     }
   }
 
@@ -215,6 +236,7 @@ const GroupedReceiptForm: FC<Props> = ({
     data,
     componentRef,
     isEnglish,
+    invoiceLang,
     currencyLabel,
     currency,
     modernInvoiceNumber,
@@ -271,6 +293,10 @@ const GroupedReceiptForm: FC<Props> = ({
           }}
         />
       </Tooltip>
+
+      <span className={s.languageSelector}>
+        <InvoiceLanguageSelector lang={invoiceLang} onChange={handleSaveLanguage} />
+      </span>
 
       <TemplateComponent {...templateProps} />
     </>

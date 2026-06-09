@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react'
 import {
   CheckOutlined,
+  CopyOutlined,
   DeleteOutlined,
   DownloadOutlined,
   FilterOutlined,
@@ -83,6 +84,7 @@ export interface PaymentCardHeaderProps {
   singleDomain?: string
   isDashboard?: boolean
   onBulkMarkPaid?: (payments: IExtendedPayment[]) => void
+  onBulkDuplicate?: (payments: IExtendedPayment[]) => void
 }
 
 const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
@@ -107,6 +109,7 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
   isDashboard,
   onDeleteClick,
   onBulkMarkPaid,
+  onBulkDuplicate,
 }) => {
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -232,6 +235,8 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
     delete: onDeleteClick,
     bulkMarkPaid: () =>
       onBulkMarkPaid?.(selectedPayments as IExtendedPayment[]),
+    bulkDuplicate: () =>
+      onBulkDuplicate?.(selectedPayments as IExtendedPayment[]),
   }
 
   const handleMenuClick: MenuProps['onClick'] = ({ key }) =>
@@ -356,6 +361,15 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
             key: 'bulkMarkPaid',
             label: 'Позначити оплати',
             icon: <CheckOutlined />,
+          },
+        ]
+      : []),
+    ...(isAdmin && pathname === AppRoutes.PAYMENT && selectedPayments.length > 0
+      ? [
+          {
+            key: 'bulkDuplicate',
+            label: 'Дублювати рахунки',
+            icon: <CopyOutlined />,
           },
         ]
       : []),
