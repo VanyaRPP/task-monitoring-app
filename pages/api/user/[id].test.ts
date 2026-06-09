@@ -109,5 +109,29 @@ describe('/api/user/[id]', () => {
 
       expect(res.status).toHaveBeenCalledWith(200)
     })
+
+    it('should reject role escalation from a non-global user (closed isFirstLogin hole)', async () => {
+      const { getCurrentUser } = require('@utils/getCurrentUser')
+      ;(getCurrentUser as jest.Mock).mockReturnValueOnce({
+        user: { _id: '123', email: 'user@test.com' },
+        isGlobalAdmin: false,
+        isDomainAdmin: false,
+      })
+
+      const req = {
+        method: 'PATCH',
+        query: { id: '123' },
+        body: { roles: ['GlobalAdmin'], isFirstLogin: false },
+      } as any
+
+      const res = {
+        status: jest.fn(() => res),
+        json: jest.fn(),
+      } as any
+
+      await handler(req, res)
+
+      expect(res.status).toHaveBeenCalledWith(403)
+    })
   })
 })

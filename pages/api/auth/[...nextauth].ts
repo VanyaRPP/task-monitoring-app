@@ -65,7 +65,6 @@ const providers: NextAuthOptions['providers'] = [
             name: credentials.name,
             email: credentials.email,
             password: hash,
-            isFirstLogin: true,
           })
           return {
             id: newUser._id.toString(),
@@ -118,18 +117,9 @@ export const authOptions: NextAuthOptions = {
   },
   providers,
   callbacks: {
-    async signIn({ user, account }) {
-  try {
-    const existingUser = await User.findOne({ email: user.email })
-    if (existingUser && existingUser.isFirstLogin === undefined) {
-      await User.updateOne(
-        { email: user.email },
-        { $set: { isFirstLogin: true } }
-      )
-    }
-  } catch (e) {}
-  return true
-},
+    async signIn() {
+      return true
+    },
     async redirect({ url, baseUrl }) {
       return baseUrl
     },

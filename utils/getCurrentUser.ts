@@ -4,7 +4,6 @@ import { isAdminCheck } from '@utils/helpers'
 import { getServerSession } from 'next-auth'
 import { Roles } from './constants'
 import Domain from '@modules/models/Domain'
-import RealEstate from '@modules/models/RealEstate'
 
 export async function getCurrentUser(req, res) {
   const session = await getServerSession(req, res, authOptions)
@@ -12,21 +11,28 @@ export async function getCurrentUser(req, res) {
   if (!user) {
     throw new Error('no user found')
   }
-  const isInDomain = await Domain.exists({ adminEmails: user.email })
-  const isInRealEstate = await RealEstate.exists({ adminEmails: user.email })
-  const shouldBeDomainAdmin = Boolean(isInDomain || isInRealEstate)
- 
-  if (
-    shouldBeDomainAdmin &&
-    !user.roles?.includes(Roles.DOMAIN_ADMIN) &&
-    !user.roles?.includes(Roles.GLOBAL_ADMIN)
-  ) {
-    
-    await User.updateOne(
-      { _id: user._id },
-      { $addToSet: { roles: Roles.DOMAIN_ADMIN } }
+  // Role is derived from ownership: a user is a DomainAdmin if (and only if)
+  // their email is listed in the adminEmails of at least one Domain. Being an
+  // admin of a company (RealEstate) makes them a company owner, but the role
+  // stays User. GlobalAdmin is never touched by this derivation.
+  if (!user.roles?.includes(Roles.GLOBAL_ADMIN)) {
+    const shouldBeDomainAdmin = Boolean(
+      await Domain.exists({ adminEmails: user.email })
     )
-    user.roles = [...(user.roles || []), Roles.DOMAIN_ADMIN]
+    const hasDomainAdmin = user.roles?.includes(Roles.DOMAIN_ADMIN)
+
+    if (shouldBeDomainAdmin && !hasDomainAdmin) {
+      // Promote: keep any existing role and add DomainAdmin.
+      await User.updateOne(
+        { _id: user._id },
+        { $addToSet: { roles: Roles.DOMAIN_ADMIN } }
+      )
+      user.roles = [...(user.roles || []), Roles.DOMAIN_ADMIN]
+    } else if (!shouldBeDomainAdmin && hasDomainAdmin) {
+      // Demote: the user no longer administers any domain, so reset to User.
+      await User.updateOne({ _id: user._id }, { roles: [Roles.USER] })
+      user.roles = [Roles.USER]
+    }
   }
   const isUser =
     user?.roles?.includes(Roles.USER) ||
