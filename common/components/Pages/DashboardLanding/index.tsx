@@ -2,43 +2,57 @@
 
 import React, { useEffect, useState } from 'react'
 import { Modal, Button, Typography, Space } from 'antd'
-import { useRouter } from 'next/router'
 import ScrollFactoryAnimation from '@components/ScrollFactoryAnimation'
 import { Header } from '@components/Layouts/Header'
 import { Footer } from '@components/Layouts/Footer'
-import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
-import { useUpdateUserMutation } from '@common/api/userApi/user.api'
-import { Roles, AppRoutes } from '@utils/constants'
+import {
+  useGetCurrentUserQuery,
+  useGetUserByIdQuery,
+  userApi,
+} from '@common/api/userApi/user.api'
+import { useAppDispatch } from '@modules/store/hooks'
+import { Roles } from '@utils/constants'
+import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
+import DomainModal from '@components/UI/DomainsComponents/DomainModal'
 import s from './DashboardLanding.module.scss'
 
 const { Title, Text } = Typography
 
 const DashboardLanding = () => {
-  const router = useRouter()
+  const dispatch = useAppDispatch()
   const { data: user } = useGetCurrentUserQuery()
-  const [updateUser] = useUpdateUserMutation()
-  const [modalOpen, setModalOpen] = useState(false)
+  // The by-id endpoint returns adminDomains/adminCompanies, which lets us
+  // decide modal visibility from what the user owns (data-driven) instead of a
+  // one-shot isFirstLogin flag.
+  const { data: fullUser } = useGetUserByIdQuery(user?._id as string, {
+    skip: !user?._id,
+  })
+  const [welcomeOpen, setWelcomeOpen] = useState(false)
+  const [domainModalOpen, setDomainModalOpen] = useState(false)
 
   useEffect(() => {
-  const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
-  if (user && user.isFirstLogin && !isGlobalAdmin) {
-    setModalOpen(true)
-  }
-}, [user])
-
-  const handleChoice = async (isProvider: boolean) => {
-    if (!user?._id) return
-
-    await updateUser({
-      _id: user._id,
-      isFirstLogin: false,
-      ...(isProvider && { roles: [Roles.DOMAIN_ADMIN] }),
-    })
-
-    setModalOpen(false)
-    if (isProvider) {
-      router.push(AppRoutes.DOMAIN)
+    if (!fullUser) return
+    const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
+    const scoped = fullUser as typeof fullUser & {
+      adminDomains?: unknown[]
+      adminCompanies?: unknown[]
     }
+    const ownsNothing =
+      !scoped.adminDomains?.length && !scoped.adminCompanies?.length
+    setWelcomeOpen(Boolean(ownsNothing && !isGlobalAdmin))
+  }, [fullUser, user])
+
+  const handleCreateProvider = () => {
+    setWelcomeOpen(false)
+    setDomainModalOpen(true)
+  }
+
+  const handleDomainModalClose = () => {
+    setDomainModalOpen(false)
+    // Creating a domain adds the user to its adminEmails, which promotes them
+    // to DomainAdmin on the next getCurrentUser call. Refresh the user so the
+    // new role (and the data-driven modal visibility) updates without a reload.
+    dispatch(userApi.util.invalidateTags(['User']))
   }
 
   return (
@@ -91,9 +105,9 @@ const DashboardLanding = () => {
       </div>
 
       <Modal
-        open={modalOpen}
+        open={welcomeOpen}
         footer={null}
-        closable={false}
+        onCancel={() => setWelcomeOpen(false)}
         centered
         width={480}
       >
@@ -107,29 +121,24 @@ const DashboardLanding = () => {
             </Text>
           </div>
 
-          <Text strong style={{ display: 'block', textAlign: 'center' }}>
-            Ким ви будете?
-          </Text>
-
-          <Space direction="vertical" style={{ width: '100%' }} size="middle">
-            <Button
-              type="primary"
-              block
-              size="large"
-              onClick={() => handleChoice(true)}
-            >
-              Надавач послуг
-            </Button>
-            <Button
-              block
-              size="large"
-              onClick={() => handleChoice(false)}
-            >
-              Споживач
-            </Button>
-          </Space>
+          <Button
+            type="primary"
+            block
+            size="large"
+            onClick={handleCreateProvider}
+          >
+            Створити надавача послуг
+          </Button>
         </Space>
       </Modal>
+
+      {domainModalOpen && (
+        <DomainModal
+          currentDomain={null as unknown as IExtendedDomain}
+          editable
+          closeModal={handleDomainModalClose}
+        />
+      )}
     </div>
   )
 }
