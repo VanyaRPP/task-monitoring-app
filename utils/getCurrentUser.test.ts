@@ -3,9 +3,10 @@ import { getCurrentUser } from '@utils/getCurrentUser'
 
 import { mockLoginAs } from '@utils/mockLoginAs'
 import { setupTestEnvironment } from '@utils/setupTestEnvironment'
-import { users } from '@utils/testData'
+import { users, domains } from '@utils/testData'
 import { Roles } from '@utils/constants'
 import User from '@modules/models/User'
+import Domain from '@modules/models/Domain'
 
 jest.mock('@pages/api/auth/[...nextauth]', () => ({ authOptions: {} }))
 jest.mock('next-auth', () => ({ getServerSession: jest.fn() }))
@@ -57,9 +58,13 @@ describe('getCurrentUser', () => {
   })
 
   it('Should derive DomainAdmin from Domain membership (promotion)', async () => {
-    // users.user is seeded with role User but is listed in domains[1].adminEmails,
+    // user2 is seeded with role User; add their email to a domain's adminEmails
     // so the role is derived up to DomainAdmin.
-    await mockLoginAs(users.user)
+    await Domain.updateOne(
+      { _id: domains[2]._id },
+      { $addToSet: { adminEmails: users.user2.email } }
+    )
+    await mockLoginAs(users.user2)
 
     const { isDomainAdmin, user } = await getCurrentUser({}, {})
 
