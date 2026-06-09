@@ -120,6 +120,17 @@ export const domainApi = createApi({
               { type: 'Domain', id: 'LIST' },
             ]
           : [],
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        // Domain edits may reshape customServices groups; force the
+        // customServicesApi cache to refresh so Payment Bulk + RealEstateModal
+        // see the new structure without a manual reload.
+        try {
+          await queryFulfilled
+          dispatch(customServicesApi.util.invalidateTags(['CustomService']))
+        } catch {
+          // mutation failed — nothing to invalidate
+        }
+      },
     }),
     updateArchivedDomain: builder.mutation<
       IExtendedDomain,
@@ -137,17 +148,6 @@ export const domainApi = createApi({
               { type: 'Domain', id: 'LIST' },
             ]
           : [],
-                async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
-        // Domain edits may reshape customServices groups; force the
-        // customServicesApi cache to refresh so Payment Bulk + RealEstateModal
-        // see the new structure without a manual reload.
-        try {
-          await queryFulfilled
-          dispatch(customServicesApi.util.invalidateTags(['CustomService']))
-        } catch {
-          // mutation failed — nothing to invalidate
-        }
-      },
     }),
     getAreas: builder.query<IExtendedAreas, { domainId?: string }>({
       query: ({ domainId }) => ({

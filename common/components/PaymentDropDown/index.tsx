@@ -1,5 +1,6 @@
 import {
   CheckOutlined,
+  CopyOutlined,
   DeleteOutlined,
   EditOutlined,
   EyeOutlined,
@@ -23,6 +24,7 @@ interface Props {
   onEdit: (p: IExtendedPayment) => void
   onDelete: (id: string) => void
   onMarkPaid: (p: IExtendedPayment) => void
+  onDuplicate: (p: IExtendedPayment) => void
   deleteLoading: boolean
 }
 
@@ -42,6 +44,7 @@ const PaymentDropdown: React.FC<Props> = ({
   onEdit,
   onDelete,
   onMarkPaid,
+  onDuplicate,
   deleteLoading,
 }) => {
   const [htmlToPdf, { isLoading: pdfLoading }] = useHtmlToPdfMutation()
@@ -111,6 +114,11 @@ const PaymentDropdown: React.FC<Props> = ({
               },
             ]
           : []),
+        {
+          key: 'duplicate',
+          label: 'Дублювати рахунок',
+          icon: <CopyOutlined />,
+        },
       ]
     : []
 
@@ -143,6 +151,7 @@ const PaymentDropdown: React.FC<Props> = ({
     if (key === 'view') onView(payment)
     if (key === 'edit') onEdit(payment)
     if (key === 'mark') onMarkPaid(payment)
+    if (key === 'duplicate') onDuplicate(payment)
     if (key === 'download') handleDownloadPdf()
     if (key === 'delete') {
       Modal.confirm({

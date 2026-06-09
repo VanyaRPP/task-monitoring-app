@@ -209,7 +209,7 @@ describe('Domains API - ARCHIVE / UNARCHIVE', () => {
   //фільтр після архівації 2 тести
 
   describe('GET filter after archive', () => {
-    it('archived domain does not appear in GET without archived param', async () => {
+    it('archived domain does not appear in GET with archived=false', async () => {
       await Domain.findByIdAndUpdate(domains[0]._id, { archived: true })
 
       await mockLoginAs(users.globalAdmin)
@@ -218,7 +218,7 @@ describe('Domains API - ARCHIVE / UNARCHIVE', () => {
 
       const mockReq = {
         method: 'GET',
-        query: {},
+        query: { archived: 'false' },
       } as any
       const mockRes = {
         status: jest.fn(() => mockRes),
@@ -253,6 +253,32 @@ describe('Domains API - ARCHIVE / UNARCHIVE', () => {
       expect(mockRes.status).toHaveBeenCalledWith(200)
       const ids = mockRes.json.mock.lastCall[0].data.map((d: any) => d._id.toString())
       expect(ids).toContain(domains[0]._id.toString())
+    })
+
+    it('legacy domain without archived field appears in GET with archived=false', async () => {
+      // simulate a domain created before the archive feature (no `archived` field)
+      await Domain.findByIdAndUpdate(domains[1]._id, { $unset: { archived: '' } })
+
+      await mockLoginAs(users.globalAdmin)
+
+      const getHandler = require('@pages/api/domain/index').default
+
+      const mockReq = {
+        method: 'GET',
+        query: { archived: 'false' },
+      } as any
+      const mockRes = {
+        status: jest.fn(() => mockRes),
+        json: jest.fn(),
+      } as any
+
+      await getHandler(mockReq, mockRes)
+
+      expect(mockRes.status).toHaveBeenCalledWith(200)
+      const ids = mockRes.json.mock.lastCall[0].data.map((d: any) =>
+        d._id.toString()
+      )
+      expect(ids).toContain(domains[1]._id.toString())
     })
   })
 })

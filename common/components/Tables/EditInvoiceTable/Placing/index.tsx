@@ -1,4 +1,5 @@
 import { usePaymentContext } from '@components/AddPaymentModal'
+import { useInvoiceCurrency } from '@modules/hooks/useInvoiceCurrency'
 import {
   InvoiceComponentProps,
   InvoiceType,
@@ -32,6 +33,7 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
 }) => {
   const name = useMemo(() => toArray<string>(_name), [_name])
   const { company, prevService, prevPayment } = usePaymentContext()
+  const currency = useInvoiceCurrency()
 
   const invoices: InvoiceType[] = Form.useWatch(['invoice'], form)
   const amount = Form.useWatch(['invoice', ...name, 'amount'], form)
@@ -72,8 +74,8 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
     if (!editable && !isInitial) return null
     return (
       <Typography.Text delete={!isInitial}>
-        {currencyWithUnit(toRoundFixed(rentPrice), company)} +{' '}
-        {currencyWithUnit(toRoundFixed(inflicionInvoice?.sum), company)} ={' '}
+        {currencyWithUnit(toRoundFixed(rentPrice), currency)} +{' '}
+        {currencyWithUnit(toRoundFixed(inflicionInvoice?.sum), currency)} ={' '}
       </Typography.Text>
     )
   }
@@ -114,6 +116,7 @@ export const Price: React.FC<InvoiceComponentProps> = ({
 }) => {
   const name = useMemo(() => toArray<string>(_name), [_name])
   const { company, prevService, prevPayment } = usePaymentContext()
+  const currency = useInvoiceCurrency()
   const invoices: InvoiceType[] = Form.useWatch(['invoice'], form)
   const watchedPrice = Form.useWatch(['invoice', ...name, 'price'], form)
   const changed = Form.useWatch(['invoiceMeta', 'changed'], form) ?? false
@@ -166,13 +169,13 @@ export const Price: React.FC<InvoiceComponentProps> = ({
 
   const suffix = useMemo(() => {
     return company?.inflicion ? (
-      <span>{currencyWithUnit('', company)}</span>
+      <span>{currencyWithUnit('', currency)}</span>
     ) : (
       <span>
-        {currencyWithUnit('', company)}/м<sup>2</sup>
+        {currencyWithUnit('', currency)}/м<sup>2</sup>
       </span>
     )
-  }, [company])
+  }, [company, currency])
 
   if (!editable) {
     return (
@@ -205,6 +208,7 @@ export const Price: React.FC<InvoiceComponentProps> = ({
 export const Sum: React.FC<InvoiceComponentProps> = ({ form, name: _name }) => {
   const name = useMemo(() => toArray<string>(_name), [_name])
   const { company } = usePaymentContext()
+  const currency = useInvoiceCurrency()
 
   const price = Form.useWatch(['invoice', ...name, 'price'], form)
   const amount = Form.useWatch(['invoice', ...name, 'amount'], form)
@@ -212,7 +216,7 @@ export const Sum: React.FC<InvoiceComponentProps> = ({ form, name: _name }) => {
 
   useSyncSum(form!, name, company?.inflicion ? +price : +price * +amount)
 
-  return <strong>{currencyWithUnit(toRoundFixed(sum), company)}</strong>
+  return <strong>{currencyWithUnit(toRoundFixed(sum), currency)}</strong>
 }
 
 const Placing = {

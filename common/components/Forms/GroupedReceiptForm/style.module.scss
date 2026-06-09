@@ -1,7 +1,7 @@
 .print {
   position: absolute;
   top: -80px;
-  right: 118px;
+  right: 155px;
   user-select: none;
   cursor: pointer;
   font-size: 25px;
@@ -10,7 +10,7 @@
 .telegramIcon {
   position: absolute;
   top: -80px;
-  right: 120px;
+  right: 155px;
   user-select: none;
   cursor: pointer;
   font-size: 25px;
@@ -19,7 +19,7 @@
 .edit {
   position: absolute;
   top: -80px;
-  right: 80px;
+  right: 115px;
   user-select: none;
   cursor: pointer;
   font-size: 25px;
@@ -28,7 +28,7 @@
 .tableDetailsToggle {
   position: absolute;
   top: -80px;
-  right: 40px;
+  right: 75px;
   user-select: none;
   cursor: pointer;
   font-size: 25px;
@@ -46,4 +46,13 @@
   &:hover {
     color: var(--ant-color-primary-hover, #4096ff);
   }
+}
+
+.languageSelector {
+  position: absolute;
+  top: -80px;
+  right: 0;
+  display: flex;
+  align-items: center;
+  height: 25px;
 }

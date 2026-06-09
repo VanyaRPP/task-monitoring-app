@@ -47,7 +47,13 @@ export default async function handler(
         }
 
         const isArchived = archived ? archived === 'true' : undefined
-        options.archived = isArchived !== undefined ? isArchived : false
+        if (isArchived === true) {
+          options.archived = true
+        } else if (isArchived === false) {
+          // legacy domains created before the archive feature have no
+          // `archived` field, so `$ne: true` matches false + missing + null
+          options.archived = { $ne: true }
+        }
 
         if (isDomainAdmin) {
           options.adminEmails = user.email

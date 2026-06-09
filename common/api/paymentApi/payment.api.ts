@@ -209,6 +209,29 @@ export const paymentApi = createApi({
       }) => response.data,
       invalidatesTags: (response) => (response ? ['Payment'] : []),
     }),
+    duplicatePayments: builder.mutation<
+      {
+        createdIds: string[]
+        skippedIds: string[]
+        totalRequested: number
+      },
+      string[]
+    >({
+      query: (ids) => ({
+        url: `spacehub/payment/duplicate`,
+        method: 'POST',
+        body: { ids },
+      }),
+      transformResponse: (response: {
+        success: boolean
+        data: {
+          createdIds: string[]
+          skippedIds: string[]
+          totalRequested: number
+        }
+      }) => response.data,
+      invalidatesTags: (response) => (response ? ['Payment', 'Profit'] : []),
+    }),
     htmlToPdf: builder.mutation<IHtmlToPdfResponse, IHtmlToPdfRequest>({
       query: (body) => ({
         url: 'spacehub/payment/htmlToPdf',
@@ -266,6 +289,7 @@ export const {
   useGetPaymentNumberQuery,
   useEditPaymentMutation,
   useMarkPaymentsPaidMutation,
+  useDuplicatePaymentsMutation,
   useHtmlToPdfMutation,
   useHtmlToPdfZipMutation,
   useGetCostPaymentQuery,
