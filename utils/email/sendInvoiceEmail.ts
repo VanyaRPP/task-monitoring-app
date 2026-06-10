@@ -134,8 +134,7 @@ export async function sendInvoiceEmail(
 
     const result = await transporter.sendMail({
       from: sender,
-      to: sender,
-      bcc: recipients.join(', '),
+      to: recipients.join(', '),
       subject: `Invoice ${invoiceId} for ${companyName}`,
       text: `Invoice ${invoiceId} notification (PDF attachment temporarily unavailable).`,
     })
