@@ -16,13 +16,15 @@ import {
   paymentApi,
   useMarkPaymentsPaidMutation,
   useDuplicatePaymentsMutation,
+  useSendPaymentEmailMutation,
+  useUpdatePaymentStatusMutation,
 } from '@common/api/paymentApi/payment.api'
 import {
   debtorsApi,
   useGetDebtorsQuery,
 } from '@common/api/debtorsApi/debtors.api'
 
-import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
+import { IExtendedPayment, PaymentStatus } from '@common/api/paymentApi/payment.api.types'
 
 import TableCard from '@components/UI/TableCard'
 import PaymentsHeader from '@components/Tables/Payment/Header'
@@ -159,6 +161,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
       domainIds: sepDomainID || filters?.domain || undefined,
       streetIds: filters?.street || undefined,
       type: filters?.type || undefined,
+      status: filters?.status || undefined,
     },
     { skip: currUserLoading || !currUser }
   )
@@ -182,6 +185,8 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
   const [deleteMultiplePayments] = useDeleteMultiplePaymentsMutation()
   const [markPaymentsPaid] = useMarkPaymentsPaidMutation()
   const [duplicatePayments] = useDuplicatePaymentsMutation()
+  const [sendPaymentEmail] = useSendPaymentEmailMutation()
+  const [updatePaymentStatus] = useUpdatePaymentStatusMutation()
   const patchDebtorsCache = useCallback(
     (changes: Array<{ companyId: string; debtDelta: number }>) => {
       if (!changes.length || !domainIds.length) return
@@ -481,6 +486,15 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     deleteLoading,
     onMarkPaid: handleMarkPaid,
     onDuplicate: handleDuplicate,
+    onSendPaymentEmail: async (paymentId: string) =>
+      sendPaymentEmail(paymentId).unwrap(),
+    onUpdatePaymentStatus: async ({
+      _id,
+      status,
+    }: {
+      _id: string
+      status: PaymentStatus
+    }) => updatePaymentStatus({ _id, status }).unwrap(),
   }
   const debtProps = {
     debtorCompanies,

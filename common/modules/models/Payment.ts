@@ -3,6 +3,7 @@ import {
   IPaymentTransactions,
   IProvider,
   IReciever,
+  PaymentStatus,
 } from '@common/api/paymentApi/payment.api.types'
 import mongoose, { ObjectId, Schema } from 'mongoose'
 import { Currency } from '@utils/constants'
@@ -10,6 +11,7 @@ import { Currency } from '@utils/constants'
 export interface IPaymentModel {
   invoiceNumber: number
   type: string
+  status?: PaymentStatus
   invoiceCreationDate: Date
   domain: ObjectId
   street: ObjectId
@@ -30,6 +32,11 @@ export interface IPaymentModel {
 export const PaymentSchema = new Schema<IPaymentModel>({
   invoiceNumber: { type: Number, required: true },
   type: { type: String },
+  status: {
+    type: String,
+    enum: [PaymentStatus.Draft, PaymentStatus.Sent],
+    default: PaymentStatus.Draft,
+  },
   invoiceCreationDate: { type: Date, required: true, default: Date.now },
   domain: { type: Schema.Types.ObjectId, ref: 'Domain' },
   street: { type: Schema.Types.ObjectId, ref: 'Street' },

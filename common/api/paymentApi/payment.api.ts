@@ -21,6 +21,7 @@ import {
   ICostPayment,
   IGetPaymentChangeLogsResponse,
   ICreatePaymentChangeLogResponse,
+  PaymentStatus,
 } from './payment.api.types'
 
 /**
@@ -68,6 +69,7 @@ export const paymentApi = createApi({
         companyIds?: string[]
         streetIds?: string[]
         serviceIds?: string[]
+        status?: PaymentStatus | PaymentStatus[]
         dateField?: 'invoiceCreationDate' | 'date'
       }
     >({
@@ -84,6 +86,7 @@ export const paymentApi = createApi({
         companyIds,
         streetIds,
         serviceIds,
+        status,
       }) => {
         return {
           url: `spacehub/payment`,
@@ -100,6 +103,7 @@ export const paymentApi = createApi({
             companyIds,
             streetIds,
             serviceIds,
+            status,
           },
         }
       },
@@ -185,6 +189,26 @@ export const paymentApi = createApi({
       },
       invalidatesTags: (response) => (response ? ['Payment'] : []),
       onQueryStarted: invalidatePaymentSideEffects,
+    }),
+    updatePaymentStatus: builder.mutation<
+      IExtendedPayment,
+      { _id: string; status: PaymentStatus }
+    >({
+      query({ _id, status }) {
+        return {
+          url: `spacehub/payment/${_id}`,
+          method: 'PATCH',
+          body: { status },
+        }
+      },
+      invalidatesTags: (response) => (response ? ['Payment'] : []),
+      onQueryStarted: invalidatePaymentSideEffects,
+    }),
+    sendPaymentEmail: builder.mutation<{ success: boolean }, string>({
+      query: (id) => ({
+        url: `spacehub/payment/${id}/send-email`,
+        method: 'POST',
+      }),
     }),
     markPaymentsPaid: builder.mutation<
       {
@@ -295,4 +319,6 @@ export const {
   useGetCostPaymentQuery,
   useAddCostPaymentMutation,
   useGenerateExcelMutation,
+  useUpdatePaymentStatusMutation,
+  useSendPaymentEmailMutation,
 } = paymentApi

@@ -1,11 +1,23 @@
 import { useMemo } from 'react'
-import { Badge, Button, List, Tooltip, Typography, theme } from 'antd'
+import {
+  Badge,
+  Button,
+  List,
+  Tag,
+  Tooltip,
+  Typography,
+  theme,
+  message,
+} from 'antd'
+import { MailOutlined } from '@ant-design/icons'
 import { ColumnType, ColumnsType } from 'antd/es/table'
+import { useTranslation } from 'react-i18next'
 import { IPaymentFilterResponse } from '@common/api/filterApi/filter.api.types'
 import {
   IExtendedPayment,
   IFilter,
   IGetPaymentResponse,
+  PaymentStatus,
 } from '@common/api/paymentApi/payment.api.types'
 import {
   dateToDefaultFormat,
@@ -57,9 +69,26 @@ interface Params {
   onDelete: (id: string) => void
   onMarkPaid: (p: IExtendedPayment) => void
   onDuplicate: (p: IExtendedPayment) => void
+  onSendPaymentEmail: (paymentId: string) => Promise<{ success: boolean }>
+  onUpdatePaymentStatus: (args: {
+    _id: string
+    status: PaymentStatus
+  }) => Promise<unknown>
   deleteLoading: boolean
   visibleCustomServices?: ICustomServiceItem[]
 }
+
+const PAYMENT_STATUSES: PaymentStatus[] = [
+  PaymentStatus.Draft,
+  PaymentStatus.Sent,
+]
+
+const normalizePaymentStatus = (
+  payment: Pick<IExtendedPayment, 'status'>
+): PaymentStatus =>
+  payment.status === PaymentStatus.Sent
+    ? PaymentStatus.Sent
+    : PaymentStatus.Draft
 
 function widenFilterDropdown(w = 240) {
   return (open: boolean) => {
@@ -102,10 +131,13 @@ export function usePaymentColumns({
   onDelete,
   onMarkPaid,
   onDuplicate,
+  onSendPaymentEmail,
+  onUpdatePaymentStatus,
   deleteLoading,
   visibleCustomServices,
 }: Params): ColumnsType<IExtendedPayment> {
   const { token } = theme.useToken()
+  const { t } = useTranslation()
 
   const isSingleCompanyByData = useMemo(
     () => companiesFilter?.length === 1,
@@ -170,8 +202,7 @@ export function usePaymentColumns({
           _record: IExtendedPayment,
           index: number
         ) => {
-          const companyName = company.companyName
-          const companyId = company._id
+          const { companyName, _id: companyId } = company
           const debtor = debtorCompanies.find(
             (d) => d.companyName === companyName
           )
@@ -410,6 +441,93 @@ export function usePaymentColumns({
           )
         },
       },
+      {
+        title: t('payments.statusLabel'),
+        dataIndex: 'status',
+        width: 176,
+        filters: PAYMENT_STATUSES.map((status) => ({
+          text:
+            status === PaymentStatus.Sent
+              ? t('payments.statuses.sent')
+              : t('payments.statuses.draft'),
+          value: status,
+        })),
+        filteredValue: filters?.status || null,
+        filterMultiple: true,
+        render: (_value, payment) => {
+          const status = normalizePaymentStatus(payment)
+          const isSent = status === PaymentStatus.Sent
+          const disabled = isSent
+
+          const handleSend = async () => {
+            try {
+              const response = await onSendPaymentEmail(payment._id)
+              if (!response?.success) {
+                message.error(t('payments.messages.sendFailed'))
+                return
+              }
+
+              await onUpdatePaymentStatus({
+                _id: payment._id,
+                status: PaymentStatus.Sent,
+              })
+              message.success(t('payments.messages.sendSuccess'))
+            } catch {
+              message.error(t('payments.messages.sendFailed'))
+            }
+          }
+
+          const sendButton = (
+            <Button
+              type="text"
+              icon={<MailOutlined />}
+              disabled={disabled}
+              onClick={handleSend}
+              style={{
+                padding: 0,
+                color: disabled ? token.colorTextDisabled : token.colorSuccess,
+              }}
+            />
+          )
+
+          return (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8,
+              }}
+            >
+              <Tag
+                style={{
+                  borderRadius: 16,
+                  paddingInline: 12,
+                  marginInlineEnd: 0,
+                  lineHeight: '22px',
+                  border: `1px solid ${isSent ? token.colorSuccessBorder : token.colorBorderSecondary}`,
+                  background: isSent
+                    ? token.colorSuccessBg
+                    : token.colorFillSecondary,
+                  color: isSent ? token.colorSuccess : token.colorTextSecondary,
+                }}
+              >
+                {isSent
+                  ? t('payments.statuses.sent')
+                  : t('payments.statuses.draft')}
+              </Tag>
+
+              {disabled ? (
+                <Tooltip title={t('payments.tooltips.alreadySent')}>
+                  {sendButton}
+                </Tooltip>
+              ) : (
+                sendButton
+              )}
+            </div>
+          )
+        },
+      },
       ...(selectedColumns.map((value) => {
         const customService = visibleCustomServices?.find(
           (s) => s._id === value
@@ -419,6 +537,7 @@ export function usePaymentColumns({
           isCustom
             ? payment.invoice.find((i) => i.serviceId === value)
             : payment.invoice.find((i) => i.type === value)
+
         return {
           title: isCustom ? customService.name : ServiceName[value],
           dataIndex: value,
@@ -469,12 +588,16 @@ export function usePaymentColumns({
       onDelete,
       onMarkPaid,
       onDuplicate,
+      onSendPaymentEmail,
+      onUpdatePaymentStatus,
       isGlobalAdmin,
       isDomainAdmin,
       isUser,
       isSingleCompanyByData,
       themeKey,
       token,
+      t,
+      visibleCustomServices,
     ]
   )
 }

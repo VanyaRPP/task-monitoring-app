@@ -1,5 +1,19 @@
 {
   "siteTitle": "My Website",
+  "payments": {
+    "statusLabel": "Status",
+    "statuses": {
+      "draft": "Draft",
+      "sent": "Sent"
+    },
+    "tooltips": {
+      "alreadySent": "This payment has already been sent to the recipient"
+    },
+    "messages": {
+      "sendFailed": "Failed to send the payment email",
+      "sendSuccess": "Payment email sent"
+    }
+  },
   "modal": {
     "successMessage": "Changes saved successfully",
     "errorMessage": "Failed to save changes"

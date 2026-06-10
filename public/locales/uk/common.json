@@ -1,5 +1,19 @@
 {
   "siteTitle": "My Website",
+  "payments": {
+    "statusLabel": "Статус",
+    "statuses": {
+      "draft": "Драфт",
+      "sent": "Відправлено"
+    },
+    "tooltips": {
+      "alreadySent": "Ця проплата уже була відправлена одержувачу"
+    },
+    "messages": {
+      "sendFailed": "Не вдалося відправити проплату на пошту",
+      "sendSuccess": "Проплату відправлено на пошту"
+    }
+  },
   "modal": {
     "successMessage": "Зміни успішно збережено",
     "errorMessage": "Не вдалося зберегти зміни"
