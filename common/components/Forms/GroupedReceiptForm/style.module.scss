@@ -1,7 +1,7 @@
 .print {
   position: absolute;
   top: -80px;
-  right: 155px;
+  right: 195px;
   user-select: none;
   cursor: pointer;
   font-size: 25px;
@@ -10,7 +10,7 @@
 .telegramIcon {
   position: absolute;
   top: -80px;
-  right: 155px;
+  right: 195px;
   user-select: none;
   cursor: pointer;
   font-size: 25px;
@@ -19,10 +19,33 @@
 .edit {
   position: absolute;
   top: -80px;
+  right: 155px;
+  user-select: none;
+  cursor: pointer;
+  font-size: 25px;
+}
+
+.descEdit {
+  position: absolute;
+  top: -80px;
   right: 115px;
   user-select: none;
   cursor: pointer;
   font-size: 25px;
+  color: rgba(0, 0, 0, 0.45);
+  transition: color 0.2s;
+
+  &:hover {
+    color: rgba(0, 0, 0, 0.75);
+  }
+}
+
+.descEditActive {
+  color: var(--ant-color-primary, #1677ff);
+
+  &:hover {
+    color: var(--ant-color-primary-hover, #4096ff);
+  }
 }
 
 .tableDetailsToggle {
@@ -55,4 +78,65 @@
   display: flex;
   align-items: center;
   height: 25px;
+}
+
+.saveBar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 10px 14px;
+  border: 1px solid var(--ant-color-primary, #722ed1);
+  border-radius: 8px;
+  background: transparent;
+  animation: fadeSlideUp 0.15s ease;
+  flex-wrap: wrap;
+}
+
+.saveBarOptions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.saveBarRadio {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.saveBarInfo {
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+.saveBarTemplateName {
+  opacity: 0.6;
+  font-size: 12px;
+}
+
+.saveBarInput {
+  width: 220px;
+  min-width: 160px;
+}
+
+.saveBarActions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

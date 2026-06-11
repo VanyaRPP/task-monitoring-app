@@ -9,6 +9,7 @@ import {
   getDomainHeading,
   getRecipientCompanyHeading,
 } from '../invoice-party-headings'
+import EditableText from '../../EditableText'
 import cs from './style.module.scss'
 
 const ClassicTemplate: FC<TemplateProps> = ({
@@ -20,15 +21,20 @@ const ClassicTemplate: FC<TemplateProps> = ({
   currency,
   domainName,
   companyLabel,
-  rows,
-  getQty,
-  subtotal,
-  taxPercent,
-  taxAmount,
-  total,
-  paymentInfoLines,
-  issuedToLines,
-  normalizedBankDetailsLines,
+  rows: _rows,
+  getQty: _getQty,
+  subtotal: _subtotal,
+  taxPercent: _taxPercent,
+  taxAmount: _taxAmount,
+  total: _total,
+  paymentInfoLines: _paymentInfoLines,
+  issuedToLines: _issuedToLines,
+  normalizedBankDetailsLines: _normalizedBankDetailsLines,
+  editMode,
+  rawProviderDesc,
+  rawReceiverDesc,
+  onProviderDescChange,
+  onReceiverDescChange,
 }) => {
   const providerDomainHeading = getDomainHeading(data, domainName)
   const recipientCompanyHeading = getRecipientCompanyHeading(data, companyLabel)
@@ -49,24 +55,36 @@ const ClassicTemplate: FC<TemplateProps> = ({
         <div className={cs.label}>
           {isEnglish ? 'Provider' : 'Постачальник'}
         </div>
-        <pre className={cs.preLabel}>
-          
-          {data?.provider?.description?.trim()} <br />
-          <br />
-        </pre>
+        <EditableText
+          editMode={!!editMode}
+          rawText={rawProviderDesc ?? data?.provider?.description?.trim() ?? ''}
+          onChange={onProviderDescChange ?? (() => {})}
+          rows={5}
+        >
+          <pre className={cs.preLabel}>
+            {data?.provider?.description?.trim()} <br />
+            <br />
+          </pre>
+        </EditableText>
       </div>
 
       <div className={cs.receiverInfo}>
         <div className={cs.label}>{isEnglish ? 'Recipient' : 'Одержувач'}</div>
-        <pre className={cs.preLabel}>
-         
-          {data?.reciever?.description?.trim()} <br />
-          {data?.reciever?.adminEmails?.map((email: string) => (
-            <div key={email}>
-              {email} <br />
-            </div>
-          ))}
-        </pre>
+        <EditableText
+          editMode={!!editMode}
+          rawText={rawReceiverDesc ?? data?.reciever?.description?.trim() ?? ''}
+          onChange={onReceiverDescChange ?? (() => {})}
+          rows={5}
+        >
+          <pre className={cs.preLabel}>
+            {data?.reciever?.description?.trim()} <br />
+            {data?.reciever?.adminEmails?.map((email: string) => (
+              <div key={email}>
+                {email} <br />
+              </div>
+            ))}
+          </pre>
+        </EditableText>
       </div>
 
       <div className={cs.providerInvoice}>

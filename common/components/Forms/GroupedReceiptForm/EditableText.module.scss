@@ -1,0 +1,20 @@
+.textarea {
+  width: 100%;
+  font: inherit;
+  font-size: inherit;
+  color: inherit;
+  border: 1.5px dashed var(--ant-color-primary, #722ed1);
+  border-radius: 4px;
+  background: transparent;
+  padding: 4px 6px;
+  resize: vertical;
+  min-height: 60px;
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+  line-height: 1.5;
+
+  &:focus {
+    border-color: var(--ant-color-primary-hover, #9254de);
+  }
+}

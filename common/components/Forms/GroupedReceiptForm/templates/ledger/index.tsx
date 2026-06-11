@@ -5,6 +5,7 @@ import {
   getBillFromHeadingAndBodyLines,
   getIssuedToHeadingAndBodyLines,
 } from '../invoice-party-headings'
+import EditableText from '../../EditableText'
 import lg from './ledger.module.scss'
 
 const LedgerTemplate: FC<TemplateProps> = ({
@@ -23,6 +24,11 @@ const LedgerTemplate: FC<TemplateProps> = ({
   paymentInfoLines,
   issuedToLines,
   normalizedBankDetailsLines,
+  editMode,
+  rawProviderDesc,
+  rawReceiverDesc,
+  onProviderDescChange,
+  onReceiverDescChange,
 }) => {
   const { heading: paymentHeading, bodyLines: paymentBodyLines } =
     getBillFromHeadingAndBodyLines(data, paymentInfoLines)
@@ -87,61 +93,86 @@ const LedgerTemplate: FC<TemplateProps> = ({
             {isEnglish ? 'Provider (Contractor)' : 'Підрядник'}
           </div>
           <div className={lg.lgPartyBody}>
-            {!!paymentHeading && (
-              <div className={lg.lgPartyName}>{paymentHeading}</div>
-            )}
-            {paymentBodyLines.map((line: string, idx: number) => (
-              <div
-                key={`pi-${idx}`}
-                className={
-                  !paymentHeading && idx === 0 ? lg.lgPartyName : lg.lgPartyLine
-                }
-              >
-                {line}
-              </div>
-            ))}
-            {!!normalizedBankDetailsLines.length && (
-              <div className={lg.lgBankSection}>
-                {normalizedBankDetailsLines.map((line: string, idx: number) => {
-                  const sep = line.indexOf(':')
-                  if (sep < 0) {
-                    return (
-                      <div className={lg.lgBankLine} key={`bk-${idx}`}>
-                        {line}
-                      </div>
-                    )
-                  }
-                  return (
-                    <div className={lg.lgBankLine} key={`bk-${idx}`}>
-                      <span className={lg.lgBankLineLabel}>
-                        {line.slice(0, sep + 1)}
-                      </span>
-                      {line.slice(sep + 1)}
-                    </div>
-                  )
-                })}
-              </div>
-            )}
+            <EditableText
+              editMode={!!editMode}
+              rawText={rawReceiverDesc ?? ''}
+              onChange={onReceiverDescChange ?? (() => {})}
+              rows={6}
+            >
+              <>
+                {!!paymentHeading && (
+                  <div className={lg.lgPartyName}>{paymentHeading}</div>
+                )}
+                {paymentBodyLines.map((line: string, idx: number) => (
+                  <div
+                    key={`pi-${idx}`}
+                    className={
+                      !paymentHeading && idx === 0
+                        ? lg.lgPartyName
+                        : lg.lgPartyLine
+                    }
+                  >
+                    {line}
+                  </div>
+                ))}
+                {!!normalizedBankDetailsLines.length && (
+                  <div className={lg.lgBankSection}>
+                    {normalizedBankDetailsLines.map(
+                      (line: string, idx: number) => {
+                        const sep = line.indexOf(':')
+                        if (sep < 0) {
+                          return (
+                            <div className={lg.lgBankLine} key={`bk-${idx}`}>
+                              {line}
+                            </div>
+                          )
+                        }
+                        return (
+                          <div className={lg.lgBankLine} key={`bk-${idx}`}>
+                            <span className={lg.lgBankLineLabel}>
+                              {line.slice(0, sep + 1)}
+                            </span>
+                            {line.slice(sep + 1)}
+                          </div>
+                        )
+                      }
+                    )}
+                  </div>
+                )}
+              </>
+            </EditableText>
           </div>
         </div>
+
         <div className={lg.lgPartyBox}>
           <div className={lg.lgPartyHeader}>
             {isEnglish ? 'Customer (Recipient)' : 'Замовник'}
           </div>
           <div className={lg.lgPartyBody}>
-            {!!issuedHeading && (
-              <div className={lg.lgPartyName}>{issuedHeading}</div>
-            )}
-            {issuedBodyLines.map((line: string, idx: number) => (
-              <div
-                key={`it-${idx}`}
-                className={
-                  !issuedHeading && idx === 0 ? lg.lgPartyName : lg.lgPartyLine
-                }
-              >
-                {line}
-              </div>
-            ))}
+            <EditableText
+              editMode={!!editMode}
+              rawText={rawProviderDesc ?? ''}
+              onChange={onProviderDescChange ?? (() => {})}
+              rows={6}
+            >
+              <>
+                {!!issuedHeading && (
+                  <div className={lg.lgPartyName}>{issuedHeading}</div>
+                )}
+                {issuedBodyLines.map((line: string, idx: number) => (
+                  <div
+                    key={`it-${idx}`}
+                    className={
+                      !issuedHeading && idx === 0
+                        ? lg.lgPartyName
+                        : lg.lgPartyLine
+                    }
+                  >
+                    {line}
+                  </div>
+                ))}
+              </>
+            </EditableText>
           </div>
         </div>
       </div>

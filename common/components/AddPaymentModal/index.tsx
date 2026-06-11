@@ -21,7 +21,7 @@ import PriceList from '@common/components/Forms/AddPaymentForm/PriceList'
 import { useResolveMonthServiceId } from '@common/components/Forms/AddPaymentForm/useResolveMonthServiceId'
 import Modal from '@components/UI/ModalWindow'
 import { usePaymentFormData } from '@modules/hooks/usePaymentData'
-import { Operations } from '@utils/constants'
+import {Currency, Operations } from '@utils/constants'
 import { getInvoices } from '@utils/getInvoices'
 import {
   getPaymentProviderAndReciever,

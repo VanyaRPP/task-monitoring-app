@@ -6,6 +6,10 @@ interface ReceiptTemplatePropsInput {
   data: any
   contextCompany?: any
   lang?: 'en' | 'uk'
+  descriptionOverrides?: {
+    providerDescription?: string
+    receiverDescription?: string
+  }
 }
 
 export interface ReceiptTemplateProps {
@@ -45,6 +49,7 @@ export function useReceiptTemplateProps({
   data,
   contextCompany,
   lang,
+  descriptionOverrides,
 }: ReceiptTemplatePropsInput): ReceiptTemplateProps {
   const currency =
     data?.currency ||
@@ -90,19 +95,27 @@ export function useReceiptTemplateProps({
   const taxAmount = 0
   const total = subtotal + taxAmount
 
-  const domainDescription =
+  const rawDomainDescription =
     data?.domain?.description ||
     (typeof contextCompany?.domain === 'object'
       ? contextCompany?.domain?.description
       : '')
+  const domainDescription =
+    descriptionOverrides?.providerDescription !== undefined
+      ? descriptionOverrides.providerDescription
+      : rawDomainDescription
 
   const issuedToLines = [
     ...(domainDescription?.trim()?.split('\n') || []),
   ].filter(Boolean)
 
-  const receiverDescriptionLines = (
-    data?.reciever?.description?.split('\n') || []
-  )
+  const rawReceiverDescription = data?.reciever?.description || ''
+  const receiverDescriptionRaw =
+    descriptionOverrides?.receiverDescription !== undefined
+      ? descriptionOverrides.receiverDescription
+      : rawReceiverDescription
+
+  const receiverDescriptionLines = (receiverDescriptionRaw?.split('\n') || [])
     .map((line: string) => line?.trim())
     .filter(Boolean)
 
