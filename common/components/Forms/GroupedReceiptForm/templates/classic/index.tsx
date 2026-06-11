@@ -1,4 +1,5 @@
 import { FC } from 'react'
+import dayjs from 'dayjs'
 import GroupedPricesTable from '@components/Forms/GroupedReceiptForm/GroupedPricesTable'
 import {
   formatInvoiceDate,
@@ -50,7 +51,7 @@ const ClassicTemplate: FC<TemplateProps> = ({
           {isEnglish ? 'Provider' : 'Постачальник'}
         </div>
         <pre className={cs.preLabel}>
-          
+
           {data?.provider?.description?.trim()} <br />
           <br />
         </pre>
@@ -59,7 +60,7 @@ const ClassicTemplate: FC<TemplateProps> = ({
       <div className={cs.receiverInfo}>
         <div className={cs.label}>{isEnglish ? 'Recipient' : 'Одержувач'}</div>
         <pre className={cs.preLabel}>
-         
+
           {data?.reciever?.description?.trim()} <br />
           {data?.reciever?.adminEmails?.map((email: string) => (
             <div key={email}>
@@ -109,19 +110,11 @@ const ClassicTemplate: FC<TemplateProps> = ({
           {isEnglish ? 'Payment purpose:' : 'Призначення платежу:'}{' '}
           <strong>
             {isEnglish
-              ? `Payment for services according to invoice № ${
-                  data.invoiceNumber
-                } dated ${formatInvoiceDate(data?.invoiceCreationDate)}`
-              : `Оплата за послуги згідно рахунку № ${
-                  data.invoiceNumber
-                } від ${formatInvoiceDate(data?.invoiceCreationDate)}`}
+              ? `Payment for services according to invoice ${data.invoiceNumber
+              } dated ${dayjs(data?.invoiceCreationDate).format('DD-MM-YYYY')}`
+              : `Оплата за послуги згідно рахунку ${data.invoiceNumber
+              } від ${dayjs(data?.invoiceCreationDate).format('DD-MM-YYYY')}`}
           </strong>
-        </div>
-
-        <div className={cs.payFixed}>
-          {providerDomainHeading ||
-            data?.provider?.description?.split('\n')?.[0] ||
-            ''}
         </div>
       </div>
     </div>
