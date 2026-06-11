@@ -24,7 +24,6 @@ import { IPermissions } from '@modules/models/User'
 import { useGetUserByEmailQuery } from '@common/api/userApi/user.api'
 import { AppRoutes, Operations } from '@utils/constants'
 import { useState, useEffect } from 'react'
-import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 
 export const toFirstUpperCase = (text: string) => {
   return text ? text[0].toUpperCase() + text.slice(1) : ''
@@ -350,11 +349,10 @@ export function toRoundFixed(value: string | number | any, length = 2): string {
 
 export function currencyWithUnit(
   value: number | string,
-  company?: IRealestate,
+  currency?: string,
   unit?: string
 ) {
-  const currency = company?.currency ?? Currency.UAH
-  const label = CURRENCY_MAP[currency]?.label ?? 'грн'
+  const label = CURRENCY_MAP[normalizeCurrency(currency)].label
 
   return `${value} ${label}${unit ? `/${unit}` : ''}`
 }

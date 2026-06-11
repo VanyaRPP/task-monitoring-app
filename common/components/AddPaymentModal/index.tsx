@@ -21,9 +21,12 @@ import PriceList from '@common/components/Forms/AddPaymentForm/PriceList'
 import { useResolveMonthServiceId } from '@common/components/Forms/AddPaymentForm/useResolveMonthServiceId'
 import Modal from '@components/UI/ModalWindow'
 import { usePaymentFormData } from '@modules/hooks/usePaymentData'
-import { Operations, Currency } from '@utils/constants'
+import { Currency, Operations } from '@utils/constants'
 import { getInvoices } from '@utils/getInvoices'
-import { getPaymentProviderAndReciever } from '@utils/helpers'
+import {
+  getPaymentProviderAndReciever,
+  normalizeCurrency,
+} from '@utils/helpers'
 import { Form, Tabs, TabsProps, message } from 'antd'
 import { FormInstance } from 'antd/es/form/Form'
 import { useChangelogOptions } from './changelog/useChangelogOptions'
@@ -75,6 +78,8 @@ export interface IPaymentContext {
   setTemplateScope: (scope: TemplateScopeTarget | undefined) => void
   showQuantityInPreview: boolean
   setShowQuantityInPreview: (value: boolean) => void
+  invoiceLang: 'en' | 'uk'
+  setInvoiceLang: (lang: 'en' | 'uk') => void
 }
 
 export const PaymentContext = createContext<IPaymentContext>({
@@ -90,6 +95,8 @@ export const PaymentContext = createContext<IPaymentContext>({
   setTemplateScope: () => void 0,
   showQuantityInPreview: false,
   setShowQuantityInPreview: () => void 0,
+  invoiceLang: 'uk',
+  setInvoiceLang: () => void 0,
 })
 
 export const usePaymentContext = () =>
@@ -144,6 +151,12 @@ const AddPaymentModal: FC<Props> = ({
 
   const [showQuantityInPreview, setShowQuantityInPreviewState] = useState(false)
   const [activeTabKey, setActiveTabKey] = useState(preview ? '2' : '1')
+  const [invoiceLang, setInvoiceLang] = useState<'en' | 'uk'>(
+    paymentData?.invoiceLang ??
+    (paymentData?.currency && paymentData.currency !== Currency.UAH
+      ? 'en'
+      : 'uk')
+  )
 
   const setShowQuantityInPreview = useCallback(
     (value: boolean) => {
@@ -454,6 +467,7 @@ const AddPaymentModal: FC<Props> = ({
       reciever,
       transaction,
       template,
+      invoiceLang,
     })
 
     const finalPayload = templateScope
@@ -462,9 +476,9 @@ const AddPaymentModal: FC<Props> = ({
 
     const response = edit
       ? await editPayment({
-          _id: paymentData?._id,
-          ...finalPayload,
-        })
+        _id: paymentData?._id,
+        ...finalPayload,
+      })
       : await addPayment(finalPayload)
 
     if ('data' in response) {
@@ -489,6 +503,9 @@ const AddPaymentModal: FC<Props> = ({
     const isEditing = !!paymentId || edit
     if (isEditing) {
       lastLoadedCompanyId.current = company._id
+      if (!form.getFieldValue('currency')) {
+        form.setFieldValue('currency', normalizeCurrency(company.currency))
+      }
       return
     }
 
@@ -506,7 +523,7 @@ const AddPaymentModal: FC<Props> = ({
 
     const isNewCompanySelected = lastLoadedCompanyId.current !== company._id
     if (isNewCompanySelected) {
-      form.setFieldValue('currency', company.currency || Currency.UAH)
+      form.setFieldValue('currency', normalizeCurrency(company.currency))
       lastLoadedCompanyId.current = company._id
     }
   }, [company, filteredInvoices, paymentId, edit, activeTabKey, saved, form])
@@ -526,6 +543,8 @@ const AddPaymentModal: FC<Props> = ({
         setTemplateScope,
         showQuantityInPreview,
         setShowQuantityInPreview,
+        invoiceLang,
+        setInvoiceLang,
       }}
     >
       <Modal
@@ -558,7 +577,9 @@ const AddPaymentModal: FC<Props> = ({
                 : filteredInvoices,
             description: paymentData?.description,
             generalSum: paymentData?.generalSum,
-            currency: paymentData?.currency || Currency.UAH,
+            currency: paymentData?.currency
+              ? normalizeCurrency(paymentData.currency)
+              : undefined,
             invoiceNumber: paymentData?.invoiceNumber,
             invoiceCreationDate: dayjs(paymentData?.invoiceCreationDate),
             operation: paymentData?.type || Operations.Debit,
