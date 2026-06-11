@@ -6,6 +6,7 @@ export interface TemplateProps {
   componentRef: RefObject<HTMLDivElement | null>
   isEnglish: boolean
   invoiceLang?: 'en' | 'uk'
+  showQuantityInPreview: boolean
   currencyLabel: string
   currency?: string
   modernInvoiceNumber: string

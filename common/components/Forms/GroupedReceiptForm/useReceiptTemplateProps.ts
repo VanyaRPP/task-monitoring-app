@@ -6,11 +6,13 @@ interface ReceiptTemplatePropsInput {
   data: any
   contextCompany?: any
   lang?: 'en' | 'uk'
+  showQuantityInPreview?: boolean
 }
 
 export interface ReceiptTemplateProps {
   data: any
   isEnglish: boolean
+  showQuantityInPreview: boolean
   currencyLabel: string
   currency?: string
   modernInvoiceNumber: string
@@ -45,6 +47,7 @@ export function useReceiptTemplateProps({
   data,
   contextCompany,
   lang,
+  showQuantityInPreview = false,
 }: ReceiptTemplatePropsInput): ReceiptTemplateProps {
   const currency =
     data?.currency ||
@@ -177,6 +180,7 @@ export function useReceiptTemplateProps({
   return {
     data,
     isEnglish,
+    showQuantityInPreview,
     currencyLabel,
     currency,
     modernInvoiceNumber,
