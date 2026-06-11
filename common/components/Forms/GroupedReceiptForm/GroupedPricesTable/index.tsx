@@ -238,6 +238,7 @@ const GroupedPricesTable: React.FC<PaymentPricesTableProps> = ({
   preview,
   usePreviewQuantityToggle,
   domainId,
+  invoiceLang,
   showQuantityInPreview: showQuantityInPreviewProp,
 }) => {
   const { form, company, showQuantityInPreview: showQuantityInPreviewCtx } = usePaymentContext()

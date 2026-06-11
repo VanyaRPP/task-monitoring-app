@@ -190,7 +190,7 @@ const AddPaymentModal: FC<Props> = ({
     if (paymentData?.template) return
     const resolved = fetchedDomain?.defaultTemplate
     if (resolved) setTemplate(resolved as TemplateKey)
-  }, [activeDomainId, fetchedDomain?.defaultTemplate])
+  }, [activeDomainId, fetchedDomain?.defaultTemplate, paymentData?.template])
 
   const { data: changelogRes, isLoading: changelogLoading } =
     useGetPaymentChangeLogsQuery(paymentId, { skip: !edit || !paymentId })

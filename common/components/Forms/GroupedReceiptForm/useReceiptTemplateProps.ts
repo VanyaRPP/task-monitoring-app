@@ -46,6 +46,7 @@ const entrepreneurTitleRegex =
 export function useReceiptTemplateProps({
   data,
   contextCompany,
+  lang,
   showQuantityInPreview = false,
 }: ReceiptTemplatePropsInput): ReceiptTemplateProps {
   const currency =
