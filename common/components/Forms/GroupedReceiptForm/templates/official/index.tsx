@@ -20,6 +20,7 @@ const OfficialTemplate: FC<TemplateProps> = ({
   modernInvoiceNumber,
   domainName: domainNameFromProps,
   companyLabel: companyLabelFromProps,
+  showQuantityInPreview,
   rows,
   getQty,
   subtotal,
@@ -97,9 +98,13 @@ const OfficialTemplate: FC<TemplateProps> = ({
           <thead>
             <tr>
               <th>{isEnglish ? 'Description' : 'Опис'}</th>
-              <th>{isEnglish ? 'Quantity' : 'Кількість'}</th>
-              <th>{isEnglish ? 'Unit Price' : 'Ціна одиниці'}</th>
-              <th>{isEnglish ? 'Amount' : 'Сума'}</th>
+              {showQuantityInPreview && (
+                <>
+                  <th className={`${cl.colNum} ${cl.colQty}`}>{isEnglish ? 'Quantity' : 'Кількість'}</th>
+                  <th className={`${cl.colNum} ${cl.colUnit}`}>{isEnglish ? 'Unit Price' : 'Ціна одиниці'}</th>
+                </>
+              )}
+              <th className={`${cl.colNum} ${cl.colAmount}`}>{isEnglish ? 'Amount' : 'Сума'}</th>
             </tr>
           </thead>
           <tbody>
@@ -113,9 +118,19 @@ const OfficialTemplate: FC<TemplateProps> = ({
               return (
                 <tr key={`${item?.type || item?.name}-${index}`}>
                   <td>{item?.name || item?.type || '—'}</td>
-                  <td>{qty?.toFixed?.(2) ?? qty}</td>
-                  <td>{rate.toFixed(2)}</td>
-                  <td>{Number(item?.sum || 0).toFixed(2)}</td>
+                  {showQuantityInPreview && (
+                    <>
+                      <td className={`${cl.colNum} ${cl.colQty}`}>
+                        {qty?.toFixed?.(2) ?? qty}
+                      </td>
+                      <td className={`${cl.colNum} ${cl.colUnit}`}>
+                        {rate.toFixed(2)}
+                      </td>
+                    </>
+                  )}
+                  <td className={`${cl.colNum} ${cl.colAmount}`}>
+                    {Number(item?.sum || 0).toFixed(2)}
+                  </td>
                 </tr>
               )
             })}

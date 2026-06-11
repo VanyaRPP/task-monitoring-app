@@ -1,6 +1,7 @@
 import { FC, useEffect, useRef } from 'react'
 import { resolveBuiltinTemplateKey, templateMap } from './templateMap'
 import { useReceiptTemplateProps } from './useReceiptTemplateProps'
+import { readShowQuantityInPreview } from './previewQtyStorage'
 
 interface Props {
   payment: any
@@ -68,6 +69,7 @@ const HeadlessReceiptRenderer: FC<Props> = ({
   const receiptProps = useReceiptTemplateProps({
     data: payment,
     contextCompany,
+    showQuantityInPreview: readShowQuantityInPreview(payment?._id),
   })
 
   const resolvedKey = templateKey || resolveBuiltinTemplateKey(payment)

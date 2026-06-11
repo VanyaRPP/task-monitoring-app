@@ -43,6 +43,7 @@ import {
 } from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
 import GroupedReceiptForm from '../Forms/GroupedReceiptForm'
+import { getPreviewQtyStorageKey } from '../Forms/GroupedReceiptForm/previewQtyStorage'
 import PaymentReceiptForm from '../Forms/PaymentReceiptForm'
 import ReceiptForm from '../Forms/ReceiptForm'
 import serviceFilter from './serviceFilter'
@@ -106,11 +107,6 @@ const getId = (obj?: string | Partial<{ _id: string }>) => {
   if (typeof obj === 'string') return obj
   return obj._id
 }
-
-const getPreviewQtyStorageKey = (id?: string) =>
-  id
-    ? `addPayment:showQuantityInPreview:${id}`
-    : 'addPayment:showQuantityInPreview:draft'
 
 const AddPaymentModal: FC<Props> = ({
   closeModal,
@@ -194,7 +190,7 @@ const AddPaymentModal: FC<Props> = ({
     if (paymentData?.template) return
     const resolved = fetchedDomain?.defaultTemplate
     if (resolved) setTemplate(resolved as TemplateKey)
-  }, [activeDomainId, fetchedDomain?.defaultTemplate])
+  }, [activeDomainId, fetchedDomain?.defaultTemplate, paymentData?.template])
 
   const { data: changelogRes, isLoading: changelogLoading } =
     useGetPaymentChangeLogsQuery(paymentId, { skip: !edit || !paymentId })
