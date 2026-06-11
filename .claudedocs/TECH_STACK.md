@@ -37,6 +37,10 @@ Authoritative list of libraries and versions. **Do not introduce new dependencie
 | ------------------ | ------- | --------------------------------------- |
 | `@reduxjs/toolkit` | ^2.2.6  | `createSlice` + RTK Query (`createApi`) |
 | `react-redux`      | ^9.1.2  |                                         |
+| Library            | Version | Usage                                   |
+| ------------------ | ------- | --------------------------------------- |
+| `@reduxjs/toolkit` | ^2.2.6  | `createSlice` + RTK Query (`createApi`) |
+| `react-redux`      | ^9.1.2  |                                         |
 
 ## Database & Auth
 
@@ -57,9 +61,19 @@ Authoritative list of libraries and versions. **Do not introduce new dependencie
 | `next-i18next`  | ^15.4.2 | Config in `next-i18next.config.js` |
 | `react-i18next` | ^15.5.3 |                                    |
 | `i18next`       | ^25.2.1 |                                    |
+| Library         | Version | Usage                              |
+| --------------- | ------- | ---------------------------------- |
+| `next-i18next`  | ^15.4.2 | Config in `next-i18next.config.js` |
+| `react-i18next` | ^15.5.3 |                                    |
+| `i18next`       | ^25.2.1 |                                    |
 
 ## Drag & Drop
 
+| Library              | Version | Usage                      |
+| -------------------- | ------- | -------------------------- |
+| `@dnd-kit/core`      | ^6.3.1  | Use this — not `react-dnd` |
+| `@dnd-kit/sortable`  | ^10.0.0 |                            |
+| `@dnd-kit/utilities` | ^3.2.2  |                            |
 | Library              | Version | Usage                      |
 | -------------------- | ------- | -------------------------- |
 | `@dnd-kit/core`      | ^6.3.1  | Use this — not `react-dnd` |
@@ -92,6 +106,17 @@ Authoritative list of libraries and versions. **Do not introduce new dependencie
 
 ## Path Aliases (tsconfig)
 
+| Alias           | Resolves to           |
+| --------------- | --------------------- |
+| `@common/*`     | `common/*`            |
+| `@components/*` | `common/components/*` |
+| `@modules/*`    | `common/modules/*`    |
+| `@lib/*`        | `common/lib/*`        |
+| `@assets/*`     | `common/assets/*`     |
+| `@utils/*`      | `utils/*`             |
+| `@styles/*`     | `styles/*`            |
+| `@public/*`     | `public/*`            |
+| `@pages/*`      | `pages/*`             |
 | Alias           | Resolves to           |
 | --------------- | --------------------- |
 | `@common/*`     | `common/*`            |
