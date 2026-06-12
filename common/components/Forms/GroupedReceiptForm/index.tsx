@@ -15,8 +15,9 @@ import {
   RightOutlined,
   CheckOutlined,
   TableOutlined,
+  MoreOutlined,
 } from '@ant-design/icons'
-import { Dropdown, Form, Tooltip, message, MenuProps } from 'antd'
+import { Dropdown, Form, message, MenuProps, Button } from 'antd'
 import s from './style.module.scss'
 import { templateMap } from './templateMap'
 import InvoiceLanguageSelector from './InvoiceLanguageSelector'
@@ -54,9 +55,6 @@ const GroupedReceiptForm: FC<Props> = ({
   const invoiceCurrency = useInvoiceCurrency()
   const liveInvoice = Form.useWatch('invoice', form)
   const rawData = currPayment ?? paymentData ?? null
-  // useReceiptTemplateProps maps `name = description || name` for template
-  // rows, and GroupedPricesTable resolves description-first via
-  // resolveInvoiceLabel — so we only need to swap in the live invoice here.
   const data = rawData
     ? {
         ...rawData,
@@ -230,6 +228,41 @@ const GroupedReceiptForm: FC<Props> = ({
     ),
   }))
 
+  const mainMenuItems: MenuProps['items'] = [
+    {
+      key: 'print',
+      icon: <PrinterOutlined />,
+      label: isEnglish ? 'Друк' : 'Друк',
+      onClick: handlePrint,
+    },
+    {
+      key: 'template',
+      icon: <LayoutOutlined />,
+      label: isEnglish ? 'Обрати шаблон' : 'Обрати шаблон',
+      children: dropdownItems,
+    },
+    {
+      key: 'tableToggle',
+      icon: <TableOutlined />,
+      label: showQuantityInPreview
+        ? 'Приховати кількість і ціну'
+        : 'Показати кількість і ціну',
+      onClick: () => setShowQuantityInPreview(!showQuantityInPreview),
+    },
+    { type: 'divider' },
+    {
+      key: 'language',
+      label: (
+        <div onClick={(e) => e.stopPropagation()}>
+          <InvoiceLanguageSelector
+            lang={invoiceLang}
+            onChange={handleSaveLanguage}
+          />
+        </div>
+      ),
+    },
+  ]
+
   const TemplateComponent = templateMap[template] || templateMap.olimp
 
   const templateProps = {
@@ -256,47 +289,18 @@ const GroupedReceiptForm: FC<Props> = ({
 
   return (
     <>
-      <Tooltip title="Друк">
-        <PrinterOutlined className={s.print} onClick={handlePrint} />
-      </Tooltip>
-      <Dropdown
-        trigger={['click']}
-        placement="bottomLeft"
-        menu={{
-          items: dropdownItems,
-          style: { minWidth: 240 },
-        }}
-      >
-        <Tooltip title={isEnglish ? 'Select template' : 'Обрати шаблон'}>
-          <LayoutOutlined className={s.edit} />
-        </Tooltip>
-      </Dropdown>
-      <Tooltip title="Показувати кількість і ціну в таблиці перегляду">
-        <TableOutlined
-          role="button"
-          tabIndex={0}
-          aria-label={
-            showQuantityInPreview
-              ? 'Приховати кількість і ціну в перегляді'
-              : 'Показати кількість і ціну в перегляді'
-          }
-          aria-pressed={showQuantityInPreview}
-          className={`${s.tableDetailsToggle} ${
-            showQuantityInPreview ? s.tableDetailsToggleActive : ''
-          }`}
-          onClick={() => setShowQuantityInPreview(!showQuantityInPreview)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault()
-              setShowQuantityInPreview(!showQuantityInPreview)
-            }
-          }}
-        />
-      </Tooltip>
-
-      <span className={s.languageSelector}>
-        <InvoiceLanguageSelector lang={invoiceLang} onChange={handleSaveLanguage} />
-      </span>
+      <div style={{ position: 'absolute', top: -85, right: 35, zIndex: 100 }}>
+        <Dropdown
+          menu={{ items: mainMenuItems, style: { minWidth: 220 } }}
+          trigger={['click']}
+          placement="bottomRight"
+        >
+          <Button
+            type="text"
+            icon={<MoreOutlined style={{ fontSize: 20, color: 'inherit' }} />}
+          />
+        </Dropdown>
+      </div>
 
       <TemplateComponent {...templateProps} />
     </>
