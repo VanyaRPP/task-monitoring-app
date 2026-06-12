@@ -12,6 +12,7 @@ import {
   MenuOutlined,
   ImportOutlined,
   MoreOutlined,
+  ReloadOutlined,
 } from '@ant-design/icons'
 import { dateToDefaultFormat } from '@assets/features/formatDate'
 import {
@@ -85,6 +86,8 @@ export interface PaymentCardHeaderProps {
   isDashboard?: boolean
   onBulkMarkPaid?: (payments: IExtendedPayment[]) => void
   onBulkDuplicate?: (payments: IExtendedPayment[]) => void
+  onRefresh?: () => void | Promise<unknown>
+  isRefreshing?: boolean
 }
 
 const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
@@ -110,6 +113,8 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
   onDeleteClick,
   onBulkMarkPaid,
   onBulkDuplicate,
+  onRefresh,
+  isRefreshing,
 }) => {
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -226,7 +231,20 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
     setBulkPaymentsToRender(selectedPayments as IExtendedPayment[])
   }
 
+  const handleRefresh = async () => {
+    if (!onRefresh) return
+    const key = 'payments-refresh'
+    message.loading({ content: 'Оновлення даних...', key })
+    try {
+      await onRefresh()
+      message.success({ content: 'Дані оновлено', key })
+    } catch {
+      message.error({ content: 'Не вдалося оновити дані', key })
+    }
+  }
+
   const menuActions: Record<string, () => void> = {
+    refresh: handleRefresh,
     export: handleExportExcel,
     import: () => setIsImportModalOpen(true),
     invoices: () => router.push(AppRoutes.PAYMENT_BULK),
@@ -334,6 +352,15 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
           },
         ]
       : []),
+    ...(isAdmin
+      ? [
+          {
+            key: 'refresh',
+            label: 'Оновити',
+            icon: <ReloadOutlined spin={isRefreshing} />,
+          },
+        ]
+      : []),
     ...(isAdmin && pathname === AppRoutes.PAYMENT && selectedPayments.length > 0
       ? [{ key: 'export', label: 'Export to Excel', icon: <ExportOutlined /> }]
       : []),
@@ -386,6 +413,11 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
   ]
 
   const dashboardItems: MenuProps['items'] = [
+    {
+      key: 'refresh',
+      label: 'Оновити',
+      icon: <ReloadOutlined spin={isRefreshing} />,
+    },
     { key: 'import', label: 'Імпорт', icon: <ImportOutlined /> },
     { key: 'invoices', label: 'Інвойси', icon: <SelectOutlined /> },
     { key: 'add', label: 'Додати', icon: <PlusOutlined /> },
