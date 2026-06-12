@@ -1,6 +1,9 @@
 import '@testing-library/jest-dom'
 import '@testing-library/jest-dom/jest-globals'
+import { configure } from '@testing-library/react'
 import { TextEncoder, TextDecoder } from 'util'
+
+configure({ asyncUtilTimeout: 5000 })
 
 process.env.MONGODB_URI =
   process.env.MONGODB_URI ?? 'mongodb://test-placeholder/jest'

@@ -29,6 +29,9 @@ export interface PaymentsHeaderProps {
   enablePaymentsButton: boolean
   onColumnsSelect: (columns: ServiceType[]) => void
   onBulkMarkPaid?: (payments: IExtendedPayment[]) => void
+  onBulkDuplicate?: (payments: IExtendedPayment[]) => void
+  onRefresh?: () => void | Promise<unknown>
+  isRefreshing?: boolean
   onDeleteClick?: () => void
   domainFilter: IFilter[]
   realEstatesFilter: IFilter[]
@@ -51,6 +54,9 @@ const PaymentsHeader: React.FC<PaymentsHeaderProps> = ({
   enablePaymentsButton,
   onColumnsSelect,
   onBulkMarkPaid,
+  onBulkDuplicate,
+  onRefresh,
+  isRefreshing,
   domainFilter,
   realEstatesFilter,
   isDashboard,
@@ -73,6 +79,9 @@ const PaymentsHeader: React.FC<PaymentsHeaderProps> = ({
       enablePaymentsButton={enablePaymentsButton}
       onColumnsSelect={onColumnsSelect}
       onBulkMarkPaid={onBulkMarkPaid}
+      onBulkDuplicate={onBulkDuplicate}
+      onRefresh={onRefresh}
+      isRefreshing={isRefreshing}
       domainFilter={domainFilter}
       realEstatesFilter={realEstatesFilter}
       isDashboard={isDashboard}

@@ -44,6 +44,7 @@ interface ActionProps {
   onEditClick: (p: IExtendedPayment) => void
   onDelete: (id: string) => void
   onMarkPaid: (p: IExtendedPayment) => void
+  onDuplicate: (p: IExtendedPayment) => void
   deleteLoading: boolean
 }
 
@@ -122,7 +123,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
   const { filters, setFilters, domainsFilter, companiesFilter, dateFilters } =
     filterProps
   const { pageData, handlePagination } = paginationProps
-  const { onViewClick, onEditClick, onDelete, onMarkPaid, deleteLoading } =
+  const { onViewClick, onEditClick, onDelete, onMarkPaid, onDuplicate, deleteLoading } = 
     actionProps
   const { debtorCompanies } = debtProps
   const { selectedColumns } = columnSelectionProps
@@ -167,6 +168,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
     onEditClick,
     onDelete,
     onMarkPaid,
+    onDuplicate,
     deleteLoading,
     visibleCustomServices,
   })

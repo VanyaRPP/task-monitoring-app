@@ -25,6 +25,7 @@ export interface BuildPaymentPayloadParams {
   reciever: any
   transaction: any
   template: TemplateKey
+  invoiceLang?: 'en' | 'uk'
 }
 
 /**
@@ -38,6 +39,7 @@ export const buildPaymentPayload = ({
   reciever,
   transaction,
   template,
+  invoiceLang,
 }: BuildPaymentPayloadParams) => ({
   invoiceNumber: formData.invoiceNumber,
   type: formData.operation,
@@ -56,4 +58,5 @@ export const buildPaymentPayload = ({
     ? (formData.invoice ?? []).filter((invoice) => +invoice.sum !== 0)
     : [],
   template,
+  invoiceLang,
 })

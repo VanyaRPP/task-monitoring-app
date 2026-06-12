@@ -20,6 +20,7 @@ export interface ICustomDomainService {
     _id: ObjectId | string
     name: string
     fieldName: string
+    serviceType?: string
     __v?: number
   }[]
 }

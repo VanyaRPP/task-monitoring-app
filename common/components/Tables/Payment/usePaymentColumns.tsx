@@ -56,6 +56,7 @@ interface Params {
   onEditClick: (p: IExtendedPayment) => void
   onDelete: (id: string) => void
   onMarkPaid: (p: IExtendedPayment) => void
+  onDuplicate: (p: IExtendedPayment) => void
   deleteLoading: boolean
   visibleCustomServices?: ICustomServiceItem[]
 }
@@ -151,6 +152,7 @@ export function usePaymentColumns({
   onEditClick,
   onDelete,
   onMarkPaid,
+  onDuplicate,
   deleteLoading,
   visibleCustomServices,
 }: Params): ColumnsType<IExtendedPayment> {
@@ -499,6 +501,7 @@ export function usePaymentColumns({
             onEdit={onEditClick}
             onDelete={onDelete}
             onMarkPaid={onMarkPaid}
+            onDuplicate={onDuplicate}
             deleteLoading={deleteLoading}
           />
         ),
@@ -519,6 +522,7 @@ export function usePaymentColumns({
       onEditClick,
       onDelete,
       onMarkPaid,
+      onDuplicate,
       isGlobalAdmin,
       isDomainAdmin,
       isUser,

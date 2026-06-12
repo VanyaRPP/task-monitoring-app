@@ -1,7 +1,7 @@
 import { validateField } from '@assets/features/validators'
 import EmailSelect from '@components/UI/Reusable/EmailSelect'
 import { Form, Input } from 'antd'
-import { FC, useEffect } from 'react'
+import { FC, useEffect, useRef } from 'react'
 import DomainStreets from '../DomainStreets'
 import s from '../style.module.scss'
 import type { TabProps } from './types'
@@ -13,8 +13,28 @@ const useAutoSyncDescription = (form: TabProps['form'], editable: boolean) => {
   const rnokpp = Form.useWatch('rnokpp', form)
   const mfo = Form.useWatch('mfo', form)
 
+  const prevRef = useRef<{
+    iban?: string
+    rnokpp?: string
+    mfo?: string
+  } | null>(null)
+
   useEffect(() => {
     if (!editable) return
+
+    const prev = prevRef.current
+    prevRef.current = { iban, rnokpp, mfo }
+
+    if (prev === null) return
+
+    if (
+      prev.iban === undefined &&
+      prev.rnokpp === undefined &&
+      prev.mfo === undefined
+    )
+      return
+
+    if (prev.iban === iban && prev.rnokpp === rnokpp && prev.mfo === mfo) return
 
     const currentDescription: string = form.getFieldValue('description') || ''
     const autoLinePatterns = [/^IBAN: /, /^РНОКПП: /, /^МФО: /]

@@ -1,5 +1,6 @@
 import { dateToMonthYear } from '@assets/features/formatDate'
 import { usePaymentContext } from '@components/AddPaymentModal'
+import { useInvoiceCurrency } from '@modules/hooks/useInvoiceCurrency'
 import { InvoiceComponentProps } from '@components/Tables/EditInvoiceTable'
 import { resolveCustomServicePrice } from '@utils/domain/domain-invoice-selector'
 import {
@@ -76,7 +77,9 @@ export const Name: React.FC<InvoiceComponentProps> = ({
   if (!editable || type !== 'custom') {
     return (
       <Space direction="vertical" size={0}>
-        <Typography.Text>{record?.description || value || type}</Typography.Text>
+        <Typography.Text>
+          {record?.description || value || type}
+        </Typography.Text>
         <Typography.Text type="secondary" style={{ fontSize: '0.75rem' }}>
           {toFirstUpperCase(dateToMonthYear(service?.date))}
         </Typography.Text>
@@ -169,10 +172,10 @@ export const Price: React.FC<InvoiceComponentProps> = ({
 }) => {
   const name = useMemo(() => toArray<string>(_name), [_name])
   const price = Form.useWatch(['invoice', ...name, 'price'], form)
-  const { company } = usePaymentContext()
+  const currency = useInvoiceCurrency()
 
   if (!editable) {
-    return <span>{currencyWithUnit(toRoundFixed(price), company)}</span>
+    return <span>{currencyWithUnit(toRoundFixed(price), currency)}</span>
   }
 
   return (
@@ -185,7 +188,7 @@ export const Price: React.FC<InvoiceComponentProps> = ({
         type="number"
         placeholder="Значення..."
         disabled={disabled}
-        suffix={currencyWithUnit('', company)}
+        suffix={currencyWithUnit('', currency)}
       />
     </Form.Item>
   )
@@ -196,11 +199,11 @@ export const Sum: React.FC<InvoiceComponentProps> = ({ form, name: _name }) => {
   const price = Form.useWatch(['invoice', ...name, 'price'], form)
   const amount = Form.useWatch(['invoice', ...name, 'amount'], form)
   const sum = Form.useWatch(['invoice', ...name, 'sum'], form)
-  const { company } = usePaymentContext()
+  const currency = useInvoiceCurrency()
 
   useSyncSum(form!, name, +price * (+amount > 0 ? +amount : 1))
 
-  return <strong>{currencyWithUnit(toRoundFixed(sum), company)}</strong>
+  return <strong>{currencyWithUnit(toRoundFixed(sum), currency)}</strong>
 }
 
 const Custom = {

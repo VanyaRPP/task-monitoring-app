@@ -5,11 +5,14 @@ import dayjs from 'dayjs'
 interface ReceiptTemplatePropsInput {
   data: any
   contextCompany?: any
+  lang?: 'en' | 'uk'
+  showQuantityInPreview?: boolean
 }
 
 export interface ReceiptTemplateProps {
   data: any
   isEnglish: boolean
+  showQuantityInPreview: boolean
   currencyLabel: string
   currency?: string
   modernInvoiceNumber: string
@@ -43,6 +46,8 @@ const entrepreneurTitleRegex =
 export function useReceiptTemplateProps({
   data,
   contextCompany,
+  lang,
+  showQuantityInPreview = false,
 }: ReceiptTemplatePropsInput): ReceiptTemplateProps {
   const currency =
     data?.currency ||
@@ -51,7 +56,9 @@ export function useReceiptTemplateProps({
     data?.domain?.currency
 
   const currencyLabel = getCurrencyShortLabel(currency)
-  const isEnglish = normalizeCurrency(currency) !== Currency.UAH
+  const isEnglish = lang
+    ? lang === 'en'
+    : normalizeCurrency(currency) !== Currency.UAH
 
   const invoiceDatePrefix = dayjs(data?.invoiceCreationDate).isValid()
     ? dayjs(data?.invoiceCreationDate).format('DDMMYY')
@@ -173,6 +180,7 @@ export function useReceiptTemplateProps({
   return {
     data,
     isEnglish,
+    showQuantityInPreview,
     currencyLabel,
     currency,
     modernInvoiceNumber,

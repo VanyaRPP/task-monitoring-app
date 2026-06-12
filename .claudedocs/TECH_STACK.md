@@ -6,10 +6,10 @@ Authoritative list of libraries and versions. **Do not introduce new dependencie
 
 | Area        | Library              | Version  | Notes                                          |
 | ----------- | -------------------- | -------- | ---------------------------------------------- |
-| Framework   | `next`               | ^13.4.19 | **Pages Router only** — no `app/` directory    |
-| Runtime     | `react`, `react-dom` | 18.1.0   | Pinned                                         |
+| Framework   | `next`               | ^14.2.35 | **Pages Router only** — no `app/` directory    |
+| Runtime     | `react`, `react-dom` | ^18.3.1  | React 18                                       |
 | Language    | `typescript`         | ^5.8.3   | `strict: false`, but typing is still mandatory |
-| Node        | engine               | >=18     |                                                |
+| Node        | engine               | 22.x     | Pinned via `engines` in package.json           |
 | PWA         | `next-pwa`           | ^5.6.0   |                                                |
 | Package mgr | `yarn`               | 1.22.22  | Use yarn, not npm, for installs                |
 
@@ -21,7 +21,7 @@ Authoritative list of libraries and versions. **Do not introduce new dependencie
 | `@ant-design/cssinjs`       | ^1.21.0     | SSR-safe styling for Ant Design               |
 | `@ant-design/compatible`    | ^5.1.3      | v4→v5 bridge — avoid in new code              |
 | `@ant-design/icons`         | ^5.4.0      | Icon set                                      |
-| `@ant-design/plots`         | ^2.1.2      | Charts (prefer over chart.js for new charts)  |
+| `@ant-design/plots`         | ^2.6.8      | Charts (prefer over chart.js for new charts)  |
 | `chart.js`                  | ^4.4.0      | Legacy charts                                 |
 | `sass`                      | ^1.53.0     | SCSS Modules — `*.module.scss` per component  |
 | `classnames` / `clsx`       | ^2.3 / ^2.1 | Conditional className composition (mandatory) |
@@ -42,12 +42,12 @@ Authoritative list of libraries and versions. **Do not introduce new dependencie
 
 | Library                      | Version | Usage                                           |
 | ---------------------------- | ------- | ----------------------------------------------- |
-| `mongoose`                   | ^7.8.4  | All DB access — models in `@modules/models`     |
+| `mongoose`                   | ^7.8.9  | All DB access — models in `@modules/models`     |
 | `mongodb`                    | ^4.16.0 | Used by NextAuth adapter only                   |
 | `next-auth`                  | ^4.23.1 | Session = `getServerSession(...)` in API routes |
 | `@next-auth/mongodb-adapter` | ^1.1.3  |                                                 |
-| `bcrypt`                     | ^5.0.1  | Password hashing                                |
-| `jsonwebtoken`               | ^8.5.1  | + `@types/jsonwebtoken`                         |
+| `bcryptjs`                   | ^3.0.3  | Password hashing (+ `@types/bcryptjs`)          |
+| `jsonwebtoken`               | ^9.0.3  | + `@types/jsonwebtoken`                         |
 | `crypto-js`                  | ^4.2.0  | + `@types/crypto-js`                            |
 
 ## i18n & Routing
@@ -75,7 +75,6 @@ Authoritative list of libraries and versions. **Do not introduce new dependencie
 | PDF / scrape  | `puppeteer`                              | ^22.15.0     | **devDependency only** — local dev / tests. Do NOT import in `pages/api/**`.       |
 | Animations    | `gsap`                                   | ^3.13.0      | Register plugins client-side; SSR-guard with `useEffect`                           |
 | Animations    | `lottie-react`                           | ^2.4.1       | SSR-guard or `dynamic({ ssr: false })`                                             |
-| Animations    | `greensock`                              | ^1.20.2      | Legacy — prefer `gsap`                                                             |
 | Excel         | `xlsx` + `xlsx-js-style`                 | ^0.18 / ^1.2 | Styled exports                                                                     |
 | File download | `file-saver`                             | ^2.0.5       | Client-side                                                                        |
 | Zip           | `archiver`                               | ^6.0.1       |                                                                                    |

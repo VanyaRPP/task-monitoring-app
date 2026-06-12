@@ -14,6 +14,7 @@ const OlimpTemplate: FC<TemplateProps> = ({
   currencyLabel,
   modernInvoiceNumber,
   domainName,
+  showQuantityInPreview,
   rows,
   getQty,
   subtotal,
@@ -195,9 +196,13 @@ const OlimpTemplate: FC<TemplateProps> = ({
         <thead>
           <tr>
             <th>{isEnglish ? 'DESCRIPTION' : 'ОПИС'}</th>
-            <th>{isEnglish ? 'RATE' : 'ЦІНА'}</th>
-            <th>{isEnglish ? 'QTY' : 'К-СТЬ'}</th>
-            <th>{isEnglish ? 'TOTAL' : 'СУМА'}</th>
+            {showQuantityInPreview && (
+              <>
+                <th className={s.colRate}>{isEnglish ? 'RATE' : 'ЦІНА'}</th>
+                <th className={s.colQty}>{isEnglish ? 'QTY' : 'К-СТЬ'}</th>
+              </>
+            )}
+            <th className={s.colTotal}>{isEnglish ? 'TOTAL' : 'СУМА'}</th>
           </tr>
         </thead>
         <tbody>
@@ -212,9 +217,13 @@ const OlimpTemplate: FC<TemplateProps> = ({
             return (
               <tr key={`${item?.type || item?.name}-${index}`}>
                 <td>{item?.name || item?.type || '-'}</td>
-                <td>{rate.toFixed(2)}</td>
-                <td>{qty}</td>
-                <td>
+                {showQuantityInPreview && (
+                  <>
+                    <td className={s.colRate}>{rate.toFixed(2)}</td>
+                    <td className={s.colQty}>{qty}</td>
+                  </>
+                )}
+                <td className={s.colTotal}>
                   {Number(item?.sum || 0).toFixed(2)} {currencyLabel}
                 </td>
               </tr>
