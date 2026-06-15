@@ -191,37 +191,39 @@ const OlimpTemplate: FC<TemplateProps> = ({
         </div>
       </div>
 
-      <table className={s.invoiceTable}>
-        <thead>
-          <tr>
-            <th>{isEnglish ? 'DESCRIPTION' : 'ОПИС'}</th>
-            <th>{isEnglish ? 'RATE' : 'ЦІНА'}</th>
-            <th>{isEnglish ? 'QTY' : 'К-СТЬ'}</th>
-            <th>{isEnglish ? 'TOTAL' : 'СУМА'}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((item: any, index: number) => {
-            const qty = getQty(item)
-            const rate = Number.isFinite(Number(item?.price))
-              ? Number(item.price)
-              : qty
-                ? Number(item?.sum || 0) / qty
-                : Number(item?.sum || 0)
+      <div className={s.tableWrapper}>
+        <table className={s.invoiceTable}>
+          <thead>
+            <tr>
+              <th>{isEnglish ? 'DESCRIPTION' : 'ОПИС'}</th>
+              <th>{isEnglish ? 'RATE' : 'ЦІНА'}</th>
+              <th>{isEnglish ? 'QTY' : 'К-СТЬ'}</th>
+              <th>{isEnglish ? 'TOTAL' : 'СУМА'}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((item: any, index: number) => {
+              const qty = getQty(item)
+              const rate = Number.isFinite(Number(item?.price))
+                ? Number(item.price)
+                : qty
+                  ? Number(item?.sum || 0) / qty
+                  : Number(item?.sum || 0)
 
-            return (
-              <tr key={`${item?.type || item?.name}-${index}`}>
-                <td>{item?.name || item?.type || '-'}</td>
-                <td>{rate.toFixed(2)}</td>
-                <td>{qty}</td>
-                <td>
-                  {Number(item?.sum || 0).toFixed(2)} {currencyLabel}
-                </td>
-              </tr>
-            )
-          })}
-        </tbody>
-      </table>
+              return (
+                <tr key={`${item?.type || item?.name}-${index}`}>
+                  <td>{item?.name || item?.type || '-'}</td>
+                  <td>{rate.toFixed(2)}</td>
+                  <td>{qty}</td>
+                  <td>
+                    {Number(item?.sum || 0).toFixed(2)} {currencyLabel}
+                  </td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
 
       <div className={s.summarySection}>
         <div className={s.invoiceDates}>
