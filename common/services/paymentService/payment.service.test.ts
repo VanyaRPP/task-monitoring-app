@@ -37,6 +37,7 @@ jest.mock('@modules/models/Domain', () => ({
   __esModule: true,
   default: {
     findById: jest.fn(),
+    find: jest.fn(),
   },
 }))
 
@@ -76,6 +77,7 @@ import ProfitService from '@common/services/profitService/profit.service'
 import { sendInvoiceEmail } from '@utils/email/sendInvoiceEmail'
 import {
   createPayment,
+  duplicatePayments,
   getNextInvoiceNumber,
   getPayments,
 } from './payment.service'
@@ -317,5 +319,137 @@ describe('getNextInvoiceNumber', () => {
     expect(await getNextInvoiceNumber()).toBe(11)
     expect(await getNextInvoiceNumber()).toBe(12)
     expect(await getNextInvoiceNumber()).toBe(13)
+  })
+})
+
+describe('duplicatePayments', () => {
+  const paymentFindMock = Payment.find as jest.Mock
+  const aggregateMock = Payment.aggregate as jest.Mock
+  const domainFindMock = Domain.find as jest.Mock
+
+  const makeSource = (id: string, domain: string, type = 'debit') => ({
+    _id: { toString: () => id },
+    domain: { toString: () => domain },
+    toObject: () => ({
+      _id: id,
+      __v: 0,
+      invoiceNumber: 7,
+      invoiceCreationDate: new Date('2020-01-01T00:00:00.000Z'),
+      transaction: { paid: true },
+      type,
+      domain,
+      generalSum: 500,
+      description: 'original',
+      currency: 'UAH',
+    }),
+  })
+
+  const globalPerms = {
+    isGlobalAdmin: true,
+    isDomainAdmin: false,
+    user: { email: 'admin@test.com' },
+  }
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    createProfitMock.mockResolvedValue({})
+    sendInvoiceEmailMock.mockResolvedValue(true)
+    paymentCreateMock.mockImplementation((data: any) =>
+      Promise.resolve({
+        ...data,
+        _id: `new-${data.invoiceNumber}`,
+        id: `new-${data.invoiceNumber}`,
+      })
+    )
+  })
+
+  it('clones each source, assigns sequential invoice numbers from one base, and never emails', async () => {
+    aggregateMock.mockResolvedValueOnce([{ maxNumber: 100 }])
+    paymentFindMock.mockResolvedValue([
+      makeSource('src-1', 'domain-1'),
+      makeSource('src-2', 'domain-1'),
+    ])
+
+    const result = await duplicatePayments(['src-1', 'src-2'], globalPerms)
+
+    expect(result.createdIds).toEqual(['new-101', 'new-102'])
+    expect(result.skippedIds).toEqual([])
+    expect(result.totalRequested).toBe(2)
+
+    expect(paymentCreateMock).toHaveBeenCalledTimes(2)
+    const firstBody = paymentCreateMock.mock.calls[0][0]
+    const secondBody = paymentCreateMock.mock.calls[1][0]
+    expect(firstBody.invoiceNumber).toBe(101)
+    expect(secondBody.invoiceNumber).toBe(102)
+
+    // re-generated / stripped fields must NOT be carried over from the source
+    expect(firstBody).not.toHaveProperty('_id')
+    expect(firstBody).not.toHaveProperty('__v')
+    expect(firstBody).not.toHaveProperty('transaction')
+    expect(firstBody.invoiceCreationDate).toBeInstanceOf(Date)
+
+    // copied fields survive
+    expect(firstBody.generalSum).toBe(500)
+    expect(firstBody.description).toBe('original')
+
+    // base invoice number resolved once, not once per payment
+    expect(aggregateMock).toHaveBeenCalledTimes(1)
+    expect(createProfitMock).toHaveBeenCalledTimes(2)
+    expect(sendInvoiceEmailMock).not.toHaveBeenCalled()
+  })
+
+  it('reports ids that do not resolve to a payment as skipped', async () => {
+    aggregateMock.mockResolvedValueOnce([{ maxNumber: 0 }])
+    paymentFindMock.mockResolvedValue([makeSource('src-1', 'domain-1')])
+
+    const result = await duplicatePayments(['src-1', 'missing-id'], globalPerms)
+
+    expect(result.createdIds).toEqual(['new-1'])
+    expect(result.skippedIds).toContain('missing-id')
+  })
+
+  it('skips a source when its create fails but still duplicates the rest', async () => {
+    aggregateMock.mockResolvedValueOnce([{ maxNumber: 200 }])
+    paymentFindMock.mockResolvedValue([
+      makeSource('src-1', 'domain-1'),
+      makeSource('src-2', 'domain-1'),
+    ])
+    // First duplicate: profit creation fails -> createPayment throws -> skipped.
+    createProfitMock
+      .mockRejectedValueOnce(new Error('profit down'))
+      .mockResolvedValue({})
+    const consoleErrorSpy = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => undefined)
+
+    const result = await duplicatePayments(['src-1', 'src-2'], globalPerms)
+
+    expect(result.skippedIds).toContain('src-1')
+    expect(result.createdIds).toEqual(['new-201'])
+    // the failed number is reused (not burned): the second duplicate also gets 201
+    expect(paymentCreateMock.mock.calls[1][0].invoiceNumber).toBe(201)
+
+    consoleErrorSpy.mockRestore()
+  })
+
+  it('domain admin: only duplicates payments within an administered domain', async () => {
+    aggregateMock.mockResolvedValueOnce([{ maxNumber: 0 }])
+    paymentFindMock.mockResolvedValue([
+      makeSource('own', 'allowed-domain'),
+      makeSource('foreign', 'other-domain'),
+    ])
+    domainFindMock.mockResolvedValue([
+      { _id: { toString: () => 'allowed-domain' } },
+    ])
+
+    const result = await duplicatePayments(['own', 'foreign'], {
+      isGlobalAdmin: false,
+      isDomainAdmin: true,
+      user: { email: 'domain-admin@test.com' },
+    })
+
+    expect(result.createdIds).toEqual(['new-1'])
+    expect(result.skippedIds).toContain('foreign')
+    expect(paymentCreateMock).toHaveBeenCalledTimes(1)
   })
 })

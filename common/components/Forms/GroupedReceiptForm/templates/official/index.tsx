@@ -15,10 +15,12 @@ import cl from './official.module.scss'
 const OfficialTemplate: FC<TemplateProps> = ({
   data,
   componentRef,
+  isEnglish,
   currencyLabel,
   modernInvoiceNumber,
   domainName: domainNameFromProps,
   companyLabel: companyLabelFromProps,
+  showQuantityInPreview,
   rows,
   getQty,
   subtotal,
@@ -39,8 +41,8 @@ const OfficialTemplate: FC<TemplateProps> = ({
   const subjectText =
     data?.notes ||
     (serviceMonth
-      ? `Services rendered for ${dateToMonthYearEn(serviceMonth)}`
-      : `Invoice ${modernInvoiceNumber}`)
+      ? `${isEnglish ? 'Services rendered for' : 'Послуги надані за'} ${dateToMonthYearEn(serviceMonth)}`
+      : `${isEnglish ? 'Invoice' : 'Рахунок'} ${modernInvoiceNumber}`)
 
   return (
     <div
@@ -50,18 +52,18 @@ const OfficialTemplate: FC<TemplateProps> = ({
     >
       {/* ── Header ── */}
       <div className={cl.clHeader}>
-        <div className={cl.clTitle}>Invoice</div>
+        <div className={cl.clTitle}>{isEnglish ? 'Invoice' : 'Рахунок'}</div>
 
         <div className={cl.clHeaderRight}>
           {!!domainLabel.trim() && (
             <div className={cl.clFromBlock}>
-              <span className={cl.clFromLabel}>From</span>
+              <span className={cl.clFromLabel}>{isEnglish ? 'From' : 'Від'}</span>
               <div className={cl.clFromValue}>{domainLabel}</div>
             </div>
           )}
           {!!clientCompany && (
             <div className={cl.clToBlock}>
-              <span className={cl.clToLabel}>Invoice For</span>
+              <span className={cl.clToLabel}>{isEnglish ? 'Invoice For' : 'На адресу'}</span>
               <div className={cl.clToValue}>{clientCompany}</div>
             </div>
           )}
@@ -70,23 +72,23 @@ const OfficialTemplate: FC<TemplateProps> = ({
 
       <div className={cl.clMeta}>
         <div className={cl.clMetaRow}>
-          <div className={cl.clMetaLabel}>Invoice ID</div>
+          <div className={cl.clMetaLabel}>{isEnglish ? 'Invoice ID' : 'Номер рахунку'}</div>
           <div className={cl.clMetaValue}>{modernInvoiceNumber}</div>
         </div>
         <div className={cl.clMetaRow}>
-          <div className={cl.clMetaLabel}>Issue Date</div>
+          <div className={cl.clMetaLabel}>{isEnglish ? 'Issue Date' : 'Дата видачі'}</div>
           <div className={cl.clMetaValue}>
             {formatInvoiceDateUs(data?.invoiceCreationDate)}
           </div>
         </div>
         <div className={cl.clMetaRow}>
-          <div className={cl.clMetaLabel}>Due Date</div>
+          <div className={cl.clMetaLabel}>{isEnglish ? 'Due Date' : 'Строк оплати'}</div>
           <div className={cl.clMetaValue}>
-            {formatInvoiceDueDateUs(data?.invoiceCreationDate)} (upon receipt)
+            {formatInvoiceDueDateUs(data?.invoiceCreationDate)} {isEnglish ? '(upon receipt)' : '(при отриманні)'}
           </div>
         </div>
         <div className={cl.clMetaRow}>
-          <div className={cl.clMetaLabel}>Subject</div>
+          <div className={cl.clMetaLabel}>{isEnglish ? 'Subject' : 'Призначення'}</div>
           <div className={cl.clMetaValue}>{subjectText}</div>
         </div>
       </div>
@@ -95,10 +97,14 @@ const OfficialTemplate: FC<TemplateProps> = ({
         <table className={cl.clTable}>
           <thead>
             <tr>
-              <th>Description</th>
-              <th>Quantity</th>
-              <th>Unit Price</th>
-              <th>Amount</th>
+              <th>{isEnglish ? 'Description' : 'Опис'}</th>
+              {showQuantityInPreview && (
+                <>
+                  <th className={`${cl.colNum} ${cl.colQty}`}>{isEnglish ? 'Quantity' : 'Кількість'}</th>
+                  <th className={`${cl.colNum} ${cl.colUnit}`}>{isEnglish ? 'Unit Price' : 'Ціна одиниці'}</th>
+                </>
+              )}
+              <th className={`${cl.colNum} ${cl.colAmount}`}>{isEnglish ? 'Amount' : 'Сума'}</th>
             </tr>
           </thead>
           <tbody>
@@ -112,9 +118,19 @@ const OfficialTemplate: FC<TemplateProps> = ({
               return (
                 <tr key={`${item?.type || item?.name}-${index}`}>
                   <td>{item?.name || item?.type || '—'}</td>
-                  <td>{qty?.toFixed?.(2) ?? qty}</td>
-                  <td>{rate.toFixed(2)}</td>
-                  <td>{Number(item?.sum || 0).toFixed(2)}</td>
+                  {showQuantityInPreview && (
+                    <>
+                      <td className={`${cl.colNum} ${cl.colQty}`}>
+                        {qty?.toFixed?.(2) ?? qty}
+                      </td>
+                      <td className={`${cl.colNum} ${cl.colUnit}`}>
+                        {rate.toFixed(2)}
+                      </td>
+                    </>
+                  )}
+                  <td className={`${cl.colNum} ${cl.colAmount}`}>
+                    {Number(item?.sum || 0).toFixed(2)}
+                  </td>
                 </tr>
               )
             })}
@@ -127,13 +143,13 @@ const OfficialTemplate: FC<TemplateProps> = ({
           {taxPercent > 0 && (
             <>
               <div className={cl.clTotalRow}>
-                <span>Subtotal</span>
+                <span>{isEnglish ? 'Subtotal' : 'Сума без ПДВ'}</span>
                 <strong>
                   {currencyLabel}&nbsp;{subtotal.toFixed(2)}
                 </strong>
               </div>
               <div className={cl.clTotalRow}>
-                <span>VAT {taxPercent}%</span>
+                <span>{isEnglish ? 'VAT' : 'ПДВ'} {taxPercent}%</span>
                 <strong>
                   {currencyLabel}&nbsp;{taxAmount.toFixed(2)}
                 </strong>
@@ -141,7 +157,7 @@ const OfficialTemplate: FC<TemplateProps> = ({
             </>
           )}
           <div className={`${cl.clTotalRow} ${cl.clGrandTotal}`}>
-            <span>Total Due</span>
+            <span>{isEnglish ? 'Total Due' : 'Сума до оплати'}</span>
             <strong>
               {currencyLabel}&nbsp;
               {(+data?.generalSum || +data?.debit || total).toFixed(2)}

@@ -137,18 +137,17 @@ async function attachServiceToDomainGroup(
   domainId: mongoose.Types.ObjectId,
   serviceId: mongoose.Types.ObjectId
 ): Promise<void> {
-  // Try to push to existing default group; if it doesn't exist, append the group.
-  // arrayFilters lets us update the embedded group whose name matches.
-  const pushed = await Domain.updateOne(
-    { _id: domainId, 'customServices.groupName': DEFAULT_GROUP_NAME },
-    {
-      $addToSet: { 'customServices.$[group].services': serviceId },
-    },
-    {
-      arrayFilters: [{ 'group.groupName': DEFAULT_GROUP_NAME }],
-    }
-  )
-  if (pushed.matchedCount === 0) {
+  const domain = await Domain.findById(domainId).select('customServices')
+  const existingGroups = domain?.customServices ?? []
+
+  if (existingGroups.length > 0) {
+    const firstGroupName = existingGroups[0].groupName
+    await Domain.updateOne(
+      { _id: domainId, 'customServices.groupName': firstGroupName },
+      { $addToSet: { 'customServices.$[group].services': serviceId } },
+      { arrayFilters: [{ 'group.groupName': firstGroupName }] }
+    )
+  } else {
     await Domain.updateOne(
       { _id: domainId },
       {
@@ -544,5 +543,97 @@ export async function listCustomServicesForDomain(
   }
 
   const services = await CustomService.find(filter).lean()
-  return ok(services)
+  const seenIds = new Set<string>()
+  const seenNames = new Set<string>()
+  const unique = services.filter((s: any) => {
+    const id = String(s?._id ?? '')
+    if (!id || seenIds.has(id)) return false
+    const nameKey = String(s?.name ?? '').trim().toLowerCase()
+    if (nameKey && seenNames.has(nameKey)) return false
+    seenIds.add(id)
+    if (nameKey) seenNames.add(nameKey)
+    return true
+  })
+  return ok(unique)
+}
+
+export interface LeanCustomService {
+  _id: unknown
+  [key: string]: unknown
+}
+
+export interface DomainServiceGroup {
+  groupName: string | null
+  services: LeanCustomService[]
+}
+
+/**
+ * Resolves a domain's `customServices` groups into full service documents.
+ *
+ * A group's service ids can point either at services scoped to this domain OR at
+ * shared/seeded catalog entries (utility services pulled in via a
+ * DomainTypeTemplate) that have no `domain` ref. Resolving only against the
+ * domain-scoped set drops the shared ones, leaving groups with empty `services`
+ * — which silently hides the matching columns in Payment Bulk and breaks invoice
+ * grouping. We therefore look services up in a combined map keyed by _id.
+ *
+ * Domain-scoped services not referenced by any group are appended as a synthetic
+ * `groupName: null` "ungrouped" bucket (renderers treat it as standalone rows).
+ */
+export function assembleDomainServiceCatalog(
+  domainCustomServices:
+    | Array<{ groupName?: string | null; services?: unknown[] }>
+    | undefined,
+  domainScopedServices: LeanCustomService[],
+  referencedServices: LeanCustomService[]
+): DomainServiceGroup[] {
+  const servicesById = new Map<string, LeanCustomService>()
+  for (const service of domainScopedServices) {
+    servicesById.set(String(service._id), service)
+  }
+  for (const service of referencedServices) {
+    servicesById.set(String(service._id), service)
+  }
+
+  const groupedServices: DomainServiceGroup[] = (
+    domainCustomServices || []
+  ).map((group, index) => ({
+    groupName: group?.groupName ?? `Група ${index + 1}`,
+    services: (group?.services || [])
+      .map((id) => servicesById.get(String(id)))
+      .filter((service): service is LeanCustomService => Boolean(service)),
+  }))
+
+  const groupedIds = new Set(
+    groupedServices.flatMap((group) =>
+      group.services.map((service) => String(service._id))
+    )
+  )
+  const ungroupedServices = domainScopedServices.filter(
+    (service) => !groupedIds.has(String(service._id))
+  )
+
+  const result: DomainServiceGroup[] = [...groupedServices]
+  if (ungroupedServices.length > 0) {
+    // groupName: null marks "not in any user-defined group" — renderers show
+    // these as standalone rows instead of under a group header.
+    result.push({ groupName: null, services: ungroupedServices })
+  }
+  return result
+}
+
+/** Flattened, de-duplicated service ids referenced across a domain's groups. */
+export function collectReferencedServiceIds(
+  domainCustomServices:
+    | Array<{ groupName?: string | null; services?: unknown[] }>
+    | undefined
+): string[] {
+  return Array.from(
+    new Set(
+      (domainCustomServices || [])
+        .flatMap((group) => group?.services || [])
+        .map((id) => String(id))
+        .filter((id) => id && id !== 'undefined' && id !== 'null')
+    )
+  )
 }

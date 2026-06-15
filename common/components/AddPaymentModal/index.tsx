@@ -1,4 +1,5 @@
 import { useGetCustomServicesByDomainQuery } from '@common/api/customServicesApi/customServices.api'
+import { useCreateCustomServiceMutation } from '@common/api/customServicesApi/customServices.api'
 import { useGetDomainByPkQuery } from '@common/api/domainApi/domain.api'
 import { buildPaymentPayload } from './buildPaymentPayload'
 import { resolveTemplate, TemplateKey } from './resolveTemplate'
@@ -21,9 +22,12 @@ import PriceList from '@common/components/Forms/AddPaymentForm/PriceList'
 import { useResolveMonthServiceId } from '@common/components/Forms/AddPaymentForm/useResolveMonthServiceId'
 import Modal from '@components/UI/ModalWindow'
 import { usePaymentFormData } from '@modules/hooks/usePaymentData'
-import { Operations, Currency } from '@utils/constants'
+import { Operations, Currency, ServiceType } from '@utils/constants'
 import { getInvoices } from '@utils/getInvoices'
-import { getPaymentProviderAndReciever } from '@utils/helpers'
+import {
+  getPaymentProviderAndReciever,
+  normalizeCurrency,
+} from '@utils/helpers'
 import { Form, Tabs, TabsProps, message } from 'antd'
 import { FormInstance } from 'antd/es/form/Form'
 import { useChangelogOptions } from './changelog/useChangelogOptions'
@@ -40,6 +44,7 @@ import {
 } from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
 import GroupedReceiptForm from '../Forms/GroupedReceiptForm'
+import { getPreviewQtyStorageKey } from '../Forms/GroupedReceiptForm/previewQtyStorage'
 import PaymentReceiptForm from '../Forms/PaymentReceiptForm'
 import ReceiptForm from '../Forms/ReceiptForm'
 import serviceFilter from './serviceFilter'
@@ -74,6 +79,8 @@ export interface IPaymentContext {
   setTemplateScope: (scope: TemplateScopeTarget | undefined) => void
   showQuantityInPreview: boolean
   setShowQuantityInPreview: (value: boolean) => void
+  invoiceLang: 'en' | 'uk'
+  setInvoiceLang: (lang: 'en' | 'uk') => void
 }
 
 export const PaymentContext = createContext<IPaymentContext>({
@@ -89,6 +96,8 @@ export const PaymentContext = createContext<IPaymentContext>({
   setTemplateScope: () => void 0,
   showQuantityInPreview: false,
   setShowQuantityInPreview: () => void 0,
+  invoiceLang: 'uk',
+  setInvoiceLang: () => void 0,
 })
 
 export const usePaymentContext = () =>
@@ -99,11 +108,6 @@ const getId = (obj?: string | Partial<{ _id: string }>) => {
   if (typeof obj === 'string') return obj
   return obj._id
 }
-
-const getPreviewQtyStorageKey = (id?: string) =>
-  id
-    ? `addPayment:showQuantityInPreview:${id}`
-    : 'addPayment:showQuantityInPreview:draft'
 
 const AddPaymentModal: FC<Props> = ({
   closeModal,
@@ -148,6 +152,12 @@ const AddPaymentModal: FC<Props> = ({
 
   const [showQuantityInPreview, setShowQuantityInPreviewState] = useState(false)
   const [activeTabKey, setActiveTabKey] = useState(preview ? '2' : '1')
+  const [invoiceLang, setInvoiceLang] = useState<'en' | 'uk'>(
+    paymentData?.invoiceLang ??
+    (paymentData?.currency && paymentData.currency !== Currency.UAH
+      ? 'en'
+      : 'uk')
+  )
 
   const setShowQuantityInPreview = useCallback(
     (value: boolean) => {
@@ -181,7 +191,7 @@ const AddPaymentModal: FC<Props> = ({
     if (paymentData?.template) return
     const resolved = fetchedDomain?.defaultTemplate
     if (resolved) setTemplate(resolved as TemplateKey)
-  }, [activeDomainId, fetchedDomain?.defaultTemplate])
+  }, [activeDomainId, fetchedDomain?.defaultTemplate, paymentData?.template])
 
   const { data: changelogRes, isLoading: changelogLoading } =
     useGetPaymentChangeLogsQuery(paymentId, { skip: !edit || !paymentId })
@@ -245,6 +255,7 @@ const AddPaymentModal: FC<Props> = ({
   const [addPayment, { isLoading: isAddingLoading }] = useAddPaymentMutation()
   const [editPayment, { isLoading: isEditingLoading }] =
     useEditPaymentMutation()
+  const [createCustomService] = useCreateCustomServiceMutation()
 
   const resolveMonthServiceId = useResolveMonthServiceId()
   const { data: customDomainServices } = useGetCustomServicesByDomainQuery(
@@ -418,6 +429,37 @@ const AddPaymentModal: FC<Props> = ({
     [resolveMonthServiceId, form]
   )
 
+  const saveAdHocCustomServices = useCallback(
+    async (invoices: any[], currentDomainId: string) => {
+      if (!currentDomainId) return
+
+      const adHocInvoices = invoices.filter(
+        (inv) =>
+          inv?.type === ServiceType.Custom &&
+          !inv?.customService && 
+          inv?.saveToDomain === true &&
+          (inv?.name || inv?.description) 
+      )
+
+      for (const inv of adHocInvoices) {
+        const name = (inv.name || inv.description || '').trim()
+        if (!name) continue
+
+        try {
+          await createCustomService({
+            name,
+            domainId: currentDomainId,
+          }).unwrap()
+        } catch (e: any) {
+          if (e?.status !== 409) {
+            console.warn('createCustomService failed for', name, e)
+          }
+        }
+      }
+    },
+    [createCustomService]
+  )
+
   const handleOk = async () => {
     setChanged(false)
     setSaved(true)
@@ -458,6 +500,7 @@ const AddPaymentModal: FC<Props> = ({
       reciever,
       transaction,
       template,
+      invoiceLang,
     })
 
     const finalPayload = templateScope
@@ -466,12 +509,17 @@ const AddPaymentModal: FC<Props> = ({
 
     const response = edit
       ? await editPayment({
-          _id: paymentData?._id,
-          ...finalPayload,
-        })
+        _id: paymentData?._id,
+        ...finalPayload,
+      })
       : await addPayment(finalPayload)
 
     if ('data' in response) {
+      const currentDomainId = String(domainId || paymentDomainId || '')
+      if (currentDomainId && formData.invoice?.length) {
+        await saveAdHocCustomServices(formData.invoice, currentDomainId)
+      }
+
       const action = edit ? 'Збережено' : 'Додано'
       form.resetFields()
       message.success(action)
@@ -493,13 +541,15 @@ const AddPaymentModal: FC<Props> = ({
     const isEditing = !!paymentId || edit
     if (isEditing) {
       lastLoadedCompanyId.current = company._id
+      if (!form.getFieldValue('currency')) {
+        form.setFieldValue('currency', normalizeCurrency(company.currency))
+      }
       return
     }
 
     const hasFilteredInvoices =
       Array.isArray(filteredInvoices) && filteredInvoices.length > 0
     if (!hasFilteredInvoices) return
-
     // Re-seed `invoice` whenever upstream data (company, service, prevService,
     // prevPayment, customDomainServices) changes — that's exactly when
     // `filteredInvoices` gets a new reference. Editing existing payments is
@@ -510,7 +560,7 @@ const AddPaymentModal: FC<Props> = ({
 
     const isNewCompanySelected = lastLoadedCompanyId.current !== company._id
     if (isNewCompanySelected) {
-      form.setFieldValue('currency', company.currency || Currency.UAH)
+      form.setFieldValue('currency', normalizeCurrency(company.currency))
       lastLoadedCompanyId.current = company._id
     }
   }, [company, filteredInvoices, paymentId, edit, activeTabKey, saved, form])
@@ -530,6 +580,8 @@ const AddPaymentModal: FC<Props> = ({
         setTemplateScope,
         showQuantityInPreview,
         setShowQuantityInPreview,
+        invoiceLang,
+        setInvoiceLang,
       }}
     >
       <Modal
@@ -562,7 +614,9 @@ const AddPaymentModal: FC<Props> = ({
                 : filteredInvoices,
             description: paymentData?.description,
             generalSum: paymentData?.generalSum,
-            currency: paymentData?.currency || Currency.UAH,
+            currency: paymentData?.currency
+              ? normalizeCurrency(paymentData.currency)
+              : undefined,
             invoiceNumber: paymentData?.invoiceNumber,
             invoiceCreationDate: dayjs(paymentData?.invoiceCreationDate),
             operation: paymentData?.type || Operations.Debit,

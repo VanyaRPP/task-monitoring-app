@@ -48,6 +48,7 @@ const setup = (paymentOverride = {}, isAdmin = true) => {
   const onEdit = jest.fn()
   const onDelete = jest.fn()
   const onMarkPaid = jest.fn()
+  const onDuplicate = jest.fn()
 
   render(
     <PaymentDropdown
@@ -57,11 +58,12 @@ const setup = (paymentOverride = {}, isAdmin = true) => {
       onEdit={onEdit}
       onDelete={onDelete}
       onMarkPaid={onMarkPaid}
+      onDuplicate={onDuplicate}
       deleteLoading={false}
     />
   )
 
-  return { onView, onEdit, onDelete, onMarkPaid }
+  return { onView, onEdit, onDelete, onMarkPaid, onDuplicate }
 }
 
 const openDropdown = () => fireEvent.click(screen.getByRole('button'))

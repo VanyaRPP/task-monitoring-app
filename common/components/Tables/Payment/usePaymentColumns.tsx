@@ -56,6 +56,7 @@ interface Params {
   onEditClick: (p: IExtendedPayment) => void
   onDelete: (id: string) => void
   onMarkPaid: (p: IExtendedPayment) => void
+  onDuplicate: (p: IExtendedPayment) => void
   deleteLoading: boolean
   visibleCustomServices?: ICustomServiceItem[]
 }
@@ -83,6 +84,57 @@ function widenFilterDropdown(w = 240) {
   }
 }
 
+const CustomName = 'custom-name:'
+
+function buildAutoCustomColumns({
+  payments,
+  sepDomainID,
+}: {
+  payments?: IGetPaymentResponse
+  sepDomainID?: string
+}): ColumnType<IExtendedPayment>[] {
+  if (!payments?.data?.length) return []
+
+  const order: string[] = []
+  const seenNames = new Set<string>()
+
+  payments.data.forEach((payment) => {
+    payment.invoice?.forEach((field) => {
+      if (field.type !== ServiceType.Custom) return
+      const sum = Number(field.sum ?? field.price ?? 0)
+      if (sum <= 0) return
+      const label = field.name
+      if (!label || seenNames.has(label)) return
+      seenNames.add(label)
+      order.push(label)
+    })
+  })
+
+  return order.map((label) => {
+    const matches = (field: IExtendedPayment['invoice'][number]) =>
+      field.type === ServiceType.Custom && field.name === label
+    const sumFor = (payment: IExtendedPayment) =>
+      payment.invoice?.reduce(
+        (acc, field) =>
+          matches(field) ? acc + Number(field.sum ?? field.price ?? 0) : acc,
+        0
+      ) ?? 0
+
+    return {
+      title: label,
+      dataIndex: `${CustomName}${label}`,
+      width: 132,
+      ellipsis: true,
+      hidden: Boolean(sepDomainID),
+      render: (_value: unknown, payment: IExtendedPayment) => (
+        <span>{renderCurrency(sumFor(payment).toFixed(2))}</span>
+      ),
+      sorter: (a: IExtendedPayment, b: IExtendedPayment) =>
+        sumFor(a) - sumFor(b),
+    }
+  })
+}
+
 export function usePaymentColumns({
   sepDomainID,
   filters,
@@ -100,6 +152,7 @@ export function usePaymentColumns({
   onEditClick,
   onDelete,
   onMarkPaid,
+  onDuplicate,
   deleteLoading,
   visibleCustomServices,
 }: Params): ColumnsType<IExtendedPayment> {
@@ -408,29 +461,32 @@ export function usePaymentColumns({
           )
         },
       },
-      ...(selectedColumns.map((value) => {
-        const customService = visibleCustomServices?.find(
-          (s) => s._id === value
+      ...(selectedColumns
+        .filter((value) => value !== ServiceType.Custom)
+        .filter(
+          (value) => !visibleCustomServices?.some((s) => s._id === value)
         )
-        const isCustom = !!customService
-        const findItem = (payment: IExtendedPayment) =>
-          isCustom
-            ? payment.invoice.find((i) => i.serviceId === value)
-            : payment.invoice.find((i) => i.type === value)
-        return {
-          title: isCustom ? customService.name : ServiceName[value],
-          dataIndex: value,
-          width: 132,
-          ellipsis: true,
-          render: (_value, payment: IExtendedPayment) => {
-            const item = findItem(payment)
-            const sum = +(item?.sum || item?.price || 0)
-            return <span>{renderCurrency(sum.toFixed(2))}</span>
-          },
-          hidden: Boolean(sepDomainID),
-          sorter: (a: IExtendedPayment, b: IExtendedPayment) =>
-            (findItem(a)?.sum || 0) - (findItem(b)?.sum || 0),
-        }
+        .map((value) => {
+          const findItem = (payment: IExtendedPayment) =>
+            payment.invoice.find((i) => i.type === value)
+          return {
+            title: ServiceName[value],
+            dataIndex: value,
+            width: 132,
+            ellipsis: true,
+            render: (_value, payment: IExtendedPayment) => {
+              const item = findItem(payment)
+              const sum = +(item?.sum || item?.price || 0)
+              return <span>{renderCurrency(sum.toFixed(2))}</span>
+            },
+            hidden: Boolean(sepDomainID),
+            sorter: (a: IExtendedPayment, b: IExtendedPayment) =>
+              (findItem(a)?.sum || 0) - (findItem(b)?.sum || 0),
+          }
+        }) as ColumnType<IExtendedPayment>[]),
+      ...(buildAutoCustomColumns({
+        payments,
+        sepDomainID,
       }) as ColumnType<IExtendedPayment>[]),
       {
         align: 'center',
@@ -445,6 +501,7 @@ export function usePaymentColumns({
             onEdit={onEditClick}
             onDelete={onDelete}
             onMarkPaid={onMarkPaid}
+            onDuplicate={onDuplicate}
             deleteLoading={deleteLoading}
           />
         ),
@@ -465,6 +522,7 @@ export function usePaymentColumns({
       onEditClick,
       onDelete,
       onMarkPaid,
+      onDuplicate,
       isGlobalAdmin,
       isDomainAdmin,
       isUser,

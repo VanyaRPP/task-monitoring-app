@@ -6,6 +6,9 @@ export interface ICustomService {
   groupName?: string
   name: string
   services?: string
+  serviceType?: string
+  domain?: string
+  category?: string
 }
 
 export interface ICustomDomainService {
@@ -17,6 +20,7 @@ export interface ICustomDomainService {
     _id: ObjectId | string
     name: string
     fieldName: string
+    serviceType?: string
     __v?: number
   }[]
 }

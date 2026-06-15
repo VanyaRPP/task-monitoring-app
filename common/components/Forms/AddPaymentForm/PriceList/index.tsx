@@ -9,6 +9,7 @@ import GroupedPricesTable from '@components/Forms/GroupedReceiptForm/GroupedPric
 import { IPayment } from '@common/api/paymentApi/payment.api.types'
 import { getCurrencyNames, normalizeCurrency } from '@utils/helpers'
 import { usePaymentContext } from '@components/AddPaymentModal'
+import { useInvoiceCurrency } from '@modules/hooks/useInvoiceCurrency'
 import {
   getDomainHeading,
   getRecipientCompanyHeading,
@@ -17,6 +18,7 @@ import {
 const PriceList: FC<{ data: IPayment }> = ({ data }) => {
   const { form, company, showQuantityInPreview, setShowQuantityInPreview } =
     usePaymentContext()
+  const currency = useInvoiceCurrency()
 
   const liveInvoice = Form.useWatch('invoice', form)
 
@@ -28,22 +30,11 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
   )
 
   const { totalSum, totalFractionSum } = useMemo(() => {
-    const sum = payment.invoice.reduce(
-      (acc, item) => acc + Number(item.sum),
-      0
-    )
+    const sum = payment.invoice.reduce((acc, item) => acc + Number(item.sum), 0)
     const [, fraction] = sum.toFixed(2).split('.')
     return { totalSum: sum, totalFractionSum: Number(fraction) }
   }, [payment.invoice])
 
-  const paymentCompany = payment?.company as
-    | { currency?: string }
-    | string
-    | undefined
-  const companyCurrency =
-    typeof paymentCompany === 'object' ? paymentCompany?.currency : undefined
-  const currency =
-    payment?.currency || companyCurrency || payment?.domain?.currency
   const isEnglish = normalizeCurrency(currency) !== 'UAH'
   const currencyNames = getCurrencyNames(currency, isEnglish)
 

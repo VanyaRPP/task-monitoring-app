@@ -1,4 +1,5 @@
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
+import { useInvoiceCurrency } from '@modules/hooks/useInvoiceCurrency'
 import numberToTextNumber from '@utils/numberToText'
 import { getCurrencyShortLabel } from '@utils/helpers'
 import dayjs from 'dayjs'
@@ -16,8 +17,7 @@ interface Props {
 
 const PaymentReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
   const newData = currPayment || paymentData
-  const currency =
-    newData?.currency || newData?.company?.currency || newData?.domain?.currency
+  const currency = useInvoiceCurrency()
   const currencyLabel = getCurrencyShortLabel(currency)
   const componentRef = useRef()
   const { token } = theme.useToken()

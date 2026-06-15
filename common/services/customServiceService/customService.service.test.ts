@@ -1,5 +1,7 @@
 import mongoose from 'mongoose'
 import {
+  assembleDomainServiceCatalog,
+  collectReferencedServiceIds,
   createCustomService,
   deleteCustomService,
   isServiceErr,
@@ -25,6 +27,7 @@ jest.mock('@modules/models/Domain', () => ({
   default: {
     exists: jest.fn(),
     updateOne: jest.fn(),
+    findById: jest.fn(),
   },
 }))
 
@@ -80,6 +83,11 @@ beforeEach(() => {
   asMock(Domain.updateOne).mockResolvedValue({
     acknowledged: true,
     matchedCount: 1,
+  })
+  // attachServiceToDomainGroup reads the domain's groups first; default to a
+  // domain with no groups so the helper takes the "create default group" path.
+  asMock(Domain.findById).mockReturnValue({
+    select: jest.fn().mockResolvedValue({ customServices: [] }),
   })
   asMock(RealEstate.updateMany).mockResolvedValue({ acknowledged: true })
 })
@@ -190,10 +198,12 @@ describe('createCustomService', () => {
         fieldName: 'foo',
       }),
     })
-    // First call attempts to add to existing default group — pretend it exists.
-    asMock(Domain.updateOne).mockResolvedValueOnce({
-      acknowledged: true,
-      matchedCount: 1,
+    // The domain already has a default group — attach should target it by its
+    // actual name (the first group), not a hard-coded one.
+    asMock(Domain.findById).mockReturnValueOnce({
+      select: jest.fn().mockResolvedValueOnce({
+        customServices: [{ groupName: 'Загальні', services: [] }],
+      }),
     })
 
     await createCustomService(
@@ -225,19 +235,17 @@ describe('createCustomService', () => {
         fieldName: 'foo',
       }),
     })
-    // First call: no matching group (matchedCount: 0).
-    asMock(Domain.updateOne)
-      .mockResolvedValueOnce({ acknowledged: true, matchedCount: 0 })
-      .mockResolvedValueOnce({ acknowledged: true })
+    // The domain has no groups yet — attach should append a new default group.
+    asMock(Domain.findById).mockReturnValueOnce({
+      select: jest.fn().mockResolvedValueOnce({ customServices: [] }),
+    })
 
     await createCustomService(
       { name: 'Foo', domainId: String(ownDomainId) },
       ctxGlobal
     )
 
-    // Second call appends a new group entry.
-    expect(asMock(Domain.updateOne)).toHaveBeenNthCalledWith(
-      2,
+    expect(asMock(Domain.updateOne)).toHaveBeenCalledWith(
       { _id: expect.anything() },
       {
         $push: {
@@ -620,5 +628,99 @@ describe('listCustomServicesForDomain', () => {
     expect(result.ok).toBe(true)
     if (result.ok) expect(result.data).toEqual([])
     expect(asMock(CustomService.find)).not.toHaveBeenCalled()
+  })
+})
+
+describe('collectReferencedServiceIds', () => {
+  it('flattens and de-duplicates ids across all groups', () => {
+    const ids = collectReferencedServiceIds([
+      { groupName: 'A', services: ['a', 'b'] },
+      { groupName: 'B', services: ['b', 'c'] },
+    ])
+    expect(ids.sort()).toEqual(['a', 'b', 'c'])
+  })
+
+  it('tolerates missing/empty service arrays and nullish ids', () => {
+    expect(collectReferencedServiceIds(undefined)).toEqual([])
+    expect(
+      collectReferencedServiceIds([
+        { groupName: 'A' },
+        { groupName: 'B', services: [] },
+        { groupName: 'C', services: [null, undefined] },
+      ])
+    ).toEqual([])
+  })
+})
+
+describe('assembleDomainServiceCatalog', () => {
+  // The regression: a group references a SHARED/seeded service (no `domain`
+  // ref), so it is absent from the domain-scoped query and must be supplied via
+  // the by-id `referencedServices` lookup instead.
+  it('resolves group members from shared services missing in the domain scope', () => {
+    const shared = { _id: 'shared-maintenance', name: 'Утримання' }
+
+    const result = assembleDomainServiceCatalog(
+      [{ groupName: 'Комунальні', services: ['shared-maintenance'] }],
+      [], // domain-scoped query returns nothing for this group's members
+      [shared]
+    )
+
+    expect(result).toEqual([{ groupName: 'Комунальні', services: [shared] }])
+  })
+
+  it('keeps domain-scoped resolution working and merges both sources', () => {
+    const shared = { _id: 'shared-1', name: 'Shared' }
+    const local = { _id: 'local-1', name: 'Local' }
+
+    const result = assembleDomainServiceCatalog(
+      [{ groupName: 'Mixed', services: ['shared-1', 'local-1'] }],
+      [local],
+      [shared]
+    )
+
+    expect(result[0].services).toEqual([shared, local])
+  })
+
+  it('drops ids that resolve to no service', () => {
+    const result = assembleDomainServiceCatalog(
+      [{ groupName: 'A', services: ['ghost'] }],
+      [],
+      []
+    )
+    expect(result).toEqual([{ groupName: 'A', services: [] }])
+  })
+
+  it('appends domain-scoped services that are in no group as a null bucket', () => {
+    const grouped = { _id: 'g1', name: 'Grouped' }
+    const loose = { _id: 'l1', name: 'Loose' }
+
+    const result = assembleDomainServiceCatalog(
+      [{ groupName: 'A', services: ['g1'] }],
+      [grouped, loose],
+      []
+    )
+
+    expect(result).toEqual([
+      { groupName: 'A', services: [grouped] },
+      { groupName: null, services: [loose] },
+    ])
+  })
+
+  it('omits the null bucket when every domain service is grouped', () => {
+    const grouped = { _id: 'g1', name: 'Grouped' }
+
+    const result = assembleDomainServiceCatalog(
+      [{ groupName: 'A', services: ['g1'] }],
+      [grouped],
+      []
+    )
+
+    expect(result).toHaveLength(1)
+    expect(result[0].groupName).toBe('A')
+  })
+
+  it('falls back to a positional group name when none is set', () => {
+    const result = assembleDomainServiceCatalog([{ services: [] }], [], [])
+    expect(result[0].groupName).toBe('Група 1')
   })
 })
