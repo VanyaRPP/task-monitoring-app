@@ -92,7 +92,7 @@ export const Name: React.FC<InvoiceComponentProps> = ({
           <Input
             size="small"
             variant="borderless"
-            placeholder={monthLabel}
+            placeholder="Опис"
             disabled={disabled}
             style={{ padding: 0, fontSize: '0.75rem' }}
           />

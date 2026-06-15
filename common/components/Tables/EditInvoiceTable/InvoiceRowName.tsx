@@ -78,9 +78,7 @@ const InvoiceRowName: React.FC<InvoiceRowNameProps> = ({
             <Input
               size="small"
               variant="borderless"
-              placeholder={
-                typeof subtitleText === 'string' ? subtitleText : undefined
-              }
+              placeholder="Опис"
               disabled={disabled}
               style={{ padding: 0, fontSize: '0.75rem' }}
             />
