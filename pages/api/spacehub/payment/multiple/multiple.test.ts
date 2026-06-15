@@ -40,6 +40,18 @@ describe('Payment API Endpoint - bulk delete', () => {
     jest.clearAllMocks()
     ;(getServerSession as jest.Mock).mockReset()
     ;(Payment.deleteMany as jest.Mock).mockReset()
+    // Domain is mocked here; reflect real domain admins so getCurrentUser's
+    // role derivation doesn't demote seeded DomainAdmins (and doesn't promote
+    // regular users).
+    ;(Domain.exists as jest.Mock).mockImplementation((q) =>
+      Promise.resolve(
+        [users.domainAdmin.email, users.domainAdmin2.email].includes(
+          q?.adminEmails
+        )
+          ? { _id: 'exists' }
+          : null
+      )
+    )
   })
 
   it('rejects non-DELETE methods with 405', async () => {

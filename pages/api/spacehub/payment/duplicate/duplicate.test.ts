@@ -50,6 +50,18 @@ describe('Payment API Endpoint - duplicate', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     ;(getServerSession as jest.Mock).mockReset()
+    // Domain is mocked here; reflect real domain admins so getCurrentUser's
+    // role derivation doesn't demote seeded DomainAdmins (and doesn't promote
+    // regular users).
+    ;(Domain.exists as jest.Mock).mockImplementation((q) =>
+      Promise.resolve(
+        [users.domainAdmin.email, users.domainAdmin2.email].includes(
+          q?.adminEmails
+        )
+          ? { _id: 'exists' }
+          : null
+      )
+    )
     ;(ProfitService.create as jest.Mock).mockResolvedValue({})
     ;(Payment.aggregate as jest.Mock).mockResolvedValue([{ maxNumber: 500 }])
     ;(Payment.create as jest.Mock).mockImplementation((data: any) =>
