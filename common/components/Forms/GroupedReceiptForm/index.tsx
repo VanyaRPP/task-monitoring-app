@@ -291,12 +291,15 @@ const GroupedReceiptForm: FC<Props> = ({
     <>
       <div style={{ position: 'absolute', top: -85, right: 35, zIndex: 100 }}>
         <Dropdown
-          menu={{ items: mainMenuItems, style: { minWidth: 220 } }}
+          menu={{
+            items: mainMenuItems,
+            style: { minWidth: 220, transform: 'translateX(35px)' },
+          }}
           trigger={['click']}
-          placement="bottomRight"
         >
           <Button
-            type="text"
+            type="default" 
+            style={{ borderColor: 'rgba(150, 150, 150, 0.4)' }}
             icon={<MoreOutlined style={{ fontSize: 20, color: 'inherit' }} />}
           />
         </Dropdown>
