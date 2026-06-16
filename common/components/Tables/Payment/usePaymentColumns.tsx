@@ -86,7 +86,7 @@ function widenFilterDropdown(w = 240) {
 
 const CustomName = 'custom-name:'
 
-function buildAutoCustomColumns({
+export function buildAutoCustomColumns({
   payments,
   sepDomainID,
 }: {
@@ -102,7 +102,9 @@ function buildAutoCustomColumns({
     payment.invoice?.forEach((field) => {
       if (field.type !== ServiceType.Custom) return
       const sum = Number(field.sum ?? field.price ?? 0)
-      if (sum <= 0) return
+      // skip only empty (zero) custom rows; a service that is always negative
+      // (e.g. a discount) must still get its own column
+      if (sum === 0) return
       const label = field.name
       if (!label || seenNames.has(label)) return
       seenNames.add(label)
