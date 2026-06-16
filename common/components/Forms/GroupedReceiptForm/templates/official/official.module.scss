@@ -239,6 +239,7 @@ $bg-row-l: #fafafa;
   font-size: 0.85rem;
   border-bottom: 1px solid $border;
   background: $bg-row;
+  gap: 1rem;
 
   span {
     color: $ink-muted;
@@ -337,6 +338,7 @@ $lightRoot: ":global(:root[data-theme='light'])";
   #{$lightRoot} & {
     border-color: $border-l;
   }
+  overflow-x: auto;
 }
 
 .clTable {
