@@ -2,6 +2,7 @@ import { useGetCustomServicesByDomainQuery } from '@common/api/customServicesApi
 import { useCreateCustomServiceMutation } from '@common/api/customServicesApi/customServices.api'
 import { useGetDomainByPkQuery } from '@common/api/domainApi/domain.api'
 import { buildPaymentPayload } from './buildPaymentPayload'
+import { keepInvoiceRow } from './invoiceRowFilter'
 import { resolveTemplate, TemplateKey } from './resolveTemplate'
 import {
   useAddPaymentMutation,
@@ -50,13 +51,6 @@ import ReceiptForm from '../Forms/ReceiptForm'
 import serviceFilter from './serviceFilter'
 import { normalizeTechnicalTransactionId } from '../Pages/BankTransactions/components/TransactionsTable/components/bankHelper'
 import s from './style.module.scss'
-
-const DEFAULT_INVOICES = [
-  'discount',
-  'maintenancePrice',
-  'garbageCollectorPrice',
-  'electricityPrice',
-]
 
 interface Props {
   closeModal: (success?: boolean) => void
@@ -289,9 +283,7 @@ const AddPaymentModal: FC<Props> = ({
       })
     }
 
-    return serviceFilteredInvoices?.filter(
-      (invoice) => invoice?.sum > 0 || DEFAULT_INVOICES.includes(invoice?.type)
-    )
+    return serviceFilteredInvoices?.filter(keepInvoiceRow)
   }, [
     company,
     service,
