@@ -1,4 +1,5 @@
 import { usePaymentContext } from '@components/AddPaymentModal'
+import { keepInvoiceRow } from '@components/AddPaymentModal/invoiceRowFilter'
 import { EditInvoicesTable_unstable } from '@components/Tables/EditInvoiceTable'
 import { IService } from '@common/api/serviceApi/service.api.types'
 import { Form } from 'antd'
@@ -23,16 +24,7 @@ const PaymentPricesTable: React.FC<PaymentPricesTableProps> = ({
   const invoices = form.getFieldValue('invoice')
 
   useEffect(() => {
-    const filteredInvoices = invoices?.filter(
-      (invoice) =>
-        invoice?.sum > 0 ||
-        [
-          'discount',
-          'maintenancePrice',
-          'garbageCollectorPrice',
-          'electricityPrice',
-        ].includes(invoice?.type)
-    )
+    const filteredInvoices = invoices?.filter(keepInvoiceRow)
 
     form.setFieldsValue({
       invoice: filteredInvoices,
