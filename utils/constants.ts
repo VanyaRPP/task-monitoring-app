@@ -111,7 +111,6 @@ export enum ServiceName {
   waterPart = 'Водонарахування',
   discount = 'Знижка',
   cleaningPrice = 'Прибирання',
-  custom = 'Додаткові витрати',
 }
 
 export enum ServiceType {

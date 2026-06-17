@@ -150,6 +150,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     isError: paymentsError,
     isLoading: paymentsLoading,
     isFetching: paymentsFetching,
+    refetch: refetchPayments,
   } = useGetAllPaymentsQuery(
     {
       skip: (currentPage - 1) * pageSize,
@@ -530,6 +531,8 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
       dispatch(setSelectedColumns(cols)),
     onBulkMarkPaid: handleBulkMarkPaid,
     onBulkDuplicate: handleBulkDuplicate,
+    onRefresh: () => refetchPayments(),
+    isRefreshing: paymentsFetching,
     domainFilter: filterProps.domainsFilter,
     realEstatesFilter: filterProps.companiesFilter,
     isDashboard: router.pathname === AppRoutes.INDEX,
