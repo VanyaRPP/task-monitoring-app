@@ -17,12 +17,12 @@ export interface PaymentPricesTableProps {
   loading?: boolean
   invoices?: any[]
   invoiceLang?: 'en' | 'uk'
+  showQuantityInPreview?: boolean
 }
 
 interface IPriceTableRow {
   key: number
   name: string
-  description?: string
   sum: number | string
   amount?: number
   price?: number
@@ -130,7 +130,7 @@ const assignInvoicesToGroupsFirstWin = (
 }
 
 function resolveInvoiceLabel(inv: any, t: TFunction<'groupedReceipt'>): string {
-  if (inv?.customName) return inv.customName
+  if (inv?.description) return inv.description
   return inv?.name ?? t(`services.${getInvoiceServiceLabelKey(inv.type)}`)
 }
 
@@ -151,17 +151,6 @@ const getColumns = (
       title: t('columns.serviceName'),
       dataIndex: 'name',
       key: 'name',
-      render: (value: any, record: IPriceTableRow) =>
-        record?.description ? (
-          <div>
-            <div>{value}</div>
-            <div style={{ fontSize: '0.85em', opacity: 0.65 }}>
-              {record.description}
-            </div>
-          </div>
-        ) : (
-          value
-        ),
     },
   ]
 
@@ -250,9 +239,11 @@ const GroupedPricesTable: React.FC<PaymentPricesTableProps> = ({
   usePreviewQuantityToggle,
   domainId,
   invoiceLang,
+  showQuantityInPreview: showQuantityInPreviewProp,
 }) => {
-  const { form, company, showQuantityInPreview } = usePaymentContext()
-  const { domain } = form?.getFieldsValue() ?? {}
+  const { form, company, showQuantityInPreview: showQuantityInPreviewCtx } = usePaymentContext()
+  const { domain } = form?.getFieldsValue?.() ?? {}
+  const showQuantityInPreview = showQuantityInPreviewProp ?? showQuantityInPreviewCtx
   const { i18n } = useTranslation('groupedReceipt')
 
   const resolvedDomainId =
@@ -298,7 +289,6 @@ const GroupedPricesTable: React.FC<PaymentPricesTableProps> = ({
         filtered.map((inv, index) => ({
           key: index + 1,
           name: resolveInvoiceLabel(inv, tInvoice),
-          description: inv.description,
           sum: inv.sum,
           amount: inv.amount,
           price: inv.price,
@@ -325,7 +315,6 @@ const GroupedPricesTable: React.FC<PaymentPricesTableProps> = ({
       rows.push({
         key: rows.length + 1,
         name: resolveInvoiceLabel(discountInvoice, tInvoice),
-        description: discountInvoice.description,
         sum: discountInvoice.sum,
       })
     }
@@ -334,7 +323,6 @@ const GroupedPricesTable: React.FC<PaymentPricesTableProps> = ({
       rows.push({
         key: rows.length + 1,
         name: resolveInvoiceLabel(inv, tInvoice),
-        description: inv.description,
         sum: inv.sum,
       })
     })

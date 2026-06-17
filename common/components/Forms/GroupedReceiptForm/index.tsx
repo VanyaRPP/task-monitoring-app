@@ -69,6 +69,7 @@ const GroupedReceiptForm: FC<Props> = ({
     data,
     contextCompany: company,
     lang: invoiceLang,
+    showQuantityInPreview,
   })
 
   const {
@@ -236,7 +237,7 @@ const GroupedReceiptForm: FC<Props> = ({
     data,
     componentRef,
     isEnglish,
-    invoiceLang,
+    showQuantityInPreview,
     currencyLabel,
     currency,
     modernInvoiceNumber,

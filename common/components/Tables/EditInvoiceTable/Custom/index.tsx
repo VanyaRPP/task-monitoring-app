@@ -10,8 +10,8 @@ import {
   toRoundFixed,
 } from '@utils/helpers'
 import validator from '@utils/validator'
-import { Form, Input, Space, Typography } from 'antd'
-import { useEffect, useMemo } from 'react'
+import { Checkbox, Form, Input, Space, Tooltip, Typography } from 'antd'
+import { useEffect, useMemo, useRef } from 'react'
 import useSyncSum from '../useSyncSum'
 import { LabelInput } from '../LabelInput'
 import { UpdateInvoiceButton } from './UpdateInvoiceButton'
@@ -38,6 +38,17 @@ export const Name: React.FC<InvoiceComponentProps> = ({
   const defaultLabel = value || type || ''
   const monthLabel = toFirstUpperCase(dateToMonthYear(service?.date))
 
+  const adHocBindingRef = useRef<'name' | 'description' | null>(null)
+  if (
+    adHocBindingRef.current === null &&
+    type === 'custom' &&
+    !isCustomService
+  ) {
+    adHocBindingRef.current = record?.name ? 'description' : 'name'
+  }
+  const adHocBinding =
+    adHocBindingRef.current === 'description' ? 'description' : 'name'
+
   // Seed `customName` once defaultLabel is known. defaultLabel is derived
   // from useWatch-backed `value`/`type`, which are undefined on first render
   // and become available a tick later — so we run on every defaultLabel
@@ -49,6 +60,14 @@ export const Name: React.FC<InvoiceComponentProps> = ({
       form.setFieldValue(['invoice', ...name, 'customName'], defaultLabel)
     }
   }, [defaultLabel, editable, form, name])
+
+  useEffect(() => {
+    if (!editable || !form || !name.length) return
+    if (type !== 'custom' || isCustomService) return
+    if (adHocBindingRef.current !== 'name') return
+    if (value === undefined) return
+    form.setFieldValue(['invoice', ...name, 'description'], value || '')
+  }, [value, editable, form, name, type, isCustomService])
 
   const defaultPrice = useMemo(
     () =>
@@ -72,6 +91,7 @@ export const Name: React.FC<InvoiceComponentProps> = ({
   return (
     <Space
       direction="horizontal"
+      align="start"
       style={{ justifyContent: 'space-between', width: '100%' }}
     >
       <Space direction="vertical" size={0} style={{ width: '100%' }}>
@@ -81,7 +101,7 @@ export const Name: React.FC<InvoiceComponentProps> = ({
           </Form.Item>
         ) : (
           <Form.Item
-            name={[...name, 'name']}
+            name={[...name, adHocBinding]}
             rules={[validator.required()]}
             style={{ margin: 0 }}
           >
@@ -98,15 +118,28 @@ export const Name: React.FC<InvoiceComponentProps> = ({
           />
         </Form.Item>
       </Space>
-      <UpdateInvoiceButton
-        currentPrice={currentPrice}
-        defaultPrice={defaultPrice}
-        editable={editable}
-        type={type}
-        onRestore={() =>
-          form.setFieldValue(['invoice', ...name, 'price'], defaultPrice)
-        }
-      />
+      <Space direction="horizontal" size={8} align="center">
+        {!isCustomService && (
+          <Tooltip title="Додати цю послугу в основні домену">
+            <Form.Item
+              name={[...name, 'saveToDomain']}
+              valuePropName="checked"
+              style={{ margin: 0 }}
+            >
+              <Checkbox />
+            </Form.Item>
+          </Tooltip>
+        )}
+        <UpdateInvoiceButton
+          currentPrice={currentPrice}
+          defaultPrice={defaultPrice}
+          editable={editable}
+          type={type}
+          onRestore={() =>
+            form.setFieldValue(['invoice', ...name, 'price'], defaultPrice)
+          }
+        />
+      </Space>
     </Space>
   )
 }

@@ -226,11 +226,14 @@ describe('Payments API - GET', () => {
     expect(response.status).toHaveBeenCalledWith(200)
 
     const received = parseReceived(response.data)
+    // users.user is a company owner (not a domain admin), so querying by a
+    // domainId returns payments for the companies they own within that domain.
     const expected = payments.filter((payment) => {
-      const domain = domains.find((domain) =>
-        domain.adminEmails.includes(users.user.email)
+      const company = realEstates.find((re) => re._id === payment.company)
+      return (
+        !!company?.adminEmails.includes(users.user.email) &&
+        payment.domain === domains[1]._id
       )
-      return payment.domain === domain?._id
     })
     expect(received).toEqual(expected)
   })

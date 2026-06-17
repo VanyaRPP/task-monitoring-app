@@ -85,12 +85,9 @@ export default async function handler(
       }
     case 'POST':
       try {
-        if (!isDomainAdmin && !isGlobalAdmin) {
-          return res
-            .status(403)
-            .json({ success: false, error: 'Access denied: not an admin' })
-        }
-
+        // Any authenticated user may create a domain. Creating one makes them
+        // its admin (their email is added to adminEmails below), which promotes
+        // them to DomainAdmin on the next request via getCurrentUser.
         const { name, streets } = req.body
 
         const existingDomain = await Domain.findOne({
@@ -105,7 +102,7 @@ export default async function handler(
 
         const updatedObj = encryptDomainBankTokens(req.body, SECURE_TOKEN)
         delete updatedObj.archived
-        if (isDomainAdmin && !isGlobalAdmin) {
+        if (!isGlobalAdmin) {
           if (
             !updatedObj.adminEmails ||
             !Array.isArray(updatedObj.adminEmails)
