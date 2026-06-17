@@ -36,6 +36,7 @@ export const Name: React.FC<InvoiceComponentProps> = ({
   const { service, company, prevPayment } = usePaymentContext()
   const currentPrice = Form.useWatch(['invoice', ...name, 'price'], form)
   const defaultLabel = value || type || ''
+  const monthLabel = toFirstUpperCase(dateToMonthYear(service?.date))
 
   const adHocBindingRef = useRef<'name' | 'description' | null>(null)
   if (
@@ -48,15 +49,15 @@ export const Name: React.FC<InvoiceComponentProps> = ({
   const adHocBinding =
     adHocBindingRef.current === 'description' ? 'description' : 'name'
 
-  // Seed `description` once defaultLabel is known. defaultLabel is derived
+  // Seed `customName` once defaultLabel is known. defaultLabel is derived
   // from useWatch-backed `value`/`type`, which are undefined on first render
   // and become available a tick later — so we run on every defaultLabel
   // change and only write when the field is still blank.
   useEffect(() => {
     if (!editable || !form || !name.length || !defaultLabel) return
-    const current = form.getFieldValue(['invoice', ...name, 'description'])
+    const current = form.getFieldValue(['invoice', ...name, 'customName'])
     if (!current) {
-      form.setFieldValue(['invoice', ...name, 'description'], defaultLabel)
+      form.setFieldValue(['invoice', ...name, 'customName'], defaultLabel)
     }
   }, [defaultLabel, editable, form, name])
 
@@ -78,24 +79,24 @@ export const Name: React.FC<InvoiceComponentProps> = ({
     return (
       <Space direction="vertical" size={0}>
         <Typography.Text>
-          {record?.description || value || type}
+          {record?.customName || value || type}
         </Typography.Text>
         <Typography.Text type="secondary" style={{ fontSize: '0.75rem' }}>
-          {toFirstUpperCase(dateToMonthYear(service?.date))}
+          {record?.description || monthLabel}
         </Typography.Text>
       </Space>
     )
   }
 
   return (
-  <Space
-    direction="horizontal"
-    style={{ justifyContent: 'space-between', width: '100%' }}
-  >
-    <Space direction="vertical" size={0}>
-      <Space direction="horizontal" size={8} align="center">
+    <Space
+      direction="horizontal"
+      align="start"
+      style={{ justifyContent: 'space-between', width: '100%' }}
+    >
+      <Space direction="vertical" size={0} style={{ width: '100%' }}>
         {isCustomService ? (
-          <Form.Item name={[...name, 'description']} style={{ margin: 0 }}>
+          <Form.Item name={[...name, 'customName']} style={{ margin: 0 }}>
             <LabelInput defaultLabel={defaultLabel} disabled={disabled} />
           </Form.Item>
         ) : (
@@ -107,6 +108,17 @@ export const Name: React.FC<InvoiceComponentProps> = ({
             <Input placeholder="Назва..." disabled={disabled} />
           </Form.Item>
         )}
+        <Form.Item name={[...name, 'description']} style={{ margin: 0 }}>
+          <Input
+            size="small"
+            variant="borderless"
+            placeholder="Опис"
+            disabled={disabled}
+            style={{ padding: 0, fontSize: '0.75rem' }}
+          />
+        </Form.Item>
+      </Space>
+      <Space direction="horizontal" size={8} align="center">
         {!isCustomService && (
           <Tooltip title="Додати цю послугу в основні домену">
             <Form.Item
@@ -118,22 +130,18 @@ export const Name: React.FC<InvoiceComponentProps> = ({
             </Form.Item>
           </Tooltip>
         )}
+        <UpdateInvoiceButton
+          currentPrice={currentPrice}
+          defaultPrice={defaultPrice}
+          editable={editable}
+          type={type}
+          onRestore={() =>
+            form.setFieldValue(['invoice', ...name, 'price'], defaultPrice)
+          }
+        />
       </Space>
-      <Typography.Text type="secondary" style={{ fontSize: '0.75rem' }}>
-        {toFirstUpperCase(dateToMonthYear(service?.date))}
-      </Typography.Text>
     </Space>
-    <UpdateInvoiceButton
-      currentPrice={currentPrice}
-      defaultPrice={defaultPrice}
-      editable={editable}
-      type={type}
-      onRestore={() =>
-        form.setFieldValue(['invoice', ...name, 'price'], defaultPrice)
-      }
-    />
-  </Space>
-)
+  )
 }
 
 export const Amount: React.FC<InvoiceComponentProps> = ({

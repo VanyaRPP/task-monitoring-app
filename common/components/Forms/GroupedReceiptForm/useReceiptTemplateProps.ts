@@ -73,7 +73,7 @@ export function useReceiptTemplateProps({
 
   const rows = (data?.invoice || [])
     .filter((item: any) => Number(item?.sum) !== 0)
-    .map((item: any) => ({ ...item, name: item?.description || item?.name }))
+    .map((item: any) => ({ ...item, name: item?.customName || item?.name }))
 
   const getQty = (item: any): number => {
     if (Number.isFinite(Number(item?.amount))) {

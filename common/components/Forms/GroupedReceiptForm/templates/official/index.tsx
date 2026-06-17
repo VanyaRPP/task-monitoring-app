@@ -117,7 +117,14 @@ const OfficialTemplate: FC<TemplateProps> = ({
                   : Number(item?.sum || 0)
               return (
                 <tr key={`${item?.type || item?.name}-${index}`}>
-                  <td>{item?.name || item?.type || '—'}</td>
+                  <td>
+                    {item?.name || item?.type || '—'}
+                    {item?.description ? (
+                      <div style={{ fontSize: '0.85em', opacity: 0.65 }}>
+                        {item.description}
+                      </div>
+                    ) : null}
+                  </td>
                   {showQuantityInPreview && (
                     <>
                       <td className={`${cl.colNum} ${cl.colQty}`}>
@@ -131,6 +138,7 @@ const OfficialTemplate: FC<TemplateProps> = ({
                   <td className={`${cl.colNum} ${cl.colAmount}`}>
                     {Number(item?.sum || 0).toFixed(2)}
                   </td>
+
                 </tr>
               )
             })}

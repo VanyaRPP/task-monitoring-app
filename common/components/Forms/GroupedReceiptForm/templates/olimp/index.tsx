@@ -216,7 +216,14 @@ const OlimpTemplate: FC<TemplateProps> = ({
 
             return (
               <tr key={`${item?.type || item?.name}-${index}`}>
-                <td>{item?.name || item?.type || '-'}</td>
+                <td>
+                  {item?.name || item?.type || '-'}
+                  {item?.description ? (
+                    <div style={{ fontSize: '0.85em', opacity: 0.65 }}>
+                      {item.description}
+                    </div>
+                  ) : null}
+                </td>                
                 {showQuantityInPreview && (
                   <>
                     <td className={s.colRate}>{rate.toFixed(2)}</td>
