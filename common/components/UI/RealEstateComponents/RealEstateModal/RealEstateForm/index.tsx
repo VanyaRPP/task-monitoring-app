@@ -32,6 +32,7 @@ interface Props {
   editable?: boolean
   setIsValueChanged: (value: boolean) => void
   customServices?: any[]
+  preselectedStreet?: string
 }
 
 const RealEstateForm: FC<Props> = ({
@@ -40,6 +41,7 @@ const RealEstateForm: FC<Props> = ({
   editable = true,
   setIsValueChanged,
   customServices = [],
+  preselectedStreet,
 }) => {
   const watchedDomainId = Form.useWatch('domain', form)
   const domainId = watchedDomainId || currentRealEstate?.domain?._id
@@ -132,7 +134,12 @@ const RealEstateForm: FC<Props> = ({
           <Input disabled value={currentRealEstate?.street?.address || ''} />
         </Form.Item>
       ) : (
-        <AddressesSelect form={form} key={domainId} />
+        <AddressesSelect
+          form={form}
+          key={domainId}
+          street={preselectedStreet}
+          required={false}
+        />
       )}
       <Form.Item
         name="companyName"
