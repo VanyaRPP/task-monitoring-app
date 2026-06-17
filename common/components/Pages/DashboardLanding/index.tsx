@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { Modal, Button, Typography, Space } from 'antd'
+import AddPaymentModal from '@components/AddPaymentModal'
 import ScrollFactoryAnimation from '@components/ScrollFactoryAnimation'
 import { Header } from '@components/Layouts/Header'
 import { Footer } from '@components/Layouts/Footer'
@@ -29,6 +30,9 @@ const DashboardLanding = () => {
   })
   const [welcomeOpen, setWelcomeOpen] = useState(false)
   const [domainModalOpen, setDomainModalOpen] = useState(false)
+  const [invoicePromptOpen, setInvoicePromptOpen] = useState(false)
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false)
+  const [createdDomainId, setCreatedDomainId] = useState<string>()
 
   useEffect(() => {
     if (!fullUser) return
@@ -47,12 +51,25 @@ const DashboardLanding = () => {
     setDomainModalOpen(true)
   }
 
-  const handleDomainModalClose = () => {
+  const handleDomainModalClose = (createdDomain?: IExtendedDomain) => {
     setDomainModalOpen(false)
     // Creating a domain adds the user to its adminEmails, which promotes them
     // to DomainAdmin on the next getCurrentUser call. Refresh the user so the
     // new role (and the data-driven modal visibility) updates without a reload.
     dispatch(userApi.util.invalidateTags(['User']))
+    if (createdDomain?._id) {
+      setCreatedDomainId(createdDomain._id)
+      setInvoicePromptOpen(true)
+    }
+  }
+
+  const handleStartFirstInvoice = () => {
+    setInvoicePromptOpen(false)
+    setPaymentModalOpen(true)
+  }
+
+  const handlePaymentModalClose = () => {
+    setPaymentModalOpen(false)
   }
 
   return (
@@ -137,6 +154,36 @@ const DashboardLanding = () => {
           currentDomain={null as unknown as IExtendedDomain}
           editable
           closeModal={handleDomainModalClose}
+        />
+      )}
+
+      <Modal
+        open={invoicePromptOpen}
+        centered
+        width={420}
+        onCancel={() => setInvoicePromptOpen(false)}
+        footer={[
+          <Button key="later" onClick={() => setInvoicePromptOpen(false)}>
+            Пізніше
+          </Button>,
+          <Button key="yes" type="primary" onClick={handleStartFirstInvoice}>
+            Так
+          </Button>,
+        ]}
+      >
+        <Space direction="vertical" size="small" style={{ width: '100%' }}>
+          <Title level={4} style={{ marginBottom: 0 }}>
+            Надавача послуг створено!
+          </Title>
+          <Text type="secondary">Створити перший рахунок?</Text>
+        </Space>
+      </Modal>
+
+      {paymentModalOpen && (
+        <AddPaymentModal
+          paymentActions={{ edit: false, preview: false }}
+          preselectedDomain={createdDomainId}
+          closeModal={handlePaymentModalClose}
         />
       )}
     </div>
