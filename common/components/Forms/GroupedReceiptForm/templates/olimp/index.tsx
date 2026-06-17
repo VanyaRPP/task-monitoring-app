@@ -191,7 +191,7 @@ const OlimpTemplate: FC<TemplateProps> = ({
           </div>
         </div>
       </div>
-
+      <div className={s.tableWrapper}>
       <table className={s.invoiceTable}>
         <thead>
           <tr>
@@ -238,6 +238,7 @@ const OlimpTemplate: FC<TemplateProps> = ({
           })}
         </tbody>
       </table>
+      </div>
 
       <div className={s.summarySection}>
         <div className={s.invoiceDates}>

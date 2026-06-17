@@ -155,11 +155,16 @@
   }
 }
 
+.tableWrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
 .invoiceTable {
   width: 100%;
   border-collapse: collapse;
   margin-top: 0.6rem;
-  table-layout: fixed;
+  table-layout: auto;
 
   th,
   td {
@@ -197,7 +202,7 @@
 }
 
 .totalsBlock {
-  width: 360px;
+  min-width: 160px;
   max-width: 100%;
 }
 
