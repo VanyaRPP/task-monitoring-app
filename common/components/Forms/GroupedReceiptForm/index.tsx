@@ -15,11 +15,18 @@ import {
   RightOutlined,
   CheckOutlined,
   TableOutlined,
+  MailOutlined,
 } from '@ant-design/icons'
 import { Dropdown, Form, Tooltip, message, MenuProps } from 'antd'
+import { useTranslation } from 'react-i18next'
 import s from './style.module.scss'
 import { templateMap } from './templateMap'
 import InvoiceLanguageSelector from './InvoiceLanguageSelector'
+import {
+  useSendPaymentEmailMutation,
+  useUpdatePaymentStatusMutation,
+} from '@common/api/paymentApi/payment.api'
+import { PaymentStatus } from '@common/api/paymentApi/payment.api.types'
 
 const templateItems = [
   { key: 'classic', label: 'Класичний шаблон' },
@@ -39,6 +46,7 @@ const GroupedReceiptForm: FC<Props> = ({
   paymentData,
   paymentActions: _paymentActions,
 }) => {
+  const { t } = useTranslation('common')
   const {
     form,
     template,
@@ -51,6 +59,8 @@ const GroupedReceiptForm: FC<Props> = ({
     setInvoiceLang,
   } = usePaymentContext()
   const [editPayment] = useEditPaymentMutation()
+  const [sendPaymentEmail] = useSendPaymentEmailMutation()
+  const [updatePaymentStatus] = useUpdatePaymentStatusMutation()
   const invoiceCurrency = useInvoiceCurrency()
   const liveInvoice = Form.useWatch('invoice', form)
   const rawData = currPayment ?? paymentData ?? null
@@ -151,6 +161,31 @@ const GroupedReceiptForm: FC<Props> = ({
     const result = await editPayment({ _id: data._id, invoiceLang: lang })
     if ('error' in result) {
       message.error('Помилка збереження мови')
+    }
+  }
+
+  const paymentStatus =
+    data?.status === PaymentStatus.Sent ? PaymentStatus.Sent : PaymentStatus.Draft
+  const isSent = paymentStatus === PaymentStatus.Sent
+
+  const handleSendEmail = async () => {
+    if (!data?._id || isSent) return
+
+    try {
+      const response = await sendPaymentEmail(data._id).unwrap()
+      if (!response?.success) {
+        message.error(t('payments.messages.sendFailed'))
+        return
+      }
+
+      await updatePaymentStatus({
+        _id: data._id,
+        status: PaymentStatus.Sent,
+      }).unwrap()
+
+      message.success(t('payments.messages.sendSuccess'))
+    } catch {
+      message.error(t('payments.messages.sendFailed'))
     }
   }
 
@@ -271,6 +306,25 @@ const GroupedReceiptForm: FC<Props> = ({
           <LayoutOutlined className={s.edit} />
         </Tooltip>
       </Dropdown>
+
+      <Tooltip
+        title={
+          isSent
+            ? t('payments.tooltips.alreadySent')
+            : t('payments.tooltips.sendEmail')
+        }
+      >
+        <MailOutlined
+          className={s.mail}
+          onClick={handleSendEmail}
+          style={{
+            color: isSent ? 'var(--ant-color-text-disabled)' : 'var(--ant-color-success)',
+            cursor: isSent ? 'not-allowed' : 'pointer',
+          }}
+          aria-disabled={isSent}
+        />
+      </Tooltip>
+
       <Tooltip title="Показувати кількість і ціну в таблиці перегляду">
         <TableOutlined
           role="button"

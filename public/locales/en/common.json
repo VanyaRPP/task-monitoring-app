@@ -7,7 +7,8 @@
       "sent": "Sent"
     },
     "tooltips": {
-      "alreadySent": "This payment has already been sent to the recipient"
+      "alreadySent": "This payment has already been sent to the recipient",
+      "sendEmail": "Send payment email"
     },
     "messages": {
       "sendFailed": "Failed to send the payment email",

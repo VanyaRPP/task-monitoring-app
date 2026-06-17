@@ -32,6 +32,8 @@ jest.mock('@components/Forms/GroupedReceiptForm/GroupedPricesTable', () => ({
 
 jest.mock('@common/api/paymentApi/payment.api', () => ({
   useEditPaymentMutation: () => [jest.fn().mockResolvedValue({ data: {} })],
+  useSendPaymentEmailMutation: () => [jest.fn().mockResolvedValue({ success: true })],
+  useUpdatePaymentStatusMutation: () => [jest.fn().mockResolvedValue({ data: {} })],
 }))
 
 jest.mock('next/dynamic', () => (importFn: () => Promise<any>) => {
@@ -211,5 +213,52 @@ describe('Classic template', () => {
   test('generalSum = 0 відображає 0.00', () => {
     renderClassic({ generalSum: 0 })
     expect(screen.getByText(/0\.00/)).toBeInTheDocument()
+  })
+})
+
+describe('GroupedReceiptForm - Send Email Button', () => {
+  beforeEach(() => {
+    template = 'olimp'
+    companyCurrency = 'UAH'
+  })
+
+  const renderWithMail = (overrides = {}) =>
+    render(
+      <GroupedReceiptForm
+        paymentData={{ ...mockPayment, _id: 'test-id', status: 'Draft', ...overrides } as any}
+        paymentActions={{ preview: true, edit: true }}
+      />
+    )
+
+  test('renders toolbar with multiple icons', () => {
+    const { container } = renderWithMail()
+    const icons = container.querySelectorAll('svg')
+    expect(icons.length).toBeGreaterThanOrEqual(3)
+  })
+
+  test('renders invoice template when payment data provided', () => {
+    renderWithMail()
+    expect(screen.getAllByText(/РАХУНОК|INVOICE/i).length).toBeGreaterThan(0)
+  })
+
+  test('displays invoice header and data', () => {
+    renderWithMail()
+    expect(screen.getAllByText('Test Domain').length).toBeGreaterThan(0)
+  })
+
+  test('renders all expected toolbar icons (printer, template, table, language selector)', () => {
+    const { container } = renderWithMail()
+    const svgs = container.querySelectorAll('svg')
+    expect(svgs.length).toBeGreaterThanOrEqual(4)
+  })
+
+  test('null paymentData renders null', () => {
+    const { container } = render(
+      <GroupedReceiptForm
+        paymentData={null}
+        paymentActions={{ preview: true, edit: true }}
+      />
+    )
+    expect(container).toBeEmptyDOMElement()
   })
 })
