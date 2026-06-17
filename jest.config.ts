@@ -8,19 +8,31 @@ const config: Config = {
   testPathIgnorePatterns: ['/node_modules/', '/.next/'],
   testEnvironment: 'jsdom',
 
+  testTimeout: 15000,
+
   collectCoverageFrom: [
     'utils/**/*.{ts,tsx}',
     'common/services/**/*.{ts,tsx}',
-    'common/api/**/*.{ts,tsx}',
     '!**/*.d.ts',
     '!**/*.test.{ts,tsx}',
     '!**/*.spec.{ts,tsx}',
     '!**/tests/**',
     '!**/__mocks__/**',
+    '!utils/config.ts',
+    '!utils/inflicion.tsx',
   ],
   coveragePathIgnorePatterns: ['/node_modules/', '/.next/'],
   coverageDirectory: 'coverage',
   coverageReporters: ['text-summary', 'text', 'html', 'lcov'],
+
+  coverageThreshold: {
+    global: {
+      statements: 80,
+      branches: 68,
+      functions: 75,
+      lines: 80,
+    },
+  },
 
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
 

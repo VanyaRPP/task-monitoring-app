@@ -182,22 +182,19 @@
     padding-bottom: 0.9rem;
   }
 
-  th:nth-child(2),
-  td:nth-child(2) {
+  .colRate {
     width: 12%;
     text-align: right;
     white-space: nowrap;
   }
 
-  th:nth-child(3),
-  td:nth-child(3) {
+  .colQty {
     width: 10%;
     text-align: right;
     white-space: nowrap;
   }
 
-  th:nth-child(4),
-  td:nth-child(4) {
+  .colTotal {
     width: 18%;
     text-align: right;
     white-space: nowrap;

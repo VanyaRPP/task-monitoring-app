@@ -105,7 +105,8 @@ describe('Domains API - GET', () => {
   })
 
   it('load domains as User - success', async () => {
-    await mockLoginAs(users.user)
+    // user2 administers no domain, so a plain User sees an empty list.
+    await mockLoginAs(users.user2)
 
     const mockReq = {
       method: 'GET',

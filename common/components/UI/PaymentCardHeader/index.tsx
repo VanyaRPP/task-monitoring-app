@@ -12,6 +12,7 @@ import {
   MenuOutlined,
   ImportOutlined,
   MoreOutlined,
+  ReloadOutlined,
 } from '@ant-design/icons'
 import { dateToDefaultFormat } from '@assets/features/formatDate'
 import {
@@ -58,7 +59,6 @@ import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { useGetCustomServicesQuery } from '@common/api/customServicesApi/customServices.api'
 import {
   ICustomServiceItem,
-  extractDomainsFromRealEstates,
   getVisibleServices,
 } from '@utils/servicesVisibility'
 
@@ -85,6 +85,8 @@ export interface PaymentCardHeaderProps {
   isDashboard?: boolean
   onBulkMarkPaid?: (payments: IExtendedPayment[]) => void
   onBulkDuplicate?: (payments: IExtendedPayment[]) => void
+  onRefresh?: () => void | Promise<unknown>
+  isRefreshing?: boolean
 }
 
 const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
@@ -110,6 +112,8 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
   onDeleteClick,
   onBulkMarkPaid,
   onBulkDuplicate,
+  onRefresh,
+  isRefreshing,
 }) => {
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -226,7 +230,20 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
     setBulkPaymentsToRender(selectedPayments as IExtendedPayment[])
   }
 
+  const handleRefresh = async () => {
+    if (!onRefresh) return
+    const key = 'payments-refresh'
+    message.loading({ content: 'Оновлення даних...', key })
+    try {
+      await onRefresh()
+      message.success({ content: 'Дані оновлено', key })
+    } catch {
+      message.error({ content: 'Не вдалося оновити дані', key })
+    }
+  }
+
   const menuActions: Record<string, () => void> = {
+    refresh: handleRefresh,
     export: handleExportExcel,
     import: () => setIsImportModalOpen(true),
     invoices: () => router.push(AppRoutes.PAYMENT_BULK),
@@ -274,24 +291,26 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
     payments.data.forEach((payment: IExtendedPayment) => {
       payment.invoice?.forEach((field) => {
         if (field.type) types.add(field.type)
+        if (field.serviceId) types.add(String(field.serviceId))
       })
     })
     return types
   }, [payments])
 
-  const visibleDomains = useMemo(
-    () =>
-      extractDomainsFromRealEstates(
-        payments?.data?.map((p) => ({ domain: p.domain })) ?? []
-      ),
-    [payments?.data]
-  )
-
-  const visibleCustomServices = useMemo(
-    () =>
-      getVisibleServices(currUser?.roles, visibleDomains, allCustomServices),
-    [currUser?.roles, visibleDomains, allCustomServices]
-  )
+  const selectedDomainId = useMemo(
+  () => filters?.domain?.[0] ?? null,
+  [filters?.domain]
+)
+const { data: domainCustomServicesData } = useGetCustomServicesQuery(
+  { domainId: selectedDomainId },
+  { skip: !selectedDomainId }
+)
+const visibleCustomServices = useMemo(() => {
+  if (!selectedDomainId) {
+    return isGlobalAdmin ? allCustomServices : []
+  }
+  return (domainCustomServicesData?.data ?? []) as ICustomServiceItem[]
+}, [isGlobalAdmin, selectedDomainId, domainCustomServicesData, allCustomServices])
 
   const { preview, edit } = paymentActions
 
@@ -331,6 +350,15 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
             label: infoTooltip,
             icon: <InfoCircleOutlined />,
             disabled: true,
+          },
+        ]
+      : []),
+    ...(isAdmin
+      ? [
+          {
+            key: 'refresh',
+            label: 'Оновити',
+            icon: <ReloadOutlined spin={isRefreshing} />,
           },
         ]
       : []),
@@ -386,6 +414,11 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
   ]
 
   const dashboardItems: MenuProps['items'] = [
+    {
+      key: 'refresh',
+      label: 'Оновити',
+      icon: <ReloadOutlined spin={isRefreshing} />,
+    },
     { key: 'import', label: 'Імпорт', icon: <ImportOutlined /> },
     { key: 'invoices', label: 'Інвойси', icon: <SelectOutlined /> },
     { key: 'add', label: 'Додати', icon: <PlusOutlined /> },
@@ -589,13 +622,17 @@ const ColumnSelect: React.FC<ColumnSelectProps> = ({
   useEffect(() => {
     if (!allowedServices || !filterByAvailable) return
 
-    const allAvailable = Object.entries(ServiceName)
-      .filter(([value]) => allowedServices.has(value))
+    const builtIn = Object.entries(ServiceName)
+      .filter(([value]) => value !== 'custom' && allowedServices.has(value))
       .map(([value]) => value)
+    const customs = (visibleCustomServices ?? [])
+      .map((s) => String(s._id))
+      .filter((id) => allowedServices.has(id))
+    const allAvailable = [...builtIn, ...customs]
 
     setSelected(allAvailable)
     localStorage.setItem('payments_columns', JSON.stringify(allAvailable))
-  }, [allowedServices, filterByAvailable])
+  }, [allowedServices, filterByAvailable, visibleCustomServices])
 
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem('payments_columns') ?? '[]')
@@ -613,13 +650,17 @@ const ColumnSelect: React.FC<ColumnSelectProps> = ({
 
     if (saved.length > 0) return
 
-    const allAvailable = Object.entries(ServiceName)
-      .filter(([value]) => allowedServices.has(value))
+    const builtIn = Object.entries(ServiceName)
+      .filter(([value]) => value !== 'custom' && allowedServices.has(value))
       .map(([value]) => value)
+    const customs = (visibleCustomServices ?? [])
+      .map((s) => String(s._id))
+      .filter((id) => allowedServices.has(id))
+    const allAvailable = [...builtIn, ...customs]
 
     setSelected(allAvailable)
     localStorage.setItem('payments_columns', JSON.stringify(allAvailable))
-  }, [allowedServices, filterByAvailable])
+  }, [allowedServices, filterByAvailable, visibleCustomServices])
 
   useEffect(() => {
     onSelect?.(selected)
