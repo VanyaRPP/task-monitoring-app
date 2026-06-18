@@ -12,6 +12,7 @@ import {
   userApi,
 } from '@common/api/userApi/user.api'
 import { useAppDispatch } from '@modules/store/hooks'
+import { useRouter } from 'next/router'
 import { Roles } from '@utils/constants'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 import DomainModal from '@components/UI/DomainsComponents/DomainModal'
@@ -21,6 +22,7 @@ const { Title, Text } = Typography
 
 const DashboardLanding = () => {
   const dispatch = useAppDispatch()
+  const router = useRouter()
   const { data: user } = useGetCurrentUserQuery()
   // The by-id endpoint returns adminDomains/adminCompanies, which lets us
   // decide modal visibility from what the user owns (data-driven) instead of a
@@ -67,9 +69,15 @@ const DashboardLanding = () => {
     setInvoicePromptOpen(false)
     setPaymentModalOpen(true)
   }
+  
+  const handleDeclineFirstInvoice = () => {
+    setInvoicePromptOpen(false)
+    router.reload()
+  }
 
   const handlePaymentModalClose = () => {
     setPaymentModalOpen(false)
+    router.reload()
   }
 
   return (
@@ -161,9 +169,9 @@ const DashboardLanding = () => {
         open={invoicePromptOpen}
         centered
         width={420}
-        onCancel={() => setInvoicePromptOpen(false)}
+        onCancel={handleDeclineFirstInvoice}
         footer={[
-          <Button key="later" onClick={() => setInvoicePromptOpen(false)}>
+          <Button key="later" onClick={handleDeclineFirstInvoice}>
             Пізніше
           </Button>,
           <Button key="yes" type="primary" onClick={handleStartFirstInvoice}>

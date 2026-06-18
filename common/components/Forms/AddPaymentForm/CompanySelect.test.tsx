@@ -23,9 +23,9 @@ jest.mock('@components/UI/RealEstateComponents/RealEstateModal', () => ({
 const mockedQuery = useGetAllRealEstateQuery as jest.Mock
 
 const Wrapper = ({
-  initialValues = { domain: 'd1', street: 's1', monthService: 'm1' },
+  initialValues = { domain: 'd1', street: 's1' },
 }: {
-  initialValues?: { domain?: string; street?: string; monthService?: string }
+  initialValues?: { domain?: string; street?: string }
 }) => {
   const [form] = Form.useForm()
   return (
@@ -36,37 +36,46 @@ const Wrapper = ({
       <Form.Item name="street" hidden>
         <Input />
       </Form.Item>
-      <Form.Item name="monthService" hidden>
-        <Input />
-      </Form.Item>
       <CompanySelect form={form} />
     </Form>
   )
 }
 
+const openCompanyDropdown = () =>
+  fireEvent.mouseDown(screen.getByRole('combobox'))
+
 describe('CompanySelect — поле вибору компанії', () => {
   afterEach(() => jest.clearAllMocks())
 
-  it('показує «Немає компанії? Створити», коли для вибору немає жодної компанії', () => {
+  it('показує «Немає компанії? Створити» у дропдауні, коли компаній немає', () => {
     mockedQuery.mockReturnValue({ data: { data: [] }, isLoading: false })
 
     render(<Wrapper />)
+    openCompanyDropdown()
 
     expect(screen.getByText('Немає компанії? Створити')).toBeInTheDocument()
   })
 
-  it('показує кнопку створення, коли обрано домен і адресу, навіть без місяця', () => {
-    mockedQuery.mockReturnValue({ data: { data: [] }, isLoading: false })
+  it('показує «Створити компанію», коли компанія вже існує', () => {
+    mockedQuery.mockReturnValue({
+      data: { data: [{ _id: 'c1', companyName: 'Acme' }] },
+      isLoading: false,
+    })
 
-    render(<Wrapper initialValues={{ domain: 'd1', street: 's1' }} />)
+    render(<Wrapper />)
+    openCompanyDropdown()
 
-    expect(screen.getByText('Немає компанії? Створити')).toBeInTheDocument()
+    expect(screen.getByText('Створити компанію')).toBeInTheDocument()
+    expect(
+      screen.queryByText('Немає компанії? Створити')
+    ).not.toBeInTheDocument()
   })
 
-  it('показує кнопку створення лише з доменом (адреса необовʼязкова)', () => {
+  it('кнопка створення доступна навіть без обраної адреси', () => {
     mockedQuery.mockReturnValue({ data: { data: [] }, isLoading: false })
 
     render(<Wrapper initialValues={{ domain: 'd1' }} />)
+    openCompanyDropdown()
 
     expect(screen.getByText('Немає компанії? Створити')).toBeInTheDocument()
   })
@@ -75,6 +84,7 @@ describe('CompanySelect — поле вибору компанії', () => {
     mockedQuery.mockReturnValue({ data: { data: [] }, isLoading: false })
 
     render(<Wrapper />)
+    openCompanyDropdown()
 
     expect(screen.queryByTestId('real-estate-modal')).not.toBeInTheDocument()
 
@@ -84,26 +94,13 @@ describe('CompanySelect — поле вибору компанії', () => {
     expect(modal).toHaveTextContent('modal:d1:s1')
   })
 
-  it('ховає кнопку створення, поки компанії завантажуються', () => {
-    mockedQuery.mockReturnValue({ data: { data: [] }, isLoading: true })
+  it('показує заглушку, коли надавача послуг ще не обрано', () => {
+    mockedQuery.mockReturnValue({ data: { data: [] }, isLoading: false })
 
-    render(<Wrapper />)
-
-    expect(
-      screen.queryByText('Немає компанії? Створити')
-    ).not.toBeInTheDocument()
-  })
-
-  it('не показує кнопку створення, коли компанія вже існує', () => {
-    mockedQuery.mockReturnValue({
-      data: { data: [{ _id: 'c1', companyName: 'Acme' }] },
-      isLoading: false,
-    })
-
-    render(<Wrapper />)
+    render(<Wrapper initialValues={{}} />)
 
     expect(
-      screen.queryByText('Немає компанії? Створити')
-    ).not.toBeInTheDocument()
+      screen.getByText('Спершу оберіть надавача послуг')
+    ).toBeInTheDocument()
   })
 })

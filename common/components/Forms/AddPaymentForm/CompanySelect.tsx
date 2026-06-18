@@ -3,7 +3,7 @@ import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.a
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import RealEstateModal from '@components/UI/RealEstateComponents/RealEstateModal'
 import { PlusOutlined } from '@ant-design/icons'
-import { Button, Form, Select } from 'antd'
+import { Button, Divider, Form, Select } from 'antd'
 import { FormInstance } from 'antd/es/form/Form'
 import { useEffect, useMemo, useState } from 'react'
 
@@ -16,15 +16,12 @@ interface Props {
 export default function CompanySelect({ form, edit, company }: Props) {
   const domainId = Form.useWatch('domain', form)
   const streetId = Form.useWatch('street', form)
-  const month = Form.useWatch('monthService', form)
 
-  const canResolveCompany = !!domainId
-  const isSelectDisabled = !domainId || !month
 
-  if (!canResolveCompany) {
+  if (!domainId) {
     return (
       <Form.Item label="Компанія">
-        <Select placeholder="Оберіть надавача послуг та адресу" disabled />
+        <Select placeholder="Спершу оберіть надавача послуг" disabled />
       </Form.Item>
     )
   }
@@ -36,7 +33,6 @@ export default function CompanySelect({ form, edit, company }: Props) {
       form={form}
       edit={edit}
       company={company}
-      selectDisabled={isSelectDisabled}
     />
   )
 }
@@ -47,7 +43,6 @@ interface RealEstateDataFetcherProps {
   form: FormInstance
   edit?: boolean
   company?: string | Partial<IRealestate>
-  selectDisabled: boolean
 }
 
 function RealEstateDataFetcher({
@@ -56,7 +51,6 @@ function RealEstateDataFetcher({
   form,
   edit,
   company,
-  selectDisabled,
 }: RealEstateDataFetcherProps) {
   const { data, isLoading, refetch } = useGetAllRealEstateQuery({
     domainId,
@@ -69,9 +63,9 @@ function RealEstateDataFetcher({
 
   useEffect(() => {
     if (!edit) {
-      if (companies?.length === 1) {
+      if (companies.length === 1) {
         form.setFieldValue('company', companies[0]._id)
-      } else if (companies?.length > 0 && company) {
+      } else if (companies.length > 0 && company) {
         const companyId = typeof company === 'object' ? company._id : company
         if (form.getFieldValue('company') !== companyId) {
           form.setFieldValue('company', companyId)
@@ -80,15 +74,12 @@ function RealEstateDataFetcher({
     }
   }, [companies, company, edit, form])
 
-  const showCreateCompany = !isLoading && companies.length === 0
+  const createCompanyLabel =
+    companies.length === 0 ? 'Немає компанії? Створити' : 'Створити компанію'
 
   return (
     <>
-      {selectDisabled ? (
-        <Form.Item label="Компанія">
-          <Select placeholder="Оберіть надавача послуг та адресу" disabled />
-        </Form.Item>
-      ) : (
+      
         <Form.Item
           name="company"
           label="Компанія"
@@ -96,7 +87,6 @@ function RealEstateDataFetcher({
         >
           <Select
             filterSort={(optionA, optionB) =>
-              // TODO: invistagate ts-ignore issue
               (optionA?.label ?? '')
                 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                 // @ts-ignore
@@ -105,37 +95,35 @@ function RealEstateDataFetcher({
                 // @ts-ignore
                 .localeCompare((optionB?.label ?? '').toLowerCase())
             }
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-
             filterOption={(input, option) =>
               (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
             }
-            options={companies?.map((i) => ({
+            options={companies.map((i) => ({
               value: i._id,
               label: i.companyName,
             }))}
-            optionFilterProp="children"
-            placeholder="Пошук адреси"
-            disabled={companies?.length === 1 || isLoading}
+            optionFilterProp="label"
+            placeholder="Пошук компанії"
             loading={isLoading}
             showSearch
-          />
-        </Form.Item>
-      )}
-
-      {showCreateCompany && (
-        <Button
-          color="purple"
-          variant="outlined"
-          block
-          icon={<PlusOutlined />}
-          style={{ marginTop: 8, marginBottom: 8 }}
-          onClick={() => setIsCompanyModalOpen(true)}
-        >
-          Немає компанії? Створити
-        </Button>
-      )}
+            popupRender={(menu) => (
+              <>
+                {menu}
+              <Divider style={{ margin: '8px 0' }} />
+              <Button
+                type="text"
+                block
+                icon={<PlusOutlined />}
+                style={{ textAlign: 'left' }}
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => setIsCompanyModalOpen(true)}
+              >
+                {createCompanyLabel}
+              </Button>
+            </>
+          )}
+        />
+      </Form.Item>
 
       {isCompanyModalOpen && (
         <RealEstateModal
