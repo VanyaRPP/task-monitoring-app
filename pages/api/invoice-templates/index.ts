@@ -31,8 +31,14 @@ async function invoiceTemplatesHandler(
     }
 
     case 'POST': {
-      const { name, baseTemplateKey, providerDescription, receiverDescription, domainId } =
-        req.body ?? {}
+      const {
+        name,
+        baseTemplateKey,
+        providerDescription,
+        receiverDescription,
+        overrides,
+        domainId,
+      } = req.body ?? {}
 
       if (!name?.trim()) {
         return res
@@ -50,6 +56,7 @@ async function invoiceTemplatesHandler(
         baseTemplateKey: String(baseTemplateKey || 'classic').trim(),
         providerDescription: String(providerDescription || ''),
         receiverDescription: String(receiverDescription || ''),
+        ...(overrides !== undefined ? { overrides } : {}),
         domainId: new mongoose.Types.ObjectId(domainId),
         isBuiltIn: false,
         createdBy: user._id,

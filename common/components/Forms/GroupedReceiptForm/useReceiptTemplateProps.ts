@@ -1,3 +1,4 @@
+import { IInvoiceTemplateOverrides } from '@common/api/invoiceTemplateApi/invoiceTemplate.api.types'
 import { Currency } from '@utils/constants'
 import { getCurrencyShortLabel, normalizeCurrency } from '@utils/helpers'
 import dayjs from 'dayjs'
@@ -10,6 +11,7 @@ interface ReceiptTemplatePropsInput {
     providerDescription?: string
     receiverDescription?: string
   }
+  overrides?: IInvoiceTemplateOverrides
 }
 
 export interface ReceiptTemplateProps {
@@ -32,9 +34,7 @@ export interface ReceiptTemplateProps {
   overrides?: TemplateOverrides
 }
 
-export interface TemplateOverrides {
-  [key: string]: unknown
-}
+export type TemplateOverrides = IInvoiceTemplateOverrides
 
 const bankDetailsTriggerRegex =
   /(account details|usd account details|iban|swift|bic|bank name|bank address|bank name and address|рахунок|банк|мфо)/i
@@ -50,6 +50,7 @@ export function useReceiptTemplateProps({
   contextCompany,
   lang,
   descriptionOverrides,
+  overrides,
 }: ReceiptTemplatePropsInput): ReceiptTemplateProps {
   const currency =
     data?.currency ||
@@ -204,6 +205,6 @@ export function useReceiptTemplateProps({
     paymentInfoLines,
     issuedToLines,
     normalizedBankDetailsLines,
-    overrides: undefined,
+    overrides,
   }
 }

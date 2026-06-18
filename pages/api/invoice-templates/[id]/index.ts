@@ -20,8 +20,13 @@ async function invoiceTemplateByIdHandler(
 
   switch (req.method) {
     case 'PATCH': {
-      const { name, providerDescription, receiverDescription, baseTemplateKey } =
-        req.body ?? {}
+      const {
+        name,
+        providerDescription,
+        receiverDescription,
+        overrides,
+        baseTemplateKey,
+      } = req.body ?? {}
 
       const update: Record<string, unknown> = {}
       if (name !== undefined) update.name = String(name).trim()
@@ -29,6 +34,7 @@ async function invoiceTemplateByIdHandler(
         update.providerDescription = String(providerDescription)
       if (receiverDescription !== undefined)
         update.receiverDescription = String(receiverDescription)
+      if (overrides !== undefined) update.overrides = overrides
       if (baseTemplateKey !== undefined)
         update.baseTemplateKey = String(baseTemplateKey)
 

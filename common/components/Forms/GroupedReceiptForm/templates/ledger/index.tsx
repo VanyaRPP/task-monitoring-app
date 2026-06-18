@@ -5,6 +5,7 @@ import {
   getBillFromHeadingAndBodyLines,
   getIssuedToHeadingAndBodyLines,
 } from '../invoice-party-headings'
+import { getLabel, resolveTemplateChrome } from '../applyTemplateOverrides'
 import EditableText from '../../EditableText'
 import lg from './ledger.module.scss'
 
@@ -24,16 +25,18 @@ const LedgerTemplate: FC<TemplateProps> = ({
   paymentInfoLines,
   issuedToLines,
   normalizedBankDetailsLines,
-  editMode,
-  rawProviderDesc,
-  rawReceiverDesc,
-  onProviderDescChange,
-  onReceiverDescChange,
+  overrides,
 }) => {
   const { heading: paymentHeading, bodyLines: paymentBodyLines } =
     getBillFromHeadingAndBodyLines(data, paymentInfoLines)
   const { heading: issuedHeading, bodyLines: issuedBodyLines } =
     getIssuedToHeadingAndBodyLines(data, issuedToLines, domainName)
+  const { accentColor, invoiceTitle, footerText } = resolveTemplateChrome(
+    overrides,
+    isEnglish
+  )
+  const L = (key: string, def: string) =>
+    getLabel(overrides, key, def, isEnglish)
 
   return (
     <div
@@ -49,8 +52,14 @@ const LedgerTemplate: FC<TemplateProps> = ({
           <div className={lg.lgBrandSub}>Digital Services</div>
         </div>
         <div className={lg.lgInvoiceTitle}>
-          <div className={lg.lgDocType}>
-            {isEnglish ? 'Invoice' : 'Рахунок'}
+          <div
+            className={lg.lgDocType}
+            style={accentColor ? { color: accentColor } : undefined}
+          >
+            <EditableText
+              valuePath="invoiceTitle"
+              defaultValue={invoiceTitle ?? (isEnglish ? 'Invoice' : 'Рахунок')}
+            />
           </div>
           <div className={lg.lgInvoiceNumber}>№ {modernInvoiceNumber}</div>
         </div>
@@ -90,88 +99,94 @@ const LedgerTemplate: FC<TemplateProps> = ({
       <div className={lg.lgParties}>
         <div className={lg.lgPartyBox}>
           <div className={lg.lgPartyHeader}>
-            {isEnglish ? 'Provider (Contractor)' : 'Підрядник'}
+            <EditableText
+              fieldKey="provider.header"
+              defaultValue={L(
+                'provider.header',
+                isEnglish ? 'Provider (Contractor)' : 'Підрядник'
+              )}
+            />
           </div>
           <div className={lg.lgPartyBody}>
             <EditableText
-              editMode={!!editMode}
-              rawText={rawReceiverDesc ?? ''}
-              onChange={onReceiverDescChange ?? (() => {})}
-              rows={6}
+              valuePath="receiverDescription"
+              multiline
+              defaultValue={data?.reciever?.description ?? ''}
             >
-              <>
-                {!!paymentHeading && (
-                  <div className={lg.lgPartyName}>{paymentHeading}</div>
-                )}
-                {paymentBodyLines.map((line: string, idx: number) => (
-                  <div
-                    key={`pi-${idx}`}
-                    className={
-                      !paymentHeading && idx === 0
-                        ? lg.lgPartyName
-                        : lg.lgPartyLine
-                    }
-                  >
-                    {line}
-                  </div>
-                ))}
-                {!!normalizedBankDetailsLines.length && (
-                  <div className={lg.lgBankSection}>
-                    {normalizedBankDetailsLines.map(
-                      (line: string, idx: number) => {
-                        const sep = line.indexOf(':')
-                        if (sep < 0) {
-                          return (
-                            <div className={lg.lgBankLine} key={`bk-${idx}`}>
-                              {line}
-                            </div>
-                          )
-                        }
+              {!!paymentHeading && (
+                <div className={lg.lgPartyName}>{paymentHeading}</div>
+              )}
+              {paymentBodyLines.map((line: string, idx: number) => (
+                <div
+                  key={`pi-${idx}`}
+                  className={
+                    !paymentHeading && idx === 0
+                      ? lg.lgPartyName
+                      : lg.lgPartyLine
+                  }
+                >
+                  {line}
+                </div>
+              ))}
+              {!!normalizedBankDetailsLines.length && (
+                <div className={lg.lgBankSection}>
+                  {normalizedBankDetailsLines.map(
+                    (line: string, idx: number) => {
+                      const sep = line.indexOf(':')
+                      if (sep < 0) {
                         return (
                           <div className={lg.lgBankLine} key={`bk-${idx}`}>
-                            <span className={lg.lgBankLineLabel}>
-                              {line.slice(0, sep + 1)}
-                            </span>
-                            {line.slice(sep + 1)}
+                            {line}
                           </div>
                         )
                       }
-                    )}
-                  </div>
-                )}
-              </>
+                      return (
+                        <div className={lg.lgBankLine} key={`bk-${idx}`}>
+                          <span className={lg.lgBankLineLabel}>
+                            {line.slice(0, sep + 1)}
+                          </span>
+                          {line.slice(sep + 1)}
+                        </div>
+                      )
+                    }
+                  )}
+                </div>
+              )}
             </EditableText>
           </div>
         </div>
 
         <div className={lg.lgPartyBox}>
           <div className={lg.lgPartyHeader}>
-            {isEnglish ? 'Customer (Recipient)' : 'Замовник'}
+            <EditableText
+              fieldKey="customer.header"
+              defaultValue={L(
+                'customer.header',
+                isEnglish ? 'Customer (Recipient)' : 'Замовник'
+              )}
+            />
           </div>
           <div className={lg.lgPartyBody}>
             <EditableText
-              editMode={!!editMode}
-              rawText={rawProviderDesc ?? ''}
-              onChange={onProviderDescChange ?? (() => {})}
-              rows={6}
+              valuePath="providerDescription"
+              multiline
+              defaultValue={data?.provider?.description ?? ''}
             >
-              <>
-                {!!issuedHeading && (
-                  <div className={lg.lgPartyName}>{issuedHeading}</div>
-                )}
-                {issuedBodyLines.map((line: string, idx: number) => (
-                  <div
-                    key={`it-${idx}`}
-                    className={
-                      !issuedHeading && idx === 0
-                        ? lg.lgPartyName
-                        : lg.lgPartyLine
-                    }
-                  >
-                    {line}
-                  </div>
-                ))}
-              </>
+              {!!issuedHeading && (
+                <div className={lg.lgPartyName}>{issuedHeading}</div>
+              )}
+              {issuedBodyLines.map((line: string, idx: number) => (
+                <div
+                  key={`it-${idx}`}
+                  className={
+                    !issuedHeading && idx === 0
+                      ? lg.lgPartyName
+                      : lg.lgPartyLine
+                  }
+                >
+                  {line}
+                </div>
+              ))}
             </EditableText>
           </div>
         </div>
@@ -181,10 +196,33 @@ const LedgerTemplate: FC<TemplateProps> = ({
         <table className={lg.lgTable}>
           <thead>
             <tr>
-              <th>{isEnglish ? 'Description' : 'Опис'}</th>
-              <th>{isEnglish ? 'Rate' : 'Ціна'}</th>
-              <th>{isEnglish ? 'Qty' : 'К-сть'}</th>
-              <th>{isEnglish ? 'Total' : 'Сума'}</th>
+              <th>
+                <EditableText
+                  fieldKey="col.description"
+                  defaultValue={L(
+                    'col.description',
+                    isEnglish ? 'Description' : 'Опис'
+                  )}
+                />
+              </th>
+              <th>
+                <EditableText
+                  fieldKey="col.rate"
+                  defaultValue={L('col.rate', isEnglish ? 'Rate' : 'Ціна')}
+                />
+              </th>
+              <th>
+                <EditableText
+                  fieldKey="col.qty"
+                  defaultValue={L('col.qty', isEnglish ? 'Qty' : 'К-сть')}
+                />
+              </th>
+              <th>
+                <EditableText
+                  fieldKey="col.total"
+                  defaultValue={L('col.total', isEnglish ? 'Total' : 'Сума')}
+                />
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -212,7 +250,12 @@ const LedgerTemplate: FC<TemplateProps> = ({
 
       <div className={lg.lgSummary}>
         <div className={lg.lgDates}>
-          <div className={lg.lgDatesHeader}>{isEnglish ? 'Dates' : 'Дати'}</div>
+          <div className={lg.lgDatesHeader}>
+            <EditableText
+              fieldKey="datesHeader"
+              defaultValue={L('datesHeader', isEnglish ? 'Dates' : 'Дати')}
+            />
+          </div>
           <div className={lg.lgDatesBody}>
             <div className={lg.lgDateRow}>
               <span>{isEnglish ? 'Issued' : 'Дата'}</span>
@@ -232,7 +275,13 @@ const LedgerTemplate: FC<TemplateProps> = ({
         </div>
         <div className={lg.lgTotalsBox}>
           <div className={lg.lgTotalsHeader}>
-            {isEnglish ? 'Summary' : 'Підсумок'}
+            <EditableText
+              fieldKey="summaryHeader"
+              defaultValue={L(
+                'summaryHeader',
+                isEnglish ? 'Summary' : 'Підсумок'
+              )}
+            />
           </div>
           <div className={lg.lgTotalsBody}>
             {taxPercent > 0 && (
@@ -252,7 +301,15 @@ const LedgerTemplate: FC<TemplateProps> = ({
               </>
             )}
             <div className={`${lg.lgTotalRow} ${lg.lgGrandTotal}`}>
-              <span>{isEnglish ? 'Total due' : 'До сплати'}</span>
+              <span>
+                <EditableText
+                  fieldKey="totalDue"
+                  defaultValue={L(
+                    'totalDue',
+                    isEnglish ? 'Total due' : 'До сплати'
+                  )}
+                />
+              </span>
               <strong>
                 {(+data?.generalSum || +data?.debit || total).toFixed(2)}&nbsp;
                 {currencyLabel}
@@ -264,7 +321,15 @@ const LedgerTemplate: FC<TemplateProps> = ({
 
       <div className={lg.lgFooter}>
         <div className={lg.lgFooterNote}>
-          {isEnglish ? 'Thank you for your business' : 'Дякуємо за співпрацю'}
+          <EditableText
+            valuePath="footerText"
+            defaultValue={
+              footerText ??
+              (isEnglish
+                ? 'Thank you for your business'
+                : 'Дякуємо за співпрацю')
+            }
+          />
         </div>
         <div className={lg.lgSignatureBlock}>
           <div className={lg.lgSignatureLine}>______________</div>

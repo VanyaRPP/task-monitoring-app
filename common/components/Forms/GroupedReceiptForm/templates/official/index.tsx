@@ -10,6 +10,9 @@ import {
   getDomainHeading,
   getRecipientCompanyHeading,
 } from '../invoice-party-headings'
+import { getLabel, resolveTemplateChrome } from '../applyTemplateOverrides'
+import EditableText from '../../EditableText'
+import { useInvoiceEditContext } from '../../InvoiceEditContext'
 import cl from './official.module.scss'
 
 const OfficialTemplate: FC<TemplateProps> = ({
@@ -27,9 +30,16 @@ const OfficialTemplate: FC<TemplateProps> = ({
   total,
   paymentInfoLines: _paymentInfoLines,
   issuedToLines: _issuedToLines,
+  overrides,
 }) => {
   const domainLabel = getDomainHeading(data, domainNameFromProps)
   const clientCompany = getRecipientCompanyHeading(data, companyLabelFromProps)
+  const { accentColor, invoiceTitle, footerText } = resolveTemplateChrome(
+    overrides,
+    true
+  )
+  const { editMode } = useInvoiceEditContext()
+  const L = (key: string, def: string) => getLabel(overrides, key, def, true)
 
   const serviceMonth = resolveServiceMonth(
     data?.monthService,
@@ -50,18 +60,36 @@ const OfficialTemplate: FC<TemplateProps> = ({
     >
       {/* ── Header ── */}
       <div className={cl.clHeader}>
-        <div className={cl.clTitle}>Invoice</div>
+        <div
+          className={cl.clTitle}
+          style={accentColor ? { color: accentColor } : undefined}
+        >
+          <EditableText
+            valuePath="invoiceTitle"
+            defaultValue={invoiceTitle ?? 'Invoice'}
+          />
+        </div>
 
         <div className={cl.clHeaderRight}>
           {!!domainLabel.trim() && (
             <div className={cl.clFromBlock}>
-              <span className={cl.clFromLabel}>From</span>
+              <span className={cl.clFromLabel}>
+                <EditableText
+                  fieldKey="from"
+                  defaultValue={L('from', 'From')}
+                />
+              </span>
               <div className={cl.clFromValue}>{domainLabel}</div>
             </div>
           )}
           {!!clientCompany && (
             <div className={cl.clToBlock}>
-              <span className={cl.clToLabel}>Invoice For</span>
+              <span className={cl.clToLabel}>
+                <EditableText
+                  fieldKey="invoiceFor"
+                  defaultValue={L('invoiceFor', 'Invoice For')}
+                />
+              </span>
               <div className={cl.clToValue}>{clientCompany}</div>
             </div>
           )}
@@ -95,10 +123,30 @@ const OfficialTemplate: FC<TemplateProps> = ({
         <table className={cl.clTable}>
           <thead>
             <tr>
-              <th>Description</th>
-              <th>Quantity</th>
-              <th>Unit Price</th>
-              <th>Amount</th>
+              <th>
+                <EditableText
+                  fieldKey="col.description"
+                  defaultValue={L('col.description', 'Description')}
+                />
+              </th>
+              <th>
+                <EditableText
+                  fieldKey="col.quantity"
+                  defaultValue={L('col.quantity', 'Quantity')}
+                />
+              </th>
+              <th>
+                <EditableText
+                  fieldKey="col.unitPrice"
+                  defaultValue={L('col.unitPrice', 'Unit Price')}
+                />
+              </th>
+              <th>
+                <EditableText
+                  fieldKey="col.amount"
+                  defaultValue={L('col.amount', 'Amount')}
+                />
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -141,7 +189,12 @@ const OfficialTemplate: FC<TemplateProps> = ({
             </>
           )}
           <div className={`${cl.clTotalRow} ${cl.clGrandTotal}`}>
-            <span>Total Due</span>
+            <span>
+              <EditableText
+                fieldKey="totalDue"
+                defaultValue={L('totalDue', 'Total Due')}
+              />
+            </span>
             <strong>
               {currencyLabel}&nbsp;
               {(+data?.generalSum || +data?.debit || total).toFixed(2)}
@@ -149,6 +202,16 @@ const OfficialTemplate: FC<TemplateProps> = ({
           </div>
         </div>
       </div>
+
+      {(!!footerText || editMode) && (
+        <div style={{ marginTop: '1.5em', whiteSpace: 'pre-wrap' }}>
+          <EditableText
+            valuePath="footerText"
+            multiline
+            defaultValue={footerText ?? ''}
+          />
+        </div>
+      )}
     </div>
   )
 }

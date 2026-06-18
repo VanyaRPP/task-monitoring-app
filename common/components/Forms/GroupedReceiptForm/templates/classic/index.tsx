@@ -9,7 +9,9 @@ import {
   getDomainHeading,
   getRecipientCompanyHeading,
 } from '../invoice-party-headings'
+import { getLabel, resolveTemplateChrome } from '../applyTemplateOverrides'
 import EditableText from '../../EditableText'
+import { useInvoiceEditContext } from '../../InvoiceEditContext'
 import cs from './style.module.scss'
 
 const ClassicTemplate: FC<TemplateProps> = ({
@@ -30,14 +32,17 @@ const ClassicTemplate: FC<TemplateProps> = ({
   paymentInfoLines: _paymentInfoLines,
   issuedToLines: _issuedToLines,
   normalizedBankDetailsLines: _normalizedBankDetailsLines,
-  editMode,
-  rawProviderDesc,
-  rawReceiverDesc,
-  onProviderDescChange,
-  onReceiverDescChange,
+  overrides,
 }) => {
   const providerDomainHeading = getDomainHeading(data, domainName)
   const recipientCompanyHeading = getRecipientCompanyHeading(data, companyLabel)
+  const { accentColor, invoiceTitle, footerText } = resolveTemplateChrome(
+    overrides,
+    isEnglish
+  )
+  const { editMode } = useInvoiceEditContext()
+  const L = (key: string, def: string) =>
+    getLabel(overrides, key, def, isEnglish)
 
   return (
     <div
@@ -53,13 +58,18 @@ const ClassicTemplate: FC<TemplateProps> = ({
     >
       <div className={cs.providerInfo}>
         <div className={cs.label}>
-          {isEnglish ? 'Provider' : 'Постачальник'}
+          <EditableText
+            fieldKey="provider.title"
+            defaultValue={L(
+              'provider.title',
+              isEnglish ? 'Provider' : 'Постачальник'
+            )}
+          />
         </div>
         <EditableText
-          editMode={!!editMode}
-          rawText={rawProviderDesc ?? data?.provider?.description?.trim() ?? ''}
-          onChange={onProviderDescChange ?? (() => {})}
-          rows={5}
+          valuePath="providerDescription"
+          multiline
+          defaultValue={data?.provider?.description?.trim() ?? ''}
         >
           <pre className={cs.preLabel}>
             {data?.provider?.description?.trim()} <br />
@@ -69,12 +79,19 @@ const ClassicTemplate: FC<TemplateProps> = ({
       </div>
 
       <div className={cs.receiverInfo}>
-        <div className={cs.label}>{isEnglish ? 'Recipient' : 'Одержувач'}</div>
+        <div className={cs.label}>
+          <EditableText
+            fieldKey="recipient.title"
+            defaultValue={L(
+              'recipient.title',
+              isEnglish ? 'Recipient' : 'Одержувач'
+            )}
+          />
+        </div>
         <EditableText
-          editMode={!!editMode}
-          rawText={rawReceiverDesc ?? data?.reciever?.description?.trim() ?? ''}
-          onChange={onReceiverDescChange ?? (() => {})}
-          rows={5}
+          valuePath="receiverDescription"
+          multiline
+          defaultValue={data?.reciever?.description?.trim() ?? ''}
         >
           <pre className={cs.preLabel}>
             {data?.reciever?.description?.trim()} <br />
@@ -88,8 +105,15 @@ const ClassicTemplate: FC<TemplateProps> = ({
       </div>
 
       <div className={cs.providerInvoice}>
-        <div className={cs.datecellTitle}>
-          {isEnglish ? 'INVOICE №' : 'РАХУНОК №'} {data.invoiceNumber}
+        <div
+          className={cs.datecellTitle}
+          style={accentColor ? { color: accentColor } : undefined}
+        >
+          <EditableText
+            valuePath="invoiceTitle"
+            defaultValue={invoiceTitle ?? (isEnglish ? 'INVOICE' : 'РАХУНОК')}
+          />{' '}
+          № {data.invoiceNumber}
         </div>
         <div className={cs.datecellDate}>
           {isEnglish ? 'Dated' : 'Від'} &nbsp;
@@ -116,7 +140,13 @@ const ClassicTemplate: FC<TemplateProps> = ({
 
       <div className={cs.payTable}>
         <div className={cs.payFixed}>
-          {isEnglish ? 'Total payment amount:' : 'Загальна сума оплати:'}
+          <EditableText
+            fieldKey="totalLabel"
+            defaultValue={L(
+              'totalLabel',
+              isEnglish ? 'Total payment amount:' : 'Загальна сума оплати:'
+            )}
+          />
           <div className={cs.payBoldSum}>
             {(+data?.generalSum || +data?.debit || 0).toFixed(2)}{' '}
             {currencyLabel}
@@ -124,7 +154,13 @@ const ClassicTemplate: FC<TemplateProps> = ({
         </div>
 
         <div>
-          {isEnglish ? 'Payment purpose:' : 'Призначення платежу:'}{' '}
+          <EditableText
+            fieldKey="purposeLabel"
+            defaultValue={L(
+              'purposeLabel',
+              isEnglish ? 'Payment purpose:' : 'Призначення платежу:'
+            )}
+          />{' '}
           <strong>
             {isEnglish
               ? `Payment for services according to invoice № ${
@@ -142,6 +178,16 @@ const ClassicTemplate: FC<TemplateProps> = ({
             ''}
         </div>
       </div>
+
+      {(!!footerText || editMode) && (
+        <div style={{ marginTop: '1.5em', whiteSpace: 'pre-wrap' }}>
+          <EditableText
+            valuePath="footerText"
+            multiline
+            defaultValue={footerText ?? ''}
+          />
+        </div>
+      )}
     </div>
   )
 }

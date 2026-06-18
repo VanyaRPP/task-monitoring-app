@@ -1,9 +1,26 @@
+export type LocalizedText = { en?: string; uk?: string }
+
+export interface IInvoiceTemplateOverrides {
+  accentColor?: string
+  logoUrl?: string
+  invoiceTitle?: LocalizedText
+  footerText?: LocalizedText
+  labels?: Record<string, LocalizedText>
+  show?: {
+    tax?: boolean
+    quantity?: boolean
+    bankDetails?: boolean
+    dueDate?: boolean
+  }
+}
+
 export interface IInvoiceTemplate {
   _id: string
   name: string
   baseTemplateKey: string
   providerDescription: string
   receiverDescription: string
+  overrides?: IInvoiceTemplateOverrides
   domainId?: string
   isBuiltIn: boolean
   createdBy?: string
@@ -25,6 +42,7 @@ export interface ICreateInvoiceTemplateRequest {
   baseTemplateKey: string
   providerDescription: string
   receiverDescription: string
+  overrides?: IInvoiceTemplateOverrides
   domainId: string
 }
 
@@ -38,6 +56,7 @@ export interface IUpdateInvoiceTemplateRequest {
   name?: string
   providerDescription?: string
   receiverDescription?: string
+  overrides?: IInvoiceTemplateOverrides
   baseTemplateKey?: string
 }
 

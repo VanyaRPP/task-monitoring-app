@@ -21,9 +21,4 @@ export interface TemplateProps {
   issuedToLines: string[]
   normalizedBankDetailsLines: string[]
   overrides?: TemplateOverrides
-  editMode?: boolean
-  rawProviderDesc?: string
-  rawReceiverDesc?: string
-  onProviderDescChange?: (value: string) => void
-  onReceiverDescChange?: (value: string) => void
 }

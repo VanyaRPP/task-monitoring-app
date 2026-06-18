@@ -21,7 +21,7 @@ import PriceList from '@common/components/Forms/AddPaymentForm/PriceList'
 import { useResolveMonthServiceId } from '@common/components/Forms/AddPaymentForm/useResolveMonthServiceId'
 import Modal from '@components/UI/ModalWindow'
 import { usePaymentFormData } from '@modules/hooks/usePaymentData'
-import {Currency, Operations } from '@utils/constants'
+import { Currency, Operations } from '@utils/constants'
 import { getInvoices } from '@utils/getInvoices'
 import {
   getPaymentProviderAndReciever,
@@ -42,6 +42,7 @@ import {
   useState,
 } from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
+import InvoiceTemplateTab from './InvoiceTemplateTab'
 import GroupedReceiptForm from '../Forms/GroupedReceiptForm'
 import PaymentReceiptForm from '../Forms/PaymentReceiptForm'
 import ReceiptForm from '../Forms/ReceiptForm'
@@ -326,6 +327,8 @@ const AddPaymentModal: FC<Props> = ({
     })
   }, [selectedChangelogId, changelogRes, form])
 
+  const operation = Form.useWatch('operation', form)
+
   const items: TabsProps['items'] = []
   const shouldTabsEnabled = (edit && !changed) || preview || saved
 
@@ -340,6 +343,14 @@ const AddPaymentModal: FC<Props> = ({
           changelogLoading={changelogLoading}
         />
       ),
+    })
+  }
+
+  if (!preview && operation !== Operations.Credit) {
+    items.push({
+      key: 'template',
+      label: 'Шаблон',
+      children: <InvoiceTemplateTab />,
     })
   }
 
@@ -381,8 +392,6 @@ const AddPaymentModal: FC<Props> = ({
       children: <PriceList data={currPayment ?? paymentData} />,
     })
   }
-
-  const operation = Form.useWatch('operation', form)
 
   const effectiveOperation = preview ? paymentData?.type : operation
 
