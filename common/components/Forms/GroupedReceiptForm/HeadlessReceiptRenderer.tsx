@@ -69,6 +69,7 @@ const HeadlessReceiptRenderer: FC<Props> = ({
   const receiptProps = useReceiptTemplateProps({
     data: payment,
     contextCompany,
+    lang: payment?.invoiceLang,
     showQuantityInPreview: readShowQuantityInPreview(payment?._id),
   })
 
