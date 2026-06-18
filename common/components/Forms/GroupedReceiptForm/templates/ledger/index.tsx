@@ -16,6 +16,7 @@ const LedgerTemplate: FC<TemplateProps> = ({
   currencyLabel,
   modernInvoiceNumber,
   domainName,
+  showQuantityInPreview,
   rows,
   getQty,
   subtotal,
@@ -205,19 +206,23 @@ const LedgerTemplate: FC<TemplateProps> = ({
                   )}
                 />
               </th>
-              <th>
-                <EditableText
-                  fieldKey="col.rate"
-                  defaultValue={L('col.rate', isEnglish ? 'Rate' : 'Ціна')}
-                />
-              </th>
-              <th>
-                <EditableText
-                  fieldKey="col.qty"
-                  defaultValue={L('col.qty', isEnglish ? 'Qty' : 'К-сть')}
-                />
-              </th>
-              <th>
+              {showQuantityInPreview && (
+                <>
+                  <th className={lg.colRate}>
+                    <EditableText
+                      fieldKey="col.rate"
+                      defaultValue={L('col.rate', isEnglish ? 'Rate' : 'Ціна')}
+                    />
+                  </th>
+                  <th className={lg.colQty}>
+                    <EditableText
+                      fieldKey="col.qty"
+                      defaultValue={L('col.qty', isEnglish ? 'Qty' : 'К-сть')}
+                    />
+                  </th>
+                </>
+              )}
+              <th className={lg.colTotal}>
                 <EditableText
                   fieldKey="col.total"
                   defaultValue={L('col.total', isEnglish ? 'Total' : 'Сума')}
@@ -235,10 +240,21 @@ const LedgerTemplate: FC<TemplateProps> = ({
                   : Number(item?.sum || 0)
               return (
                 <tr key={`${item?.type || item?.name}-${index}`}>
-                  <td>{item?.name || item?.type || '—'}</td>
-                  <td>{rate.toFixed(2)}</td>
-                  <td>{qty}</td>
                   <td>
+                    {item?.name || item?.type || '—'}
+                    {item?.description ? (
+                      <div style={{ fontSize: '0.85em', opacity: 0.65 }}>
+                        {item.description}
+                      </div>
+                    ) : null}
+                  </td>
+                  {showQuantityInPreview && (
+                    <>
+                      <td className={lg.colRate}>{rate.toFixed(2)}</td>
+                      <td className={lg.colQty}>{qty}</td>
+                    </>
+                  )}
+                  <td className={lg.colTotal}>
                     {Number(item?.sum || 0).toFixed(2)}&nbsp;{currencyLabel}
                   </td>
                 </tr>

@@ -70,6 +70,7 @@ const GroupedReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
     lang: invoiceLang,
     descriptionOverrides,
     overrides,
+    showQuantityInPreview,
   })
 
   const {
@@ -263,7 +264,7 @@ const GroupedReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
     data: effectiveData,
     componentRef,
     isEnglish,
-    invoiceLang,
+    showQuantityInPreview,
     currencyLabel,
     currency,
     modernInvoiceNumber,

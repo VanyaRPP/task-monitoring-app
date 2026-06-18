@@ -155,9 +155,7 @@ $bg-row-l: #fafafa;
       text-align: left;
       border-bottom: 1px solid $border;
 
-      &:nth-child(2),
-      &:nth-child(3),
-      &:nth-child(4) {
+      &.colNum {
         text-align: right;
       }
     }
@@ -179,9 +177,7 @@ $bg-row-l: #fafafa;
       vertical-align: middle;
       color: $ink;
 
-      &:nth-child(2),
-      &:nth-child(3),
-      &:nth-child(4) {
+      &.colNum {
         text-align: right;
         font-family: $mono;
         font-size: 0.83rem;
@@ -190,20 +186,15 @@ $bg-row-l: #fafafa;
     }
   }
 
-  th:nth-child(1),
-  td:nth-child(1) {
-    width: auto;
-  }
-  th:nth-child(2),
-  td:nth-child(2) {
+  .colQty {
     width: 10%;
+    font-weight: 600;
   }
-  th:nth-child(3),
-  td:nth-child(3) {
+  .colUnit {
     width: 16%;
+    font-weight: 600;
   }
-  th:nth-child(4),
-  td:nth-child(4) {
+  .colAmount {
     width: 18%;
     font-weight: 600;
   }
@@ -239,6 +230,7 @@ $bg-row-l: #fafafa;
   font-size: 0.85rem;
   border-bottom: 1px solid $border;
   background: $bg-row;
+  gap: 1rem;
 
   span {
     color: $ink-muted;
@@ -337,6 +329,7 @@ $lightRoot: ":global(:root[data-theme='light'])";
   #{$lightRoot} & {
     border-color: $border-l;
   }
+  overflow-x: auto;
 }
 
 .clTable {

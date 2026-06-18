@@ -1,4 +1,5 @@
 import { FC } from 'react'
+import dayjs from 'dayjs'
 import GroupedPricesTable from '@components/Forms/GroupedReceiptForm/GroupedPricesTable'
 import {
   formatInvoiceDate,
@@ -33,6 +34,7 @@ const ClassicTemplate: FC<TemplateProps> = ({
   issuedToLines: _issuedToLines,
   normalizedBankDetailsLines: _normalizedBankDetailsLines,
   overrides,
+  showQuantityInPreview,
 }) => {
   const providerDomainHeading = getDomainHeading(data, domainName)
   const recipientCompanyHeading = getRecipientCompanyHeading(data, companyLabel)
@@ -131,6 +133,7 @@ const ClassicTemplate: FC<TemplateProps> = ({
         <GroupedPricesTable
           preview
           usePreviewQuantityToggle
+          showQuantityInPreview={showQuantityInPreview}
           domainId={data?.domain?._id ?? data?.domain}
           currency={currency}
           invoices={data?.invoice ?? []}
@@ -163,19 +166,13 @@ const ClassicTemplate: FC<TemplateProps> = ({
           />{' '}
           <strong>
             {isEnglish
-              ? `Payment for services according to invoice № ${
+              ? `Payment for services according to invoice ${
                   data.invoiceNumber
-                } dated ${formatInvoiceDate(data?.invoiceCreationDate)}`
-              : `Оплата за послуги згідно рахунку № ${
+                } dated ${dayjs(data?.invoiceCreationDate).format('DD-MM-YYYY')}`
+              : `Оплата за послуги згідно рахунку ${
                   data.invoiceNumber
-                } від ${formatInvoiceDate(data?.invoiceCreationDate)}`}
+                } від ${dayjs(data?.invoiceCreationDate).format('DD-MM-YYYY')}`}
           </strong>
-        </div>
-
-        <div className={cs.payFixed}>
-          {providerDomainHeading ||
-            data?.provider?.description?.split('\n')?.[0] ||
-            ''}
         </div>
       </div>
 

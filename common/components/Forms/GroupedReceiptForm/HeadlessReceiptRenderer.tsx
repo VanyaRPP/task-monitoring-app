@@ -3,6 +3,7 @@ import { useGetInvoiceTemplatesQuery } from '@common/api/invoiceTemplateApi/invo
 import { resolveBuiltinTemplateKey, templateMap } from './templateMap'
 import { useReceiptTemplateProps } from './useReceiptTemplateProps'
 import { applyDescriptionOverrides } from './applyDescriptionOverrides'
+import { readShowQuantityInPreview } from './previewQtyStorage'
 
 interface Props {
   payment: any
@@ -92,6 +93,7 @@ const HeadlessReceiptRenderer: FC<Props> = ({
     contextCompany,
     descriptionOverrides,
     overrides: customTemplate?.overrides,
+    showQuantityInPreview: readShowQuantityInPreview(payment?._id),
   })
 
   const resolvedKey =

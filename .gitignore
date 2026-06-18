@@ -50,6 +50,7 @@ yarn-error.log*
 /pages/api-doc.tsx
 .cursor
 .claude
+.claudeignore
 
 # PWA build artifacts
 /public/sw.js
