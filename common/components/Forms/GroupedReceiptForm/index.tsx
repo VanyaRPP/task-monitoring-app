@@ -9,6 +9,9 @@ import { TemplateKey } from '@components/AddPaymentModal/resolveTemplate'
 import { FC, useRef } from 'react'
 import { useReactToPrint } from 'react-to-print'
 import { useReceiptTemplateProps } from './useReceiptTemplateProps'
+import { useInvoiceTemplateDescriptions } from './useInvoiceTemplateDescriptions'
+import { applyDescriptionOverrides } from './applyDescriptionOverrides'
+import { builtinTemplateItems } from './builtinTemplates'
 import {
   PrinterOutlined,
   LayoutOutlined,
@@ -22,24 +25,13 @@ import s from './style.module.scss'
 import { templateMap } from './templateMap'
 import InvoiceLanguageSelector from './InvoiceLanguageSelector'
 
-const templateItems = [
-  { key: 'classic', label: 'Класичний шаблон' },
-  { key: 'olimp', label: 'OLIMP DIGITAL OÜ' },
-  { key: 'ledger', label: 'Formal Ledger' },
-  { key: 'official', label: 'Official Invoice' },
-]
-
 interface Props {
   currPayment?: IExtendedPayment | null
   paymentData?: IExtendedPayment | null | undefined
   paymentActions: { preview: boolean; edit: boolean }
 }
 
-const GroupedReceiptForm: FC<Props> = ({
-  currPayment,
-  paymentData,
-  paymentActions: _paymentActions,
-}) => {
+const GroupedReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
   const {
     form,
     template,
@@ -63,10 +55,22 @@ const GroupedReceiptForm: FC<Props> = ({
       }
     : rawData
 
+  const {
+    customTemplates,
+    isCustomTemplate,
+    currentCustomTemplate,
+    descriptionOverrides,
+    overrides,
+  } = useInvoiceTemplateDescriptions({ data })
+
+  const effectiveData = applyDescriptionOverrides(data, descriptionOverrides)
+
   const receiptProps = useReceiptTemplateProps({
-    data,
+    data: effectiveData,
     contextCompany: company,
     lang: invoiceLang,
+    descriptionOverrides,
+    overrides,
     showQuantityInPreview,
   })
 
@@ -86,7 +90,6 @@ const GroupedReceiptForm: FC<Props> = ({
     paymentInfoLines,
     issuedToLines,
     normalizedBankDetailsLines,
-    overrides,
   } = receiptProps
 
   const componentRef = useRef<HTMLDivElement | null>(null)
@@ -103,9 +106,8 @@ const GroupedReceiptForm: FC<Props> = ({
     documentTitle:
       `${printCompanyName}-inv-${modernInvoiceNumber}` || 'invoice',
   })
-  if (!rawData) {
-    return null
-  }
+
+  if (!rawData) return null
 
   const companyLabel = receiptCompanyLabel
 
@@ -114,7 +116,6 @@ const GroupedReceiptForm: FC<Props> = ({
     scope?: TemplateScope
   ) => {
     setTemplate(templateKey)
-
     if (!data?._id) {
       if (scope === 'company' || scope === 'domain') {
         setTemplateScope(scope)
@@ -128,13 +129,11 @@ const GroupedReceiptForm: FC<Props> = ({
       }
       return
     }
-
     const result = await editPayment({
       _id: data._id,
       template: templateKey,
       _templateScope: scope !== 'payment' ? scope : undefined,
     })
-
     if ('error' in result) {
       message.error('Помилка збереження')
     } else if (scope === 'company') {
@@ -155,10 +154,7 @@ const GroupedReceiptForm: FC<Props> = ({
 
   const makeSaveMenu = (templateKey: TemplateKey): MenuProps => ({
     items: [
-      {
-        key: 'payment',
-        label: 'Зберегти для цього платежу',
-      },
+      { key: 'payment', label: 'Зберегти для цього платежу' },
       { type: 'divider' },
       {
         key: 'company',
@@ -191,7 +187,7 @@ const GroupedReceiptForm: FC<Props> = ({
     },
   })
 
-  const dropdownItems = templateItems.map((item) => ({
+  const builtinDropdownItems = builtinTemplateItems.map((item) => ({
     key: item.key,
     label: (
       <div
@@ -264,10 +260,43 @@ const GroupedReceiptForm: FC<Props> = ({
     },
   ]
 
-  const TemplateComponent = templateMap[template] || templateMap.olimp
+  const customDropdownItems = customTemplates.map((ct) => ({
+    key: ct._id,
+    label: (
+      <span
+        onClick={() => handleSaveTemplate(ct._id as TemplateKey)}
+        style={{ display: 'flex', gap: 6, width: '100%', alignItems: 'center' }}
+      >
+        {template === ct._id && (
+          <CheckOutlined style={{ fontSize: 12, opacity: 0.7 }} />
+        )}
+        <span
+          style={{
+            maxWidth: 200,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {ct.name}
+        </span>
+      </span>
+    ),
+  }))
 
+  const dropdownItems = [
+    ...builtinDropdownItems,
+    ...(customTemplates.length > 0
+      ? [{ type: 'divider' as const }, ...customDropdownItems]
+      : []),
+  ]
+
+  const baseTemplateKey = isCustomTemplate
+    ? currentCustomTemplate?.baseTemplateKey || 'classic'
+    : template
+  const TemplateComponent = templateMap[baseTemplateKey] || templateMap.olimp
   const templateProps = {
-    data,
+    data: effectiveData,
     componentRef,
     isEnglish,
     showQuantityInPreview,
