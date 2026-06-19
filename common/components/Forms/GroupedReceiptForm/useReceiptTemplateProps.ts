@@ -1,3 +1,4 @@
+import { IInvoiceTemplateOverrides } from '@common/api/invoiceTemplateApi/invoiceTemplate.api.types'
 import { Currency } from '@utils/constants'
 import { getCurrencyShortLabel, normalizeCurrency } from '@utils/helpers'
 import dayjs from 'dayjs'
@@ -6,6 +7,11 @@ interface ReceiptTemplatePropsInput {
   data: any
   contextCompany?: any
   lang?: 'en' | 'uk'
+  descriptionOverrides?: {
+    providerDescription?: string
+    receiverDescription?: string
+  }
+  overrides?: IInvoiceTemplateOverrides
   showQuantityInPreview?: boolean
 }
 
@@ -30,9 +36,7 @@ export interface ReceiptTemplateProps {
   overrides?: TemplateOverrides
 }
 
-export interface TemplateOverrides {
-  [key: string]: unknown
-}
+export type TemplateOverrides = IInvoiceTemplateOverrides
 
 const bankDetailsTriggerRegex =
   /(account details|usd account details|iban|swift|bic|bank name|bank address|bank name and address|рахунок|банк|мфо)/i
@@ -47,6 +51,8 @@ export function useReceiptTemplateProps({
   data,
   contextCompany,
   lang,
+  descriptionOverrides,
+  overrides,
   showQuantityInPreview = false,
 }: ReceiptTemplatePropsInput): ReceiptTemplateProps {
   const currency =
@@ -93,19 +99,27 @@ export function useReceiptTemplateProps({
   const taxAmount = 0
   const total = subtotal + taxAmount
 
-  const domainDescription =
+  const rawDomainDescription =
     data?.domain?.description ||
     (typeof contextCompany?.domain === 'object'
       ? contextCompany?.domain?.description
       : '')
+  const domainDescription =
+    descriptionOverrides?.providerDescription !== undefined
+      ? descriptionOverrides.providerDescription
+      : rawDomainDescription
 
   const issuedToLines = [
     ...(domainDescription?.trim()?.split('\n') || []),
   ].filter(Boolean)
 
-  const receiverDescriptionLines = (
-    data?.reciever?.description?.split('\n') || []
-  )
+  const rawReceiverDescription = data?.reciever?.description || ''
+  const receiverDescriptionRaw =
+    descriptionOverrides?.receiverDescription !== undefined
+      ? descriptionOverrides.receiverDescription
+      : rawReceiverDescription
+
+  const receiverDescriptionLines = (receiverDescriptionRaw?.split('\n') || [])
     .map((line: string) => line?.trim())
     .filter(Boolean)
 
@@ -195,6 +209,6 @@ export function useReceiptTemplateProps({
     paymentInfoLines,
     issuedToLines,
     normalizedBankDetailsLines,
-    overrides: undefined,
+    overrides,
   }
 }

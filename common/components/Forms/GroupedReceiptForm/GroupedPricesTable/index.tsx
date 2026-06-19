@@ -241,9 +241,14 @@ const GroupedPricesTable: React.FC<PaymentPricesTableProps> = ({
   invoiceLang,
   showQuantityInPreview: showQuantityInPreviewProp,
 }) => {
-  const { form, company, showQuantityInPreview: showQuantityInPreviewCtx } = usePaymentContext()
+  const {
+    form,
+    company,
+    showQuantityInPreview: showQuantityInPreviewCtx,
+  } = usePaymentContext()
   const { domain } = form?.getFieldsValue?.() ?? {}
-  const showQuantityInPreview = showQuantityInPreviewProp ?? showQuantityInPreviewCtx
+  const showQuantityInPreview =
+    showQuantityInPreviewProp ?? showQuantityInPreviewCtx
   const { i18n } = useTranslation('groupedReceipt')
 
   const resolvedDomainId =

@@ -34,6 +34,12 @@ jest.mock('@common/api/paymentApi/payment.api', () => ({
   useEditPaymentMutation: () => [jest.fn().mockResolvedValue({ data: {} })],
 }))
 
+jest.mock('@common/api/invoiceTemplateApi/invoiceTemplate.api', () => ({
+  useGetInvoiceTemplatesQuery: () => ({ data: { data: [] } }),
+  useCreateInvoiceTemplateMutation: () => [jest.fn()],
+  useUpdateInvoiceTemplateMutation: () => [jest.fn()],
+}))
+
 jest.mock('next/dynamic', () => (importFn: () => Promise<any>) => {
   let Component: any = null
   importFn().then((mod: any) => {
