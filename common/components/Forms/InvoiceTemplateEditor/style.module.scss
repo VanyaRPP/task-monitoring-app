@@ -62,5 +62,20 @@
   padding: 16px;
   background: #fff;
   max-height: 68vh;
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+/* Builder follows the app theme: in dark mode the toolbar/canvas turn dark so
+   the rendered invoice (dark-first templates) sits on a matching surface. */
+:global([data-theme='dark']) {
+  .toolbar {
+    background: #1f1f1f;
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+
+  .canvas {
+    background: #141414;
+    border-color: rgba(255, 255, 255, 0.12);
+  }
 }

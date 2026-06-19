@@ -20,6 +20,12 @@
   }
 }
 
+/* In a dark surface the focused field must not flip to a white background,
+   or inherited light text becomes invisible while editing. */
+:global([data-theme='dark']) .field:focus {
+  background: rgba(255, 255, 255, 0.12);
+}
+
 .textarea {
   display: block;
   resize: vertical;

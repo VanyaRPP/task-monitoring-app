@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react'
+import { useState } from 'react'
 import EditableText from './EditableText'
 import { InvoiceEditContext } from './InvoiceEditContext'
 
@@ -60,6 +61,41 @@ describe('EditableText', () => {
     expect((screen.getByRole('textbox') as HTMLInputElement).value).toBe(
       'DRAFT'
     )
+  })
+
+  it('round-trips a label edit through stateful labels overrides (editor wiring)', () => {
+    // Mirrors InvoiceTemplateEditor's editCtx: getLabel/setLabel backed by
+    // overrides.labels state. Proves a fieldKey input actually mutates and
+    // reflects the typed value across re-renders (the "labels don't change?" Q).
+    const Harness = () => {
+      const [labels, setLabels] = useState<
+        Record<string, { uk?: string; en?: string }>
+      >({})
+      return (
+        <InvoiceEditContext.Provider
+          value={{
+            editMode: true,
+            lang: 'uk',
+            getLabel: (key) => labels[key]?.uk,
+            setLabel: (key, value) =>
+              setLabels((prev) => ({
+                ...prev,
+                [key]: { ...prev[key], uk: value },
+              })),
+          }}
+        >
+          <EditableText
+            fieldKey="paymentInfo.header"
+            defaultValue="ПЛАТІЖНІ ДАНІ:"
+          />
+        </InvoiceEditContext.Provider>
+      )
+    }
+    render(<Harness />)
+    const input = screen.getByRole('textbox') as HTMLInputElement
+    expect(input.value).toBe('ПЛАТІЖНІ ДАНІ:')
+    fireEvent.change(input, { target: { value: 'РЕКВІЗИТИ:' } })
+    expect(input.value).toBe('РЕКВІЗИТИ:')
   })
 
   it('writes label overrides by key via setLabel', () => {
