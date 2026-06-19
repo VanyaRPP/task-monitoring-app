@@ -225,41 +225,6 @@ const GroupedReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
     ),
   }))
 
-  const mainMenuItems: MenuProps['items'] = [
-    {
-      key: 'print',
-      icon: <PrinterOutlined />,
-      label: isEnglish ? 'Друк' : 'Друк',
-      onClick: handlePrint,
-    },
-    {
-      key: 'template',
-      icon: <LayoutOutlined />,
-      label: isEnglish ? 'Обрати шаблон' : 'Обрати шаблон',
-      children: dropdownItems,
-    },
-    {
-      key: 'tableToggle',
-      icon: <TableOutlined />,
-      label: showQuantityInPreview
-        ? 'Приховати кількість і ціну'
-        : 'Показати кількість і ціну',
-      onClick: () => setShowQuantityInPreview(!showQuantityInPreview),
-    },
-    { type: 'divider' },
-    {
-      key: 'language',
-      label: (
-        <div onClick={(e) => e.stopPropagation()}>
-          <InvoiceLanguageSelector
-            lang={invoiceLang}
-            onChange={handleSaveLanguage}
-          />
-        </div>
-      ),
-    },
-  ]
-
   const customDropdownItems = customTemplates.map((ct) => ({
     key: ct._id,
     label: (
@@ -316,6 +281,41 @@ const GroupedReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
     normalizedBankDetailsLines,
     overrides,
   }
+  
+  const mainMenuItems: MenuProps['items'] = [
+    {
+      key: 'print',
+      icon: <PrinterOutlined />,
+      label: isEnglish ? 'Друк' : 'Друк',
+      onClick: handlePrint,
+    },
+    {
+      key: 'template',
+      icon: <LayoutOutlined />,
+      label: isEnglish ? 'Обрати шаблон' : 'Обрати шаблон',
+      children: dropdownItems,
+    },
+    {
+      key: 'tableToggle',
+      icon: <TableOutlined />,
+      label: showQuantityInPreview
+        ? 'Приховати кількість і ціну'
+        : 'Показати кількість і ціну',
+      onClick: () => setShowQuantityInPreview(!showQuantityInPreview),
+    },
+    { type: 'divider' },
+    {
+      key: 'language',
+      label: (
+        <div onClick={(e) => e.stopPropagation()}>
+          <InvoiceLanguageSelector
+            lang={invoiceLang}
+            onChange={handleSaveLanguage}
+          />
+        </div>
+      ),
+    },
+  ]
 
   return (
     <>
