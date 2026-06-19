@@ -281,18 +281,18 @@ const GroupedReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
     normalizedBankDetailsLines,
     overrides,
   }
-  
+
   const mainMenuItems: MenuProps['items'] = [
     {
       key: 'print',
       icon: <PrinterOutlined />,
-      label: isEnglish ? 'Друк' : 'Друк',
+      label: isEnglish ? 'Print' : 'Друк',
       onClick: handlePrint,
     },
     {
       key: 'template',
       icon: <LayoutOutlined />,
-      label: isEnglish ? 'Обрати шаблон' : 'Обрати шаблон',
+      label: isEnglish ? 'Choose template' : 'Обрати шаблон',
       children: dropdownItems,
     },
     {
