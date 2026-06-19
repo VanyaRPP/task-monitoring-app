@@ -4,6 +4,7 @@ import { isAdminCheck } from '@utils/helpers'
 import { getServerSession } from 'next-auth'
 import { Roles } from './constants'
 import Domain from '@modules/models/Domain'
+import Domain from '@modules/models/Domain'
 
 export async function getCurrentUser(req, res) {
   const session = await getServerSession(req, res, authOptions)

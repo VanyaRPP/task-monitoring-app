@@ -1,6 +1,7 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-# yarn test
-# yarn lint:fix
-# yarn prettier:fix
+# Fast gate: type-check + run only tests affected by staged changes.
+# Full coverage gate (with thresholds) runs on pre-push — see .husky/pre-push.
+yarn types:check
+yarn test:changed

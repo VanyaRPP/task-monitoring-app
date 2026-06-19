@@ -20,6 +20,8 @@ import s from './DashboardLanding.module.scss'
 
 const { Title, Text } = Typography
 
+const { Title, Text } = Typography
+
 const DashboardLanding = () => {
   const dispatch = useAppDispatch()
   const router = useRouter()

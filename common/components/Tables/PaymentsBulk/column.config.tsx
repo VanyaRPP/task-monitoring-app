@@ -77,6 +77,7 @@ export const getDefaultColumns = (
       width: 250,
       render: (_, { name }: { name: number }) => <CompanyName name={name} />,
     },
+    (has(ServiceType.Placing) || has(ServiceType.Maintenance)) && 
     {
       title: 'Площа, м²',
       width: 160,
@@ -232,6 +233,7 @@ export const getDefaultColumns = (
       width: 200,
       render: (_, { name }: { name: number }) => <Cleaning name={name} />,
     },
+    has(ServiceType.Discount) && 
     {
       title: 'Знижка',
       width: 200,

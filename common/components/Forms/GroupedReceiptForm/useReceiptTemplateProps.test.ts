@@ -25,9 +25,7 @@ describe('useReceiptTemplateProps — isEnglish / lang override', () => {
     })
 
     it('isEnglish=false when currency is absent (defaults to UAH)', () => {
-      const { result } = renderHook(() =>
-        useReceiptTemplateProps({ data: {} })
-      )
+      const { result } = renderHook(() => useReceiptTemplateProps({ data: {} }))
       expect(result.current.isEnglish).toBe(false)
     })
   })

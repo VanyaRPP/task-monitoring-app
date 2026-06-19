@@ -7,6 +7,10 @@ import { users, domains } from '@utils/testData'
 import { Roles } from '@utils/constants'
 import User from '@modules/models/User'
 import Domain from '@modules/models/Domain'
+import { users, domains } from '@utils/testData'
+import { Roles } from '@utils/constants'
+import User from '@modules/models/User'
+import Domain from '@modules/models/Domain'
 
 jest.mock('@pages/api/auth/[...nextauth]', () => ({ authOptions: {} }))
 jest.mock('next-auth', () => ({ getServerSession: jest.fn() }))
@@ -18,7 +22,11 @@ describe('getCurrentUser', () => {
   it('Should find and return a plain User (administers nothing)', async () => {
     // user2 is not listed in any Domain/RealEstate adminEmails.
     await mockLoginAs(users.user2)
+  it('Should find and return a plain User (administers nothing)', async () => {
+    // user2 is not listed in any Domain/RealEstate adminEmails.
+    await mockLoginAs(users.user2)
 
+    const { isDomainAdmin, isGlobalAdmin, isUser } = await getCurrentUser(
     const { isDomainAdmin, isGlobalAdmin, isUser } = await getCurrentUser(
       {},
       {}

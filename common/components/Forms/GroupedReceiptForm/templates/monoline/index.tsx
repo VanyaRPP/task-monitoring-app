@@ -176,15 +176,15 @@ const MonolineTemplate: FC<TemplateProps> = ({
           </div>
           <div className={ml.mlPaymentNoteText}>
             {isEnglish
-              ? `Payment for services according to invoice № ${
+              ? `Payment for services according to invoice ${
                   data.invoiceNumber
                 } dated ${dayjs(data?.invoiceCreationDate)?.format?.(
-                  'DD.MM.YYYY'
+                  'DD-MM-YYYY'
                 )}`
-              : `Оплата за послуги згідно рахунку № ${
+              : `Оплата за послуги згідно рахунку ${
                   data.invoiceNumber
                 } від ${dayjs(data?.invoiceCreationDate)?.format?.(
-                  'DD.MM.YYYY'
+                  'DD-MM-YYYY'
                 )}`}
           </div>
         </div>

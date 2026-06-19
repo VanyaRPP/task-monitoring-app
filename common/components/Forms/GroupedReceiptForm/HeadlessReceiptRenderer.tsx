@@ -1,6 +1,9 @@
 import { FC, useEffect, useRef } from 'react'
+import { useGetInvoiceTemplatesQuery } from '@common/api/invoiceTemplateApi/invoiceTemplate.api'
 import { resolveBuiltinTemplateKey, templateMap } from './templateMap'
 import { useReceiptTemplateProps } from './useReceiptTemplateProps'
+import { applyDescriptionOverrides } from './applyDescriptionOverrides'
+import { readShowQuantityInPreview } from './previewQtyStorage'
 
 interface Props {
   payment: any
@@ -65,12 +68,38 @@ const HeadlessReceiptRenderer: FC<Props> = ({
   const componentRef = useRef<HTMLDivElement | null>(null)
   const capturedRef = useRef(false)
 
+  const domainId: string =
+    (typeof payment?.domain === 'object'
+      ? payment?.domain?._id
+      : payment?.domain) || ''
+  const { data: customTemplatesRes } = useGetInvoiceTemplatesQuery(
+    { domainId },
+    { skip: !domainId }
+  )
+  const customTemplate =
+    customTemplatesRes?.data?.find(
+      (t) => t._id === (templateKey || payment?.template)
+    ) ?? null
+
+  const descriptionOverrides = customTemplate
+    ? {
+        providerDescription: customTemplate.providerDescription,
+        receiverDescription: customTemplate.receiverDescription,
+      }
+    : undefined
+
   const receiptProps = useReceiptTemplateProps({
-    data: payment,
+    data: applyDescriptionOverrides(payment, descriptionOverrides),
     contextCompany,
+    descriptionOverrides,
+    overrides: customTemplate?.overrides,
+    showQuantityInPreview: readShowQuantityInPreview(payment?._id),
   })
 
-  const resolvedKey = templateKey || resolveBuiltinTemplateKey(payment)
+  const resolvedKey =
+    customTemplate?.baseTemplateKey ||
+    templateKey ||
+    resolveBuiltinTemplateKey(payment)
   const TemplateComponent = templateMap[resolvedKey] || templateMap.classic
 
   useEffect(() => {
