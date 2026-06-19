@@ -6,11 +6,13 @@ interface ReceiptTemplatePropsInput {
   data: any
   contextCompany?: any
   lang?: 'en' | 'uk'
+  showQuantityInPreview?: boolean
 }
 
 export interface ReceiptTemplateProps {
   data: any
   isEnglish: boolean
+  showQuantityInPreview: boolean
   currencyLabel: string
   currency?: string
   modernInvoiceNumber: string
@@ -45,6 +47,7 @@ export function useReceiptTemplateProps({
   data,
   contextCompany,
   lang,
+  showQuantityInPreview = false,
 }: ReceiptTemplatePropsInput): ReceiptTemplateProps {
   const currency =
     data?.currency ||
@@ -70,7 +73,7 @@ export function useReceiptTemplateProps({
 
   const rows = (data?.invoice || [])
     .filter((item: any) => Number(item?.sum) !== 0)
-    .map((item: any) => ({ ...item, name: item?.description || item?.name }))
+    .map((item: any) => ({ ...item, name: item?.customName || item?.name }))
 
   const getQty = (item: any): number => {
     if (Number.isFinite(Number(item?.amount))) {
@@ -177,6 +180,7 @@ export function useReceiptTemplateProps({
   return {
     data,
     isEnglish,
+    showQuantityInPreview,
     currencyLabel,
     currency,
     modernInvoiceNumber,

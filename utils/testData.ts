@@ -83,7 +83,7 @@ export const domains = [
   {
     _id: '64d68421d9ba2fc8fea79d12',
     name: 'domain 1',
-    adminEmails: [users.user.email],
+    adminEmails: [],
     streets: [streets[1]._id],
     description: 'none',
     customServices: [],

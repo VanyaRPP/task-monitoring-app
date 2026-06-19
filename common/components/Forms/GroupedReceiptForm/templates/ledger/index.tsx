@@ -14,6 +14,7 @@ const LedgerTemplate: FC<TemplateProps> = ({
   currencyLabel,
   modernInvoiceNumber,
   domainName,
+  showQuantityInPreview,
   rows,
   getQty,
   subtotal,
@@ -151,9 +152,13 @@ const LedgerTemplate: FC<TemplateProps> = ({
           <thead>
             <tr>
               <th>{isEnglish ? 'Description' : 'Опис'}</th>
-              <th>{isEnglish ? 'Rate' : 'Ціна'}</th>
-              <th>{isEnglish ? 'Qty' : 'К-сть'}</th>
-              <th>{isEnglish ? 'Total' : 'Сума'}</th>
+              {showQuantityInPreview && (
+                <>
+                  <th className={lg.colRate}>{isEnglish ? 'Rate' : 'Ціна'}</th>
+                  <th className={lg.colQty}>{isEnglish ? 'Qty' : 'К-сть'}</th>
+                </>
+              )}
+              <th className={lg.colTotal}>{isEnglish ? 'Total' : 'Сума'}</th>
             </tr>
           </thead>
           <tbody>
@@ -166,7 +171,21 @@ const LedgerTemplate: FC<TemplateProps> = ({
                   : Number(item?.sum || 0)
               return (
                 <tr key={`${item?.type || item?.name}-${index}`}>
-                  <td>{item?.name || item?.type || '—'}</td>
+                  <td>
+                    {item?.name || item?.type || '—'}
+                    {item?.description ? (
+                      <div style={{ fontSize: '0.85em', opacity: 0.65 }}>
+                        {item.description}
+                      </div>
+                    ) : null}
+                  </td>
+                  {showQuantityInPreview && (
+                    <>
+                      <td className={lg.colRate}>{rate.toFixed(2)}</td>
+                      <td className={lg.colQty}>{qty}</td>
+                    </>
+                  )}
+                  <td className={lg.colTotal}></td>
                   <td>{rate.toFixed(2)}</td>
                   <td>{qty}</td>
                   <td>

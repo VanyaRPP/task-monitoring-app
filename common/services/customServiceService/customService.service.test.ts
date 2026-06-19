@@ -27,6 +27,7 @@ jest.mock('@modules/models/Domain', () => ({
   default: {
     exists: jest.fn(),
     updateOne: jest.fn(),
+    findById: jest.fn(),
   },
 }))
 
@@ -82,6 +83,11 @@ beforeEach(() => {
   asMock(Domain.updateOne).mockResolvedValue({
     acknowledged: true,
     matchedCount: 1,
+  })
+  // attachServiceToDomainGroup reads the domain's groups first; default to a
+  // domain with no groups so the helper takes the "create default group" path.
+  asMock(Domain.findById).mockReturnValue({
+    select: jest.fn().mockResolvedValue({ customServices: [] }),
   })
   asMock(RealEstate.updateMany).mockResolvedValue({ acknowledged: true })
 })
@@ -192,10 +198,12 @@ describe('createCustomService', () => {
         fieldName: 'foo',
       }),
     })
-    // First call attempts to add to existing default group — pretend it exists.
-    asMock(Domain.updateOne).mockResolvedValueOnce({
-      acknowledged: true,
-      matchedCount: 1,
+    // The domain already has a default group — attach should target it by its
+    // actual name (the first group), not a hard-coded one.
+    asMock(Domain.findById).mockReturnValueOnce({
+      select: jest.fn().mockResolvedValueOnce({
+        customServices: [{ groupName: 'Загальні', services: [] }],
+      }),
     })
 
     await createCustomService(
@@ -227,19 +235,17 @@ describe('createCustomService', () => {
         fieldName: 'foo',
       }),
     })
-    // First call: no matching group (matchedCount: 0).
-    asMock(Domain.updateOne)
-      .mockResolvedValueOnce({ acknowledged: true, matchedCount: 0 })
-      .mockResolvedValueOnce({ acknowledged: true })
+    // The domain has no groups yet — attach should append a new default group.
+    asMock(Domain.findById).mockReturnValueOnce({
+      select: jest.fn().mockResolvedValueOnce({ customServices: [] }),
+    })
 
     await createCustomService(
       { name: 'Foo', domainId: String(ownDomainId) },
       ctxGlobal
     )
 
-    // Second call appends a new group entry.
-    expect(asMock(Domain.updateOne)).toHaveBeenNthCalledWith(
-      2,
+    expect(asMock(Domain.updateOne)).toHaveBeenCalledWith(
       { _id: expect.anything() },
       {
         $push: {
