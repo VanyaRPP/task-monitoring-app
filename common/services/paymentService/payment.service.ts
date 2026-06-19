@@ -6,6 +6,7 @@ import {
   getCreditDebitPipeline,
   getInvoicesTotalPipeline,
   getMaxInvoiceNumber,
+  getServiceTotalsPipeline,
   getTotalGeneralSumPipeline,
 } from '@pages/api/spacehub/payment/pipelines'
 import { quarters, SortOrder } from '@utils/constants'
@@ -209,10 +210,14 @@ export async function getPayments(
   const genralSumPipeline = getTotalGeneralSumPipeline(options)
   const totalGeneralSum = await Payment.aggregate(genralSumPipeline)
 
+  const serviceTotalsPipeline = getServiceTotalsPipeline(options)
+  const serviceTotals = await Payment.aggregate(serviceTotalsPipeline)
+
   const totalPaymentsData = [
     ...totalPayments,
     ...totalInvoices,
     ...totalGeneralSum,
+    ...serviceTotals,
   ]
   return {
     currentCompaniesCount: distinctCompanyIds.length,

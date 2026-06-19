@@ -58,6 +58,7 @@ jest.mock('@pages/api/spacehub/payment/pipelines', () => ({
     { $group: { _id: null, maxNumber: { $max: '$invoiceNumber' } } },
   ]),
   getTotalGeneralSumPipeline: jest.fn(),
+  getServiceTotalsPipeline: jest.fn(),
 }))
 
 jest.mock('@utils/helpers', () => ({

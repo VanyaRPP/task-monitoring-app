@@ -68,3 +68,45 @@ export function getTotalGeneralSumPipeline(options) {
     },
   ]
 }
+export function getServiceTotalsPipeline(options) {
+  return [
+    { $match: { ...options, type: 'debit' } },
+    { $unwind: '$invoice' },
+    {
+      $addFields: {
+        invoiceSum: {
+          $cond: {
+            if: { $isNumber: '$invoice.sum' },
+            then: { $toDouble: '$invoice.sum' },
+            else: {
+              $cond: {
+                if: { $isNumber: '$invoice.price' },
+                then: { $toDouble: '$invoice.price' },
+                else: 0,
+              },
+            },
+          },
+        },
+        invoiceKey: {
+          $cond: {
+            if: { $eq: ['$invoice.type', 'custom'] },
+            then: { $concat: ['custom-name:', '$invoice.name'] },
+            else: '$invoice.type',
+          },
+        },
+      },
+    },
+    {
+      $match: {
+        invoiceKey: { $exists: true, $ne: null },
+        invoiceSum: { $gt: 0 },
+      },
+    },
+    {
+      $group: {
+        _id: '$invoiceKey',
+        totalSum: { $sum: '$invoiceSum' },
+      },
+    },
+  ]
+}
