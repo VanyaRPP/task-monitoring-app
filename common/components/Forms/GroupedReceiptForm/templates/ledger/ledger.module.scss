@@ -193,12 +193,13 @@ $mono: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
   border-radius: 4px;
   overflow: hidden;
   margin-bottom: 0;
+  overflow-x: auto;
 }
 
 .lgTable {
   width: 100%;
   border-collapse: collapse;
-  table-layout: fixed;
+  table-layout: auto;
 
   thead {
     background: $surface-head;
@@ -489,6 +490,7 @@ $surface-stripe-l: rgba(0, 0, 0, 0.02);
 
   .lgTableWrap {
     border-color: $rule-mid-l;
+    overflow: visible !important;
   }
   .lgTable {
     thead {

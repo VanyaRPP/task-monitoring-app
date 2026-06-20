@@ -44,6 +44,7 @@ import {
   useState,
 } from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
+import InvoiceTemplateTab from './InvoiceTemplateTab'
 import GroupedReceiptForm from '../Forms/GroupedReceiptForm'
 import { getPreviewQtyStorageKey } from '../Forms/GroupedReceiptForm/previewQtyStorage'
 import PaymentReceiptForm from '../Forms/PaymentReceiptForm'
@@ -316,6 +317,8 @@ const AddPaymentModal: FC<Props> = ({
     })
   }, [selectedChangelogId, changelogRes, form])
 
+  const operation = Form.useWatch('operation', form)
+
   const items: TabsProps['items'] = []
   const shouldTabsEnabled = (edit && !changed) || preview || saved
 
@@ -330,6 +333,14 @@ const AddPaymentModal: FC<Props> = ({
           changelogLoading={changelogLoading}
         />
       ),
+    })
+  }
+
+  if (!preview && operation !== Operations.Credit) {
+    items.push({
+      key: 'template',
+      label: 'Шаблон',
+      children: <InvoiceTemplateTab />,
     })
   }
 
@@ -371,8 +382,6 @@ const AddPaymentModal: FC<Props> = ({
       children: <PriceList data={currPayment ?? paymentData} />,
     })
   }
-
-  const operation = Form.useWatch('operation', form)
 
   const effectiveOperation = preview ? paymentData?.type : operation
 
