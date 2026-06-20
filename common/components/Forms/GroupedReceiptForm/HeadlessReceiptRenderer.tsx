@@ -93,6 +93,7 @@ const HeadlessReceiptRenderer: FC<Props> = ({
     contextCompany,
     descriptionOverrides,
     overrides: customTemplate?.overrides,
+    lang: payment?.invoiceLang,
     showQuantityInPreview: readShowQuantityInPreview(payment?._id),
   })
 

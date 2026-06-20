@@ -10,6 +10,20 @@ const COMMON_LAUNCH_ARGS = [
   '--disable-gpu',
 ]
 
+let executablePathPromise: Promise<string> | undefined
+
+function resolveExecutablePath(chromium: {
+  executablePath: () => Promise<string>
+}): Promise<string> {
+  if (!executablePathPromise) {
+    executablePathPromise = chromium.executablePath().catch((err) => {
+      executablePathPromise = undefined
+      throw err
+    })
+  }
+  return executablePathPromise
+}
+
 async function launchBrowser() {
   if (isServerless) {
     const [{ default: puppeteerCore }, { default: chromium }] =
@@ -20,7 +34,7 @@ async function launchBrowser() {
     return puppeteerCore.launch({
       args: [...chromium.args, ...COMMON_LAUNCH_ARGS],
       defaultViewport: chromium.defaultViewport,
-      executablePath: await chromium.executablePath(),
+      executablePath: await resolveExecutablePath(chromium),
       headless: true,
       protocolTimeout: 60_000,
     })

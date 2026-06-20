@@ -69,7 +69,7 @@ describe('getCurrentUser', () => {
     const { isDomainAdmin, user } = await getCurrentUser({}, {})
 
     expect(isDomainAdmin).toBeTruthy()
-    expect(user.roles).toContain(Roles.DOMAIN_ADMIN)
+    expect(user.roles).toEqual([Roles.DOMAIN_ADMIN])
   })
 
   it('Should demote a DomainAdmin who administers no domain (demotion)', async () => {
