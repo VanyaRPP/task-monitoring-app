@@ -1,7 +1,3 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
-
-# Fast gate: type-check + run only tests affected by staged changes.
-# Full coverage gate (with thresholds) runs on pre-push — see .husky/pre-push.
-yarn types:check
-yarn test:changed
+# Format & lint only the staged files (config: "lint-staged" in package.json).
+# Full lint/type/test gates run in CI on push & PR to dev/deploy — see .github/workflows/lintTest.yml
+npx lint-staged
