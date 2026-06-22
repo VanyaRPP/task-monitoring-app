@@ -75,11 +75,15 @@ const RealEstateForm: FC<Props> = ({
     if (!domainId) return
 
     if (currentRealEstate?.street) {
-      const streetVal =
+      let streetVal =
         typeof currentRealEstate.street === 'object' &&
         currentRealEstate.street !== null
           ? currentRealEstate.street._id
           : currentRealEstate.street
+
+      if (streetVal && !/^[0-9a-fA-F]{24}$/.test(String(streetVal))) {
+        streetVal = undefined
+      }
 
       setTimeout(() => {
         form.setFieldsValue({
@@ -117,6 +121,15 @@ const RealEstateForm: FC<Props> = ({
     isServiceExistById('677d414283b6ef93c6b8ea2c') ||
     isServiceExistById('682dd48d9665126611c81950')
 
+  const getSafeStreetId = () => {
+    const val =
+      typeof currentRealEstate?.street === 'object' &&
+      currentRealEstate?.street !== null
+        ? currentRealEstate.street._id
+        : currentRealEstate?.street
+    return val && /^[0-9a-fA-F]{24}$/.test(String(val)) ? val : undefined
+  }
+
   return (
     <Form
       form={form}
@@ -126,11 +139,7 @@ const RealEstateForm: FC<Props> = ({
       onValuesChange={() => setIsValueChanged(true)}
       initialValues={{
         currency: currentRealEstate?.currency || Currency.UAH,
-        street:
-          typeof currentRealEstate?.street === 'object' &&
-          currentRealEstate?.street !== null
-            ? currentRealEstate.street._id
-            : currentRealEstate?.street,
+        street: getSafeStreetId(),
       }}
     >
       <DomainsSelect form={form} edit={!!currentRealEstate} />
