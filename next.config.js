@@ -11,7 +11,18 @@ const nextConfig = {
   reactStrictMode: true,
   i18n,
   experimental: {
-    serverComponentsExternalPackages: ['@sparticuz/chromium', 'puppeteer-core'],
+    serverComponentsExternalPackages: [
+      '@sparticuz/chromium',
+      '@sparticuz/chromium-min',
+      'puppeteer-core',
+    ],
+    // Chromium's binary/library assets are loaded at runtime via fs, so Next's
+    // file tracing misses them and the serverless function ships without
+    // libnspr4.so etc. Force the @sparticuz/chromium assets into every API
+    // function so the bundled-binary path works on Vercel/Lambda.
+    outputFileTracingIncludes: {
+      '/api/**': ['./node_modules/@sparticuz/chromium/**'],
+    },
   },
   transpilePackages: [
     'antd',
