@@ -60,6 +60,11 @@ export const AdminPanelPage: React.FC = () => {
                 </>
               ),
             },
+            {
+              key: 'customservices',
+              label: 'Послуги',
+              children: <CustomServicesTable />,
+            },
             ...(isGlobalAdmin
               ? [
                   {
@@ -94,11 +99,6 @@ export const AdminPanelPage: React.FC = () => {
                     ),
                   },
                   {
-                    key: 'customservices',
-                    label: 'Послуги',
-                    children: <CustomServicesTable />,
-                  },
-                  {
                     key: 'templates',
                     label: 'Шаблони типів',
                     children: <DomainTypeTemplatesTable />,
@@ -107,16 +107,20 @@ export const AdminPanelPage: React.FC = () => {
                     key: 'logs',
                     label: 'Логування',
                     children: (
-                    <>
-                    <Flex justify="space-between" align="center" style={{ marginBottom: 16 }}>
-                      <Typography.Title level={4} style={{ margin: 0 }}>
-                        Логування
-                        </Typography.Title>
+                      <>
+                        <Flex
+                          justify="space-between"
+                          align="center"
+                          style={{ marginBottom: 16 }}
+                        >
+                          <Typography.Title level={4} style={{ margin: 0 }}>
+                            Логування
+                          </Typography.Title>
                         </Flex>
                         <LogsConsole />
-                        </>
-                      ),
-                    },
+                      </>
+                    ),
+                  },
                 ]
               : []),
           ]}

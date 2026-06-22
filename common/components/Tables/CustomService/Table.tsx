@@ -43,7 +43,9 @@ export const CustomServicesTable: React.FC = () => {
   const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
   const isDomainAdmin = user?.roles?.includes(Roles.DOMAIN_ADMIN)
 
-  const { data: customServicesResponse, isLoading } = useGetCustomServicesQuery({})
+  const { data: customServicesResponse, isLoading } = useGetCustomServicesQuery(
+    {}
+  )
   const allServices = useMemo(
     () => customServicesResponse?.data ?? [],
     [customServicesResponse?.data]
@@ -105,23 +107,29 @@ export const CustomServicesTable: React.FC = () => {
 
   const defaultServiceIds = useMemo(() => new Set(defaultServices), [])
 
-  const resolveCategory = (s: ICustomService): DomainTypeTemplateCategory | string | undefined =>
-    s.category
-    ?? serviceIdToCategoryMap.get(String(s._id))
-    ?? (s.domain ? domainCategoryMap.get(s.domain) : undefined)
-    ?? (defaultServiceIds.has(s._id) ? ('utility' as DomainTypeTemplateCategory) : undefined)
-    ?? s.groupName
+  const resolveCategory = (
+    s: ICustomService
+  ): DomainTypeTemplateCategory | string | undefined =>
+    s.category ??
+    serviceIdToCategoryMap.get(String(s._id)) ??
+    (s.domain ? domainCategoryMap.get(s.domain) : undefined) ??
+    (defaultServiceIds.has(s._id)
+      ? ('utility' as DomainTypeTemplateCategory)
+      : undefined) ??
+    s.groupName
 
   const [search, setSearch] = useState('')
-  const [selectedDomain, setSelectedDomain] = useState<string | undefined>(undefined)
+  const [selectedDomain, setSelectedDomain] = useState<string | undefined>(
+    undefined
+  )
 
   const domainOptions = useMemo(
     () =>
-      (allDomains as any[]).map((d) => ({
+      (domains as any[]).map((d) => ({
         value: String(d._id),
         label: d.name,
       })),
-    [allDomains]
+    [domains]
   )
 
   const filtered = useMemo(() => {
@@ -143,7 +151,9 @@ export const CustomServicesTable: React.FC = () => {
 
   const [deleteService] = useDeleteCustomServiceMutation()
   const [editService, { isLoading: isEditing }] = useEditCustomServiceMutation()
-  const [editingService, setEditingService] = useState<ICustomService | null>(null)
+  const [editingService, setEditingService] = useState<ICustomService | null>(
+    null
+  )
   const [form] = Form.useForm<{ name: string }>()
 
   const openEdit = (record: ICustomService) => {
@@ -191,7 +201,9 @@ export const CustomServicesTable: React.FC = () => {
         return (
           <Tag color={cat ? 'blue' : 'default'}>
             {cat
-              ? getDomainTypeTemplateCategoryLabel(cat as DomainTypeTemplateCategory)
+              ? getDomainTypeTemplateCategoryLabel(
+                  cat as DomainTypeTemplateCategory
+                )
               : 'Інше'}
           </Tag>
         )
@@ -243,7 +255,7 @@ export const CustomServicesTable: React.FC = () => {
           allowClear
           style={{ width: 320 }}
         />
-        {isGlobalAdmin && (
+        {(isGlobalAdmin || adminDomains.length > 1) && (
           <Select
             placeholder="Фільтр за доменом"
             allowClear

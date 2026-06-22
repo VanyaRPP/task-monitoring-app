@@ -495,14 +495,26 @@ export async function listCustomServicesForDomain(
   query: ListCustomServicesQuery,
   ctx: UserContext
 ): Promise<ServiceResult<unknown[]>> {
-  if (ctx.isUser) {
-    // Match legacy contract: User-level access returns 400 with 'Не дозволено'.
+  if (!ctx.isGlobalAdmin && !ctx.isDomainAdmin) {
     return err('invalid', 'Не дозволено')
   }
 
   const filter: Record<string, unknown> = {}
 
+  if (ctx.isDomainAdmin) {
+    const domainIds = await Domain.find({
+      adminEmails: ctx.user.email,
+    }).distinct('_id')
+
+    if (!domainIds.length) {
+      return ok([])
+    }
+
+    filter.domain = { $in: domainIds }
+  }
+
   if (
+    ctx.isGlobalAdmin &&
     query.domainId !== undefined &&
     query.domainId !== null &&
     query.domainId !== ''
@@ -530,7 +542,7 @@ export async function listCustomServicesForDomain(
     } else {
       filter.$or = [
         { domain: domainObjectId },
-        { domain: { $in: [null, undefined] } },
+        { domain: null },
         { domain: { $exists: false } },
       ]
     }
@@ -548,7 +560,9 @@ export async function listCustomServicesForDomain(
   const unique = services.filter((s: any) => {
     const id = String(s?._id ?? '')
     if (!id || seenIds.has(id)) return false
-    const nameKey = String(s?.name ?? '').trim().toLowerCase()
+    const nameKey = String(s?.name ?? '')
+      .trim()
+      .toLowerCase()
     if (nameKey && seenNames.has(nameKey)) return false
     seenIds.add(id)
     if (nameKey) seenNames.add(nameKey)

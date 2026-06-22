@@ -58,7 +58,19 @@ export function getVisibleServices(
   if (!selectedIds.length) return []
 
   const selectedSet = new Set(selectedIds)
-  return allServices.filter((s) => selectedSet.has(s._id))
+
+  const domainIds = new Set(
+    (Array.isArray(domains) ? domains : domains ? [domains] : [])
+      .map((d) => (d && d._id ? String(d._id) : ''))
+      .filter(Boolean)
+  )
+
+  return allServices.filter((s: any) => {
+    if (selectedSet.has(s._id)) return true
+    const svcDomain = (s as any).domain
+    if (svcDomain && domainIds.has(String(svcDomain))) return true
+    return false
+  })
 }
 
 export function canEditDomainServiceSelection(
