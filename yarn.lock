@@ -2612,6 +2612,14 @@
     "@smithy/util-buffer-from" "^2.2.0"
     tslib "^2.6.2"
 
+"@sparticuz/chromium-min@^127":
+  version "127.0.0"
+  resolved "https://registry.yarnpkg.com/@sparticuz/chromium-min/-/chromium-min-127.0.0.tgz#23a8904b426c46b46f1252d51f513e363ac5268e"
+  integrity sha512-WaEcpgdAaqkEfL0zhEq0aoFJ0F+oCRn9tWemOdQjB/7qT3YrqH+7pNAT4tUaO0T0A4nexJbfLUAZx8MnhAteVg==
+  dependencies:
+    follow-redirects "^1.15.6"
+    tar-fs "^3.0.6"
+
 "@sparticuz/chromium@^127.0.0":
   version "127.0.0"
   resolved "https://registry.npmjs.org/@sparticuz/chromium/-/chromium-127.0.0.tgz"

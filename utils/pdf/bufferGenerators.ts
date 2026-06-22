@@ -12,11 +12,14 @@ const COMMON_LAUNCH_ARGS = [
 
 let executablePathPromise: Promise<string> | undefined
 
-function resolveExecutablePath(chromium: {
-  executablePath: () => Promise<string>
-}): Promise<string> {
+function resolveExecutablePath(
+  chromium: {
+    executablePath: (input?: string) => Promise<string>
+  },
+  input?: string
+): Promise<string> {
   if (!executablePathPromise) {
-    executablePathPromise = chromium.executablePath().catch((err) => {
+    executablePathPromise = chromium.executablePath(input).catch((err) => {
       executablePathPromise = undefined
       throw err
     })
@@ -26,15 +29,22 @@ function resolveExecutablePath(chromium: {
 
 async function launchBrowser() {
   if (isServerless) {
+    // When CHROMIUM_PACK_URL is set, fetch the Chromium binary + libs from that
+    // remote pack via @sparticuz/chromium-min (keeps the function small and
+    // sidesteps bundling issues). Otherwise use the full @sparticuz/chromium
+    // whose assets are force-traced into the function (see next.config.js).
+    const packUrl = process.env.CHROMIUM_PACK_URL
     const [{ default: puppeteerCore }, { default: chromium }] =
       await Promise.all([
         import('puppeteer-core'),
-        import('@sparticuz/chromium'),
+        packUrl
+          ? import('@sparticuz/chromium-min')
+          : import('@sparticuz/chromium'),
       ])
     return puppeteerCore.launch({
       args: [...chromium.args, ...COMMON_LAUNCH_ARGS],
       defaultViewport: chromium.defaultViewport,
-      executablePath: await resolveExecutablePath(chromium),
+      executablePath: await resolveExecutablePath(chromium, packUrl),
       headless: true,
       protocolTimeout: 60_000,
     })
