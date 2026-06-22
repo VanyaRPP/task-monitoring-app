@@ -44,6 +44,7 @@
     "@react-google-maps/api": "^2.12.0",
     "@reduxjs/toolkit": "^2.2.6",
     "@sparticuz/chromium": "^127.0.0",
+    "@sparticuz/chromium-min": "^127",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.5.0",
     "@testing-library/react": "^16.0.1",
