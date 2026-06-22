@@ -11,18 +11,13 @@ const nextConfig = {
   reactStrictMode: true,
   i18n,
   experimental: {
+    // Chromium itself is fetched at runtime from a remote pack via
+    // @sparticuz/chromium-min (see utils/pdf/bufferGenerators.ts), so we only
+    // need to keep these out of the webpack bundle — no asset tracing required.
     serverComponentsExternalPackages: [
-      '@sparticuz/chromium',
       '@sparticuz/chromium-min',
       'puppeteer-core',
     ],
-    // Chromium's binary/library assets are loaded at runtime via fs, so Next's
-    // file tracing misses them and the serverless function ships without
-    // libnspr4.so etc. Force the @sparticuz/chromium assets into every API
-    // function so the bundled-binary path works on Vercel/Lambda.
-    outputFileTracingIncludes: {
-      '/api/**': ['./node_modules/@sparticuz/chromium/**'],
-    },
   },
   transpilePackages: [
     'antd',
