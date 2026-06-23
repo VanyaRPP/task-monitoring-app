@@ -22,7 +22,7 @@ const getEntityId = (value?: { _id?: string } | string) => {
 }
 
 interface Props {
-  chosenRealEstate: { domain: string }
+  chosenRealEstate: { domain: string; street?: string } | null
   closeModal: VoidFunction
   currentRealEstate?: IExtendedRealestate
   editable?: boolean
@@ -40,7 +40,10 @@ const RealEstateModal: FC<Props> = ({
   const [addRealEstate, { isLoading: isAdding }] = useAddRealEstateMutation()
   const [editRealEstate, { isLoading: isEditing }] = useEditRealEstateMutation()
   const domainId = Form.useWatch('domain', form)
-  const currentDomainId = getEntityId(currentRealEstate?.domain) || domainId
+  const currentDomainId =
+    getEntityId(currentRealEstate?.domain) ||
+    domainId ||
+    chosenRealEstate?.domain
   const { data: customDomainServices } = useGetCustomServicesByDomainQuery(
     { domainId: currentDomainId },
     { skip: !currentDomainId }
@@ -122,7 +125,10 @@ const RealEstateModal: FC<Props> = ({
 
     const realEstateData = {
       domain: getEntityId(formData.domain),
-      street: currentRealEstate?.street?._id || getEntityId(formData.street),
+      street:
+        getEntityId(formData.street) ||
+        getEntityId(currentRealEstate?.street) ||
+        undefined,
       companyName: formData.companyName,
       description: formData.description,
       adminEmails: formData.adminEmails,
@@ -168,7 +174,22 @@ const RealEstateModal: FC<Props> = ({
       message.success(action)
     } else {
       const action = currentRealEstate ? 'збереженні' : 'додаванні'
-      message.error(`Помилка при ${action}`)
+      // Surface the server's reason so the failure is diagnosable instead of a
+      // generic toast (e.g. "Domain is required", validation errors, etc.).
+      const errData = (response as { error?: { data?: { message?: unknown } } })
+        ?.error?.data
+      const serverMsg =
+        typeof errData?.message === 'string'
+          ? errData.message
+          : errData?.message
+            ? JSON.stringify(errData.message)
+            : undefined
+      console.error('addRealEstate failed:', response)
+      message.error(
+        serverMsg
+          ? `Помилка при ${action}: ${serverMsg}`
+          : `Помилка при ${action}`
+      )
     }
   }
 
@@ -191,6 +212,7 @@ const RealEstateModal: FC<Props> = ({
         editable={editable}
         setIsValueChanged={setIsValueChanged}
         customServices={domainCustomServices}
+        preselectedStreet={chosenRealEstate?.street}
       />
     </Modal>
   )

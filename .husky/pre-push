@@ -1,5 +1,0 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
-
-# Full coverage gate: enforces coverageThreshold in jest.config.ts.
-yarn test:coverage

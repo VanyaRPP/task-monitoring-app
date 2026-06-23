@@ -4,15 +4,40 @@ import TemplateTab from './TemplateTab'
 
 jest.mock('../style.module.scss', () => ({ templateItem: 'templateItem' }))
 
+jest.mock('@common/api/invoiceTemplateApi/invoiceTemplate.api', () => ({
+  useGetInvoiceTemplatesQuery: () => ({ data: { data: [] } }),
+  useCreateInvoiceTemplateMutation: () => [jest.fn()],
+  useDeleteInvoiceTemplateMutation: () => [jest.fn()],
+}))
+
+jest.mock('@components/Forms/InvoiceTemplateEditor', () => ({
+  __esModule: true,
+  default: () => null,
+}))
+
+const Harness = ({
+  initialValues,
+  editable,
+}: {
+  initialValues?: { defaultTemplate?: string }
+  editable: boolean
+}) => {
+  const [form] = Form.useForm()
+  return (
+    <Form form={form} initialValues={initialValues}>
+      <TemplateTab
+        editable={editable}
+        form={form}
+        setIsValueChanged={() => undefined}
+      />
+    </Form>
+  )
+}
+
 const renderInForm = (
   initialValues?: { defaultTemplate?: string },
   editable = true
-) =>
-  render(
-    <Form initialValues={initialValues}>
-      <TemplateTab editable={editable} />
-    </Form>
-  )
+) => render(<Harness initialValues={initialValues} editable={editable} />)
 
 describe('TemplateTab', () => {
   it('renders the field label', () => {

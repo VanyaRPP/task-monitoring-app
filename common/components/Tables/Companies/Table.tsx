@@ -580,7 +580,7 @@ const getDefaultColumns = ({
 
   const domainColumn: any = {
     fixed: 'left',
-    title: 'Назва компанії',
+    title: 'Компанія',
     dataIndex: 'companyName',
     width: 200,
     filterSearch: true,
@@ -654,11 +654,12 @@ const getDefaultColumns = ({
   }
 
   columns.unshift(streetColumn)
-  columns.unshift(companyColumn)
 
   if (!isSingleCompanyByData) {
     columns.unshift(domainColumn)
   }
+
+  columns.unshift(companyColumn)
 
   return columns
 }
