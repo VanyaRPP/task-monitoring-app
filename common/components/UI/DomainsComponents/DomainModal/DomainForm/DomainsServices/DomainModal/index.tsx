@@ -54,6 +54,7 @@ interface Props {
   onUpdateCustomService?: (id: string, newTitle: string) => Promise<void>
   isGlobalAdmin?: boolean
   domainId?: string
+  editable?: boolean
 }
 
 const DomainModal: FC<Props> = ({
@@ -67,11 +68,10 @@ const DomainModal: FC<Props> = ({
   onUpdateCustomService,
   isGlobalAdmin,
   domainId,
+  editable = true,
 }) => {
   const [targetKeys, setTargetKeys] = useState<Record<string, string[]>>({})
-  const [localServiceGroups, setLocalServiceGroups] = useState<ServiceGroup[]>(
-    []
-  )
+  const [localServiceGroups, setLocalServiceGroups] = useState<ServiceGroup[]>([])
   const [localData, setLocalData] = useState<ServiceItem[]>([])
   const [newGroupName, setNewGroupName] = useState('')
   const [editingKey, setEditingKey] = useState<string | null>(null)
@@ -79,6 +79,7 @@ const DomainModal: FC<Props> = ({
   const [newServiceName, setNewServiceName] = useState('')
   const [activePanel, setActivePanel] = useState<string | string[]>([])
   const { data: user } = useGetCurrentUserQuery()
+  
   isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
   const isAdmin = isAdminCheck(user?.roles)
 
@@ -91,8 +92,11 @@ const DomainModal: FC<Props> = ({
 
     setTargetKeys(initialTargets)
     setLocalServiceGroups(serviceGroups)
-    setLocalData(data)
   }, [open])
+
+  useEffect(() => {
+    setLocalData(data)
+  }, [data])
 
   const handleChange = (
     groupName: string,
@@ -139,10 +143,8 @@ const DomainModal: FC<Props> = ({
         }))
       )
 
-      setLocalData((prev) => prev.filter((item) => item.key !== serviceKey))
-
       onDeleteCustomService?.(serviceKey)
-    } catch (error) {
+    } catch (error: any) {
       message.error(error?.data?.message || 'Помилка при видаленні')
     }
   }
@@ -191,14 +193,9 @@ const DomainModal: FC<Props> = ({
         ...(domainId ? { domainId } : {}),
       }).unwrap()
 
-      setLocalData((prev) =>
-        prev.map((s) =>
-          s.key === item.key ? { ...s, title: tempTitle.trim() } : s
-        )
-      )
       message.success('Назву послуги оновлено')
       handleCancelEdit()
-    } catch (error) {
+    } catch (error: any) {
       message.error(error?.data?.message || 'Не вдалося оновити назву')
     }
   }
@@ -237,6 +234,7 @@ const DomainModal: FC<Props> = ({
     try {
       await onCreateCustomService(newServiceName)
       message.success('Кастомна послуга додана')
+
       setNewServiceName('')
       setActivePanel([])
     } catch (err: any) {
@@ -283,6 +281,7 @@ const DomainModal: FC<Props> = ({
         titles={['Доступні послуги', 'Обрані послуги']}
         targetKeys={targetKeys[groupName] || []}
         onChange={(keys) => handleChange(groupName, keys)}
+        disabled={!editable}
         listStyle={{
           width: '55%',
           height: 300,
@@ -325,7 +324,7 @@ const DomainModal: FC<Props> = ({
               )}
 
               <Space size="small">
-                {isCustom && isAdmin && (isGlobalAdmin || !!domainId) && (
+                {editable && isCustom && isAdmin && (isGlobalAdmin || !!domainId) && (
                   <>
                     {isEditing ? (
                       <>
@@ -468,14 +467,22 @@ const DomainModal: FC<Props> = ({
       open={open}
       onCancel={onClose}
       width={1200}
-      footer={[
-        <Button key="cancel" onClick={onClose}>
-          Скасувати
-        </Button>,
-        <Button key="save" type="primary" onClick={handleSaveModal}>
-          Зберегти
-        </Button>,
-      ]}
+      footer={
+        editable
+          ? [
+              <Button key="cancel" onClick={onClose}>
+                Скасувати
+              </Button>,
+              <Button key="save" type="primary" onClick={handleSaveModal}>
+                Зберегти
+              </Button>,
+            ]
+          : [
+              <Button key="close" onClick={onClose}>
+                Закрити
+              </Button>,
+            ]
+      }
       style={{
         maxHeight: '80vh',
         overflowY: 'auto',
@@ -483,11 +490,13 @@ const DomainModal: FC<Props> = ({
       }}
     >
       <Space direction="vertical" style={{ width: '100%' }} size="large">
-        <Collapse
-          items={collapseItems}
-          activeKey={activePanel}
-          onChange={handlePanelChange}
-        />
+        {editable && (
+          <Collapse
+            items={collapseItems}
+            activeKey={activePanel}
+            onChange={handlePanelChange}
+          />
+        )}
 
         <div style={{ maxHeight: 'calc(70vh - 150px)', overflowY: 'auto' }}>
           {localServiceGroups.length > 0
@@ -503,7 +512,7 @@ const DomainModal: FC<Props> = ({
                       }}
                     >
                       <span>Група: {g.groupName}</span>
-                      {isGlobalAdmin && (
+                      {editable && isGlobalAdmin && (
                         <Button
                           type="text"
                           danger

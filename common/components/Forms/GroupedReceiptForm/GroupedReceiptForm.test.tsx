@@ -5,13 +5,14 @@ jest.mock('./style.module.scss', () => ({}))
 jest.mock('./templates/style.module.scss', () => ({}))
 
 let template = 'olimp'
+let companyCurrency = 'UAH'
 
 jest.mock('@components/AddPaymentModal', () => ({
   usePaymentContext: () => ({
     template,
     setTemplate: jest.fn(),
     company: {
-      currency: 'UAH',
+      currency: companyCurrency,
       domain: { name: 'Test Domain', description: 'Test Company\nKyiv' },
     },
     showQuantityInPreview: false,
@@ -31,6 +32,12 @@ jest.mock('@components/Forms/GroupedReceiptForm/GroupedPricesTable', () => ({
 
 jest.mock('@common/api/paymentApi/payment.api', () => ({
   useEditPaymentMutation: () => [jest.fn().mockResolvedValue({ data: {} })],
+}))
+
+jest.mock('@common/api/invoiceTemplateApi/invoiceTemplate.api', () => ({
+  useGetInvoiceTemplatesQuery: () => ({ data: { data: [] } }),
+  useCreateInvoiceTemplateMutation: () => [jest.fn()],
+  useUpdateInvoiceTemplateMutation: () => [jest.fn()],
 }))
 
 jest.mock('next/dynamic', () => (importFn: () => Promise<any>) => {
@@ -71,6 +78,7 @@ const renderOlimp = (overrides = {}) =>
 describe('OLIMP template', () => {
   beforeEach(() => {
     template = 'olimp'
+    companyCurrency = 'UAH'
   })
 
   test('renders invoice header and total', () => {
@@ -100,7 +108,8 @@ describe('OLIMP template', () => {
   })
 
   test('показує INVOICE № для USD валюти', () => {
-    renderOlimp({ company: { currency: 'USD' } })
+    companyCurrency = 'USD'
+    renderOlimp()
     expect(screen.getByText(/INVOICE №/i)).toBeInTheDocument()
     expect(screen.queryByText(/РАХУНОК №/i)).not.toBeInTheDocument()
   })
@@ -111,7 +120,8 @@ describe('OLIMP template', () => {
   })
 
   test('показує секцію "PAYMENT INFO" для USD', () => {
-    renderOlimp({ company: { currency: 'USD' } })
+    companyCurrency = 'USD'
+    renderOlimp()
     expect(screen.getByText(/PAYMENT INFO/i)).toBeInTheDocument()
   })
 
@@ -121,7 +131,8 @@ describe('OLIMP template', () => {
   })
 
   test('показує секцію "ISSUED TO" для USD', () => {
-    renderOlimp({ company: { currency: 'USD' } })
+    companyCurrency = 'USD'
+    renderOlimp()
     expect(screen.getByText(/ISSUED TO/i)).toBeInTheDocument()
   })
 
@@ -167,6 +178,7 @@ describe('OLIMP template', () => {
 describe('Classic template', () => {
   beforeEach(() => {
     template = 'classic'
+    companyCurrency = 'UAH'
   })
 
   const renderClassic = (overrides = {}) =>

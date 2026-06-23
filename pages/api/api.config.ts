@@ -4,6 +4,7 @@ import '@common/modules/models/Domain'
 import '@common/modules/models/Payment'
 import '@common/modules/models/Service'
 import '@common/modules/models/Street'
+import '@common/modules/models/InvoiceTemplate'
 
 export type Data = {
   data?: any

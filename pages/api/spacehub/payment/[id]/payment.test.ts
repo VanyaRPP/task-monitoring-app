@@ -49,6 +49,11 @@ describe('Payment API Endpoint - [id]', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     ;(getServerSession as jest.Mock).mockReset()
+    // Domain is mocked in this suite, so getCurrentUser's role derivation sees
+    // no domains and would demote seeded DomainAdmins. Reflect reality: a
+    // domain exists, so derived roles stay stable (per-domain ownership is still
+    // enforced by the handler via Domain.findOne).
+    ;(Domain.exists as jest.Mock).mockResolvedValue(true)
   })
 
   describe('Auth & method handling', () => {

@@ -2,6 +2,7 @@ import { CloseCircleOutlined } from '@ant-design/icons'
 import TotalArea from './cells/TotalArea'
 import CompanyName from './cells/CompanyName'
 import { Popconfirm, TableColumnsType } from 'antd'
+import { ServiceType, UTILITY_SERVICE_ID_TO_TYPE } from '@utils/constants'
 
 import {
   ElectricityAmount,
@@ -27,25 +28,62 @@ import {
   WaterPartSum,
 } from './cells/WaterPart'
 
+type AllowedService = {
+  _id?: unknown
+  fieldName?: string
+  serviceType?: string
+}
+
+const SERVICE_TYPE_VALUES = new Set<string>(Object.values(ServiceType))
+
+// A catalog entry can carry its "communal" type three different ways, so we
+// resolve in priority order. Relying on any single one breaks a real case:
+//  - pinned seed _id     → shared seeded services (UTILITY_SERVICE_ID_TO_TYPE)
+//  - serviceType         → per-domain typed copies (own _id, set via the form)
+//  - fieldName === value → legacy rows whose fieldName already equals the type
+// The #1598 cleanup dropped the hardcoded fieldName fallback, so the legacy
+// literals (rentPrice, GarbageCollectorAmount, ...) no longer matched anything.
+const resolveServiceType = (
+  service: AllowedService
+): ServiceType | undefined => {
+  const byId = UTILITY_SERVICE_ID_TO_TYPE[String(service?._id)]
+  if (byId) return byId
+  if (service?.serviceType && SERVICE_TYPE_VALUES.has(service.serviceType)) {
+    return service.serviceType as ServiceType
+  }
+  if (service?.fieldName && SERVICE_TYPE_VALUES.has(service.fieldName)) {
+    return service.fieldName as ServiceType
+  }
+  return undefined
+}
+
 export const getDefaultColumns = (
   remove: (index: number) => void,
-  _allowedServices: any,
+  allowedServices: AllowedService[] = [],
   losses?: number,
   extraColumns: TableColumnsType = []
-): TableColumnsType =>
-  [
+): TableColumnsType => {
+  const allowedTypes = new Set<ServiceType>(
+    allowedServices
+      .map(resolveServiceType)
+      .filter((type): type is ServiceType => Boolean(type))
+  )
+  const has = (type: ServiceType): boolean => allowedTypes.has(type)
+
+  return [
     {
       fixed: 'left',
       title: 'Компанія',
       width: 250,
       render: (_, { name }: { name: number }) => <CompanyName name={name} />,
     },
+    (has(ServiceType.Placing) || has(ServiceType.Maintenance)) && 
     {
       title: 'Площа, м²',
       width: 160,
       render: (_, { name }: { name: number }) => <TotalArea name={name} />,
     },
-    _allowedServices.some((inv) => inv?.fieldName === 'rentPrice') && {
+    has(ServiceType.Maintenance) && {
       title: 'Утримання',
       children: [
         {
@@ -64,7 +102,7 @@ export const getDefaultColumns = (
         },
       ],
     },
-    _allowedServices.some((inv) => inv?.fieldName === 'placingPrice') && {
+    has(ServiceType.Placing) && {
       title: 'Розміщення',
       children: [
         {
@@ -81,12 +119,12 @@ export const getDefaultColumns = (
         },
       ],
     },
-    _allowedServices.some((inv) => inv?.fieldName === 'inflicionPrice') && {
+    has(ServiceType.Inflicion) && {
       title: <InflicionTitle />,
       width: 200,
       render: (_, { name }: { name: number }) => <InflicionSum name={name} />,
     },
-    _allowedServices.some((inv) => inv?.fieldName === 'electricityPrice') && {
+    has(ServiceType.Electricity) && {
       title: losses
         ? `Електропостачання + Втрати ${losses}%`
         : 'Електропостачання',
@@ -128,7 +166,7 @@ export const getDefaultColumns = (
         },
       ],
     },
-    _allowedServices.some((inv) => inv?.fieldName === 'waterPrice') && {
+    has(ServiceType.Water) && {
       title: 'Водопостачання',
       children: [
         {
@@ -152,7 +190,7 @@ export const getDefaultColumns = (
         },
       ],
     },
-    _allowedServices.some((inv) => inv?.fieldName === 'waterPartAmount') && {
+    has(ServiceType.WaterPart) && {
       title: 'Водопостачання без лічильника',
       children: [
         {
@@ -171,9 +209,7 @@ export const getDefaultColumns = (
         },
       ],
     },
-    _allowedServices.some(
-      (inv) => inv?.fieldName === 'GarbageCollectorAmount'
-    ) && {
+    has(ServiceType.GarbageCollector) && {
       title: 'Вивіз ТПВ',
       children: [
         {
@@ -192,11 +228,12 @@ export const getDefaultColumns = (
         },
       ],
     },
-    _allowedServices.some((inv) => inv?.fieldName === 'Cleaning') && {
+    has(ServiceType.Cleaning) && {
       title: 'Прибирання',
       width: 200,
       render: (_, { name }: { name: number }) => <Cleaning name={name} />,
     },
+    has(ServiceType.Discount) && 
     {
       title: 'Знижка',
       width: 200,
@@ -219,3 +256,4 @@ export const getDefaultColumns = (
       ),
     },
   ].filter(Boolean) as TableColumnsType
+}

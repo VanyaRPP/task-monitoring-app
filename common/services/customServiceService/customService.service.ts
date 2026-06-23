@@ -1,5 +1,6 @@
 import CustomService from '@modules/models/CustomService'
 import Domain from '@modules/models/Domain'
+import RealEstate from '@modules/models/RealEstate'
 import { DomainTypeTemplateCategory } from '@modules/models/domain-type-template'
 import { getDefaultServiceIdsForCategory } from '@common/services/domainTypeTemplateService/domainTypeTemplate.service'
 import { ServiceType } from '@utils/constants'
@@ -7,6 +8,8 @@ import { escapeRegexForMongo } from '@utils/escape-regex/escape-regex'
 import { defaultServicesSet } from '@utils/helpers'
 import { transliterateAndCamelCase } from '@utils/transliterateAndCamelCase'
 import mongoose from 'mongoose'
+
+const DEFAULT_GROUP_NAME = 'Загальні'
 
 export type ServiceErrorCode =
   | 'forbidden'
@@ -130,6 +133,78 @@ async function findDuplicateInDomain(
   return CustomService.findOne(filter)
 }
 
+async function attachServiceToDomainGroup(
+  domainId: mongoose.Types.ObjectId,
+  serviceId: mongoose.Types.ObjectId
+): Promise<void> {
+  const domain = await Domain.findById(domainId).select('customServices')
+  const existingGroups = domain?.customServices ?? []
+
+  if (existingGroups.length > 0) {
+    const firstGroupName = existingGroups[0].groupName
+    await Domain.updateOne(
+      { _id: domainId, 'customServices.groupName': firstGroupName },
+      { $addToSet: { 'customServices.$[group].services': serviceId } },
+      { arrayFilters: [{ 'group.groupName': firstGroupName }] }
+    )
+  } else {
+    await Domain.updateOne(
+      { _id: domainId },
+      {
+        $push: {
+          customServices: {
+            groupName: DEFAULT_GROUP_NAME,
+            services: [serviceId],
+          },
+        },
+      }
+    )
+  }
+}
+
+async function detachServiceFromDomainGroups(
+  domainId: mongoose.Types.ObjectId,
+  serviceId: mongoose.Types.ObjectId | string
+): Promise<void> {
+  await Domain.updateOne(
+    { _id: domainId },
+    { $pull: { 'customServices.$[].services': serviceId } }
+  )
+}
+
+async function detachServiceFromDomainCompanies(
+  domainId: mongoose.Types.ObjectId,
+  serviceId: mongoose.Types.ObjectId | string
+): Promise<void> {
+  await RealEstate.updateMany(
+    { domain: domainId },
+    { $pull: { customServices: { _id: serviceId } } }
+  )
+}
+
+async function attachServiceToDomainCompanies(
+  domainId: mongoose.Types.ObjectId,
+  service: {
+    _id: mongoose.Types.ObjectId
+    name: string
+    fieldName: string
+  }
+): Promise<void> {
+  await RealEstate.updateMany(
+    { domain: domainId, archived: { $ne: true } },
+    {
+      $push: {
+        customServices: {
+          _id: service._id,
+          label: service.name,
+          fieldName: service.fieldName,
+          price: 0,
+        },
+      },
+    }
+  )
+}
+
 export async function createCustomService(
   input: CreateCustomServiceInput,
   ctx: UserContext
@@ -183,6 +258,26 @@ export async function createCustomService(
     ...(parsedType.value ? { serviceType: parsedType.value } : {}),
     ...(domainObjectId ? { domain: domainObjectId } : {}),
   })
+
+  if (domainObjectId) {
+    // Best-effort: make the new service visible immediately by attaching it to
+    // the domain's default group and to every active company under that domain
+    // with a price of 0. Failures are non-fatal — the service still exists.
+    try {
+      await attachServiceToDomainGroup(domainObjectId, created._id)
+    } catch (e) {
+      console.warn('attachServiceToDomainGroup failed', e)
+    }
+    try {
+      await attachServiceToDomainCompanies(domainObjectId, {
+        _id: created._id,
+        name: created.name,
+        fieldName: created.fieldName,
+      })
+    } catch (e) {
+      console.warn('attachServiceToDomainCompanies failed', e)
+    }
+  }
 
   return ok(created.toObject())
 }
@@ -306,8 +401,10 @@ export async function deleteCustomService(
     return err('not_found', 'Сервіс не знайдений')
   }
 
+  const serviceDomain = service.domain as mongoose.Types.ObjectId | undefined
+
   if (ctx.isGlobalAdmin) {
-    await CustomService.findByIdAndDelete(idStr)
+    await cascadeDeleteCustomService(idStr, serviceDomain)
     return ok('Сервіс успішно видалено')
   }
 
@@ -316,15 +413,36 @@ export async function deleteCustomService(
   if (isServiceErr(access)) return access
   const domainId = access.data
 
-  const serviceDomain = service.domain as mongoose.Types.ObjectId | undefined
-
   if (serviceDomain && !domainId.equals(serviceDomain)) {
     return err('forbidden', 'Сервіс не належить вашому домену')
   }
 
-  // Own-domain or legacy → delete the original document.
-  await CustomService.findByIdAndDelete(idStr)
+  // Legacy services (no domain ref) are never referenced in any
+  // Domain.customServices group, so cascade is a no-op — skip it.
+  await cascadeDeleteCustomService(idStr, serviceDomain)
   return ok('Сервіс успішно видалено')
+}
+
+async function cascadeDeleteCustomService(
+  serviceId: string,
+  domainId?: mongoose.Types.ObjectId
+): Promise<void> {
+  // Cascade order: pull refs from embedded structures first, then delete the
+  // catalog record. If the delete fails, the embeds are already cleaned — they
+  // would be orphaned anyway since the catalog record was about to be removed.
+  if (domainId) {
+    try {
+      await detachServiceFromDomainGroups(domainId, serviceId)
+    } catch (e) {
+      console.warn('detachServiceFromDomainGroups failed', e)
+    }
+    try {
+      await detachServiceFromDomainCompanies(domainId, serviceId)
+    } catch (e) {
+      console.warn('detachServiceFromDomainCompanies failed', e)
+    }
+  }
+  await CustomService.findByIdAndDelete(serviceId)
 }
 
 export interface ListCustomServicesQuery {
@@ -425,5 +543,97 @@ export async function listCustomServicesForDomain(
   }
 
   const services = await CustomService.find(filter).lean()
-  return ok(services)
+  const seenIds = new Set<string>()
+  const seenNames = new Set<string>()
+  const unique = services.filter((s: any) => {
+    const id = String(s?._id ?? '')
+    if (!id || seenIds.has(id)) return false
+    const nameKey = String(s?.name ?? '').trim().toLowerCase()
+    if (nameKey && seenNames.has(nameKey)) return false
+    seenIds.add(id)
+    if (nameKey) seenNames.add(nameKey)
+    return true
+  })
+  return ok(unique)
+}
+
+export interface LeanCustomService {
+  _id: unknown
+  [key: string]: unknown
+}
+
+export interface DomainServiceGroup {
+  groupName: string | null
+  services: LeanCustomService[]
+}
+
+/**
+ * Resolves a domain's `customServices` groups into full service documents.
+ *
+ * A group's service ids can point either at services scoped to this domain OR at
+ * shared/seeded catalog entries (utility services pulled in via a
+ * DomainTypeTemplate) that have no `domain` ref. Resolving only against the
+ * domain-scoped set drops the shared ones, leaving groups with empty `services`
+ * — which silently hides the matching columns in Payment Bulk and breaks invoice
+ * grouping. We therefore look services up in a combined map keyed by _id.
+ *
+ * Domain-scoped services not referenced by any group are appended as a synthetic
+ * `groupName: null` "ungrouped" bucket (renderers treat it as standalone rows).
+ */
+export function assembleDomainServiceCatalog(
+  domainCustomServices:
+    | Array<{ groupName?: string | null; services?: unknown[] }>
+    | undefined,
+  domainScopedServices: LeanCustomService[],
+  referencedServices: LeanCustomService[]
+): DomainServiceGroup[] {
+  const servicesById = new Map<string, LeanCustomService>()
+  for (const service of domainScopedServices) {
+    servicesById.set(String(service._id), service)
+  }
+  for (const service of referencedServices) {
+    servicesById.set(String(service._id), service)
+  }
+
+  const groupedServices: DomainServiceGroup[] = (
+    domainCustomServices || []
+  ).map((group, index) => ({
+    groupName: group?.groupName ?? `Група ${index + 1}`,
+    services: (group?.services || [])
+      .map((id) => servicesById.get(String(id)))
+      .filter((service): service is LeanCustomService => Boolean(service)),
+  }))
+
+  const groupedIds = new Set(
+    groupedServices.flatMap((group) =>
+      group.services.map((service) => String(service._id))
+    )
+  )
+  const ungroupedServices = domainScopedServices.filter(
+    (service) => !groupedIds.has(String(service._id))
+  )
+
+  const result: DomainServiceGroup[] = [...groupedServices]
+  if (ungroupedServices.length > 0) {
+    // groupName: null marks "not in any user-defined group" — renderers show
+    // these as standalone rows instead of under a group header.
+    result.push({ groupName: null, services: ungroupedServices })
+  }
+  return result
+}
+
+/** Flattened, de-duplicated service ids referenced across a domain's groups. */
+export function collectReferencedServiceIds(
+  domainCustomServices:
+    | Array<{ groupName?: string | null; services?: unknown[] }>
+    | undefined
+): string[] {
+  return Array.from(
+    new Set(
+      (domainCustomServices || [])
+        .flatMap((group) => group?.services || [])
+        .map((id) => String(id))
+        .filter((id) => id && id !== 'undefined' && id !== 'null')
+    )
+  )
 }

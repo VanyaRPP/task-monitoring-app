@@ -15,7 +15,23 @@ jest.mock('@modules/models/CustomService', () => ({
   },
 }))
 
+jest.mock('@modules/models/Domain', () => ({
+  __esModule: true,
+  default: {
+    updateOne: jest.fn(),
+  },
+}))
+
+jest.mock('@modules/models/RealEstate', () => ({
+  __esModule: true,
+  default: {
+    updateMany: jest.fn(),
+  },
+}))
+
 import CustomService from '@modules/models/CustomService'
+import Domain from '@modules/models/Domain'
+import RealEstate from '@modules/models/RealEstate'
 
 jest.mock('@utils/getCurrentUser', () => ({
   getCurrentUser: jest.fn(),
@@ -37,6 +53,13 @@ beforeEach(() => {
     isGlobalAdmin: true,
     isDomainAdmin: false,
     isUser: false,
+  })
+  ;(Domain.updateOne as jest.Mock).mockResolvedValue({
+    acknowledged: true,
+    matchedCount: 1,
+  })
+  ;(RealEstate.updateMany as jest.Mock).mockResolvedValue({
+    acknowledged: true,
   })
 })
 

@@ -119,44 +119,46 @@ describe('getCurrencyNames', () => {
 
 describe('currencyWithUnit', () => {
   it('відображає суму з UAH міткою без unit', () => {
-    expect(currencyWithUnit(100, { currency: 'UAH' } as any)).toBe('100 грн')
+    expect(currencyWithUnit(100, 'UAH')).toBe('100 грн')
   })
 
   it('відображає суму з unit', () => {
-    expect(currencyWithUnit(200, { currency: 'UAH' } as any, 'м²')).toBe(
-      '200 грн/м²'
-    )
+    expect(currencyWithUnit(200, 'UAH', 'м²')).toBe('200 грн/м²')
   })
 
-  it('fallback до "грн" якщо company undefined', () => {
+  it('fallback до "грн" якщо валюта undefined', () => {
     expect(currencyWithUnit(100, undefined)).toBe('100 грн')
   })
 
-  it('fallback до "грн" якщо currency відсутня в company', () => {
-    expect(currencyWithUnit(100, {} as any)).toBe('100 грн')
+  it('fallback до "грн" якщо валюта порожній рядок', () => {
+    expect(currencyWithUnit(100, '')).toBe('100 грн')
   })
 
   it('відображає суму з USD міткою без unit', () => {
-    expect(currencyWithUnit(100, { currency: 'USD' } as any)).toBe('100 USD')
+    expect(currencyWithUnit(100, 'USD')).toBe('100 USD')
   })
 
   it('відображає суму з EUR міткою без unit', () => {
-    expect(currencyWithUnit(100, { currency: 'EUR' } as any)).toBe('100 EUR')
+    expect(currencyWithUnit(100, 'EUR')).toBe('100 EUR')
   })
 
   it('відображає суму з USD міткою з unit', () => {
-    expect(currencyWithUnit(200, { currency: 'USD' } as any, 'м²')).toBe(
-      '200 USD/м²'
-    )
+    expect(currencyWithUnit(200, 'USD', 'м²')).toBe('200 USD/м²')
+  })
+
+  it('нормалізує валюту в нижньому регістрі "usd" -> "USD"', () => {
+    expect(currencyWithUnit(100, 'usd')).toBe('100 USD')
+  })
+
+  it('fallback до "грн" для невідомої валюти', () => {
+    expect(currencyWithUnit(100, 'GBP')).toBe('100 грн')
   })
 
   it('відображає рядкове значення суми', () => {
-    expect(currencyWithUnit('500', { currency: 'UAH' } as any)).toBe('500 грн')
+    expect(currencyWithUnit('500', 'UAH')).toBe('500 грн')
   })
 
   it('відображає рядкове значення з unit', () => {
-    expect(currencyWithUnit('300', { currency: 'USD' } as any, 'м²')).toBe(
-      '300 USD/м²'
-    )
+    expect(currencyWithUnit('300', 'USD', 'м²')).toBe('300 USD/м²')
   })
 })

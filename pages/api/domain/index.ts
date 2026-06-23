@@ -36,15 +36,23 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
-        const { limit = 0, domainId = [], streetId = [] } = req.query
+        const { limit = 0, domainId = [], streetId = [], archived } = req.query
 
         const domainIds = typeof domainId === 'string' ? [domainId] : domainId
         const streetIds = typeof streetId === 'string' ? [streetId] : streetId
-
         const options: any = {}
 
         if (!isDomainAdmin && !isGlobalAdmin) {
           return res.status(200).json({ success: true, data: [] })
+        }
+
+        const isArchived = archived ? archived === 'true' : undefined
+        if (isArchived === true) {
+          options.archived = true
+        } else if (isArchived === false) {
+          // legacy domains created before the archive feature have no
+          // `archived` field, so `$ne: true` matches false + missing + null
+          options.archived = { $ne: true }
         }
 
         if (isDomainAdmin) {
@@ -77,12 +85,9 @@ export default async function handler(
       }
     case 'POST':
       try {
-        if (!isDomainAdmin && !isGlobalAdmin) {
-          return res
-            .status(403)
-            .json({ success: false, error: 'Access denied: not an admin' })
-        }
-
+        // Any authenticated user may create a domain. Creating one makes them
+        // its admin (their email is added to adminEmails below), which promotes
+        // them to DomainAdmin on the next request via getCurrentUser.
         const { name, streets } = req.body
 
         const existingDomain = await Domain.findOne({
@@ -96,8 +101,8 @@ export default async function handler(
         }
 
         const updatedObj = encryptDomainBankTokens(req.body, SECURE_TOKEN)
-
-        if (isDomainAdmin && !isGlobalAdmin) {
+        delete updatedObj.archived
+        if (!isGlobalAdmin) {
           if (
             !updatedObj.adminEmails ||
             !Array.isArray(updatedObj.adminEmails)

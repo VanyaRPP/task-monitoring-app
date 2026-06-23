@@ -10,17 +10,44 @@ const COMMON_LAUNCH_ARGS = [
   '--disable-gpu',
 ]
 
+// On serverless (Vercel/AWS Lambda) a bundled Chromium can't load its shared
+// libraries (libnspr4.so etc.), so we always fetch the matching pack (binary +
+// libs) at runtime via @sparticuz/chromium-min. Defaults to the public v127
+// pack so it works even where we can't set env vars (AWS prod); override with
+// CHROMIUM_PACK_URL to point at your own mirror. Must match @sparticuz/chromium*
+// major (127) and puppeteer-core (22.x → Chrome 127).
+const CHROMIUM_PACK_URL =
+  process.env.CHROMIUM_PACK_URL ||
+  'https://github.com/Sparticuz/chromium/releases/download/v127.0.0/chromium-v127.0.0-pack.tar'
+
+let executablePathPromise: Promise<string> | undefined
+
+function resolveExecutablePath(
+  chromium: {
+    executablePath: (input?: string) => Promise<string>
+  },
+  input?: string
+): Promise<string> {
+  if (!executablePathPromise) {
+    executablePathPromise = chromium.executablePath(input).catch((err) => {
+      executablePathPromise = undefined
+      throw err
+    })
+  }
+  return executablePathPromise
+}
+
 async function launchBrowser() {
   if (isServerless) {
     const [{ default: puppeteerCore }, { default: chromium }] =
       await Promise.all([
         import('puppeteer-core'),
-        import('@sparticuz/chromium'),
+        import('@sparticuz/chromium-min'),
       ])
     return puppeteerCore.launch({
       args: [...chromium.args, ...COMMON_LAUNCH_ARGS],
       defaultViewport: chromium.defaultViewport,
-      executablePath: await chromium.executablePath(),
+      executablePath: await resolveExecutablePath(chromium, CHROMIUM_PACK_URL),
       headless: true,
       protocolTimeout: 60_000,
     })

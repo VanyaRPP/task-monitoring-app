@@ -1,8 +1,11 @@
 import CustomService from '@modules/models/CustomService'
 import Domain from '@modules/models/Domain'
 import start, { Data } from '@pages/api/api.config'
+import {
+  assembleDomainServiceCatalog,
+  collectReferencedServiceIds,
+} from '@common/services/customServiceService/customService.service'
 import { getCurrentUser } from '@utils/getCurrentUser'
-import mongoose from 'mongoose'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 start()
@@ -21,13 +24,6 @@ export default async function handler(
       try {
         const { domainId } = req.query
 
-        // if (isUser) {                    // Access for User
-        //   return res.status(400).json({
-        //     success: false,
-        //     message: 'access denied',
-        //   })
-        // }
-
         if (!domainId || Array.isArray(domainId)) {
           return res.status(400).json({
             success: false,
@@ -44,57 +40,31 @@ export default async function handler(
           })
         }
 
-        if (!domain.customServices || domain.customServices.length === 0) {
-          return res.status(200).json({
-            success: true,
-            data: [],
-          })
-        }
-
-        const domainGroups = domain.customServices.map((service, index) => {
-          return {
-            groupName: service?.groupName ?? `Група ${index + 1}`,
-            services: service?.services || [],
-          }
-        })
-
-        const allServiceIds = domainGroups
-          .flatMap((group) => group.services || [])
-          .map(String)
-          .filter((id) => mongoose.Types.ObjectId.isValid(id))
-
-        if (allServiceIds.length === 0) {
-          return res.status(200).json({
-            success: true,
-            data: domainGroups.map((group, index) => ({
-              groupName: group.groupName ?? `Група ${index + 1}`,
-              services: [],
-            })),
-          })
-        }
-
-        const customServices = await CustomService.find({
-          _id: { $in: allServiceIds },
+        // CustomServices scoped to this domain — the per-domain catalog. Used
+        // both to resolve group members and to expose un-grouped services as a
+        // synthetic bucket so the rest of the system (Payment Bulk,
+        // RealEstateModal, invoice) can use them just like grouped ones.
+        const allDomainServices = await CustomService.find({
+          domain: domainId,
         }).lean()
 
-        const groupedServices = domainGroups.map((group, index) => {
-          const services = (group.services || [])
-            .map((id) =>
-              customServices.find(
-                (service) => String(service._id) === String(id)
-              )
-            )
-            .filter(Boolean)
+        // Group ids can reference shared/seeded services (e.g. utility services
+        // attached via a DomainTypeTemplate) that have no `domain` ref, so the
+        // domain-scoped query above misses them. Fetch those explicitly by _id.
+        const referencedIds = collectReferencedServiceIds(domain.customServices)
+        const referencedServices = referencedIds.length
+          ? await CustomService.find({ _id: { $in: referencedIds } }).lean()
+          : []
 
-          return {
-            groupName: group.groupName ?? `Група ${index + 1}`,
-            services,
-          }
-        })
+        const responseData = assembleDomainServiceCatalog(
+          domain.customServices,
+          allDomainServices,
+          referencedServices
+        )
 
         return res.status(200).json({
           success: true,
-          data: groupedServices,
+          data: responseData,
         })
       } catch (error: any) {
         return res.status(500).json({

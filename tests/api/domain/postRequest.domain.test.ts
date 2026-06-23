@@ -52,6 +52,40 @@ describe('Domain API - POST', () => {
     )
   })
 
+  it('should let any authenticated user create their first domain and add them as admin (bootstrap)', async () => {
+    const mockReq = {
+      method: 'POST',
+      body: {
+        name: 'brand new domain',
+        streets: [],
+        description: 'none',
+      },
+    } as any
+
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+
+    ;(getCurrentUser as any).mockResolvedValueOnce({
+      isGlobalAdmin: false,
+      isDomainAdmin: false,
+      user: { email: 'newuser@example.com' },
+    })
+    ;(Domain.findOne as jest.Mock).mockResolvedValueOnce(null)
+    ;(Domain.create as jest.Mock).mockResolvedValueOnce({ _id: 'new123' })
+
+    await handler(mockReq, mockRes)
+
+    expect(mockRes.status).toHaveBeenCalledWith(201)
+    expect(Domain.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'brand new domain',
+        adminEmails: ['newuser@example.com'],
+      })
+    )
+  })
+
   it('should not create a domain because it already exists', async () => {
     const mockReq = {
       method: 'POST',

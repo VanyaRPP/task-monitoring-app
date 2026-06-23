@@ -10,8 +10,10 @@ export const getPaymentsChartData = (data: IExtendedPayment[]) => {
           (payment?.monthService as any)?.date || payment?.invoiceCreationDate
 
         const mappedValues = payment?.invoice
-          .filter((item) =>
-            Object.values(ServiceType).includes(item.type as ServiceType)
+          .filter(
+            (item) =>
+              item.type !== ServiceType.Custom &&
+              Object.values(ServiceType).includes(item.type as ServiceType)
           )
           .map((item) => {
             const itemType =

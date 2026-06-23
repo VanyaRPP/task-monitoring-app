@@ -42,7 +42,7 @@ const DomainForm: FC<Props> = ({
           {
             key: 'template',
             label: 'Шаблон',
-            children: <TemplateTab editable={editable} />,
+            children: <TemplateTab {...tabProps} />,
           },
           {
             key: 'services',
