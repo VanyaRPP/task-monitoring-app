@@ -149,9 +149,9 @@ const AddPaymentModal: FC<Props> = ({
   const [activeTabKey, setActiveTabKey] = useState(preview ? '2' : '1')
   const [invoiceLang, setInvoiceLang] = useState<'en' | 'uk'>(
     paymentData?.invoiceLang ??
-    (paymentData?.currency && paymentData.currency !== Currency.UAH
-      ? 'en'
-      : 'uk')
+      (paymentData?.currency && paymentData.currency !== Currency.UAH
+        ? 'en'
+        : 'uk')
   )
 
   const setShowQuantityInPreview = useCallback(
@@ -437,9 +437,9 @@ const AddPaymentModal: FC<Props> = ({
       const adHocInvoices = invoices.filter(
         (inv) =>
           inv?.type === ServiceType.Custom &&
-          !inv?.customService && 
+          !inv?.customService &&
           inv?.saveToDomain === true &&
-          (inv?.name || inv?.description) 
+          (inv?.name || inv?.description)
       )
 
       for (const inv of adHocInvoices) {
@@ -510,9 +510,9 @@ const AddPaymentModal: FC<Props> = ({
 
     const response = edit
       ? await editPayment({
-        _id: paymentData?._id,
-        ...finalPayload,
-      })
+          _id: paymentData?._id,
+          ...finalPayload,
+        })
       : await addPayment(finalPayload)
 
     if ('data' in response) {

@@ -69,7 +69,7 @@ const DashboardLanding = () => {
     setInvoicePromptOpen(false)
     setPaymentModalOpen(true)
   }
-  
+
   const handleDeclineFirstInvoice = () => {
     setInvoicePromptOpen(false)
     router.reload()
