@@ -44,12 +44,13 @@ export const Name: React.FC<InvoiceComponentProps> = ({
     type === 'custom' &&
     !isCustomService
   ) {
-    adHocBindingRef.current = record?.name ? 'description' : 'name'
+    adHocBindingRef.current =
+      record?.customName || record?.description ? 'description' : 'name'
   }
   const adHocBinding =
     adHocBindingRef.current === 'description' ? 'description' : 'name'
 
-  // Seed `customName` once defaultLabel is known. defaultLabel is derived
+  // Seed `customName` once de faultLabel is known. defaultLabel is derived
   // from useWatch-backed `value`/`type`, which are undefined on first render
   // and become available a tick later — so we run on every defaultLabel
   // change and only write when the field is still blank.
@@ -76,13 +77,15 @@ export const Name: React.FC<InvoiceComponentProps> = ({
   )
 
   if (!editable || type !== 'custom') {
+    const displayName = record?.customName || record?.name || value || ''
+    const isTypePlaceholder = displayName === 'custom'
     return (
       <Space direction="vertical" size={0}>
         <Typography.Text>
-          {record?.customName || value || type}
+          {isTypePlaceholder ? record?.description || '' : displayName}
         </Typography.Text>
         <Typography.Text type="secondary" style={{ fontSize: '0.75rem' }}>
-          {record?.description || monthLabel}
+          {isTypePlaceholder ? '' : record?.description || monthLabel}
         </Typography.Text>
       </Space>
     )
