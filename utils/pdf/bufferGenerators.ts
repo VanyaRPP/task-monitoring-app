@@ -67,10 +67,14 @@ export async function generatePdfFromHtml(html: string): Promise<Buffer> {
 
   await page.setContent(html, { waitUntil: 'networkidle0' })
 
-  const pdfBuffer = await page.pdf({
-    format: 'a4',
-    printBackground: true,
-  })
+  // Wrap in Buffer.from() so this compiles whether puppeteer-core returns
+  // Buffer (v22) or Uint8Array (v23+) — downstream callers expect Buffer.
+  const pdfBuffer = Buffer.from(
+    await page.pdf({
+      format: 'a4',
+      printBackground: true,
+    })
+  )
 
   await browser.close()
 
@@ -111,10 +115,12 @@ export async function generateZipFromHtmls(
       const page = await browser.newPage()
       await page.setContent(item.html, { waitUntil: 'networkidle0' })
 
-      const pdfBuffer = await page.pdf({
-        format: 'a4',
-        printBackground: true,
-      })
+      const pdfBuffer = Buffer.from(
+        await page.pdf({
+          format: 'a4',
+          printBackground: true,
+        })
+      )
       await page.close()
 
       const baseName = item.fileName || 'invoice'
