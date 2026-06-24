@@ -4,7 +4,6 @@ import RealEstate from '@modules/models/RealEstate'
 import Service from '@modules/models/Service'
 import {
   getCreditDebitPipeline,
-  getInvoicesTotalPipeline,
   getMaxInvoiceNumber,
   getServiceTotalsPipeline,
   getTotalGeneralSumPipeline,
@@ -204,9 +203,6 @@ export async function getPayments(
   const creditDebitPipeline = getCreditDebitPipeline(options)
   const totalPayments = await Payment.aggregate(creditDebitPipeline)
 
-  const invoicesPipeline = getInvoicesTotalPipeline(options)
-  const totalInvoices = await Payment.aggregate(invoicesPipeline)
-
   const genralSumPipeline = getTotalGeneralSumPipeline(options)
   const totalGeneralSum = await Payment.aggregate(genralSumPipeline)
 
@@ -215,7 +211,6 @@ export async function getPayments(
 
   const totalPaymentsData = [
     ...totalPayments,
-    ...totalInvoices,
     ...totalGeneralSum,
     ...serviceTotals,
   ]

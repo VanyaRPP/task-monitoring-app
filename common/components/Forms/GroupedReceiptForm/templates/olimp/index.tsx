@@ -192,52 +192,52 @@ const OlimpTemplate: FC<TemplateProps> = ({
         </div>
       </div>
       <div className={s.tableWrapper}>
-      <table className={s.invoiceTable}>
-        <thead>
-          <tr>
-            <th>{isEnglish ? 'DESCRIPTION' : 'ОПИС'}</th>
-            {showQuantityInPreview && (
-              <>
-                <th className={s.colRate}>{isEnglish ? 'RATE' : 'ЦІНА'}</th>
-                <th className={s.colQty}>{isEnglish ? 'QTY' : 'К-СТЬ'}</th>
-              </>
-            )}
-            <th className={s.colTotal}>{isEnglish ? 'TOTAL' : 'СУМА'}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((item: any, index: number) => {
-            const qty = getQty(item)
-            const rate = Number.isFinite(Number(item?.price))
-              ? Number(item.price)
-              : qty
-                ? Number(item?.sum || 0) / qty
-                : Number(item?.sum || 0)
+        <table className={s.invoiceTable}>
+          <thead>
+            <tr>
+              <th>{isEnglish ? 'DESCRIPTION' : 'ОПИС'}</th>
+              {showQuantityInPreview && (
+                <>
+                  <th className={s.colRate}>{isEnglish ? 'RATE' : 'ЦІНА'}</th>
+                  <th className={s.colQty}>{isEnglish ? 'QTY' : 'К-СТЬ'}</th>
+                </>
+              )}
+              <th className={s.colTotal}>{isEnglish ? 'TOTAL' : 'СУМА'}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((item: any, index: number) => {
+              const qty = getQty(item)
+              const rate = Number.isFinite(Number(item?.price))
+                ? Number(item.price)
+                : qty
+                  ? Number(item?.sum || 0) / qty
+                  : Number(item?.sum || 0)
 
-            return (
-              <tr key={`${item?.type || item?.name}-${index}`}>
-                <td>
-                  {item?.name || item?.type || '-'}
-                  {item?.description ? (
-                    <div style={{ fontSize: '0.85em', opacity: 0.65 }}>
-                      {item.description}
-                    </div>
-                  ) : null}
-                </td>                
-                {showQuantityInPreview && (
-                  <>
-                    <td className={s.colRate}>{rate.toFixed(2)}</td>
-                    <td className={s.colQty}>{qty}</td>
-                  </>
-                )}
-                <td className={s.colTotal}>
-                  {Number(item?.sum || 0).toFixed(2)} {currencyLabel}
-                </td>
-              </tr>
-            )
-          })}
-        </tbody>
-      </table>
+              return (
+                <tr key={`${item?.type || item?.name}-${index}`}>
+                  <td>
+                    {item?.name || item?.type || '-'}
+                    {item?.description ? (
+                      <div style={{ fontSize: '0.85em', opacity: 0.65 }}>
+                        {item.description}
+                      </div>
+                    ) : null}
+                  </td>
+                  {showQuantityInPreview && (
+                    <>
+                      <td className={s.colRate}>{rate.toFixed(2)}</td>
+                      <td className={s.colQty}>{qty}</td>
+                    </>
+                  )}
+                  <td className={s.colTotal}>
+                    {Number(item?.sum || 0).toFixed(2)} {currencyLabel}
+                  </td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
       </div>
 
       <div className={s.summarySection}>

@@ -11,10 +11,7 @@ const DomainStreets: React.FC<DomainStreetsProps> = ({ disabled = false }) => {
   const { data: streets, isLoading } = useGetAllStreetsQuery({})
 
   return (
-    <Form.Item
-      name="streets"
-      label="Закріплені адреси"
-    >
+    <Form.Item name="streets" label="Закріплені адреси">
       <Select
         options={streets?.map((i) => ({
           value: i._id,

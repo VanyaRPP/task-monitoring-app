@@ -57,13 +57,17 @@ const OfficialTemplate: FC<TemplateProps> = ({
         <div className={cl.clHeaderRight}>
           {!!domainLabel.trim() && (
             <div className={cl.clFromBlock}>
-              <span className={cl.clFromLabel}>{isEnglish ? 'From' : 'Від'}</span>
+              <span className={cl.clFromLabel}>
+                {isEnglish ? 'From' : 'Від'}
+              </span>
               <div className={cl.clFromValue}>{domainLabel}</div>
             </div>
           )}
           {!!clientCompany && (
             <div className={cl.clToBlock}>
-              <span className={cl.clToLabel}>{isEnglish ? 'Invoice For' : 'На адресу'}</span>
+              <span className={cl.clToLabel}>
+                {isEnglish ? 'Invoice For' : 'На адресу'}
+              </span>
               <div className={cl.clToValue}>{clientCompany}</div>
             </div>
           )}
@@ -72,23 +76,32 @@ const OfficialTemplate: FC<TemplateProps> = ({
 
       <div className={cl.clMeta}>
         <div className={cl.clMetaRow}>
-          <div className={cl.clMetaLabel}>{isEnglish ? 'Invoice ID' : 'Номер рахунку'}</div>
+          <div className={cl.clMetaLabel}>
+            {isEnglish ? 'Invoice ID' : 'Номер рахунку'}
+          </div>
           <div className={cl.clMetaValue}>{modernInvoiceNumber}</div>
         </div>
         <div className={cl.clMetaRow}>
-          <div className={cl.clMetaLabel}>{isEnglish ? 'Issue Date' : 'Дата видачі'}</div>
+          <div className={cl.clMetaLabel}>
+            {isEnglish ? 'Issue Date' : 'Дата видачі'}
+          </div>
           <div className={cl.clMetaValue}>
             {formatInvoiceDateUs(data?.invoiceCreationDate)}
           </div>
         </div>
         <div className={cl.clMetaRow}>
-          <div className={cl.clMetaLabel}>{isEnglish ? 'Due Date' : 'Строк оплати'}</div>
+          <div className={cl.clMetaLabel}>
+            {isEnglish ? 'Due Date' : 'Строк оплати'}
+          </div>
           <div className={cl.clMetaValue}>
-            {formatInvoiceDueDateUs(data?.invoiceCreationDate)} {isEnglish ? '(upon receipt)' : '(при отриманні)'}
+            {formatInvoiceDueDateUs(data?.invoiceCreationDate)}{' '}
+            {isEnglish ? '(upon receipt)' : '(при отриманні)'}
           </div>
         </div>
         <div className={cl.clMetaRow}>
-          <div className={cl.clMetaLabel}>{isEnglish ? 'Subject' : 'Призначення'}</div>
+          <div className={cl.clMetaLabel}>
+            {isEnglish ? 'Subject' : 'Призначення'}
+          </div>
           <div className={cl.clMetaValue}>{subjectText}</div>
         </div>
       </div>
@@ -100,11 +113,17 @@ const OfficialTemplate: FC<TemplateProps> = ({
               <th>{isEnglish ? 'Description' : 'Опис'}</th>
               {showQuantityInPreview && (
                 <>
-                  <th className={`${cl.colNum} ${cl.colQty}`}>{isEnglish ? 'Quantity' : 'Кількість'}</th>
-                  <th className={`${cl.colNum} ${cl.colUnit}`}>{isEnglish ? 'Unit Price' : 'Ціна одиниці'}</th>
+                  <th className={`${cl.colNum} ${cl.colQty}`}>
+                    {isEnglish ? 'Quantity' : 'Кількість'}
+                  </th>
+                  <th className={`${cl.colNum} ${cl.colUnit}`}>
+                    {isEnglish ? 'Unit Price' : 'Ціна одиниці'}
+                  </th>
                 </>
               )}
-              <th className={`${cl.colNum} ${cl.colAmount}`}>{isEnglish ? 'Amount' : 'Сума'}</th>
+              <th className={`${cl.colNum} ${cl.colAmount}`}>
+                {isEnglish ? 'Amount' : 'Сума'}
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -138,7 +157,6 @@ const OfficialTemplate: FC<TemplateProps> = ({
                   <td className={`${cl.colNum} ${cl.colAmount}`}>
                     {Number(item?.sum || 0).toFixed(2)}
                   </td>
-
                 </tr>
               )
             })}
@@ -157,7 +175,9 @@ const OfficialTemplate: FC<TemplateProps> = ({
                 </strong>
               </div>
               <div className={cl.clTotalRow}>
-                <span>{isEnglish ? 'VAT' : 'ПДВ'} {taxPercent}%</span>
+                <span>
+                  {isEnglish ? 'VAT' : 'ПДВ'} {taxPercent}%
+                </span>
                 <strong>
                   {currencyLabel}&nbsp;{taxAmount.toFixed(2)}
                 </strong>

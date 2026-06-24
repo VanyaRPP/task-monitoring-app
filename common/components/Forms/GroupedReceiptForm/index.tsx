@@ -296,7 +296,10 @@ const GroupedReceiptForm: FC<Props> = ({
       </Tooltip>
 
       <span className={s.languageSelector}>
-        <InvoiceLanguageSelector lang={invoiceLang} onChange={handleSaveLanguage} />
+        <InvoiceLanguageSelector
+          lang={invoiceLang}
+          onChange={handleSaveLanguage}
+        />
       </span>
 
       <TemplateComponent {...templateProps} />

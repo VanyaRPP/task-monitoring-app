@@ -52,7 +52,6 @@ const ClassicTemplate: FC<TemplateProps> = ({
           {isEnglish ? 'Provider' : 'Постачальник'}
         </div>
         <pre className={cs.preLabel}>
-
           {data?.provider?.description?.trim()} <br />
           <br />
         </pre>
@@ -61,7 +60,6 @@ const ClassicTemplate: FC<TemplateProps> = ({
       <div className={cs.receiverInfo}>
         <div className={cs.label}>{isEnglish ? 'Recipient' : 'Одержувач'}</div>
         <pre className={cs.preLabel}>
-
           {data?.reciever?.description?.trim()} <br />
           {data?.reciever?.adminEmails?.map((email: string) => (
             <div key={email}>
@@ -112,10 +110,12 @@ const ClassicTemplate: FC<TemplateProps> = ({
           {isEnglish ? 'Payment purpose:' : 'Призначення платежу:'}{' '}
           <strong>
             {isEnglish
-              ? `Payment for services according to invoice ${data.invoiceNumber
-              } dated ${dayjs(data?.invoiceCreationDate).format('DD-MM-YYYY')}`
-              : `Оплата за послуги згідно рахунку ${data.invoiceNumber
-              } від ${dayjs(data?.invoiceCreationDate).format('DD-MM-YYYY')}`}
+              ? `Payment for services according to invoice ${
+                  data.invoiceNumber
+                } dated ${dayjs(data?.invoiceCreationDate).format('DD-MM-YYYY')}`
+              : `Оплата за послуги згідно рахунку ${
+                  data.invoiceNumber
+                } від ${dayjs(data?.invoiceCreationDate).format('DD-MM-YYYY')}`}
           </strong>
         </div>
       </div>

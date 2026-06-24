@@ -194,14 +194,7 @@ export const InvoiceSelector: React.FC<{
   domainId?: string
   excludeKeys?: string[]
   onSelect?: (payload: IInvoiceLineAddPayload) => void
-}> = ({
-  service,
-  company,
-  prevPayment,
-  domainId,
-  excludeKeys,
-  onSelect,
-}) => {
+}> = ({ service, company, prevPayment, domainId, excludeKeys, onSelect }) => {
   const resolvedDomainId = service?.domain?._id
     ? String(service.domain._id)
     : domainId

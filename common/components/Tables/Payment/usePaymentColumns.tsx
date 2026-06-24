@@ -231,7 +231,7 @@ export function usePaymentColumns({
           const isFirstOccurrence =
             payments?.data?.findIndex(
               (item) =>
-              item.company != null &&
+                item.company != null &&
                 typeof item.company === 'object' &&
                 (item.company as any).companyName === companyName
             ) === index
@@ -466,9 +466,7 @@ export function usePaymentColumns({
       },
       ...(selectedColumns
         .filter((value) => value !== ServiceType.Custom)
-        .filter(
-          (value) => !visibleCustomServices?.some((s) => s._id === value)
-        )
+        .filter((value) => !visibleCustomServices?.some((s) => s._id === value))
         .map((value) => {
           const findItem = (payment: IExtendedPayment) =>
             payment.invoice.find((i) => i.type === value)
