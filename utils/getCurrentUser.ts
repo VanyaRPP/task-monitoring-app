@@ -20,14 +20,12 @@ export async function getCurrentUser(req, res) {
       await Domain.exists({ adminEmails: user.email })
     )
     const hasDomainAdmin = user.roles?.includes(Roles.DOMAIN_ADMIN)
+    const hasUserRole = user.roles?.includes(Roles.USER)
 
-    if (shouldBeDomainAdmin && !hasDomainAdmin) {
-      // Promote: keep any existing role and add DomainAdmin.
-      await User.updateOne(
-        { _id: user._id },
-        { $addToSet: { roles: Roles.DOMAIN_ADMIN } }
-      )
-      user.roles = [...(user.roles || []), Roles.DOMAIN_ADMIN]
+    if (shouldBeDomainAdmin && (!hasDomainAdmin || hasUserRole)) {
+      // Promote: a domain admin is no longer a plain User, so REPLACE the role
+      await User.updateOne({ _id: user._id }, { roles: [Roles.DOMAIN_ADMIN] })
+      user.roles = [Roles.DOMAIN_ADMIN]
     } else if (!shouldBeDomainAdmin && hasDomainAdmin) {
       // Demote: the user no longer administers any domain, so reset to User.
       await User.updateOne({ _id: user._id }, { roles: [Roles.USER] })

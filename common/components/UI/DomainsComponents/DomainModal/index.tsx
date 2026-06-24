@@ -6,7 +6,10 @@ import {
 } from '@common/api/domainApi/domain.api'
 import { Form, message } from 'antd'
 import React, { FC, useEffect, useMemo, useState } from 'react'
-import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
+import {
+  IAddDomainResponse,
+  IExtendedDomain,
+} from '@common/api/domainApi/domain.api.types'
 import DomainForm from './DomainForm'
 import Modal from '../../ModalWindow'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
@@ -15,7 +18,7 @@ import { filterChangedCompaniesAreas } from './areasFilter'
 
 interface Props {
   currentDomain: IExtendedDomain
-  closeModal: VoidFunction
+  closeModal: (createdDomain?: IExtendedDomain) => void
   editable: boolean
 }
 
@@ -132,7 +135,12 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
         }
       }
 
-      closeModal()
+      const createdDomain =
+        !currentDomain && 'data' in response
+          ? (response.data as IAddDomainResponse)?.data
+          : undefined
+
+      closeModal(createdDomain)
       setIsValueChanged(false)
       form.resetFields()
       message.success(currentDomain ? 'Збережено' : 'Додано')

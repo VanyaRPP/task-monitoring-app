@@ -32,13 +32,11 @@ describe('/api/user/[id]', () => {
 
       jest.spyOn(User, 'findById').mockResolvedValue(mockUser as any)
 
-      jest.spyOn(Domain, 'find').mockResolvedValue([
-        { name: 'Rozetka' },
-      ] as any)
+      jest.spyOn(Domain, 'find').mockResolvedValue([{ name: 'Rozetka' }] as any)
 
-      jest.spyOn(RealEstate, 'find').mockResolvedValue([
-        { companyName: 'TestCompany' },
-      ] as any)
+      jest
+        .spyOn(RealEstate, 'find')
+        .mockResolvedValue([{ companyName: 'TestCompany' }] as any)
 
       const req = {
         method: 'GET',
