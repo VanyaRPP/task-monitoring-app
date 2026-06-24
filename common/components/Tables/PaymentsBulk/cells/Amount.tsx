@@ -1,4 +1,4 @@
-import { Form, Input } from 'antd'
+import { Form, InputNumber } from 'antd'
 import validator from '@utils/validator'
 
 export const Amount: React.FC<{ name: number; fieldName: string }> = ({
@@ -11,6 +11,6 @@ export const Amount: React.FC<{ name: number; fieldName: string }> = ({
     rules={[validator.required(), validator.min(1)]}
     style={{ margin: 0 }}
   >
-    <Input type="number" placeholder="К-сть..." />
+    <InputNumber placeholder="К-сть..." style={{ width: '100%' }} min={0} />
   </Form.Item>
 )

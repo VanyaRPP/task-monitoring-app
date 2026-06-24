@@ -1,0 +1,89 @@
+.customTable {
+  :global {
+    .ant-table,
+    .ant-table-thead > tr > th,
+    .ant-table-tbody > tr > td,
+    .ant-table-container,
+    .ant-table-cell-fix-left,
+    .ant-table-cell-fix-right,
+    .ant-table-cell,
+    .ant-input,
+    .ant-input-number,
+    .ant-input-number-input,
+    .ant-input-number-handler-wrap,
+    .ant-select-selector,
+    .ant-select-selection-item {
+      transition: none !important;
+      animation: none !important;
+    }
+
+    .ant-table-thead > tr > th {
+      background-color: #f0f0f0 !important;
+      border-bottom: 1px solid rgba(150, 150, 150, 0.2) !important;
+      border-right: 1px solid rgba(150, 150, 150, 0.2) !important;
+      font-weight: 600 !important;
+    }
+
+    .ant-table-thead > tr > th::before {
+      display: none !important;
+    }
+
+    .ant-table-tbody > tr > td {
+      border-bottom: 1px solid rgba(150, 150, 150, 0.15) !important;
+      border-right: 1px solid rgba(150, 150, 150, 0.15) !important;
+    }
+
+    .ant-table-container {
+      border-left: 1px solid rgba(150, 150, 150, 0.15) !important;
+      border-top: 1px solid rgba(150, 150, 150, 0.15) !important;
+    }
+
+    .ant-table-tbody > tr:hover > td {
+      background-color: rgba(150, 150, 150, 0.08) !important;
+    }
+
+    .ant-table-cell-fix-left,
+    .ant-table-cell-fix-right {
+      background-color: #ffffff !important;
+      z-index: 2 !important;
+    }
+
+    .ant-table-tbody > tr:hover > td.ant-table-cell-fix-left,
+    .ant-table-tbody > tr:hover > td.ant-table-cell-fix-right {
+      background-color: #f5f5f5 !important;
+    }
+  }
+}
+
+:global(html[data-theme='dark']) .customTable,
+:global(body[data-theme='dark']) .customTable,
+:global(html.dark) .customTable,
+:global(body.dark) .customTable {
+  :global {
+    .ant-table-thead > tr > th {
+      background-color: #1d1d1d !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+      border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
+    }
+
+    .ant-table-tbody > tr > td {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+      border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
+    }
+
+    .ant-table-container {
+      border-left: 1px solid rgba(255, 255, 255, 0.05) !important;
+      border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+    }
+
+    .ant-table-cell-fix-left,
+    .ant-table-cell-fix-right {
+      background-color: #141414 !important;
+    }
+
+    .ant-table-tbody > tr:hover > td.ant-table-cell-fix-left,
+    .ant-table-tbody > tr:hover > td.ant-table-cell-fix-right {
+      background-color: #262626 !important;
+    }
+  }
+}
