@@ -17,7 +17,6 @@ export default function CompanySelect({ form, edit, company }: Props) {
   const domainId = Form.useWatch('domain', form)
   const streetId = Form.useWatch('street', form)
 
-
   if (!domainId) {
     return (
       <Form.Item label="Компанія">
@@ -79,36 +78,35 @@ function RealEstateDataFetcher({
 
   return (
     <>
-      
-        <Form.Item
-          name="company"
-          label="Компанія"
-          rules={validateField('required')}
-        >
-          <Select
-            filterSort={(optionA, optionB) =>
-              (optionA?.label ?? '')
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore
-                ?.toLowerCase()
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore
-                .localeCompare((optionB?.label ?? '').toLowerCase())
-            }
-            filterOption={(input, option) =>
-              (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-            }
-            options={companies.map((i) => ({
-              value: i._id,
-              label: i.companyName,
-            }))}
-            optionFilterProp="label"
-            placeholder="Пошук компанії"
-            loading={isLoading}
-            showSearch
-            popupRender={(menu) => (
-              <>
-                {menu}
+      <Form.Item
+        name="company"
+        label="Компанія"
+        rules={validateField('required')}
+      >
+        <Select
+          filterSort={(optionA, optionB) =>
+            (optionA?.label ?? '')
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
+              ?.toLowerCase()
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
+              .localeCompare((optionB?.label ?? '').toLowerCase())
+          }
+          filterOption={(input, option) =>
+            (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+          }
+          options={companies.map((i) => ({
+            value: i._id,
+            label: i.companyName,
+          }))}
+          optionFilterProp="label"
+          placeholder="Пошук компанії"
+          loading={isLoading}
+          showSearch
+          popupRender={(menu) => (
+            <>
+              {menu}
               <Divider style={{ margin: '8px 0' }} />
               <Button
                 type="text"

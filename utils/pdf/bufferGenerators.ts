@@ -10,6 +10,16 @@ const COMMON_LAUNCH_ARGS = [
   '--disable-gpu',
 ]
 
+// On serverless (Vercel/AWS Lambda) a bundled Chromium can't load its shared
+// libraries (libnspr4.so etc.), so we always fetch the matching pack (binary +
+// libs) at runtime via @sparticuz/chromium-min. Defaults to the public v127
+// pack so it works even where we can't set env vars (AWS prod); override with
+// CHROMIUM_PACK_URL to point at your own mirror. Must match @sparticuz/chromium*
+// major (127) and puppeteer-core (22.x → Chrome 127).
+const CHROMIUM_PACK_URL =
+  process.env.CHROMIUM_PACK_URL ||
+  'https://github.com/Sparticuz/chromium/releases/download/v127.0.0/chromium-v127.0.0-pack.tar'
+
 let executablePathPromise: Promise<string> | undefined
 
 function resolveExecutablePath(
@@ -29,22 +39,15 @@ function resolveExecutablePath(
 
 async function launchBrowser() {
   if (isServerless) {
-    // When CHROMIUM_PACK_URL is set, fetch the Chromium binary + libs from that
-    // remote pack via @sparticuz/chromium-min (keeps the function small and
-    // sidesteps bundling issues). Otherwise use the full @sparticuz/chromium
-    // whose assets are force-traced into the function (see next.config.js).
-    const packUrl = process.env.CHROMIUM_PACK_URL
     const [{ default: puppeteerCore }, { default: chromium }] =
       await Promise.all([
         import('puppeteer-core'),
-        packUrl
-          ? import('@sparticuz/chromium-min')
-          : import('@sparticuz/chromium'),
+        import('@sparticuz/chromium-min'),
       ])
     return puppeteerCore.launch({
       args: [...chromium.args, ...COMMON_LAUNCH_ARGS],
       defaultViewport: chromium.defaultViewport,
-      executablePath: await resolveExecutablePath(chromium, packUrl),
+      executablePath: await resolveExecutablePath(chromium, CHROMIUM_PACK_URL),
       headless: true,
       protocolTimeout: 60_000,
     })
@@ -64,10 +67,14 @@ export async function generatePdfFromHtml(html: string): Promise<Buffer> {
 
   await page.setContent(html, { waitUntil: 'networkidle0' })
 
-  const pdfBuffer = await page.pdf({
-    format: 'a4',
-    printBackground: true,
-  })
+  // Wrap in Buffer.from() so this compiles whether puppeteer-core returns
+  // Buffer (v22) or Uint8Array (v23+) — downstream callers expect Buffer.
+  const pdfBuffer = Buffer.from(
+    await page.pdf({
+      format: 'a4',
+      printBackground: true,
+    })
+  )
 
   await browser.close()
 
@@ -108,10 +115,12 @@ export async function generateZipFromHtmls(
       const page = await browser.newPage()
       await page.setContent(item.html, { waitUntil: 'networkidle0' })
 
-      const pdfBuffer = await page.pdf({
-        format: 'a4',
-        printBackground: true,
-      })
+      const pdfBuffer = Buffer.from(
+        await page.pdf({
+          format: 'a4',
+          printBackground: true,
+        })
+      )
       await page.close()
 
       const baseName = item.fileName || 'invoice'
