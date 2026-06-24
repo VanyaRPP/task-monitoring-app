@@ -10,6 +10,9 @@ import {
   getDomainHeading,
   getRecipientCompanyHeading,
 } from '../invoice-party-headings'
+import { getLabel, resolveTemplateChrome } from '../applyTemplateOverrides'
+import EditableText from '../../EditableText'
+import { useInvoiceEditContext } from '../../InvoiceEditContext'
 import cl from './official.module.scss'
 
 const OfficialTemplate: FC<TemplateProps> = ({
@@ -29,9 +32,17 @@ const OfficialTemplate: FC<TemplateProps> = ({
   total,
   paymentInfoLines: _paymentInfoLines,
   issuedToLines: _issuedToLines,
+  overrides,
 }) => {
   const domainLabel = getDomainHeading(data, domainNameFromProps)
   const clientCompany = getRecipientCompanyHeading(data, companyLabelFromProps)
+  const { accentColor, invoiceTitle, footerText } = resolveTemplateChrome(
+    overrides,
+    isEnglish
+  )
+  const { editMode } = useInvoiceEditContext()
+  const L = (key: string, def: string) =>
+    getLabel(overrides, key, def, isEnglish)
 
   const serviceMonth = resolveServiceMonth(
     data?.monthService,
@@ -52,13 +63,24 @@ const OfficialTemplate: FC<TemplateProps> = ({
     >
       {/* ── Header ── */}
       <div className={cl.clHeader}>
-        <div className={cl.clTitle}>{isEnglish ? 'Invoice' : 'Рахунок'}</div>
+        <div
+          className={cl.clTitle}
+          style={accentColor ? { color: accentColor } : undefined}
+        >
+          <EditableText
+            valuePath="invoiceTitle"
+            defaultValue={invoiceTitle ?? (isEnglish ? 'Invoice' : 'Рахунок')}
+          />
+        </div>
 
         <div className={cl.clHeaderRight}>
           {!!domainLabel.trim() && (
             <div className={cl.clFromBlock}>
               <span className={cl.clFromLabel}>
-                {isEnglish ? 'From' : 'Від'}
+                <EditableText
+                  fieldKey="from"
+                  defaultValue={L('from', isEnglish ? 'From' : 'Від')}
+                />
               </span>
               <div className={cl.clFromValue}>{domainLabel}</div>
             </div>
@@ -66,7 +88,13 @@ const OfficialTemplate: FC<TemplateProps> = ({
           {!!clientCompany && (
             <div className={cl.clToBlock}>
               <span className={cl.clToLabel}>
-                {isEnglish ? 'Invoice For' : 'На адресу'}
+                <EditableText
+                  fieldKey="invoiceFor"
+                  defaultValue={L(
+                    'invoiceFor',
+                    isEnglish ? 'Invoice For' : 'На адресу'
+                  )}
+                />
               </span>
               <div className={cl.clToValue}>{clientCompany}</div>
             </div>
@@ -110,19 +138,42 @@ const OfficialTemplate: FC<TemplateProps> = ({
         <table className={cl.clTable}>
           <thead>
             <tr>
-              <th>{isEnglish ? 'Description' : 'Опис'}</th>
+              <th>
+                <EditableText
+                  fieldKey="col.description"
+                  defaultValue={L(
+                    'col.description',
+                    isEnglish ? 'Description' : 'Опис'
+                  )}
+                />
+              </th>
               {showQuantityInPreview && (
                 <>
                   <th className={`${cl.colNum} ${cl.colQty}`}>
-                    {isEnglish ? 'Quantity' : 'Кількість'}
+                    <EditableText
+                      fieldKey="col.quantity"
+                      defaultValue={L(
+                        'col.quantity',
+                        isEnglish ? 'Quantity' : 'Кількість'
+                      )}
+                    />
                   </th>
                   <th className={`${cl.colNum} ${cl.colUnit}`}>
-                    {isEnglish ? 'Unit Price' : 'Ціна одиниці'}
+                    <EditableText
+                      fieldKey="col.unitPrice"
+                      defaultValue={L(
+                        'col.unitPrice',
+                        isEnglish ? 'Unit Price' : 'Ціна одиниці'
+                      )}
+                    />
                   </th>
                 </>
               )}
               <th className={`${cl.colNum} ${cl.colAmount}`}>
-                {isEnglish ? 'Amount' : 'Сума'}
+                <EditableText
+                  fieldKey="col.amount"
+                  defaultValue={L('col.amount', isEnglish ? 'Amount' : 'Сума')}
+                />
               </th>
             </tr>
           </thead>
@@ -185,7 +236,15 @@ const OfficialTemplate: FC<TemplateProps> = ({
             </>
           )}
           <div className={`${cl.clTotalRow} ${cl.clGrandTotal}`}>
-            <span>{isEnglish ? 'Total Due' : 'Сума до оплати'}</span>
+            <span>
+              <EditableText
+                fieldKey="totalDue"
+                defaultValue={L(
+                  'totalDue',
+                  isEnglish ? 'Total Due' : 'Сума до оплати'
+                )}
+              />
+            </span>
             <strong>
               {currencyLabel}&nbsp;
               {(+data?.generalSum || +data?.debit || total).toFixed(2)}
@@ -193,6 +252,16 @@ const OfficialTemplate: FC<TemplateProps> = ({
           </div>
         </div>
       </div>
+
+      {(!!footerText || editMode) && (
+        <div style={{ marginTop: '1.5em', whiteSpace: 'pre-wrap' }}>
+          <EditableText
+            valuePath="footerText"
+            multiline
+            defaultValue={footerText ?? ''}
+          />
+        </div>
+      )}
     </div>
   )
 }
