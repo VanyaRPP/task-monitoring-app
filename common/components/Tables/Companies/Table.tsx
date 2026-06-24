@@ -49,6 +49,7 @@ import { useGetDebtorsQuery } from '@common/api/debtorsApi/debtors.api'
 import CollapsedTags from '@components/UI/CollapsedTags'
 import {
   extractDomainsFromRealEstates,
+  getSelectedServiceIds,
   getVisibleServices,
 } from '@utils/servicesVisibility'
 
@@ -203,16 +204,34 @@ const CompaniesTable: React.FC<Props> = ({
     [realEstates?.data]
   )
 
+  const hasActiveFilters = !!(
+    filters?.domain?.length || filters?.company?.length
+  )
+
   const filteredCustomServices = useMemo(() => {
     const withoutStandard = customServices?.filter((custom) => {
       return !STANDARD_SERVICE_NAMES.includes(custom.name)
     })
+
+    if (isGlobalAdmin && hasActiveFilters) {
+      const selectedIds = getSelectedServiceIds(visibleDomains)
+      if (!selectedIds.length) return []
+      const selectedSet = new Set(selectedIds)
+      return (withoutStandard ?? []).filter((s) => selectedSet.has(s._id))
+    }
+
     return getVisibleServices(
       userResponse?.roles,
       visibleDomains,
       withoutStandard ?? []
     )
-  }, [customServices, userResponse?.roles, visibleDomains])
+  }, [
+    customServices,
+    userResponse?.roles,
+    visibleDomains,
+    hasActiveFilters,
+    isGlobalAdmin,
+  ])
 
   if (isError) return <Alert message="Помилка" type="error" showIcon closable />
 
