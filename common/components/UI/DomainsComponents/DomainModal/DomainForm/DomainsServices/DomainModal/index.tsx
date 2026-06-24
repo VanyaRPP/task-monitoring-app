@@ -71,7 +71,9 @@ const DomainModal: FC<Props> = ({
   editable = true,
 }) => {
   const [targetKeys, setTargetKeys] = useState<Record<string, string[]>>({})
-  const [localServiceGroups, setLocalServiceGroups] = useState<ServiceGroup[]>([])
+  const [localServiceGroups, setLocalServiceGroups] = useState<ServiceGroup[]>(
+    []
+  )
   const [localData, setLocalData] = useState<ServiceItem[]>([])
   const [newGroupName, setNewGroupName] = useState('')
   const [editingKey, setEditingKey] = useState<string | null>(null)
@@ -79,7 +81,7 @@ const DomainModal: FC<Props> = ({
   const [newServiceName, setNewServiceName] = useState('')
   const [activePanel, setActivePanel] = useState<string | string[]>([])
   const { data: user } = useGetCurrentUserQuery()
-  
+
   isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
   const isAdmin = isAdminCheck(user?.roles)
 
@@ -316,7 +318,9 @@ const DomainModal: FC<Props> = ({
               ) : (
                 <Text
                   strong
-                  ellipsis={{ tooltip: { title: item.title, placement: 'top' } }}
+                  ellipsis={{
+                    tooltip: { title: item.title, placement: 'top' },
+                  }}
                   style={{ display: 'block', flex: 1, minWidth: 0 }}
                 >
                   {item.title}
@@ -324,65 +328,68 @@ const DomainModal: FC<Props> = ({
               )}
 
               <Space size="small">
-                {editable && isCustom && isAdmin && (isGlobalAdmin || !!domainId) && (
-                  <>
-                    {isEditing ? (
-                      <>
+                {editable &&
+                  isCustom &&
+                  isAdmin &&
+                  (isGlobalAdmin || !!domainId) && (
+                    <>
+                      {isEditing ? (
+                        <>
+                          <Button
+                            type="text"
+                            size="small"
+                            icon={
+                              <CheckOutlined
+                                style={{
+                                  color: '#642AB5',
+                                  stroke: '#642AB5',
+                                  strokeWidth: 60,
+                                }}
+                              />
+                            }
+                            onClick={() => handleSaveEdit(item)}
+                            loading={isUpdating}
+                          />
+                          <Button
+                            type="text"
+                            size="small"
+                            icon={
+                              <CloseOutlined
+                                style={{
+                                  stroke: 'currentColor',
+                                  strokeWidth: 60,
+                                }}
+                              />
+                            }
+                            onClick={handleCancelEdit}
+                            disabled={isUpdating}
+                          />
+                        </>
+                      ) : (
                         <Button
                           type="text"
                           size="small"
-                          icon={
-                            <CheckOutlined
-                              style={{
-                                color: '#642AB5',
-                                stroke: '#642AB5',
-                                strokeWidth: 60,
-                              }}
-                            />
-                          }
-                          onClick={() => handleSaveEdit(item)}
-                          loading={isUpdating}
+                          icon={<EditOutlined />}
+                          onClick={() => handleStartEdit(item)}
+                          disabled={isUpdating || isDeleting}
                         />
-                        <Button
-                          type="text"
-                          size="small"
-                          icon={
-                            <CloseOutlined
-                              style={{
-                                stroke: 'currentColor',
-                                strokeWidth: 60,
-                              }}
-                            />
-                          }
-                          onClick={handleCancelEdit}
-                          disabled={isUpdating}
+                      )}
+                      <Popconfirm
+                        title="Видалити послугу?"
+                        onConfirm={() => handleDeleteService(item.key)}
+                        okText="Так"
+                        cancelText="Ні"
+                        disabled={isDeleting || isUpdating}
+                      >
+                        <DeleteOutlined
+                          style={{
+                            color: isDeleting || isUpdating ? '#ccc' : 'red',
+                            cursor: 'pointer',
+                          }}
                         />
-                      </>
-                    ) : (
-                      <Button
-                        type="text"
-                        size="small"
-                        icon={<EditOutlined />}
-                        onClick={() => handleStartEdit(item)}
-                        disabled={isUpdating || isDeleting}
-                      />
-                    )}
-                    <Popconfirm
-                      title="Видалити послугу?"
-                      onConfirm={() => handleDeleteService(item.key)}
-                      okText="Так"
-                      cancelText="Ні"
-                      disabled={isDeleting || isUpdating}
-                    >
-                      <DeleteOutlined
-                        style={{
-                          color: isDeleting || isUpdating ? '#ccc' : 'red',
-                          cursor: 'pointer',
-                        }}
-                      />
-                    </Popconfirm>
-                  </>
-                )}
+                      </Popconfirm>
+                    </>
+                  )}
               </Space>
             </div>
           )

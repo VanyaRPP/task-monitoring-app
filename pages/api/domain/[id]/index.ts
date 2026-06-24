@@ -63,7 +63,11 @@ export default async function handler(
             // rather than persisting a bogus one.
             return null
           }
-          return { ...item, token: matched.token, shortToken: matched.shortToken }
+          return {
+            ...item,
+            token: matched.token,
+            shortToken: matched.shortToken,
+          }
         }
 
         return {

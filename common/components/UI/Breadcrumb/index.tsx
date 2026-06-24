@@ -41,14 +41,14 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
       normalizedPath.map((item) => {
         const path = item.path
         return {
-        title: item.title,
-        ...(item.path && {
-          onClick: () => {
-            if (onPathClick) onPathClick(item.path!)
-            else router.push(item.path!)
-          },
-        }),
-      }
+          title: item.title,
+          ...(item.path && {
+            onClick: () => {
+              if (onPathClick) onPathClick(item.path!)
+              else router.push(item.path!)
+            },
+          }),
+        }
       }) ?? []
     )
   }, [router, normalizedPath, onPathClick])

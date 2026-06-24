@@ -125,12 +125,16 @@ describe('buildPaymentPayload', () => {
 
   it('invoiceLang: included in payload when set to uk', () => {
     const inputs = baseInputs()
-    expect(buildPaymentPayload({ ...inputs, invoiceLang: 'uk' }).invoiceLang).toBe('uk')
+    expect(
+      buildPaymentPayload({ ...inputs, invoiceLang: 'uk' }).invoiceLang
+    ).toBe('uk')
   })
 
   it('invoiceLang: included in payload when set to en', () => {
     const inputs = baseInputs()
-    expect(buildPaymentPayload({ ...inputs, invoiceLang: 'en' }).invoiceLang).toBe('en')
+    expect(
+      buildPaymentPayload({ ...inputs, invoiceLang: 'en' }).invoiceLang
+    ).toBe('en')
   })
 
   it('invoiceLang: undefined when not provided', () => {
