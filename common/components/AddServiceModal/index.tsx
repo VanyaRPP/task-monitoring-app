@@ -57,10 +57,12 @@ const AddServiceModal: FC<Props> = ({
 
   const handleSubmit = async () => {
     const formData: FormData = await form.validateFields()
+
+    const picked = dayjs(formData.date);
     const serviceData = {
       domain: currentService?.domain?._id?.toString() || formData.domain,
       street: currentService?.street?._id?.toString() || formData.street,
-      date: dayjs(formData.date).toDate(),
+      date: new Date(Date.UTC(picked.year(), picked.month(), 1, 12, 0, 0)),
       rentPrice:
         formData.customServices?.find((c) => c.fieldName === 'rentPrice')
           ?.price ?? formData?.rentPrice,
@@ -94,9 +96,9 @@ const AddServiceModal: FC<Props> = ({
     }
     const response = currentService
       ? await editService({
-          _id: currentService?._id?.toString(),
-          ...serviceData,
-        })
+        _id: currentService?._id?.toString(),
+        ...serviceData,
+      })
       : await addService(serviceData)
 
     if ('data' in response) {
