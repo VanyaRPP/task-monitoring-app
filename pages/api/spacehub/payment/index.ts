@@ -1,3 +1,4 @@
+import mongoose from 'mongoose'
 import start from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
@@ -6,6 +7,7 @@ import {
   getPayments,
 } from '@common/services/paymentService/payment.service'
 import { applyTemplateScope } from '@common/services/paymentService/templateScope.service'
+import { logPaymentMutation } from '@common/modules/services/paymentAudit'
 
 start()
 
@@ -34,7 +36,8 @@ export default async function handler(
         return res.status(403).json({ success: false, message: 'not allowed' })
       }
 
-      const { _templateScope, ...paymentBody } = req.body ?? {}
+      const { _templateScope, _bulk, _batchId, ...paymentBody } =
+        req.body ?? {}
 
       const scopeResult = await applyTemplateScope({
         scope: _templateScope,
@@ -51,6 +54,19 @@ export default async function handler(
       }
 
       const payment = await createPayment(paymentBody, isAdmin)
+
+      const isBulk = Boolean(_bulk)
+      await logPaymentMutation({
+        actionType: isBulk ? 'BULK_CREATE' : 'CREATE',
+        source: isBulk ? 'bulk' : 'single',
+        actor: user,
+        after: payment,
+        batchId:
+          isBulk && mongoose.Types.ObjectId.isValid(_batchId)
+            ? _batchId
+            : undefined,
+      })
+
       return res.status(200).json({ success: true, data: payment })
     } catch (error: any) {
       return res

@@ -232,7 +232,10 @@ describe('Payment API Endpoint - mark-paid', () => {
 
     const logArg = (PaymentChangeLog.create as jest.Mock).mock.calls[0][0]
     expect(logArg.paymentId).toBe(debitPayments[0]._id)
+    expect(logArg.actionType).toBe('MARK_PAID')
+    expect(logArg.source).toBe('quick-pay')
     expect(logArg.reason).toBe('mark-paid')
-    expect(logArg.invoiceData.creditPaymentId).toBe('new-credit-id')
+    expect(logArg.before._id).toBe(debitPayments[0]._id)
+    expect(logArg.after._id).toBe('new-credit-id')
   })
 })

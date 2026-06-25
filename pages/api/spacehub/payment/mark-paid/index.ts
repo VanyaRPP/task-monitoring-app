@@ -1,5 +1,4 @@
 import Payment from '@common/modules/models/Payment'
-import PaymentChangeLog from '@common/modules/models/PaymentChangeLog'
 import Domain from '@modules/models/Domain'
 import start, { Data } from '@pages/api/api.config'
 import ProfitService from '@common/services/profitService/profit.service'
@@ -8,6 +7,7 @@ import { getCurrentUser } from '@utils/getCurrentUser'
 import { Operations } from '@utils/constants'
 import { dateShiftMs } from '@common/assets/features/formatDate'
 import type { NextApiRequest, NextApiResponse } from 'next'
+import { logPaymentMutation } from '@common/modules/services/paymentAudit'
 
 start()
 
@@ -100,24 +100,13 @@ export default async function handler(
         continue
       }
 
-      await PaymentChangeLog.create({
-        paymentId: source._id,
-        date: new Date(),
+      await logPaymentMutation({
+        actionType: 'MARK_PAID',
+        source: 'quick-pay',
+        actor: user,
         reason: 'mark-paid',
-        actorId: user?._id,
-        actorEmail: user?.email,
-        invoiceData: {
-          invoiceNumber: source.invoiceNumber,
-          invoiceCreationDate: source.invoiceCreationDate,
-          invoice: source.invoice,
-          provider: source.provider,
-          reciever: source.reciever,
-          generalSum: source.generalSum,
-          description: source.description,
-          type: source.type,
-          template: source.template,
-          creditPaymentId: created._id,
-        },
+        before: source,
+        after: created,
       })
 
       if (isGlobalAdmin) {
