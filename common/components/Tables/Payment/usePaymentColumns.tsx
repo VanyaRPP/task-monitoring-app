@@ -209,6 +209,7 @@ export function usePaymentColumns({
           const isFirstOccurrence =
             payments?.data?.findIndex(
               (item) =>
+                item.company != null &&
                 typeof item.company === 'object' &&
                 (item.company as any).companyName === companyName
             ) === index

@@ -1,0 +1,35 @@
+.field {
+  font: inherit;
+  font-size: inherit;
+  color: inherit;
+  width: 100%;
+  max-width: 100%;
+  border: 1px dashed var(--ant-color-primary, #722ed1);
+  border-radius: 4px;
+  background: rgba(114, 46, 209, 0.04);
+  padding: 1px 4px;
+  outline: none;
+  box-sizing: border-box;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
+
+  &:focus {
+    border-style: solid;
+    background: #fff;
+  }
+}
+
+/* In a dark surface the focused field must not flip to a white background,
+   or inherited light text becomes invisible while editing. */
+:global([data-theme='dark']) .field:focus {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.textarea {
+  display: block;
+  resize: vertical;
+  min-height: 72px;
+  line-height: 1.5;
+  padding: 4px 6px;
+}

@@ -153,9 +153,10 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
   )
 
   const visibleDomains = useMemo(
-    () => extractDomainsFromRealEstates(
-      payments?.data?.map((p) => ({ domain: p.domain })) ?? []
-    ),
+    () =>
+      extractDomainsFromRealEstates(
+        payments?.data?.map((p) => ({ domain: p.domain })) ?? []
+      ),
     [payments?.data]
   )
 

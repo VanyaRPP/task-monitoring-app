@@ -9,17 +9,21 @@ import { TemplateKey } from '@components/AddPaymentModal/resolveTemplate'
 import { FC, useRef } from 'react'
 import { useReactToPrint } from 'react-to-print'
 import { useReceiptTemplateProps } from './useReceiptTemplateProps'
+import { useInvoiceTemplateDescriptions } from './useInvoiceTemplateDescriptions'
+import { applyDescriptionOverrides } from './applyDescriptionOverrides'
+import { builtinTemplateItems } from './builtinTemplates'
 import {
   PrinterOutlined,
   LayoutOutlined,
   RightOutlined,
   CheckOutlined,
   TableOutlined,
+  MoreOutlined,
   MailOutlined,
 } from '@ant-design/icons'
-import { Dropdown, Form, Tooltip, message, MenuProps } from 'antd'
-import { useTranslation } from 'react-i18next'
+import { Dropdown, Form, message, MenuProps, Button, Tooltip } from 'antd'
 import s from './style.module.scss'
+import { useTranslation } from 'react-i18next'
 import { templateMap } from './templateMap'
 import InvoiceLanguageSelector from './InvoiceLanguageSelector'
 import {
@@ -27,13 +31,8 @@ import {
   useUpdatePaymentStatusMutation,
 } from '@common/api/paymentApi/payment.api'
 import { PaymentStatus } from '@common/api/paymentApi/payment.api.types'
+import { t } from 'i18next'
 
-const templateItems = [
-  { key: 'classic', label: 'Класичний шаблон' },
-  { key: 'olimp', label: 'OLIMP DIGITAL OÜ' },
-  { key: 'ledger', label: 'Formal Ledger' },
-  { key: 'official', label: 'Official Invoice' },
-]
 
 interface Props {
   currPayment?: IExtendedPayment | null
@@ -41,12 +40,7 @@ interface Props {
   paymentActions: { preview: boolean; edit: boolean }
 }
 
-const GroupedReceiptForm: FC<Props> = ({
-  currPayment,
-  paymentData,
-  paymentActions: _paymentActions,
-}) => {
-  const { t } = useTranslation('common')
+const GroupedReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
   const {
     form,
     template,
@@ -64,9 +58,6 @@ const GroupedReceiptForm: FC<Props> = ({
   const invoiceCurrency = useInvoiceCurrency()
   const liveInvoice = Form.useWatch('invoice', form)
   const rawData = currPayment ?? paymentData ?? null
-  // useReceiptTemplateProps maps `name = description || name` for template
-  // rows, and GroupedPricesTable resolves description-first via
-  // resolveInvoiceLabel — so we only need to swap in the live invoice here.
   const data = rawData
     ? {
         ...rawData,
@@ -75,10 +66,22 @@ const GroupedReceiptForm: FC<Props> = ({
       }
     : rawData
 
+  const {
+    customTemplates,
+    isCustomTemplate,
+    currentCustomTemplate,
+    descriptionOverrides,
+    overrides,
+  } = useInvoiceTemplateDescriptions({ data })
+
+  const effectiveData = applyDescriptionOverrides(data, descriptionOverrides)
+
   const receiptProps = useReceiptTemplateProps({
-    data,
+    data: effectiveData,
     contextCompany: company,
     lang: invoiceLang,
+    descriptionOverrides,
+    overrides,
     showQuantityInPreview,
   })
 
@@ -98,7 +101,6 @@ const GroupedReceiptForm: FC<Props> = ({
     paymentInfoLines,
     issuedToLines,
     normalizedBankDetailsLines,
-    overrides,
   } = receiptProps
 
   const componentRef = useRef<HTMLDivElement | null>(null)
@@ -115,9 +117,8 @@ const GroupedReceiptForm: FC<Props> = ({
     documentTitle:
       `${printCompanyName}-inv-${modernInvoiceNumber}` || 'invoice',
   })
-  if (!rawData) {
-    return null
-  }
+
+  if (!rawData) return null
 
   const companyLabel = receiptCompanyLabel
 
@@ -126,7 +127,6 @@ const GroupedReceiptForm: FC<Props> = ({
     scope?: TemplateScope
   ) => {
     setTemplate(templateKey)
-
     if (!data?._id) {
       if (scope === 'company' || scope === 'domain') {
         setTemplateScope(scope)
@@ -140,13 +140,11 @@ const GroupedReceiptForm: FC<Props> = ({
       }
       return
     }
-
     const result = await editPayment({
       _id: data._id,
       template: templateKey,
       _templateScope: scope !== 'payment' ? scope : undefined,
     })
-
     if ('error' in result) {
       message.error('Помилка збереження')
     } else if (scope === 'company') {
@@ -192,10 +190,7 @@ const GroupedReceiptForm: FC<Props> = ({
 
   const makeSaveMenu = (templateKey: TemplateKey): MenuProps => ({
     items: [
-      {
-        key: 'payment',
-        label: 'Зберегти для цього платежу',
-      },
+      { key: 'payment', label: 'Зберегти для цього платежу' },
       { type: 'divider' },
       {
         key: 'company',
@@ -228,7 +223,7 @@ const GroupedReceiptForm: FC<Props> = ({
     },
   })
 
-  const dropdownItems = templateItems.map((item) => ({
+  const builtinDropdownItems = builtinTemplateItems.map((item) => ({
     key: item.key,
     label: (
       <div
@@ -266,10 +261,43 @@ const GroupedReceiptForm: FC<Props> = ({
     ),
   }))
 
-  const TemplateComponent = templateMap[template] || templateMap.olimp
+  const customDropdownItems = customTemplates.map((ct) => ({
+    key: ct._id,
+    label: (
+      <span
+        onClick={() => handleSaveTemplate(ct._id as TemplateKey)}
+        style={{ display: 'flex', gap: 6, width: '100%', alignItems: 'center' }}
+      >
+        {template === ct._id && (
+          <CheckOutlined style={{ fontSize: 12, opacity: 0.7 }} />
+        )}
+        <span
+          style={{
+            maxWidth: 200,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {ct.name}
+        </span>
+      </span>
+    ),
+  }))
 
+  const dropdownItems = [
+    ...builtinDropdownItems,
+    ...(customTemplates.length > 0
+      ? [{ type: 'divider' as const }, ...customDropdownItems]
+      : []),
+  ]
+
+  const baseTemplateKey = isCustomTemplate
+    ? currentCustomTemplate?.baseTemplateKey || 'classic'
+    : template
+  const TemplateComponent = templateMap[baseTemplateKey] || templateMap.olimp
   const templateProps = {
-    data,
+    data: effectiveData,
     componentRef,
     isEnglish,
     showQuantityInPreview,
@@ -290,25 +318,45 @@ const GroupedReceiptForm: FC<Props> = ({
     overrides,
   }
 
+  const mainMenuItems: MenuProps['items'] = [
+    {
+      key: 'print',
+      icon: <PrinterOutlined />,
+      label: isEnglish ? 'Print' : 'Друк',
+      onClick: handlePrint,
+    },
+    {
+      key: 'template',
+      icon: <LayoutOutlined />,
+      label: isEnglish ? 'Choose template' : 'Обрати шаблон',
+      children: dropdownItems,
+    },
+    {
+      key: 'tableToggle',
+      icon: <TableOutlined />,
+      label: showQuantityInPreview
+        ? 'Приховати кількість і ціну'
+        : 'Показати кількість і ціну',
+      onClick: () => setShowQuantityInPreview(!showQuantityInPreview),
+    },
+    { type: 'divider' },
+    {
+      key: 'language',
+      label: (
+        <div onClick={(e) => e.stopPropagation()}>
+          <InvoiceLanguageSelector
+            lang={invoiceLang}
+            onChange={handleSaveLanguage}
+          />
+        </div>
+      ),
+    },
+  ]
+
   return (
     <>
-      <Tooltip title="Друк">
-        <PrinterOutlined className={s.print} onClick={handlePrint} />
-      </Tooltip>
-      <Dropdown
-        trigger={['click']}
-        placement="bottomLeft"
-        menu={{
-          items: dropdownItems,
-          style: { minWidth: 240 },
-        }}
-      >
-        <Tooltip title={isEnglish ? 'Select template' : 'Обрати шаблон'}>
-          <LayoutOutlined className={s.edit} />
-        </Tooltip>
-      </Dropdown>
-
-      <Tooltip
+      <div style={{ position: 'absolute', top: -85, right: 35, zIndex: 100 }}>
+              <Tooltip
         title={
           isSent
             ? t('payments.tooltips.alreadySent')
@@ -325,33 +373,21 @@ const GroupedReceiptForm: FC<Props> = ({
           aria-disabled={isSent}
         />
       </Tooltip>
-
-      <Tooltip title="Показувати кількість і ціну в таблиці перегляду">
-        <TableOutlined
-          role="button"
-          tabIndex={0}
-          aria-label={
-            showQuantityInPreview
-              ? 'Приховати кількість і ціну в перегляді'
-              : 'Показати кількість і ціну в перегляді'
-          }
-          aria-pressed={showQuantityInPreview}
-          className={`${s.tableDetailsToggle} ${
-            showQuantityInPreview ? s.tableDetailsToggleActive : ''
-          }`}
-          onClick={() => setShowQuantityInPreview(!showQuantityInPreview)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault()
-              setShowQuantityInPreview(!showQuantityInPreview)
-            }
+        <Dropdown
+          menu={{
+            items: mainMenuItems,
+            style: { minWidth: 220, transform: 'translateX(35px)' },
           }}
-        />
-      </Tooltip>
-
-      <span className={s.languageSelector}>
-        <InvoiceLanguageSelector lang={invoiceLang} onChange={handleSaveLanguage} />
-      </span>
+          trigger={['click']}
+        >
+          <Button
+            type="default"
+            style={{ borderColor: 'rgba(150, 150, 150, 0.4)' }}
+            icon={<MoreOutlined style={{ fontSize: 20, color: 'inherit' }} />}
+          />
+        </Dropdown>
+        
+      </div>
 
       <TemplateComponent {...templateProps} />
     </>

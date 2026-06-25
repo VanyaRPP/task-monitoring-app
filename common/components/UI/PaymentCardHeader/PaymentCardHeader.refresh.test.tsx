@@ -71,9 +71,9 @@ const messageMock = message as unknown as {
   error: jest.Mock
 }
 
-const {
-  useGetCurrentUserQuery,
-} = jest.requireMock('@common/api/userApi/user.api')
+const { useGetCurrentUserQuery } = jest.requireMock(
+  '@common/api/userApi/user.api'
+)
 
 const makeProps = (overrides: Record<string, any> = {}) => ({
   setCurrentDateFilter: jest.fn(),

@@ -63,9 +63,7 @@ const mockCreatedService = {
 
 const mockDomain = {
   _id: DOMAIN_ID,
-  customServices: [
-    { groupName: 'Стандартні послуги', services: [] },
-  ],
+  customServices: [{ groupName: 'Стандартні послуги', services: [] }],
 }
 
 describe('saveAdHocService — збереження власної послуги в домен', () => {
@@ -112,7 +110,10 @@ describe('saveAdHocService — збереження власної послуг�
         expect.objectContaining({ success: true })
       )
       expect(CustomService.create).toHaveBeenCalledWith(
-        expect.objectContaining({ name: 'Прибирання', domain: expect.anything() })
+        expect.objectContaining({
+          name: 'Прибирання',
+          domain: expect.anything(),
+        })
       )
     })
 

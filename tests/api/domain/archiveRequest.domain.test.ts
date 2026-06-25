@@ -74,7 +74,7 @@ describe('Domains API - ARCHIVE / UNARCHIVE', () => {
 
       const mockReq = {
         method: 'PATCH',
-        query: { id: domains[1]._id.toString() }, 
+        query: { id: domains[1]._id.toString() },
         body: { archived: true },
       } as any
       const mockRes = {
@@ -122,7 +122,7 @@ describe('Domains API - ARCHIVE / UNARCHIVE', () => {
 
       const mockReq = {
         method: 'PATCH',
-        query: { id: domains[6]._id.toString() }, 
+        query: { id: domains[6]._id.toString() },
         body: { archived: false },
       } as any
       const mockRes = {
@@ -144,7 +144,7 @@ describe('Domains API - ARCHIVE / UNARCHIVE', () => {
 
       const mockReq = {
         method: 'PATCH',
-        query: { id: domains[6]._id.toString() }, 
+        query: { id: domains[6]._id.toString() },
         body: { archived: false },
       } as any
       const mockRes = {
@@ -166,7 +166,7 @@ describe('Domains API - ARCHIVE / UNARCHIVE', () => {
 
       const mockReq = {
         method: 'PATCH',
-        query: { id: domains[6]._id.toString() }, 
+        query: { id: domains[6]._id.toString() },
         body: { archived: false },
       } as any
       const mockRes = {
@@ -228,7 +228,9 @@ describe('Domains API - ARCHIVE / UNARCHIVE', () => {
       await getHandler(mockReq, mockRes)
 
       expect(mockRes.status).toHaveBeenCalledWith(200)
-      const ids = mockRes.json.mock.lastCall[0].data.map((d: any) => d._id.toString())
+      const ids = mockRes.json.mock.lastCall[0].data.map((d: any) =>
+        d._id.toString()
+      )
       expect(ids).not.toContain(domains[0]._id.toString())
     })
 
@@ -251,13 +253,17 @@ describe('Domains API - ARCHIVE / UNARCHIVE', () => {
       await getHandler(mockReq, mockRes)
 
       expect(mockRes.status).toHaveBeenCalledWith(200)
-      const ids = mockRes.json.mock.lastCall[0].data.map((d: any) => d._id.toString())
+      const ids = mockRes.json.mock.lastCall[0].data.map((d: any) =>
+        d._id.toString()
+      )
       expect(ids).toContain(domains[0]._id.toString())
     })
 
     it('legacy domain without archived field appears in GET with archived=false', async () => {
       // simulate a domain created before the archive feature (no `archived` field)
-      await Domain.findByIdAndUpdate(domains[1]._id, { $unset: { archived: '' } })
+      await Domain.findByIdAndUpdate(domains[1]._id, {
+        $unset: { archived: '' },
+      })
 
       await mockLoginAs(users.globalAdmin)
 

@@ -17,6 +17,7 @@ export enum PaymentStatus {
 export interface IPaymentField {
   type: ServiceType | string
   name?: string
+  customName?: string
   description?: string
   customService?: boolean
   isIndividual?: boolean

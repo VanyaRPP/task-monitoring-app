@@ -5,12 +5,13 @@ import { getDefaultColumns } from '@common/components/Tables/PaymentsBulk/column
 import serviceFilter from '@components/AddPaymentModal/serviceFilter'
 import { AppRoutes, Operations } from '@utils/constants'
 import { getInvoices } from '@utils/getInvoices'
-import { Alert, Empty, Form, Input, Table } from 'antd'
+import { Alert, Empty, Form, InputNumber, Table } from 'antd'
 import { useRouter } from 'next/router'
 import { useEffect, useMemo } from 'react'
 import { defaultServices } from '@utils/constants'
 import { findPrevPaymentMatch } from './hooks/usePrevPayment/usePrevPayment'
 import { Amount } from './cells/Amount'
+import styles from './stylestable.module.scss'
 
 const InvoicesTable: React.FC = () => {
   const router = useRouter()
@@ -42,7 +43,6 @@ const InvoicesTable: React.FC = () => {
     [groups]
   )
 
-  // TEMP DIAGNOSTIC — remove after confirming communal columns render.
   useEffect(() => {
     console.warn('[PaymentsBulk] diag', {
       domainId,
@@ -77,19 +77,24 @@ const InvoicesTable: React.FC = () => {
           children: [
             {
               title: 'Кількість',
-              width: 140,
+              width: 120,
               render: (_: any, { name }: { name: number }) => (
                 <Amount name={name} fieldName={s.fieldName} />
               ),
             },
             {
-              width: 160,
+              title: 'Ціна',
+              width: 140,
               render: (_: any, { name }: { name: number }) => (
                 <Form.Item
                   name={[name, 'invoice', s.fieldName, 'sum']}
                   style={{ margin: 0 }}
                 >
-                  <Input />
+                  <InputNumber
+                    placeholder="Ціна"
+                    style={{ width: '100%' }}
+                    min={0}
+                  />
                 </Form.Item>
               ),
             },
@@ -157,6 +162,8 @@ const InvoicesTable: React.FC = () => {
     <Form.List name="payments">
       {(fields, { remove }) => (
         <Table
+          className={styles.customTable}
+          bordered
           rowKey="name"
           size="small"
           pagination={false}
