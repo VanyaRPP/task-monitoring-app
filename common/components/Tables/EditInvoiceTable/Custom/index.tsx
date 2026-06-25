@@ -62,13 +62,13 @@ export const Name: React.FC<InvoiceComponentProps> = ({
     }
   }, [defaultLabel, editable, form, name])
 
-  useEffect(() => {
-    if (!editable || !form || !name.length) return
-    if (type !== 'custom' || isCustomService) return
-    if (adHocBindingRef.current !== 'name') return
-    if (value === undefined) return
-    form.setFieldValue(['invoice', ...name, 'description'], value || '')
-  }, [value, editable, form, name, type, isCustomService])
+  // useEffect(() => {
+  //   if (!editable || !form || !name.length) return
+  //   if (type !== 'custom' || isCustomService) return
+  //   if (adHocBindingRef.current !== 'name') return
+  //   if (value === undefined) return
+  //   form.setFieldValue(['invoice', ...name, 'description'], value || '')
+  // }, [value, editable, form, name, type, isCustomService])
 
   const defaultPrice = useMemo(
     () =>

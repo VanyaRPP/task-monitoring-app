@@ -172,7 +172,6 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
         dispatch(paymentApi.util.invalidateTags(['Payment']))
       }
     }
-
     return () => {
       channel.close()
     }
@@ -321,7 +320,8 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
         } else {
           message.error(
             many
-              ? 'Не вдалося продублювати обрані рахунки' : 'Не вдалося продублювати рахунок'
+              ? 'Не вдалося продублювати обрані рахунки'
+              : 'Не вдалося продублювати рахунок'
           )
         }
       } else {
