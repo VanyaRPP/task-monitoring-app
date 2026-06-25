@@ -32,8 +32,12 @@ jest.mock('@components/Forms/GroupedReceiptForm/GroupedPricesTable', () => ({
 
 jest.mock('@common/api/paymentApi/payment.api', () => ({
   useEditPaymentMutation: () => [jest.fn().mockResolvedValue({ data: {} })],
-  useSendPaymentEmailMutation: () => [jest.fn().mockResolvedValue({ success: true })],
-  useUpdatePaymentStatusMutation: () => [jest.fn().mockResolvedValue({ data: {} })],
+  useSendPaymentEmailMutation: () => [
+    jest.fn().mockResolvedValue({ success: true }),
+  ],
+  useUpdatePaymentStatusMutation: () => [
+    jest.fn().mockResolvedValue({ data: {} }),
+  ],
 }))
 
 jest.mock('@common/api/invoiceTemplateApi/invoiceTemplate.api', () => ({
@@ -231,7 +235,14 @@ describe('GroupedReceiptForm - Send Email Button', () => {
   const renderWithMail = (overrides = {}) =>
     render(
       <GroupedReceiptForm
-        paymentData={{ ...mockPayment, _id: 'test-id', status: 'Draft', ...overrides } as any}
+        paymentData={
+          {
+            ...mockPayment,
+            _id: 'test-id',
+            status: 'Draft',
+            ...overrides,
+          } as any
+        }
         paymentActions={{ preview: true, edit: true }}
       />
     )

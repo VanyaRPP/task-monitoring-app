@@ -33,7 +33,6 @@ import {
 import { PaymentStatus } from '@common/api/paymentApi/payment.api.types'
 import { t } from 'i18next'
 
-
 interface Props {
   currPayment?: IExtendedPayment | null
   paymentData?: IExtendedPayment | null | undefined
@@ -164,7 +163,9 @@ const GroupedReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
   }
 
   const paymentStatus =
-    data?.status === PaymentStatus.Sent ? PaymentStatus.Sent : PaymentStatus.Draft
+    data?.status === PaymentStatus.Sent
+      ? PaymentStatus.Sent
+      : PaymentStatus.Draft
   const isSent = paymentStatus === PaymentStatus.Sent
 
   const handleSendEmail = async () => {
@@ -356,23 +357,25 @@ const GroupedReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
   return (
     <>
       <div style={{ position: 'absolute', top: -85, right: 35, zIndex: 100 }}>
-              <Tooltip
-        title={
-          isSent
-            ? t('payments.tooltips.alreadySent')
-            : t('payments.tooltips.sendEmail')
-        }
-      >
-        <MailOutlined
-          className={s.mail}
-          onClick={handleSendEmail}
-          style={{
-            color: isSent ? 'var(--ant-color-text-disabled)' : 'var(--ant-color-success)',
-            cursor: isSent ? 'not-allowed' : 'pointer',
-          }}
-          aria-disabled={isSent}
-        />
-      </Tooltip>
+        <Tooltip
+          title={
+            isSent
+              ? t('payments.tooltips.alreadySent')
+              : t('payments.tooltips.sendEmail')
+          }
+        >
+          <MailOutlined
+            className={s.mail}
+            onClick={handleSendEmail}
+            style={{
+              color: isSent
+                ? 'var(--ant-color-text-disabled)'
+                : 'var(--ant-color-success)',
+              cursor: isSent ? 'not-allowed' : 'pointer',
+            }}
+            aria-disabled={isSent}
+          />
+        </Tooltip>
         <Dropdown
           menu={{
             items: mainMenuItems,
@@ -386,7 +389,6 @@ const GroupedReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
             icon={<MoreOutlined style={{ fontSize: 20, color: 'inherit' }} />}
           />
         </Dropdown>
-        
       </div>
 
       <TemplateComponent {...templateProps} />

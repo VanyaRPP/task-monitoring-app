@@ -24,7 +24,10 @@ import {
   useGetDebtorsQuery,
 } from '@common/api/debtorsApi/debtors.api'
 
-import { IExtendedPayment, PaymentStatus } from '@common/api/paymentApi/payment.api.types'
+import {
+  IExtendedPayment,
+  PaymentStatus,
+} from '@common/api/paymentApi/payment.api.types'
 
 import TableCard from '@components/UI/TableCard'
 import PaymentsHeader from '@components/Tables/Payment/Header'

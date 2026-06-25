@@ -263,8 +263,8 @@ const AddCostForm: React.FC<Props> = ({
               isDebit
                 ? t('profitPage:form.amountDebit')
                 : isCredit
-                ? t('profitPage:form.amountCredit')
-                : t('profitPage:form.amount')
+                  ? t('profitPage:form.amountCredit')
+                  : t('profitPage:form.amount')
             }
           >
             <Input

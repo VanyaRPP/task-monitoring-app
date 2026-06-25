@@ -78,7 +78,9 @@ describe('PaymentReceiptForm - Send Email Button', () => {
 describe('PaymentReceiptForm - Rendering', () => {
   test('displays receipt header', () => {
     renderPaymentReceipt()
-    expect(screen.getByText(/КВИТАНЦІЯ ПРО ОТРИМАННЯ ПЛАТЕЖУ/)).toBeInTheDocument()
+    expect(
+      screen.getByText(/КВИТАНЦІЯ ПРО ОТРИМАННЯ ПЛАТЕЖУ/)
+    ).toBeInTheDocument()
   })
 
   test('displays transaction account number', () => {
