@@ -1,5 +1,4 @@
 import Payment from '@common/modules/models/Payment'
-import Domain from '@modules/models/Domain'
 import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
@@ -58,12 +57,26 @@ export default async function handler(
       return res.status(403).json({ success: false, message: 'not allowed' })
     }
 
+    // Mirror createPayment: when the stored receiver has no recipients (e.g.
+    // legacy payments saved before receiver was populated), fall back to the
+    // payment's domain admins instead of silently sending to nobody.
+    const currentReceiver = payment.reciever || {}
+    const reciever = {
+      companyName:
+        currentReceiver.companyName || payment.domain?.name || 'invoice',
+      adminEmails: currentReceiver.adminEmails?.length
+        ? currentReceiver.adminEmails
+        : payment.domain?.adminEmails || [],
+      description:
+        currentReceiver.description || payment.domain?.description || '',
+    }
+
     const result = await sendInvoiceEmail({
       invoiceNumber: payment.invoiceNumber,
       invoiceCreationDate: payment.invoiceCreationDate,
       invoice: payment.invoice,
       provider: payment.provider,
-      reciever: payment.reciever,
+      reciever,
       generalSum: payment.generalSum,
       type: payment.type,
       company: payment.company,
