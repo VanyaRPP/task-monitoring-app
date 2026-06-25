@@ -29,10 +29,12 @@ const InvoicesTable: React.FC = () => {
 
   const domainId = Form.useWatch('domain', form)
 
-  const { data: customDomainServices } = useGetCustomServicesByDomainQuery(
-    { domainId },
-    { skip: !domainId }
-  )
+  const {
+    data: customDomainServices,
+    isFetching: isServicesFetching,
+    isError: isServicesError,
+    error: servicesError,
+  } = useGetCustomServicesByDomainQuery({ domainId }, { skip: !domainId })
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const groups = customDomainServices?.data ?? []
