@@ -1,8 +1,23 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { Input, Select, DatePicker, Button, Tag, Typography, Flex, Space, Tooltip } from 'antd'
-import { ClearOutlined, DownloadOutlined, SearchOutlined, ReloadOutlined } from '@ant-design/icons'
+import {
+  Input,
+  Select,
+  DatePicker,
+  Button,
+  Tag,
+  Typography,
+  Flex,
+  Space,
+  Tooltip,
+} from 'antd'
+import {
+  ClearOutlined,
+  DownloadOutlined,
+  SearchOutlined,
+  ReloadOutlined,
+} from '@ant-design/icons'
 import dayjs from 'dayjs'
 
 const { Text } = Typography
@@ -20,20 +35,65 @@ interface LogEntry {
 }
 
 const MOCK_LOGS: LogEntry[] = [
-  { id: '1',  timestamp: '2025-05-25 10:01:02', level: 'success', user: 'admin@example.com',    action: 'LOGIN',ip: '192.168.1.10' },
-  { id: '2',  timestamp: '2025-05-25 10:02:15', level: 'info',    user: 'ivan@example.com',     action: 'VIEW_PAGE',ip: '10.0.0.5'     },
-  { id: '3',  timestamp: '2025-05-25 10:03:44', level: 'warning', user: 'olena@example.com',    action: 'EDIT_USER',ip: '172.16.0.3'   },
-  { id: '4',  timestamp: '2025-05-25 10:04:10', level: 'error',   user: 'test@example.com',     action: 'LOGIN_FAILED',ip: '203.0.113.42' },
-  { id: '5',  timestamp: '2025-05-25 10:05:33', level: 'info',    user: 'admin@example.com',    action: 'CREATE_USER',ip: '192.168.1.10' },
-  { id: '6',  timestamp: '2025-05-25 10:06:55', level: 'success', user: 'petro@example.com',    action: 'LOGIN',ip: '10.0.0.22'    },
+  {
+    id: '1',
+    timestamp: '2025-05-25 10:01:02',
+    level: 'success',
+    user: 'admin@example.com',
+    action: 'LOGIN',
+    ip: '192.168.1.10',
+  },
+  {
+    id: '2',
+    timestamp: '2025-05-25 10:02:15',
+    level: 'info',
+    user: 'ivan@example.com',
+    action: 'VIEW_PAGE',
+    ip: '10.0.0.5',
+  },
+  {
+    id: '3',
+    timestamp: '2025-05-25 10:03:44',
+    level: 'warning',
+    user: 'olena@example.com',
+    action: 'EDIT_USER',
+    ip: '172.16.0.3',
+  },
+  {
+    id: '4',
+    timestamp: '2025-05-25 10:04:10',
+    level: 'error',
+    user: 'test@example.com',
+    action: 'LOGIN_FAILED',
+    ip: '203.0.113.42',
+  },
+  {
+    id: '5',
+    timestamp: '2025-05-25 10:05:33',
+    level: 'info',
+    user: 'admin@example.com',
+    action: 'CREATE_USER',
+    ip: '192.168.1.10',
+  },
+  {
+    id: '6',
+    timestamp: '2025-05-25 10:06:55',
+    level: 'success',
+    user: 'petro@example.com',
+    action: 'LOGIN',
+    ip: '10.0.0.22',
+  },
 ]
 
-const LEVEL_CONFIG: Record<LogLevel, { color: string; label: string; ansiColor: string }> = {
+const LEVEL_CONFIG: Record<
+  LogLevel,
+  { color: string; label: string; ansiColor: string }
+> = {
   success: { color: 'success', label: 'SUCCESS', ansiColor: '#52c41a' },
-  info:    { color: 'processing', label: 'INFO',    ansiColor: '#1677ff' },
-  warning: { color: 'warning', label: 'WARN',    ansiColor: '#faad14' },
-  error:   { color: 'error',   label: 'ERROR',   ansiColor: '#ff4d4f' },
-  debug:   { color: 'default', label: 'DEBUG',   ansiColor: '#8c8c8c' },
+  info: { color: 'processing', label: 'INFO', ansiColor: '#1677ff' },
+  warning: { color: 'warning', label: 'WARN', ansiColor: '#faad14' },
+  error: { color: 'error', label: 'ERROR', ansiColor: '#ff4d4f' },
+  debug: { color: 'default', label: 'DEBUG', ansiColor: '#8c8c8c' },
 }
 
 export const LogsConsole: React.FC = () => {
@@ -62,7 +122,10 @@ export const LogsConsole: React.FC = () => {
 
   const handleDownload = () => {
     const content = filtered
-      .map((l) => `[${l.timestamp}] [${l.level.toUpperCase()}] ${l.user} — ${l.action}: (${l.ip})`)
+      .map(
+        (l) =>
+          `[${l.timestamp}] [${l.level.toUpperCase()}] ${l.user} — ${l.action}: (${l.ip})`
+      )
       .join('\n')
     const blob = new Blob([content], { type: 'text/plain' })
     const url = URL.createObjectURL(blob)
@@ -91,17 +154,21 @@ export const LogsConsole: React.FC = () => {
           options={[
             { value: 'all', label: 'Всі рівні' },
             { value: 'success', label: 'SUCCESS' },
-            { value: 'info',    label: 'INFO'    },
-            { value: 'warning', label: 'WARN'    },
-            { value: 'error',   label: 'ERROR'   },
-            { value: 'debug',   label: 'DEBUG'   },
+            { value: 'info', label: 'INFO' },
+            { value: 'warning', label: 'WARN' },
+            { value: 'error', label: 'ERROR' },
+            { value: 'debug', label: 'DEBUG' },
           ]}
         />
         <Flex gap={8} style={{ marginLeft: 'auto' }}>
-          <Tooltip title={isLive ? 'Зупинити live' : 'Увімкнути live'}>
-          </Tooltip>
+          <Tooltip
+            title={isLive ? 'Зупинити live' : 'Увімкнути live'}
+          ></Tooltip>
           <Tooltip title="Оновити">
-            <Button icon={<ReloadOutlined />} onClick={() => setLogs(MOCK_LOGS)} />
+            <Button
+              icon={<ReloadOutlined />}
+              onClick={() => setLogs(MOCK_LOGS)}
+            />
           </Tooltip>
           <Tooltip title="Очистити консоль">
             <Button icon={<ClearOutlined />} onClick={handleClear} />
@@ -113,21 +180,28 @@ export const LogsConsole: React.FC = () => {
       </Flex>
 
       <Flex gap={8} wrap="wrap">
-        {(['success', 'info', 'warning', 'error', 'debug'] as LogLevel[]).map((lvl) => {
-          const count = logs.filter((l) => l.level === lvl).length
-          const { color, label } = LEVEL_CONFIG[lvl]
-          return (
-            <Tag
-              key={lvl}
-              color={color}
-              style={{ cursor: 'pointer', userSelect: 'none' }}
-              onClick={() => setLevelFilter(lvl === levelFilter ? 'all' : lvl)}
-            >
-              {label}: {count}
-            </Tag>
-          )
-        })}
-        <Text type="secondary" style={{ fontSize: 12, marginLeft: 'auto', alignSelf: 'center' }}>
+        {(['success', 'info', 'warning', 'error', 'debug'] as LogLevel[]).map(
+          (lvl) => {
+            const count = logs.filter((l) => l.level === lvl).length
+            const { color, label } = LEVEL_CONFIG[lvl]
+            return (
+              <Tag
+                key={lvl}
+                color={color}
+                style={{ cursor: 'pointer', userSelect: 'none' }}
+                onClick={() =>
+                  setLevelFilter(lvl === levelFilter ? 'all' : lvl)
+                }
+              >
+                {label}: {count}
+              </Tag>
+            )
+          }
+        )}
+        <Text
+          type="secondary"
+          style={{ fontSize: 12, marginLeft: 'auto', alignSelf: 'center' }}
+        >
           Показано {filtered.length} з {logs.length} записів
         </Text>
       </Flex>
@@ -161,10 +235,22 @@ export const LogsConsole: React.FC = () => {
                   alignItems: 'flex-start',
                   transition: 'background 0.15s',
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.06)')}
-                onMouseLeave={(e) => (e.currentTarget.style.background = isEven ? 'transparent' : 'rgba(255,255,255,0.02)')}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.background = 'rgba(255,255,255,0.06)')
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.background = isEven
+                    ? 'transparent'
+                    : 'rgba(255,255,255,0.02)')
+                }
               >
-                <span style={{ color: '#484f58', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                <span
+                  style={{
+                    color: '#484f58',
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0,
+                  }}
+                >
                   {log.timestamp}
                 </span>
 
@@ -181,14 +267,35 @@ export const LogsConsole: React.FC = () => {
                   [{label}]
                 </span>
 
-                <span style={{ color: '#79c0ff', whiteSpace: 'nowrap', flexShrink: 0, minWidth: 160 }}>
+                <span
+                  style={{
+                    color: '#79c0ff',
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0,
+                    minWidth: 160,
+                  }}
+                >
                   {log.user}
                 </span>
-                <span style={{ color: '#ffa657', whiteSpace: 'nowrap', flexShrink: 0, minWidth: 120 }}>
+                <span
+                  style={{
+                    color: '#ffa657',
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0,
+                    minWidth: 120,
+                  }}
+                >
                   {log.action}
                 </span>
 
-                <span style={{ color: '#484f58', whiteSpace: 'nowrap', flexShrink: 0, marginLeft: 'auto' }}>
+                <span
+                  style={{
+                    color: '#484f58',
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0,
+                    marginLeft: 'auto',
+                  }}
+                >
                   {log.ip}
                 </span>
               </div>

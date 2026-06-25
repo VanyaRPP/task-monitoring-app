@@ -66,6 +66,7 @@ const paymentsSlice = createSlice({
       }
     },
     setFilters(state, action: PayloadAction<Record<string, any> | undefined>) {
+      state.currentPage = 1
       state.filters = action.payload
     },
     setDomainsFilter(state, action: PayloadAction<IFilter[]>) {

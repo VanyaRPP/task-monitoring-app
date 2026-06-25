@@ -1,4 +1,5 @@
 // API imports
+import { invoiceTemplateApi } from '@common/api/invoiceTemplateApi/invoiceTemplate.api'
 import { bankApi } from '@common/api/bankApi/bank.api'
 import { mockBankApi } from '@common/api/bankApi/mockBank.api'
 import { categoryApi } from '@common/api/categoriesApi/category.api'
@@ -49,6 +50,7 @@ export const store = configureStore({
     [debtorsApi.reducerPath]: debtorsApi.reducer,
     [mockBankApi.reducerPath]: mockBankApi.reducer,
     [FeatureFlagApi.reducerPath]: FeatureFlagApi.reducer,
+    [invoiceTemplateApi.reducerPath]: invoiceTemplateApi.reducer,
 
     sidebar: sidebarReducer,
     theme: themeReducer,
@@ -83,6 +85,7 @@ export const store = configureStore({
       .concat(mockBankApi.middleware)
       .concat(debtorsApi.middleware)
       .concat(FeatureFlagApi.middleware)
+      .concat(invoiceTemplateApi.middleware)
       .concat(profitApi.middleware),
 })
 

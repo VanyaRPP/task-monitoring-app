@@ -123,8 +123,14 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
   const { filters, setFilters, domainsFilter, companiesFilter, dateFilters } =
     filterProps
   const { pageData, handlePagination } = paginationProps
-  const { onViewClick, onEditClick, onDelete, onMarkPaid, onDuplicate, deleteLoading } = 
-    actionProps
+  const {
+    onViewClick,
+    onEditClick,
+    onDelete,
+    onMarkPaid,
+    onDuplicate,
+    deleteLoading,
+  } = actionProps
   const { debtorCompanies } = debtProps
   const { selectedColumns } = columnSelectionProps
   const { handleTableChange } = tableEventProps
@@ -140,9 +146,10 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
   )
 
   const visibleDomains = useMemo(
-    () => extractDomainsFromRealEstates(
-      payments?.data?.map((p) => ({ domain: p.domain })) ?? []
-    ),
+    () =>
+      extractDomainsFromRealEstates(
+        payments?.data?.map((p) => ({ domain: p.domain })) ?? []
+      ),
     [payments?.data]
   )
 

@@ -24,12 +24,7 @@ import {
 import { ServiceType, defaultServices } from '@utils/constants'
 
 describe('getCount', () => {
-  const tasks = [
-    { category: 'a' },
-    { category: 'b' },
-    { category: 'a' },
-    {},
-  ]
+  const tasks = [{ category: 'a' }, { category: 'b' }, { category: 'a' }, {}]
 
   it('returns tasks whose category matches the name', () => {
     expect(getCount(tasks, 'a')).toEqual([{ category: 'a' }, { category: 'a' }])

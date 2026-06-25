@@ -59,11 +59,11 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
 
   if (!editable) {
     const base = amount - lastAmount
-    const withLosses = base + base * (losses / 100)
+    const withLosses = Number(toRoundFixed(base + base * (losses / 100)))
 
     return losses > 0 ? (
       <DividedSpace>
-        <Typography.Text>{withLosses} кВт</Typography.Text>
+        <Typography.Text>{toRoundFixed(withLosses)} кВт</Typography.Text>
         <Tooltip
           title={
             <div>
@@ -74,7 +74,7 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
                 <strong>Втрати:</strong> {losses.toFixed(2)}%
               </div>
               <div>
-                <strong>З втратами:</strong> {withLosses} кВт
+                <strong>З втратами:</strong> {toRoundFixed(withLosses)} кВт
               </div>
             </div>
           }
