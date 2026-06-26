@@ -626,7 +626,7 @@ const ColumnSelect: React.FC<ColumnSelectProps> = ({
         localStorage.setItem('payments_columns', JSON.stringify(filtered))
       }
     }
-  }, [filterByAvailable, allowedServices])
+  }, [filterByAvailable, allowedServices, selected])
 
   useEffect(() => {
     if (!allowedServices || !filterByAvailable) return

@@ -58,7 +58,7 @@ const AddServiceModal: FC<Props> = ({
   const handleSubmit = async () => {
     const formData: FormData = await form.validateFields()
 
-    const picked = dayjs(formData.date);
+    const picked = dayjs(formData.date)
     const serviceData = {
       domain: currentService?.domain?._id?.toString() || formData.domain,
       street: currentService?.street?._id?.toString() || formData.street,
@@ -96,9 +96,9 @@ const AddServiceModal: FC<Props> = ({
     }
     const response = currentService
       ? await editService({
-        _id: currentService?._id?.toString(),
-        ...serviceData,
-      })
+          _id: currentService?._id?.toString(),
+          ...serviceData,
+        })
       : await addService(serviceData)
 
     if ('data' in response) {

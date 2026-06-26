@@ -30,14 +30,14 @@ describe('AddServiceModal Sync', () => {
   beforeEach(() => {
     jest.useFakeTimers()
     jest.clearAllMocks()
-      ; (useAddServiceMutation as jest.Mock).mockReturnValue([
-        mockAddService,
-        { isLoading: false },
-      ])
-      ; (useEditServiceMutation as jest.Mock).mockReturnValue([
-        mockEditService,
-        { isLoading: false },
-      ])
+    ;(useAddServiceMutation as jest.Mock).mockReturnValue([
+      mockAddService,
+      { isLoading: false },
+    ])
+    ;(useEditServiceMutation as jest.Mock).mockReturnValue([
+      mockEditService,
+      { isLoading: false },
+    ])
   })
 
   afterEach(() => {
@@ -85,7 +85,14 @@ describe('AddServiceModal Date Logic (Timezone Fix)', () => {
     const pickedDateUTCMinus = dayjs('2026-05-01T00:00:00-04:00')
 
     const fixedDate = new Date(
-      Date.UTC(pickedDateUTCMinus.year(), pickedDateUTCMinus.month(), 1, 12, 0, 0)
+      Date.UTC(
+        pickedDateUTCMinus.year(),
+        pickedDateUTCMinus.month(),
+        1,
+        12,
+        0,
+        0
+      )
     )
 
     expect(fixedDate.getUTCMonth()).toBe(4)
