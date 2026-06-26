@@ -63,6 +63,8 @@ describe('PaymentChangeLog API - POST', () => {
     expect(PaymentChangeLog.create).toHaveBeenCalledWith({
       paymentId: validPaymentId,
       invoiceData: mockInvoiceData,
+      actionType: 'UPDATE',
+      source: 'single',
       reason: 'manual',
       actorId: 'user123',
       actorEmail: 'admin@test.com',
@@ -102,6 +104,8 @@ describe('PaymentChangeLog API - POST', () => {
     expect(PaymentChangeLog.create).toHaveBeenCalledWith({
       paymentId: validPaymentId,
       invoiceData: mockInvoiceData,
+      actionType: 'UPDATE',
+      source: 'single',
       reason: 'manual',
       actorId: 'user456',
       actorEmail: 'user@test.com',
@@ -232,6 +236,8 @@ describe('PaymentChangeLog API - POST', () => {
     expect(PaymentChangeLog.create).toHaveBeenCalledWith({
       paymentId: validPaymentId,
       invoiceData: mockInvoiceData,
+      actionType: 'UPDATE',
+      source: 'single',
       reason: 'manual',
       actorId: undefined,
       actorEmail: undefined,

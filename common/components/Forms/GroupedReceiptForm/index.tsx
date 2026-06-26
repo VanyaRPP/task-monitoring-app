@@ -328,7 +328,7 @@ const GroupedReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
           trigger={['click']}
         >
           <Button
-            type="default" 
+            type="default"
             style={{ borderColor: 'rgba(150, 150, 150, 0.4)' }}
             icon={<MoreOutlined style={{ fontSize: 20, color: 'inherit' }} />}
           />

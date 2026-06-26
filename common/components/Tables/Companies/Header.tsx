@@ -22,7 +22,9 @@ import {
 import { useGetCustomServicesQuery } from '@common/api/customServicesApi/customServices.api'
 import {
   extractDomainsFromRealEstates,
+  getSelectedServiceIds,
   getVisibleServices,
+  isGlobalAdmin,
 } from '@utils/servicesVisibility'
 
 export interface Props {
@@ -72,10 +74,19 @@ const CompaniesHeader: React.FC<Props> = ({
     [realEstates?.data]
   )
 
-  const customServices = useMemo(
-    () => getVisibleServices(user?.roles, visibleDomains, allCustomServices),
-    [user?.roles, visibleDomains, allCustomServices]
+  const hasActiveFilters = !!(
+    filters?.domain?.length || filters?.company?.length
   )
+
+  const customServices = useMemo(() => {
+    if (isGlobalAdmin(user?.roles) && hasActiveFilters) {
+      const selectedIds = getSelectedServiceIds(visibleDomains)
+      if (!selectedIds.length) return []
+      const selectedSet = new Set(selectedIds)
+      return allCustomServices.filter((s) => selectedSet.has(s._id))
+    }
+    return getVisibleServices(user?.roles, visibleDomains, allCustomServices)
+  }, [user?.roles, visibleDomains, allCustomServices, hasActiveFilters])
 
   const openModal = () => {
     setIsModalOpen(true)

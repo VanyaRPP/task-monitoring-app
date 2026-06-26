@@ -49,6 +49,8 @@ export default async function handler(
     const log = await PaymentChangeLog.create({
       paymentId,
       invoiceData,
+      actionType: 'UPDATE',
+      source: 'single',
       reason: reason ?? 'manual',
       actorId: (req as any).user?._id,
       actorEmail: (req as any).user?.email,

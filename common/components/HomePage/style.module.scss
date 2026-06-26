@@ -1,16 +1,66 @@
 .HomePage {
+  // Color tokens come from the shared Midnight Galaxy set in globals.scss
+  // (switched by [data-theme]); only the Lottie wave blend is local here.
+  --hero-wave-opacity: 0.35;
+  --hero-wave-blend: multiply;
+
   position: relative;
   min-height: calc(100vh + 48px);
   margin: -24px;
-  background-color: #1a0b2e;
+  background-color: var(--hero-bg);
   overflow: hidden;
   display: flex;
   flex-direction: column;
+
+  font-family:
+    'Work Sans',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+  color: var(--hero-text);
+  transition:
+    background-color 0.4s ease,
+    color 0.4s ease;
+
+  // Signature: soft cosmic radial glow, behind content / above wave.
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background:
+      radial-gradient(60% 50% at 78% 12%, var(--hero-glow) 0%, transparent 60%),
+      radial-gradient(
+        52% 42% at 12% 88%,
+        var(--hero-glow-2) 0%,
+        transparent 55%
+      );
+  }
+}
+
+:global([data-theme='dark']) .HomePage {
+  --hero-wave-opacity: 0.9;
+  --hero-wave-blend: screen;
+}
+
+// Lottie wave background — component untouched; only blended into the theme.
+.WaveBg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: var(--hero-wave-opacity);
+  mix-blend-mode: var(--hero-wave-blend);
+  transition: opacity 0.4s ease;
 }
 
 .Header {
   margin: 2rem 2rem 1rem;
-  padding: 2rem;
+  padding: 1.5rem 2rem;
   position: sticky;
 
   display: flex;
@@ -20,34 +70,20 @@
 
   z-index: 60;
 
-  background: rgba(100, 42, 181, 0.28);
+  background: var(--hero-surface);
   border-radius: 50px;
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(8.4px);
-  -webkit-backdrop-filter: blur(8.4px);
-  border: 1px solid rgba(100, 42, 181, 0.43);
+  box-shadow: 0 8px 30px var(--hero-shadow);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--hero-border);
 
   .Logo {
     display: flex;
     align-items: center;
+    gap: 0.25rem;
     font-size: calc(12px + (11.5 + 11.5 * 0.7) * ((100vw - 320px) / 1440));
-    color: var(--primaryColor);
-    transition: color 0.5s;
-
-    @media (max-width: 425px) {
-      font-size: calc(
-        12px + (11.5 + 11.5 * 0.7) * ((100vw - 320px) / 1440)
-      ) !important;
-    }
-  }
-
-  .Menu {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    font-size: calc(12px + (11.5 + 11.5 * 0.7) * ((100vw - 320px) / 1440));
-    color: var(--primaryColor);
-    transition: color 0.5s;
+    color: var(--hero-text);
+    transition: color 0.4s;
 
     @media (max-width: 425px) {
       font-size: calc(
@@ -61,24 +97,6 @@
     gap: 1rem;
     align-items: flex-start;
   }
-}
-
-.HeaderMobile {
-  display: none;
-  letter-spacing: 3px;
-  text-align: center;
-  transition: color 0.5s;
-  font-size: calc(12px + (11.5 + 11.5 * 0.7) * ((100vw - 320px) / 1440));
-  color: var(--primaryColor);
-
-  @media (max-width: 425px) {
-    display: block;
-  }
-}
-
-.Name {
-  display: block;
-  padding: 0 1rem;
 }
 
 .Container {
@@ -124,113 +142,45 @@
   }
 }
 
-.Text {
-  width: 100%;
-  max-width: 900px;
-  transition: color 0.5s;
-  color: var(--textColor);
-  padding: 22px;
-  margin-top: -2em;
-  font-weight: 200;
-  font-size: 20px;
+.TextGlassCard {
+  background: var(--hero-surface);
+  border-radius: 32px;
+  box-shadow: 0 8px 30px var(--hero-shadow);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--hero-border);
 
-  @media (min-width: 600px) {
-    margin: 10px 0;
-    padding: 10px 10px;
-  }
+  padding: 2.5rem;
+  text-align: center;
+  color: var(--hero-text);
+  z-index: 60;
 
   @media (max-width: 600px) {
-    padding: 10px 0;
-    font-size: 12px;
-  }
-
-  @media (min-width: 1024px) {
-    margin-left: -2rem;
-    width: 120%;
-    padding-top: 0.5rem;
-  }
-
-  @media (min-width: 1440px) {
-    width: 100%;
-    padding-top: 0.5rem;
-  }
-
-  @media (min-width: 2560px) {
-    max-width: 1000px;
-    width: 100%;
-  }
-
-  @media (width: 320px) {
-    line-height: 1em;
-  }
-
-  span {
-    font-weight: 500;
+    padding: 1.5rem;
+    border-radius: 24px;
   }
 }
 
-.Image {
-  position: relative;
-  width: 100%;
-  height: 100%;
-
-  // @media (min-width: 600px) and (max-width: 768px) {
-  //   width: 52%;
-  // }
-
-  > *:first-of-type {
-    position: absolute !important;
-
-    > * {
-      animation: floater 10s ease-in-out infinite;
-      z-index: 2;
-    }
-  }
-
-  > *:last-of-type {
-    > * {
-      animation: floater 10s ease-in-out 0.5s infinite;
-      z-index: 1;
-    }
-  }
-
-  &::after {
-    content: '';
-    position: absolute;
-    z-index: 3;
-    width: 100%;
-    height: 100%;
-    left: 0;
-    top: 0;
+.heroTitle {
+  &:global(.ant-typography) {
+    font-family: 'Outfit', sans-serif;
+    font-size: clamp(1.8rem, 1.2rem + 2vw, 2.6rem);
+    font-weight: 700;
+    color: var(--hero-text);
+    margin-bottom: 1rem;
+    transition: color 0.4s;
   }
 }
 
-@keyframes floater {
-  0% {
-    transform: translateY(-30%);
+.heroText {
+  &:global(.ant-typography) {
+    font-family: 'Work Sans', sans-serif;
+    font-size: clamp(1rem, 0.9rem + 0.6vw, 1.25rem);
+    line-height: 1.7;
+    color: var(--hero-text-dim);
+    margin-bottom: 0;
+    transition: color 0.4s;
   }
-
-  50% {
-    transform: translateY(1%);
-  }
-
-  100% {
-    transform: translateY(-30%);
-  }
-}
-
-.TextGlassCard {
-  background: rgba(100, 42, 181, 0.28);
-  border-radius: 50px;
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(8.4px);
-  -webkit-backdrop-filter: blur(8.4px);
-  border: 1px solid rgba(100, 42, 181, 0.43);
-
-  padding: 2rem;
-  text-align: center;
-  text-align: center;
-  z-index: 60;
 }
 
 .cardPage {

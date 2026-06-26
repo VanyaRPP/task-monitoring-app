@@ -24,9 +24,7 @@ export async function getCurrentUser(req, res) {
 
     if (shouldBeDomainAdmin && (!hasDomainAdmin || hasUserRole)) {
       // Promote: a domain admin is no longer a plain User, so REPLACE the role
-      await User.updateOne(
-        { _id: user._id },
-        { roles: [Roles.DOMAIN_ADMIN] })
+      await User.updateOne({ _id: user._id }, { roles: [Roles.DOMAIN_ADMIN] })
       user.roles = [Roles.DOMAIN_ADMIN]
     } else if (!shouldBeDomainAdmin && hasDomainAdmin) {
       // Demote: the user no longer administers any domain, so reset to User.

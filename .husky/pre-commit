@@ -1,3 +1,4 @@
+#!/bin/sh
 # Format & lint only the staged files (config: "lint-staged" in package.json).
 # Full lint/type/test gates run in CI on push & PR to dev/deploy — see .github/workflows/lintTest.yml
 npx lint-staged

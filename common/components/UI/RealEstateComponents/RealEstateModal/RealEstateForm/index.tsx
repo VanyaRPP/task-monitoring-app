@@ -69,7 +69,6 @@ const RealEstateForm: FC<Props> = ({
 
       form.setFieldsValue({
         services: servicesWithEnabled,
-        // discount: currentRealEstate?.discount || 0,
       })
     }
   }, [services, currentRealEstate, form])
@@ -77,10 +76,20 @@ const RealEstateForm: FC<Props> = ({
   useEffect(() => {
     if (!domainId) return
 
-    if (currentRealEstate?.street?._id) {
+    if (currentRealEstate?.street) {
+      let streetVal =
+        typeof currentRealEstate.street === 'object' &&
+        currentRealEstate.street !== null
+          ? currentRealEstate.street._id
+          : currentRealEstate.street
+
+      if (streetVal && !/^[0-9a-fA-F]{24}$/.test(String(streetVal))) {
+        streetVal = undefined
+      }
+
       setTimeout(() => {
         form.setFieldsValue({
-          street: currentRealEstate.street._id,
+          street: streetVal,
         })
       }, 0)
     }
@@ -114,6 +123,15 @@ const RealEstateForm: FC<Props> = ({
     isServiceExistById('677d414283b6ef93c6b8ea2c') ||
     isServiceExistById('682dd48d9665126611c81950')
 
+  const getSafeStreetId = () => {
+    const val =
+      typeof currentRealEstate?.street === 'object' &&
+      currentRealEstate?.street !== null
+        ? currentRealEstate.street._id
+        : currentRealEstate?.street
+    return val && /^[0-9a-fA-F]{24}$/.test(String(val)) ? val : undefined
+  }
+
   return (
     <Form
       form={form}
@@ -123,10 +141,17 @@ const RealEstateForm: FC<Props> = ({
       onValuesChange={() => setIsValueChanged(true)}
       initialValues={{
         currency: currentRealEstate?.currency || Currency.UAH,
+        street: getSafeStreetId(),
       }}
     >
       <DomainsSelect form={form} edit={!!currentRealEstate} />
-      <Form.Item name="street" hidden>
+      <Form.Item
+        name="street"
+        hidden
+        normalize={(value) =>
+          typeof value === 'object' && value !== null ? value._id : value
+        }
+      >
         <Input />
       </Form.Item>
       {currentRealEstate ? (
@@ -180,19 +205,6 @@ const RealEstateForm: FC<Props> = ({
         />
       </Form.Item>
       <EmailSelect form={form} disabled={!editable} required={false} />
-      {/*<Form.Item name="discount" label="Знижка" rules={validateField('number')}>
-        <InputNumber
-          min={0}
-          max={100}
-          precision={2}
-          formatter={(value) => `${value}`}
-          placeholder="Вкажіть знижку"
-          className={s.formInput}
-          disabled={!editable}
-          style={{ width: '100%' }}
-        />
-      </Form.Item>
-      */}
 
       {isMeterBasedServiceExist && (
         <>
@@ -230,14 +242,6 @@ const RealEstateForm: FC<Props> = ({
           skipAutoPopulate
         />
       </Form.Item>
-      {/*<Form.Item
-        valuePropName="checked"
-        name="garbageCollector"
-        label="Вивіз сміття"
-      >
-        <Checkbox disabled={!editable} />
-      </Form.Item>
-      */}
 
       {isServiceExist('inflicionPrice') && (
         <Form.Item

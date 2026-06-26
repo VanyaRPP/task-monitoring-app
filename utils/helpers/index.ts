@@ -811,7 +811,7 @@ export function usePermissions(user?: IUser): IPermissions | null {
         isAdmin: false,
       })
     }
-  }, [isLoading, userData, isGlobalAdminUser, isDomainAdminUser])
+  }, [isLoading, userData, isGlobalAdminUser, isDomainAdminUser, isAdmin])
 
   return permissions
 }

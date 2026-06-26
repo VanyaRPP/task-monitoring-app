@@ -46,9 +46,9 @@ export default async function handler(
             adminCompanies,
           },
         })
-        } catch (error: any) {
-          return res.status(400).json({ success: false, message: error?.message })
-        }
+      } catch (error: any) {
+        return res.status(400).json({ success: false, message: error?.message })
+      }
 
     case 'PATCH':
       try {
@@ -92,9 +92,11 @@ export default async function handler(
 
         const targetUser = await User.findById(targetId)
 
-          if (!targetUser) {
-            return res.status(404).json({ success: false, message: 'User not found' })
-          }
+        if (!targetUser) {
+          return res
+            .status(404)
+            .json({ success: false, message: 'User not found' })
+        }
 
         const { adminDomains, adminCompanies, ...userBody } = req.body
         const targetEmail = targetUser.email
@@ -105,13 +107,13 @@ export default async function handler(
               adminEmails: targetEmail,
               _id: { $nin: adminDomains },
             },
-              { $pull: { adminEmails: targetEmail } }
+            { $pull: { adminEmails: targetEmail } }
           )
 
           await Domain.updateMany(
-              { _id: { $in: adminDomains } },
-              { $addToSet: { adminEmails: targetEmail } }
-            )
+            { _id: { $in: adminDomains } },
+            { $addToSet: { adminEmails: targetEmail } }
+          )
         }
 
         if (Array.isArray(adminCompanies)) {
@@ -120,9 +122,9 @@ export default async function handler(
               adminEmails: targetEmail,
               _id: { $nin: adminCompanies },
             },
-             { $pull: { adminEmails: targetEmail } }
+            { $pull: { adminEmails: targetEmail } }
           )
-            
+
           await RealEstate.updateMany(
             { _id: { $in: adminCompanies } },
             { $addToSet: { adminEmails: targetEmail } }

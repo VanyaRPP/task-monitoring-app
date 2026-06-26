@@ -39,7 +39,9 @@ describe('changelog auto-select on edit modal open', () => {
 
     runEffect(form, ref, logs)
 
-    expect(form.setFieldsValue).toHaveBeenCalledWith({ changelogId: 'manual-log' })
+    expect(form.setFieldsValue).toHaveBeenCalledWith({
+      changelogId: 'manual-log',
+    })
     expect(ref.current).toBe(true)
   })
 
@@ -68,7 +70,9 @@ describe('changelog auto-select on edit modal open', () => {
 
     runEffect(form, ref, logs)
 
-    expect(form.setFieldsValue).toHaveBeenCalledWith({ changelogId: 'manual-latest' })
+    expect(form.setFieldsValue).toHaveBeenCalledWith({
+      changelogId: 'manual-latest',
+    })
   })
 
   it('does not override when auto-select already happened', () => {

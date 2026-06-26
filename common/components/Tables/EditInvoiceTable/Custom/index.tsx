@@ -78,9 +78,7 @@ export const Name: React.FC<InvoiceComponentProps> = ({
   if (!editable || type !== 'custom') {
     return (
       <Space direction="vertical" size={0}>
-        <Typography.Text>
-          {record?.customName || value || type}
-        </Typography.Text>
+        <Typography.Text>{record?.customName || value || type}</Typography.Text>
         <Typography.Text type="secondary" style={{ fontSize: '0.75rem' }}>
           {record?.description || monthLabel}
         </Typography.Text>

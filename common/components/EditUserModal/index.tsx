@@ -34,7 +34,7 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({
   const [updateUser, { isLoading: isUpdating }] = useUpdateUserMutation()
 
   const getSelectValue = (item: any) => item?.value ?? item?._id ?? item
-  
+
   useEffect(() => {
     if (user) {
       form.setFieldsValue({
