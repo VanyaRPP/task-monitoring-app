@@ -35,32 +35,24 @@ export const Name: React.FC<InvoiceComponentProps> = ({
 
   const { service, company, prevPayment } = usePaymentContext()
   const currentPrice = Form.useWatch(['invoice', ...name, 'price'], form)
-  const defaultLabel = value || type || ''
+  const defaultLabel = value && value !== 'custom' ? value : ''
   const monthLabel = toFirstUpperCase(dateToMonthYear(service?.date))
 
-  const adHocBindingRef = useRef<'name' | 'description' | null>(null)
-  if (
-    adHocBindingRef.current === null &&
-    type === 'custom' &&
-    !isCustomService
-  ) {
-    adHocBindingRef.current =
-      record?.customName || record?.description ? 'description' : 'name'
-  }
-  const adHocBinding =
-    adHocBindingRef.current === 'description' ? 'description' : 'name'
+  const adHocBinding = 'name'
 
   // Seed `customName` once de faultLabel is known. defaultLabel is derived
   // from useWatch-backed `value`/`type`, which are undefined on first render
   // and become available a tick later — so we run on every defaultLabel
   // change and only write when the field is still blank.
-  useEffect(() => {
-    if (!editable || !form || !name.length || !defaultLabel) return
-    const current = form.getFieldValue(['invoice', ...name, 'customName'])
-    if (!current) {
-      form.setFieldValue(['invoice', ...name, 'customName'], defaultLabel)
-    }
-  }, [defaultLabel, editable, form, name])
+  // useEffect(() => {
+  //   if (!editable || !form || !name.length) return
+  //   if (type !== 'custom' || isCustomService) return
+  //   if (!value || value === 'custom') return
+  //   const current = form.getFieldValue(['invoice', ...name, 'customName'])
+  //   if (!current || current === 'custom') {
+  //     form.setFieldValue(['invoice', ...name, 'customName'], value)
+  //   }
+  // }, [value, editable, form, name, type, isCustomService])
 
   // useEffect(() => {
   //   if (!editable || !form || !name.length) return
@@ -77,16 +69,20 @@ export const Name: React.FC<InvoiceComponentProps> = ({
   )
 
   if (!editable || type !== 'custom') {
-    const displayName = record?.customName || record?.name || value || ''
-    const isTypePlaceholder = displayName === 'custom'
+    const displayName =
+      record?.name && record.name !== 'custom'
+        ? record.name
+        : record?.customName && record.customName !== 'custom'
+          ? record.customName
+          : ''
     return (
       <Space direction="vertical" size={0}>
-        <Typography.Text>
-          {isTypePlaceholder ? record?.description || '' : displayName}
-        </Typography.Text>
-        <Typography.Text type="secondary" style={{ fontSize: '0.75rem' }}>
-          {isTypePlaceholder ? '' : record?.description || monthLabel}
-        </Typography.Text>
+        <Typography.Text>{displayName}</Typography.Text>
+        {record?.description && (
+          <Typography.Text type="secondary" style={{ fontSize: '0.75rem' }}>
+            {record.description}
+          </Typography.Text>
+        )}
       </Space>
     )
   }
@@ -99,7 +95,7 @@ export const Name: React.FC<InvoiceComponentProps> = ({
     >
       <Space direction="vertical" size={0} style={{ width: '100%' }}>
         {isCustomService ? (
-          <Form.Item name={[...name, 'customName']} style={{ margin: 0 }}>
+          <Form.Item name={[...name, 'name']} style={{ margin: 0 }}>
             <LabelInput defaultLabel={defaultLabel} disabled={disabled} />
           </Form.Item>
         ) : (
