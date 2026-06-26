@@ -75,11 +75,14 @@ const DashboardLanding = () => {
     router.reload()
   }
 
-  const handlePaymentModalClose = () => {
+  const handlePaymentModalClose = (success?: boolean) => {
     setPaymentModalOpen(false)
-    router.reload()
+    if (success) {
+      router.push('/payment')
+    } else {
+      router.reload()
+    }
   }
-
   return (
     <div
       style={{
