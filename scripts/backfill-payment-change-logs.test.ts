@@ -17,8 +17,7 @@ const invoiceData = {
   type: 'debit',
 }
 
-const insertRaw = (docs: any[]) =>
-  PaymentChangeLog.collection.insertMany(docs)
+const insertRaw = (docs: any[]) => PaymentChangeLog.collection.insertMany(docs)
 
 const findRaw = (id: mongoose.Types.ObjectId) =>
   PaymentChangeLog.findById(id).lean() as any

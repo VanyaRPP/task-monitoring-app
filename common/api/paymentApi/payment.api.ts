@@ -128,7 +128,8 @@ export const paymentApi = createApi({
           body,
         }
       },
-      invalidatesTags: (response) => response ? ['Payment', 'Profit', 'PaymentAudit'] : [],
+      invalidatesTags: (response) =>
+        response ? ['Payment', 'Profit', 'PaymentAudit'] : [],
       onQueryStarted: invalidatePaymentSideEffects,
     }),
     addCostPayment: builder.mutation<IAddCostPaymentResponse, ICostPayment>({
@@ -150,7 +151,8 @@ export const paymentApi = createApi({
           method: 'DELETE',
         }
       },
-      invalidatesTags: (response) => response ? ['Payment', 'PaymentAudit'] : [],
+      invalidatesTags: (response) =>
+        response ? ['Payment', 'PaymentAudit'] : [],
       onQueryStarted: invalidateDebtorsOnSuccess,
     }),
     deleteMultiplePayments: builder.mutation<
@@ -168,7 +170,8 @@ export const paymentApi = createApi({
         success: boolean
         data: { deletedIds: string[] }
       }) => response.data,
-      invalidatesTags: (response) => response ? ['Payment', 'PaymentAudit'] : [],
+      invalidatesTags: (response) =>
+        response ? ['Payment', 'PaymentAudit'] : [],
       onQueryStarted: invalidateDebtorsOnSuccess,
     }),
     getPaymentNumber: builder.query<number, object>({
@@ -185,7 +188,8 @@ export const paymentApi = createApi({
           body: body,
         }
       },
-      invalidatesTags: (response) => response ? ['Payment', 'PaymentAudit'] : [],
+      invalidatesTags: (response) =>
+        response ? ['Payment', 'PaymentAudit'] : [],
       onQueryStarted: invalidatePaymentSideEffects,
     }),
     markPaymentsPaid: builder.mutation<
@@ -209,7 +213,8 @@ export const paymentApi = createApi({
           totalRequested: number
         }
       }) => response.data,
-      invalidatesTags: (response) => response ? ['Payment', 'PaymentAudit'] : [],
+      invalidatesTags: (response) =>
+        response ? ['Payment', 'PaymentAudit'] : [],
     }),
     duplicatePayments: builder.mutation<
       {

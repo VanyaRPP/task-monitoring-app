@@ -21,7 +21,8 @@ const toArray = (value?: string | string[]): string[] | undefined => {
 }
 
 /** Escape user input before embedding it in a RegExp (avoids ReDoS / injection). */
-const escapeRegex = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+const escapeRegex = (value: string) =>
+  value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
 const firstString = (value?: string | string[]): string | undefined =>
   Array.isArray(value) ? value[0] : value
@@ -51,8 +52,12 @@ export default async function handler(
   }
 
   // Pagination (with defaults and an upper bound on page size).
-  const page = Math.max(1, parseInt(firstString(req.query.page) ?? '', 10) || DEFAULT_PAGE)
-  const limitRaw = parseInt(firstString(req.query.limit) ?? '', 10) || DEFAULT_LIMIT
+  const page = Math.max(
+    1,
+    parseInt(firstString(req.query.page) ?? '', 10) || DEFAULT_PAGE
+  )
+  const limitRaw =
+    parseInt(firstString(req.query.limit) ?? '', 10) || DEFAULT_LIMIT
   const limit = Math.min(Math.max(1, limitRaw), MAX_LIMIT)
   const skip = (page - 1) * limit
 
@@ -127,8 +132,7 @@ export default async function handler(
     // Resolve a human-readable domain name for each entry (only for the ids on
     // this page). Falls back to the snapshot domain for legacy entries.
     const domainIdOf = (log: any): string | null => {
-      const candidate =
-        log.domainId ?? log.before?.domain ?? log.after?.domain
+      const candidate = log.domainId ?? log.before?.domain ?? log.after?.domain
       if (!candidate) return null
       if (typeof candidate === 'object' && candidate._id) {
         return candidate._id.toString()

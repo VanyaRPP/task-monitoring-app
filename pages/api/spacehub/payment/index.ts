@@ -36,8 +36,7 @@ export default async function handler(
         return res.status(403).json({ success: false, message: 'not allowed' })
       }
 
-      const { _templateScope, _bulk, _batchId, ...paymentBody } =
-        req.body ?? {}
+      const { _templateScope, _bulk, _batchId, ...paymentBody } = req.body ?? {}
 
       const scopeResult = await applyTemplateScope({
         scope: _templateScope,

@@ -34,28 +34,28 @@ const Snapshot = ({
 }) => {
   const { token } = theme.useToken()
   return (
-  <Col xs={24} md={span}>
-    <Title level={5} style={{ marginTop: 0 }}>
-      {title}
-    </Title>
-    <pre
-      style={{
-        background: token.colorFillTertiary,
-        border: `1px solid ${token.colorBorderSecondary}`,
-        color: token.colorText,
-        borderRadius: 6,
-        padding: 12,
-        margin: 0,
-        maxHeight: 420,
-        overflow: 'auto',
-        fontSize: 12,
-        whiteSpace: 'pre-wrap',
-        wordBreak: 'break-word',
-      }}
-    >
-      {value ? JSON.stringify(value, null, 2) : '—'}
-    </pre>
-  </Col>
+    <Col xs={24} md={span}>
+      <Title level={5} style={{ marginTop: 0 }}>
+        {title}
+      </Title>
+      <pre
+        style={{
+          background: token.colorFillTertiary,
+          border: `1px solid ${token.colorBorderSecondary}`,
+          color: token.colorText,
+          borderRadius: 6,
+          padding: 12,
+          margin: 0,
+          maxHeight: 420,
+          overflow: 'auto',
+          fontSize: 12,
+          whiteSpace: 'pre-wrap',
+          wordBreak: 'break-word',
+        }}
+      >
+        {value ? JSON.stringify(value, null, 2) : '—'}
+      </pre>
+    </Col>
   )
 }
 
@@ -117,7 +117,11 @@ const AuditDetailsModal: React.FC<Props> = ({ open, record, onClose }) => {
                 onConfirm={handleRestore}
                 okButtonProps={{ loading: isLoading }}
               >
-                <Button type="primary" icon={<UndoOutlined />} loading={isLoading}>
+                <Button
+                  type="primary"
+                  icon={<UndoOutlined />}
+                  loading={isLoading}
+                >
                   Відновити
                 </Button>
               </Popconfirm>,

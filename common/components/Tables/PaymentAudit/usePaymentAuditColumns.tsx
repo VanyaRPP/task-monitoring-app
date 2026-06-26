@@ -1,10 +1,15 @@
 import { useMemo } from 'react'
-import { Button, DatePicker, Input, Space, Tag, Tooltip, Typography } from 'antd'
+import {
+  Button,
+  DatePicker,
+  Input,
+  Space,
+  Tag,
+  Tooltip,
+  Typography,
+} from 'antd'
 import type { ColumnsType } from 'antd/es/table'
-import type {
-  FilterDropdownProps,
-  FilterValue,
-} from 'antd/es/table/interface'
+import type { FilterDropdownProps, FilterValue } from 'antd/es/table/interface'
 import { SearchOutlined, EyeOutlined } from '@ant-design/icons'
 import dayjs, { Dayjs } from 'dayjs'
 import {
@@ -26,9 +31,9 @@ export const ACTION_COLORS: Record<PaymentActionType, string> = {
   RESTORE: 'purple',
 }
 
-const ACTION_OPTIONS = (
-  Object.keys(ACTION_COLORS) as PaymentActionType[]
-).map((value) => ({ text: value, value }))
+const ACTION_OPTIONS = (Object.keys(ACTION_COLORS) as PaymentActionType[]).map(
+  (value) => ({ text: value, value })
+)
 
 const SOURCE_OPTIONS = [
   { text: 'single', value: 'single' },
@@ -94,9 +99,7 @@ const actorSearchDropdown = ({
       autoFocus
       placeholder="Email користувача"
       value={selectedKeys[0] as string}
-      onChange={(e) =>
-        setSelectedKeys(e.target.value ? [e.target.value] : [])
-      }
+      onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
       onPressEnter={() => confirm()}
       style={{ marginBottom: 8, display: 'block', width: 220 }}
     />

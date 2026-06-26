@@ -54,12 +54,17 @@ const PaymentAuditTable: React.FC = () => {
     setDetailsOpen(true)
   }
 
-  const columns = usePaymentAuditColumns({ filters, onOpenDetails: openDetails })
+  const columns = usePaymentAuditColumns({
+    filters,
+    onOpenDetails: openDetails,
+  })
 
   const handleChange = (
     pagination: TablePaginationConfig,
     nextFilters: TableFilters,
-    _sorter: SorterResult<IPaymentChangeLog> | SorterResult<IPaymentChangeLog>[],
+    _sorter:
+      | SorterResult<IPaymentChangeLog>
+      | SorterResult<IPaymentChangeLog>[],
     extra: { action: 'paginate' | 'sort' | 'filter' }
   ) => {
     if (extra.action === 'filter') {

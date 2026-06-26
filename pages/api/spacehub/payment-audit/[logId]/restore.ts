@@ -75,9 +75,7 @@ export default async function handler(
     const ownedDomains = await Domain.find({ adminEmails: user.email }).select(
       '_id'
     )
-    const ownedIds = new Set(
-      ownedDomains.map((d: any) => d._id.toString())
-    )
+    const ownedIds = new Set(ownedDomains.map((d: any) => d._id.toString()))
     const beforeDomainId = domainIdOf(before.domain)
     if (!beforeDomainId || !ownedIds.has(beforeDomainId)) {
       return res.status(403).json({ success: false, message: 'not allowed' })

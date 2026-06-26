@@ -548,7 +548,9 @@ export async function listCustomServicesForDomain(
   const unique = services.filter((s: any) => {
     const id = String(s?._id ?? '')
     if (!id || seenIds.has(id)) return false
-    const nameKey = String(s?.name ?? '').trim().toLowerCase()
+    const nameKey = String(s?.name ?? '')
+      .trim()
+      .toLowerCase()
     if (nameKey && seenNames.has(nameKey)) return false
     seenIds.add(id)
     if (nameKey) seenNames.add(nameKey)

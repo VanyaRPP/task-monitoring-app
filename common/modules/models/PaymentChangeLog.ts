@@ -69,7 +69,15 @@ const PaymentChangeLogSchema = new Schema<IPaymentChangeLogModel>(
 
     actionType: {
       type: String,
-      enum: [ 'CREATE', 'BULK_CREATE', 'UPDATE', 'DELETE', 'BULK_DELETE', 'MARK_PAID', 'RESTORE' ],
+      enum: [
+        'CREATE',
+        'BULK_CREATE',
+        'UPDATE',
+        'DELETE',
+        'BULK_DELETE',
+        'MARK_PAID',
+        'RESTORE',
+      ],
       required: true,
       index: true,
     },
