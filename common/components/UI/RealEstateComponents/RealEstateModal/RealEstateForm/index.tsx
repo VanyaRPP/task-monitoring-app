@@ -3,18 +3,17 @@ import { validateField } from '@assets/features/validators'
 import { IExtendedRealestate } from '@common/api/realestateApi/realestate.api.types'
 import EmailSelect from '@components/UI/Reusable/EmailSelect'
 import {
-  Button,
-  Card,
   Checkbox,
-  Flex,
   Form,
   FormInstance,
   Input,
   InputNumber,
   Select,
+  Tabs,
   Typography,
 } from 'antd'
-import { FC, useEffect } from 'react'
+import type { TabsProps } from 'antd'
+import { FC, useEffect, useState } from 'react'
 import AddressesSelect from '../../../Reusable/AddressesSelect'
 import DomainsSelect from '../../../Reusable/DomainsSelect'
 import s from './style.module.scss'
@@ -23,7 +22,6 @@ import { IDomain } from '@modules/models/Domain'
 import { inputNumberParser } from '@utils/helpers'
 import { CURRENCY_SELECT_OPTIONS, Currency } from '@utils/constants'
 import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
-import DomainsServices from '@components/UI/DomainsComponents/DomainModal/DomainForm/DomainsServices'
 import CustomServicesCard from '../../../CustomServicesCard'
 
 interface Props {
@@ -46,11 +44,7 @@ const RealEstateForm: FC<Props> = ({
   const watchedDomainId = Form.useWatch('domain', form)
   const domainId = watchedDomainId || currentRealEstate?.domain?._id
   const streetId = currentRealEstate?.street?._id
-  const {
-    data: domain = {} as IDomain,
-    isLoading: isDomainLoading,
-    isError: isDomainError,
-  } = useGetDomainByPkQuery(
+  const { data: domain = {} as IDomain } = useGetDomainByPkQuery(
     { domainId: domainId || currentRealEstate?.domain?._id },
     { skip: !domainId && !currentRealEstate?.domain?._id }
   )
@@ -97,7 +91,6 @@ const RealEstateForm: FC<Props> = ({
 
   const isServiceExistById = (serviceId: string) => {
     if (!domain?.customServices?.length) return false
-
     return domain.customServices.some((group) =>
       group.services?.includes(serviceId)
     )
@@ -108,16 +101,6 @@ const RealEstateForm: FC<Props> = ({
     const existedValues = services.map((x) => !!x[value])
     return existedValues.includes(true)
   }
-
-  const latestGarbageService = [...(services ?? [])]
-    .filter(
-      (s) =>
-        s.garbageCollectorPrice &&
-        s.garbageCollectorPrice > 0 &&
-        String(s.domain?._id) === String(domainId) &&
-        String(s.street?._id) === String(streetId)
-    )
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0]
 
   const isMeterBasedServiceExist =
     isServiceExistById('677d414283b6ef93c6b8ea2c') ||
@@ -132,18 +115,8 @@ const RealEstateForm: FC<Props> = ({
     return val && /^[0-9a-fA-F]{24}$/.test(String(val)) ? val : undefined
   }
 
-  return (
-    <Form
-      form={form}
-      requiredMark={editable}
-      layout="vertical"
-      className={s.Form}
-      onValuesChange={() => setIsValueChanged(true)}
-      initialValues={{
-        currency: currentRealEstate?.currency || Currency.UAH,
-        street: getSafeStreetId(),
-      }}
-    >
+  const renderMainInfo = () => (
+    <>
       <DomainsSelect form={form} edit={!!currentRealEstate} />
       <Form.Item
         name="street"
@@ -234,14 +207,6 @@ const RealEstateForm: FC<Props> = ({
           </Form.Item>
         </>
       )}
-      <Form.Item label="Індивідуальні послуги">
-        <CustomServicesCard
-          form={form}
-          disabled={!editable}
-          allCustomServices={customServices}
-          skipAutoPopulate
-        />
-      </Form.Item>
 
       {isServiceExist('inflicionPrice') && (
         <Form.Item
@@ -252,6 +217,54 @@ const RealEstateForm: FC<Props> = ({
           <Checkbox disabled={!editable} />
         </Form.Item>
       )}
+    </>
+  )
+
+  const renderServices = () => (
+    <>
+      <div style={{ marginBottom: 16 }}>
+        <Typography.Text type="secondary">
+          Оберіть послуги, які будуть доступні для цієї компанії, та вкажіть
+          їхню вартість.
+        </Typography.Text>
+      </div>
+      <Form.Item style={{ marginBottom: 0 }}>
+        <CustomServicesCard
+          form={form}
+          disabled={!editable}
+          allCustomServices={customServices}
+          skipAutoPopulate={!!currentRealEstate}
+        />
+      </Form.Item>
+    </>
+  )
+
+  const tabItems: TabsProps['items'] = [
+    {
+      key: '1',
+      label: 'Основна інформація',
+      children: renderMainInfo(),
+    },
+    {
+      key: '2',
+      label: 'Послуги',
+      children: renderServices(),
+    },
+  ]
+
+  return (
+    <Form
+      form={form}
+      requiredMark={editable}
+      layout="vertical"
+      className={s.Form}
+      onValuesChange={() => setIsValueChanged(true)}
+      initialValues={{
+        currency: currentRealEstate?.currency || Currency.UAH,
+        street: getSafeStreetId(),
+      }}
+    >
+      <Tabs defaultActiveKey="1" items={tabItems} />
     </Form>
   )
 }

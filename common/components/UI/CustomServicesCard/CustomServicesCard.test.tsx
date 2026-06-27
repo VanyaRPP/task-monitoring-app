@@ -17,8 +17,6 @@ jest.mock('@utils/helpers', () => ({
   ),
 }))
 
-// antd Select's virtualised popup doesn't open in jsdom; stub it with a flat
-// list of buttons so we can drive onChange via real clicks.
 jest.mock('antd', () => {
   const actual = jest.requireActual('antd')
   const React = require('react')
@@ -27,6 +25,7 @@ jest.mock('antd', () => {
     value = [],
     onChange,
     placeholder,
+    popupRender,
   }: any) =>
     React.createElement(
       'div',
@@ -37,6 +36,7 @@ jest.mock('antd', () => {
           { 'data-testid': 'placeholder' },
           placeholder
         ),
+      popupRender && popupRender(null),
       options.map((o: any) =>
         React.createElement(
           'button',
@@ -95,7 +95,52 @@ describe('CustomServicesCard', () => {
     expect(screen.getByText('Індивідуальні послуги')).toBeInTheDocument()
   })
 
-  test('adds custom service from dropdown', () => {
+  // СЦЕНАРІЙ 1: Початковий стан — всі послуги вибрані зі значенням undefined
+  test('auto-populates all services with undefined price on init', () => {
+    renderWithForm(
+      <CustomServicesCard
+        form={{ setFieldsValue: setFieldsValueMock }}
+        allCustomServices={ALL_CUSTOM_SERVICES}
+        disabled={false}
+        skipAutoPopulate={false}
+      />
+    )
+
+    expect(setFieldsValueMock).toHaveBeenCalledWith({
+      customServices: [
+        {
+          _id: '1',
+          label: 'Послуга 1',
+          fieldName: 'service1',
+          price: undefined,
+        },
+      ],
+    })
+  })
+
+  // СЦЕНАРІЙ 2: Робота кнопки "Прибрати всі" (Скасувати вибір)
+  test('clears all services when "Скасувати вибір" is clicked', () => {
+    useWatchSpy.mockReturnValue([
+      { _id: '1', label: 'Послуга 1', fieldName: 'service1', price: 100 },
+    ])
+
+    renderWithForm(
+      <CustomServicesCard
+        form={{ setFieldsValue: setFieldsValueMock }}
+        allCustomServices={ALL_CUSTOM_SERVICES}
+        disabled={false}
+      />
+    )
+
+    fireEvent.click(screen.getByText('Скасувати вибір'))
+
+    expect(setFieldsValueMock).toHaveBeenCalledWith({
+      customServices: [],
+    })
+  })
+
+  // СЦЕНАРІЙ 3: Вибір окремих послуг (перевірка undefined замість 0)
+  test('adds custom service from dropdown with undefined price', () => {
     renderWithForm(
       <CustomServicesCard
         form={{ setFieldsValue: setFieldsValueMock }}
@@ -105,7 +150,6 @@ describe('CustomServicesCard', () => {
       />
     )
 
-    fireEvent.click(screen.getByText('Індивідуальні послуги'))
     fireEvent.click(screen.getByText('Послуга 1'))
 
     expect(setFieldsValueMock).toHaveBeenCalledWith({
@@ -114,7 +158,7 @@ describe('CustomServicesCard', () => {
           _id: '1',
           label: 'Послуга 1',
           fieldName: 'service1',
-          price: 0,
+          price: undefined,
         },
       ],
     })

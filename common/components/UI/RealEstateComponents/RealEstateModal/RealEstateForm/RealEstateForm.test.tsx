@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import { Form, FormInstance } from 'antd'
 import RealEstateForm from './index'
 
@@ -67,5 +67,18 @@ describe('RealEstateForm — префіл адреси', () => {
     expect(addressesSpy).toHaveBeenCalledWith(
       expect.objectContaining({ street: undefined })
     )
+  })
+})
+
+describe('RealEstateForm — вкладки (Tabs)', () => {
+  it('відображає вкладку "Послуги" та рендерить CustomServicesCard при перемиканні', () => {
+    render(<Wrapper />)
+
+    const servicesTab = screen.getByText('Послуги')
+    expect(servicesTab).toBeInTheDocument()
+
+    fireEvent.click(servicesTab)
+
+    expect(screen.getByTestId('custom-services')).toBeInTheDocument()
   })
 })

@@ -32,7 +32,7 @@ const CustomServicesCard: FC<CustomServicesCardProps> = ({
     _id: service?._id,
     label: service?.label,
     fieldName: service?.fieldName,
-    price: 0,
+    price: undefined,
   })
 
   const applyIds = (ids: string[]) => {
