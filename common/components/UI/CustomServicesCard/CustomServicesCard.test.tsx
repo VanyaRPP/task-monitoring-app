@@ -22,12 +22,21 @@ jest.mock('@utils/helpers', () => ({
 jest.mock('antd', () => {
   const actual = jest.requireActual('antd')
   const React = require('react')
-  const MockSelect = ({ options = [], value = [], onChange, placeholder }: any) =>
+  const MockSelect = ({
+    options = [],
+    value = [],
+    onChange,
+    placeholder,
+  }: any) =>
     React.createElement(
       'div',
       { 'data-testid': 'mock-select' },
       placeholder &&
-        React.createElement('span', { 'data-testid': 'placeholder' }, placeholder),
+        React.createElement(
+          'span',
+          { 'data-testid': 'placeholder' },
+          placeholder
+        ),
       options.map((o: any) =>
         React.createElement(
           'button',

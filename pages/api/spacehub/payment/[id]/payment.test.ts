@@ -143,7 +143,14 @@ describe('Payment API Endpoint - [id]', () => {
       expect(jsonResponse.success).toBe(true)
       expect(jsonResponse.data.description).toBe('Updated')
 
-      expect(PaymentChangeLog.create).toHaveBeenCalled()
+      expect(PaymentChangeLog.create).toHaveBeenCalledWith(
+        expect.objectContaining({ actionType: 'UPDATE', source: 'single' })
+      )
+      const auditArg = (PaymentChangeLog.create as jest.Mock).mock.calls[0][0]
+      expect(auditArg.before).toBeDefined()
+      expect(auditArg.after).toBeDefined()
+      expect(auditArg.after.description).toBe('Updated')
+      expect(auditArg.before.description).not.toBe(auditArg.after.description)
       expect(ProfitService.updatePayment).toHaveBeenCalled()
     })
 
@@ -332,6 +339,13 @@ describe('Payment API Endpoint - [id]', () => {
       expect(res.status).toHaveBeenCalledWith(200)
       expect(ProfitService.deleteByIdPayment).toHaveBeenCalledWith(
         debitPayment._id.toString()
+      )
+      expect(PaymentChangeLog.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          actionType: 'DELETE',
+          source: 'single',
+          before: expect.objectContaining({ _id: debitPayment._id }),
+        })
       )
     })
 

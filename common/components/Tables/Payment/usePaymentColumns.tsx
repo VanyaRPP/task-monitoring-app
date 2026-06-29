@@ -223,14 +223,15 @@ export function usePaymentColumns({
           _record: IExtendedPayment,
           index: number
         ) => {
-          const companyName = company.companyName
-          const companyId = company._id
+          const companyName = company?.companyName
+          const companyId = company?._id
           const debtor = debtorCompanies.find(
             (d) => d.companyName === companyName
           )
           const isFirstOccurrence =
             payments?.data?.findIndex(
               (item) =>
+                item.company != null &&
                 typeof item.company === 'object' &&
                 (item.company as any).companyName === companyName
             ) === index
@@ -465,9 +466,7 @@ export function usePaymentColumns({
       },
       ...(selectedColumns
         .filter((value) => value !== ServiceType.Custom)
-        .filter(
-          (value) => !visibleCustomServices?.some((s) => s._id === value)
-        )
+        .filter((value) => !visibleCustomServices?.some((s) => s._id === value))
         .map((value) => {
           const findItem = (payment: IExtendedPayment) =>
             payment.invoice.find((i) => i.type === value)

@@ -37,9 +37,15 @@ const useAutoSyncDescription = (form: TabProps['form'], editable: boolean) => {
 
     const changes: Array<{ pattern: RegExp; newLine: string | null }> = []
     if (prev.iban !== iban)
-      changes.push({ pattern: /^IBAN: /, newLine: iban ? `IBAN: ${iban}` : null })
+      changes.push({
+        pattern: /^IBAN: /,
+        newLine: iban ? `IBAN: ${iban}` : null,
+      })
     if (prev.rnokpp !== rnokpp)
-      changes.push({ pattern: /^РНОКПП: /, newLine: rnokpp ? `РНОКПП: ${rnokpp}` : null })
+      changes.push({
+        pattern: /^РНОКПП: /,
+        newLine: rnokpp ? `РНОКПП: ${rnokpp}` : null,
+      })
     if (prev.mfo !== mfo)
       changes.push({ pattern: /^МФО: /, newLine: mfo ? `МФО: ${mfo}` : null })
 

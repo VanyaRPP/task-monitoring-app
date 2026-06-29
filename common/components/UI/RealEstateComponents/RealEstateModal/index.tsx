@@ -65,10 +65,6 @@ const RealEstateModal: FC<Props> = ({
   }, [customDomainServices])
 
   const mergedCustomServices = useMemo(() => {
-    // Saved entries take precedence (preserve user prices), but only if the
-    // service still exists in the domain catalog (orphans get dropped).
-    // New domain services that the company hasn't seen yet are appended with
-    // price 0 so they show up immediately after a domain admin adds them.
     const saved = currentRealEstate?.customServices || []
     const validSaved = saved.filter((s) =>
       domainCustomServices.some((d) => d._id === s._id)
@@ -82,9 +78,6 @@ const RealEstateModal: FC<Props> = ({
   useEffect(() => {
     if (initializedRef.current) return
     if (!currentDomainId) return
-    // Wait for domain custom services query to resolve before initializing
-    // form state, otherwise the merge above runs against an empty list and
-    // initializedRef locks it in.
     if (customDomainServices === undefined) return
 
     form.setFieldsValue({
@@ -92,9 +85,7 @@ const RealEstateModal: FC<Props> = ({
         chosenRealEstate?.domain ||
         getEntityId(currentRealEstate?.domain) ||
         currentDomainId,
-      street:
-        currentRealEstate?.street &&
-        `${currentRealEstate.street.address} (м. ${currentRealEstate.street.city})`,
+      street: getEntityId(currentRealEstate?.street),
       companyName: currentRealEstate?.companyName || '',
       description: currentRealEstate?.description || '',
       adminEmails: currentRealEstate?.adminEmails || [],

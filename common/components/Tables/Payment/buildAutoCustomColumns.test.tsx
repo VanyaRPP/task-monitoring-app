@@ -3,7 +3,7 @@ import type { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { buildAutoCustomColumns } from './usePaymentColumns'
 
 const payment = (invoice: any[]): IExtendedPayment =>
-  ({ _id: Math.random().toString(36).slice(2), invoice } as any)
+  ({ _id: Math.random().toString(36).slice(2), invoice }) as any
 
 const withData = (data: IExtendedPayment[]) =>
   buildAutoCustomColumns({ payments: { data } as any })
@@ -49,7 +49,9 @@ describe('buildAutoCustomColumns', () => {
   })
 
   it('returns no columns when there are no payments', () => {
-    expect(buildAutoCustomColumns({ payments: { data: [] } as any })).toEqual([])
+    expect(buildAutoCustomColumns({ payments: { data: [] } as any })).toEqual(
+      []
+    )
     expect(buildAutoCustomColumns({})).toEqual([])
   })
 

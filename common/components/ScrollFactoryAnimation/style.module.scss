@@ -33,10 +33,13 @@ $textMuted: #4a4a4a;
   justify-content: space-between;
   padding: 0 5% 0 5%;
 
-  background-image: url('/wallpaper.jpg');
-  background-position: center center;
-  background-size: cover;
-  background-repeat: no-repeat;
+  // Theme-aware Midnight Galaxy background (shared --hero-* tokens, switched
+  // by [data-theme]) — replaces the fixed /wallpaper.jpg that ignored the theme.
+  background:
+    radial-gradient(60% 50% at 78% 12%, var(--hero-glow) 0%, transparent 60%),
+    radial-gradient(52% 42% at 12% 88%, var(--hero-glow-2) 0%, transparent 55%),
+    var(--hero-bg);
+  transition: background-color 0.4s ease;
 
   overflow: hidden;
 
@@ -78,16 +81,18 @@ $textMuted: #4a4a4a;
   margin: 0;
   font-size: clamp(32px, 4vw, 56px);
   font-weight: 800;
-  color: #ffffff;
+  color: var(--hero-text);
   line-height: 1.1;
   letter-spacing: -0.02em;
+  transition: color 0.4s ease;
 }
 
 .heroSubtitle {
   margin: 0;
   font-size: clamp(16px, 1.2vw, 18px);
-  color: #e5e7eb;
+  color: var(--hero-text-dim);
   line-height: 1.6;
+  transition: color 0.4s ease;
 }
 
 .rightContent {
@@ -99,6 +104,20 @@ $textMuted: #4a4a4a;
   justify-content: center;
   margin-top: -15vh;
 
+  // Soft theme-aware halo behind the render — fills in where the framed
+  // white edges dissolve, tying the product into the Midnight Galaxy bg.
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 6% 6% 10%;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(closest-side, var(--hero-glow-2) 0%, transparent 72%),
+      radial-gradient(closest-side, var(--hero-glow) 0%, transparent 82%);
+    filter: blur(24px);
+  }
+
   @media (max-width: 992px) {
     flex: 0 0 auto;
     width: 100%;
@@ -106,12 +125,60 @@ $textMuted: #4a4a4a;
   }
 }
 
+// Intentional display bezel around the render. The baked rectangle becomes a
+// deliberate "screen" (rounded, bordered, shadowed) instead of a harsh cut.
+.screen {
+  position: relative;
+  width: 100%;
+  max-width: 760px;
+  aspect-ratio: 1904 / 1088;
+  max-height: 80vh;
+  z-index: 5;
+
+  border-radius: 28px;
+  overflow: hidden;
+
+  // Rounded corners + every edge feathered: keeps the rounded rectangular
+  // shape but melts into the background on all four sides. Two axis gradients
+  // intersect into a soft-edged rectangle; border-radius rounds the corners.
+  $fx: linear-gradient(
+    to right,
+    transparent 0%,
+    #000 8%,
+    #000 92%,
+    transparent 100%
+  );
+  $fy: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #000 8%,
+    #000 92%,
+    transparent 100%
+  );
+  -webkit-mask-image: $fx, $fy;
+  -webkit-mask-composite: source-in;
+  mask-image: $fx, $fy;
+  mask-composite: intersect;
+}
+
 .canvas {
+  display: block;
   width: 100%;
   height: 100%;
-  max-height: 80vh;
   object-fit: contain;
-  z-index: 5;
+}
+
+// Wash the baked white of the frames toward the theme background. multiply
+// with the bg colour self-scales: on light it barely shifts, on dark the white
+// recolours into the deep purple. opacity is the single intensity knob.
+.factoryWash {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: var(--hero-bg);
+  mix-blend-mode: multiply;
+  opacity: 0.55;
 }
 
 .canvasCard {

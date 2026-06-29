@@ -126,11 +126,7 @@ describe('<InvoiceRowName>', () => {
 
     it('falls back to label when record has no customName (non-editable)', () => {
       render(
-        <InvoiceRowName
-          {...baseProps}
-          label="Утримання"
-          record={{} as any}
-        />
+        <InvoiceRowName {...baseProps} label="Утримання" record={{} as any} />
       )
       expect(screen.queryByText('Утримання')).not.toBeNull()
     })
@@ -181,9 +177,7 @@ describe('<InvoiceRowName>', () => {
       })
       // useEffect runs once after mount — at that point the field is empty so
       // the component should write label into it.
-      expect(form.getFieldValue(['invoice', 0, 'customName'])).toBe(
-        'Утримання'
-      )
+      expect(form.getFieldValue(['invoice', 0, 'customName'])).toBe('Утримання')
     })
 
     it('does NOT overwrite an existing customName value on mount', () => {
@@ -236,9 +230,7 @@ describe('<InvoiceRowName>', () => {
         label: <span>Утримання</span>,
         editable: true,
       })
-      expect(
-        form.getFieldValue(['invoice', 0, 'customName'])
-      ).toBeUndefined()
+      expect(form.getFieldValue(['invoice', 0, 'customName'])).toBeUndefined()
     })
   })
 })

@@ -68,18 +68,21 @@ const PaymentTableSummary: React.FC<Props> = ({
               </Table.Summary.Cell>
             )
           }
+          const cellValue =
+            totalPayments[column.dataIndex as keyof typeof totalPayments]
+
+          // ServiceType columns always render a total; other columns render one
+          // only when the aggregation produced a matching key (e.g. the
+          // `custom-name:<name>` keys from getServiceTotalsPipeline).
           if (
-            Object.values(ServiceType).includes(column.dataIndex as ServiceType)
+            Object.values(ServiceType).includes(
+              column.dataIndex as ServiceType
+            ) ||
+            (column.dataIndex && cellValue !== undefined)
           ) {
             return (
               <Table.Summary.Cell key={idx} index={idx}>
-                {renderCurrency(
-                  toRoundFixed(
-                    totalPayments[
-                      column.dataIndex as keyof typeof totalPayments
-                    ] || 0
-                  )
-                )}
+                {renderCurrency(toRoundFixed(Number(cellValue) || 0))}
               </Table.Summary.Cell>
             )
           }
