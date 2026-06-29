@@ -287,15 +287,21 @@ const ScrollFactoryAnimation: FC<Props> = ({
             <span className={s.textAccent}>E-ORENDA!</span>
           </h1>
           <p className={s.heroSubtitle}>
-            Керуйте процесом надання послуг нерухомості та систематизуйте
-            відносини між користувачами за допомогою нашого сайту! Ресурс
-            допоможе з автоматичним розрахунком платежів та своєчасним
-            формуванням та виставленням рахунків.
+            Платформа, що перетворює виставлення рахунків на автоматичний
+            конвеєр — від імпорту банківських даних до доставки готових інвойсів
+            вашим клієнтам.
           </p>
         </div>
 
         <div className={s.rightContent}>
-          <canvas ref={canvasRef} className={s.canvas} />
+          {/* Intentional "screen" bezel — frames the factory render so its
+              rectangular, baked-light edge reads as a deliberate display
+              rather than a harsh cut against the theme background. */}
+          <div className={s.screen}>
+            <canvas ref={canvasRef} className={s.canvas} />
+            {/* Wash that recolors the baked white toward the theme bg */}
+            <div className={s.factoryWash} aria-hidden />
+          </div>
           {/* ВІДНОВЛЕНІ КАРТКИ З НАПИСАМИ */}
           {ANNOTATIONS.map((card, idx) => {
             const opacity = cardOpacities[idx]

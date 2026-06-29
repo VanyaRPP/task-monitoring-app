@@ -16,15 +16,7 @@ const HomePage: React.FC = () => {
     <div className={s.HomePage}>
       <SplashCursor />
 
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          zIndex: 0,
-          pointerEvents: 'none',
-          overflow: 'hidden',
-        }}
-      >
+      <div className={s.WaveBg}>
         <LottieAnimation
           src="/animations/WaveForBG.json"
           loop
@@ -48,7 +40,9 @@ const HomePage: React.FC = () => {
       >
         <div className={s.Header}>
           <div className={s.Logo}>
-            <LogoIcon style={{ fontSize: '100px', color: 'white' }} />
+            <LogoIcon
+              style={{ fontSize: '100px', color: 'var(--hero-text)' }}
+            />
             <HomePageTitle />
           </div>
 
@@ -82,22 +76,16 @@ const HomePage: React.FC = () => {
         <div className={s.Container}>
           <div className={s.HalfBlock}>
             <div className={s.TextGlassCard}>
-              <Typography.Title
-                level={2}
-                style={{ fontSize: '2rem', color: 'white' }}
-              >
+              <Typography.Title level={2} className={s.heroTitle}>
                 Ласкаво просимо до E-ORENDA!
               </Typography.Title>
-              <Typography.Paragraph
-                style={{ fontSize: '1.3rem', color: 'rgba(255,255,255,0.85)' }}
-              >
-                Керуйте процесом надання послуг нерухомості та систематизуйте
-                відносини між користувачами за допомогою нашого сайту! Ресурс
-                допоможе з автоматичним розрахунком платежів та своєчасним
-                формуванням та виставленням рахунків. Вам, як надавачу послуг,
-                платформа дозволить легко впоратися з усіма аспектами
-                користування нерухомим майном. Забезпечте собі простоту,
-                ефективність та зручність в управлінні!
+              <Typography.Paragraph className={s.heroText}>
+                E-ORENDA автоматизує виставлення рахунків від першого до
+                останнього кроку: підтягує дані з банку, сама рахує суми за
+                вашими формулами та послугами й генерує десятки персоналізованих
+                інвойсів за один клік. Готові рахунки система доставляє клієнтам
+                у Telegram, на email або PDF, а ви бачите оплати, баланс і
+                боржників у реальному часі.
               </Typography.Paragraph>
             </div>
           </div>

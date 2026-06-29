@@ -109,14 +109,14 @@ describe('<InvoiceRowName>', () => {
     expect(btn.getAttribute('data-service')).toBe(ServiceType.Maintenance)
   })
 
-  // ── description-aware behavior (commit 3e9533fe) ──
-  describe('description rendering', () => {
-    it('shows record.description instead of the label when not editable', () => {
+  //description is the optional note shown under the name)
+  describe('name + note rendering', () => {
+    it('shows record.customName instead of the label when not editable', () => {
       render(
         <InvoiceRowName
           {...baseProps}
           label="Утримання"
-          record={{ description: 'Custom label from user' } as any}
+          record={{ customName: 'Custom label from user' } as any}
         />
       )
       expect(screen.queryByText('Custom label from user')).not.toBeNull()
@@ -124,57 +124,63 @@ describe('<InvoiceRowName>', () => {
       expect(screen.queryByText('Утримання')).toBeNull()
     })
 
-    it('falls back to label when record has no description (non-editable)', () => {
+    it('falls back to label when record has no customName (non-editable)', () => {
+      render(
+        <InvoiceRowName {...baseProps} label="Утримання" record={{} as any} />
+      )
+      expect(screen.queryByText('Утримання')).not.toBeNull()
+    })
+
+    it('treats empty-string customName as missing and shows the label', () => {
+      // record?.customName || label — '' is falsy, so label wins.
       render(
         <InvoiceRowName
           {...baseProps}
           label="Утримання"
-          record={{} as any}
+          record={{ customName: '' } as any}
         />
       )
       expect(screen.queryByText('Утримання')).not.toBeNull()
     })
 
-    it('treats empty-string description as missing and shows the label', () => {
-      // record?.description || label — '' is falsy, so label wins.
+    it('shows record.description as the note under the name when not editable', () => {
       render(
         <InvoiceRowName
           {...baseProps}
           label="Утримання"
-          record={{ description: '' } as any}
+          record={{ description: 'Друга половина місяця' } as any}
         />
       )
-      expect(screen.queryByText('Утримання')).not.toBeNull()
+      expect(screen.queryByText('Друга половина місяця')).not.toBeNull()
     })
   })
 
   describe('editable input', () => {
-    it('renders a Form.Item input bound to invoice[name].description', () => {
+    it('renders inputs bound to customName and description', () => {
       renderWithForm({
         name: 0,
         serviceType: ServiceType.Maintenance,
         label: 'Утримання',
         editable: true,
       })
-      // editable mode swaps Typography.Text for an <input>
-      expect(screen.queryByRole('textbox')).not.toBeNull()
+      // editable mode swaps Typography.Text for the name input and adds the
+      // optional note input below it.
+      expect(screen.getAllByRole('textbox').length).toBeGreaterThanOrEqual(2)
     })
 
-    it('seeds invoice[name].description with the label on first render', () => {
+    it('seeds invoice[name].customName with the label on first render', () => {
       const { form } = renderWithForm({
         name: 0,
         serviceType: ServiceType.Maintenance,
         label: 'Утримання',
         editable: true,
       })
-      // useEffect with [] deps runs once after mount — at that point the
-      // field is empty so the component should write label into it.
-      expect(form.getFieldValue(['invoice', 0, 'description'])).toBe(
-        'Утримання'
-      )
+      // useEffect runs once after mount — at that point the field is empty so
+      // the component should write label into it.
+      expect(form.getFieldValue(['invoice', 0, 'customName'])).toBe('Утримання')
     })
 
-    it('does NOT overwrite an existing description value on mount', () => {
+    it('does NOT overwrite an existing customName value on mount', () => {
       const { form } = renderWithForm(
         {
           name: 0,
@@ -182,14 +188,14 @@ describe('<InvoiceRowName>', () => {
           label: 'Утримання',
           editable: true,
         },
-        { invoice: [{ description: 'Already set' }] }
+        { invoice: [{ customName: 'Already set' }] }
       )
-      expect(form.getFieldValue(['invoice', 0, 'description'])).toBe(
+      expect(form.getFieldValue(['invoice', 0, 'customName'])).toBe(
         'Already set'
       )
     })
 
-    it('shows defaultLabel inside the input when the form has no value yet', () => {
+    it('shows defaultLabel inside the customName input when the form has no value yet', () => {
       renderWithForm({
         name: 0,
         serviceType: ServiceType.Maintenance,
@@ -197,9 +203,9 @@ describe('<InvoiceRowName>', () => {
         editable: true,
       })
       // After the seed-effect runs, the form value === label, so the visible
-      // input value is the label too. (This also covers the LabelInput
-      // fallback path indirectly.)
-      const input = screen.getByRole('textbox') as HTMLInputElement
+      // name input value is the label too. The note input is the second
+      // textbox and starts empty.
+      const input = screen.getAllByRole('textbox')[0] as HTMLInputElement
       expect(input.value).toBe('Утримання')
     })
 
@@ -217,16 +223,14 @@ describe('<InvoiceRowName>', () => {
       expect(screen.queryByText('Утримання')).not.toBeNull()
     })
 
-    it('does NOT seed description when label is not a string (e.g. ReactNode)', () => {
+    it('does NOT seed customName when label is not a string (e.g. ReactNode)', () => {
       const { form } = renderWithForm({
         name: 0,
         serviceType: ServiceType.Maintenance,
         label: <span>Утримання</span>,
         editable: true,
       })
-      expect(
-        form.getFieldValue(['invoice', 0, 'description'])
-      ).toBeUndefined()
+      expect(form.getFieldValue(['invoice', 0, 'customName'])).toBeUndefined()
     })
   })
 })

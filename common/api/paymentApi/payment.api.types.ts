@@ -12,6 +12,7 @@ export type TemplateScopeTarget = Exclude<TemplateScope, 'payment'>
 export interface IPaymentField {
   type: ServiceType | string
   name?: string
+  customName?: string
   description?: string
   customService?: boolean
   isIndividual?: boolean
@@ -53,6 +54,8 @@ export interface IPayment {
   template?: string
   _templateScope?: TemplateScopeTarget
   invoiceLang?: 'en' | 'uk'
+  _bulk?: boolean
+  _batchId?: string
 }
 
 export interface IExtendedPayment extends IPayment {
@@ -198,6 +201,34 @@ export interface IPaymentInvoiceSnapshot {
   type: string
 }
 
+export type PaymentActionType =
+  | 'CREATE'
+  | 'BULK_CREATE'
+  | 'UPDATE'
+  | 'DELETE'
+  | 'BULK_DELETE'
+  | 'MARK_PAID'
+  | 'RESTORE'
+
+export type PaymentMutationSource =
+  | 'single'
+  | 'bulk'
+  | 'quick-pay'
+  | 'admin-restore'
+
+export type IPaymentSnapshot = Omit<IPayment, '_id'> & { _id: string }
+
+export interface AuditFilters {
+  page?: number
+  limit?: number
+  actorEmail?: string
+  actionType?: PaymentActionType | PaymentActionType[]
+  source?: PaymentMutationSource | PaymentMutationSource[]
+  domainId?: string
+  from?: string
+  to?: string
+}
+
 export interface IPaymentChangeLog {
   _id: string
   paymentId: string
@@ -205,6 +236,15 @@ export interface IPaymentChangeLog {
   reason?: string
   actorId?: string
   actorEmail?: string
+  actionType?: PaymentActionType
+  source?: PaymentMutationSource
+  before?: IPaymentSnapshot
+  after?: IPaymentSnapshot
+  domainId?: string
+  companyId?: string
+  domainName?: string
+  companyName?: string
+  batchId?: string
   invoiceData: IPaymentInvoiceSnapshot
 }
 

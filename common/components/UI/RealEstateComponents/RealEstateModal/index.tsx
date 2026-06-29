@@ -22,7 +22,7 @@ const getEntityId = (value?: { _id?: string } | string) => {
 }
 
 interface Props {
-  chosenRealEstate: { domain: string }
+  chosenRealEstate: { domain: string; street?: string } | null
   closeModal: VoidFunction
   currentRealEstate?: IExtendedRealestate
   editable?: boolean
@@ -40,7 +40,10 @@ const RealEstateModal: FC<Props> = ({
   const [addRealEstate, { isLoading: isAdding }] = useAddRealEstateMutation()
   const [editRealEstate, { isLoading: isEditing }] = useEditRealEstateMutation()
   const domainId = Form.useWatch('domain', form)
-  const currentDomainId = getEntityId(currentRealEstate?.domain) || domainId
+  const currentDomainId =
+    getEntityId(currentRealEstate?.domain) ||
+    domainId ||
+    chosenRealEstate?.domain
   const { data: customDomainServices } = useGetCustomServicesByDomainQuery(
     { domainId: currentDomainId },
     { skip: !currentDomainId }
@@ -62,10 +65,6 @@ const RealEstateModal: FC<Props> = ({
   }, [customDomainServices])
 
   const mergedCustomServices = useMemo(() => {
-    // Saved entries take precedence (preserve user prices), but only if the
-    // service still exists in the domain catalog (orphans get dropped).
-    // New domain services that the company hasn't seen yet are appended with
-    // price 0 so they show up immediately after a domain admin adds them.
     const saved = currentRealEstate?.customServices || []
     const validSaved = saved.filter((s) =>
       domainCustomServices.some((d) => d._id === s._id)
@@ -79,9 +78,6 @@ const RealEstateModal: FC<Props> = ({
   useEffect(() => {
     if (initializedRef.current) return
     if (!currentDomainId) return
-    // Wait for domain custom services query to resolve before initializing
-    // form state, otherwise the merge above runs against an empty list and
-    // initializedRef locks it in.
     if (customDomainServices === undefined) return
 
     form.setFieldsValue({
@@ -89,9 +85,7 @@ const RealEstateModal: FC<Props> = ({
         chosenRealEstate?.domain ||
         getEntityId(currentRealEstate?.domain) ||
         currentDomainId,
-      street:
-        currentRealEstate?.street &&
-        `${currentRealEstate.street.address} (м. ${currentRealEstate.street.city})`,
+      street: getEntityId(currentRealEstate?.street),
       companyName: currentRealEstate?.companyName || '',
       description: currentRealEstate?.description || '',
       adminEmails: currentRealEstate?.adminEmails || [],
@@ -132,7 +126,9 @@ const RealEstateModal: FC<Props> = ({
     const realEstateData = {
       domain: getEntityId(formData.domain),
       street:
-        getEntityId(formData.street) || getEntityId(currentRealEstate?.street),
+        getEntityId(formData.street) ||
+        getEntityId(currentRealEstate?.street) ||
+        undefined,
       companyName: formData.companyName,
       description: formData.description,
       adminEmails: formData.adminEmails,
@@ -178,7 +174,22 @@ const RealEstateModal: FC<Props> = ({
       message.success(action)
     } else {
       const action = currentRealEstate ? 'збереженні' : 'додаванні'
-      message.error(`Помилка при ${action}`)
+      // Surface the server's reason so the failure is diagnosable instead of a
+      // generic toast (e.g. "Domain is required", validation errors, etc.).
+      const errData = (response as { error?: { data?: { message?: unknown } } })
+        ?.error?.data
+      const serverMsg =
+        typeof errData?.message === 'string'
+          ? errData.message
+          : errData?.message
+            ? JSON.stringify(errData.message)
+            : undefined
+      console.error('addRealEstate failed:', response)
+      message.error(
+        serverMsg
+          ? `Помилка при ${action}: ${serverMsg}`
+          : `Помилка при ${action}`
+      )
     }
   }
 
@@ -201,6 +212,7 @@ const RealEstateModal: FC<Props> = ({
         editable={editable}
         setIsValueChanged={setIsValueChanged}
         customServices={domainCustomServices}
+        preselectedStreet={chosenRealEstate?.street}
       />
     </Modal>
   )
