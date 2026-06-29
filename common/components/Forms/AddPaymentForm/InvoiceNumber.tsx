@@ -18,7 +18,11 @@ export default function InvoiceNumber({ form, paymentActions }) {
   }, [newInvoiceNumber]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <Form.Item name="invoiceNumber" label="№ інвойса">
+    <Form.Item
+      name="invoiceNumber"
+      label="№ інвойса"
+      tooltip="Порядковий номер рахунку. Підставляється автоматично, можна змінити."
+    >
       <InputNumber
         parser={inputNumberParser}
         style={{ minWidth: '166px' }}

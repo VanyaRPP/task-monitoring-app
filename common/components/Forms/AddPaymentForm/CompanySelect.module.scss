@@ -1,0 +1,15 @@
+.companyRow {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.companyField {
+  flex: 1;
+  min-width: 0;
+}
+
+.emailField {
+  flex: 1;
+  min-width: 0;
+}

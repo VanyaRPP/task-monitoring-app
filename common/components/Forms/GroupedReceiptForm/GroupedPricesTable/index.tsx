@@ -130,6 +130,15 @@ const assignInvoicesToGroupsFirstWin = (
 }
 
 function resolveInvoiceLabel(inv: any, t: TFunction<'groupedReceipt'>): string {
+  if (inv?.type === 'custom') {
+    const displayName =
+      inv?.name && inv.name !== 'custom'
+        ? inv.name
+        : inv?.customName && inv.customName !== 'custom'
+          ? inv.customName
+          : inv?.description || ''
+    return displayName
+  }
   if (inv?.description) return inv.description
   return inv?.name ?? t(`services.${getInvoiceServiceLabelKey(inv.type)}`)
 }

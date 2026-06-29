@@ -4,6 +4,7 @@ import {
   IInvoiceTemplateOverrides,
 } from '@common/api/invoiceTemplateApi/invoiceTemplate.api.types'
 import { usePaymentContext } from '@components/AddPaymentModal'
+import { isNewEntityValue } from '@utils/inlineCreate'
 import { templateMap } from './templateMap'
 
 interface Input {
@@ -35,12 +36,15 @@ export function useInvoiceTemplateDescriptions({
 }: Input = {}): InvoiceTemplateDescriptions {
   const { template, company } = usePaymentContext()
 
-  const domainId: string =
+  const rawDomainId: string =
     (typeof data?.domain === 'object' ? data?.domain?._id : data?.domain) ||
     (typeof company?.domain === 'object'
       ? (company.domain as any)?._id
       : company?.domain) ||
     ''
+
+  // A not-yet-created provider (held as a `new::` sentinel) has no templates.
+  const domainId = isNewEntityValue(rawDomainId) ? '' : rawDomainId
 
   const { data: customTemplatesRes } = useGetInvoiceTemplatesQuery(
     { domainId },
