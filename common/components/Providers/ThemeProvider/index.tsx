@@ -1,7 +1,7 @@
 'use client'
 
 import useTheme from '@modules/hooks/useTheme'
-import { ConfigProvider, theme as themeConfig } from 'antd'
+import { ConfigProvider, theme as themeConfig, App } from 'antd'
 import { useMemo, useState, useEffect } from 'react'
 
 export const ThemeProvider: React.FC<{
@@ -111,7 +111,7 @@ export const ThemeProvider_pages: React.FC<{
         },
       }}
     >
-      {children}
+      <App>{children}</App>
     </ConfigProvider>
   )
 }
