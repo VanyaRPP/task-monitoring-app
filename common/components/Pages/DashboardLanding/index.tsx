@@ -45,13 +45,17 @@ const DashboardLanding = () => {
     setPaymentModalOpen(true)
   }
 
-  const handlePaymentModalClose = () => {
+  const handlePaymentModalClose = (success?: boolean) => {
     setPaymentModalOpen(false)
+    if (success) {
+      router.push('/payment')
+    } else {
+      router.reload()
+    }
     // The first invoice creates a provider+company on the fly, which promotes
     // the user to DomainAdmin. Reload so the new role and data take effect.
     router.reload()
   }
-
   return (
     <div
       style={{
