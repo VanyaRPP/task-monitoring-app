@@ -83,7 +83,7 @@ const InvoiceRowName: React.FC<InvoiceRowNameProps> = ({
           </Form.Item>
         ) : (
           <Typography.Text type="secondary" style={{ fontSize: '0.75rem' }}>
-            {record?.description || subtitleText}
+            {record?.description || ''}
           </Typography.Text>
         )}
       </Space>
