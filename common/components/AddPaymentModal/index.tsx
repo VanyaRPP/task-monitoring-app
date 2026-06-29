@@ -3,9 +3,11 @@ import { useCreateCustomServiceMutation } from '@common/api/customServicesApi/cu
 import {
   useAddDomainMutation,
   useGetDomainByPkQuery,
+  useGetDomainTypeTemplatesQuery,
 } from '@common/api/domainApi/domain.api'
 import { useAddRealEstateMutation } from '@common/api/realestateApi/realestate.api'
 import { getNewEntityName, isNewEntityValue } from '@utils/inlineCreate'
+import { domainTypeTemplateToCustomServices } from '@utils/domain/domain-type-template-services'
 import { buildPaymentPayload } from './buildPaymentPayload'
 import { keepInvoiceRow } from './invoiceRowFilter'
 import { resolveTemplate, TemplateKey } from './resolveTemplate'
@@ -302,6 +304,10 @@ const AddPaymentModal: FC<Props> = ({
   const [createCustomService] = useCreateCustomServiceMutation()
   const [addDomain] = useAddDomainMutation()
   const [addRealEstate] = useAddRealEstateMutation()
+  const { data: typeTemplates = [] } = useGetDomainTypeTemplatesQuery(
+    undefined,
+    { skip: edit || preview }
+  )
 
   const resolveMonthServiceId = useResolveMonthServiceId()
   const { data: customDomainServices } = useGetCustomServicesByDomainQuery(
@@ -556,6 +562,12 @@ const AddPaymentModal: FC<Props> = ({
 
       if (isNewEntityValue(nextDomainId)) {
         const name = getNewEntityName(nextDomainId).trim()
+        // Seed the provider's services from the chosen service-type template
+        // (e.g. «Комунальні»); empty when the user picked «Без послуг».
+        const templateId = formData.newDomainTemplateId || undefined
+        const template = templateId
+          ? typeTemplates.find((t) => t._id === templateId)
+          : undefined
         const created = await addDomain({
           name,
           // `description` is required; seed it with the name so a quick-created
@@ -563,6 +575,8 @@ const AddPaymentModal: FC<Props> = ({
           // richer description from IBAN/МФО/РНОКПП later, if edited).
           description: name,
           streets: [],
+          domainTypeTemplateId: templateId,
+          customServices: domainTypeTemplateToCustomServices(template),
         } as any).unwrap()
         nextDomainId = created.data._id
         form.setFieldValue('domain', nextDomainId)
@@ -582,7 +596,7 @@ const AddPaymentModal: FC<Props> = ({
 
       return { domain: nextDomainId, company: nextCompanyId }
     },
-    [addDomain, addRealEstate, form]
+    [addDomain, addRealEstate, form, typeTemplates]
   )
 
   const handleSubmit = async () => {

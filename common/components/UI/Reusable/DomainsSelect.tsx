@@ -1,4 +1,7 @@
-import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
+import {
+  useGetDomainsQuery,
+  useGetDomainTypeTemplatesQuery,
+} from '@common/api/domainApi/domain.api'
 import { validateField } from '@assets/features/validators'
 import { PlusOutlined } from '@ant-design/icons'
 import { Button, Divider, Form, FormInstance, Input, Select } from 'antd'
@@ -8,6 +11,7 @@ import {
   isNewEntityValue,
   makeNewEntityValue,
 } from '@utils/inlineCreate'
+import s from './DomainsSelect.module.scss'
 
 export interface DomainsSelectProps {
   form: FormInstance
@@ -16,12 +20,15 @@ export interface DomainsSelectProps {
   currentProfit?: any
   // When true the user can create a brand-new provider inline: a persistent
   // "Створити нового надавача" button in the dropdown switches the field into a
-  // name-input mode. The value becomes a `new::` sentinel that the owning form
-  // materializes into a real Domain on submit (see AddPaymentModal).
+  // name-input mode (+ a service-type picker). The value becomes a `new::`
+  // sentinel that the owning form materializes into a real Domain on submit
+  // (see AddPaymentModal).
   allowCreate?: boolean
 }
 
 const DOMAIN_TOOLTIP = 'Хто виставляє рахунок — ваша організація/ОСББ.'
+const TEMPLATE_TOOLTIP =
+  'Набір послуг для надавача. «Без послуг» — почати з чистого аркуша.'
 
 const DomainsSelect: React.FC<DomainsSelectProps> = ({
   form,
@@ -38,6 +45,9 @@ const DomainsSelect: React.FC<DomainsSelectProps> = ({
     isError: isDomainsError,
   } = useGetDomainsQuery({ archived: false })
 
+  const { data: typeTemplates = [], isLoading: isTemplatesLoading } =
+    useGetDomainTypeTemplatesQuery(undefined, { skip: !allowCreate })
+
   useEffect(() => {
     if (fetchedDomains.length) {
       setDomains(fetchedDomains)
@@ -51,6 +61,17 @@ const DomainsSelect: React.FC<DomainsSelectProps> = ({
     return domains.map((i) => ({ value: i._id, label: i.name }))
   }, [domains])
 
+  const templateOptions = useMemo(
+    () => [
+      { value: '', label: 'Без послуг' },
+      ...typeTemplates.map((t) => ({
+        value: t._id,
+        label: t.isBuiltIn ? t.name : `${t.name} (адмін)`,
+      })),
+    ],
+    [typeTemplates]
+  )
+
   useEffect(() => {
     // Auto-pick the only existing provider, but never while quick-creating.
     if (!edit && !allowCreate && options.length === 1) {
@@ -59,41 +80,67 @@ const DomainsSelect: React.FC<DomainsSelectProps> = ({
   }, [form, options, edit, allowCreate])
 
   const enterCreateMode = () => {
-    form.setFieldValue('domain', makeNewEntityValue(search.trim()))
+    form.setFieldsValue({
+      domain: makeNewEntityValue(search.trim()),
+      newDomainTemplateId: '',
+    })
     setSearch('')
+  }
+
+  const exitCreateMode = () => {
+    form.setFieldsValue({ domain: undefined, newDomainTemplateId: undefined })
   }
 
   if (isNew) {
     return (
-      <Form.Item
-        name="domain"
-        label="Надавач послуг"
-        tooltip={DOMAIN_TOOLTIP}
-        getValueProps={(v) => ({
-          value: isNewEntityValue(v) ? getNewEntityName(v) : '',
-        })}
-        normalize={(input) => makeNewEntityValue(input ?? '')}
-        rules={[
-          {
-            validator: (_, v) =>
-              getNewEntityName(v ?? '').trim()
-                ? Promise.resolve()
-                : Promise.reject(new Error('Вкажіть назву надавача послуг')),
-          },
-        ]}
-        extra={
-          <Button
-            type="link"
-            size="small"
-            style={{ padding: 0 }}
-            onClick={() => form.setFieldValue('domain', undefined)}
+      <>
+        <div className={s.createRow}>
+          <Form.Item
+            name="domain"
+            label="Надавач послуг"
+            tooltip={DOMAIN_TOOLTIP}
+            className={s.nameField}
+            getValueProps={(v) => ({
+              value: isNewEntityValue(v) ? getNewEntityName(v) : '',
+            })}
+            normalize={(input) => makeNewEntityValue(input ?? '')}
+            rules={[
+              {
+                validator: (_, v) =>
+                  getNewEntityName(v ?? '').trim()
+                    ? Promise.resolve()
+                    : Promise.reject(
+                        new Error('Вкажіть назву надавача послуг')
+                      ),
+              },
+            ]}
           >
-            ← обрати наявного
-          </Button>
-        }
-      >
-        <Input placeholder="Назва нового надавача послуг" />
-      </Form.Item>
+            <Input placeholder="Назва надавача" />
+          </Form.Item>
+          <Form.Item
+            name="newDomainTemplateId"
+            label="Напрямок послуг"
+            tooltip={TEMPLATE_TOOLTIP}
+            className={s.templateField}
+          >
+            <Select
+              options={templateOptions}
+              optionFilterProp="label"
+              placeholder="Без послуг"
+              loading={isTemplatesLoading}
+              showSearch
+            />
+          </Form.Item>
+        </div>
+        <Button
+          type="link"
+          size="small"
+          style={{ padding: 0, marginBottom: 8 }}
+          onClick={exitCreateMode}
+        >
+          ← обрати наявного
+        </Button>
+      </>
     )
   }
 
