@@ -51,10 +51,7 @@ describe('TableFilterLink', () => {
 
   it('merges new filter with existing filters on click', () => {
     render(
-      <TableFilterLink
-        {...defaultProps}
-        filters={{ company: ['company-1'] }}
-      />
+      <TableFilterLink {...defaultProps} filters={{ company: ['company-1'] }} />
     )
     fireEvent.click(screen.getByText('Test Label'))
     expect(setFilters).toHaveBeenCalledWith({

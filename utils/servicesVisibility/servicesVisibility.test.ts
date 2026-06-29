@@ -90,9 +90,9 @@ describe('servicesVisibility — getSelectedServiceIds', () => {
 
   it('ignores nullish entries in array input', () => {
     const d1 = domain('d1', [{ groupName: 'A', services: ['s1'] }])
-    expect(
-      getSelectedServiceIds([d1, null as any, undefined as any])
-    ).toEqual(['s1'])
+    expect(getSelectedServiceIds([d1, null as any, undefined as any])).toEqual([
+      's1',
+    ])
   })
 })
 
@@ -169,27 +169,26 @@ describe('servicesVisibility — extractDomainsFromRealEstates', () => {
   it('returns one entry per unique domain, preserving insertion order', () => {
     const d1 = domain('d1', [{ groupName: 'A', services: ['s1'] }])
     const d2 = domain('d2', [{ groupName: 'B', services: ['s2'] }])
-    const realEstates = [
-      { domain: d1 },
-      { domain: d2 },
-      { domain: d1 },
-    ]
+    const realEstates = [{ domain: d1 }, { domain: d2 }, { domain: d1 }]
     expect(extractDomainsFromRealEstates(realEstates)).toEqual([d1, d2])
   })
 
   it('skips realEstates that have no domain', () => {
     const d1 = domain('d1', [])
-    const realEstates = [{ domain: null }, { domain: undefined }, { domain: d1 }]
+    const realEstates = [
+      { domain: null },
+      { domain: undefined },
+      { domain: d1 },
+    ]
     expect(extractDomainsFromRealEstates(realEstates)).toEqual([d1])
   })
 
   it('keeps domains without an _id (will not be deduped)', () => {
     const d1: IDomainForVisibility = { customServices: [] }
     const d2: IDomainForVisibility = { customServices: [] }
-    expect(extractDomainsFromRealEstates([{ domain: d1 }, { domain: d2 }])).toEqual([
-      d1,
-      d2,
-    ])
+    expect(
+      extractDomainsFromRealEstates([{ domain: d1 }, { domain: d2 }])
+    ).toEqual([d1, d2])
   })
 })
 
@@ -220,7 +219,11 @@ describe('servicesVisibility — integration: Companies page scenarios', () => {
     const realEstates = [{ domain: d1 }, { domain: d2 }]
 
     const visibleDomains = extractDomainsFromRealEstates(realEstates)
-    const visible = getVisibleServices([Roles.DOMAIN_ADMIN], visibleDomains, all)
+    const visible = getVisibleServices(
+      [Roles.DOMAIN_ADMIN],
+      visibleDomains,
+      all
+    )
 
     expect(visible.map((s) => s._id).sort()).toEqual(['s1', 's3', 's4'])
   })
@@ -229,9 +232,7 @@ describe('servicesVisibility — integration: Companies page scenarios', () => {
     const d = domain('d1', [])
     const realEstates = [{ domain: d }]
     const visibleDomains = extractDomainsFromRealEstates(realEstates)
-    expect(
-      getVisibleServices([Roles.USER], visibleDomains, all)
-    ).toEqual([])
+    expect(getVisibleServices([Roles.USER], visibleDomains, all)).toEqual([])
   })
 
   it('Filter for User without realestates is empty', () => {
@@ -241,8 +242,8 @@ describe('servicesVisibility — integration: Companies page scenarios', () => {
 
   it('GlobalAdmin sees all services regardless of realestate scope', () => {
     const visibleDomains = extractDomainsFromRealEstates([])
-    expect(getVisibleServices([Roles.GLOBAL_ADMIN], visibleDomains, all)).toEqual(
-      all
-    )
+    expect(
+      getVisibleServices([Roles.GLOBAL_ADMIN], visibleDomains, all)
+    ).toEqual(all)
   })
 })

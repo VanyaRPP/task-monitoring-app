@@ -64,19 +64,20 @@ const DomainsHeader: React.FC<Props> = ({
         position: 'relative',
       }}
     >
-        <Button type="link" onClick={() => router.push(AppRoutes.DOMAIN)}>
-          Надавачі послуг
-          <SelectOutlined />
-          <Tooltip title="Надавачі послуг - це організації та компанії, що здійснюють управління та мають під собою менші компанії та об'єкти нерухомості. Управляються адміністраторами">
-            <QuestionCircleOutlined />
-          </Tooltip>
-        </Button>
+      <Button type="link" onClick={() => router.push(AppRoutes.DOMAIN)}>
+        Надавачі послуг
+        <SelectOutlined />
+        <Tooltip title="Надавачі послуг - це організації та компанії, що здійснюють управління та мають під собою менші компанії та об'єкти нерухомості. Управляються адміністраторами">
+          <QuestionCircleOutlined />
+        </Tooltip>
+      </Button>
       <div
         style={{
           position: 'absolute',
           left: '50%',
           transform: 'translateX(-50%)',
-        }}>
+        }}
+      >
         {children}
       </div>
 

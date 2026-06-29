@@ -44,6 +44,7 @@ import {
   useState,
 } from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
+import InvoiceTemplateTab from './InvoiceTemplateTab'
 import GroupedReceiptForm from '../Forms/GroupedReceiptForm'
 import { getPreviewQtyStorageKey } from '../Forms/GroupedReceiptForm/previewQtyStorage'
 import PaymentReceiptForm from '../Forms/PaymentReceiptForm'
@@ -148,9 +149,9 @@ const AddPaymentModal: FC<Props> = ({
   const [activeTabKey, setActiveTabKey] = useState(preview ? '2' : '1')
   const [invoiceLang, setInvoiceLang] = useState<'en' | 'uk'>(
     paymentData?.invoiceLang ??
-    (paymentData?.currency && paymentData.currency !== Currency.UAH
-      ? 'en'
-      : 'uk')
+      (paymentData?.currency && paymentData.currency !== Currency.UAH
+        ? 'en'
+        : 'uk')
   )
 
   const setShowQuantityInPreview = useCallback(
@@ -316,6 +317,8 @@ const AddPaymentModal: FC<Props> = ({
     })
   }, [selectedChangelogId, changelogRes, form])
 
+  const operation = Form.useWatch('operation', form)
+
   const items: TabsProps['items'] = []
   const shouldTabsEnabled = (edit && !changed) || preview || saved
 
@@ -330,6 +333,14 @@ const AddPaymentModal: FC<Props> = ({
           changelogLoading={changelogLoading}
         />
       ),
+    })
+  }
+
+  if (!preview && operation !== Operations.Credit) {
+    items.push({
+      key: 'template',
+      label: 'Шаблон',
+      children: <InvoiceTemplateTab />,
     })
   }
 
@@ -371,8 +382,6 @@ const AddPaymentModal: FC<Props> = ({
       children: <PriceList data={currPayment ?? paymentData} />,
     })
   }
-
-  const operation = Form.useWatch('operation', form)
 
   const effectiveOperation = preview ? paymentData?.type : operation
 
@@ -428,9 +437,9 @@ const AddPaymentModal: FC<Props> = ({
       const adHocInvoices = invoices.filter(
         (inv) =>
           inv?.type === ServiceType.Custom &&
-          !inv?.customService && 
+          !inv?.customService &&
           inv?.saveToDomain === true &&
-          (inv?.name || inv?.description) 
+          (inv?.name || inv?.description)
       )
 
       for (const inv of adHocInvoices) {
@@ -501,9 +510,9 @@ const AddPaymentModal: FC<Props> = ({
 
     const response = edit
       ? await editPayment({
-        _id: paymentData?._id,
-        ...finalPayload,
-      })
+          _id: paymentData?._id,
+          ...finalPayload,
+        })
       : await addPayment(finalPayload)
 
     if ('data' in response) {

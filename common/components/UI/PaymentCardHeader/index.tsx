@@ -298,19 +298,24 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
   }, [payments])
 
   const selectedDomainId = useMemo(
-  () => filters?.domain?.[0] ?? null,
-  [filters?.domain]
-)
-const { data: domainCustomServicesData } = useGetCustomServicesQuery(
-  { domainId: selectedDomainId },
-  { skip: !selectedDomainId }
-)
-const visibleCustomServices = useMemo(() => {
-  if (!selectedDomainId) {
-    return isGlobalAdmin ? allCustomServices : []
-  }
-  return (domainCustomServicesData?.data ?? []) as ICustomServiceItem[]
-}, [isGlobalAdmin, selectedDomainId, domainCustomServicesData, allCustomServices])
+    () => filters?.domain?.[0] ?? null,
+    [filters?.domain]
+  )
+  const { data: domainCustomServicesData } = useGetCustomServicesQuery(
+    { domainId: selectedDomainId },
+    { skip: !selectedDomainId }
+  )
+  const visibleCustomServices = useMemo(() => {
+    if (!selectedDomainId) {
+      return isGlobalAdmin ? allCustomServices : []
+    }
+    return (domainCustomServicesData?.data ?? []) as ICustomServiceItem[]
+  }, [
+    isGlobalAdmin,
+    selectedDomainId,
+    domainCustomServicesData,
+    allCustomServices,
+  ])
 
   const { preview, edit } = paymentActions
 
@@ -583,7 +588,11 @@ const ColumnSelect: React.FC<ColumnSelectProps> = ({
   }, [filterByAvailable, allowedServices])
 
   const customEntries = useMemo(
-    () => (visibleCustomServices ?? []).map(s => ({ value: s._id, label: s.name })),
+    () =>
+      (visibleCustomServices ?? []).map((s) => ({
+        value: s._id,
+        label: s.name,
+      })),
     [visibleCustomServices]
   )
 
@@ -617,7 +626,7 @@ const ColumnSelect: React.FC<ColumnSelectProps> = ({
         localStorage.setItem('payments_columns', JSON.stringify(filtered))
       }
     }
-  }, [filterByAvailable, allowedServices])
+  }, [filterByAvailable, allowedServices, selected])
 
   useEffect(() => {
     if (!allowedServices || !filterByAvailable) return

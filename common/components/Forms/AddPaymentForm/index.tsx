@@ -50,7 +50,12 @@ function AddPaymentForm({
   return (
     <>
       <DomainsSelect form={form} edit={edit} />
-      <AddressesSelect form={form} edit={edit} street={company?.street?._id} />
+      <AddressesSelect
+        form={form}
+        edit={edit}
+        street={company?.street?._id}
+        required={false}
+      />
       <MonthServiceSelect form={form} edit={edit} />
       <CompanySelect form={form} edit={edit} company={payment?.company} />
       <PaymentTypeSelect />

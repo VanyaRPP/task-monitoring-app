@@ -11,6 +11,7 @@ export interface AddressesSelectProps {
   create?: boolean
   dropdownStyle?: CSSProperties
   street?: string
+  required?: boolean
   onStreetHasServiceChange?: (hasService: boolean) => void
 }
 
@@ -19,6 +20,7 @@ const AddressesSelect: React.FC<AddressesSelectProps> = ({
   edit,
   dropdownStyle,
   street,
+  required = true,
   onStreetHasServiceChange,
 }) => {
   const streetId: string = Form.useWatch('street', form)
@@ -62,12 +64,12 @@ const AddressesSelect: React.FC<AddressesSelectProps> = ({
       form.setFieldsValue({ street: undefined })
       onStreetHasServiceChange?.(false)
     }
-  }, [domainId, options, form, street])
+  }, [domainId, options, form, street, onStreetHasServiceChange])
 
   const selectedStreet = options.find((option) => option.value === streetId)
   const showNoServiceTooltip = !!selectedStreet && !selectedStreet.hasService
   const showNoAddressesTooltip =
-    !!domainId && !isStreetsLoading && options.length === 0
+    required && !!domainId && !isStreetsLoading && options.length === 0
   const tooltipContent = showNoAddressesTooltip ? (
     <span>
       За вибраним Надавачем послуг немає жодної адреси. Будь ласка,{' '}
@@ -87,7 +89,11 @@ const AddressesSelect: React.FC<AddressesSelectProps> = ({
       visible={showNoAddressesTooltip || showNoServiceTooltip}
       placement="top"
     >
-      <Form.Item name="street" label="Адреса" rules={validateField('required')}>
+      <Form.Item
+        name="street"
+        label="Адреса"
+        rules={required ? validateField('required') : []}
+      >
         <Select
           options={options}
           optionFilterProp="label"

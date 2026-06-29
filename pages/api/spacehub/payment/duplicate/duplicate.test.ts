@@ -11,7 +11,9 @@ import ProfitService from '@common/services/profitService/profit.service'
 jest.mock('next-auth', () => ({ getServerSession: jest.fn() }))
 jest.mock('@pages/api/auth/[...nextauth]', () => ({ authOptions: {} }))
 jest.mock('@pages/api/api.config', () => jest.fn())
-jest.mock('@utils/email/sendInvoiceEmail', () => ({ sendInvoiceEmail: jest.fn() }))
+jest.mock('@utils/email/sendInvoiceEmail', () => ({
+  sendInvoiceEmail: jest.fn(),
+}))
 
 jest.mock('@common/modules/models/Payment')
 jest.mock('@modules/models/Domain')
