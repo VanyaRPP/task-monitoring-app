@@ -14,7 +14,7 @@ interface Props {
   style?: React.CSSProperties
   open?: boolean
   okButtonProps?: ButtonProps
-  title: string
+  title: React.ReactNode
   preview?: boolean
   destroyOnHidden?: boolean
   width?: number | string

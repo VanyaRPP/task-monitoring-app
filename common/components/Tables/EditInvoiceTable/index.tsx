@@ -4,6 +4,7 @@ import { IPayment } from '@common/api/paymentApi/payment.api.types'
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
 import { ServiceType } from '@utils/constants'
+import { isNewEntityValue } from '@utils/inlineCreate'
 import {
   catalogRowToSelectOption,
   flattenDomainCatalogServices,
@@ -11,7 +12,7 @@ import {
   IInvoicePriceContext,
   invoiceLineExcludeKey,
 } from '@utils/domain/domain-invoice-selector'
-import { Form, FormInstance, Select, Table } from 'antd'
+import { Empty, Form, FormInstance, Select, Table } from 'antd'
 import React, { useCallback, useMemo } from 'react'
 
 import Cleaning from './Cleaning'
@@ -161,6 +162,30 @@ export const EditInvoicesTable_unstable: React.FC<EditInvoicesTableProps> = ({
             size="small"
             dataSource={fields}
             pagination={false}
+            locale={
+              editable
+                ? {
+                    emptyText: (
+                      <Empty
+                        image={Empty.PRESENTED_IMAGE_SIMPLE}
+                        description={
+                          <span
+                            style={{
+                              maxWidth: 360,
+                              display: 'inline-block',
+                            }}
+                          >
+                            Ще немає послуг. Додайте рядок нижче: оберіть з
+                            каталогу або «Власне», вкажіть назву, кількість і
+                            ціну — сума порахується автоматично (ціна ×
+                            кількість).
+                          </span>
+                        }
+                      />
+                    ),
+                  }
+                : undefined
+            }
             footer={
               editable
                 ? () => (
@@ -195,20 +220,26 @@ export const InvoiceSelector: React.FC<{
   excludeKeys?: string[]
   onSelect?: (payload: IInvoiceLineAddPayload) => void
 }> = ({ service, company, prevPayment, domainId, excludeKeys, onSelect }) => {
-  const resolvedDomainId = service?.domain?._id
+  const rawDomainId = service?.domain?._id
     ? String(service.domain._id)
     : domainId
       ? String(domainId)
       : undefined
 
+  // A brand-new (not-yet-created) provider has no catalog to fetch, but the user
+  // still needs the "Власне" option to add custom lines to the first invoice.
+  const isNewDomain = isNewEntityValue(rawDomainId)
+  const catalogDomainId = isNewDomain ? undefined : rawDomainId
+  const hasDomainContext = !!rawDomainId
+
   const { data: catalogRes, isLoading } = useGetCustomServicesByDomainQuery(
-    { domainId: resolvedDomainId ? [resolvedDomainId] : undefined },
-    { skip: !resolvedDomainId }
+    { domainId: catalogDomainId ? [catalogDomainId] : undefined },
+    { skip: !catalogDomainId }
   )
 
   const options = useMemo(() => {
-    if (!resolvedDomainId) return []
-    const groups = catalogRes?.data ?? []
+    if (!hasDomainContext) return []
+    const groups = catalogDomainId ? (catalogRes?.data ?? []) : []
     const rows = flattenDomainCatalogServices(groups)
     const priceContext: IInvoicePriceContext = {
       company,
@@ -224,7 +255,15 @@ export const InvoiceSelector: React.FC<{
       payload: { type: ServiceType.Custom },
     }
     return [...catalogOptions, customOption]
-  }, [catalogRes, resolvedDomainId, excludeKeys, company, service, prevPayment])
+  }, [
+    catalogRes,
+    catalogDomainId,
+    hasDomainContext,
+    excludeKeys,
+    company,
+    service,
+    prevPayment,
+  ])
 
   const handleSelect = useCallback(
     (value: string) => {
@@ -244,20 +283,20 @@ export const InvoiceSelector: React.FC<{
       style={{ width: '100%' }}
       suffixIcon={<PlusOutlined />}
       placeholder={
-        resolvedDomainId
+        hasDomainContext
           ? 'Додати поле з каталогу домену...'
           : 'Немає домену в сервісі — каталог недоступний'
       }
       onSelect={handleSelect}
       value={undefined}
       options={options}
-      loading={!!resolvedDomainId && isLoading}
-      disabled={!resolvedDomainId || isLoading}
+      loading={!!catalogDomainId && isLoading}
+      disabled={!hasDomainContext || (!!catalogDomainId && isLoading)}
       allowClear
       showSearch
       optionFilterProp="label"
       notFoundContent={
-        resolvedDomainId && !isLoading
+        catalogDomainId && !isLoading
           ? 'У групах домену немає послуг'
           : undefined
       }

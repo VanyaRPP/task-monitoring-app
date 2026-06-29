@@ -9,19 +9,14 @@ import { Footer } from '@components/Layouts/Footer'
 import {
   useGetCurrentUserQuery,
   useGetUserByIdQuery,
-  userApi,
 } from '@common/api/userApi/user.api'
-import { useAppDispatch } from '@modules/store/hooks'
 import { useRouter } from 'next/router'
 import { Roles } from '@utils/constants'
-import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
-import DomainModal from '@components/UI/DomainsComponents/DomainModal'
 import s from './DashboardLanding.module.scss'
 
 const { Title, Text } = Typography
 
 const DashboardLanding = () => {
-  const dispatch = useAppDispatch()
   const router = useRouter()
   const { data: user } = useGetCurrentUserQuery()
   // The by-id endpoint returns adminDomains/adminCompanies, which lets us
@@ -31,10 +26,7 @@ const DashboardLanding = () => {
     skip: !user?._id,
   })
   const [welcomeOpen, setWelcomeOpen] = useState(false)
-  const [domainModalOpen, setDomainModalOpen] = useState(false)
-  const [invoicePromptOpen, setInvoicePromptOpen] = useState(false)
   const [paymentModalOpen, setPaymentModalOpen] = useState(false)
-  const [createdDomainId, setCreatedDomainId] = useState<string>()
 
   useEffect(() => {
     if (!fullUser) return
@@ -48,35 +40,15 @@ const DashboardLanding = () => {
     setWelcomeOpen(Boolean(ownsNothing && !isGlobalAdmin))
   }, [fullUser, user])
 
-  const handleCreateProvider = () => {
-    setWelcomeOpen(false)
-    setDomainModalOpen(true)
-  }
-
-  const handleDomainModalClose = (createdDomain?: IExtendedDomain) => {
-    setDomainModalOpen(false)
-    // Creating a domain adds the user to its adminEmails, which promotes them
-    // to DomainAdmin on the next getCurrentUser call. Refresh the user so the
-    // new role (and the data-driven modal visibility) updates without a reload.
-    dispatch(userApi.util.invalidateTags(['User']))
-    if (createdDomain?._id) {
-      setCreatedDomainId(createdDomain._id)
-      setInvoicePromptOpen(true)
-    }
-  }
-
   const handleStartFirstInvoice = () => {
-    setInvoicePromptOpen(false)
+    setWelcomeOpen(false)
     setPaymentModalOpen(true)
-  }
-
-  const handleDeclineFirstInvoice = () => {
-    setInvoicePromptOpen(false)
-    router.reload()
   }
 
   const handlePaymentModalClose = () => {
     setPaymentModalOpen(false)
+    // The first invoice creates a provider+company on the fly, which promotes
+    // the user to DomainAdmin. Reload so the new role and data take effect.
     router.reload()
   }
 
@@ -150,47 +122,16 @@ const DashboardLanding = () => {
             type="primary"
             block
             size="large"
-            onClick={handleCreateProvider}
+            onClick={handleStartFirstInvoice}
           >
-            Створити надавача послуг
+            Створити перший рахунок
           </Button>
-        </Space>
-      </Modal>
-
-      {domainModalOpen && (
-        <DomainModal
-          currentDomain={null as unknown as IExtendedDomain}
-          editable
-          closeModal={handleDomainModalClose}
-        />
-      )}
-
-      <Modal
-        open={invoicePromptOpen}
-        centered
-        width={420}
-        onCancel={handleDeclineFirstInvoice}
-        footer={[
-          <Button key="later" onClick={handleDeclineFirstInvoice}>
-            Пізніше
-          </Button>,
-          <Button key="yes" type="primary" onClick={handleStartFirstInvoice}>
-            Так
-          </Button>,
-        ]}
-      >
-        <Space direction="vertical" size="small" style={{ width: '100%' }}>
-          <Title level={4} style={{ marginBottom: 0 }}>
-            Надавача послуг створено!
-          </Title>
-          <Text type="secondary">Створити перший рахунок?</Text>
         </Space>
       </Modal>
 
       {paymentModalOpen && (
         <AddPaymentModal
           paymentActions={{ edit: false, preview: false }}
-          preselectedDomain={createdDomainId}
           closeModal={handlePaymentModalClose}
         />
       )}
