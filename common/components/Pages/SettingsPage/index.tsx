@@ -60,6 +60,20 @@ export const AdminPanelPage: React.FC = () => {
                 </>
               ),
             },
+            ...(isGlobalAdmin || isDomainAdmin
+              ? [
+                  {
+                    key: 'customservices',
+                    label: 'Послуги',
+                    children: (
+                      <CustomServicesTable
+                        domains={domains}
+                        isDomainAdmin={isDomainAdmin}
+                      />
+                    ),
+                  },
+                ]
+              : []),
             ...(isGlobalAdmin
               ? [
                   {
@@ -88,15 +102,9 @@ export const AdminPanelPage: React.FC = () => {
                             onClick={() => setModalOpen(true)}
                           ></Button>
                         </Flex>
-
                         <FeatureFlagsTable />
                       </>
                     ),
-                  },
-                  {
-                    key: 'customservices',
-                    label: 'Послуги',
-                    children: <CustomServicesTable />,
                   },
                   {
                     key: 'templates',
