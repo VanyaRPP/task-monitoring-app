@@ -36,11 +36,14 @@ export const streetApi = createApi({
       },
       providesTags: (response: IStreet[]) =>
         response
-          ? response.map((item: IStreet) => ({
-              type: 'Street',
-              id: item._id,
-            }))
-          : [],
+          ? [
+              ...response.map((item: IStreet) => ({
+                type: 'Street' as const,
+                id: item._id,
+              })),
+              { type: 'Street' as const, id: 'LIST' },
+            ]
+          : [{ type: 'Street' as const, id: 'LIST' }],
       transformResponse: (response: AllStreetsQuery) => response.data,
     }),
     addStreet: builder.mutation<IStreet, Partial<IStreet>>({
@@ -51,7 +54,7 @@ export const streetApi = createApi({
           body,
         }
       },
-      invalidatesTags: ['Street'],
+      invalidatesTags: ['Street', { type: 'Street', id: 'LIST' }],
     }),
     deleteStreet: builder.mutation<{ success: boolean; id: ObjectId }, string>({
       query(id) {

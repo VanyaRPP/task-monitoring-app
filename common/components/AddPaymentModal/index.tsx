@@ -24,6 +24,8 @@ import {
   IPayment,
   TemplateScopeTarget,
 } from '@common/api/paymentApi/payment.api.types'
+import { useAddStreetMutation } from '@common/api/streetApi/street.api'
+import { makeNewEntityValue } from '@utils/inlineCreate'
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
 import PriceList from '@common/components/Forms/AddPaymentForm/PriceList'
@@ -304,6 +306,7 @@ const AddPaymentModal: FC<Props> = ({
   const [createCustomService] = useCreateCustomServiceMutation()
   const [addDomain] = useAddDomainMutation()
   const [addRealEstate] = useAddRealEstateMutation()
+  const [addStreet] = useAddStreetMutation()
   const { data: typeTemplates = [] } = useGetDomainTypeTemplatesQuery(
     undefined,
     { skip: edit || preview }
@@ -556,7 +559,9 @@ const AddPaymentModal: FC<Props> = ({
   // domain promotes the user to its admin (server adds them to adminEmails), so
   // the company create that follows is authorized.
   const materializeQuickEntities = useCallback(
-    async (formData: any): Promise<{ domain: string; company: string }> => {
+    async (
+      formData: any
+    ): Promise<{ domain: string; company: string; street: string }> => {
       let nextDomainId = formData.domain
       let nextCompanyId = formData.company
 
@@ -593,8 +598,24 @@ const AddPaymentModal: FC<Props> = ({
         nextCompanyId = created.data._id
         form.setFieldValue('company', nextCompanyId)
       }
-
-      return { domain: nextDomainId, company: nextCompanyId }
+      let nextStreetId = formData.street
+      if (isNewEntityValue(nextStreetId)) {
+        const streetData = getNewEntityName(nextStreetId)
+        // формат: "address::city"
+        const [address, city] = streetData.split('::')
+        const created = await addStreet({
+          address: address?.trim() || streetData,
+          city: city?.trim() || '',
+          domain: nextDomainId,
+        } as any).unwrap()
+        nextStreetId = (created as any).data?._id ?? (created as any)._id
+        form.setFieldValue('street', nextStreetId)
+      }
+      return {
+        domain: nextDomainId,
+        company: nextCompanyId,
+        street: nextStreetId,
+      }
     },
     [addDomain, addRealEstate, form, typeTemplates]
   )
@@ -602,7 +623,7 @@ const AddPaymentModal: FC<Props> = ({
   const handleSubmit = async () => {
     const formData = await form.validateFields()
 
-    let materialized: { domain: string; company: string }
+    let materialized: { domain: string; company: string; street: string }
     try {
       materialized = await materializeQuickEntities(formData)
     } catch (e) {
@@ -612,6 +633,7 @@ const AddPaymentModal: FC<Props> = ({
     }
     formData.domain = materialized.domain
     formData.company = materialized.company
+    formData.street = materialized.street
 
     const monthServiceId = await prepareMonthService(formData)
     if (monthServiceId === null) return
