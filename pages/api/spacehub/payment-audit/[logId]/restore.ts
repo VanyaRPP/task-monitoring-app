@@ -9,7 +9,8 @@ import { logPaymentMutation } from '@common/modules/services/paymentAudit'
 
 start()
 
-const RESTORABLE_ACTIONS = ['DELETE', 'BULK_DELETE']
+const DELETE_ACTIONS = ['DELETE', 'BULK_DELETE']
+const RESTORABLE_ACTIONS = ['DELETE', 'BULK_DELETE', 'UPDATE']
 
 const firstString = (value?: string | string[]): string | undefined =>
   Array.isArray(value) ? value[0] : value
@@ -59,7 +60,7 @@ export default async function handler(
   if (!RESTORABLE_ACTIONS.includes(log.actionType)) {
     return res.status(400).json({
       success: false,
-      message: 'Only DELETE / BULK_DELETE entries can be restored',
+      message: 'Only DELETE / BULK_DELETE / UPDATE entries can be restored',
     })
   }
 
@@ -82,27 +83,48 @@ export default async function handler(
     }
   }
 
-  const alreadyExists = await Payment.exists({ _id: before._id })
-  if (alreadyExists) {
-    return res
-      .status(409)
-      .json({ success: false, message: 'Payment already exists' })
-  }
+  const { _id, __v, ...beforeFields } = before
 
   try {
-    const restored: any = await Payment.create({
-      ...before,
-      _id: before._id,
-    } as any)
+    if (DELETE_ACTIONS.includes(log.actionType)) {
+      const alreadyExists = await Payment.exists({ _id: before._id })
+      if (alreadyExists) {
+        return res
+          .status(409)
+          .json({ success: false, message: 'Payment already exists' })
+      }
+
+      const restored: any = await Payment.create({
+        ...beforeFields,
+        _id: before._id,
+      } as any)
+
+      await logPaymentMutation({
+        actionType: 'RESTORE',
+        source: 'admin-restore',
+        actor: user,
+        after: restored,
+      })
+
+      return res.status(201).json({ success: true, data: restored })
+    }
+
+    const current: any = await Payment.findById(before._id)
+
+    const reverted: any = current
+      ? await Payment.findByIdAndUpdate(before._id, beforeFields, { new: true })
+      : await Payment.create({ ...beforeFields, _id: before._id } as any)
 
     await logPaymentMutation({
       actionType: 'RESTORE',
       source: 'admin-restore',
       actor: user,
-      after: restored,
+      reason: 'restore-invoice',
+      before: current ?? undefined,
+      after: reverted,
     })
 
-    return res.status(201).json({ success: true, data: restored })
+    return res.status(200).json({ success: true, data: reverted })
   } catch (error: any) {
     return res
       .status(500)

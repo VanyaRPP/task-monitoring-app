@@ -1,16 +1,24 @@
+import { useEffect, useState } from 'react'
 import {
   Button,
   Col,
+  Flex,
   Modal,
-  Popconfirm,
   Row,
+  Segmented,
   Space,
   Tag,
   Typography,
   message,
   theme,
 } from 'antd'
-import { UndoOutlined } from '@ant-design/icons'
+import {
+  CheckCircleOutlined,
+  CodeOutlined,
+  EyeOutlined,
+  HistoryOutlined,
+  UndoOutlined,
+} from '@ant-design/icons'
 import dayjs from 'dayjs'
 import {
   IPaymentChangeLog,
@@ -18,12 +26,13 @@ import {
 } from '@common/api/paymentApi/payment.api.types'
 import { useRestorePaymentMutation } from '@common/api/paymentApi/payment.api'
 import { ACTION_COLORS } from './usePaymentAuditColumns'
+import InvoiceReceiptView from './InvoiceReceiptView'
 
 const { Text, Title } = Typography
 
-const RESTORABLE: PaymentActionType[] = ['DELETE', 'BULK_DELETE']
+const RESTORABLE: PaymentActionType[] = ['DELETE', 'BULK_DELETE', 'UPDATE']
 
-const Snapshot = ({
+const JsonSnapshot = ({
   title,
   value,
   span = 12,
@@ -67,27 +76,100 @@ interface Props {
 
 const AuditDetailsModal: React.FC<Props> = ({ open, record, onClose }) => {
   const [restorePayment, { isLoading }] = useRestorePaymentMutation()
+  const [view, setView] = useState<string>('Перегляд')
+
+  const hasBefore = !!record?.before
+  const hasAfter = !!record?.after
+  const isLegacy = !!record && !hasBefore && !hasAfter
+
+  useEffect(() => {
+    if (record) setView('Перегляд')
+  }, [record])
 
   const canRestore =
-    !!record?.actionType && RESTORABLE.includes(record.actionType)
+    !!record?.actionType &&
+    RESTORABLE.includes(record.actionType) &&
+    hasBefore
 
   const handleRestore = async () => {
     if (!record) return
     const res = await restorePayment({ logId: record._id })
     if ('data' in res) {
-      message.success('Платіж відновлено')
+      message.success('Рахунок відновлено')
       onClose()
     } else {
       const err = res.error as any
-      message.error(err?.data?.message || 'Не вдалося відновити платіж')
+      message.error(err?.data?.message || 'Не вдалося відновити рахунок')
     }
   }
+
+  const restoreButton = canRestore && (
+    <Button
+      type="primary"
+      icon={<UndoOutlined />}
+      loading={isLoading}
+      onClick={handleRestore}
+    >
+      Відновити рахунок
+    </Button>
+  )
+
+  const renderPreview = () => {
+    if (!record) return null
+    if (isLegacy) {
+      return <InvoiceReceiptView snapshot={record.invoiceData} />
+    }
+    return (
+      <Row gutter={16}>
+        {hasBefore && (
+          <Col xs={24} md={hasAfter ? 12 : 24}>
+            <Title level={5} style={{ marginTop: 0 }}>
+              <HistoryOutlined /> До
+            </Title>
+            <InvoiceReceiptView snapshot={record.before} />
+          </Col>
+        )}
+        {hasAfter && (
+          <Col xs={24} md={hasBefore ? 12 : 24}>
+            <Title level={5} style={{ marginTop: 0 }}>
+              <CheckCircleOutlined /> Після
+            </Title>
+            <InvoiceReceiptView snapshot={record.after} />
+          </Col>
+        )}
+      </Row>
+    )
+  }
+
+  const renderJson = () => {
+    if (!record) return null
+    if (isLegacy) {
+      return (
+        <Row gutter={16}>
+          <JsonSnapshot title="Дані інвойсу" value={record.invoiceData} span={24} />
+        </Row>
+      )
+    }
+    return (
+      <Row gutter={16}>
+        {hasBefore && <JsonSnapshot title="До" value={record.before} />}
+        {hasAfter && <JsonSnapshot title="Після" value={record.after} />}
+      </Row>
+    )
+  }
+
+  const options = [
+    { value: 'Перегляд', label: 'Перегляд', icon: <EyeOutlined /> },
+    { value: 'JSON', label: 'JSON', icon: <CodeOutlined /> },
+  ]
 
   return (
     <Modal
       open={open}
       onCancel={onClose}
-      width={920}
+      width="95vw"
+      style={{ maxWidth: 1700, top: 20 }}
+      footer={null}
       title={
         record ? (
           <Space wrap>
@@ -105,45 +187,26 @@ const AuditDetailsModal: React.FC<Props> = ({ open, record, onClose }) => {
           'Деталі'
         )
       }
-      footer={
-        canRestore
-          ? [
-              <Popconfirm
-                key="restore"
-                title="Відновити цей платіж?"
-                description="Платіж буде створено з його оригінальним ідентифікатором."
-                okText="Відновити"
-                cancelText="Скасувати"
-                onConfirm={handleRestore}
-                okButtonProps={{ loading: isLoading }}
-              >
-                <Button
-                  type="primary"
-                  icon={<UndoOutlined />}
-                  loading={isLoading}
-                >
-                  Відновити
-                </Button>
-              </Popconfirm>,
-            ]
-          : null
-      }
     >
-      {record &&
-        (record.before || record.after ? (
-          <Row gutter={16}>
-            <Snapshot title="До" value={record.before} />
-            <Snapshot title="Після" value={record.after} />
-          </Row>
-        ) : (
-          <Row gutter={16}>
-            <Snapshot
-              title="Дані інвойсу"
-              value={record.invoiceData}
-              span={24}
+      {record && (
+        <>
+          <Flex
+            justify="space-between"
+            align="center"
+            gap={8}
+            wrap="wrap"
+            style={{ marginBottom: 16 }}
+          >
+            <Segmented
+              options={options}
+              value={view}
+              onChange={(v) => setView(v as string)}
             />
-          </Row>
-        ))}
+            {restoreButton}
+          </Flex>
+          {view === 'JSON' ? renderJson() : renderPreview()}
+        </>
+      )}
     </Modal>
   )
 }

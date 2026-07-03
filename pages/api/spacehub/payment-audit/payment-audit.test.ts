@@ -6,6 +6,7 @@ import { setupTestEnvironment } from '@utils/setupTestEnvironment'
 import { domains, realEstates, users } from '@utils/testData'
 import handler from '.'
 import PaymentChangeLog from '@common/modules/models/PaymentChangeLog'
+import Payment from '@common/modules/models/Payment'
 
 jest.mock('next-auth', () => ({ getServerSession: jest.fn() }))
 jest.mock('@pages/api/auth/[...nextauth]', () => ({ authOptions: {} }))
@@ -256,5 +257,80 @@ describe('Payment Audit API - GET', () => {
     const body3 = jsonOf(page3)
     expect(body3.total).toBe(5)
     expect(body3.data).toHaveLength(1)
+  })
+
+  it('filters by invoice type (credit)', async () => {
+    await mockLoginAs(users.globalAdmin)
+    await PaymentChangeLog.create(
+      makeLog({
+        domainId: ownDomain,
+        actorEmail: 'credit@example.com',
+        invoiceData: { ...baseInvoiceData, type: 'credit' },
+      })
+    )
+
+    const res = await performRequest({ type: 'credit' })
+    const body = jsonOf(res)
+    expect(body.total).toBe(1)
+    expect(body.data[0].invoiceData.type).toBe('credit')
+  })
+
+  it('filters by company', async () => {
+    await mockLoginAs(users.globalAdmin)
+    const company = realEstates[0]
+    await PaymentChangeLog.create(
+      makeLog({
+        domainId: ownDomain,
+        companyId: new mongoose.Types.ObjectId(company._id),
+        actorEmail: 'co@example.com',
+      })
+    )
+
+    const res = await performRequest({ companyId: company._id })
+    const body = jsonOf(res)
+    expect(body.total).toBe(1)
+    expect(body.data[0].companyId?.toString()).toBe(company._id)
+  })
+
+  it('fills invoiceData.currency from the live payment when the snapshot lacks it', async () => {
+    await mockLoginAs(users.globalAdmin)
+    const paymentId = new mongoose.Types.ObjectId()
+    await Payment.create({
+      _id: paymentId,
+      invoiceNumber: 5,
+      type: 'debit',
+      invoiceCreationDate: new Date('2024-01-01'),
+      domain: ownDomain,
+      currency: 'USD',
+      invoice: [],
+      provider: { description: 'p' },
+      reciever: { companyName: 'c', adminEmails: [], description: 'd' },
+      generalSum: 100,
+    })
+    await PaymentChangeLog.create(
+      makeLog({ paymentId, domainId: ownDomain, actorEmail: 'usd@example.com' })
+    )
+
+    const res = await performRequest({ actorEmail: 'usd@example.com' })
+    const body = jsonOf(res)
+    expect(body.data).toHaveLength(1)
+    expect(body.data[0].invoiceData.currency).toBe('USD')
+  })
+
+  it('combines type + actionType filters', async () => {
+    await mockLoginAs(users.globalAdmin)
+    await PaymentChangeLog.create(
+      makeLog({
+        domainId: ownDomain,
+        actionType: 'DELETE',
+        actorEmail: 'combo@example.com',
+        invoiceData: { ...baseInvoiceData, type: 'credit' },
+      })
+    )
+
+    const res = await performRequest({ type: 'credit', actionType: 'DELETE' })
+    const body = jsonOf(res)
+    expect(body.total).toBe(1)
+    expect(body.data[0].actorEmail).toBe('combo@example.com')
   })
 })
