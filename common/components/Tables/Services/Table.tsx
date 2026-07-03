@@ -158,6 +158,17 @@ const renderTooltip = (text: string) => {
   )
 }
 
+const formatStreetValue = (address?: string, city?: string): string => {
+  const trimmedAddress = address?.trim()
+  const trimmedCity = city?.trim()
+
+  if (!trimmedAddress && !trimmedCity) return '-'
+  if (!trimmedAddress) return trimmedCity ? `м. ${trimmedCity}` : '-'
+  if (!trimmedCity) return trimmedAddress
+
+  return `${trimmedAddress} (м. ${trimmedCity})`
+}
+
 const getDefaultColumns = (
   isAdmin?: boolean,
   handleDelete?: (...args: any) => void,
@@ -207,7 +218,7 @@ const getDefaultColumns = (
       width: 250,
       filters: isOnPage ? addressFilter : null,
       filteredValue: filter?.street || null,
-      render: (i) => `${i?.address} (м. ${i?.city})`,
+      render: (i) => formatStreetValue(i?.address, i?.city),
       filterSearch: true,
     },
     {
