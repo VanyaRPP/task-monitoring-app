@@ -47,7 +47,7 @@ describe('AuditDetailsModal', () => {
     expect(screen.getByText('Відновити рахунок')).toBeInTheDocument()
   })
 
-  it('a CREATE record shows only Після and no restore button', () => {
+  it('a CREATE record shows both До and Після (До empty) and no restore button', () => {
     const createRecord: any = {
       ...updateRecord,
       actionType: 'CREATE',
@@ -57,7 +57,7 @@ describe('AuditDetailsModal', () => {
       <AuditDetailsModal open record={createRecord} onClose={jest.fn()} />
     )
 
-    expect(screen.queryByText('До')).not.toBeInTheDocument()
+    expect(screen.getByText('До')).toBeInTheDocument()
     expect(screen.getByText('Після')).toBeInTheDocument()
     expect(screen.queryByText('Відновити рахунок')).not.toBeInTheDocument()
   })

@@ -121,22 +121,26 @@ const AuditDetailsModal: React.FC<Props> = ({ open, record, onClose }) => {
     }
     return (
       <Row gutter={16}>
-        {hasBefore && (
-          <Col xs={24} md={hasAfter ? 12 : 24}>
-            <Title level={5} style={{ marginTop: 0 }}>
-              <HistoryOutlined /> До
-            </Title>
+        <Col xs={24} md={12}>
+          <Title level={5} style={{ marginTop: 0 }}>
+            <HistoryOutlined /> До
+          </Title>
+          {record.before ? (
             <InvoiceReceiptView snapshot={record.before} />
-          </Col>
-        )}
-        {hasAfter && (
-          <Col xs={24} md={hasBefore ? 12 : 24}>
-            <Title level={5} style={{ marginTop: 0 }}>
-              <CheckCircleOutlined /> Після
-            </Title>
+          ) : (
+            <Text type="secondary">—</Text>
+          )}
+        </Col>
+        <Col xs={24} md={12}>
+          <Title level={5} style={{ marginTop: 0 }}>
+            <CheckCircleOutlined /> Після
+          </Title>
+          {record.after ? (
             <InvoiceReceiptView snapshot={record.after} />
-          </Col>
-        )}
+          ) : (
+            <Text type="secondary">—</Text>
+          )}
+        </Col>
       </Row>
     )
   }
@@ -152,8 +156,8 @@ const AuditDetailsModal: React.FC<Props> = ({ open, record, onClose }) => {
     }
     return (
       <Row gutter={16}>
-        {hasBefore && <JsonSnapshot title="До" value={record.before} />}
-        {hasAfter && <JsonSnapshot title="Після" value={record.after} />}
+        <JsonSnapshot title="До" value={record.before} />
+        <JsonSnapshot title="Після" value={record.after} />
       </Row>
     )
   }
@@ -163,13 +167,19 @@ const AuditDetailsModal: React.FC<Props> = ({ open, record, onClose }) => {
     { value: 'JSON', label: 'JSON', icon: <CodeOutlined /> },
   ]
 
+  const sideBySide = !isLegacy
+
   return (
     <Modal
       open={open}
       onCancel={onClose}
-      width="95vw"
-      style={{ maxWidth: 1700, top: 20 }}
-      footer={null}
+      width={sideBySide ? '95vw' : 900}
+      style={{ top: 20, ...(sideBySide ? { maxWidth: 1700 } : {}) }}
+      footer={[
+        <Button key="close" onClick={onClose}>
+          Закрити
+        </Button>,
+      ]}
       title={
         record ? (
           <Space wrap>
