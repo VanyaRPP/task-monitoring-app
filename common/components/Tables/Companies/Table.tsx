@@ -664,19 +664,45 @@ const getDefaultColumns = ({
             </div>
           )
 
+          const badgeColor = getDebtorTooltipColor(debtor)
+
           return (
             <Badge
-              count={formatDebt(debtor.totalDebt)}
-              title=""
-              color={getDebtorTooltipColor(debtor)}
-              overflowCount={Infinity}
-              style={{ cursor: 'pointer' }}
-              size="small"
+              count={
+                <Tooltip title={tooltipDebtor} placement="top">
+                  <span
+                    style={{
+                      backgroundColor: badgeColor,
+                      color: badgeColor === 'yellow' ? '#000' : '#fff',
+                      borderRadius: 10,
+                      marginRight: '-10px',
+                      marginTop: '-3px',
+                      padding: '0 6px',
+                      fontSize: 12,
+                      lineHeight: '20px',
+                      display: 'inline-block',
+                      whiteSpace: 'nowrap',
+                      cursor: 'default',
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {formatDebt(debtor.totalDebt)}
+                  </span>
+                </Tooltip>
+              }
               offset={[3, -8]}
             >
-              <Tooltip title={tooltipDebtor}>
-                <span style={{ cursor: 'pointer' }}>{i}</span>
-              </Tooltip>
+              {canFilter ? (
+                <TableFilterLink
+                  label={i}
+                  filterKey="company"
+                  filterId={String(companyId)}
+                  filters={filters}
+                  setFilters={setFilters}
+                />
+              ) : (
+                i
+              )}
             </Badge>
           )
         }
