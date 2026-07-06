@@ -85,6 +85,7 @@ export interface IPaymentContext {
   setShowQuantityInPreview: (value: boolean) => void
   invoiceLang: 'en' | 'uk'
   setInvoiceLang: (lang: 'en' | 'uk') => void
+  registerTemplateSaver: (fn: (() => Promise<string | null>) | null) => void
 }
 
 export const PaymentContext = createContext<IPaymentContext>({
@@ -102,6 +103,7 @@ export const PaymentContext = createContext<IPaymentContext>({
   setShowQuantityInPreview: () => void 0,
   invoiceLang: 'uk',
   setInvoiceLang: () => void 0,
+  registerTemplateSaver: () => void 0,
 })
 
 export const usePaymentContext = () =>
@@ -155,6 +157,15 @@ const AddPaymentModal: FC<Props> = ({
   const [templateScope, setTemplateScope] = useState<
     TemplateScopeTarget | undefined
   >()
+
+  // Set by the "Шаблон" editor while mounted; called on save (see handleSubmit).
+  const templateSaverRef = useRef<(() => Promise<string | null>) | null>(null)
+  const registerTemplateSaver = useCallback(
+    (fn: (() => Promise<string | null>) | null) => {
+      templateSaverRef.current = fn
+    },
+    []
+  )
 
   const [showQuantityInPreview, setShowQuantityInPreviewState] = useState(false)
   const [activeTabKey, setActiveTabKey] = useState(preview ? '2' : '1')
@@ -616,13 +627,26 @@ const AddPaymentModal: FC<Props> = ({
     const monthServiceId = await prepareMonthService(formData)
     if (monthServiceId === null) return
 
+    let effectiveTemplate = template
+    try {
+      const savedTemplateId = await templateSaverRef.current?.()
+      if (savedTemplateId) {
+        effectiveTemplate = savedTemplateId as TemplateKey
+        setTemplate(effectiveTemplate)
+      }
+    } catch (e) {
+      console.error('template auto-save failed', e)
+      message.error('Не вдалося зберегти шаблон')
+      return
+    }
+
     const payment = buildPaymentPayload({
       formData,
       monthServiceId,
       provider,
       reciever,
       transaction,
-      template,
+      template: effectiveTemplate,
       invoiceLang,
     })
 
@@ -707,6 +731,7 @@ const AddPaymentModal: FC<Props> = ({
         setShowQuantityInPreview,
         invoiceLang,
         setInvoiceLang,
+        registerTemplateSaver,
       }}
     >
       <Modal
