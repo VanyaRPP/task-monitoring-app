@@ -86,6 +86,7 @@ const MonthServiceSelect: React.FC<MonthServiceSelectProps> = ({
     <Form.Item
       name="monthService"
       label="Місяць"
+      tooltip="Розрахунковий період, за який виставляється рахунок."
       rules={validateField('required')}
     >
       <Select

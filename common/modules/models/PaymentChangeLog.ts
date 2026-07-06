@@ -1,8 +1,11 @@
 import mongoose, { Schema, ObjectId } from 'mongoose'
 import {
   IPaymentField,
+  IPaymentSnapshot,
   IProvider,
   IReciever,
+  PaymentActionType,
+  PaymentMutationSource,
 } from '@common/api/paymentApi/payment.api.types'
 
 export interface IPaymentChangeLogModel {
@@ -13,6 +16,16 @@ export interface IPaymentChangeLogModel {
 
   actorId?: ObjectId
   actorEmail?: string
+
+  actionType: PaymentActionType
+  source: PaymentMutationSource
+
+  before?: IPaymentSnapshot
+  after?: IPaymentSnapshot
+
+  domainId?: ObjectId
+  companyId?: ObjectId
+  batchId?: ObjectId
 
   invoiceData: {
     invoiceNumber: number
@@ -52,6 +65,50 @@ const PaymentChangeLogSchema = new Schema<IPaymentChangeLogModel>(
 
     actorEmail: {
       type: String,
+    },
+
+    actionType: {
+      type: String,
+      enum: [
+        'CREATE',
+        'BULK_CREATE',
+        'UPDATE',
+        'DELETE',
+        'BULK_DELETE',
+        'MARK_PAID',
+        'RESTORE',
+      ],
+      required: true,
+      index: true,
+    },
+
+    source: {
+      type: String,
+      enum: ['single', 'bulk', 'quick-pay', 'admin-restore'],
+      required: true,
+    },
+
+    before: {
+      type: Object,
+    },
+
+    after: {
+      type: Object,
+    },
+
+    domainId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Domain',
+      index: true,
+    },
+
+    companyId: {
+      type: Schema.Types.ObjectId,
+      ref: 'RealEstate',
+    },
+
+    batchId: {
+      type: Schema.Types.ObjectId,
     },
 
     invoiceData: {

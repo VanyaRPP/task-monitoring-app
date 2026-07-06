@@ -9,6 +9,7 @@ const PaymentTypeSelect = () => {
     <Form.Item
       name="operation"
       label="Тип оплати"
+      tooltip="Дебет (Реалізація) — нарахування за послуги переліком; Кредит (Оплата) — разова сума одним рядком."
       rules={validateField('required')}
     >
       <Segmented

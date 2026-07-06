@@ -1,6 +1,5 @@
-// @ts-nocheck
-import handler from '@pages/api/custom-services'
-import { getCurrentUser } from '@utils/getCurrentUser'
+import handlerImport from '@pages/api/custom-services'
+import { getCurrentUser as getCurrentUserFn } from '@utils/getCurrentUser'
 import { setupTestEnvironment } from '@utils/setupTestEnvironment'
 
 jest.mock('@pages/api/api.config', () => jest.fn())
@@ -35,13 +34,23 @@ jest.mock('@modules/models/RealEstate', () => ({
   },
 }))
 
-import CustomService from '@modules/models/CustomService'
-import Domain from '@modules/models/Domain'
-import RealEstate from '@modules/models/RealEstate'
+import CustomServiceModel from '@modules/models/CustomService'
+import DomainModel from '@modules/models/Domain'
+import RealEstateModel from '@modules/models/RealEstate'
 
 jest.mock('@utils/getCurrentUser', () => ({
   getCurrentUser: jest.fn(),
 }))
+
+// These modules are jest-mocked above; re-type them as loose jest mocks so
+// .mockResolvedValue / .mockReturnValue are available without fighting the real
+// mongoose model types. Behaviour is unchanged — only the static types differ.
+const CustomService = CustomServiceModel as unknown as Record<string, jest.Mock>
+const Domain = DomainModel as unknown as Record<string, jest.Mock>
+const RealEstate = RealEstateModel as unknown as Record<string, jest.Mock>
+const getCurrentUser = getCurrentUserFn as unknown as jest.Mock
+// req/res are partial mocks in tests, so accept anything here.
+const handler = handlerImport as (req: any, res: any) => Promise<unknown>
 
 setupTestEnvironment()
 

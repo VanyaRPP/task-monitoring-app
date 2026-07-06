@@ -172,7 +172,6 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
         dispatch(paymentApi.util.invalidateTags(['Payment']))
       }
     }
-
     return () => {
       channel.close()
     }

@@ -53,9 +53,10 @@ const ClassicTemplate: FC<TemplateProps> = ({
       style={{
         width: '100%',
         height: '100%',
-        marginTop: '2em',
-        marginRight: '1.5em',
-        marginLeft: '1.5em',
+        boxSizing: 'border-box',
+        paddingTop: '2em',
+        paddingRight: '1.5em',
+        paddingLeft: '1.5em',
       }}
     >
       <div className={cs.providerInfo}>

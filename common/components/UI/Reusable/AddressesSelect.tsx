@@ -1,6 +1,7 @@
 import { validateField } from '@assets/features/validators'
 import { useGetAllStreetsQuery } from '@common/api/streetApi/street.api'
 import { AppRoutes } from '@utils/constants'
+import { isNewEntityValue } from '@utils/inlineCreate'
 import { Form, FormInstance, Select, Tooltip } from 'antd'
 import Link from 'next/link'
 import { CSSProperties, useEffect, useMemo } from 'react'
@@ -30,7 +31,10 @@ const AddressesSelect: React.FC<AddressesSelectProps> = ({
     data: streets = [],
     isLoading: isStreetsLoading,
     isError: isStreetsError,
-  } = useGetAllStreetsQuery({ domainId }, { skip: !domainId })
+  } = useGetAllStreetsQuery(
+    { domainId },
+    { skip: !domainId || isNewEntityValue(domainId) }
+  )
 
   const options = useMemo(() => {
     return streets.map((i) => ({
@@ -92,6 +96,7 @@ const AddressesSelect: React.FC<AddressesSelectProps> = ({
       <Form.Item
         name="street"
         label="Адреса"
+        tooltip="Об'єкт (адреса), за яким нараховується оплата. Необов'язково."
         rules={required ? validateField('required') : []}
       >
         <Select
