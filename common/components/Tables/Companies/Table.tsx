@@ -664,46 +664,33 @@ const getDefaultColumns = ({
             </div>
           )
 
-          const badgeColor = getDebtorTooltipColor(debtor)
+          const companyLabel = canFilter ? (
+            <TableFilterLink
+              label={i}
+              filterKey="company"
+              filterId={String(companyId)}
+              filters={filters}
+              setFilters={setFilters}
+              tooltipTitle=""
+            />
+          ) : (
+            i
+          )
 
           return (
-            <Badge
-              count={
-                <Tooltip title={tooltipDebtor} placement="top">
-                  <span
-                    style={{
-                      backgroundColor: badgeColor,
-                      color: badgeColor === 'yellow' ? '#000' : '#fff',
-                      borderRadius: 10,
-                      marginRight: '-10px',
-                      marginTop: '-3px',
-                      padding: '0 6px',
-                      fontSize: 12,
-                      lineHeight: '20px',
-                      display: 'inline-block',
-                      whiteSpace: 'nowrap',
-                      cursor: 'default',
-                    }}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    {formatDebt(debtor.totalDebt)}
-                  </span>
-                </Tooltip>
-              }
-              offset={[3, -8]}
-            >
-              {canFilter ? (
-                <TableFilterLink
-                  label={i}
-                  filterKey="company"
-                  filterId={String(companyId)}
-                  filters={filters}
-                  setFilters={setFilters}
-                />
-              ) : (
-                i
-              )}
-            </Badge>
+            <Tooltip title={tooltipDebtor} placement="top">
+              <Badge
+                count={formatDebt(debtor.totalDebt)}
+                title=""
+                color={getDebtorTooltipColor(debtor)}
+                overflowCount={Infinity}
+                style={{ cursor: 'pointer' }}
+                size="small"
+                offset={[10, 0]}
+              >
+                {companyLabel}
+              </Badge>
+            </Tooltip>
           )
         }
       }
