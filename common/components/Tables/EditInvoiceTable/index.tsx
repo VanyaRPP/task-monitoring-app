@@ -148,7 +148,7 @@ export const EditInvoicesTable_unstable: React.FC<EditInvoicesTableProps> = ({
             render: (_: any, record: { name: number }) => (
               <MinusCircleOutlined
                 onClick={() => !disabled && remove(record.name)}
-                style={{ opacity: disabled ? 0.5 : 1 }}
+                style={{ opacity: disabled ? 0.5 : 1, fontSize: 16 }}
               />
             ),
             hidden: !editable,
@@ -226,8 +226,6 @@ export const InvoiceSelector: React.FC<{
       ? String(domainId)
       : undefined
 
-  // A brand-new (not-yet-created) provider has no catalog to fetch, but the user
-  // still needs the "Власне" option to add custom lines to the first invoice.
   const isNewDomain = isNewEntityValue(rawDomainId)
   const catalogDomainId = isNewDomain ? undefined : rawDomainId
   const hasDomainContext = !!rawDomainId
