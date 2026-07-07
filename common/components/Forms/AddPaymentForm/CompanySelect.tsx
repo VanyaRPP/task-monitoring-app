@@ -1,8 +1,7 @@
 import { validateField } from '@assets/features/validators'
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
-import { PlusOutlined } from '@ant-design/icons'
-import { Button, Divider, Form, Input, Select } from 'antd'
+import { Button, Form, Input, Select } from 'antd'
 import { FormInstance } from 'antd/es/form/Form'
 import { useEffect, useMemo, useState } from 'react'
 import {
@@ -97,20 +96,29 @@ function CompanyPicker({
   }, [companies, company, edit, form])
 
   useEffect(() => {
-    // A brand-new provider has no companies, so jump straight into create mode.
-    if (edit || !allowCreate || !isNewDomain) return
-    if (!form.getFieldValue('company')) {
-      form.setFieldValue('company', makeNewEntityValue(''))
-    }
-  }, [isNewDomain, allowCreate, edit, form])
+    // Force create mode when there's nothing to pick: a brand-new provider has
+    // no companies, and a user with no companies of their own can only create.
+    if (edit || !allowCreate || isLoading) return
+    if (!isNewDomain && companies.length > 0) return
+    queueMicrotask(() => {
+      if (!isNewEntityValue(form.getFieldValue('company'))) {
+        form.setFieldValue('company', makeNewEntityValue(''))
+      }
+    })
+  }, [isNewDomain, companies.length, allowCreate, edit, isLoading, form])
 
   const options = useMemo(
     () => companies.map((i) => ({ value: i._id, label: i.companyName })),
     [companies]
   )
 
-  const enterCreateMode = () => {
-    form.setFieldValue('company', makeNewEntityValue(search.trim()))
+  const commitTypedValue = () => {
+    const typed = search.trim()
+    if (!typed) return
+    const match = companies.find(
+      (c) => c.companyName?.trim().toLowerCase() === typed.toLowerCase()
+    )
+    form.setFieldValue('company', match ? match._id : makeNewEntityValue(typed))
     setSearch('')
   }
 
@@ -153,7 +161,7 @@ function CompanyPicker({
             <Input placeholder="email@example.com" />
           </Form.Item>
         </div>
-        {!isNewDomain && (
+        {!isNewDomain && companies.length > 0 && (
           <Button
             type="link"
             size="small"
@@ -177,33 +185,26 @@ function CompanyPicker({
       <Select
         options={options}
         optionFilterProp="label"
-        placeholder="Пошук компанії"
+        placeholder={
+          allowCreate ? 'Пошук або назва нової компанії' : 'Пошук компанії'
+        }
         loading={isLoading}
         showSearch
         allowClear
         searchValue={search}
         onSearch={setSearch}
         onChange={() => setSearch('')}
-        popupRender={
+        onBlur={allowCreate ? commitTypedValue : undefined}
+        onInputKeyDown={
           allowCreate
-            ? (menu) => (
-                <>
-                  {menu}
-                  <Divider style={{ margin: '8px 0' }} />
-                  <Button
-                    type="text"
-                    block
-                    icon={<PlusOutlined />}
-                    style={{ textAlign: 'left' }}
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={enterCreateMode}
-                  >
-                    {search.trim()
-                      ? `Створити «${search.trim()}»`
-                      : 'Створити нову компанію'}
-                  </Button>
-                </>
-              )
+            ? (e) => {
+                if (e.key === 'Enter') commitTypedValue()
+              }
+            : undefined
+        }
+        notFoundContent={
+          allowCreate && search.trim()
+            ? 'Немає збігів — натисніть Enter, щоб створити нову компанію'
             : undefined
         }
       />
