@@ -1,6 +1,9 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import { Operations } from '@utils/constants'
-import { invalidateDebtorsOnSuccess } from '@common/api/debtorsApi/debtors.api'
+import {
+  invalidateDebtorsOnSuccess,
+  debtorsApi,
+} from '@common/api/debtorsApi/debtors.api'
 import { domainApi } from '@common/api/domainApi/domain.api'
 import { realestateApi } from '@common/api/realestateApi/realestate.api'
 import {
@@ -26,12 +29,9 @@ import {
 } from './payment.api.types'
 
 /**
- * Refresh data in sibling RTK Query slices that a payment write can affect:
- * - Debtors badge (cross-API; uses its own helper for queryFulfilled handling)
- * - Domain & RealEstate caches, because changing a payment can flip default
- *   templates and aggregated counters that those slices expose.
+ * Refresh data in sibling RTK Query slices that a payment write can affect.
  */
-const invalidatePaymentSideEffects = async (
+export const invalidatePaymentSideEffects = async (
   arg: unknown,
   api: {
     dispatch: (action: any) => any
@@ -43,6 +43,9 @@ const invalidatePaymentSideEffects = async (
     await api.queryFulfilled
     api.dispatch(domainApi.util.invalidateTags(['Domain']))
     api.dispatch(realestateApi.util.invalidateTags(['RealEstate']))
+    if (debtorsApi) {
+      api.dispatch(debtorsApi.util.invalidateTags(['Debtors']))
+    }
   } catch {
     // mutation failed; nothing to invalidate
   }
@@ -153,7 +156,7 @@ export const paymentApi = createApi({
       },
       invalidatesTags: (response) =>
         response ? ['Payment', 'PaymentAudit'] : [],
-      onQueryStarted: invalidateDebtorsOnSuccess,
+      onQueryStarted: invalidatePaymentSideEffects,
     }),
     deleteMultiplePayments: builder.mutation<
       { deletedIds: string[] },
@@ -172,7 +175,7 @@ export const paymentApi = createApi({
       }) => response.data,
       invalidatesTags: (response) =>
         response ? ['Payment', 'PaymentAudit'] : [],
-      onQueryStarted: invalidateDebtorsOnSuccess,
+      onQueryStarted: invalidatePaymentSideEffects,
     }),
     getPaymentNumber: builder.query<number, object>({
       query: () => `spacehub/payment/number`,
@@ -215,6 +218,7 @@ export const paymentApi = createApi({
       }) => response.data,
       invalidatesTags: (response) =>
         response ? ['Payment', 'PaymentAudit'] : [],
+      onQueryStarted: invalidatePaymentSideEffects,
     }),
     duplicatePayments: builder.mutation<
       {
@@ -238,6 +242,7 @@ export const paymentApi = createApi({
         }
       }) => response.data,
       invalidatesTags: (response) => (response ? ['Payment', 'Profit'] : []),
+      onQueryStarted: invalidatePaymentSideEffects,
     }),
     htmlToPdf: builder.mutation<IHtmlToPdfResponse, IHtmlToPdfRequest>({
       query: (body) => ({
@@ -301,6 +306,7 @@ export const paymentApi = createApi({
     }),
   }),
 })
+
 export const {
   useGetPaymentChangeLogsQuery,
   useCreatePaymentChangeLogMutation,
