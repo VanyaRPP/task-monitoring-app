@@ -607,7 +607,7 @@ const getDefaultColumns = ({
                 label: (
                   <Popconfirm
                     id="popconfirm_custom"
-                    title={`Ви впевнені що хочете видалити нерухомість?`}
+                    title={`Ви впевнені що хочете видалити компанію?`}
                     onConfirm={() => handleDelete(realEstate?._id)}
                     okText="Видалити"
                     cancelText="Ні"
