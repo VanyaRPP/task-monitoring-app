@@ -47,6 +47,7 @@ import {
 import { useEffect, useState, useMemo } from 'react'
 import { useGetDebtorsQuery } from '@common/api/debtorsApi/debtors.api'
 import CollapsedTags from '@components/UI/CollapsedTags'
+import TableFilterLink from '@components/UI/Reusable/TableFilterLink'
 import {
   extractDomainsFromRealEstates,
   getSelectedServiceIds,
@@ -67,7 +68,6 @@ type CompanyWithPayments = {
   totalDebt: number
 }
 
-// Human-readable names of standard service columns — used to exclude duplicates from customServices
 const STANDARD_SERVICE_NAMES = [
   'Опис',
   'Площа (м²)',
@@ -199,9 +199,47 @@ const CompaniesTable: React.FC<Props> = ({
     return realEstateData?.realEstatesFilter?.length === 1
   }, [realEstateData?.realEstatesFilter?.length])
 
+  const filteredData = useMemo(() => {
+    if (!realEstates?.data?.length) return realEstates?.data ?? []
+    let data = realEstates.data
+
+    const domainIds: string[] = Array.isArray(filters?.domain)
+      ? filters.domain
+      : filters?.domain
+        ? [String(filters.domain)]
+        : []
+    if (domainIds.length) {
+      data = data.filter((r) =>
+        domainIds.includes(String((r as any).domain?._id))
+      )
+    }
+
+    const companyIds: string[] = Array.isArray(filters?.company)
+      ? filters.company
+      : filters?.company
+        ? [String(filters.company)]
+        : []
+    if (companyIds.length) {
+      data = data.filter((r) => companyIds.includes(String(r._id)))
+    }
+
+    const streetIds: string[] = Array.isArray(filters?.street)
+      ? filters.street
+      : filters?.street
+        ? [String(filters.street)]
+        : []
+    if (streetIds.length) {
+      data = data.filter((r) =>
+        streetIds.includes(String((r as any).street?._id))
+      )
+    }
+
+    return data
+  }, [realEstates?.data, filters])
+
   const visibleDomains = useMemo(
-    () => extractDomainsFromRealEstates(realEstates?.data),
-    [realEstates?.data]
+    () => extractDomainsFromRealEstates(filteredData),
+    [filteredData]
   )
 
   const hasActiveFilters = !!(
@@ -292,8 +330,9 @@ const CompaniesTable: React.FC<Props> = ({
         isUser,
         isSingleCompanyByData,
         customServices: filteredCustomServices,
+        setFilters,
       })}
-      dataSource={realEstates?.data}
+      dataSource={filteredData}
       scroll={{ x: tableWidth }}
       onChange={(__, tableFilters) => {
         const newFilters: any = {
@@ -343,6 +382,7 @@ const getDefaultColumns = ({
   isUser,
   isSingleCompanyByData,
   customServices,
+  setFilters,
 }: {
   domainId?: string
   streetId?: string
@@ -364,6 +404,7 @@ const getDefaultColumns = ({
   isUser?: boolean
   isSingleCompanyByData?: boolean
   customServices?: { _id: string; name: string }[]
+  setFilters?: (filters: any) => void
 }): ColumnType<any>[] => {
   const isOnPage = pathname === AppRoutes.REAL_ESTATE
 
@@ -389,7 +430,6 @@ const getDefaultColumns = ({
       align: 'center',
       render: renderTooltip,
     },
-    // TODO: enum
     shouldShowService('totalArea') && {
       title: 'Площа (м²)',
       dataIndex: 'totalArea',
@@ -604,37 +644,67 @@ const getDefaultColumns = ({
     width: 200,
     filterSearch: true,
     render: (i: string) => {
-      if (isUser || !debtorCompanies) return i
-      const debtor = debtorCompanies?.find(
-        (companie) => companie?.companyName === i
-      )
+      const companyId = realEstatesFilter?.find((f) => f.text === i)?.value
+      const canFilter =
+        isOnPage && setFilters && companyId && !isSingleCompanyByData
 
-      if (!debtor) return i
+      if (!isUser && debtorCompanies) {
+        const debtor = debtorCompanies?.find(
+          (companie) => companie?.companyName === i
+        )
 
-      const tooltipDebtor = (
-        <div>
-          <p>
-            <b>Компанія боржник</b>
-          </p>
-          <p>Назва компанії: {i}</p>
-          <p>Сума боргу: {formatDebt(debtor.totalDebt)}</p>
-        </div>
-      )
+        if (debtor) {
+          const tooltipDebtor = (
+            <div>
+              <p>
+                <b>Компанія боржник</b>
+              </p>
+              <p>Назва компанії: {i}</p>
+              <p>Сума боргу: {formatDebt(debtor.totalDebt)}</p>
+            </div>
+          )
 
-      return (
-        <Badge
-          count={formatDebt(debtor.totalDebt)}
-          title=""
-          color={getDebtorTooltipColor(debtor)}
-          overflowCount={Infinity}
-          style={{ cursor: 'pointer' }}
-          size="small"
-          offset={[3, -8]}
-        >
-          <Tooltip title={tooltipDebtor}>
-            <span style={{ cursor: 'pointer' }}>{i}</span>
-          </Tooltip>
-        </Badge>
+          const companyLabel = canFilter ? (
+            <TableFilterLink
+              label={i}
+              filterKey="company"
+              filterId={String(companyId)}
+              filters={filters}
+              setFilters={setFilters}
+              tooltipTitle=""
+            />
+          ) : (
+            i
+          )
+
+          return (
+            <Tooltip title={tooltipDebtor} placement="top">
+              <Badge
+                count={formatDebt(debtor.totalDebt)}
+                title=""
+                color={getDebtorTooltipColor(debtor)}
+                overflowCount={Infinity}
+                style={{ cursor: 'pointer' }}
+                size="small"
+                offset={[10, 0]}
+              >
+                {companyLabel}
+              </Badge>
+            </Tooltip>
+          )
+        }
+      }
+
+      return canFilter ? (
+        <TableFilterLink
+          label={i}
+          filterKey="company"
+          filterId={String(companyId)}
+          filters={filters}
+          setFilters={setFilters}
+        />
+      ) : (
+        i
       )
     },
   }
@@ -642,7 +712,18 @@ const getDefaultColumns = ({
     title: 'Надавач послуг',
     dataIndex: 'domain',
     width: 200,
-    render: (i) => i?.name,
+    render: (i) =>
+      isOnPage && setFilters ? (
+        <TableFilterLink
+          label={i?.name}
+          filterKey="domain"
+          filterId={i?._id}
+          filters={filters}
+          setFilters={setFilters}
+        />
+      ) : (
+        i?.name
+      ),
     hidden: domainsFilter?.length <= 1,
     filterSearch: true,
   }

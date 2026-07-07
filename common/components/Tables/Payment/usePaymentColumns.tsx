@@ -21,6 +21,7 @@ import {
   renderCurrency,
   toFirstUpperCase,
 } from '@utils/helpers'
+import TableFilterLink from '@components/UI/Reusable/TableFilterLink'
 import DateFilterDropdown from './DateFilter/DateFilterDropdown'
 import PaymentDropdown from '@components/PaymentDropDown'
 import s from './style.module.scss'
@@ -195,15 +196,13 @@ export function usePaymentColumns({
           sepDomainID ? (
             domain.name
           ) : (
-            <Tooltip title="Додати в фільтри">
-              <Typography.Link
-                onClick={() =>
-                  setFilters({ ...filters, domain: [domain?._id] })
-                }
-              >
-                {domain?.name}
-              </Typography.Link>
-            </Tooltip>
+            <TableFilterLink
+              label={domain?.name}
+              filterKey="domain"
+              filterId={domain?._id}
+              filters={filters}
+              setFilters={setFilters}
+            />
           ),
         hidden: isDomainAdmin
           ? isSingleCompanyByData && !filters?.company
@@ -222,6 +221,7 @@ export function usePaymentColumns({
           _record: IExtendedPayment,
           index: number
         ) => {
+          if (!company) return null
           const companyName = company?.companyName
           const companyId = company?._id
           const debtor = debtorCompanies.find(
@@ -236,13 +236,13 @@ export function usePaymentColumns({
             ) === index
 
           const companyLabel = (
-            <Tooltip title="Додати в фільтри">
-              <Typography.Link
-                onClick={() => setFilters({ ...filters, company: [companyId] })}
-              >
-                {companyName}
-              </Typography.Link>
-            </Tooltip>
+            <TableFilterLink
+              label={companyName}
+              filterKey="company"
+              filterId={companyId}
+              filters={filters}
+              setFilters={setFilters}
+            />
           )
 
           const hasDebt = Boolean(
