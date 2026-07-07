@@ -62,7 +62,9 @@ export const serviceApi = createApi({
       IAddServiceResponse,
       Omit<IService, '_id' | 'domain' | 'street'> & {
         domain: string
-        street: string
+        // street is optional — the backend omits it for street-less companies
+        // (sending '' would fail the ObjectId cast).
+        street?: string
       }
     >({
       query(body) {

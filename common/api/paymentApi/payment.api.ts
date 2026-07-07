@@ -1,9 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import { Operations } from '@utils/constants'
-import {
-  invalidateDebtorsOnSuccess,
-  debtorsApi,
-} from '@common/api/debtorsApi/debtors.api'
+import { debtorsApi } from '@common/api/debtorsApi/debtors.api'
 import { domainApi } from '@common/api/domainApi/domain.api'
 import { realestateApi } from '@common/api/realestateApi/realestate.api'
 import {
@@ -32,20 +29,17 @@ import {
  * Refresh data in sibling RTK Query slices that a payment write can affect.
  */
 export const invalidatePaymentSideEffects = async (
-  arg: unknown,
+  _arg: unknown,
   api: {
     dispatch: (action: any) => any
     queryFulfilled: Promise<unknown>
   }
 ): Promise<void> => {
-  invalidateDebtorsOnSuccess(arg, api)
   try {
     await api.queryFulfilled
     api.dispatch(domainApi.util.invalidateTags(['Domain']))
     api.dispatch(realestateApi.util.invalidateTags(['RealEstate']))
-    if (debtorsApi) {
-      api.dispatch(debtorsApi.util.invalidateTags(['Debtors']))
-    }
+    api.dispatch(debtorsApi.util.invalidateTags(['Debtors']))
   } catch {
     // mutation failed; nothing to invalidate
   }

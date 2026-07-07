@@ -42,8 +42,13 @@ export function useResolveMonthServiceId() {
 
       const created = await addService({
         domain,
-        street,
-        date: monthStart.startOf('month').toDate(),
+        // street is optional; sending '' fails the ObjectId cast on the backend.
+        ...(street ? { street } : {}),
+        // noon UTC on the 1st so no timezone offset can push the service into
+        // the neighbouring month (matches AddServiceModal's normalisation).
+        date: new Date(
+          Date.UTC(monthStart.year(), monthStart.month(), 1, 12, 0, 0)
+        ),
         rentPrice: 0,
         electricityPrice: 0,
         waterPrice: 0,
