@@ -40,7 +40,8 @@ export interface IPayment {
   type: string
   invoiceCreationDate: Date
   domain: Partial<IDomain> | any
-  street: Partial<IStreet> | string
+  // optional: street-less companies omit it (sending '' fails the ObjectId cast)
+  street?: Partial<IStreet> | string
   company: Partial<IRealestate> | string
   monthService: Partial<IService> | string
   description?: string

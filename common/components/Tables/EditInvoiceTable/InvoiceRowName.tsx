@@ -83,14 +83,14 @@ const InvoiceRowName: React.FC<InvoiceRowNameProps> = ({
           </Form.Item>
         ) : (
           <Typography.Text type="secondary" style={{ fontSize: '0.75rem' }}>
-            {record?.description || ''}
+            {record?.description || subtitleText}
           </Typography.Text>
         )}
       </Space>
       {editable && (
         <UpdateInvoiceButton
-          form={form!}
-          name={name!}
+          form={form}
+          name={name}
           serviceType={serviceType}
           disabled={disabled}
         />
