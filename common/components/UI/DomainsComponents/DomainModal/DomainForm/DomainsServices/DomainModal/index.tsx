@@ -94,7 +94,7 @@ const DomainModal: FC<Props> = ({
 
     setTargetKeys(initialTargets)
     setLocalServiceGroups(serviceGroups)
-  }, [open])
+  }, [open, serviceGroups])
 
   useEffect(() => {
     setLocalData(data)

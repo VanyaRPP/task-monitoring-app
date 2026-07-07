@@ -114,9 +114,7 @@ const ServicesTable: React.FC<Props> = ({
     }
     if (activeMonths?.length) {
       data = data.filter((s) =>
-        activeMonths.some(
-          (m) => new Date(s.date).getMonth() + 1 === Number(m)
-        )
+        activeMonths.some((m) => new Date(s.date).getMonth() + 1 === Number(m))
       )
     }
     return data
@@ -199,6 +197,17 @@ const renderTooltip = (text: string) => {
   )
 }
 
+const formatStreetValue = (address?: string, city?: string): string => {
+  const trimmedAddress = address?.trim()
+  const trimmedCity = city?.trim()
+
+  if (!trimmedAddress && !trimmedCity) return '-'
+  if (!trimmedAddress) return trimmedCity ? `м. ${trimmedCity}` : '-'
+  if (!trimmedCity) return trimmedAddress
+
+  return `${trimmedAddress} (м. ${trimmedCity})`
+}
+
 const getDefaultColumns = (
   isAdmin?: boolean,
   handleDelete?: (...args: any) => void,
@@ -231,8 +240,7 @@ const getDefaultColumns = (
       width: 180,
       filters: isOnPage ? domainFilter : null,
       filteredValue: filter?.domain || null,
-      onFilter: (value, record) =>
-        String(record.domain?._id) === String(value),
+      onFilter: (value, record) => String(record.domain?._id) === String(value),
       render: (i) =>
         isOnPage && setFilter ? (
           <TableFilterLink
@@ -264,9 +272,8 @@ const getDefaultColumns = (
       width: 250,
       filters: isOnPage ? addressFilter : null,
       filteredValue: filter?.street || null,
-      onFilter: (value, record) =>
-        String(record.street?._id) === String(value),
-      render: (i) => `${i?.address} (м. ${i?.city})`,
+      onFilter: (value, record) => String(record.street?._id) === String(value),
+      render: (i) => formatStreetValue(i?.address, i?.city),
       filterSearch: true,
     },
     {

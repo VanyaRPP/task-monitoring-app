@@ -195,7 +195,7 @@ const AddServiceForm: React.FC<Props> = ({
         onValuesChange={() => setIsValueChanged(true)}
       >
         <DomainsSelect form={form} edit={edit} />
-        <AddressesSelect form={form} edit={edit} />
+        <AddressesSelect form={form} edit={edit} required={false} />
         <Form.Item
           name="date"
           label="Місяць та рік"

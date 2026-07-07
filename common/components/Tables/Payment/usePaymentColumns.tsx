@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import React, { useMemo, useEffect, useState } from 'react'
 import { Badge, Button, List, Tooltip, Typography, theme } from 'antd'
 import { ColumnType, ColumnsType } from 'antd/es/table'
 import { IPaymentFilterResponse } from '@common/api/filterApi/filter.api.types'
@@ -103,8 +103,7 @@ export function buildAutoCustomColumns({
     payment.invoice?.forEach((field) => {
       if (field.type !== ServiceType.Custom) return
       const sum = Number(field.sum ?? field.price ?? 0)
-      // skip only empty (zero) custom rows; a service that is always negative
-      // (e.g. a discount) must still get its own column
+
       if (sum === 0) return
       const label = field.name
       if (!label || seenNames.has(label)) return
@@ -246,21 +245,22 @@ export function usePaymentColumns({
             />
           )
 
-          if (!isUser && debtor && isFirstOccurrence && debtor.totalDebt > 1) {
-            return (
-              <Badge
-                count={formatDebt(debtor.totalDebt)}
-                title=""
-                color={getDebtorTooltipColor(debtor)}
-                overflowCount={Infinity}
-                style={{ cursor: 'pointer' }}
-                size="small"
-              >
-                {companyLabel}
-              </Badge>
-            )
-          }
-          return companyLabel
+          const hasDebt = Boolean(
+            !isUser && debtor && isFirstOccurrence && debtor.totalDebt > 1
+          )
+
+          return (
+            <Badge
+              count={hasDebt && debtor ? formatDebt(debtor.totalDebt) : 0}
+              title=""
+              color={debtor ? getDebtorTooltipColor(debtor) : '#d9d9d9'}
+              overflowCount={Infinity}
+              style={{ cursor: 'pointer' }}
+              size="small"
+            >
+              {companyLabel}
+            </Badge>
+          )
         },
         hidden: isDomainAdmin
           ? isSingleCompanyByData && !filters?.domain
