@@ -185,7 +185,7 @@ const AddressesSelect: React.FC<AddressesSelectProps> = ({
           placeholder="Пошук адреси"
           status={isStreetsError && 'error'}
           loading={isStreetsLoading}
-          disabled={isStreetsLoading || streets.length === 1 || !domainId}
+          disabled={isStreetsLoading || !domainId}
           dropdownStyle={dropdownStyle}
           allowClear
           showSearch
