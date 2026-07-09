@@ -38,7 +38,15 @@ import {
   DOMAIN_TYPE_TEMPLATE_CATEGORY_OPTIONS,
 } from '@utils/domain/domain-type-template-categories'
 
-export const CustomServicesTable: React.FC = () => {
+export interface CustomServicesTableProps {
+  domains?: any[]
+  isDomainAdmin?: boolean
+}
+
+export const CustomServicesTable: React.FC<CustomServicesTableProps> = ({
+  domains: passedDomains,
+  isDomainAdmin: passedIsDomainAdmin,
+}) => {
   const { data: user } = useGetCurrentUserQuery()
   const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
   const isDomainAdmin = user?.roles?.includes(Roles.DOMAIN_ADMIN)
