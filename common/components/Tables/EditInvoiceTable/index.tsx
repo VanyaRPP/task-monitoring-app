@@ -148,7 +148,7 @@ export const EditInvoicesTable_unstable: React.FC<EditInvoicesTableProps> = ({
             render: (_: any, field: { name: number }) => (
               <MinusCircleOutlined
                 onClick={() => !disabled && remove(field.name)}
-                style={{ opacity: disabled ? 0.5 : 1 }}
+                style={{ opacity: disabled ? 0.5 : 1, fontSize: 16 }}
               />
             ),
             hidden: !editable,
