@@ -1,4 +1,12 @@
-import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  FC,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  ReactNode,
+} from 'react'
 import s from './style.module.scss'
 
 const FRAME_COUNT = 193
@@ -82,12 +90,14 @@ type Props = {
   scrollHeight?: number
   introTitle?: string
   introSubtitle?: string
+  action?: ReactNode
 }
 
 const ScrollFactoryAnimation: FC<Props> = ({
   scrollHeight = 350,
   introTitle,
   introSubtitle,
+  action,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -291,6 +301,7 @@ const ScrollFactoryAnimation: FC<Props> = ({
             конвеєр — від імпорту банківських даних до доставки готових інвойсів
             вашим клієнтам.
           </p>
+          {action}
         </div>
 
         <div className={s.rightContent}>
