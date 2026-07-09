@@ -26,7 +26,7 @@ export function useResolveMonthServiceId() {
         serviceApi.endpoints.getAllServices.initiate(
           {
             domainId: domain,
-            streetId: street,
+            streetId: street || undefined,
             year,
             month,
             limit: 1,
