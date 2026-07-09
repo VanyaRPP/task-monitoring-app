@@ -2,6 +2,7 @@ import React from 'react'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import TransactionDrawer from './TransactionsDrawer'
+import { Operations } from '@utils/constants'
 
 let lastPaymentData: any = null
 
@@ -464,7 +465,40 @@ describe('transactionPayload passed to AddPaymentModal', () => {
     )
   })
 })
+describe('Default operation type for AddPaymentModal (Send from Bank)', () => {
+  it('passes type=Credit when opening the modal via manual Send', async () => {
+    mockUseGetAllRealEstateQuery.mockReturnValue({
+      data: { data: [makeCompany({ account: 'NO_MATCH' })] },
+    })
+    renderDrawer(makeTransaction({ AUT_CNTR_ACC: 'NO_MATCH_ACC' }))
 
+    await userEvent.click(screen.getByRole('combobox'))
+    await userEvent.click(await screen.findByText('ТОВ Тест'))
+    await userEvent.click(screen.getByRole('button', { name: /Send/i }))
+
+    await waitFor(() => {
+      expect(screen.getByTestId('add-payment-modal')).toBeInTheDocument()
+    })
+
+    expect(lastPaymentData?.type).toBe(Operations.Credit) // see note below
+  })
+
+  it('passes type=Credit when opening the modal via "Швидке створення" (matched account)', async () => {
+    renderDrawer()
+
+    await waitFor(() => expect(getDropdownSendButton()).toBeTruthy())
+    const sendBtn = getDropdownSendButton()
+    if (!sendBtn) throw new Error('Send button not found')
+    await userEvent.click(sendBtn)
+    await userEvent.click(await screen.findByText('Швидке створення'))
+
+    await waitFor(() => {
+      expect(screen.getByTestId('add-payment-modal')).toBeInTheDocument()
+    })
+
+    expect(lastPaymentData?.type).toBe(Operations.Credit) // see note below
+  })
+})
 describe('saveAccountToCompany after successful payment creation', () => {
   it('calls editRealEstate with account when company was manually selected and success=true', async () => {
     mockUseGetAllRealEstateQuery.mockReturnValue({

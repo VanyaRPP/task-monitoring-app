@@ -24,6 +24,8 @@ import {
   IPayment,
   TemplateScopeTarget,
 } from '@common/api/paymentApi/payment.api.types'
+import { useAddStreetMutation } from '@common/api/streetApi/street.api'
+import { makeNewEntityValue } from '@utils/inlineCreate'
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
 import PriceList from '@common/components/Forms/AddPaymentForm/PriceList'
@@ -85,6 +87,7 @@ export interface IPaymentContext {
   setShowQuantityInPreview: (value: boolean) => void
   invoiceLang: 'en' | 'uk'
   setInvoiceLang: (lang: 'en' | 'uk') => void
+  registerTemplateSaver: (fn: (() => Promise<string | null>) | null) => void
 }
 
 export const PaymentContext = createContext<IPaymentContext>({
@@ -102,6 +105,7 @@ export const PaymentContext = createContext<IPaymentContext>({
   setShowQuantityInPreview: () => void 0,
   invoiceLang: 'uk',
   setInvoiceLang: () => void 0,
+  registerTemplateSaver: () => void 0,
 })
 
 export const usePaymentContext = () =>
@@ -155,6 +159,15 @@ const AddPaymentModal: FC<Props> = ({
   const [templateScope, setTemplateScope] = useState<
     TemplateScopeTarget | undefined
   >()
+
+  // Set by the "Шаблон" editor while mounted; called on save (see handleSubmit).
+  const templateSaverRef = useRef<(() => Promise<string | null>) | null>(null)
+  const registerTemplateSaver = useCallback(
+    (fn: (() => Promise<string | null>) | null) => {
+      templateSaverRef.current = fn
+    },
+    []
+  )
 
   const [showQuantityInPreview, setShowQuantityInPreviewState] = useState(false)
   const [activeTabKey, setActiveTabKey] = useState(preview ? '2' : '1')
@@ -304,6 +317,7 @@ const AddPaymentModal: FC<Props> = ({
   const [createCustomService] = useCreateCustomServiceMutation()
   const [addDomain] = useAddDomainMutation()
   const [addRealEstate] = useAddRealEstateMutation()
+  const [addStreet] = useAddStreetMutation()
   const { data: typeTemplates = [] } = useGetDomainTypeTemplatesQuery(
     undefined,
     { skip: edit || preview }
@@ -556,7 +570,9 @@ const AddPaymentModal: FC<Props> = ({
   // domain promotes the user to its admin (server adds them to adminEmails), so
   // the company create that follows is authorized.
   const materializeQuickEntities = useCallback(
-    async (formData: any): Promise<{ domain: string; company: string }> => {
+    async (
+      formData: any
+    ): Promise<{ domain: string; company: string; street: string }> => {
       let nextDomainId = formData.domain
       let nextCompanyId = formData.company
 
@@ -593,8 +609,24 @@ const AddPaymentModal: FC<Props> = ({
         nextCompanyId = created.data._id
         form.setFieldValue('company', nextCompanyId)
       }
-
-      return { domain: nextDomainId, company: nextCompanyId }
+      let nextStreetId = formData.street
+      if (isNewEntityValue(nextStreetId)) {
+        const streetData = getNewEntityName(nextStreetId)
+        // формат: "address::city"
+        const [address, city] = streetData.split('::')
+        const created = await addStreet({
+          address: address?.trim() || streetData,
+          city: city?.trim() || '',
+          domain: nextDomainId,
+        } as any).unwrap()
+        nextStreetId = (created as any).data?._id ?? (created as any)._id
+        form.setFieldValue('street', nextStreetId)
+      }
+      return {
+        domain: nextDomainId,
+        company: nextCompanyId,
+        street: nextStreetId,
+      }
     },
     [addDomain, addRealEstate, form, typeTemplates]
   )
@@ -602,7 +634,7 @@ const AddPaymentModal: FC<Props> = ({
   const handleSubmit = async () => {
     const formData = await form.validateFields()
 
-    let materialized: { domain: string; company: string }
+    let materialized: { domain: string; company: string; street: string }
     try {
       materialized = await materializeQuickEntities(formData)
     } catch (e) {
@@ -612,9 +644,23 @@ const AddPaymentModal: FC<Props> = ({
     }
     formData.domain = materialized.domain
     formData.company = materialized.company
+    formData.street = materialized.street
 
     const monthServiceId = await prepareMonthService(formData)
     if (monthServiceId === null) return
+
+    let effectiveTemplate = template
+    try {
+      const savedTemplateId = await templateSaverRef.current?.()
+      if (savedTemplateId) {
+        effectiveTemplate = savedTemplateId as TemplateKey
+        setTemplate(effectiveTemplate)
+      }
+    } catch (e) {
+      console.error('template auto-save failed', e)
+      message.error('Не вдалося зберегти шаблон')
+      return
+    }
 
     const payment = buildPaymentPayload({
       formData,
@@ -622,7 +668,7 @@ const AddPaymentModal: FC<Props> = ({
       provider,
       reciever,
       transaction,
-      template,
+      template: effectiveTemplate,
       invoiceLang,
     })
 
@@ -707,6 +753,7 @@ const AddPaymentModal: FC<Props> = ({
         setShowQuantityInPreview,
         invoiceLang,
         setInvoiceLang,
+        registerTemplateSaver,
       }}
     >
       <Modal

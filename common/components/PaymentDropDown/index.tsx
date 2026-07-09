@@ -7,7 +7,7 @@ import {
   MoreOutlined,
   DownloadOutlined,
 } from '@ant-design/icons'
-import { Button, Dropdown, MenuProps, Modal, message } from 'antd'
+import { Button, Dropdown, MenuProps, message, App } from 'antd'
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { Operations } from '@utils/constants'
 import { dateToDefaultFormat } from '@assets/features/formatDate'
@@ -16,6 +16,8 @@ import HeadlessReceiptRenderer from '@components/Forms/GroupedReceiptForm/Headle
 import { saveAs } from 'file-saver'
 import { useState } from 'react'
 import dayjs from 'dayjs'
+
+import s from './PaymentDropDown.module.scss'
 
 interface Props {
   payment: IExtendedPayment
@@ -147,6 +149,8 @@ const PaymentDropdown: React.FC<Props> = ({
     ...adminDeleteItems,
   ]
 
+  const { modal } = App.useApp()
+
   const handleMenuClick: MenuProps['onClick'] = ({ key }) => {
     if (key === 'view') onView(payment)
     if (key === 'edit') onEdit(payment)
@@ -154,7 +158,7 @@ const PaymentDropdown: React.FC<Props> = ({
     if (key === 'duplicate') onDuplicate(payment)
     if (key === 'download') handleDownloadPdf()
     if (key === 'delete') {
-      Modal.confirm({
+      modal.confirm({
         title: `Видалити оплату від ${dateToDefaultFormat(
           payment.invoiceCreationDate as unknown as string
         )}?`,
@@ -162,6 +166,11 @@ const PaymentDropdown: React.FC<Props> = ({
         cancelText: 'Відміна',
         okType: 'danger',
         onOk: () => onDelete(payment._id),
+
+        width: 440,
+        okButtonProps: {
+          className: s.customOkBtn,
+        },
       })
     }
   }

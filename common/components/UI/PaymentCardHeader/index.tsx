@@ -579,6 +579,11 @@ const ColumnSelect: React.FC<ColumnSelectProps> = ({
 }) => {
   const [selected, setSelected] = useState<string[]>([])
   const [filterByAvailable, setFilterByAvailable] = useState(true)
+  const isInitialized = React.useRef(false)
+
+  const customIds = useMemo(() => {
+    return new Set((visibleCustomServices ?? []).map((s) => String(s._id)))
+  }, [visibleCustomServices])
 
   const filteredEntries = useMemo(() => {
     return Object.entries(ServiceName).filter(([value]) => {
@@ -587,14 +592,18 @@ const ColumnSelect: React.FC<ColumnSelectProps> = ({
     })
   }, [filterByAvailable, allowedServices])
 
-  const customEntries = useMemo(
-    () =>
-      (visibleCustomServices ?? []).map((s) => ({
-        value: s._id,
-        label: s.name,
-      })),
-    [visibleCustomServices]
-  )
+  const customEntries = useMemo(() => {
+    const entries = (visibleCustomServices ?? []).map((s) => ({
+      value: String(s._id),
+      label: s.name,
+    }))
+
+    if (!filterByAvailable || !allowedServices) return entries
+
+    return entries.filter(
+      (e) => allowedServices.has(e.value) || allowedServices.has('custom')
+    )
+  }, [filterByAvailable, allowedServices, visibleCustomServices])
 
   const handleSelect = (value: string[]) => {
     setSelected(value)
@@ -619,61 +628,49 @@ const ColumnSelect: React.FC<ColumnSelectProps> = ({
   }
 
   useEffect(() => {
-    if (filterByAvailable && allowedServices) {
-      const filtered = selected.filter((s) => allowedServices.has(s))
-      if (filtered.length !== selected.length) {
-        setSelected(filtered)
-        localStorage.setItem('payments_columns', JSON.stringify(filtered))
-      }
-    }
-  }, [filterByAvailable, allowedServices, selected])
+    if (!allowedServices) return
 
-  useEffect(() => {
-    if (!allowedServices || !filterByAvailable) return
+    let saved = JSON.parse(localStorage.getItem('payments_columns') ?? '[]')
 
-    const builtIn = Object.entries(ServiceName)
-      .filter(([value]) => value !== 'custom' && allowedServices.has(value))
-      .map(([value]) => value)
-    const customs = (visibleCustomServices ?? [])
-      .map((s) => String(s._id))
-      .filter((id) => allowedServices.has(id))
-    const allAvailable = [...builtIn, ...customs]
-
-    setSelected(allAvailable)
-    localStorage.setItem('payments_columns', JSON.stringify(allAvailable))
-  }, [allowedServices, filterByAvailable, visibleCustomServices])
-
-  useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem('payments_columns') ?? '[]')
     if (!saved.includes('placingPrice')) {
       saved.push('placingPrice')
-      localStorage.setItem('payments_columns', JSON.stringify(saved))
     }
+
+    if (!isInitialized.current) {
+      if (saved.length <= 1) {
+        const builtIn = Object.entries(ServiceName)
+          .filter(([value]) => value !== 'custom' && allowedServices.has(value))
+          .map(([value]) => value)
+        const customs = (visibleCustomServices ?? [])
+          .map((s) => String(s._id))
+          .filter(
+            (id) => allowedServices.has(id) || allowedServices.has('custom')
+          )
+
+        saved = [...new Set([...saved, ...builtIn, ...customs])]
+      }
+      isInitialized.current = true
+    } else if (filterByAvailable) {
+      saved = saved.filter((s: string) => {
+        if (allowedServices.has(s) || s === 'placingPrice' || s === 'custom') {
+          return true
+        }
+        if (customIds.has(s) && allowedServices.has('custom')) {
+          return true
+        }
+        return false
+      })
+    }
+
     setSelected(saved)
-  }, [])
-
-  useEffect(() => {
-    if (!allowedServices || !filterByAvailable) return
-
-    const saved = JSON.parse(localStorage.getItem('payments_columns') ?? '[]')
-
-    if (saved.length > 0) return
-
-    const builtIn = Object.entries(ServiceName)
-      .filter(([value]) => value !== 'custom' && allowedServices.has(value))
-      .map(([value]) => value)
-    const customs = (visibleCustomServices ?? [])
-      .map((s) => String(s._id))
-      .filter((id) => allowedServices.has(id))
-    const allAvailable = [...builtIn, ...customs]
-
-    setSelected(allAvailable)
-    localStorage.setItem('payments_columns', JSON.stringify(allAvailable))
-  }, [allowedServices, filterByAvailable, visibleCustomServices])
+    localStorage.setItem('payments_columns', JSON.stringify(saved))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allowedServices, filterByAvailable, visibleCustomServices, customIds])
 
   useEffect(() => {
     onSelect?.(selected)
-  }, [onSelect, selected])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selected])
 
   const allFiltered = [
     ...filteredEntries.map(([value]) => value),
@@ -687,20 +684,16 @@ const ColumnSelect: React.FC<ColumnSelectProps> = ({
   const options: SelectProps['options'] = [
     {
       label: (
-        <div>
+        <div onClick={(e) => e.stopPropagation()}>
           <Checkbox
             checked={filterByAvailable}
             onChange={(e) => setFilterByAvailable(e.target.checked)}
-            onClick={(e) => e.stopPropagation()}
           >
             <Typography.Text type="secondary">Доступні сервіси</Typography.Text>
           </Checkbox>
           <Divider style={{ margin: '4px 0' }} />
           <Checkbox
-            onClick={(e) => {
-              e.stopPropagation()
-              handleCheckAll()
-            }}
+            onChange={handleCheckAll}
             indeterminate={isIndeterminate}
             checked={isAllChecked}
           >

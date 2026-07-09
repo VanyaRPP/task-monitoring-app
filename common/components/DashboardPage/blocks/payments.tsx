@@ -216,6 +216,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     async (id: string) => {
       const removed = payments?.data?.find((p) => p._id === id)
       const response = await deletePaymentMutation(id)
+
       if ('data' in response) {
         if (removed) {
           patchDebtorsCache([
@@ -225,12 +226,33 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
             },
           ])
         }
+
+        dispatch(
+          setSelectedPayments(
+            selectedPayments.filter((p: IExtendedPayment) => p._id !== id)
+          )
+        )
+        dispatch(
+          setPaymentsDeleteItems(
+            paymentsDeleteItems.filter(
+              (item: PaymentDeleteItem) => item.id !== id
+            )
+          )
+        )
+
         message.success('Видалено!')
       } else {
         message.error('Помилка при видаленні рахунку')
       }
     },
-    [deletePaymentMutation, patchDebtorsCache, payments]
+    [
+      deletePaymentMutation,
+      patchDebtorsCache,
+      payments,
+      selectedPayments,
+      paymentsDeleteItems,
+      dispatch,
+    ]
   )
   const handleMarkPaid = useCallback(
     async (source: IExtendedPayment) => {

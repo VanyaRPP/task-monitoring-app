@@ -1,3 +1,5 @@
+import { useState } from 'react'
+import { IInvoiceTemplate } from '@common/api/invoiceTemplateApi/invoiceTemplate.api.types'
 import { usePaymentContext } from '@components/AddPaymentModal'
 import { TemplateKey } from '@components/AddPaymentModal/resolveTemplate'
 import InvoiceTemplateEditor from '@components/Forms/InvoiceTemplateEditor'
@@ -13,9 +15,21 @@ import s from './style.module.scss'
  * is not mounted in preview), so the read-only "Перегляд" tab stays untouched.
  */
 const InvoiceTemplateTab = () => {
-  const { form, template, setTemplate, company, payment, invoiceLang } =
-    usePaymentContext()
+  const {
+    form,
+    template,
+    setTemplate,
+    company,
+    payment,
+    invoiceLang,
+    registerTemplateSaver,
+  } = usePaymentContext()
   const liveInvoice = Form.useWatch('invoice', form)
+
+  // Holds the just-created template so the editor remount resolves its layout
+  // immediately — without it, the create → refetch gap lets the editor fall
+  // back to the classic base after "Зберегти → Новий".
+  const [justSaved, setJustSaved] = useState<IInvoiceTemplate | null>(null)
 
   const data = payment
     ? { ...payment, invoice: liveInvoice ?? payment.invoice }
@@ -97,7 +111,12 @@ const InvoiceTemplateTab = () => {
       <InvoiceTemplateEditor
         key={template}
         domainId={domainId}
-        existingTemplate={isCustomTemplate ? currentCustomTemplate : null}
+        existingTemplate={
+          isCustomTemplate
+            ? (currentCustomTemplate ??
+              (justSaved?._id === template ? justSaved : null))
+            : null
+        }
         baseTemplateKey={baseKey}
         baseProviderDescription={baseProviderDescription}
         baseReceiverDescription={baseReceiverDescription}
@@ -105,7 +124,12 @@ const InvoiceTemplateTab = () => {
         contextCompany={company}
         previewLang={invoiceLang}
         defaultName={`Copy - ${currentLabel}`}
-        onSaved={(tpl) => setTemplate(tpl._id as TemplateKey)}
+        onSaved={(tpl) => {
+          setJustSaved(tpl)
+          setTemplate(tpl._id as TemplateKey)
+        }}
+        registerSaver={registerTemplateSaver}
+        showBaseSelector={false}
       />
     </div>
   )

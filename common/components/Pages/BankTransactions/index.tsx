@@ -92,7 +92,7 @@ const BankTransactions = () => {
           onTabChange={onTabChange}
         >
           {USE_MOCK ? (
-            <MockDomainBankTab />
+            <MockDomainBankTab domainId={activeDomainId || tabList[0].key} />
           ) : activeDomainId ? (
             contentList[activeDomainId]
           ) : null}

@@ -90,11 +90,11 @@ export const EditInvoicesTable_unstable: React.FC<EditInvoicesTableProps> = ({
           {
             title: 'Назва',
             width: 400,
-            render: (_: any, { name }: { name: number }) => (
+            render: (_: any, field: { name: number }) => (
               <Name
                 form={form}
-                name={name}
-                record={invoices[name]}
+                name={field.name}
+                record={form.getFieldValue(['invoice', field.name])}
                 editable={editable}
                 disabled={disabled}
               />
@@ -103,11 +103,11 @@ export const EditInvoicesTable_unstable: React.FC<EditInvoicesTableProps> = ({
           {
             title: 'Кількість',
             width: 250,
-            render: (_: any, { name }: { name: number }) => (
+            render: (_: any, field: { name: number }) => (
               <Amount
                 form={form}
-                name={name}
-                record={invoices[name]}
+                name={field.name}
+                record={form.getFieldValue(['invoice', field.name])}
                 editable={editable}
                 disabled={disabled}
               />
@@ -120,11 +120,11 @@ export const EditInvoicesTable_unstable: React.FC<EditInvoicesTableProps> = ({
                 : ''
             }`,
             width: 250,
-            render: (_: any, { name }: { name: number }) => (
+            render: (_: any, field: { name: number }) => (
               <Price
                 form={form}
-                name={name}
-                record={invoices[name]}
+                name={field.name}
+                record={form.getFieldValue(['invoice', field.name])}
                 editable={editable}
                 disabled={disabled}
               />
@@ -133,11 +133,11 @@ export const EditInvoicesTable_unstable: React.FC<EditInvoicesTableProps> = ({
           {
             title: 'Сума',
             width: 200,
-            render: (_: any, { name }: { name: number }) => (
+            render: (_: any, field: { name: number }) => (
               <Sum
                 form={form}
-                name={name}
-                record={invoices[name]}
+                name={field.name}
+                record={form.getFieldValue(['invoice', field.name])}
                 editable={editable}
                 disabled={disabled}
               />
@@ -145,9 +145,9 @@ export const EditInvoicesTable_unstable: React.FC<EditInvoicesTableProps> = ({
           },
           {
             width: 50,
-            render: (_: any, record: { name: number }) => (
+            render: (_: any, field: { name: number }) => (
               <MinusCircleOutlined
-                onClick={() => !disabled && remove(record.name)}
+                onClick={() => !disabled && remove(field.name)}
                 style={{ opacity: disabled ? 0.5 : 1 }}
               />
             ),
@@ -157,7 +157,7 @@ export const EditInvoicesTable_unstable: React.FC<EditInvoicesTableProps> = ({
 
         return (
           <Table
-            rowKey="name"
+            rowKey={(field) => field.key}
             loading={loading}
             size="small"
             dataSource={fields}
@@ -226,8 +226,6 @@ export const InvoiceSelector: React.FC<{
       ? String(domainId)
       : undefined
 
-  // A brand-new (not-yet-created) provider has no catalog to fetch, but the user
-  // still needs the "Власне" option to add custom lines to the first invoice.
   const isNewDomain = isNewEntityValue(rawDomainId)
   const catalogDomainId = isNewDomain ? undefined : rawDomainId
   const hasDomainContext = !!rawDomainId
@@ -287,8 +285,8 @@ export const InvoiceSelector: React.FC<{
           ? 'Додати поле з каталогу домену...'
           : 'Немає домену в сервісі — каталог недоступний'
       }
-      onSelect={handleSelect}
-      value={undefined}
+      onChange={handleSelect}
+      value={null}
       options={options}
       loading={!!catalogDomainId && isLoading}
       disabled={!hasDomainContext || (!!catalogDomainId && isLoading)}

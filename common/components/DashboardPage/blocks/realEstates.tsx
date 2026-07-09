@@ -7,7 +7,7 @@ import TableCard from '@components/UI/TableCard'
 import { AppRoutes } from '@utils/constants'
 import { isAdminCheck } from '@utils/helpers'
 import { useRouter } from 'next/router'
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useMemo, useState } from 'react'
 import { useGetCustomServicesQuery } from '@common/api/customServicesApi/customServices.api'
 
 export const CompanyPageContext = createContext<{
@@ -37,6 +37,15 @@ const RealEstateBlock: React.FC<Props> = ({
   const [realEstateActions, setRealEstateActions] = useState({ edit: false })
 
   const { data: customServicesData } = useGetCustomServicesQuery({})
+
+  const domainFilteredCustomServices = useMemo(() => {
+    if (!customServicesData?.data) return []
+    const domainIds = filters?.domain as string[] | null | undefined
+    if (!domainIds?.length) return customServicesData.data
+    return customServicesData.data.filter((cs) =>
+      domainIds.some((id) => String(cs.domain) === String(id))
+    )
+  }, [customServicesData?.data, filters?.domain])
 
   const {
     data: realEstates,
@@ -94,7 +103,7 @@ const RealEstateBlock: React.FC<Props> = ({
         realEstateActions={realEstateActions}
         setRealEstateActions={setRealEstateActions}
         isArchive={isArchive}
-        customServices={customServicesData?.data || []}
+        customServices={domainFilteredCustomServices}
       />
     </TableCard>
   )
