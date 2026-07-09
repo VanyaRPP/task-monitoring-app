@@ -7,7 +7,6 @@ jest.mock('@common/api/realestateApi/realestate.api', () => ({
 }))
 jest.mock('@common/api/debtorsApi/debtors.api', () => ({
   debtorsApi: { util: { invalidateTags: jest.fn() } },
-  invalidateDebtorsOnSuccess: jest.fn(),
 }))
 
 describe('paymentApi endpoints', () => {

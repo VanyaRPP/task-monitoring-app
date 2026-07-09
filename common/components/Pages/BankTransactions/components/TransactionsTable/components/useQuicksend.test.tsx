@@ -136,6 +136,60 @@ describe('useQuickSend', () => {
     )
   })
 
+  it('normalises the service date to noon UTC on the 1st of the picked month', async () => {
+    // Regression: startOf('month').toDate() shifted May -> Apr 30 21:00 UTC in
+    // +NN timezones. The service date must land on the 1st regardless of TZ.
+    const placeholderId = buildMonthServicePlaceholder(dayjs('2026-05-03'))
+
+    const { result } = renderHook(() =>
+      useQuickSend({
+        transaction,
+        domain,
+        selectedCompanyId: 'company_1',
+        relatedCompanies,
+      })
+    )
+
+    await act(async () => {
+      await result.current.handleQuickSend({
+        _id: placeholderId,
+        date: '2026-05-03',
+      } as any)
+    })
+
+    const createdDate = mockAddService.mock.calls[0][0].date as Date
+    expect(createdDate.getUTCFullYear()).toBe(2026)
+    expect(createdDate.getUTCMonth()).toBe(4) // May (0-indexed)
+    expect(createdDate.getUTCDate()).toBe(1)
+  })
+
+  it('omits street from both service and payment payloads when the company has no street', async () => {
+    const { getStreetId } = require('./quickSendHelpers')
+    ;(getStreetId as jest.Mock).mockReturnValue(undefined)
+    const placeholderId = buildMonthServicePlaceholder(dayjs('2026-05-03'))
+
+    const { result } = renderHook(() =>
+      useQuickSend({
+        transaction,
+        domain,
+        selectedCompanyId: 'company_1',
+        relatedCompanies,
+      })
+    )
+
+    await act(async () => {
+      await result.current.handleQuickSend({
+        _id: placeholderId,
+        date: '2026-05-03',
+      } as any)
+    })
+
+    // '' would fail the backend ObjectId cast — the key must be absent entirely
+    // on both the service create and the payment create.
+    expect(mockAddService.mock.calls[0][0]).not.toHaveProperty('street')
+    expect(mockAddPayment.mock.calls[0][0]).not.toHaveProperty('street')
+  })
+
   it('uses transaction DAT_OD as invoiceCreationDate when available', async () => {
     const customTransaction = { ...transaction, DAT_OD: '03.05.2026' } as any
     const { result } = renderHook(() =>

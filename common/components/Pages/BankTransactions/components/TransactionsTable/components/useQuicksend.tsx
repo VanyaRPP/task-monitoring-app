@@ -57,8 +57,14 @@ export const useQuickSend = ({
       const monthStart = parseMonthServicePlaceholder(rawMonthServiceId)
       const created = await addService({
         domain: domain._id,
-        street: streetId ?? '',
-        date: monthStart.startOf('month').toDate(),
+        // street is optional; sending '' fails the ObjectId cast on the backend,
+        // so omit it entirely when the company has no street.
+        ...(streetId ? { street: streetId } : {}),
+        // noon UTC on the 1st so no timezone offset can push the service into
+        // the neighbouring month (matches AddServiceModal's normalisation).
+        date: new Date(
+          Date.UTC(monthStart.year(), monthStart.month(), 1, 12, 0, 0)
+        ),
         rentPrice: 0,
         electricityPrice: 0,
         waterPrice: 0,
@@ -115,11 +121,11 @@ export const useQuickSend = ({
       try {
         if (!company) throw new Error('Company not found')
 
-        const { provider, reciever } = getPaymentProviderAndReciever({
-          company,
-          domain,
-          operation: Operations.Credit,
-        })
+        // getPaymentProviderAndReciever takes the company directly (same as the
+        // standard AddPaymentModal flow). Passing a { company, domain } wrapper
+        // left companyName/adminEmails undefined -> an empty reciever on the
+        // saved invoice.
+        const { provider, reciever } = getPaymentProviderAndReciever(company)
 
         const monthServiceId = await resolveMonthServiceId(service._id)
         const invoiceCreationDate = transaction.DAT_OD
@@ -131,7 +137,9 @@ export const useQuickSend = ({
           monthService: monthServiceId,
           domain: domain._id,
           company: selectedCompanyId,
-          street: getStreetId(company) ?? '',
+          // street is optional; sending '' fails the ObjectId cast on the
+          // backend, so omit it when the company has no street.
+          ...(streetId ? { street: streetId } : {}),
           invoiceNumber: nextInvoiceNumber,
           invoice: [],
           generalSum: parseFloat(transaction.SUM as string),
@@ -156,7 +164,17 @@ export const useQuickSend = ({
         setTimeout(() => channel.close(), 100)
       } catch (error) {
         console.error('Quick send error:', error)
-        message.error('Помилка при створенні рахунку')
+        const serverMsg =
+          (error as { data?: { message?: string; error?: string } })?.data
+            ?.message ??
+          (error as { data?: { message?: string; error?: string } })?.data
+            ?.error ??
+          (error as Error)?.message
+        message.error(
+          serverMsg
+            ? `Помилка при створенні рахунку: ${serverMsg}`
+            : 'Помилка при створенні рахунку'
+        )
       } finally {
         setLoading(false)
       }
@@ -171,6 +189,7 @@ export const useQuickSend = ({
       onSuccess,
       nextInvoiceNumber,
       resolveMonthServiceId,
+      streetId,
     ]
   )
 
