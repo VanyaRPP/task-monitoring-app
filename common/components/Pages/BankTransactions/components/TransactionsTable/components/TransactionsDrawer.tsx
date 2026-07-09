@@ -19,6 +19,7 @@ import {
   useEditRealEstateMutation,
 } from '@common/api/realestateApi/realestate.api'
 import { useQuickSend } from './useQuicksend'
+import { Operations } from '@utils/constants'
 import { buildTransactionPayload } from './quickSendHelpers'
 import styles from './style.module.scss'
 
@@ -216,6 +217,7 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
             company: selectedCompany,
             domain: domain,
             transaction: transactionPayload,
+            type: Operations.Credit,
           }}
           paymentActions={{
             edit: false,
