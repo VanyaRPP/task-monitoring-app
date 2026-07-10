@@ -26,6 +26,7 @@ const PaymentCardLabel = ({
   isAdmin,
   allowedServices,
   visibleCustomServices,
+  invoiceCustomServices,
 }: any) => {
   const router = useRouter()
   const { pathname } = router
@@ -64,6 +65,7 @@ const PaymentCardLabel = ({
               onSelect={onColumnsSelect}
               allowedServices={allowedServices}
               visibleCustomServices={visibleCustomServices}
+              invoiceCustomServices={invoiceCustomServices}
             />
             <PaymentCascader
               className={styles.select}
