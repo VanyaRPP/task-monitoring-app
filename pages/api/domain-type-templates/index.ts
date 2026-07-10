@@ -58,14 +58,15 @@ async function domainTypeTemplatesHandler(
 
   switch (req.method) {
     case 'GET': {
-      if (!isAdmin) {
-        return res
-          .status(403)
-          .json({ success: false, message: 'Немає доступу' })
-      }
+      // Read-only catalog of service-type templates. Any authenticated user may
+      // read it (e.g. a brand-new user picking a provider type in the invoice
+      // quick-create, before they become a DomainAdmin). Mutations stay
+      // admin-only below.
       const includeArchived = req.query.includeArchived === 'true'
       const filter = includeArchived ? {} : { archivedAt: null }
-      const list = await DomainTypeTemplate.find(filter).sort({ name: 1 }).lean()
+      const list = await DomainTypeTemplate.find(filter)
+        .sort({ name: 1 })
+        .lean()
       return res.status(200).json({ success: true, data: list })
     }
 

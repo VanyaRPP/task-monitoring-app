@@ -19,7 +19,7 @@ describe('Domains API - GET', () => {
     await Domain.deleteMany({})
     await RealEstate.deleteMany({})
     await Street.deleteMany({})
-    
+
     await Street.insertMany(streets)
     await Domain.insertMany(domains)
     await RealEstate.insertMany(realEstates)
@@ -28,17 +28,17 @@ describe('Domains API - GET', () => {
   const clean = (obj: any) => JSON.parse(JSON.stringify(obj))
 
   const getExpectedDomains = (filterFn = (d: any) => true) => {
-    return domains.filter(filterFn).map(domain => ({
+    return domains.filter(filterFn).map((domain) => ({
       ...domain,
       _id: domain._id.toString(),
       __v: 0,
-      streets: domain.streets.map(sId => {
-        const street = streets.find(s => s._id.toString() === sId.toString())
+      streets: domain.streets.map((sId) => {
+        const street = streets.find((s) => s._id.toString() === sId.toString())
         return street ? { ...street, _id: street._id.toString(), __v: 0 } : sId
       }),
       customServices: domain.customServices || [],
       domainBankToken: domain.domainBankToken || [],
-      domainServices: domain.domainServices || []
+      domainServices: domain.domainServices || [],
     }))
   }
 
@@ -105,7 +105,8 @@ describe('Domains API - GET', () => {
   })
 
   it('load domains as User - success', async () => {
-    await mockLoginAs(users.user)
+    // user2 administers no domain, so a plain User sees an empty list.
+    await mockLoginAs(users.user2)
 
     const mockReq = {
       method: 'GET',
@@ -139,7 +140,9 @@ describe('Domains API - GET', () => {
 
     expect(mockRes.status).toHaveBeenCalledWith(200)
     const received = clean(mockRes.json.mock.lastCall[0].data)
-    const expected = getExpectedDomains(d => d._id.toString() === domains[0]._id.toString())
+    const expected = getExpectedDomains(
+      (d) => d._id.toString() === domains[0]._id.toString()
+    )
     expect(received).toEqual(clean(expected))
   })
 
@@ -159,7 +162,9 @@ describe('Domains API - GET', () => {
 
     expect(mockRes.status).toHaveBeenCalledWith(200)
     const received = clean(mockRes.json.mock.lastCall[0].data)
-    const expected = getExpectedDomains(d => d._id.toString() === domains[0]._id.toString())
+    const expected = getExpectedDomains(
+      (d) => d._id.toString() === domains[0]._id.toString()
+    )
     expect(received).toEqual(clean(expected))
   })
 

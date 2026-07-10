@@ -15,7 +15,23 @@ jest.mock('@modules/models/CustomService', () => ({
   },
 }))
 
+jest.mock('@modules/models/Domain', () => ({
+  __esModule: true,
+  default: {
+    updateOne: jest.fn(),
+  },
+}))
+
+jest.mock('@modules/models/RealEstate', () => ({
+  __esModule: true,
+  default: {
+    updateMany: jest.fn(),
+  },
+}))
+
 import CustomService from '@modules/models/CustomService'
+import Domain from '@modules/models/Domain'
+import RealEstate from '@modules/models/RealEstate'
 
 jest.mock('@utils/getCurrentUser', () => ({
   getCurrentUser: jest.fn(),
@@ -37,6 +53,13 @@ beforeEach(() => {
     isGlobalAdmin: true,
     isDomainAdmin: false,
     isUser: false,
+  })
+  ;(Domain.updateOne as jest.Mock).mockResolvedValue({
+    acknowledged: true,
+    matchedCount: 1,
+  })
+  ;(RealEstate.updateMany as jest.Mock).mockResolvedValue({
+    acknowledged: true,
   })
 })
 
@@ -196,7 +219,8 @@ describe('GET /api/custom-services — per-domain filter', () => {
     expect(filter.$or).toBeDefined()
     expect(Array.isArray(filter.$or)).toBe(true)
     const ownedClause = filter.$or.find(
-      (clause: any) => clause.domain && !clause.domain.$in && !clause.domain.$exists
+      (clause: any) =>
+        clause.domain && !clause.domain.$in && !clause.domain.$exists
     )
     expect(ownedClause).toBeDefined()
     expect(String(ownedClause.domain)).toBe(VALID_DOMAIN)

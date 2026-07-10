@@ -1,5 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react'
 import {
+  CheckOutlined,
+  CopyOutlined,
   DeleteOutlined,
   DownloadOutlined,
   FilterOutlined,
@@ -7,19 +9,23 @@ import {
   SelectOutlined,
   ExportOutlined,
   InfoCircleOutlined,
-  UpOutlined,
   MenuOutlined,
+  ImportOutlined,
+  MoreOutlined,
+  ReloadOutlined,
 } from '@ant-design/icons'
 import { dateToDefaultFormat } from '@assets/features/formatDate'
 import {
   useDeleteMultiplePaymentsMutation,
-  useGeneratePdfMutation,
+  useHtmlToPdfZipMutation,
   useGenerateExcelMutation,
 } from '@common/api/paymentApi/payment.api'
+import HeadlessReceiptRenderer from '@components/Forms/GroupedReceiptForm/HeadlessReceiptRenderer'
+import dayjs from 'dayjs'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import AddPaymentModal from '@components/AddPaymentModal'
 import ImportInvoices from '@components/UI/PaymentCardHeader/ImportInvoices'
-import { AppRoutes, Roles, ServiceName } from '@utils/constants'
+import { AppRoutes, Operations, Roles, ServiceName } from '@utils/constants'
 import { isAdminCheck } from '@utils/helpers'
 import {
   Button,
@@ -30,21 +36,31 @@ import {
   Typography,
   message,
   Tooltip,
-  Collapse,
   Modal,
   Divider,
   theme,
   Drawer,
   Grid,
+  Dropdown,
+  MenuProps,
 } from 'antd'
 import { saveAs } from 'file-saver'
 import { useRouter } from 'next/router'
 import { shouldOpenModal } from '@utils/shouldOpenModal'
 import PaymentCardLabel from './PaymentCardLabel'
-import type { CollapseProps } from 'antd'
 import styles from './styles.module.scss'
+import ImportInvoicesModal from './ImportInvoices/ImportInvoicesModal'
+import {
+  resolvePreselectedCompany,
+  resolvePreselectedDomain,
+} from './preselect'
 const { useBreakpoint } = Grid
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
+import { useGetCustomServicesQuery } from '@common/api/customServicesApi/customServices.api'
+import {
+  ICustomServiceItem,
+  getVisibleServices,
+} from '@utils/servicesVisibility'
 
 export interface PaymentCardHeaderProps {
   onDeleteClick?: () => void
@@ -67,6 +83,10 @@ export interface PaymentCardHeaderProps {
   singleCompany?: string
   singleDomain?: string
   isDashboard?: boolean
+  onBulkMarkPaid?: (payments: IExtendedPayment[]) => void
+  onBulkDuplicate?: (payments: IExtendedPayment[]) => void
+  onRefresh?: () => void | Promise<unknown>
+  isRefreshing?: boolean
 }
 
 const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
@@ -89,14 +109,24 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
   singleCompany,
   singleDomain,
   isDashboard,
-  onDeleteClick
+  onDeleteClick,
+  onBulkMarkPaid,
+  onBulkDuplicate,
+  onRefresh,
+  isRefreshing,
 }) => {
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [drawerVisible, setDrawerVisible] = useState(false)
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false)
   const screens = useBreakpoint()
 
   const { data: currUser } = useGetCurrentUserQuery()
+  const { data: customServicesData } = useGetCustomServicesQuery({})
+  const allCustomServices = useMemo(
+    () => (customServicesData?.data ?? []) as ICustomServiceItem[],
+    [customServicesData?.data]
+  )
   const { pathname } = router
 
   const closeModal = () => {
@@ -108,8 +138,79 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
   const isAdmin = isAdminCheck(currUser?.roles)
   const [deletePayment] = useDeleteMultiplePaymentsMutation()
   const [generateExcel] = useGenerateExcelMutation()
-  const [generatePdf] = useGeneratePdfMutation()
+  const [htmlToPdfZip] = useHtmlToPdfZipMutation()
+  const [bulkPaymentsToRender, setBulkPaymentsToRender] = useState<
+    IExtendedPayment[]
+  >([])
+  const capturedHtmlMapRef = React.useRef<
+    Map<string, { html: string; fileName: string }>
+  >(new Map())
   const { token } = theme.useToken()
+
+  const buildBulkFileName = (payment: IExtendedPayment): string => {
+    const companyName = (payment as any)?.reciever?.companyName ?? 'invoice'
+    const datePrefix = dayjs((payment as any)?.invoiceCreationDate).isValid()
+      ? dayjs((payment as any)?.invoiceCreationDate).format('DDMMYY')
+      : ''
+    const slug = `${datePrefix}${(payment as any)?.invoiceNumber ?? ''}`
+    return `${companyName}-inv-${slug}`.trim()
+  }
+
+  const finalizeBulkPdf = async (
+    items: { html: string; fileName: string }[]
+  ) => {
+    try {
+      const response = await htmlToPdfZip({ items })
+      if ('data' in response) {
+        const { data } = response
+        if (data) {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          //@ts-ignore
+          const buffer = Buffer.from(data.buffer)
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          //@ts-ignore
+          const blob = new Blob([buffer], {
+            type: `application/${data.fileExtension}`,
+          })
+          saveAs(blob, `${data.fileName}.${data.fileExtension}`)
+        }
+      } else {
+        // eslint-disable-next-line no-console
+        console.error('htmlToPdfZip failed:', response.error)
+        const serverMsg = (response.error as { data?: { error?: string } })
+          ?.data?.error
+        message.error(
+          serverMsg
+            ? `PDF: ${serverMsg}`
+            : 'Сталася помилка під час генерації PDF'
+        )
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('htmlToPdfZip threw:', error)
+      message.error(
+        `PDF: ${(error as Error)?.message ?? 'несподівана помилка'}`
+      )
+    } finally {
+      capturedHtmlMapRef.current = new Map()
+      setBulkPaymentsToRender([])
+    }
+  }
+
+  const handleBulkCapture = (
+    paymentId: string,
+    fileName: string,
+    html: string
+  ) => {
+    capturedHtmlMapRef.current.set(paymentId, { html, fileName })
+    if (capturedHtmlMapRef.current.size === bulkPaymentsToRender.length) {
+      const items = bulkPaymentsToRender.map((p) => {
+        const cached = capturedHtmlMapRef.current.get(p._id)
+        return cached || { html: '', fileName: buildBulkFileName(p) }
+      })
+      finalizeBulkPdf(items)
+    }
+  }
 
   const handleExportExcel = async () => {
     try {
@@ -123,48 +224,50 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
     }
   }
 
- 
+  const handleGeneratePdf = () => {
+    if (!selectedPayments || selectedPayments.length === 0) return
+    capturedHtmlMapRef.current = new Map()
+    setBulkPaymentsToRender(selectedPayments as IExtendedPayment[])
+  }
 
-  const handleGeneratePdf = async () => {
+  const handleRefresh = async () => {
+    if (!onRefresh) return
+    const key = 'payments-refresh'
+    message.loading({ content: 'Оновлення даних...', key })
     try {
-      const response = await generatePdf({ payments: selectedPayments })
-      if ('data' in response) {
-        const { data } = response
-        if (data) {
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          //@ts-ignore
-          const buffer = Buffer.from(data.buffer)
-
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          //@ts-ignore
-          const blob = new Blob([buffer], {
-            type: `application/${data.fileExtension}`,
-          })
-
-          saveAs(blob, `${data.fileName}.${data.fileExtension}`)
-        }
-      } else {
-        message.error('Сталася помилка під час генерації PDF')
-      }
-    } catch (error) {
-      message.error('Сталася несподівана помилка під час генерації PDF')
+      await onRefresh()
+      message.success({ content: 'Дані оновлено', key })
+    } catch {
+      message.error({ content: 'Не вдалося оновити дані', key })
     }
   }
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
 
-  const selectedCompany =
-     useMemo(() => {
-    if (filters?.company?.length === 1) return filters.company[0]
-    if (realEstatesFilter?.length === 1) return realEstatesFilter[0].value
-    return undefined
-  }, [filters?.company, realEstatesFilter])
+  const menuActions: Record<string, () => void> = {
+    refresh: handleRefresh,
+    export: handleExportExcel,
+    import: () => setIsImportModalOpen(true),
+    invoices: () => router.push(AppRoutes.PAYMENT_BULK),
+    add: () => setIsModalOpen(true),
+    download: handleGeneratePdf,
+    delete: onDeleteClick,
+    bulkMarkPaid: () =>
+      onBulkMarkPaid?.(selectedPayments as IExtendedPayment[]),
+    bulkDuplicate: () =>
+      onBulkDuplicate?.(selectedPayments as IExtendedPayment[]),
+  }
 
-  const selectedDomain =
-  useMemo(() => {
-    if (filters?.domain?.length === 1) return filters.domain[0]
-    if (domainFilter?.length === 1) return domainFilter[0].value
-    return undefined
-  }, [filters?.domain, domainFilter])
+  const handleMenuClick: MenuProps['onClick'] = ({ key }) =>
+    menuActions[key]?.()
+
+  const selectedCompany = useMemo(
+    () => resolvePreselectedCompany(filters?.company, realEstatesFilter),
+    [filters?.company, realEstatesFilter]
+  )
+
+  const selectedDomain = useMemo(
+    () => resolvePreselectedDomain(filters?.domain, domainFilter),
+    [filters?.domain, domainFilter]
+  )
 
   const infoTooltip = useMemo(() => {
     const texts: string[] = []
@@ -173,16 +276,46 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
     return texts.join('\n')
   }, [singleDomain, singleCompany])
 
+  const canBulkMarkPaid = useMemo(
+    () =>
+      selectedPayments.length >= 1 &&
+      selectedPayments.every(
+        (payment: IExtendedPayment) => payment.type === Operations.Debit
+      ),
+    [selectedPayments]
+  )
+
   const allowedServices = useMemo(() => {
-  if (!payments?.data?.length) return undefined
-  const types = new Set<string>()
-  payments.data.forEach((payment: IExtendedPayment) => {
-    payment.invoice?.forEach((field) => {
-      if (field.type) types.add(field.type)
+    if (!payments?.data?.length) return undefined
+    const types = new Set<string>()
+    payments.data.forEach((payment: IExtendedPayment) => {
+      payment.invoice?.forEach((field) => {
+        if (field.type) types.add(field.type)
+        if (field.serviceId) types.add(String(field.serviceId))
+      })
     })
-  })
-  return types
-}, [payments])
+    return types
+  }, [payments])
+
+  const selectedDomainId = useMemo(
+    () => filters?.domain?.[0] ?? null,
+    [filters?.domain]
+  )
+  const { data: domainCustomServicesData } = useGetCustomServicesQuery(
+    { domainId: selectedDomainId },
+    { skip: !selectedDomainId }
+  )
+  const visibleCustomServices = useMemo(() => {
+    if (!selectedDomainId) {
+      return isGlobalAdmin ? allCustomServices : []
+    }
+    return (domainCustomServicesData?.data ?? []) as ICustomServiceItem[]
+  }, [
+    isGlobalAdmin,
+    selectedDomainId,
+    domainCustomServicesData,
+    allCustomServices,
+  ])
 
   const { preview, edit } = paymentActions
 
@@ -200,6 +333,7 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
             domainFilter={domainFilter}
             realEstatesFilter={realEstatesFilter}
             isAdmin={false}
+            visibleCustomServices={visibleCustomServices}
           />
         </div>
         {preview && currentPayment && (
@@ -213,120 +347,124 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
     )
   }
 
-  const panelStyle: React.CSSProperties = { border: 'none' }
-
-  const label = (
-    <PaymentCardLabel
-      enablePaymentsButton={enablePaymentsButton}
-      onColumnsSelect={onColumnsSelect}
-      setCurrentDateFilter={setCurrentDateFilter}
-      setFilters={setFilters}
-      streets={streets}
-      filters={filters}
-      domainFilter={domainFilter}
-      realEstatesFilter={realEstatesFilter}
-      isAdmin={isAdmin}
-      className={styles.select}
-      allowedServices={allowedServices}
-    />
-  )
-
-  const getItems = (
-    panelStyle: React.CSSProperties
-  ): CollapseProps['items'] => [
-    {
-      key: '1',
-      label,
-      style: panelStyle,
-      collapsible: 'icon',
-      forceRender: true,
-      children: (
-        <>
-          <Divider className={styles.Divider} />
-          <Flex className={styles.flexButtonContainer} align="center">
-            {infoTooltip && (
-              <Tooltip title={infoTooltip}>
-                <InfoCircleOutlined
-                  style={{ marginRight: 16, color: 'rgba(0,0,0,0.45)' }}
-                />
-              </Tooltip>
-            )}
-            {isAdmin &&
-              pathname === AppRoutes.PAYMENT &&
-              selectedPayments.length > 0 && (
-                <Button type="link" onClick={handleExportExcel}>
-                  Export to Excel <ExportOutlined />
-                </Button>
-              )}
-            {isAdmin && <ImportInvoices />}
-            {isAdmin && (
-              <Button
-                type="link"
-                onClick={() => router.push(AppRoutes.PAYMENT_BULK)}
-              >
-                Інвойси <SelectOutlined />
-              </Button>
-            )}
-            {isAdmin && (
-              <Button type="link" onClick={() => setIsModalOpen(true)}>
-                <PlusOutlined /> Додати
-              </Button>
-            )}
-            {shouldOpenModal(isModalOpen, currentPayment, paymentActions) && (
-              <AddPaymentModal
-                paymentActions={
-                  !isAdmin ? { edit: false, preview: true } : paymentActions
-                }
-                paymentData={currentPayment}
-                preselectedCompany={selectedCompany}
-                preselectedDomain={selectedDomain}
-                closeModal={closeModal}
-              />
-            )}
-            {isAdmin &&
-              pathname === AppRoutes.PAYMENT &&
-              selectedPayments.length > 0 && (
-                <Button type="link" onClick={handleGeneratePdf}>
-                  Завантажити рахунки <DownloadOutlined />
-                </Button>
-              )}
-            {isAdmin &&
-              pathname === AppRoutes.PAYMENT &&
-              selectedPayments.length > 0 && (
-                <Button type="link" onClick={onDeleteClick}>
-                  <DeleteOutlined /> Видалити
-                </Button>
-              )}
-          </Flex>
-        </>
-      ),
-    },
+  const items: MenuProps['items'] = [
+    ...(infoTooltip
+      ? [
+          {
+            key: 'info',
+            label: infoTooltip,
+            icon: <InfoCircleOutlined />,
+            disabled: true,
+          },
+        ]
+      : []),
+    ...(isAdmin
+      ? [
+          {
+            key: 'refresh',
+            label: 'Оновити',
+            icon: <ReloadOutlined spin={isRefreshing} />,
+          },
+        ]
+      : []),
+    ...(isAdmin && pathname === AppRoutes.PAYMENT && selectedPayments.length > 0
+      ? [{ key: 'export', label: 'Export to Excel', icon: <ExportOutlined /> }]
+      : []),
+    ...(isAdmin
+      ? [{ key: 'import', label: 'Імпорт', icon: <ImportOutlined /> }]
+      : []),
+    ...(isAdmin
+      ? [{ key: 'invoices', label: 'Інвойси', icon: <SelectOutlined /> }]
+      : []),
+    ...(isAdmin
+      ? [{ key: 'add', label: 'Додати', icon: <PlusOutlined /> }]
+      : []),
+    ...(isAdmin && pathname === AppRoutes.PAYMENT && selectedPayments.length > 0
+      ? [
+          {
+            key: 'download',
+            label: 'Завантажити рахунки',
+            icon: <DownloadOutlined />,
+          },
+        ]
+      : []),
+    ...(isAdmin && pathname === AppRoutes.PAYMENT && canBulkMarkPaid
+      ? [
+          {
+            key: 'bulkMarkPaid',
+            label: 'Позначити оплати',
+            icon: <CheckOutlined />,
+          },
+        ]
+      : []),
+    ...(isAdmin && pathname === AppRoutes.PAYMENT && selectedPayments.length > 0
+      ? [
+          {
+            key: 'bulkDuplicate',
+            label: 'Дублювати рахунки',
+            icon: <CopyOutlined />,
+          },
+        ]
+      : []),
+    ...(isAdmin && pathname === AppRoutes.PAYMENT && selectedPayments.length > 0
+      ? [
+          {
+            key: 'delete',
+            label: 'Видалити',
+            icon: <DeleteOutlined />,
+            danger: true,
+          },
+        ]
+      : []),
   ]
+
+  const dashboardItems: MenuProps['items'] = [
+    {
+      key: 'refresh',
+      label: 'Оновити',
+      icon: <ReloadOutlined spin={isRefreshing} />,
+    },
+    { key: 'import', label: 'Імпорт', icon: <ImportOutlined /> },
+    { key: 'invoices', label: 'Інвойси', icon: <SelectOutlined /> },
+    { key: 'add', label: 'Додати', icon: <PlusOutlined /> },
+  ]
+
   if (isDashboard) {
     return (
       <>
-        <Flex justify="space-between" align="center" style={{ margin: 0 }}>
+        <Flex
+          justify="space-between"
+          align="center"
+          style={{ margin: 0, width: '100%' }}
+        >
           <Button type="link" onClick={() => router.push(AppRoutes.PAYMENT)}>
             Платежі
             <SelectOutlined />
           </Button>
-          <Flex gap={8} wrap="wrap">
-            <ImportInvoices />
-            <Button
-              type="link"
-              icon={<SelectOutlined />}
-              onClick={() => router.push(AppRoutes.PAYMENT_BULK)}
-            >
-              Інвойси
-            </Button>
-            <Button
-              type="link"
-              icon={<PlusOutlined />}
-              onClick={() => setIsModalOpen(true)}
-            >
-              Додати
-            </Button>
-          </Flex>
+          <Dropdown
+            menu={{ items: dashboardItems, onClick: handleMenuClick }}
+            trigger={['click']}
+            placement="bottomRight"
+            overlayStyle={{ minWidth: 190 }}
+          >
+            <Tooltip title="Додаткові дії">
+              <Button
+                type="text"
+                icon={
+                  <MoreOutlined
+                    style={{ color: token.colorText, fontSize: 18 }}
+                  />
+                }
+                style={{
+                  padding: 8,
+                  minWidth: 40,
+                  minHeight: 40,
+                  border: `1px solid ${token.colorBorder}`,
+                  borderRadius: 8,
+                }}
+              />
+            </Tooltip>
+          </Dropdown>
         </Flex>
         {shouldOpenModal(isModalOpen, currentPayment, paymentActions) && (
           <AddPaymentModal
@@ -344,22 +482,84 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
   }
 
   return (
-    <Collapse
-      className={styles.customCollapse}
-      bordered={false}
-      defaultActiveKey={[]}
-      expandIcon={({ isActive }) => (
-        <Tooltip title="Додаткові дії">
-          <UpOutlined
-            rotate={isActive ? 0 : 180}
-            className={styles.collapseButton}
+    <>
+      <Flex
+        justify="space-between"
+        align="center"
+        style={{ marginBottom: 10, marginTop: 10, width: '100%' }}
+      >
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <PaymentCardLabel
+            enablePaymentsButton={enablePaymentsButton}
+            onColumnsSelect={onColumnsSelect}
+            setCurrentDateFilter={setCurrentDateFilter}
+            setFilters={setFilters}
+            streets={streets}
+            filters={filters}
+            domainFilter={domainFilter}
+            realEstatesFilter={realEstatesFilter}
+            isAdmin={isAdmin}
+            className={styles.select}
+            allowedServices={allowedServices}
+            visibleCustomServices={visibleCustomServices}
           />
-        </Tooltip>
+        </div>
+        <div style={{ marginLeft: 12 }}>
+          <Dropdown
+            menu={{ items, onClick: handleMenuClick }}
+            trigger={['click']}
+            placement="bottomRight"
+            overlayStyle={{ minWidth: 190 }}
+          >
+            <Tooltip title="Додаткові дії">
+              <Button
+                type="text"
+                icon={
+                  <MoreOutlined
+                    style={{ color: token.colorText, fontSize: 18 }}
+                  />
+                }
+                style={{
+                  padding: 8,
+                  minWidth: 40,
+                  minHeight: 40,
+                  border: `1px solid ${token.colorBorder}`,
+                  borderRadius: 8,
+                }}
+              />
+            </Tooltip>
+          </Dropdown>
+        </div>
+      </Flex>
+      {shouldOpenModal(isModalOpen, currentPayment, paymentActions) && (
+        <AddPaymentModal
+          paymentActions={
+            !isAdmin ? { edit: false, preview: true } : paymentActions
+          }
+          paymentData={currentPayment}
+          preselectedCompany={selectedCompany}
+          preselectedDomain={selectedDomain}
+          closeModal={closeModal}
+        />
       )}
-      expandIconPosition="right"
-      items={getItems(panelStyle)}
-      ghost
-    />
+      {isImportModalOpen && (
+        <ImportInvoicesModal closeModal={() => setIsImportModalOpen(false)} />
+      )}
+      {bulkPaymentsToRender.map((p) => (
+        <HeadlessReceiptRenderer
+          key={p._id}
+          payment={p}
+          onCapture={(html) =>
+            handleBulkCapture(p._id, buildBulkFileName(p), html)
+          }
+          onError={(err) => {
+            // eslint-disable-next-line no-console
+            console.error('Bulk render failed for', p._id, err)
+            handleBulkCapture(p._id, buildBulkFileName(p), '')
+          }}
+        />
+      ))}
+    </>
   )
 }
 
@@ -368,11 +568,22 @@ interface ColumnSelectProps {
   style?: React.CSSProperties
   className?: string
   allowedServices?: Set<string>
+  visibleCustomServices?: ICustomServiceItem[]
 }
 
-const ColumnSelect: React.FC<ColumnSelectProps> = ({ onSelect, allowedServices, ...props }) => {
+const ColumnSelect: React.FC<ColumnSelectProps> = ({
+  onSelect,
+  allowedServices,
+  visibleCustomServices,
+  ...props
+}) => {
   const [selected, setSelected] = useState<string[]>([])
   const [filterByAvailable, setFilterByAvailable] = useState(true)
+  const isInitialized = React.useRef(false)
+
+  const customIds = useMemo(() => {
+    return new Set((visibleCustomServices ?? []).map((s) => String(s._id)))
+  }, [visibleCustomServices])
 
   const filteredEntries = useMemo(() => {
     return Object.entries(ServiceName).filter(([value]) => {
@@ -381,15 +592,33 @@ const ColumnSelect: React.FC<ColumnSelectProps> = ({ onSelect, allowedServices, 
     })
   }, [filterByAvailable, allowedServices])
 
+  const customEntries = useMemo(() => {
+    const entries = (visibleCustomServices ?? []).map((s) => ({
+      value: String(s._id),
+      label: s.name,
+    }))
+
+    if (!filterByAvailable || !allowedServices) return entries
+
+    return entries.filter(
+      (e) => allowedServices.has(e.value) || allowedServices.has('custom')
+    )
+  }, [filterByAvailable, allowedServices, visibleCustomServices])
+
   const handleSelect = (value: string[]) => {
     setSelected(value)
     localStorage.setItem('payments_columns', JSON.stringify(value))
   }
 
   const handleCheckAll = () => {
-    const allFiltered = filteredEntries.map(([value]) => value)
-    if (selected.length === allFiltered.length &&
-        allFiltered.every(v => selected.includes(v))) {
+    const allFiltered = [
+      ...filteredEntries.map(([value]) => value),
+      ...customEntries.map((e) => e.value),
+    ]
+    if (
+      selected.length === allFiltered.length &&
+      allFiltered.every((v) => selected.includes(v))
+    ) {
       setSelected([])
       localStorage.setItem('payments_columns', JSON.stringify([]))
     } else {
@@ -399,87 +628,83 @@ const ColumnSelect: React.FC<ColumnSelectProps> = ({ onSelect, allowedServices, 
   }
 
   useEffect(() => {
-    if (filterByAvailable && allowedServices) {
-      const filtered = selected.filter(s => allowedServices.has(s))
-      if (filtered.length !== selected.length) {
-        setSelected(filtered)
-        localStorage.setItem('payments_columns', JSON.stringify(filtered))
-      }
-    }
-  }, [filterByAvailable, allowedServices])
+    if (!allowedServices) return
 
-  useEffect(() => {
-  if (!allowedServices || !filterByAvailable) return
-  
-  const allAvailable = Object.entries(ServiceName)
-    .filter(([value]) => allowedServices.has(value))
-    .map(([value]) => value)
+    let saved = JSON.parse(localStorage.getItem('payments_columns') ?? '[]')
 
-  setSelected(allAvailable)
-  localStorage.setItem('payments_columns', JSON.stringify(allAvailable))
-}, [allowedServices])
-
-  useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem('payments_columns') ?? '[]')
     if (!saved.includes('placingPrice')) {
       saved.push('placingPrice')
-      localStorage.setItem('payments_columns', JSON.stringify(saved))
     }
+
+    if (!isInitialized.current) {
+      if (saved.length <= 1) {
+        const builtIn = Object.entries(ServiceName)
+          .filter(([value]) => value !== 'custom' && allowedServices.has(value))
+          .map(([value]) => value)
+        const customs = (visibleCustomServices ?? [])
+          .map((s) => String(s._id))
+          .filter(
+            (id) => allowedServices.has(id) || allowedServices.has('custom')
+          )
+
+        saved = [...new Set([...saved, ...builtIn, ...customs])]
+      }
+      isInitialized.current = true
+    } else if (filterByAvailable) {
+      saved = saved.filter((s: string) => {
+        if (allowedServices.has(s) || s === 'placingPrice' || s === 'custom') {
+          return true
+        }
+        if (customIds.has(s) && allowedServices.has('custom')) {
+          return true
+        }
+        return false
+      })
+    }
+
     setSelected(saved)
-  }, [])
-
-  useEffect(() => {
-  if (!allowedServices || !filterByAvailable) return
-
-  const saved = JSON.parse(localStorage.getItem('payments_columns') ?? '[]')
-
-  if (saved.length > 0) return
-
-  const allAvailable = Object.entries(ServiceName)
-    .filter(([value]) => allowedServices.has(value))
-    .map(([value]) => value)
-
-  setSelected(allAvailable)
-  localStorage.setItem('payments_columns', JSON.stringify(allAvailable))
-}, [allowedServices])
+    localStorage.setItem('payments_columns', JSON.stringify(saved))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allowedServices, filterByAvailable, visibleCustomServices, customIds])
 
   useEffect(() => {
     onSelect?.(selected)
-  }, [onSelect, selected])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selected])
 
-  const allFiltered = filteredEntries.map(([value]) => value)
-  const isAllChecked = allFiltered.length > 0 &&
-    allFiltered.every(v => selected.includes(v))
-  const isIndeterminate = selected.some(s => allFiltered.includes(s)) && !isAllChecked
+  const allFiltered = [
+    ...filteredEntries.map(([value]) => value),
+    ...customEntries.map((e) => e.value),
+  ]
+  const isAllChecked =
+    allFiltered.length > 0 && allFiltered.every((v) => selected.includes(v))
+  const isIndeterminate =
+    selected.some((s) => allFiltered.includes(s)) && !isAllChecked
 
   const options: SelectProps['options'] = [
     {
       label: (
-        <div>
-        <Checkbox
-          checked={filterByAvailable}
-          onChange={(e) => setFilterByAvailable(e.target.checked)}
-          onClick={(e) => e.stopPropagation()}
+        <div onClick={(e) => e.stopPropagation()}>
+          <Checkbox
+            checked={filterByAvailable}
+            onChange={(e) => setFilterByAvailable(e.target.checked)}
           >
             <Typography.Text type="secondary">Доступні сервіси</Typography.Text>
           </Checkbox>
           <Divider style={{ margin: '4px 0' }} />
           <Checkbox
-            onClick={(e) => {
-              e.stopPropagation()
-              handleCheckAll()
-            }}
+            onChange={handleCheckAll}
             indeterminate={isIndeterminate}
             checked={isAllChecked}
           >
-          <Typography.Text type="secondary">Комунальні</Typography.Text>
-        </Checkbox>
+            <Typography.Text type="secondary">Послуги</Typography.Text>
+          </Checkbox>
         </div>
       ),
-      options: filteredEntries.map(([value, label]) => ({ 
-        value,
-        label,
-      })),
+      options: [
+        ...filteredEntries.map(([value, label]) => ({ value, label })),
+        ...customEntries,
+      ],
     },
   ]
 

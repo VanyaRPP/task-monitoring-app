@@ -1,22 +1,20 @@
+$charcoal: #c8c8c8;
+$charcoal-dim: rgba(200, 200, 200, 0.1);
+$slate: rgba(255, 255, 255, 0.55);
 
-$charcoal:      #c8c8c8;
-$charcoal-dim:  rgba(200, 200, 200, 0.10);
-$slate:         rgba(255, 255, 255, 0.55);
+$ink: rgba(255, 255, 255, 0.9);
+$ink-muted: rgba(255, 255, 255, 0.48);
 
-$ink:           rgba(255, 255, 255, 0.90);
-$ink-muted:     rgba(255, 255, 255, 0.48);
+$rule: rgba(255, 255, 255, 0.1);
+$rule-mid: rgba(255, 255, 255, 0.18);
+$rule-strong: rgba(255, 255, 255, 0.3);
 
-$rule:          rgba(255, 255, 255, 0.10);
-$rule-mid:      rgba(255, 255, 255, 0.18);
-$rule-strong:   rgba(255, 255, 255, 0.30);
-
-$surface:       rgba(255, 255, 255, 0.02);
+$surface: rgba(255, 255, 255, 0.02);
 $surface-stripe: rgba(255, 255, 255, 0.03);
-$surface-head:  rgba(255, 255, 255, 0.06);
+$surface-head: rgba(255, 255, 255, 0.06);
 
-$font:          'Inter', 'Helvetica Neue', Arial, sans-serif;
-$mono:          'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
-
+$font: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+$mono: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
 
 .lgInvoice {
   font-family: $font;
@@ -104,7 +102,9 @@ $mono:          'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
   border-right: 1px solid $rule;
   background: $surface-head;
 
-  &:last-child { border-right: none; }
+  &:last-child {
+    border-right: none;
+  }
 }
 
 .lgMetaCellLabel {
@@ -188,21 +188,18 @@ $mono:          'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
   font-weight: 700;
 }
 
-
-
-
-
 .lgTableWrap {
   border: 1px solid $rule-mid;
   border-radius: 4px;
   overflow: hidden;
   margin-bottom: 0;
+  overflow-x: auto;
 }
 
 .lgTable {
   width: 100%;
   border-collapse: collapse;
-  table-layout: fixed;
+  table-layout: auto;
 
   thead {
     background: $surface-head;
@@ -220,7 +217,9 @@ $mono:          'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
   }
 
   tbody tr {
-    &:nth-child(even) { background: $surface-stripe; }
+    &:nth-child(even) {
+      background: $surface-stripe;
+    }
 
     td {
       font-size: 0.88rem;
@@ -229,24 +228,28 @@ $mono:          'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
       vertical-align: middle;
     }
 
-    &:last-child td { border-bottom: none; }
+    &:last-child td {
+      border-bottom: none;
+    }
   }
 
-  th:nth-child(2), td:nth-child(2) {
+  .colRate {
     width: 14%;
     text-align: right;
     white-space: nowrap;
     font-family: $mono;
     font-size: 0.82rem;
+    font-weight: 600;
   }
-  th:nth-child(3), td:nth-child(3) {
+  .colQty {
     width: 9%;
     text-align: right;
     white-space: nowrap;
     font-family: $mono;
     font-size: 0.82rem;
+    font-weight: 600;
   }
-  th:nth-child(4), td:nth-child(4) {
+  .colTotal {
     width: 20%;
     text-align: right;
     white-space: nowrap;
@@ -255,10 +258,6 @@ $mono:          'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
     font-weight: 600;
   }
 }
-
-
-
-
 
 .lgSummary {
   display: flex;
@@ -347,8 +346,14 @@ $mono:          'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
   font-size: 0.83rem;
   color: $ink-muted;
 
-  span { font-size: 0.75rem; letter-spacing: 0.05em; }
-  strong { font-family: $mono; color: $ink; }
+  span {
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+  }
+  strong {
+    font-family: $mono;
+    color: $ink;
+  }
 }
 
 .lgGrandTotal {
@@ -372,10 +377,6 @@ $mono:          'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
     color: $ink;
   }
 }
-
-
-
-
 
 .lgFooter {
   margin-top: 2.4rem;
@@ -415,15 +416,11 @@ $mono:          'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
   color: $ink-muted;
 }
 
-
-
-
-
-$charcoal-l:     #444;
-$rule-l:         rgba(0, 0, 0, 0.08);
-$rule-mid-l:     rgba(0, 0, 0, 0.14);
-$rule-strong-l:  rgba(0, 0, 0, 0.22);
-$surface-l:      rgba(0, 0, 0, 0.01);
+$charcoal-l: #444;
+$rule-l: rgba(0, 0, 0, 0.08);
+$rule-mid-l: rgba(0, 0, 0, 0.14);
+$rule-strong-l: rgba(0, 0, 0, 0.22);
+$surface-l: rgba(0, 0, 0, 0.01);
 $surface-head-l: rgba(0, 0, 0, 0.035);
 $surface-stripe-l: rgba(0, 0, 0, 0.02);
 
@@ -435,113 +432,184 @@ $surface-stripe-l: rgba(0, 0, 0, 0.02);
     color: #1a1a1a;
   }
 
-  .lgHeader        { border-bottom-color: $rule-strong-l; }
-  .lgBrandName     { color: #1a1a1a; }
-  .lgBrandSub      { color: rgba(0, 0, 0, 0.50); }
+  .lgHeader {
+    border-bottom-color: $rule-strong-l;
+  }
+  .lgBrandName {
+    color: #1a1a1a;
+  }
+  .lgBrandSub {
+    color: rgba(0, 0, 0, 0.5);
+  }
   .lgDocType {
-    color: rgba(0, 0, 0, 0.50);
+    color: rgba(0, 0, 0, 0.5);
     background: $surface-head-l;
     border-color: $rule-l;
   }
-  .lgInvoiceNumber { color: #1a1a1a; }
+  .lgInvoiceNumber {
+    color: #1a1a1a;
+  }
 
-  .lgMeta          { border-color: $rule-mid-l; }
+  .lgMeta {
+    border-color: $rule-mid-l;
+  }
   .lgMetaCell {
     border-right-color: $rule-l;
     background: $surface-head-l;
   }
-  .lgMetaCellLabel { color: rgba(0, 0, 0, 0.50); }
-  .lgMetaCellValue { color: #1a1a1a; }
+  .lgMetaCellLabel {
+    color: rgba(0, 0, 0, 0.5);
+  }
+  .lgMetaCellValue {
+    color: #1a1a1a;
+  }
 
-  .lgPartyBox      { border-color: $rule-mid-l; }
+  .lgPartyBox {
+    border-color: $rule-mid-l;
+  }
   .lgPartyHeader {
-    color: rgba(0, 0, 0, 0.50);
+    color: rgba(0, 0, 0, 0.5);
     background: $surface-head-l;
     border-bottom-color: $rule-l;
   }
-  .lgPartyName     { color: #1a1a1a; }
-  .lgPartyLine     { color: rgba(0, 0, 0, 0.55); }
-  .lgBankSection   { border-top-color: $rule-l; }
-  .lgBankLine      { color: rgba(0, 0, 0, 0.55); }
-  .lgBankLineLabel { color: #1a1a1a; }
+  .lgPartyName {
+    color: #1a1a1a;
+  }
+  .lgPartyLine {
+    color: rgba(0, 0, 0, 0.55);
+  }
+  .lgBankSection {
+    border-top-color: $rule-l;
+  }
+  .lgBankLine {
+    color: rgba(0, 0, 0, 0.55);
+  }
+  .lgBankLineLabel {
+    color: #1a1a1a;
+  }
 
-  .lgTableWrap     { border-color: $rule-mid-l; }
+  .lgTableWrap {
+    border-color: $rule-mid-l;
+    overflow: visible !important;
+  }
   .lgTable {
     thead {
       background: $surface-head-l;
-      th { color: rgba(0, 0, 0, 0.50); border-bottom-color: $rule-strong-l; }
+      th {
+        color: rgba(0, 0, 0, 0.5);
+        border-bottom-color: $rule-strong-l;
+      }
     }
     tbody tr {
-      &:nth-child(even) { background: $surface-stripe-l; }
-      td { border-bottom-color: $rule-l; color: #1a1a1a; }
+      &:nth-child(even) {
+        background: $surface-stripe-l;
+      }
+      td {
+        border-bottom-color: $rule-l;
+        color: #1a1a1a;
+      }
     }
   }
 
-  .lgDates            { border-color: $rule-mid-l; }
+  .lgDates {
+    border-color: $rule-mid-l;
+  }
   .lgDatesHeader {
-    color: rgba(0, 0, 0, 0.50);
+    color: rgba(0, 0, 0, 0.5);
     background: $surface-head-l;
     border-bottom-color: $rule-l;
   }
   .lgDateRow {
-    span   { color: rgba(0, 0, 0, 0.50); }
-    strong { color: #1a1a1a; }
+    span {
+      color: rgba(0, 0, 0, 0.5);
+    }
+    strong {
+      color: #1a1a1a;
+    }
   }
 
-  .lgTotalsBox        { border-color: $rule-strong-l; }
+  .lgTotalsBox {
+    border-color: $rule-strong-l;
+  }
   .lgTotalsHeader {
-    color: rgba(0, 0, 0, 0.50);
+    color: rgba(0, 0, 0, 0.5);
     background: $surface-head-l;
     border-bottom-color: $rule-l;
   }
   .lgTotalRow {
     color: rgba(0, 0, 0, 0.55);
-    strong { color: #1a1a1a; }
+    strong {
+      color: #1a1a1a;
+    }
   }
   .lgGrandTotal {
     color: #1a1a1a;
-    span   { color: $charcoal-l; }
-    strong { color: #1a1a1a; }
+    span {
+      color: $charcoal-l;
+    }
+    strong {
+      color: #1a1a1a;
+    }
   }
 
-  .lgFooter           { border-top-color: $rule-strong-l; }
-  .lgFooterNote       { color: rgba(0, 0, 0, 0.50); }
-  .lgSignatureLine    { color: rgba(0, 0, 0, 0.40); }
-  .lgSignatureCaption { color: rgba(0, 0, 0, 0.40); }
+  .lgFooter {
+    border-top-color: $rule-strong-l;
+  }
+  .lgFooterNote {
+    color: rgba(0, 0, 0, 0.5);
+  }
+  .lgSignatureLine {
+    color: rgba(0, 0, 0, 0.4);
+  }
+  .lgSignatureCaption {
+    color: rgba(0, 0, 0, 0.4);
+  }
 }
 
-
-
-
-
 @media (max-width: 860px) {
-  .lgInvoice { padding: 1.4rem 1rem; }
+  .lgInvoice {
+    padding: 1.4rem 1rem;
+  }
 
   .lgHeader {
     flex-direction: column;
     gap: 0.8rem;
   }
 
-  .lgInvoiceTitle { align-items: flex-start; }
+  .lgInvoiceTitle {
+    align-items: flex-start;
+  }
 
-  .lgMeta { grid-template-columns: repeat(2, 1fr); }
-  .lgMetaCell:nth-child(2) { border-right: none; }
+  .lgMeta {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .lgMetaCell:nth-child(2) {
+    border-right: none;
+  }
   .lgMetaCell:nth-child(3),
-  .lgMetaCell:nth-child(4) { border-top: 1px solid $rule; }
+  .lgMetaCell:nth-child(4) {
+    border-top: 1px solid $rule;
+  }
 
-  .lgParties { grid-template-columns: 1fr; }
+  .lgParties {
+    grid-template-columns: 1fr;
+  }
 
-  .lgSummary { flex-direction: column; }
+  .lgSummary {
+    flex-direction: column;
+  }
   .lgDates,
-  .lgTotalsBox { width: 100%; min-width: 0; }
+  .lgTotalsBox {
+    width: 100%;
+    min-width: 0;
+  }
 }
 
-
-
-
-
 @media print {
-  @page { size: A4; margin: 12mm 14mm; }
+  @page {
+    size: A4;
+    margin: 12mm 14mm;
+  }
 
   .lgInvoice {
     max-width: none !important;
@@ -563,11 +631,23 @@ $surface-stripe-l: rgba(0, 0, 0, 0.02);
     align-items: flex-start !important;
     border-bottom-color: #999 !important;
   }
-  .lgInvoiceTitle { align-items: flex-end !important; }
-  .lgBrandName    { color: #111 !important; }
-  .lgBrandSub     { color: #555 !important; }
-  .lgInvoiceNumber { color: #111 !important; }
-  .lgDocType      { background: #f0f0f0 !important; border-color: #ddd !important; color: #555 !important; }
+  .lgInvoiceTitle {
+    align-items: flex-end !important;
+  }
+  .lgBrandName {
+    color: #111 !important;
+  }
+  .lgBrandSub {
+    color: #555 !important;
+  }
+  .lgInvoiceNumber {
+    color: #111 !important;
+  }
+  .lgDocType {
+    background: #f0f0f0 !important;
+    border-color: #ddd !important;
+    color: #555 !important;
+  }
 
   .lgMeta {
     grid-template-columns: repeat(4, 1fr) !important;
@@ -579,38 +659,83 @@ $surface-stripe-l: rgba(0, 0, 0, 0.02);
     border-right-color: #e0e0e0 !important;
     border-top: none !important;
   }
-  .lgMetaCellLabel { color: #555 !important; }
-  .lgMetaCellValue { color: #111 !important; }
+  .lgMetaCellLabel {
+    color: #555 !important;
+  }
+  .lgMetaCellValue {
+    color: #111 !important;
+  }
 
-  .lgParties      { grid-template-columns: 1.15fr 1fr !important; }
-  .lgPartyBox     { border-color: #ccc !important; border-radius: 4px !important; }
-  .lgPartyHeader  { background: #f5f5f5 !important; border-bottom-color: #e0e0e0 !important; color: #555 !important; }
-  .lgPartyName    { color: #111 !important; }
-  .lgPartyLine    { color: #555 !important; }
-  .lgBankSection  { border-top-color: #e0e0e0 !important; }
-  .lgBankLine     { color: #555 !important; }
-  .lgBankLineLabel { color: #111 !important; }
+  .lgParties {
+    grid-template-columns: 1.15fr 1fr !important;
+  }
+  .lgPartyBox {
+    border-color: #ccc !important;
+    border-radius: 4px !important;
+  }
+  .lgPartyHeader {
+    background: #f5f5f5 !important;
+    border-bottom-color: #e0e0e0 !important;
+    color: #555 !important;
+  }
+  .lgPartyName {
+    color: #111 !important;
+  }
+  .lgPartyLine {
+    color: #555 !important;
+  }
+  .lgBankSection {
+    border-top-color: #e0e0e0 !important;
+  }
+  .lgBankLine {
+    color: #555 !important;
+  }
+  .lgBankLineLabel {
+    color: #111 !important;
+  }
 
-  .lgTableWrap    { border-color: #ccc !important; border-radius: 4px !important; }
+  .lgTableWrap {
+    border-color: #ccc !important;
+    border-radius: 4px !important;
+  }
   .lgTable {
     thead {
       background: #f5f5f5 !important;
-      th { color: #555 !important; border-bottom-color: #999 !important; }
+      th {
+        color: #555 !important;
+        border-bottom-color: #999 !important;
+      }
     }
-    tbody tr:nth-child(even) { background: #fafafa !important; }
-    tbody td { border-bottom-color: #eee !important; color: #111 !important; }
+    tbody tr:nth-child(even) {
+      background: #fafafa !important;
+    }
+    tbody td {
+      border-bottom-color: #eee !important;
+      color: #111 !important;
+    }
   }
 
-  .lgSummary      { flex-direction: row !important; justify-content: space-between !important; }
+  .lgSummary {
+    flex-direction: row !important;
+    justify-content: space-between !important;
+  }
   .lgDates {
     border-color: #ccc !important;
     border-radius: 4px !important;
     min-width: 220px !important;
   }
-  .lgDatesHeader  { background: #f5f5f5 !important; border-bottom-color: #e0e0e0 !important; color: #555 !important; }
+  .lgDatesHeader {
+    background: #f5f5f5 !important;
+    border-bottom-color: #e0e0e0 !important;
+    color: #555 !important;
+  }
   .lgDateRow {
-    span   { color: #555 !important; }
-    strong { color: #111 !important; }
+    span {
+      color: #555 !important;
+    }
+    strong {
+      color: #111 !important;
+    }
   }
 
   .lgTotalsBox {
@@ -618,21 +743,39 @@ $surface-stripe-l: rgba(0, 0, 0, 0.02);
     border-radius: 4px !important;
     min-width: 220px !important;
   }
-  .lgTotalsHeader { background: #f5f5f5 !important; border-bottom-color: #e0e0e0 !important; color: #555 !important; }
+  .lgTotalsHeader {
+    background: #f5f5f5 !important;
+    border-bottom-color: #e0e0e0 !important;
+    color: #555 !important;
+  }
   .lgTotalRow {
     color: #555 !important;
-    strong { color: #111 !important; }
+    strong {
+      color: #111 !important;
+    }
   }
   .lgGrandTotal {
     color: #111 !important;
-    span   { color: #444 !important; }
-    strong { color: #111 !important; }
+    span {
+      color: #444 !important;
+    }
+    strong {
+      color: #111 !important;
+    }
   }
 
-  .lgFooter       { border-top-color: #999 !important; }
-  .lgFooterNote   { color: #555 !important; }
-  .lgSignatureLine { color: #888 !important; }
-  .lgSignatureCaption { color: #888 !important; }
+  .lgFooter {
+    border-top-color: #999 !important;
+  }
+  .lgFooterNote {
+    color: #555 !important;
+  }
+  .lgSignatureLine {
+    color: #888 !important;
+  }
+  .lgSignatureCaption {
+    color: #888 !important;
+  }
 
   .lgPartyBox,
   .lgTableWrap,

@@ -17,8 +17,16 @@ jest.mock('@assets/features/formatDate', () => ({
 }))
 
 jest.mock('@common/api/paymentApi/payment.api', () => ({
-  useGeneratePdfMutation: () => [jest.fn(), { isLoading: false }],
+  useHtmlToPdfMutation: () => [jest.fn(), { isLoading: false }],
 }))
+
+jest.mock(
+  '@components/Forms/GroupedReceiptForm/HeadlessReceiptRenderer',
+  () => ({
+    __esModule: true,
+    default: () => null,
+  })
+)
 
 const modalConfirmMock = Modal.confirm as jest.Mock
 
@@ -40,6 +48,7 @@ const setup = (paymentOverride = {}, isAdmin = true) => {
   const onEdit = jest.fn()
   const onDelete = jest.fn()
   const onMarkPaid = jest.fn()
+  const onDuplicate = jest.fn()
 
   render(
     <PaymentDropdown
@@ -49,11 +58,12 @@ const setup = (paymentOverride = {}, isAdmin = true) => {
       onEdit={onEdit}
       onDelete={onDelete}
       onMarkPaid={onMarkPaid}
+      onDuplicate={onDuplicate}
       deleteLoading={false}
     />
   )
 
-  return { onView, onEdit, onDelete, onMarkPaid }
+  return { onView, onEdit, onDelete, onMarkPaid, onDuplicate }
 }
 
 const openDropdown = () => fireEvent.click(screen.getByRole('button'))

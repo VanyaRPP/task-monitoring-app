@@ -24,6 +24,7 @@ export interface IPaymentModel {
   transaction: IPaymentTransactions
   losses?: number
   template?: string
+  invoiceLang?: 'en' | 'uk'
 }
 
 export const PaymentSchema = new Schema<IPaymentModel>({
@@ -42,10 +43,15 @@ export const PaymentSchema = new Schema<IPaymentModel>({
   currency: { type: String, required: false, default: Currency.UAH },
   transaction: { type: Object },
   losses: { type: Number },
-   template: { 
-    type: String, 
+  template: {
+    type: String,
     default: 'classic',
-  }
+  },
+  invoiceLang: {
+    type: String,
+    enum: ['en', 'uk'],
+    required: false,
+  },
 })
 
 const Payment =

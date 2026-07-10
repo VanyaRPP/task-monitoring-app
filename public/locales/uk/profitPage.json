@@ -1,6 +1,19 @@
 {
   "title": "Прибутки",
   "addButton": "Додати",
+  "dashboard": {
+    "periodMonth": "Місяць",
+    "periodQuarter": "Квартал",
+    "periodYear": "Рік",
+    "plannedProfit": "Прогнозовані прибутки",
+    "actualProfit": "Фактичні прибутки",
+    "plannedExpense": "Прогнозовані витрати",
+    "actualExpense": "Фактичні витрати",
+    "vsForecast": "від прогнозу",
+    "trendTitle": "Порівняльна динаміка",
+    "structureTitle": "Структура фактичних прибутків",
+    "details": "Деталі"
+  },
   "table": {
     "tableAriaLabel": "Таблиця з підсумком транзакцій прибутку",
     "parent": {
@@ -40,6 +53,7 @@
     "confirm": "Підтвердити",
     "cancel": "Скасувати",
     "successMessage": "Успішно збережено",
+    "editSuccess": "Запис успішно оновлено",
     "errorMessage": "Не вдалося зберегти зміни",
     "previewTitle": "Перегляд запису",
     "closeText": "Закрити"

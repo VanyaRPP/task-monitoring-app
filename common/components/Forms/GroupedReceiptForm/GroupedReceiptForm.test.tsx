@@ -5,20 +5,20 @@ jest.mock('./style.module.scss', () => ({}))
 jest.mock('./templates/style.module.scss', () => ({}))
 
 let template = 'olimp'
+let companyCurrency = 'UAH'
 
 jest.mock('@components/AddPaymentModal', () => ({
   usePaymentContext: () => ({
     template,
     setTemplate: jest.fn(),
     company: {
-      currency: 'UAH',
+      currency: companyCurrency,
       domain: { name: 'Test Domain', description: 'Test Company\nKyiv' },
     },
     showQuantityInPreview: false,
     setShowQuantityInPreview: jest.fn(),
   }),
 }))
-
 ;(global as any).ResizeObserver = class {
   observe = jest.fn()
   unobserve = jest.fn()
@@ -32,6 +32,12 @@ jest.mock('@components/Forms/GroupedReceiptForm/GroupedPricesTable', () => ({
 
 jest.mock('@common/api/paymentApi/payment.api', () => ({
   useEditPaymentMutation: () => [jest.fn().mockResolvedValue({ data: {} })],
+}))
+
+jest.mock('@common/api/invoiceTemplateApi/invoiceTemplate.api', () => ({
+  useGetInvoiceTemplatesQuery: () => ({ data: { data: [] } }),
+  useCreateInvoiceTemplateMutation: () => [jest.fn()],
+  useUpdateInvoiceTemplateMutation: () => [jest.fn()],
 }))
 
 jest.mock('next/dynamic', () => (importFn: () => Promise<any>) => {
@@ -72,6 +78,7 @@ const renderOlimp = (overrides = {}) =>
 describe('OLIMP template', () => {
   beforeEach(() => {
     template = 'olimp'
+    companyCurrency = 'UAH'
   })
 
   test('renders invoice header and total', () => {
@@ -82,16 +89,17 @@ describe('OLIMP template', () => {
 
   test('displays main invoice data', () => {
     renderOlimp()
-    expect(screen.getAllByText('Test Company').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Test Domain').length).toBeGreaterThan(0)
     expect(screen.getByText('Development services')).toBeInTheDocument()
-    expect(screen.getAllByText((c) => c.includes('100.00'))[0]).toBeInTheDocument()
+    expect(
+      screen.getAllByText((c) => c.includes('100.00'))[0]
+    ).toBeInTheDocument()
   })
 
   test('service act is hidden', () => {
     renderOlimp()
     expect(screen.queryByText(/акт надання послуг/i)).not.toBeInTheDocument()
   })
-
 
   test('показує РАХУНОК № для UAH валюти', () => {
     renderOlimp()
@@ -100,7 +108,8 @@ describe('OLIMP template', () => {
   })
 
   test('показує INVOICE № для USD валюти', () => {
-    renderOlimp({ company: { currency: 'USD' } })
+    companyCurrency = 'USD'
+    renderOlimp()
     expect(screen.getByText(/INVOICE №/i)).toBeInTheDocument()
     expect(screen.queryByText(/РАХУНОК №/i)).not.toBeInTheDocument()
   })
@@ -111,7 +120,8 @@ describe('OLIMP template', () => {
   })
 
   test('показує секцію "PAYMENT INFO" для USD', () => {
-    renderOlimp({ company: { currency: 'USD' } })
+    companyCurrency = 'USD'
+    renderOlimp()
     expect(screen.getByText(/PAYMENT INFO/i)).toBeInTheDocument()
   })
 
@@ -121,10 +131,10 @@ describe('OLIMP template', () => {
   })
 
   test('показує секцію "ISSUED TO" для USD', () => {
-    renderOlimp({ company: { currency: 'USD' } })
+    companyCurrency = 'USD'
+    renderOlimp()
     expect(screen.getByText(/ISSUED TO/i)).toBeInTheDocument()
   })
-
 
   test('відображає дату у форматі DD.MM.YYYY', () => {
     renderOlimp()
@@ -136,7 +146,6 @@ describe('OLIMP template', () => {
     expect(screen.getByText(/06\.01\.2024/)).toBeInTheDocument()
   })
 
-
   // TODO: Write a real test for provider data
   // once OLIMP template starts rendering provider info explicitly.
   test.todo('OLIMP template: displays provider data when implemented')
@@ -146,10 +155,12 @@ describe('OLIMP template', () => {
     expect(screen.getByText('test@gmail.com')).toBeInTheDocument()
   })
 
-
   test('повертає null якщо paymentData відсутній', () => {
     const { container } = render(
-      <GroupedReceiptForm paymentData={null} paymentActions={{ preview: true, edit: true }} />
+      <GroupedReceiptForm
+        paymentData={null}
+        paymentActions={{ preview: true, edit: true }}
+      />
     )
     expect(container).toBeEmptyDOMElement()
   })
@@ -167,6 +178,7 @@ describe('OLIMP template', () => {
 describe('Classic template', () => {
   beforeEach(() => {
     template = 'classic'
+    companyCurrency = 'UAH'
   })
 
   const renderClassic = (overrides = {}) =>
@@ -194,7 +206,10 @@ describe('Classic template', () => {
 
   test('повертає null якщо paymentData відсутній', () => {
     const { container } = render(
-      <GroupedReceiptForm paymentData={null} paymentActions={{ preview: true, edit: true }} />
+      <GroupedReceiptForm
+        paymentData={null}
+        paymentActions={{ preview: true, edit: true }}
+      />
     )
     expect(container).toBeEmptyDOMElement()
   })

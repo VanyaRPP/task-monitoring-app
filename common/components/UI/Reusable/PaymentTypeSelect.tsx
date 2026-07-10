@@ -1,20 +1,43 @@
 import { validateField } from '@assets/features/validators'
 import { Operations } from '@utils/constants'
-import { Form, Select } from 'antd'
+import { Form, Segmented } from 'antd'
+import { CreditCardFilled, BankFilled } from '@ant-design/icons'
+import styles from './style.module.scss'
 
-const PaymentTypeSelect = ({ edit }: { edit?: boolean }) => {
+const PaymentTypeSelect = () => {
   return (
     <Form.Item
       name="operation"
       label="Тип оплати"
+      tooltip="Дебет (Реалізація) — нарахування за послуги переліком; Кредит (Оплата) — разова сума одним рядком."
       rules={validateField('required')}
     >
-      <Select placeholder="Оберіть тип оплати">
-        <Select.Option value={Operations.Credit}>Кредит (Оплата)</Select.Option>
-        <Select.Option value={Operations.Debit}>
-          Дебет (Реалізація)
-        </Select.Option>
-      </Select>
+      <Segmented
+        block
+        className={styles.customSegmented} // Змінили назву класу
+        options={[
+          {
+            label: (
+              <div className={styles.segmentedLabel}>
+                <CreditCardFilled />
+                <span>Кредит (Оплата)</span>
+              </div>
+            ),
+            value: Operations.Credit,
+            className: styles.creditSegment,
+          },
+          {
+            label: (
+              <div className={styles.segmentedLabel}>
+                <BankFilled />
+                <span>Дебет (Реалізація)</span>
+              </div>
+            ),
+            value: Operations.Debit,
+            className: styles.debitSegment,
+          },
+        ]}
+      />
     </Form.Item>
   )
 }

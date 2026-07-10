@@ -16,6 +16,8 @@ export interface PaymentPricesTableProps {
   currency?: string
   loading?: boolean
   invoices?: any[]
+  invoiceLang?: 'en' | 'uk'
+  showQuantityInPreview?: boolean
 }
 
 interface IPriceTableRow {
@@ -32,11 +34,7 @@ export function shouldShowInvoiceQuantityAndPriceColumns(
   usePreviewQuantityToggle?: boolean,
   showQuantityInPreview?: boolean
 ): boolean {
-  return (
-    !preview ||
-    !usePreviewQuantityToggle ||
-    !!showQuantityInPreview
-  )
+  return !preview || !usePreviewQuantityToggle || !!showQuantityInPreview
 }
 
 export function shouldUseGroupedByDomainPreviewLayout(
@@ -59,10 +57,17 @@ function getInvoiceTableLng(currency?: string): 'en' | 'uk' {
   return normalizeCurrency(currency) === 'UAH' ? 'uk' : 'en'
 }
 
-const invoiceMatchesGroupService = (invoice: any, service: any): boolean =>
-  invoice?.name === service?.name ||
-  invoice?.type === service?.fieldName ||
-  (invoice?.type === 'maintenancePrice' && service?.fieldName === 'rentPrice')
+const invoiceMatchesGroupService = (invoice: any, service: any): boolean => {
+  if (!invoice || !service) return false
+  if (invoice.name && invoice.name === service.name) return true
+  if (invoice.fieldName && invoice.fieldName === service.fieldName) return true
+  if (invoice.type && invoice.type === service.fieldName) return true
+  const invoiceId = invoice.serviceId
+  if (invoiceId && String(invoiceId) === String(service._id)) return true
+  if (invoice.type === 'maintenancePrice' && service.fieldName === 'rentPrice')
+    return true
+  return false
+}
 
 const assignInvoicesToGroupsFirstWin = (
   invoices: any[] | undefined,
@@ -75,10 +80,20 @@ const assignInvoicesToGroupsFirstWin = (
     return { groupRows: [], unmatchedInvoices: invoices ?? [] }
   }
 
+  // Whether a service is technically standard (Maintenance/Electricity/etc) or
+  // truly custom doesn't matter for grouping: if it's listed on the RIGHT of a
+  // user-defined group's Transfer, it gets rolled up under that group header.
+  // What renders standalone is everything that falls through to `remaining` —
+  // services that aren't in any user-defined group (the synthetic null bucket
+  // is skipped below) or that don't exist in the domain catalog at all.
   const remaining = new Set(invoices.filter((inv) => inv?.type !== 'discount'))
   const groupRows: Array<{ groupName: string; totalSum: string }> = []
 
   for (const group of groups) {
+    // Skip the synthetic "ungrouped" bucket (groupName: null) coming from the
+    // domain endpoint — services there render as individual line items, never
+    // collapsed under a header.
+    if (!group?.groupName) continue
     const groupInvoices: any[] = []
     for (const inv of [...remaining]) {
       if (
@@ -115,9 +130,17 @@ const assignInvoicesToGroupsFirstWin = (
 }
 
 function resolveInvoiceLabel(inv: any, t: TFunction<'groupedReceipt'>): string {
-  if (inv?.name) return inv.name
-  const key = getInvoiceServiceLabelKey(inv.type)
-  return t(`services.${key}`)
+  if (inv?.type === 'custom') {
+    const displayName =
+      inv?.name && inv.name !== 'custom'
+        ? inv.name
+        : inv?.customName && inv.customName !== 'custom'
+          ? inv.customName
+          : inv?.description || ''
+    return displayName
+  }
+  if (inv?.description) return inv.description
+  return inv?.name ?? t(`services.${getInvoiceServiceLabelKey(inv.type)}`)
 }
 
 const getColumns = (
@@ -224,9 +247,17 @@ const GroupedPricesTable: React.FC<PaymentPricesTableProps> = ({
   preview,
   usePreviewQuantityToggle,
   domainId,
+  invoiceLang,
+  showQuantityInPreview: showQuantityInPreviewProp,
 }) => {
-  const { form, company, showQuantityInPreview } = usePaymentContext()
-  const { domain } = form.getFieldsValue()
+  const {
+    form,
+    company,
+    showQuantityInPreview: showQuantityInPreviewCtx,
+  } = usePaymentContext()
+  const { domain } = form?.getFieldsValue?.() ?? {}
+  const showQuantityInPreview =
+    showQuantityInPreviewProp ?? showQuantityInPreviewCtx
   const { i18n } = useTranslation('groupedReceipt')
 
   const resolvedDomainId =
@@ -240,7 +271,7 @@ const GroupedPricesTable: React.FC<PaymentPricesTableProps> = ({
   )
 
   const resolvedCurrency = currency || company?.currency || domain?.currency
-  const invoiceLng = getInvoiceTableLng(resolvedCurrency)
+  const invoiceLng = invoiceLang ?? getInvoiceTableLng(resolvedCurrency)
 
   const tInvoice = useMemo(
     () => i18n.getFixedT(invoiceLng, 'groupedReceipt'),
@@ -297,7 +328,7 @@ const GroupedPricesTable: React.FC<PaymentPricesTableProps> = ({
     if (discountInvoice) {
       rows.push({
         key: rows.length + 1,
-        name: tInvoice('services.discount'),
+        name: resolveInvoiceLabel(discountInvoice, tInvoice),
         sum: discountInvoice.sum,
       })
     }
@@ -311,12 +342,7 @@ const GroupedPricesTable: React.FC<PaymentPricesTableProps> = ({
     })
 
     return rows
-  }, [
-    invoices,
-    tInvoice,
-    useGroupedByDomainLayout,
-    customDomainServices?.data,
-  ])
+  }, [invoices, tInvoice, useGroupedByDomainLayout, customDomainServices?.data])
 
   return (
     <Table<IPriceTableRow>

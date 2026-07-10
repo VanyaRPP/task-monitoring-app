@@ -67,9 +67,9 @@ const StreetsTable: React.FC<Props> = ({
 
   const closeModal = () => setIsModalOpen(false)
   const openModal = (street, actions) => {
-    setIsModalOpen(true),
+    ;(setIsModalOpen(true),
       setStreetActions({ ...streetActions, ...actions }),
-      setCurrentStreet(street)
+      setCurrentStreet(street))
   }
 
   if (isError) return <Alert message="Помилка" type="error" showIcon closable />

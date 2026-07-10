@@ -9,13 +9,12 @@ import { useState } from 'react'
 
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 import AddDomainModal from '@components/UI/DomainsComponents/DomainModal'
-import { AppRoutes } from '@utils/constants'
-import { Roles } from '@utils/constants'
+import { AppRoutes, Roles } from '@utils/constants'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 
 export interface Props {
-  currentDomain?: IExtendedDomain
-  setCurrentDomain?: (domain: IExtendedDomain) => void
+  currentDomain?: IExtendedDomain | null
+  setCurrentDomain?: (domain: IExtendedDomain | null) => void
   setDomainActions: React.Dispatch<
     React.SetStateAction<{
       edit: boolean
@@ -24,6 +23,7 @@ export interface Props {
   domainActions: {
     edit: boolean
   }
+  children?: React.ReactNode
 }
 
 const DomainsHeader: React.FC<Props> = ({
@@ -31,6 +31,7 @@ const DomainsHeader: React.FC<Props> = ({
   setCurrentDomain,
   domainActions,
   setDomainActions,
+  children,
 }) => {
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -40,21 +41,29 @@ const DomainsHeader: React.FC<Props> = ({
   const isAdmin = isGlobalAdmin || isDomainAdmin
 
   const openModal = () => {
-    setCurrentDomain(null)
+    if (setCurrentDomain) setCurrentDomain(null)
     setDomainActions({ edit: true })
     setIsModalOpen(true)
   }
 
   const closeModal = () => {
     setIsModalOpen(false)
-    setCurrentDomain(null)
+    if (setCurrentDomain) setCurrentDomain(null)
     setDomainActions({
       edit: false,
     })
   }
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        width: '100%',
+        position: 'relative',
+      }}
+    >
       <Button type="link" onClick={() => router.push(AppRoutes.DOMAIN)}>
         Надавачі послуг
         <SelectOutlined />
@@ -62,8 +71,17 @@ const DomainsHeader: React.FC<Props> = ({
           <QuestionCircleOutlined />
         </Tooltip>
       </Button>
+      <div
+        style={{
+          position: 'absolute',
+          left: '50%',
+          transform: 'translateX(-50%)',
+        }}
+      >
+        {children}
+      </div>
 
-      <>
+      <div>
         {isAdmin && (
           <Button type="link" onClick={openModal}>
             <PlusOutlined /> Додати
@@ -71,12 +89,12 @@ const DomainsHeader: React.FC<Props> = ({
         )}
         {(isModalOpen || currentDomain) && (
           <AddDomainModal
-            currentDomain={currentDomain}
+            currentDomain={currentDomain as IExtendedDomain}
             closeModal={closeModal}
             editable={domainActions.edit}
           />
         )}
-      </>
+      </div>
     </div>
   )
 }

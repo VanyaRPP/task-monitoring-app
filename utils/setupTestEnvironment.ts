@@ -20,17 +20,23 @@ import {
 } from '@utils/testData'
 
 export const setupTestEnvironment = () => {
-  const server = new MongoMemoryServer()
+  // Each suite spins up its own mongod. When Jest runs many suites in parallel
+  // under load, the default 10s launch timeout is too tight and the instance
+  // spuriously fails with "Instance failed to start within 10000ms", cascading
+  // into hook timeouts. Give it generous headroom.
+  const server = new MongoMemoryServer({
+    instance: { launchTimeout: 60000 },
+  })
 
   beforeAll(async () => {
     await server.start()
 
     mongoose.set('strictQuery', false)
-    mongoose.connect(server.getUri(), {
+    await mongoose.connect(server.getUri(), {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     } as any)
-  })
+  }, 120000) // mongod binary may need to download/boot on a cold run (> launchTimeout)
 
   beforeEach(async () => {
     await User.insertMany(Object.values(users))

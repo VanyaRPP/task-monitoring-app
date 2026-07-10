@@ -1,17 +1,11 @@
-import { validateField } from '@assets/features/validators'
-import EmailSelect from '@components/UI/Reusable/EmailSelect'
-import { Form, FormInstance, Input, Select } from 'antd'
-import DomainStreets from './DomainStreets'
+import { Form, FormInstance, Tabs } from 'antd'
+import { FC } from 'react'
+import BankTab from './tabs/BankTab'
+import GeneralTab from './tabs/GeneralTab'
+import HistoryTab from './tabs/HistoryTab'
+import MyServicesTab from './tabs/MyServicesTab'
+import TemplateTab from './tabs/TemplateTab'
 import s from './style.module.scss'
-import DomainInfo from './DomainInfo'
-import DomainsServices from './DomainsServices'
-import ServicesSelect from '@components/UI/Reusable/ServicesSelect'
-
-const TEMPLATE_OPTIONS = [
-  { value: 'classic', label: 'Класичний шаблон' },
-  { value: 'olimp',   label: 'OLIMP DIGITAL OÜ' },
-  { value: 'ledger',  label: 'Formal Ledger' },
-]
 
 interface Props {
   form: FormInstance<any>
@@ -20,12 +14,14 @@ interface Props {
   domainId?: string
 }
 
-const DomainForm: React.FC<Props> = ({
+const DomainForm: FC<Props> = ({
   form,
   editable = true,
   setIsValueChanged,
   domainId,
 }) => {
+  const tabProps = { form, editable, domainId, setIsValueChanged }
+
   return (
     <Form
       form={form}
@@ -34,35 +30,37 @@ const DomainForm: React.FC<Props> = ({
       className={s.Form}
       onValuesChange={() => setIsValueChanged(true)}
     >
-      <Form.Item name="name" label="Назва" rules={validateField('required')}>
-        <Input
-          placeholder="Вкажіть значення"
-          maxLength={256}
-          className={s.formInput}
-          disabled={!editable}
-        />
-      </Form.Item>
-      <EmailSelect form={form} disabled={!editable} />
-      <DomainStreets disabled={!editable} />
-      <ServicesSelect form={form} disabled={!editable} domainId={domainId} />
-      <DomainsServices
-        form={form}
-        editable={editable}
-        domainId={domainId}
+      <Tabs
+        defaultActiveKey="general"
+        destroyInactiveTabPane={false}
+        items={[
+          {
+            key: 'general',
+            label: 'Загальне',
+            children: <GeneralTab {...tabProps} />,
+          },
+          {
+            key: 'template',
+            label: 'Шаблон',
+            children: <TemplateTab {...tabProps} />,
+          },
+          {
+            key: 'services',
+            label: 'Мої послуги',
+            children: <MyServicesTab {...tabProps} />,
+          },
+          {
+            key: 'history',
+            label: 'Історія налаштувань',
+            children: <HistoryTab form={form} domainId={domainId} />,
+          },
+          {
+            key: 'bank',
+            label: 'Банк API',
+            children: <BankTab {...tabProps} />,
+          },
+        ]}
       />
-      <DomainInfo editable={editable} form={form} currentDomainId={domainId} setIsValueChanged={setIsValueChanged} />
-          <Form.Item 
-      name="defaultTemplate" 
-      label="Шаблон за замовчуванням для рахунків"
-      className={s.templateItem} // Додаємо наш новий клас сюди
-    >
-      <Select
-        options={TEMPLATE_OPTIONS}
-        placeholder="Класичний шаблон"
-        disabled={!editable}
-        allowClear
-      />
-    </Form.Item>
     </Form>
   )
 }

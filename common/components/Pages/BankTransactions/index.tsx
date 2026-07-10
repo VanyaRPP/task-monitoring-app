@@ -41,10 +41,13 @@ const BankTransactions = () => {
   }, [tabList, activeDomainId, dispatch])
 
   const contentList = useMemo(() => {
-    return tabList.reduce((acc, domain) => {
-      acc[domain.key] = <DomainBankTab domainId={domain.key} />
-      return acc
-    }, {} as Record<string, ReactNode>)
+    return tabList.reduce(
+      (acc, domain) => {
+        acc[domain.key] = <DomainBankTab domainId={domain.key} />
+        return acc
+      },
+      {} as Record<string, ReactNode>
+    )
   }, [tabList])
 
   const onTabChange = (key: string) => {
@@ -88,7 +91,11 @@ const BankTransactions = () => {
           activeTabKey={activeDomainId || tabList[0].key}
           onTabChange={onTabChange}
         >
-          {USE_MOCK ? <MockDomainBankTab /> : activeDomainId ? contentList[activeDomainId] : null}
+          {USE_MOCK ? (
+            <MockDomainBankTab domainId={activeDomainId || tabList[0].key} />
+          ) : activeDomainId ? (
+            contentList[activeDomainId]
+          ) : null}
         </Card>
       )}
     </Space>

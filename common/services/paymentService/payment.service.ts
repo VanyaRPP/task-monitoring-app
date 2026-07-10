@@ -4,27 +4,21 @@ import RealEstate from '@modules/models/RealEstate'
 import Service from '@modules/models/Service'
 import {
   getCreditDebitPipeline,
-  getInvoicesTotalPipeline,
+  getMaxInvoiceNumber,
+  getServiceTotalsPipeline,
   getTotalGeneralSumPipeline,
 } from '@pages/api/spacehub/payment/pipelines'
 import { quarters, SortOrder } from '@utils/constants'
 import {
-  getDistinctCompanyAndDomain,
-  getFilterForAddress,
-} from '@utils/helpers'
-import {
   sendInvoiceEmail,
   type InvoiceEmailPayment,
 } from '@utils/email/sendInvoiceEmail'
-import { getStreetsPipeline } from '@utils/pipelines'
 import { FilterQuery } from 'mongoose'
 import ProfitService from '@common/services/profitService/profit.service'
+import { isDev } from '@utils/env'
 
 function isEmailDebugEnabled() {
-  return (
-    process.env.EMAIL_DEBUG === 'true' ||
-    process.env.NODE_ENV === 'development'
-  )
+  return process.env.EMAIL_DEBUG === 'true' || isDev
 }
 
 function maskEmail(email?: string) {
@@ -49,7 +43,7 @@ function logPaymentEmailDebug(stage: string, details: Record<string, unknown>) {
   if (!isEmailDebugEnabled()) {
     return
   }
-
+  // eslint-disable-next-line no-console
   console.info(`[payment-email] ${stage}`, details)
 }
 
@@ -199,39 +193,30 @@ export async function getPayments(
     .populate('domain')
     .populate('monthService')
 
-  const streetsPipeline = getStreetsPipeline(isGlobalAdmin, options.domain)
-
-  const streets = await Payment.aggregate(streetsPipeline)
-  const addressFilter = getFilterForAddress(streets)
-
   const total = await Payment.countDocuments(options)
 
-  const { distinctDomains, distinctCompanies } =
-    await getDistinctCompanyAndDomain({
-      isGlobalAdmin,
-      user,
-      companyGroup: 'company',
-      model: Payment,
-      filters: {},
-    })
+  const [distinctDomainIds, distinctCompanyIds] = await Promise.all([
+    Payment.distinct('domain', options),
+    Payment.distinct('company', options),
+  ])
 
   const creditDebitPipeline = getCreditDebitPipeline(options)
   const totalPayments = await Payment.aggregate(creditDebitPipeline)
 
-  const invoicesPipeline = getInvoicesTotalPipeline(options)
-  const totalInvoices = await Payment.aggregate(invoicesPipeline)
-
   const genralSumPipeline = getTotalGeneralSumPipeline(options)
   const totalGeneralSum = await Payment.aggregate(genralSumPipeline)
 
+  const serviceTotalsPipeline = getServiceTotalsPipeline(options)
+  const serviceTotals = await Payment.aggregate(serviceTotalsPipeline)
+
   const totalPaymentsData = [
     ...totalPayments,
-    ...totalInvoices,
     ...totalGeneralSum,
+    ...serviceTotals,
   ]
   return {
-    currentCompaniesCount: distinctCompanies.length,
-    currentDomainsCount: distinctDomains.length,
+    currentCompaniesCount: distinctCompanyIds.length,
+    currentDomainsCount: distinctDomainIds.length,
     data: payments,
     totalPayments: totalPaymentsData.reduce((acc, item) => {
       acc[item._id] = item.totalSum
@@ -242,8 +227,22 @@ export async function getPayments(
   }
 }
 
-export async function createPayment(body: any, isAdmin: boolean) {
+export async function getNextInvoiceNumber(): Promise<number> {
+  const result = (await Payment.aggregate(getMaxInvoiceNumber())) as Array<{
+    maxNumber?: number
+  }>
+  return (result[0]?.maxNumber ?? 0) + 1
+}
+
+export async function createPayment(
+  body: any,
+  isAdmin: boolean,
+  options: { sendInvoiceEmail?: boolean } = {}
+) {
   if (!isAdmin) throw new Error('not allowed')
+
+  // Renamed locally to avoid shadowing the imported `sendInvoiceEmail` function.
+  const { sendInvoiceEmail: shouldSendInvoiceEmail = true } = options
 
   const payment = await Payment.create(body)
 
@@ -264,7 +263,7 @@ export async function createPayment(body: any, isAdmin: boolean) {
 
   await ProfitService.create(profitObject)
 
-  if (payment.type === 'debit') {
+  if (shouldSendInvoiceEmail && payment.type === 'debit') {
     try {
       logPaymentEmailDebug('prepare_started', {
         paymentId: payment.id?.toString?.() || 'unknown',
@@ -272,10 +271,9 @@ export async function createPayment(body: any, isAdmin: boolean) {
         domainId: payment.domain?.toString?.() || 'unknown',
       })
 
-      const paymentSnapshot =
-        (typeof payment.toObject === 'function'
-          ? payment.toObject()
-          : payment) as InvoiceEmailPayment
+      const paymentSnapshot = (
+        typeof payment.toObject === 'function' ? payment.toObject() : payment
+      ) as InvoiceEmailPayment
       const currentReceiver = paymentSnapshot.reciever || {}
       const shouldLoadDomainData =
         !currentReceiver.companyName ||
@@ -290,10 +288,9 @@ export async function createPayment(body: any, isAdmin: boolean) {
 
       paymentSnapshot.reciever = {
         companyName: currentReceiver.companyName || domain?.name || 'invoice',
-        adminEmails:
-          currentReceiver.adminEmails?.length
-            ? currentReceiver.adminEmails
-            : domain?.adminEmails || [],
+        adminEmails: currentReceiver.adminEmails?.length
+          ? currentReceiver.adminEmails
+          : domain?.adminEmails || [],
         description: currentReceiver.description || domain?.description || '',
       }
 
@@ -324,6 +321,94 @@ export async function createPayment(body: any, isAdmin: boolean) {
   }
 
   return payment
+}
+
+export interface DuplicatePaymentsPerms {
+  isGlobalAdmin: boolean
+  isDomainAdmin: boolean
+  user: { email: string }
+}
+
+export interface DuplicatePaymentsResult {
+  createdIds: string[]
+  skippedIds: string[]
+  totalRequested: number
+}
+
+// Fields that must NOT be carried over to a duplicate: identity/versioning
+// (`_id`, `__v`), values we re-generate (`invoiceNumber`, `invoiceCreationDate`),
+// and payment-specific state that a fresh copy should not inherit (`transaction`).
+// A denylist keeps duplication resilient to new schema fields.
+const NON_COPYABLE_PAYMENT_FIELDS = [
+  '_id',
+  '__v',
+  'invoiceNumber',
+  'invoiceCreationDate',
+  'transaction',
+] as const
+
+export async function duplicatePayments(
+  ids: string[],
+  perms: DuplicatePaymentsPerms
+): Promise<DuplicatePaymentsResult> {
+  const { isGlobalAdmin, user } = perms
+
+  const sources = await Payment.find({ _id: { $in: ids } })
+
+  // Non-global admins may only duplicate payments within domains they administer.
+  let allowedDomainIds: Set<string> | null = null
+  if (!isGlobalAdmin) {
+    const domains = await Domain.find({ adminEmails: user.email })
+    allowedDomainIds = new Set(domains.map((d) => d._id.toString()))
+  }
+
+  const createdIds: string[] = []
+  const skippedIds: string[] = []
+
+  // Resolve the next invoice number once and increment locally, instead of
+  // running a `$max` aggregation per payment inside the loop.
+  let nextInvoiceNumber = await getNextInvoiceNumber()
+
+  for (const source of sources) {
+    const domainId = source.domain ? source.domain.toString() : null
+    if (allowedDomainIds && (!domainId || !allowedDomainIds.has(domainId))) {
+      skippedIds.push(source._id.toString())
+      continue
+    }
+
+    const body = source.toObject() as Record<string, unknown>
+    for (const field of NON_COPYABLE_PAYMENT_FIELDS) {
+      delete body[field]
+    }
+    body.invoiceNumber = nextInvoiceNumber
+    body.invoiceCreationDate = new Date()
+
+    try {
+      const created = await createPayment(body, true, {
+        sendInvoiceEmail: false,
+      })
+      createdIds.push(created.id.toString())
+      // Only advance the counter once the payment actually persisted, so a
+      // failed create leaves the number free for the next duplicate.
+      nextInvoiceNumber += 1
+    } catch (error) {
+      console.error('[payment-duplicate] create_failed', {
+        sourceId: source._id.toString(),
+        message: (error as Error)?.message,
+      })
+      skippedIds.push(source._id.toString())
+    }
+  }
+
+  const notFoundIds = ids.filter(
+    (id) => !sources.some((p) => p._id.toString() === id)
+  )
+
+  return {
+    createdIds,
+    skippedIds: [...skippedIds, ...notFoundIds],
+    totalRequested: ids.length,
+  }
 }
 
 function filterPeriodOptions(args) {

@@ -21,16 +21,18 @@ describe('API Route - GET Method', () => {
     await CustomService.deleteMany({})
   })
 
-  const mockServiceCreation = async () => {
-    return CustomService.create({
-      name: 'Test Service',
-      fieldName: 'testService',
-    })
+  const mockServiceCreation = async (
+    name = 'Test Service',
+    fieldName = 'testService'
+  ) => {
+    return CustomService.create({ name, fieldName })
   }
 
   it('returns all services if _id is not passed', async () => {
-    await mockServiceCreation()
-    await mockServiceCreation()
+    // Distinct names: listCustomServicesForDomain de-duplicates by name, so
+    // two identically-named services would collapse into one.
+    await mockServiceCreation('Test Service A', 'testServiceA')
+    await mockServiceCreation('Test Service B', 'testServiceB')
 
     const mockRequest = { method: 'GET', query: {} } as any
     const mockResponse = {
@@ -69,9 +71,9 @@ describe('API Route - GET Method', () => {
         email: 'user@example.com',
       })
 
-      const mockRequest = { 
+      const mockRequest = {
         method: 'GET',
-        query: {} 
+        query: {},
       } as any
       const mockResponse = {
         status: jest.fn(() => mockResponse),
@@ -98,7 +100,7 @@ describe('API Route - GET Method', () => {
 
       const mockRequest = {
         method: 'GET',
-        query: {} 
+        query: {},
       } as any
       const mockResponse = {
         status: jest.fn(() => mockResponse),
@@ -122,7 +124,7 @@ describe('API Route - GET Method', () => {
 
       const mockRequest = {
         method: 'GET',
-        query: {}
+        query: {},
       } as any
       const mockResponse = {
         status: jest.fn(() => mockResponse),

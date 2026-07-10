@@ -1,3 +1,18 @@
+// Match real-estates the current user is allowed to see:
+// global admin sees all; otherwise pass if user's email is listed either on
+// the real-estate (USER access) or on its parent domain (DOMAIN_ADMIN access).
+const visibleRealEstateMatch = (isGlobalAdmin, email) => ({
+  $match: {
+    $expr: {
+      $or: [
+        { $eq: [isGlobalAdmin, true] },
+        { $in: [email, { $ifNull: ['$adminEmails', []] }] },
+        { $in: [email, { $ifNull: ['$domainDetails.adminEmails', []] }] },
+      ],
+    },
+  },
+})
+
 export function getDomainsPipeline(
   isGlobalAdmin,
   email,
@@ -28,14 +43,9 @@ export function getDomainsPipeline(
       },
     },
     {
-      $group: {
-        _id: '$domain',
-      },
-    },
-    {
       $lookup: {
         from: 'domains',
-        localField: '_id',
+        localField: 'domain',
         foreignField: '_id',
         as: 'domainDetails',
       },
@@ -43,14 +53,17 @@ export function getDomainsPipeline(
     {
       $unwind: '$domainDetails',
     },
+    visibleRealEstateMatch(isGlobalAdmin, email),
+    {
+      $group: {
+        _id: '$domain',
+        domainDetails: { $first: '$domainDetails' },
+      },
+    },
     {
       $match: {
         $expr: {
-          $cond: [
-            { $eq: [isGlobalAdmin, true] },
-            true,
-            { $in: [email, '$domainDetails.adminEmails'] },
-          ],
+          $ne: ['$domainDetails.archived', true],
         },
       },
     },
@@ -123,7 +136,7 @@ export function getRealEstatesPipeline({
 
 export function getStreetsPipeline(
   isGlobalAdmin,
-  domains,
+  email,
   filteredCompanys = null,
   filteredDomains = null
 ) {
@@ -150,6 +163,18 @@ export function getStreetsPipeline(
         },
       },
     },
+    {
+      $lookup: {
+        from: 'domains',
+        localField: 'domain',
+        foreignField: '_id',
+        as: 'domainDetails',
+      },
+    },
+    {
+      $unwind: '$domainDetails',
+    },
+    visibleRealEstateMatch(isGlobalAdmin, email),
     {
       $lookup: {
         from: 'streets',

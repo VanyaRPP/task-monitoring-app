@@ -1,4 +1,5 @@
-import { FC, useEffect, useRef, useState } from 'react'
+import { FC, useMemo, useRef } from 'react'
+import { Form } from 'antd'
 import { useReactToPrint } from 'react-to-print'
 import { PrinterOutlined, TableOutlined } from '@ant-design/icons'
 import { Tooltip } from 'antd'
@@ -8,36 +9,34 @@ import GroupedPricesTable from '@components/Forms/GroupedReceiptForm/GroupedPric
 import { IPayment } from '@common/api/paymentApi/payment.api.types'
 import { getCurrencyNames, normalizeCurrency } from '@utils/helpers'
 import { usePaymentContext } from '@components/AddPaymentModal'
+import { useInvoiceCurrency } from '@modules/hooks/useInvoiceCurrency'
 import {
   getDomainHeading,
   getRecipientCompanyHeading,
 } from '@common/components/Forms/GroupedReceiptForm/templates/invoice-party-headings'
 
 const PriceList: FC<{ data: IPayment }> = ({ data }) => {
-  const [payment, setPayment] = useState(data)
-  const [totalSum, setTotalSum] = useState(0)
-  const [totalFractionSum, setTotalFractionSum] = useState(0)
+  const { form, company, showQuantityInPreview, setShowQuantityInPreview } =
+    usePaymentContext()
+  const currency = useInvoiceCurrency()
 
-  useEffect(() => {
-    setPayment(data)
-  }, [data])
+  const liveInvoice = Form.useWatch('invoice', form)
 
-  useEffect(() => {
+  // Single source of truth: live form values when present, otherwise the
+  // payment snapshot from props.
+  const payment = useMemo(
+    () => (liveInvoice ? { ...data, invoice: liveInvoice } : data),
+    [data, liveInvoice]
+  )
+
+  const { totalSum, totalFractionSum } = useMemo(() => {
     const sum = payment.invoice.reduce((acc, item) => acc + Number(item.sum), 0)
-    setTotalSum(sum)
-
     const [, fraction] = sum.toFixed(2).split('.')
-    setTotalFractionSum(Number(fraction))
-  }, [payment])
+    return { totalSum: sum, totalFractionSum: Number(fraction) }
+  }, [payment.invoice])
 
-  const paymentCompany = payment?.company as { currency?: string } | string | undefined
-  const companyCurrency = typeof paymentCompany === 'object' ? paymentCompany?.currency : undefined
-  const currency = payment?.currency || companyCurrency || payment?.domain?.currency 
   const isEnglish = normalizeCurrency(currency) !== 'UAH'
   const currencyNames = getCurrencyNames(currency, isEnglish)
-
-  const { company, showQuantityInPreview, setShowQuantityInPreview } =
-    usePaymentContext()
 
   const domainNameFromContext =
     typeof company?.domain === 'object' && company?.domain !== null
@@ -170,7 +169,9 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
 
           <div className={styles.titleSection}>
             <h1>
-              <b>{isEnglish ? 'SERVICE ACCEPTANCE ACT' : 'АКТ надання послуг'}</b>
+              <b>
+                {isEnglish ? 'SERVICE ACCEPTANCE ACT' : 'АКТ надання послуг'}
+              </b>
             </h1>
             <p>
               <b>
@@ -189,21 +190,18 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
               {isEnglish ? (
                 <>
                   We, the undersigned, the representative of the Customer{' '}
-                  {introCustomerText}
-                  , on one side, and the representative of the Provider{' '}
-                  {introProviderText}
-                  , on the other side, have executed this Act confirming that,
-                  under the agreement, the Provider performed the following
-                  services:
+                  {introCustomerText}, on one side, and the representative of
+                  the Provider {introProviderText}, on the other side, have
+                  executed this Act confirming that, under the agreement, the
+                  Provider performed the following services:
                 </>
               ) : (
                 <>
                   Ми, що нижче підписалися, представник Замовника{' '}
-                  {introCustomerText}
-                  , з одного боку, і представник Виконавця {introProviderText},
-                  з іншого боку, склали цей акт про те, що на підставі
-                  договору, Виконавцем були виконані наступні роботи (надані
-                  такі послуги):
+                  {introCustomerText}, з одного боку, і представник Виконавця{' '}
+                  {introProviderText}, з іншого боку, склали цей акт про те, що
+                  на підставі договору, Виконавцем були виконані наступні роботи
+                  (надані такі послуги):
                 </>
               )}
             </p>

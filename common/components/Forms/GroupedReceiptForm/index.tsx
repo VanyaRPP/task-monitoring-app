@@ -1,37 +1,29 @@
-import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
+import {
+  IExtendedPayment,
+  TemplateScope,
+} from '@common/api/paymentApi/payment.api.types'
 import { useEditPaymentMutation } from '@common/api/paymentApi/payment.api'
 import { usePaymentContext } from '@components/AddPaymentModal'
+import { useInvoiceCurrency } from '@modules/hooks/useInvoiceCurrency'
 import { TemplateKey } from '@components/AddPaymentModal/resolveTemplate'
-import { getCurrencyShortLabel, normalizeCurrency } from '@utils/helpers'
-import { Currency } from '@utils/constants'
-import dayjs from 'dayjs'
 import { FC, useRef } from 'react'
 import { useReactToPrint } from 'react-to-print'
+import { useReceiptTemplateProps } from './useReceiptTemplateProps'
+import { useInvoiceTemplateDescriptions } from './useInvoiceTemplateDescriptions'
+import { applyDescriptionOverrides } from './applyDescriptionOverrides'
+import { builtinTemplateItems } from './builtinTemplates'
 import {
   PrinterOutlined,
   LayoutOutlined,
   RightOutlined,
   CheckOutlined,
   TableOutlined,
+  MoreOutlined,
 } from '@ant-design/icons'
-import { Dropdown, Tooltip, message, MenuProps } from 'antd'
-import dynamic from 'next/dynamic'
+import { Dropdown, Form, message, MenuProps, Button } from 'antd'
 import s from './style.module.scss'
-
-const templateItems = [
-  { key: 'classic',    label: 'Класичний шаблон' },
-  { key: 'olimp',      label: 'OLIMP DIGITAL OÜ' },
-  { key: 'ledger',     label: 'Formal Ledger' },
-  { key: 'official',   label: 'Official Invoice' },
-]
-
-const templateMap = {
-  classic: dynamic(() => import('./templates/classic'), { ssr: false }),
-  ledger:  dynamic(() => import('./templates/ledger'),  { ssr: false }),
-  olimp:   dynamic(() => import('./templates/olimp'),   { ssr: false }),
-  official: dynamic(() => import('./templates/official'), { ssr: false }),
-}
-
+import { templateMap } from './templateMap'
+import InvoiceLanguageSelector from './InvoiceLanguageSelector'
 
 interface Props {
   currPayment?: IExtendedPayment | null
@@ -39,172 +31,104 @@ interface Props {
   paymentActions: { preview: boolean; edit: boolean }
 }
 
-const GroupedReceiptForm: FC<Props> = ({
-  currPayment,
-  paymentData,
-  paymentActions: _paymentActions,
-}) => {
-  const { template, setTemplate, company, showQuantityInPreview, setShowQuantityInPreview } =
-    usePaymentContext()
+const GroupedReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
+  const {
+    form,
+    template,
+    setTemplate,
+    setTemplateScope,
+    company,
+    showQuantityInPreview,
+    setShowQuantityInPreview,
+    invoiceLang,
+    setInvoiceLang,
+  } = usePaymentContext()
   const [editPayment] = useEditPaymentMutation()
+  const invoiceCurrency = useInvoiceCurrency()
+  const liveInvoice = Form.useWatch('invoice', form)
   const rawData = currPayment ?? paymentData ?? null
-  const data = rawData as any
-  const currency =
-    data?.currency || data?.company?.currency || company?.currency || data?.domain?.currency
-  const currencyLabel = getCurrencyShortLabel(currency)
-  const isEnglish = normalizeCurrency(currency) !== Currency.UAH
-  const invoiceDatePrefix = dayjs(data?.invoiceCreationDate).isValid()
-    ? dayjs(data?.invoiceCreationDate).format('DDMMYY')
-    : ''
-  const modernInvoiceNumber = `${invoiceDatePrefix}${data?.invoiceNumber || ''}`
-  const domainName =
-    data?.domain?.name ||
-    (typeof company?.domain === 'object' ? company?.domain?.name : '')
-  const rows = (data?.invoice || []).filter((item: any) => Number(item?.sum) !== 0)
-
-  const getQty = (item: any) => {
-    if (Number.isFinite(Number(item?.amount))) {
-      if (Number.isFinite(Number(item?.lastAmount))) {
-        return Number(item.amount) - Number(item.lastAmount)
+  const data = rawData
+    ? {
+        ...rawData,
+        invoice: liveInvoice ?? rawData.invoice,
+        currency: invoiceCurrency,
       }
-      return Number(item.amount)
-    }
-    return 1
-  }
+    : rawData
 
-  const subtotal = rows.reduce(
-    (acc: number, item: any) => acc + Number(item?.sum || 0),
-    0
-  )
-  const taxPercent = 0
-  const taxAmount = 0
-  const total = subtotal + taxAmount
+  const {
+    customTemplates,
+    isCustomTemplate,
+    currentCustomTemplate,
+    descriptionOverrides,
+    overrides,
+  } = useInvoiceTemplateDescriptions({ data })
 
-  const domainDescription =
-    data?.domain?.description ||
-    (typeof company?.domain === 'object' ? company?.domain?.description : '')
+  const effectiveData = applyDescriptionOverrides(data, descriptionOverrides)
 
-  const issuedToLines = [...(domainDescription?.trim()?.split('\n') || [])].filter(
-    Boolean
-  )
-
-  const receiverDescriptionLines = (
-    data?.reciever?.description?.split('\n') || []
-  )
-    .map((line: string) => line?.trim())
-    .filter(Boolean)
-
-  const bankDetailsTriggerRegex =
-    /(account details|usd account details|iban|swift|bic|bank name|bank address|bank name and address|рахунок|банк|мфо)/i
-
-  const paymentInfoDescriptionLines: string[] = []
-  const bankDetailsLines: string[] = []
-  let isBankSection = false
-
-  receiverDescriptionLines.forEach((line: string) => {
-    if (bankDetailsTriggerRegex.test(line)) {
-      isBankSection = true
-    }
-
-    if (isBankSection) {
-      bankDetailsLines.push(line)
-    } else {
-      paymentInfoDescriptionLines.push(line)
-    }
+  const receiptProps = useReceiptTemplateProps({
+    data: effectiveData,
+    contextCompany: company,
+    lang: invoiceLang,
+    descriptionOverrides,
+    overrides,
+    showQuantityInPreview,
   })
 
-  const bankAddressLabelRegex =
-    /^(bank name and address|bank name|bank address|назва банку|адреса банку)\s*:/i
-
-  const normalizedBankDetailsLines = bankDetailsLines.reduce(
-    (acc: string[], line: string) => {
-      const normalizedLine = line?.trim()
-      if (!normalizedLine) {
-        return acc
-      }
-
-      const lastLine = acc[acc.length - 1] || ''
-      const shouldAppendToPrevious =
-        !!lastLine &&
-        bankAddressLabelRegex.test(lastLine) &&
-        !normalizedLine.includes(':')
-
-      if (shouldAppendToPrevious) {
-        acc[acc.length - 1] = `${lastLine} ${normalizedLine}`.trim()
-      } else {
-        acc.push(normalizedLine)
-      }
-
-      return acc
-    },
-    []
-  )
-
-  const entrepreneurTitleRegex =
-    /^(private entrepreneur|private enterprise|fop|фоп|фізична особа\s*-?\s*підприємець)$/i
-
-  const normalizedCompanyName = (data?.reciever?.companyName || '').trim()
-  const firstPaymentInfoLine = (paymentInfoDescriptionLines?.[0] || '').trim()
-  const hasEntrepreneurTitle = entrepreneurTitleRegex.test(firstPaymentInfoLine)
-
-  const companyDisplayName = hasEntrepreneurTitle
-    ? `${firstPaymentInfoLine} ${normalizedCompanyName}`.trim()
-    : normalizedCompanyName
-
-  const paymentInfoBodyLines = hasEntrepreneurTitle
-    ? paymentInfoDescriptionLines.slice(1)
-    : paymentInfoDescriptionLines
-
-  const shouldPrependDescriptionTitleLine = hasEntrepreneurTitle || !normalizedCompanyName
-
-  const paymentInfoLines = [
-    ...(shouldPrependDescriptionTitleLine && companyDisplayName
-      ? [companyDisplayName]
-      : []),
-    ...paymentInfoBodyLines,
-    ...(data?.reciever?.adminEmails || []),
-  ].filter(Boolean)
+  const {
+    isEnglish,
+    currencyLabel,
+    currency,
+    modernInvoiceNumber,
+    domainName,
+    companyLabel: receiptCompanyLabel,
+    rows,
+    getQty,
+    subtotal,
+    taxPercent,
+    taxAmount,
+    total,
+    paymentInfoLines,
+    issuedToLines,
+    normalizedBankDetailsLines,
+  } = receiptProps
 
   const componentRef = useRef<HTMLDivElement | null>(null)
+
+  const printCompanyName =
+    (typeof data?.company === 'object'
+      ? data.company?.companyName
+      : undefined) ??
+    data?.reciever?.companyName ??
+    ''
 
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
     documentTitle:
-      (data?.company?.companyName ?? data?.reciever?.companyName ?? '') +
-        '-inv-' +
-        (data?.invoiceNumber ?? '') || 'invoice',
+      `${printCompanyName}-inv-${modernInvoiceNumber}` || 'invoice',
   })
-  if (!rawData) {
-    return null
-  }
 
-  const handleSendToTelegram = async () => {
-    const hide = message.loading('Генерація та відправка PDF...', 0);
+  if (!rawData) return null
 
-    try {
-      const response = await fetch('/api/telegram/send-pdf', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ paymentData: data }),
-      });
+  const companyLabel = receiptCompanyLabel
 
-      if (response.ok) {
-        message.success('Готово! Інвойс уже в Telegram.');
-      } else {
-        throw new Error('Помилка сервера при генерації PDF');
-      }
-    } catch (err: any) {
-      message.error(err.message);
-    } finally {
-      hide();
-    }
-  };
-
-  const companyLabel = (data?.company as any)?.companyName ?? company?.companyName ?? ''
-
-  const handleSaveTemplate = async (templateKey: TemplateKey, scope?: 'company' | 'domain' | 'payment') => {
-    if (!data?._id) return message.warning('Платіж не знайдено')
+  const handleSaveTemplate = async (
+    templateKey: TemplateKey,
+    scope?: TemplateScope
+  ) => {
     setTemplate(templateKey)
+    if (!data?._id) {
+      if (scope === 'company' || scope === 'domain') {
+        setTemplateScope(scope)
+        message.info(
+          `Шаблон буде встановлено як дефолт для ${
+            scope === 'company' ? 'компанії' : 'домену'
+          } після створення інвойсу`
+        )
+      } else if (scope === 'payment') {
+        setTemplateScope(undefined)
+      }
+      return
+    }
     const result = await editPayment({
       _id: data._id,
       template: templateKey,
@@ -219,19 +143,27 @@ const GroupedReceiptForm: FC<Props> = ({
     }
   }
 
+  const handleSaveLanguage = async (lang: 'en' | 'uk') => {
+    setInvoiceLang(lang)
+    if (!data?._id) return
+    const result = await editPayment({ _id: data._id, invoiceLang: lang })
+    if ('error' in result) {
+      message.error('Помилка збереження мови')
+    }
+  }
+
   const makeSaveMenu = (templateKey: TemplateKey): MenuProps => ({
     items: [
-      {
-        key: 'payment',
-        label: 'Зберегти для цього платежу',
-      },
+      { key: 'payment', label: 'Зберегти для цього платежу' },
       { type: 'divider' },
       {
         key: 'company',
         label: (
           <div>
             Дефолт для компанії{' '}
-            <span style={{ opacity: 0.5, fontSize: '13px' }}>«{companyLabel}»</span>
+            <span style={{ opacity: 0.5, fontSize: '13px' }}>
+              «{companyLabel}»
+            </span>
           </div>
         ),
       },
@@ -240,7 +172,9 @@ const GroupedReceiptForm: FC<Props> = ({
         label: (
           <div>
             Дефолт для домену{' '}
-            <span style={{ opacity: 0.5, fontSize: '13px' }}>«{domainName}»</span>
+            <span style={{ opacity: 0.5, fontSize: '13px' }}>
+              «{domainName}»
+            </span>
           </div>
         ),
       },
@@ -253,43 +187,89 @@ const GroupedReceiptForm: FC<Props> = ({
     },
   })
 
-  const dropdownItems = templateItems.map((item) => ({
+  const builtinDropdownItems = builtinTemplateItems.map((item) => ({
     key: item.key,
     label: (
-      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
         <span
           onClick={() => handleSaveTemplate(item.key as TemplateKey)}
-          style={{ display: 'flex', gap: 6 }}
+          style={{ display: 'flex', gap: 6, width: '100%' }}
         >
-          {template === item.key && <CheckOutlined style={{ fontSize: 12, opacity: 0.7 }} />}
+          {template === item.key && (
+            <CheckOutlined style={{ fontSize: 12, opacity: 0.7 }} />
+          )}
           {item.label}
         </span>
         <Dropdown
           placement={'right' as unknown as any}
           menu={makeSaveMenu(item.key as TemplateKey)}
-          trigger={['hover']}
+          trigger={['click']}
         >
-          <RightOutlined style={{ fontSize: 12, opacity: 0.7 }} />
+          <RightOutlined
+            style={{
+              fontSize: 12,
+              opacity: 0.7,
+              padding: '0 8px',
+              cursor: 'pointer',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          />
         </Dropdown>
       </div>
     ),
   }))
 
-  const TemplateComponent = templateMap[template] || templateMap.olimp
+  const customDropdownItems = customTemplates.map((ct) => ({
+    key: ct._id,
+    label: (
+      <span
+        onClick={() => handleSaveTemplate(ct._id as TemplateKey)}
+        style={{ display: 'flex', gap: 6, width: '100%', alignItems: 'center' }}
+      >
+        {template === ct._id && (
+          <CheckOutlined style={{ fontSize: 12, opacity: 0.7 }} />
+        )}
+        <span
+          style={{
+            maxWidth: 200,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {ct.name}
+        </span>
+      </span>
+    ),
+  }))
 
-  const companyLabelForTemplate =
-    (data?.company as { companyName?: string } | undefined)?.companyName ??
-    companyLabel
+  const dropdownItems = [
+    ...builtinDropdownItems,
+    ...(customTemplates.length > 0
+      ? [{ type: 'divider' as const }, ...customDropdownItems]
+      : []),
+  ]
 
+  const baseTemplateKey = isCustomTemplate
+    ? currentCustomTemplate?.baseTemplateKey || 'classic'
+    : template
+  const TemplateComponent = templateMap[baseTemplateKey] || templateMap.olimp
   const templateProps = {
-    data,
+    data: effectiveData,
     componentRef,
     isEnglish,
+    showQuantityInPreview,
     currencyLabel,
     currency,
     modernInvoiceNumber,
     domainName,
-    companyLabel: companyLabelForTemplate,
+    companyLabel,
     rows,
     getQty,
     subtotal,
@@ -299,49 +279,61 @@ const GroupedReceiptForm: FC<Props> = ({
     paymentInfoLines,
     issuedToLines,
     normalizedBankDetailsLines,
+    overrides,
   }
+
+  const mainMenuItems: MenuProps['items'] = [
+    {
+      key: 'print',
+      icon: <PrinterOutlined />,
+      label: isEnglish ? 'Print' : 'Друк',
+      onClick: handlePrint,
+    },
+    {
+      key: 'template',
+      icon: <LayoutOutlined />,
+      label: isEnglish ? 'Choose template' : 'Обрати шаблон',
+      children: dropdownItems,
+    },
+    {
+      key: 'tableToggle',
+      icon: <TableOutlined />,
+      label: showQuantityInPreview
+        ? 'Приховати кількість і ціну'
+        : 'Показати кількість і ціну',
+      onClick: () => setShowQuantityInPreview(!showQuantityInPreview),
+    },
+    { type: 'divider' },
+    {
+      key: 'language',
+      label: (
+        <div onClick={(e) => e.stopPropagation()}>
+          <InvoiceLanguageSelector
+            lang={invoiceLang}
+            onChange={handleSaveLanguage}
+          />
+        </div>
+      ),
+    },
+  ]
 
   return (
     <>
-      <Tooltip title="Друк">
-  <PrinterOutlined className={s.print} onClick={handlePrint} />
-</Tooltip>
-      <Dropdown
-        trigger={['click']}
-        placement="bottomLeft"
-        menu={{
-          items: dropdownItems,
-          style: { minWidth: 240 },
-        }}
-      >
-        <Tooltip title={isEnglish ? 'Select template' : 'Обрати шаблон'}>
-          <LayoutOutlined className={s.edit} />
-        </Tooltip>
-      </Dropdown>
-      <Tooltip title="Показувати кількість і ціну в таблиці перегляду">
-        <TableOutlined
-          role="button"
-          tabIndex={0}
-          aria-label={
-            showQuantityInPreview
-              ? 'Приховати кількість і ціну в перегляді'
-              : 'Показати кількість і ціну в перегляді'
-          }
-          aria-pressed={showQuantityInPreview}
-          className={`${s.tableDetailsToggle} ${
-            showQuantityInPreview ? s.tableDetailsToggleActive : ''
-          }`}
-          onClick={() =>
-            setShowQuantityInPreview(!showQuantityInPreview)
-          }
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault()
-              setShowQuantityInPreview(!showQuantityInPreview)
-            }
+      <div style={{ position: 'absolute', top: -85, right: 35, zIndex: 100 }}>
+        <Dropdown
+          menu={{
+            items: mainMenuItems,
+            style: { minWidth: 220, transform: 'translateX(35px)' },
           }}
-        />
-      </Tooltip>
+          trigger={['click']}
+        >
+          <Button
+            type="default"
+            style={{ borderColor: 'rgba(150, 150, 150, 0.4)' }}
+            icon={<MoreOutlined style={{ fontSize: 20, color: 'inherit' }} />}
+          />
+        </Dropdown>
+      </div>
 
       <TemplateComponent {...templateProps} />
     </>

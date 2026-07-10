@@ -5,12 +5,18 @@ import { mockLoginAs } from '@utils/mockLoginAs'
 import { setupTestEnvironment } from '@utils/setupTestEnvironment'
 import { domains, payments, realEstates, users } from '@utils/testData'
 import { sendInvoiceEmail } from '@utils/email/sendInvoiceEmail'
+import Domain from '@modules/models/Domain'
+import RealEstate from '@common/modules/models/RealEstate'
+import { logPaymentMutation } from '@common/modules/services/paymentAudit'
 
 jest.mock('next-auth', () => ({ getServerSession: jest.fn() }))
 jest.mock('@pages/api/auth/[...nextauth]', () => ({ authOptions: {} }))
 jest.mock('@pages/api/api.config', () => jest.fn())
 jest.mock('@utils/email/sendInvoiceEmail', () => ({
   sendInvoiceEmail: jest.fn(),
+}))
+jest.mock('@common/modules/services/paymentAudit', () => ({
+  logPaymentMutation: jest.fn(),
 }))
 
 setupTestEnvironment()
@@ -224,11 +230,14 @@ describe('Payments API - GET', () => {
     expect(response.status).toHaveBeenCalledWith(200)
 
     const received = parseReceived(response.data)
+    // users.user is a company owner (not a domain admin), so querying by a
+    // domainId returns payments for the companies they own within that domain.
     const expected = payments.filter((payment) => {
-      const domain = domains.find((domain) =>
-        domain.adminEmails.includes(users.user.email)
+      const company = realEstates.find((re) => re._id === payment.company)
+      return (
+        !!company?.adminEmails.includes(users.user.email) &&
+        payment.domain === domains[1]._id
       )
-      return payment.domain === domain?._id
     })
     expect(received).toEqual(expected)
   })
@@ -496,6 +505,191 @@ describe('Payments API - POST', () => {
         }),
       })
     )
+  })
+
+  it('writes a CREATE audit log on payment creation', async () => {
+    await mockLoginAs(users.globalAdmin)
+    const { _id, ...data } = payments[0]
+    ;(logPaymentMutation as jest.Mock).mockClear()
+
+    const mockReq = { method: 'POST', body: data } as any
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockReq, mockRes)
+
+    expect(mockRes.status).toHaveBeenLastCalledWith(200)
+    expect(logPaymentMutation).toHaveBeenCalledWith(
+      expect.objectContaining({ actionType: 'CREATE', source: 'single' })
+    )
+    // CREATE carries the new state in `after`; there is no prior state.
+    const auditArg = (logPaymentMutation as jest.Mock).mock.calls[0][0]
+    expect(auditArg.after).toBeDefined()
+    expect(auditArg.before).toBeUndefined()
+  })
+
+  it('writes a BULK_CREATE audit log when created via the bulk page', async () => {
+    await mockLoginAs(users.globalAdmin)
+    const { _id, ...data } = payments[0]
+    ;(logPaymentMutation as jest.Mock).mockClear()
+    const batchId = 'aaaaaaaaaaaaaaaaaaaaaaaa' // valid 24-hex ObjectId
+
+    const mockReq = {
+      method: 'POST',
+      body: { ...data, _bulk: true, _batchId: batchId },
+    } as any
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockReq, mockRes)
+
+    expect(mockRes.status).toHaveBeenLastCalledWith(200)
+    expect(logPaymentMutation).toHaveBeenCalledWith(
+      expect.objectContaining({
+        actionType: 'BULK_CREATE',
+        source: 'bulk',
+        batchId,
+      })
+    )
+    // The internal markers must not be persisted on the payment.
+    const created = (mockRes.json as jest.Mock).mock.lastCall[0].data
+    expect(created._bulk).toBeUndefined()
+    expect(created._batchId).toBeUndefined()
+  })
+
+  it('POST as non-admin user returns 403', async () => {
+    await mockLoginAs(users.user)
+    const { _id, ...data } = payments[0]
+
+    const mockReq = {
+      method: 'POST',
+      body: data,
+    } as any
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockReq, mockRes)
+
+    expect(mockRes.status).toHaveBeenLastCalledWith(403)
+  })
+
+  describe('Template scope', () => {
+    const buildBody = (overrides: Record<string, any> = {}) => {
+      const { _id, ...data } = payments[0]
+      return {
+        ...data,
+        invoiceNumber: 9999,
+        provider: { description: 'P' },
+        reciever: {
+          companyName: 'R',
+          adminEmails: [users.globalAdmin.email],
+          description: 'R',
+        },
+        ...overrides,
+      }
+    }
+
+    it('GlobalAdmin can set company default template on create', async () => {
+      await mockLoginAs(users.globalAdmin)
+      const companyId = realEstates[0]._id
+
+      const mockReq = {
+        method: 'POST',
+        body: buildBody({
+          company: companyId,
+          template: 'olimp',
+          _templateScope: 'company',
+        }),
+      } as any
+      const mockRes = {
+        status: jest.fn(() => mockRes),
+        json: jest.fn(),
+      } as any
+
+      await handler(mockReq, mockRes)
+
+      expect(mockRes.status).toHaveBeenLastCalledWith(200)
+      const company = await RealEstate.findById(companyId)
+      expect(company?.defaultTemplate).toBe('olimp')
+    })
+
+    it('DomainAdmin cannot set company default template on create', async () => {
+      await mockLoginAs(users.domainAdmin)
+      const companyId = realEstates[0]._id
+
+      const mockReq = {
+        method: 'POST',
+        body: buildBody({
+          company: companyId,
+          template: 'olimp',
+          _templateScope: 'company',
+        }),
+      } as any
+      const mockRes = {
+        status: jest.fn(() => mockRes),
+        json: jest.fn(),
+      } as any
+
+      await handler(mockReq, mockRes)
+
+      expect(mockRes.status).toHaveBeenLastCalledWith(403)
+      const company = await RealEstate.findById(companyId)
+      expect(company?.defaultTemplate).toBeFalsy()
+    })
+
+    it('DomainAdmin of payment domain can set domain default template on create', async () => {
+      await mockLoginAs(users.domainAdmin)
+      const domainId = domains[0]._id
+
+      const mockReq = {
+        method: 'POST',
+        body: buildBody({
+          domain: domainId,
+          template: 'olimp',
+          _templateScope: 'domain',
+        }),
+      } as any
+      const mockRes = {
+        status: jest.fn(() => mockRes),
+        json: jest.fn(),
+      } as any
+
+      await handler(mockReq, mockRes)
+
+      expect(mockRes.status).toHaveBeenLastCalledWith(200)
+      const domain = await Domain.findById(domainId)
+      expect(domain?.defaultTemplate).toBe('olimp')
+    })
+
+    it('DomainAdmin of a foreign domain cannot set domain default template on create', async () => {
+      await mockLoginAs(users.domainAdmin2)
+      const domainId = domains[0]._id
+
+      const mockReq = {
+        method: 'POST',
+        body: buildBody({
+          domain: domainId,
+          template: 'olimp',
+          _templateScope: 'domain',
+        }),
+      } as any
+      const mockRes = {
+        status: jest.fn(() => mockRes),
+        json: jest.fn(),
+      } as any
+
+      await handler(mockReq, mockRes)
+
+      expect(mockRes.status).toHaveBeenLastCalledWith(403)
+      const domain = await Domain.findById(domainId)
+      expect(domain?.defaultTemplate).toBeFalsy()
+    })
   })
 
   it('POST credit payment does not send invoice email', async () => {

@@ -1,3 +1,4 @@
+import { ServiceType } from '@utils/constants'
 import { inputNumberParser } from '@utils/helpers'
 import {
   Col,
@@ -9,7 +10,7 @@ import {
   Row,
   Typography,
 } from 'antd'
-import { useEffect, useMemo } from 'react'
+import { useEffect } from 'react'
 
 const { Text } = Typography
 
@@ -31,19 +32,26 @@ export const LossesCollapse: React.FC<LossesCollapseProps> = (props) => {
   // всього з пдв
   const totalWithVAT = total * 1.2
 
-  // ціна з пдв
-  const pricekWHWithVAT = useMemo(() => {
-    const electricityService = customServices?.find(
-      (item) => item?.fieldName === 'electricityPrice'
-    )
-    return electricityService?.price ?? 0
-  }, [customServices])
+  // Locate the electricityPrice row inside Form.List "customServices" and
+  // watch its scalar `price` directly. Watching the parent array alone is
+  // unreliable when the user edits a single Form.List item — the array
+  // reference may not change → useWatch consumer would not re-render and
+  // losses would not recompute live. Watching a primitive sidesteps that.
+  const electricityPriceIndex =
+    customServices?.findIndex(
+      (item: any) => item?.fieldName === ServiceType.Electricity
+    ) ?? -1
 
-  const hasElectricityService = useMemo(() => {
-    return customServices?.some(
-      (item) => item?.fieldName === 'electricityPrice'
-    )
-  }, [customServices])
+  const watchedElectricityPrice = Form.useWatch<number | undefined>(
+    electricityPriceIndex >= 0
+      ? (['customServices', electricityPriceIndex, 'price'] as any)
+      : '__none__',
+    form
+  )
+
+  const hasElectricityService = electricityPriceIndex >= 0
+  // ціна з пдв
+  const pricekWHWithVAT = watchedElectricityPrice ?? 0
 
   // ціна без пдв
   const pricekWH = pricekWHWithVAT / 1.2
@@ -62,13 +70,25 @@ export const LossesCollapse: React.FC<LossesCollapseProps> = (props) => {
   const labelLossesPercent = lossesPercent ? lossesPercent.toFixed(2) : '0.00'
 
   useEffect(() => {
-    if (!hasElectricityService) {
+    if (!hasElectricityService) return
+
+    // When upstream inputs (consumedElectricity, generalElectricity,
+    // customServices.electricityPrice) are still loading, lossesPercent comes
+    // out as NaN (0/0) or Infinity (X/0). In that case keep whatever was saved
+    // — overwriting with 0 used to wipe the persisted loss value on every
+    // re-render of the form until inputs settled, which is what the user saw
+    // ("значення з'являється тільки після кліку").
+    if (!Number.isFinite(lossesPercent)) {
+      if (form.getFieldValue(name) == null) {
+        form.setFieldValue(name, 0)
+      }
       return
     }
-    form.setFieldValue(name, isNaN(lossesPercent) ? 0 : Number(lossesPercent.toFixed(2)))
+
+    form.setFieldValue(name, Number(lossesPercent.toFixed(2)))
   }, [form, name, lossesPercent, hasElectricityService])
 
-   // якщо немає послуги з ціною електроенергії, то не виводимо втрати
+  // якщо немає послуги з ціною електроенергії, то не виводимо втрати
   if (!hasElectricityService) {
     return null
   }
@@ -77,6 +97,12 @@ export const LossesCollapse: React.FC<LossesCollapseProps> = (props) => {
     <Collapse size="small" bordered={false}>
       <Collapse.Panel
         key="1"
+        // Keep nested Form.Items (consumedElectricity, generalElectricity)
+        // mounted even when the panel is collapsed. Otherwise their fields
+        // are not registered with the form, Form.useWatch returns undefined,
+        // and `losses` cannot recompute live until the user clicks to expand
+        // — which was the "значення зʼявляється тільки після кліку" bug.
+        forceRender
         style={{ marginBottom: -24 }}
         header={
           <Form.Item

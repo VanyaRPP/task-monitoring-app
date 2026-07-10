@@ -2,6 +2,7 @@ import { toFirstUpperCase } from '@utils/helpers'
 import { DatePickerProps } from 'antd'
 import dayjs from 'dayjs'
 import 'dayjs/locale/uk'
+import 'dayjs/locale/en'
 import localizedFormat from 'dayjs/plugin/localizedFormat'
 
 dayjs.extend(localizedFormat)
@@ -26,6 +27,9 @@ export const dateToDayYearMonthFormat = (date: Date): string =>
 export const dateToMonthYear = (date: Date): string =>
   dayjs(date).format('MMMM YYYY')
 
+export const dateToMonthYearEn = (date: Date | string): string =>
+  dayjs(date).locale('en').format('MMMM YYYY')
+
 export const dateToMonth = (date: Date): string => dayjs(date).format('MMMM')
 
 export const dateToYear = (date: Date): string => dayjs(date).format('YYYY')
@@ -47,8 +51,45 @@ export const formatInvoiceDate = (date?: Date | string | null): string => {
   return d.isValid() ? d.format('DD.MM.YYYY') : ''
 }
 
-export const formatInvoiceDueDate = (date?: Date | string | null, days = 5): string => {
+export const formatInvoiceDueDate = (
+  date?: Date | string | null,
+  days = 5
+): string => {
   if (!date) return ''
   const d = dayjs(date)
   return d.isValid() ? d.add(days, 'd').format('DD.MM.YYYY') : ''
+}
+
+export const formatInvoiceDateUs = (date?: Date | string | null): string => {
+  if (!date) return ''
+  const d = dayjs(date)
+  return d.isValid() ? d.format('MM/DD/YYYY') : ''
+}
+
+export const formatInvoiceDueDateUs = (
+  date?: Date | string | null,
+  days = 5
+): string => {
+  if (!date) return ''
+  const d = dayjs(date)
+  return d.isValid() ? d.add(days, 'd').format('MM/DD/YYYY') : ''
+}
+
+export const dateShiftMs = (date: Date | string, ms: number): Date =>
+  new Date(new Date(date).getTime() + ms)
+
+export const combineDayWithCurrentTime = (
+  selectedDay?: { year(): number; month(): number; date(): number } | null
+): Date => {
+  if (!selectedDay) return new Date()
+  const now = new Date()
+  return new Date(
+    selectedDay.year(),
+    selectedDay.month(),
+    selectedDay.date(),
+    now.getHours(),
+    now.getMinutes(),
+    now.getSeconds(),
+    now.getMilliseconds()
+  )
 }

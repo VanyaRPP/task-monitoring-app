@@ -1,11 +1,16 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import { Operations } from '@utils/constants'
+import { debtorsApi } from '@common/api/debtorsApi/debtors.api'
+import { domainApi } from '@common/api/domainApi/domain.api'
+import { realestateApi } from '@common/api/realestateApi/realestate.api'
 import {
   IAddPaymentResponse,
   IDeletePaymentResponse,
   IExtendedPayment,
-  IGeneratePaymentPDF,
-  IGeneratePaymentPDFResponce,
+  IHtmlToPdfRequest,
+  IHtmlToPdfResponse,
+  IHtmlToPdfZipRequest,
+  IHtmlToPdfZipResponse,
   IGetPaymentNumberResponse,
   IGetPaymentResponse,
   IPayment,
@@ -16,14 +21,35 @@ import {
   ICostPayment,
   IGetPaymentChangeLogsResponse,
   ICreatePaymentChangeLogResponse,
+  IPaymentChangeLog,
+  AuditFilters,
 } from './payment.api.types'
-import { ITransaction } from '@components/Pages/BankTransactions/components/TransactionsTable/components/transactionTypes'
+
+/**
+ * Refresh data in sibling RTK Query slices that a payment write can affect.
+ */
+export const invalidatePaymentSideEffects = async (
+  _arg: unknown,
+  api: {
+    dispatch: (action: any) => any
+    queryFulfilled: Promise<unknown>
+  }
+): Promise<void> => {
+  try {
+    await api.queryFulfilled
+    api.dispatch(domainApi.util.invalidateTags(['Domain']))
+    api.dispatch(realestateApi.util.invalidateTags(['RealEstate']))
+    api.dispatch(debtorsApi.util.invalidateTags(['Debtors']))
+  } catch {
+    // mutation failed; nothing to invalidate
+  }
+}
 
 export const paymentApi = createApi({
   reducerPath: 'paymentApi',
   refetchOnFocus: true,
   refetchOnReconnect: true,
-  tagTypes: ['Payment', 'Profit'],
+  tagTypes: ['Payment', 'Profit', 'PaymentAudit'],
   baseQuery: fetchBaseQuery({ baseUrl: `/api/` }),
   endpoints: (builder) => ({
     getAllPayments: builder.query<
@@ -99,7 +125,9 @@ export const paymentApi = createApi({
           body,
         }
       },
-      invalidatesTags: (response) => (response ? ['Payment', 'Profit'] : []),
+      invalidatesTags: (response) =>
+        response ? ['Payment', 'Profit', 'PaymentAudit'] : [],
+      onQueryStarted: invalidatePaymentSideEffects,
     }),
     addCostPayment: builder.mutation<IAddCostPaymentResponse, ICostPayment>({
       query(body) {
@@ -120,10 +148,12 @@ export const paymentApi = createApi({
           method: 'DELETE',
         }
       },
-      invalidatesTags: (response) => (response ? ['Payment'] : []),
+      invalidatesTags: (response) =>
+        response ? ['Payment', 'PaymentAudit'] : [],
+      onQueryStarted: invalidatePaymentSideEffects,
     }),
     deleteMultiplePayments: builder.mutation<
-      IDeletePaymentResponse,
+      { deletedIds: string[] },
       IExtendedPayment['_id'][]
     >({
       query(ids) {
@@ -133,11 +163,18 @@ export const paymentApi = createApi({
           body: { ids },
         }
       },
-      invalidatesTags: (response) => (response ? ['Payment'] : []),
+      transformResponse: (response: {
+        success: boolean
+        data: { deletedIds: string[] }
+      }) => response.data,
+      invalidatesTags: (response) =>
+        response ? ['Payment', 'PaymentAudit'] : [],
+      onQueryStarted: invalidatePaymentSideEffects,
     }),
     getPaymentNumber: builder.query<number, object>({
       query: () => `spacehub/payment/number`,
       transformResponse: (response: IGetPaymentNumberResponse) => response.data,
+      providesTags: ['Payment'],
     }),
     editPayment: builder.mutation<IExtendedPayment, Partial<IExtendedPayment>>({
       query(data) {
@@ -148,18 +185,75 @@ export const paymentApi = createApi({
           body: body,
         }
       },
-      invalidatesTags: (response) => (response ? ['Payment'] : []),
+      invalidatesTags: (response) =>
+        response ? ['Payment', 'PaymentAudit'] : [],
+      onQueryStarted: invalidatePaymentSideEffects,
     }),
-    generatePdf: builder.mutation<
-      IGeneratePaymentPDFResponce,
-      IGeneratePaymentPDF
+    markPaymentsPaid: builder.mutation<
+      {
+        createdIds: string[]
+        skippedIds: string[]
+        totalRequested: number
+      },
+      string[]
     >({
+      query: (ids) => ({
+        url: `spacehub/payment/mark-paid`,
+        method: 'POST',
+        body: { ids },
+      }),
+      transformResponse: (response: {
+        success: boolean
+        data: {
+          createdIds: string[]
+          skippedIds: string[]
+          totalRequested: number
+        }
+      }) => response.data,
+      invalidatesTags: (response) =>
+        response ? ['Payment', 'PaymentAudit'] : [],
+      onQueryStarted: invalidatePaymentSideEffects,
+    }),
+    duplicatePayments: builder.mutation<
+      {
+        createdIds: string[]
+        skippedIds: string[]
+        totalRequested: number
+      },
+      string[]
+    >({
+      query: (ids) => ({
+        url: `spacehub/payment/duplicate`,
+        method: 'POST',
+        body: { ids },
+      }),
+      transformResponse: (response: {
+        success: boolean
+        data: {
+          createdIds: string[]
+          skippedIds: string[]
+          totalRequested: number
+        }
+      }) => response.data,
+      invalidatesTags: (response) => (response ? ['Payment', 'Profit'] : []),
+      onQueryStarted: invalidatePaymentSideEffects,
+    }),
+    htmlToPdf: builder.mutation<IHtmlToPdfResponse, IHtmlToPdfRequest>({
       query: (body) => ({
-        url: 'spacehub/payment/generatePdf',
+        url: 'spacehub/payment/htmlToPdf',
         method: 'POST',
         body,
       }),
     }),
+    htmlToPdfZip: builder.mutation<IHtmlToPdfZipResponse, IHtmlToPdfZipRequest>(
+      {
+        query: (body) => ({
+          url: 'spacehub/payment/htmlToPdfZip',
+          method: 'POST',
+          body,
+        }),
+      }
+    ),
     generateExcel: builder.mutation<
       IGeneratePaymentExcelResponce,
       IGeneratePaymentExcel
@@ -188,8 +282,25 @@ export const paymentApi = createApi({
       invalidatesTags: (res, err, args) =>
         res ? [{ type: 'Payment', id: args.paymentId }] : [],
     }),
+
+    getPaymentAudit: builder.query<
+      { data: IPaymentChangeLog[]; total: number },
+      AuditFilters
+    >({
+      query: (params) => ({ url: 'spacehub/payment-audit', params }),
+      providesTags: ['PaymentAudit'],
+    }),
+
+    restorePayment: builder.mutation<IPayment, { logId: string }>({
+      query: ({ logId }) => ({
+        url: `spacehub/payment-audit/${logId}/restore`,
+        method: 'POST',
+      }),
+      invalidatesTags: ['PaymentAudit', 'Payment'],
+    }),
   }),
 })
+
 export const {
   useGetPaymentChangeLogsQuery,
   useCreatePaymentChangeLogMutation,
@@ -200,8 +311,13 @@ export const {
   useDeleteMultiplePaymentsMutation,
   useGetPaymentNumberQuery,
   useEditPaymentMutation,
-  useGeneratePdfMutation,
+  useMarkPaymentsPaidMutation,
+  useDuplicatePaymentsMutation,
+  useHtmlToPdfMutation,
+  useHtmlToPdfZipMutation,
   useGetCostPaymentQuery,
   useAddCostPaymentMutation,
   useGenerateExcelMutation,
+  useGetPaymentAuditQuery,
+  useRestorePaymentMutation,
 } = paymentApi

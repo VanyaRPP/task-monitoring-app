@@ -11,7 +11,6 @@ import {
   useGetRealEstateFiltersQuery,
 } from '@common/api/filterApi/filter.api'
 
-
 interface EditUserModalProps {
   open: boolean
   userId?: string
@@ -27,22 +26,28 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({
 }) => {
   const [form] = Form.useForm()
   const { data: user, isLoading } = useGetUserByIdQuery(userId)
-  const { data: allDomains, isLoading: isDomainsLoading } = useGetDomainFiltersQuery({});
-  const { data: allCompanies, isLoading: isCompaniesLoading } = useGetRealEstateFiltersQuery({});
+  const { data: allDomains, isLoading: isDomainsLoading } =
+    useGetDomainFiltersQuery({})
+  const { data: allCompanies, isLoading: isCompaniesLoading } =
+    useGetRealEstateFiltersQuery({})
 
   const [updateUser, { isLoading: isUpdating }] = useUpdateUserMutation()
+
+  const getSelectValue = (item: any) => item?.value ?? item?._id ?? item
+
   useEffect(() => {
     if (user) {
       form.setFieldsValue({
         name: user.name,
         email: user.email,
-        adminDomains: ('adminDomains' in user) ? (user as any).adminDomains.map((d: any) => d._id) : [],
-        adminCompanies: ('adminCompanies' in user) ? (user as any).adminCompanies.map((c: any) => c._id) : [],
+        adminDomains: (user as any).adminDomains?.map(getSelectValue) ?? [],
+        adminCompanies: (user as any).adminCompanies?.map(getSelectValue) ?? [],
       })
     }
   }, [user, form])
 
   const handleSubmit = async (values: any) => {
+    if (!user?._id) return
     try {
       const response = await updateUser({ _id: user?._id, ...values })
       if ('error' in response) {
@@ -75,46 +80,51 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({
             <Input />
           </Form.Item>
           <Form.Item label="Пошта" name="email">
-            <Input readOnly suffix={<CopyOutlined onClick={handleCopyEmail} style={{ cursor: 'pointer' }} />} />
-          </Form.Item>
-          <Form.Item
-            label="Адміністратор доменів"
-            name="adminDomains"
-          >
-            <Select
-              mode="multiple"
-              showSearch
-              placement="bottomLeft" 
-              listHeight={200}
-              
-              placeholder="Виберіть домени"
-              loading={isDomainsLoading}
-              options={allDomains?.domainsFilter?.map((d: any) => ({
-                  value: d.value,
-                  label: d.text,  
-                }))}
-              filterOption={(input, option) =>
-                (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+            <Input
+              readOnly
+              suffix={
+                <CopyOutlined
+                  onClick={handleCopyEmail}
+                  style={{ cursor: 'pointer' }}
+                />
               }
             />
           </Form.Item>
-          <Form.Item
-            label="Адміністратор Компаній"
-            name="adminCompanies"
-          >
+          <Form.Item label="Адміністратор доменів" name="adminDomains">
             <Select
               mode="multiple"
               showSearch
-              placement="bottomLeft" 
+              placement="bottomLeft"
+              listHeight={200}
+              placeholder="Виберіть домени"
+              loading={isDomainsLoading}
+              options={allDomains?.domainsFilter?.map((d: any) => ({
+                value: d.value,
+                label: d.text,
+              }))}
+              filterOption={(input, option) =>
+                (option?.label ?? '')
+                  .toLowerCase()
+                  .includes(input.toLowerCase())
+              }
+            />
+          </Form.Item>
+          <Form.Item label="Адміністратор Компаній" name="adminCompanies">
+            <Select
+              mode="multiple"
+              showSearch
+              placement="bottomLeft"
               listHeight={200}
               placeholder="Виберіть компанії"
               loading={isCompaniesLoading}
               options={allCompanies?.realEstatesFilter?.map((c: any) => ({
-                    value: c.value,
-                    label: c.text,  
+                value: c.value,
+                label: c.text,
               }))}
               filterOption={(input, option) =>
-                (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                (option?.label ?? '')
+                  .toLowerCase()
+                  .includes(input.toLowerCase())
               }
             />
           </Form.Item>

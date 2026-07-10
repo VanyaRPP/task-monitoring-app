@@ -1,18 +1,26 @@
 import { ObjectId } from 'mongoose'
+import { DomainTypeTemplateCategory } from '@modules/models/domain-type-template'
 
 export interface ICustomService {
   _id: string
   groupName?: string
   name: string
   services?: string
+  serviceType?: string
+  domain?: string
+  category?: string
 }
 
 export interface ICustomDomainService {
-  groupName: string
+  // `null` marks the synthetic "ungrouped" bucket — services in the domain
+  // catalog that aren't assigned to any user-defined group. Renderers should
+  // treat these as standalone (no group header in invoices).
+  groupName: string | null
   services: {
     _id: ObjectId | string
     name: string
     fieldName: string
+    serviceType?: string
     __v?: number
   }[]
 }
@@ -20,6 +28,7 @@ export interface ICustomDomainService {
 export interface IGetCustomServicesRequest {
   _id?: string[]
   domainId?: string
+  templateCategory?: DomainTypeTemplateCategory
 }
 
 export interface IGetCustomServicesByDomainRequest {
@@ -45,6 +54,14 @@ export interface ICreateCustomServiceResponse {
 
 export interface IDeleteCustomServiceRequest {
   id: string
+  domainId?: string
+}
+
+export interface IEditCustomServiceRequest {
+  _id: string
+  domainId?: string
+  name?: string
+  serviceType?: string | null
 }
 
 export interface IDeleteCustomServiceResponse {

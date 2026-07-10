@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react'
-import { buildCreditFromDebit } from './buildCreditFromDebit'
 import { useRouter } from 'next/router'
 import { message } from 'antd'
 
@@ -15,10 +14,13 @@ import {
   useDeletePaymentMutation,
   useDeleteMultiplePaymentsMutation,
   paymentApi,
-  useGetPaymentNumberQuery,
-  useAddPaymentMutation,
+  useMarkPaymentsPaidMutation,
+  useDuplicatePaymentsMutation,
 } from '@common/api/paymentApi/payment.api'
-import { useGetDebtorsQuery } from '@common/api/debtorsApi/debtors.api'
+import {
+  debtorsApi,
+  useGetDebtorsQuery,
+} from '@common/api/debtorsApi/debtors.api'
 
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 
@@ -27,7 +29,7 @@ import PaymentsHeader from '@components/Tables/Payment/Header'
 import PaymentsTable from '@components/Tables/Payment/Table'
 import ModalDelete from '@components/UI/ModalDelete'
 
-import { AppRoutes, ServiceType, Roles } from '@utils/constants'
+import { AppRoutes, ServiceType, Roles, Operations } from '@utils/constants'
 import { dateToDefaultFormat } from '@assets/features/formatDate'
 
 import {
@@ -38,7 +40,8 @@ import {
 } from 'antd/lib/table/interface'
 
 import type { ColumnsType } from 'antd/es/table'
-import { useSelector, useDispatch } from 'react-redux'
+import { useSelector } from 'react-redux'
+import { useAppDispatch } from '@modules/store/hooks'
 import {
   setPage,
   setFilters,
@@ -56,8 +59,7 @@ import {
   setSelectedDateField,
 } from '@modules/store/paymentsSlice'
 import { RootState } from '@modules/store/store'
-import { formatDateFilterForQuery } from '@utils/helpers'
-import { getTypeOperation } from '@utils/helpers'
+import { formatDateFilterForQuery, getTypeOperation } from '@utils/helpers'
 import { PaymentDeleteItem } from '@components/Tables/Payment/Header'
 
 export interface PaymentsBlockProps {
@@ -74,7 +76,7 @@ interface TableEventProps {
 
 const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
   const router = useRouter()
-  const dispatch = useDispatch()
+  const dispatch = useAppDispatch()
   const {
     filters,
     domainsFilter,
@@ -131,7 +133,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     }
   }, [filters?.domain, domainsFiltersData])
 
-  const { data: debtorsData } = useGetDebtorsQuery(
+  const { data: debtorsData, refetch: refetchDebtors } = useGetDebtorsQuery(
     { domainIds },
     { skip: !domainIds.length }
   )
@@ -146,6 +148,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     isError: paymentsError,
     isLoading: paymentsLoading,
     isFetching: paymentsFetching,
+    refetch: refetchPayments,
   } = useGetAllPaymentsQuery(
     {
       skip: (currentPage - 1) * pageSize,
@@ -167,54 +170,231 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     channel.onmessage = (event) => {
       if (event.data === 'PAYMENT_CREATED') {
         dispatch(paymentApi.util.invalidateTags(['Payment']))
+        dispatch(debtorsApi.util.invalidateTags(['Debtors']))
       }
     }
-
     return () => {
       channel.close()
     }
   }, [dispatch])
 
-  const [addPayment] = useAddPaymentMutation()
-  const [
-    deletePaymentMutation,
-    { isLoading: deleteLoading, isError: deleteError },
-  ] = useDeletePaymentMutation()
+  const [deletePaymentMutation, { isLoading: deleteLoading }] =
+    useDeletePaymentMutation()
   const [deleteMultiplePayments] = useDeleteMultiplePaymentsMutation()
-  const { data: newInvoiceNumber = 1, refetch: refetchInvoiceNumber } = useGetPaymentNumberQuery({})
+  const [markPaymentsPaid] = useMarkPaymentsPaidMutation()
+  const [duplicatePayments] = useDuplicatePaymentsMutation()
+  const patchDebtorsCache = useCallback(
+    (changes: Array<{ companyId: string; debtDelta: number }>) => {
+      if (!changes.length || !domainIds.length) return
+      dispatch(
+        debtorsApi.util.updateQueryData(
+          'getDebtors',
+          { domainIds },
+          (draft) => {
+            if (!draft.companies) return
+            for (const { companyId, debtDelta } of changes) {
+              const company = draft.companies.find(
+                (c) => c.companyId === companyId
+              )
+              if (company) {
+                company.totalDebt += debtDelta
+              }
+            }
+            draft.companies = draft.companies.filter((c) => c.totalDebt > 0)
+          }
+        )
+      )
+    },
+    [dispatch, domainIds]
+  )
+  const getCompanyId = (p: IExtendedPayment): string =>
+    typeof p.company === 'object' && p.company
+      ? (p.company as any)._id?.toString()
+      : String(p.company)
+  const debtDeltaForRemoved = (p: IExtendedPayment): number =>
+    p.type === Operations.Debit ? -p.generalSum : p.generalSum
   const handleDeletePayment = useCallback(
     async (id: string) => {
+      const removed = payments?.data?.find((p) => p._id === id)
       const response = await deletePaymentMutation(id)
+
       if ('data' in response) {
+        if (removed) {
+          patchDebtorsCache([
+            {
+              companyId: getCompanyId(removed),
+              debtDelta: debtDeltaForRemoved(removed),
+            },
+          ])
+        }
+
+        dispatch(
+          setSelectedPayments(
+            selectedPayments.filter((p: IExtendedPayment) => p._id !== id)
+          )
+        )
+        dispatch(
+          setPaymentsDeleteItems(
+            paymentsDeleteItems.filter(
+              (item: PaymentDeleteItem) => item.id !== id
+            )
+          )
+        )
+
         message.success('Видалено!')
       } else {
         message.error('Помилка при видаленні рахунку')
       }
     },
-    [deletePaymentMutation]
+    [
+      deletePaymentMutation,
+      patchDebtorsCache,
+      payments,
+      selectedPayments,
+      paymentsDeleteItems,
+      dispatch,
+    ]
   )
   const handleMarkPaid = useCallback(
     async (source: IExtendedPayment) => {
-      const { data: currentNumber } = await refetchInvoiceNumber()
-      const invoiceNumber = currentNumber ?? newInvoiceNumber
-      const response = await addPayment(buildCreditFromDebit(source, invoiceNumber))
-      if ('data' in response) {
-        message.success('Кредіт‑платіж створено')
+      if (source.type === Operations.Credit) {
+        message.info('Платіж уже позначено як оплачений')
+        return
+      }
+
+      const response = await markPaymentsPaid([source._id])
+      if ('data' in response && response.data.createdIds.length === 1) {
+        patchDebtorsCache([
+          { companyId: getCompanyId(source), debtDelta: -source.generalSum },
+        ])
+        message.success('Платіж позначено як оплачений')
       } else {
-        message.error('Не вдалося створити оплату')
+        message.error('Не вдалося позначити платіж як оплачений')
       }
     },
-    [addPayment, newInvoiceNumber, refetchInvoiceNumber]
+    [markPaymentsPaid, patchDebtorsCache]
+  )
+  const handleBulkMarkPaid = useCallback(
+    async (payments: IExtendedPayment[]) => {
+      const debitPayments = payments.filter(
+        (payment) => payment.type === Operations.Debit
+      )
+      if (debitPayments.length < 1) {
+        message.info('Оберіть щонайменше один дебетовий платіж')
+        return
+      }
+
+      const response = await markPaymentsPaid(debitPayments.map((p) => p._id))
+      if ('data' in response) {
+        const { createdIds, skippedIds, totalRequested } = response.data
+        const skipped = new Set(skippedIds)
+        const succeeded = debitPayments.filter((p) => !skipped.has(p._id))
+        patchDebtorsCache(
+          succeeded.map((p) => ({
+            companyId: getCompanyId(p),
+            debtDelta: -p.generalSum,
+          }))
+        )
+        if (createdIds.length === totalRequested) {
+          message.success('Платежі позначено як оплачені')
+        } else if (createdIds.length > 0) {
+          message.warning('Деякі платежі були позначені, але не всі')
+        } else {
+          message.error('Не вдалося позначити платежі як оплачені')
+        }
+      } else {
+        message.error('Не вдалося позначити платежі як оплачені')
+      }
+    },
+    [markPaymentsPaid, patchDebtorsCache]
+  )
+  const debtDeltaForAdded = (p: IExtendedPayment): number =>
+    -debtDeltaForRemoved(p)
+
+  const runDuplicate = useCallback(
+    async (targets: IExtendedPayment[], clearSelection: boolean) => {
+      if (targets.length < 1) {
+        message.info('Оберіть щонайменше один рахунок')
+        return
+      }
+
+      const response = await duplicatePayments(targets.map((p) => p._id))
+      if ('data' in response) {
+        const { createdIds, skippedIds, totalRequested } = response.data
+        const skipped = new Set(skippedIds)
+        const succeeded = targets.filter((p) => !skipped.has(p._id))
+        patchDebtorsCache(
+          succeeded.map((p) => ({
+            companyId: getCompanyId(p),
+            debtDelta: debtDeltaForAdded(p),
+          }))
+        )
+        if (clearSelection) {
+          dispatch(setSelectedPayments([]))
+          dispatch(setPaymentsDeleteItems([]))
+        }
+        const many = totalRequested > 1
+        if (createdIds.length === totalRequested) {
+          message.success(
+            many ? 'Рахунки продубльовано' : 'Рахунок продубльовано'
+          )
+        } else if (createdIds.length > 0) {
+          message.warning('Деякі рахунки були не продубльовані')
+        } else {
+          message.error(
+            many
+              ? 'Не вдалося продублювати обрані рахунки'
+              : 'Не вдалося продублювати рахунок'
+          )
+        }
+      } else {
+        message.error('Не вдалося продублювати рахунки')
+      }
+    },
+    [duplicatePayments, patchDebtorsCache, dispatch]
+  )
+
+  const handleDuplicate = useCallback(
+    (source: IExtendedPayment) => {
+      const hasSelection = selectedPayments.length > 0
+      const targets = !hasSelection
+        ? [source]
+        : selectedPayments.some((p) => p._id === source._id)
+          ? selectedPayments
+          : [...selectedPayments, source]
+      return runDuplicate(targets, hasSelection)
+    },
+    [runDuplicate, selectedPayments]
+  )
+  const handleBulkDuplicate = useCallback(
+    (selected: IExtendedPayment[]) => runDuplicate(selected, true),
+    [runDuplicate]
   )
   const handleDeleteConfirm = async () => {
-    const response = await deleteMultiplePayments(
-      paymentsDeleteItems.map((item) => item.id)
-    )
+    const idsToDelete = paymentsDeleteItems.map((item) => item.id)
+    const requested =
+      payments?.data?.filter((p) => idsToDelete.includes(p._id)) ?? []
+    const response = await deleteMultiplePayments(idsToDelete)
     if ('data' in response) {
+      const { deletedIds } = response.data
+      const deletedSet = new Set(deletedIds)
+      const actuallyRemoved = requested.filter((p) => deletedSet.has(p._id))
+      patchDebtorsCache(
+        actuallyRemoved.map((p) => ({
+          companyId: getCompanyId(p),
+          debtDelta: debtDeltaForRemoved(p),
+        }))
+      )
       dispatch(setPaymentsDeleteItems([]))
       dispatch(setSelectedPayments([]))
       setDeleteModalOpen(false)
-      message.success('Видалено!')
+      if (deletedIds.length === idsToDelete.length) {
+        message.success('Видалено!')
+      } else if (deletedIds.length > 0) {
+        message.warning('Деякі платежі видалено, але не всі')
+      } else {
+        message.error('Не вдалося видалити обрані платежі')
+      }
     } else {
       message.error('Помилка при видаленні рахунків')
     }
@@ -233,9 +413,10 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     },
     {
       title: 'Дата',
-      dataIndex: 'date', 
+      dataIndex: 'date',
       key: 'date',
-      render: (date) => (date && date !== 'undefined') ? dateToDefaultFormat(date) : '-',
+      render: (date) =>
+        date && date !== 'undefined' ? dateToDefaultFormat(date) : '-',
     },
   ]
 
@@ -277,7 +458,6 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     }
 
     if (extra.action === 'filter') {
-      dispatch(setFilters(allFilters ?? undefined))
       const raw = (allFilters as any)?.invoiceCreationDate
       const invoiceVals = Array.isArray(raw)
         ? (raw.filter((x) => typeof x === 'string') as string[])
@@ -323,7 +503,8 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     onEditClick: handleEdit,
     onDelete: handleDeletePayment,
     deleteLoading,
-    onMarkPaid: handleMarkPaid
+    onMarkPaid: handleMarkPaid,
+    onDuplicate: handleDuplicate,
   }
   const debtProps = {
     debtorCompanies,
@@ -357,6 +538,14 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     enablePaymentsButton: !sepDomainID,
     onColumnsSelect: (cols: ServiceType[]) =>
       dispatch(setSelectedColumns(cols)),
+    onBulkMarkPaid: handleBulkMarkPaid,
+    onBulkDuplicate: handleBulkDuplicate,
+    onRefresh: () =>
+      Promise.all([
+        refetchPayments(),
+        domainIds.length ? refetchDebtors() : Promise.resolve(),
+      ]),
+    isRefreshing: paymentsFetching,
     domainFilter: filterProps.domainsFilter,
     realEstatesFilter: filterProps.companiesFilter,
     isDashboard: router.pathname === AppRoutes.INDEX,
@@ -365,27 +554,27 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
 
   return (
     <>
-    <TableCard title={<PaymentsHeader {...headerProps} />}>
-      <PaymentsTable
-        sepDomainID={sepDomainID}
-        payments={payments}
-        statusProps={statusProps}
-        tableEventProps={tableEventProps}
-        filterProps={filterProps}
-        paginationProps={paginationProps}
-        actionProps={actionProps}
-        debtProps={debtProps}
-        columnSelectionProps={columnSelectionProps}
-        paymentsDeleteItems={paymentsDeleteItems}
-        selectedPayments={selectedPayments}
-        onSelectPayments={(rows: IExtendedPayment[]) =>
-          dispatch(setSelectedPayments(rows))
-        }
-        onSetDeleteItems={(items: PaymentDeleteItem[]) =>
-          dispatch(setPaymentsDeleteItems(items))
-        }
-      />
-    </TableCard>
+      <TableCard title={<PaymentsHeader {...headerProps} />}>
+        <PaymentsTable
+          sepDomainID={sepDomainID}
+          payments={payments}
+          statusProps={statusProps}
+          tableEventProps={tableEventProps}
+          filterProps={filterProps}
+          paginationProps={paginationProps}
+          actionProps={actionProps}
+          debtProps={debtProps}
+          columnSelectionProps={columnSelectionProps}
+          paymentsDeleteItems={paymentsDeleteItems}
+          selectedPayments={selectedPayments}
+          onSelectPayments={(rows: IExtendedPayment[]) =>
+            dispatch(setSelectedPayments(rows))
+          }
+          onSetDeleteItems={(items: PaymentDeleteItem[]) =>
+            dispatch(setPaymentsDeleteItems(items))
+          }
+        />
+      </TableCard>
       <ModalDelete
         open={deleteModalOpen}
         onCancel={() => setDeleteModalOpen(false)}

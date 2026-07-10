@@ -24,7 +24,7 @@ describe('Domain API - DELETE', () => {
 
     await (Domain as any).create({
       ...domains[0],
-      _id: testId
+      _id: testId,
     })
 
     const mockReq = { method: 'DELETE', query: { id: testId } } as any

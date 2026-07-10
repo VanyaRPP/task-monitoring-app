@@ -42,7 +42,6 @@ const DomainModalType: FC<Props> = ({
                 onTemplateChange(value ?? null)
               }
               style={{ width: '100%' }}
-              disabled={!editable}
               options={options}
               optionFilterProp="label"
               showSearch

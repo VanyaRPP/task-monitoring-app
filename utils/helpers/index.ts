@@ -7,7 +7,13 @@ import Big from 'big.js'
 import dayjs from 'dayjs'
 import 'dayjs/locale/uk'
 import mongoose, { ObjectId } from 'mongoose'
-import { CURRENCY_MAP, Currency, Roles, defaultServices, ServiceType } from '../constants'
+import {
+  CURRENCY_MAP,
+  Currency,
+  Roles,
+  defaultServices,
+  ServiceType,
+} from '../constants'
 import {
   getDomainsPipeline,
   getRealEstatesPipeline,
@@ -18,7 +24,6 @@ import { IPermissions } from '@modules/models/User'
 import { useGetUserByEmailQuery } from '@common/api/userApi/user.api'
 import { AppRoutes, Operations } from '@utils/constants'
 import { useState, useEffect } from 'react'
-import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 
 export const toFirstUpperCase = (text: string) => {
   return text ? text[0].toUpperCase() + text.slice(1) : ''
@@ -163,12 +168,15 @@ export const omit = (
   obj: Record<string, any>,
   props: string[]
 ): Record<string, any> => {
-  return Object.keys(obj).reduce((result, key) => {
-    if (!props.includes(key)) {
-      result[key] = obj[key]
-    }
-    return result
-  }, {} as Record<string, any>)
+  return Object.keys(obj).reduce(
+    (result, key) => {
+      if (!props.includes(key)) {
+        result[key] = obj[key]
+      }
+      return result
+    },
+    {} as Record<string, any>
+  )
 }
 
 /**
@@ -341,11 +349,10 @@ export function toRoundFixed(value: string | number | any, length = 2): string {
 
 export function currencyWithUnit(
   value: number | string,
-  company?: IRealestate,
+  currency?: string,
   unit?: string
 ) {
-  const currency = company?.currency ?? Currency.UAH
-  const label = CURRENCY_MAP[currency]?.label ?? 'грн'
+  const label = CURRENCY_MAP[normalizeCurrency(currency)].label
 
   return `${value} ${label}${unit ? `/${unit}` : ''}`
 }
@@ -353,7 +360,10 @@ export function currencyWithUnit(
 export const normalizeCurrency = (currency?: string): Currency => {
   const normalizedCurrency = currency?.toUpperCase()
 
-  if (normalizedCurrency === Currency.USD || normalizedCurrency === Currency.EUR) {
+  if (
+    normalizedCurrency === Currency.USD ||
+    normalizedCurrency === Currency.EUR
+  ) {
     return normalizedCurrency
   }
 
@@ -425,11 +435,9 @@ export async function getDistinctStreets({
 }): Promise<{ _id: mongoose.ObjectId; streetData: any }[] | undefined> {
   // TODO: group of user roles helpers maybe? Such as isGlobalAdmin(user: IUser): boolean
   const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
-  const domainsPipeline = getDomainsPipeline(isGlobalAdmin, user.email)
-  const distinctDomains = await model.aggregate(domainsPipeline)
   const streetsPipeline = getStreetsPipeline(
     isGlobalAdmin,
-    distinctDomains.map((domain) => domain._id),
+    user.email,
     filteredCompanys,
     filteredDomains
   )
@@ -803,7 +811,7 @@ export function usePermissions(user?: IUser): IPermissions | null {
         isAdmin: false,
       })
     }
-  }, [isLoading, userData, isGlobalAdminUser, isDomainAdminUser])
+  }, [isLoading, userData, isGlobalAdminUser, isDomainAdminUser, isAdmin])
 
   return permissions
 }
@@ -811,7 +819,7 @@ export function usePermissions(user?: IUser): IPermissions | null {
 export function calculatePermissions(userDate: any, user: IUser) {
   const isGlobalAdminUser = isGlobalAdmin(user)
   const isDomainAdminUser = user?.roles.includes('DomainAdmin')
-  
+
   const isAdmin = isGlobalAdminUser || isDomainAdminUser
 
   if (!userDate) {
@@ -822,7 +830,7 @@ export function calculatePermissions(userDate: any, user: IUser) {
       isAdmin: false,
     }
   }
-  
+
   return {
     isGlobalAdmin: isGlobalAdminUser,
     isDomainAdmin: isDomainAdminUser,
@@ -834,7 +842,7 @@ export function calculatePermissions(userDate: any, user: IUser) {
 export function formatDebt(amount: number): string {
   if (amount === 0) return '0.00'
   if (amount > 0 && amount < 0.01) {
-    const roundedUp = Math.ceil(amount * 10000) / 10000 * 100
+    const roundedUp = (Math.ceil(amount * 10000) / 10000) * 100
     return roundedUp.toFixed(2)
   }
   return amount.toFixed(2)
@@ -855,7 +863,6 @@ export const getDebtorTooltipColor = (debtor: {
 export const defaultServicesSet = new Set(defaultServices)
 
 export const isProtectedService = (id?: string): boolean => {
-
   if (!id) return false
   return defaultServicesSet.has(id)
 }

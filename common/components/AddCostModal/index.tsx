@@ -11,11 +11,11 @@ import type { TabsProps } from 'antd'
 import { FC, useState, useEffect } from 'react'
 import s from './style.module.scss'
 import dayjs from 'dayjs'
-import Category from '@modules/models/Category'
 
 interface Props {
   closeModal: VoidFunction
   currentProfit?: Profit
+  activeDomain?: string
   profitActions?: {
     preview?: boolean
     edit?: boolean
@@ -39,13 +39,17 @@ enum CostType {
 const AddCostModal: FC<Props> = ({
   closeModal,
   currentProfit,
+  activeDomain,
   profitActions,
 }) => {
   const { t } = useTranslation()
   const [form] = Form.useForm()
   const [type, setType] = useState<CostType>(CostType.DEBIT)
-  const [createProfit, { isLoading, isError }] = useCreateProfitMutation()
+  const [createProfit, { isLoading }] = useCreateProfitMutation()
   const [updateProfit] = useUpdateProfitMutation()
+
+  const isPreview = profitActions?.preview
+  const isEdit = profitActions?.edit
 
   const handleSubmit = async () => {
     const formData: FormData = await form.validateFields()
@@ -81,9 +85,6 @@ const AddCostModal: FC<Props> = ({
   const onTabChange = (key: string) => {
     setType(key === '1' ? CostType.DEBIT : CostType.CREDIT)
   }
-
-  const isPreview = profitActions?.preview
-  const isEdit = profitActions?.edit
 
   const tabItems: TabsProps['items'] = [
     {
@@ -122,8 +123,13 @@ const AddCostModal: FC<Props> = ({
         categories: currentProfit.categories || [],
       })
       setType(currentProfit.type as CostType)
+    } else {
+      form.setFieldsValue({
+        domain: activeDomain,
+        date: dayjs(),
+      })
     }
-  }, [currentProfit, form])
+  }, [currentProfit, form, activeDomain])
 
   return (
     <Modal
@@ -131,8 +137,8 @@ const AddCostModal: FC<Props> = ({
         isPreview
           ? t('profitPage:modal.previewTitle')
           : isEdit
-          ? t('profitPage:modal.editTitle')
-          : t('profitPage:modal.addTitle')
+            ? t('profitPage:modal.editTitle')
+            : t('profitPage:modal.addTitle')
       }
       onOk={handleSubmit}
       onCancel={() => {
@@ -145,8 +151,8 @@ const AddCostModal: FC<Props> = ({
         isPreview
           ? undefined
           : isEdit
-          ? t('profitPage:modal.editOkText')
-          : t('profitPage:modal.okText')
+            ? t('profitPage:modal.editOkText')
+            : t('profitPage:modal.okText')
       }
       cancelText={
         isPreview

@@ -10,25 +10,56 @@
   display: flex;
   flex-direction: column;
 }
+
 .filters {
   display: flex;
   flex-direction: row;
   margin-left: 2rem;
   max-height: 40px;
 }
+
 .filtersTags {
   display: flex;
   flex-wrap: wrap;
   max-width: 700px;
 }
+
 .Tag {
   margin-left: 8px;
   margin-right: 0;
-
-  // font-size: 11px;
-  // margin: 0.25rem 0 0.2rem 0.5rem;
 }
 
 .allTag {
   margin-left: 8px;
+}
+
+.segmentedLabel {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+:global([data-theme='dark'])
+  .customSegmented
+  :global(.ant-segmented-item-selected) {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+.creditSegment {
+  color: #722ed1 !important;
+
+  :global([data-theme='dark']) & {
+    color: #b37feb !important;
+  }
+}
+
+.debitSegment {
+  color: #389e0d !important;
+
+  :global([data-theme='dark']) & {
+    color: #8ce6b0 !important;
+  }
 }

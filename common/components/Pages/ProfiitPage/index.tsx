@@ -41,10 +41,13 @@ const ProfitPage = () => {
   }
 
   const contentList = useMemo(() => {
-    return tabList.reduce((acc, domain) => {
-      acc[domain.key] = <ProfitTable domainId={domain.key} />
-      return acc
-    }, {} as Record<string, ReactNode>)
+    return tabList.reduce(
+      (acc, domain) => {
+        acc[domain.key] = <ProfitTable domainId={domain.key} />
+        return acc
+      },
+      {} as Record<string, ReactNode>
+    )
   }, [tabList])
 
   const closeModal = () => {
@@ -82,7 +85,9 @@ const ProfitPage = () => {
         >
           {contentList[activeTabKey]}
         </Card>
-        {isModalOpen && <AddCostModal closeModal={closeModal} />}
+        {isModalOpen && (
+          <AddCostModal closeModal={closeModal} activeDomain={activeTabKey} />
+        )}
       </Space>
     </FullScreenWrapper>
   )

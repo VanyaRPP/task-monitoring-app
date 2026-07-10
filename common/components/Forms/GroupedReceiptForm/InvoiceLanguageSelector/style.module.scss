@@ -1,0 +1,38 @@
+.container {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+}
+
+.btn {
+  border: 1px solid rgba(128, 128, 128, 0.35);
+  background: transparent;
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 0 6px;
+  height: 23px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: rgba(128, 128, 128, 0.7);
+  transition: all 0.2s;
+  line-height: 1;
+  user-select: none;
+
+  &:hover {
+    color: rgba(128, 128, 128, 1);
+    border-color: rgba(128, 128, 128, 0.6);
+  }
+}
+
+.active {
+  background: var(--ant-color-primary, #722ed1);
+  border-color: var(--ant-color-primary, #722ed1);
+  color: #fff;
+
+  &:hover {
+    background: var(--ant-color-primary-hover, #9254de);
+    border-color: var(--ant-color-primary-hover, #9254de);
+    color: #fff;
+  }
+}

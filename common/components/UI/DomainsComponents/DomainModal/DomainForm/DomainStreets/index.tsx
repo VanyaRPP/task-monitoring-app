@@ -1,4 +1,3 @@
-import { validateField } from '@assets/features/validators'
 import { useGetAllStreetsQuery } from '@common/api/streetApi/street.api'
 import { Form, Select } from 'antd'
 import React from 'react'
@@ -12,11 +11,7 @@ const DomainStreets: React.FC<DomainStreetsProps> = ({ disabled = false }) => {
   const { data: streets, isLoading } = useGetAllStreetsQuery({})
 
   return (
-    <Form.Item
-      name="streets"
-      label="Закріплені адреси"
-      rules={validateField('required')}
-    >
+    <Form.Item name="streets" label="Закріплені адреси">
       <Select
         options={streets?.map((i) => ({
           value: i._id,

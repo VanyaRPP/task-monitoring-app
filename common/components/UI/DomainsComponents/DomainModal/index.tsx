@@ -6,15 +6,19 @@ import {
 } from '@common/api/domainApi/domain.api'
 import { Form, message } from 'antd'
 import React, { FC, useEffect, useMemo, useState } from 'react'
-import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
+import {
+  IAddDomainResponse,
+  IExtendedDomain,
+} from '@common/api/domainApi/domain.api.types'
 import DomainForm from './DomainForm'
 import Modal from '../../ModalWindow'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { useEditRealEstateMutation } from '@common/api/realestateApi/realestate.api'
+import { filterChangedCompaniesAreas } from './areasFilter'
 
 interface Props {
   currentDomain: IExtendedDomain
-  closeModal: VoidFunction
+  closeModal: (createdDomain?: IExtendedDomain) => void
   editable: boolean
 }
 
@@ -110,30 +114,34 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
       : await addDomainEstate(domainData)
 
     if ('data' in response) {
-      const companiesAreas = formData.companiesAreas || []
+      const changedCompaniesAreas = filterChangedCompaniesAreas(
+        formData.companiesAreas
+      )
 
-        if (companiesAreas.length > 0) {
-          try {
-            const savePromises = companiesAreas.map((company: any) => {
-              if (company._id) {
-                return editRealEstate({
-                  _id: company._id,
-                  totalArea: company.area,
-                  rentPart: company.rentPart,
-                }).unwrap()
-              }
-              return Promise.resolve()
-            })
-
-            await Promise.all(savePromises)
-          } catch (e) {
-            console.error('Помилка при збереженні площ компаній:', e);
-            return message.error('Виникла помилка при оновленні даних площ');
-          }
+      if (changedCompaniesAreas.length > 0) {
+        try {
+          await Promise.all(
+            changedCompaniesAreas.map((company) =>
+              editRealEstate({
+                _id: company._id,
+                totalArea: company.area,
+                rentPart: company.rentPart,
+              }).unwrap()
+            )
+          )
+        } catch (e) {
+          console.error('Помилка при збереженні площ компаній:', e)
+          return message.error('Виникла помилка при оновленні даних площ')
         }
-      
-      closeModal()
-      setIsValueChanged(false);
+      }
+
+      const createdDomain =
+        !currentDomain && 'data' in response
+          ? (response.data as IAddDomainResponse)?.data
+          : undefined
+
+      closeModal(createdDomain)
+      setIsValueChanged(false)
       form.resetFields()
       message.success(currentDomain ? 'Збережено' : 'Додано')
     } else {
@@ -145,6 +153,7 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
   return (
     <Modal
       open={true}
+      width={1000}
       title={'Надавачі послуг'}
       onOk={handleSubmit}
       changed={() => isValueChanged}

@@ -1,7 +1,7 @@
 import { PlusOutlined, SelectOutlined } from '@ant-design/icons'
 import { Button, Space, Segmented, Select } from 'antd'
 import { useRouter } from 'next/router'
-import { Dispatch, SetStateAction, useState } from 'react'
+import { Dispatch, SetStateAction, useState, useMemo } from 'react'
 import {
   IExtendedRealestate,
   IGetRealestateResponse,
@@ -20,6 +20,12 @@ import {
   useGetRealEstateFiltersQuery,
 } from '@common/api/filterApi/filter.api'
 import { useGetCustomServicesQuery } from '@common/api/customServicesApi/customServices.api'
+import {
+  extractDomainsFromRealEstates,
+  getSelectedServiceIds,
+  getVisibleServices,
+  isGlobalAdmin,
+} from '@utils/servicesVisibility'
 
 export interface Props {
   showAddButton?: boolean
@@ -52,15 +58,35 @@ const CompaniesHeader: React.FC<Props> = ({
   enableRealEstateButton,
   setIsArchive,
   isSingleCompanyByData,
+  realEstates,
 }) => {
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   const { data: customServicesResponse } = useGetCustomServicesQuery({})
-  const customServices = customServicesResponse?.data || []
+  const allCustomServices = customServicesResponse?.data || []
 
   const { data: user } = useGetCurrentUserQuery()
   const isAdmin = isAdminCheck(user?.roles)
+
+  const visibleDomains = useMemo(
+    () => extractDomainsFromRealEstates(realEstates?.data),
+    [realEstates?.data]
+  )
+
+  const hasActiveFilters = !!(
+    filters?.domain?.length || filters?.company?.length
+  )
+
+  const customServices = useMemo(() => {
+    if (isGlobalAdmin(user?.roles) && hasActiveFilters) {
+      const selectedIds = getSelectedServiceIds(visibleDomains)
+      if (!selectedIds.length) return []
+      const selectedSet = new Set(selectedIds)
+      return allCustomServices.filter((s) => selectedSet.has(s._id))
+    }
+    return getVisibleServices(user?.roles, visibleDomains, allCustomServices)
+  }, [user?.roles, visibleDomains, allCustomServices, hasActiveFilters])
 
   const openModal = () => {
     setIsModalOpen(true)
@@ -129,7 +155,7 @@ const CompaniesHeader: React.FC<Props> = ({
           mode="multiple"
           allowClear
           placeholder="Фільтр послуг"
-          style={{ width: "250px", minWidth: "150px" }}
+          style={{ width: '250px', minWidth: '150px' }}
           value={filters?.services || []}
           onChange={handleServicesChange}
           maxTagCount="responsive"

@@ -1,62 +1,141 @@
 'use client'
 
-import dynamic from 'next/dynamic'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
+import { Button } from 'antd'
+import { QuestionCircleOutlined } from '@ant-design/icons'
+import { useDispatch } from 'react-redux'
+import AddPaymentModal from '@components/AddPaymentModal'
+import ScrollFactoryAnimation from '@components/ScrollFactoryAnimation'
+import { Header } from '@components/Layouts/Header'
+import { Footer } from '@components/Layouts/Footer'
+import DashboardTour from '@components/DashboardPage/DashboardTour'
+import { addButton, removeButton } from '@modules/store/floatButtonSlice'
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+import { useRouter } from 'next/router'
 import s from './DashboardLanding.module.scss'
 
-const Lottie = dynamic(() => import('lottie-react'), { ssr: false })
-
-type LottieData = Record<string, any>
-
 const DashboardLanding = () => {
-  const [animationData, setAnimationData] = useState<LottieData | null>(null)
+  const router = useRouter()
+  const dispatch = useDispatch()
+  const { data: user } = useGetCurrentUserQuery()
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false)
+  const [showTour, setShowTour] = useState(false)
+
+  const tourFloatButton = useMemo(
+    () => ({
+      key: 'dashboard-tour',
+      icon: <QuestionCircleOutlined />,
+      onClick: () => setShowTour(true),
+      tooltip: 'Тур',
+      order: 5,
+    }),
+    []
+  )
 
   useEffect(() => {
-    let alive = true
-
-    fetch('/animations/AnimationCity.json')
-      .then((r) => r.json())
-      .then((data) => {
-        if (alive) setAnimationData(data)
-      })
-      .catch(console.error)
-
+    dispatch(addButton(tourFloatButton))
     return () => {
-      alive = false
+      dispatch(removeButton(tourFloatButton.key))
     }
-  }, [])
+  }, [dispatch, tourFloatButton])
 
+  const handleStartFirstInvoice = () => {
+    setPaymentModalOpen(true)
+  }
+
+  const handlePaymentModalClose = (success?: boolean) => {
+    setPaymentModalOpen(false)
+    if (success) {
+      router.push('/payment')
+    } else {
+      router.reload()
+    }
+    // The first invoice creates a provider+company on the fly, which promotes
+    // the user to DomainAdmin. Reload so the new role and data take effect.
+    router.reload()
+  }
   return (
-    <section className={s.section}>
-      <div className={s.bgLines} />
-      <div className={s.blob} />
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: '100vh',
+        margin: '-24px',
+        position: 'relative',
+      }}
+    >
+      <div style={{ position: 'sticky', top: 0, zIndex: 1000, width: '100%' }}>
+        <Header
+          path={[{ title: 'Головна', path: '/' }]}
+          style={{
+            backdropFilter: 'blur(10px)',
+            borderBottom: '1px solid rgba(118, 12, 206, 0.1)',
+          }}
+        />
+      </div>
 
-      <div className={s.panel}>
-        <div className={s.grid}>
-          <div className={s.heroCard}>
-            <h1 className={s.title}>Ласкаво просимо до E-ORENDA!</h1>
-            <p className={s.text}>
-              Керуйте процесом надання послуг нерухомості та систематизуйте відносини між
-              користувачами за допомогою нашого сайту! Ресурс допоможе з автоматичним
-              розрахунком платежів та своєчасним формуванням та виставленням рахунків...
-            </p>
-          </div>
+      <section
+        className={s.section}
+        style={{
+          flex: 1,
+          position: 'relative',
+          height: 'auto',
+          overflow: 'visible',
+        }}
+      >
+        <div className={s.bgLines} />
+        <div className={s.blob} />
 
-          <div className={s.visual}>
-            <div className={s.lottieWrap}>
-              {animationData && (
-                <Lottie
-                  animationData={animationData}
-                  loop
-                  autoplay
-                  style={{ width: '100%', height: '100%' }}
-                />
-              )}
-            </div>
+        <div
+          className={s.panel}
+          style={{ height: 'auto', overflow: 'visible' }}
+        >
+          <div
+            className={s.grid}
+            style={{ height: 'auto', overflow: 'visible', display: 'block' }}
+          >
+            <ScrollFactoryAnimation
+              action={
+                <Button
+                  type="primary"
+                  size="large"
+                  onClick={handleStartFirstInvoice}
+                  style={{
+                    marginTop: 24,
+                    height: 56,
+                    padding: '0 40px',
+                    fontSize: 18,
+                    fontWeight: 600,
+                    borderRadius: 12,
+                  }}
+                >
+                  Створити рахунок
+                </Button>
+              }
+            />
           </div>
         </div>
+      </section>
+
+      <div style={{ position: 'relative', zIndex: 10, width: '100%' }}>
+        <Footer style={{ borderTop: '1px solid rgba(118, 12, 206, 0.1)' }} />
       </div>
-    </section>
+
+      {paymentModalOpen && (
+        <AddPaymentModal
+          paymentActions={{ edit: false, preview: false }}
+          closeModal={handlePaymentModalClose}
+        />
+      )}
+
+      <DashboardTour userRoles={user?.roles || []} />
+      <DashboardTour
+        isVisible={showTour}
+        onClose={() => setShowTour(false)}
+        isManualStart
+        userRoles={user?.roles || []}
+      />
+    </div>
   )
 }
 

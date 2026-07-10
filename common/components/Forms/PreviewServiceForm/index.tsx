@@ -58,11 +58,7 @@ const PreviewServiceForm: FC<Props> = ({ form, currentService }) => {
           disabled
         />
       </Form.Item>
-      <LossesCollapse
-        form={form}
-        name='losses'
-        disabled
-      />
+      <LossesCollapse form={form} name="losses" disabled />
     </Form>
   )
 }

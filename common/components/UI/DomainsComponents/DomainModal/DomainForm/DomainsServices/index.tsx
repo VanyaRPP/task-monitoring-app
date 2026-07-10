@@ -22,6 +22,9 @@ interface Props {
   form: FormInstance
   editable: boolean
   domainId?: string
+  /** When false, the inner Collapse with snapshots list is not rendered.
+   *  Use it when the snapshots are shown in a separate tab. */
+  renderSnapshotsList?: boolean
 }
 
 function templateToFormGroups(template: IDomainTypeTemplate) {
@@ -31,14 +34,25 @@ function templateToFormGroups(template: IDomainTypeTemplate) {
   }))
 }
 
-const DomainsServices: FC<Props> = ({ form, editable, domainId }) => {
+const DomainsServices: FC<Props> = ({
+  form,
+  editable,
+  domainId,
+  renderSnapshotsList = true,
+}) => {
   const [createCustomService] = useCreateCustomServiceMutation()
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const { data: templates = [] } = useGetDomainTypeTemplatesQuery(undefined)
+  const watchedTemplateId = Form.useWatch('domainTypeTemplateId', form) as
+    | string
+    | null
+    | undefined
+  const currentCategory = templates.find(
+    (t) => String(t._id) === String(watchedTemplateId)
+  )?.category
   const { data: customServicesData } = useGetCustomServicesQuery({
     ...(domainId ? { domainId } : {}),
-  })
-  const { data: templates = [] } = useGetDomainTypeTemplatesQuery(undefined, {
-    skip: !editable,
+    ...(currentCategory ? { templateCategory: currentCategory } : {}),
   })
   const [createSnapshot] = useCreateDomainSnapshotMutation()
   const [cloneTemplate] = useCloneDomainTypeTemplateForDomainMutation()
@@ -71,17 +85,12 @@ const DomainsServices: FC<Props> = ({ form, editable, domainId }) => {
     const groups = form.getFieldValue('customServices') ?? []
     return groups.some(
       (g: { groupName?: string; services?: string[] }) =>
-        (g?.groupName ?? '').trim() !== '' ||
-        (g?.services ?? []).length > 0
+        (g?.groupName ?? '').trim() !== '' || (g?.services ?? []).length > 0
     )
   }
 
   const lastAppliedTemplateIdRef = useRef<string | null>(null)
   const seededRef = useRef(false)
-  const watchedTemplateId = Form.useWatch('domainTypeTemplateId', form) as
-    | string
-    | null
-    | undefined
 
   useEffect(() => {
     if (seededRef.current) return
@@ -189,17 +198,27 @@ const DomainsServices: FC<Props> = ({ form, editable, domainId }) => {
     lastAppliedTemplateIdRef.current = snap.templateId ?? null
   }
 
-  if (!editable) return null
+  const handleViewTemplateChange = (templateId: string | null) => {
+    form.setFieldsValue({ domainTypeTemplateId: templateId })
+  }
 
   return (
     <>
       <DomainModalType
         templates={templates}
         editable={editable}
-        onTemplateChange={handleTemplateChange}
+        onTemplateChange={
+          editable ? handleTemplateChange : handleViewTemplateChange
+        }
       />
-      <DomainSnapshotsList domainId={domainId} onRestored={handleRestored} />
-      <Button style={{ marginBottom: 10 }} block onClick={() => setIsModalOpen(true)}>
+      {editable && renderSnapshotsList && (
+        <DomainSnapshotsList domainId={domainId} onRestored={handleRestored} />
+      )}
+      <Button
+        style={{ marginBottom: 10 }}
+        block
+        onClick={() => setIsModalOpen(true)}
+      >
         Мої Послуги
       </Button>
       <DomainModal
@@ -209,6 +228,8 @@ const DomainsServices: FC<Props> = ({ form, editable, domainId }) => {
         serviceGroups={getServiceGroups()}
         onSave={handleSaveServices}
         onCreateCustomService={handleCreateCustomService}
+        domainId={domainId}
+        editable={editable}
       />
     </>
   )

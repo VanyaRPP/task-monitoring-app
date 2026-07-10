@@ -28,9 +28,9 @@ export interface Props {
   enableServiceButton?: boolean
   handleDeleteServices?: () => void
   selectedServices: IService[]
-	user: any
-	domainsFilter: any
-	streetsFilter: any
+  user: any
+  domainsFilter: any
+  streetsFilter: any
 }
 
 const ServicesHeader: React.FC<Props> = ({
@@ -44,9 +44,9 @@ const ServicesHeader: React.FC<Props> = ({
   enableServiceButton = false,
   handleDeleteServices,
   selectedServices,
-	user,
-	domainsFilter,
-	streetsFilter,
+  user,
+  domainsFilter,
+  streetsFilter,
 }) => {
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)

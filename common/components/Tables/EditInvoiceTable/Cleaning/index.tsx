@@ -1,44 +1,20 @@
-import { dateToMonthYear } from '@assets/features/formatDate'
-import { usePaymentContext } from '@components/AddPaymentModal'
+import { useInvoiceCurrency } from '@modules/hooks/useInvoiceCurrency'
 import { InvoiceComponentProps } from '@components/Tables/EditInvoiceTable'
-import { currencyWithUnit, toArray, toFirstUpperCase, toRoundFixed } from '@utils/helpers'
+import { currencyWithUnit, toArray, toRoundFixed } from '@utils/helpers'
 import validator from '@utils/validator'
-import { Form, Input, Space, Typography } from 'antd'
-import { useEffect, useMemo } from 'react'
+import { Form, Input } from 'antd'
+import { useMemo } from 'react'
 import { ServiceType } from '@utils/constants'
-import UpdateInvoiceButton from '../UpdateInvoiceButton'
+import InvoiceRowName from '../InvoiceRowName'
+import useSyncSum from '../useSyncSum'
 
-export const Name: React.FC<InvoiceComponentProps> = ({
-  form,
-  name: _name,
-  editable,
-  disabled,
-}) => {
-  const { service } = usePaymentContext()
-  const name = useMemo(() => toArray<string>(_name), [_name])
-
-  return (
-    <Space
-      direction="horizontal"
-      style={{ justifyContent: 'space-between', width: '100%' }}
-    >
-      <Space direction="vertical" size={0}>
-        <Typography.Text>Прибирання</Typography.Text>
-        <Typography.Text type="secondary" style={{ fontSize: '0.75rem' }}>
-          {toFirstUpperCase(dateToMonthYear(service?.date))}
-        </Typography.Text>
-      </Space>
-      {editable && (
-        <UpdateInvoiceButton
-          form={form!}
-          name={name}
-          serviceType={ServiceType.Cleaning}
-          disabled={disabled}
-        />
-      )}
-    </Space>
-  )
-}
+export const Name: React.FC<InvoiceComponentProps> = (props) => (
+  <InvoiceRowName
+    {...props}
+    serviceType={ServiceType.Cleaning}
+    label="Прибирання"
+  />
+)
 
 export const Amount: React.FC<InvoiceComponentProps> = ({
   form,
@@ -56,11 +32,11 @@ export const Price: React.FC<InvoiceComponentProps> = ({
   disabled,
 }) => {
   const name = useMemo(() => toArray<string>(_name), [_name])
-  const { company } = usePaymentContext()
+  const currency = useInvoiceCurrency()
   const price = Form.useWatch(['invoice', ...name, 'price'], form)
 
   if (!editable) {
-    return <span>{currencyWithUnit(toRoundFixed(price), company)}</span>
+    return <span>{currencyWithUnit(toRoundFixed(price), currency)}</span>
   }
 
   return (
@@ -73,7 +49,7 @@ export const Price: React.FC<InvoiceComponentProps> = ({
         type="number"
         placeholder="Значення..."
         disabled={disabled}
-        suffix={currencyWithUnit('', company)}
+        suffix={currencyWithUnit('', currency)}
       />
     </Form.Item>
   )
@@ -84,12 +60,11 @@ export const Sum: React.FC<InvoiceComponentProps> = ({ form, name: _name }) => {
 
   const price = Form.useWatch(['invoice', ...name, 'price'], form)
   const sum = Form.useWatch(['invoice', ...name, 'sum'], form)
-  const { company } = usePaymentContext()
-  useEffect(() => {
-    form.setFieldValue(['invoice', ...name, 'sum'], +price)
-  }, [form, name, price])
+  const currency = useInvoiceCurrency()
 
-  return <strong>{currencyWithUnit(toRoundFixed(sum), company)}</strong>
+  useSyncSum(form!, name, +price || 0)
+
+  return <strong>{currencyWithUnit(toRoundFixed(sum), currency)}</strong>
 }
 
 const Cleaning = {

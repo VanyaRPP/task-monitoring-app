@@ -1,24 +1,25 @@
-$gold:        #c9a84c;
-$gold-light:  #e2c47a;
-$gold-muted:  rgba(201, 168, 76, 0.18);
-$gold-glow:   rgba(201, 168, 76, 0.08);
+$gold: #c9a84c;
+$gold-light: #e2c47a;
+$gold-muted: rgba(201, 168, 76, 0.18);
+$gold-glow: rgba(201, 168, 76, 0.08);
 
-$surface-0:   rgba(255, 255, 255, 0.03);
-$surface-1:   rgba(255, 255, 255, 0.06);
-$surface-2:   rgba(255, 255, 255, 0.09);
+$surface-0: rgba(255, 255, 255, 0.03);
+$surface-1: rgba(255, 255, 255, 0.06);
+$surface-2: rgba(255, 255, 255, 0.09);
 
-$border-soft: rgba(255, 255, 255, 0.10);
-$border-gold: rgba(201, 168, 76, 0.30);
+$border-soft: rgba(255, 255, 255, 0.1);
+$border-gold: rgba(201, 168, 76, 0.3);
 
-$shadow-card: 0 4px 24px rgba(0, 0, 0, 0.28), 0 1px 4px rgba(0, 0, 0, 0.18);
-$shadow-sm:   0 2px 10px rgba(0, 0, 0, 0.18);
+$shadow-card:
+  0 4px 24px rgba(0, 0, 0, 0.28),
+  0 1px 4px rgba(0, 0, 0, 0.18);
+$shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.18);
 
-$radius-xl:   20px;
-$radius-lg:   14px;
-$radius-md:   10px;
+$radius-xl: 20px;
+$radius-lg: 14px;
+$radius-md: 10px;
 
-$font:        'Inter', 'Helvetica Neue', Arial, sans-serif;
-
+$font: 'Inter', 'Helvetica Neue', Arial, sans-serif;
 
 @mixin card {
   background: $surface-1;
@@ -34,7 +35,6 @@ $font:        'Inter', 'Helvetica Neue', Arial, sans-serif;
   box-shadow: $shadow-sm;
 }
 
-
 .scInvoice {
   font-family: $font;
   font-size: 13px;
@@ -44,7 +44,6 @@ $font:        'Inter', 'Helvetica Neue', Arial, sans-serif;
   padding: 0;
   box-sizing: border-box;
 }
-
 
 .scHeader {
   @include gold-card;
@@ -56,7 +55,6 @@ $font:        'Inter', 'Helvetica Neue', Arial, sans-serif;
   position: relative;
   overflow: hidden;
 
-  
   &::before {
     content: '';
     position: absolute;
@@ -65,7 +63,11 @@ $font:        'Inter', 'Helvetica Neue', Arial, sans-serif;
     width: 160px;
     height: 160px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(201,168,76,0.12) 0%, transparent 70%);
+    background: radial-gradient(
+      circle,
+      rgba(201, 168, 76, 0.12) 0%,
+      transparent 70%
+    );
     pointer-events: none;
   }
 }
@@ -120,7 +122,6 @@ $font:        'Inter', 'Helvetica Neue', Arial, sans-serif;
   text-align: right;
 }
 
-
 .scMeta {
   @include card;
   display: flex;
@@ -154,10 +155,6 @@ $font:        'Inter', 'Helvetica Neue', Arial, sans-serif;
   font-weight: 600;
   letter-spacing: -0.01em;
 }
-
-
-
-
 
 .scParties {
   display: grid;
@@ -201,7 +198,6 @@ $font:        'Inter', 'Helvetica Neue', Arial, sans-serif;
   overflow-wrap: anywhere;
 }
 
-
 .scBankCard {
   margin-top: 0.8rem;
   padding: 0.75rem 1rem;
@@ -224,10 +220,6 @@ $font:        'Inter', 'Helvetica Neue', Arial, sans-serif;
   font-weight: 700;
   opacity: 1;
 }
-
-
-
-
 
 .scTableCard {
   @include card;
@@ -274,28 +266,26 @@ $font:        'Inter', 'Helvetica Neue', Arial, sans-serif;
     }
   }
 
-  
-  th:nth-child(2), td:nth-child(2) {
+  th:nth-child(2),
+  td:nth-child(2) {
     width: 14%;
     text-align: right;
   }
-  
-  th:nth-child(3), td:nth-child(3) {
+
+  th:nth-child(3),
+  td:nth-child(3) {
     width: 9%;
     text-align: right;
   }
-  
-  th:nth-child(4), td:nth-child(4) {
+
+  th:nth-child(4),
+  td:nth-child(4) {
     width: 20%;
     text-align: right;
     white-space: nowrap;
     font-variant-numeric: tabular-nums;
   }
 }
-
-
-
-
 
 .scSummary {
   display: flex;
@@ -362,10 +352,6 @@ $font:        'Inter', 'Helvetica Neue', Arial, sans-serif;
   color: $gold-light;
 }
 
-
-
-
-
 .scFooter {
   @include card;
   display: flex;
@@ -402,31 +388,35 @@ $font:        'Inter', 'Helvetica Neue', Arial, sans-serif;
   opacity: 0.45;
 }
 
-
-
-
-
-$gold-l:         #9a7a2e;
-$gold-light-l:   #8a6820;
-$gold-muted-l:   rgba(154, 122, 46, 0.12);
-$gold-glow-l:    rgba(154, 122, 46, 0.06);
-$surface-0-l:    rgba(0, 0, 0, 0.015);
-$surface-1-l:    rgba(0, 0, 0, 0.03);
-$surface-2-l:    rgba(0, 0, 0, 0.05);
-$border-soft-l:  rgba(0, 0, 0, 0.10);
-$border-gold-l:  rgba(154, 122, 46, 0.30);
-$shadow-card-l:  0 4px 24px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.06);
-$shadow-sm-l:    0 2px 10px rgba(0, 0, 0, 0.06);
+$gold-l: #9a7a2e;
+$gold-light-l: #8a6820;
+$gold-muted-l: rgba(154, 122, 46, 0.12);
+$gold-glow-l: rgba(154, 122, 46, 0.06);
+$surface-0-l: rgba(0, 0, 0, 0.015);
+$surface-1-l: rgba(0, 0, 0, 0.03);
+$surface-2-l: rgba(0, 0, 0, 0.05);
+$border-soft-l: rgba(0, 0, 0, 0.1);
+$border-gold-l: rgba(154, 122, 46, 0.3);
+$shadow-card-l:
+  0 4px 24px rgba(0, 0, 0, 0.08),
+  0 1px 4px rgba(0, 0, 0, 0.06);
+$shadow-sm-l: 0 2px 10px rgba(0, 0, 0, 0.06);
 
 :global(:root[data-theme='light']) {
-  .scInvoice     { color: #1a1a1a; }
+  .scInvoice {
+    color: #1a1a1a;
+  }
 
   .scHeader {
     background: linear-gradient(135deg, $gold-glow-l 0%, $surface-1-l 100%);
     border-color: $border-gold-l;
     box-shadow: $shadow-sm-l;
     &::before {
-      background: radial-gradient(circle, rgba(154, 122, 46, 0.08) 0%, transparent 70%);
+      background: radial-gradient(
+        circle,
+        rgba(154, 122, 46, 0.08) 0%,
+        transparent 70%
+      );
     }
   }
 
@@ -436,35 +426,57 @@ $shadow-sm-l:    0 2px 10px rgba(0, 0, 0, 0.06);
     background-clip: text;
   }
 
-  .scBrandSub       { color: $gold-l; }
+  .scBrandSub {
+    color: $gold-l;
+  }
 
-  .scInvoiceTitle h1 { color: #1a1a1a; }
-  .scInvoiceNum      { color: $gold-l; }
+  .scInvoiceTitle h1 {
+    color: #1a1a1a;
+  }
+  .scInvoiceNum {
+    color: $gold-l;
+  }
 
   .scMeta {
     background: $surface-1-l;
     border-color: $border-soft-l;
     box-shadow: $shadow-sm-l;
   }
-  .scMetaItem + .scMetaItem { border-left-color: $border-soft-l; }
-  .scMetaLabel   { color: $gold-l; }
-  .scMetaValue   { color: #1a1a1a; }
+  .scMetaItem + .scMetaItem {
+    border-left-color: $border-soft-l;
+  }
+  .scMetaLabel {
+    color: $gold-l;
+  }
+  .scMetaValue {
+    color: #1a1a1a;
+  }
 
   .scPartyCard {
     background: $surface-1-l;
     border-color: $border-soft-l;
     box-shadow: $shadow-sm-l;
   }
-  .scPartyLabel  { color: $gold-l; }
-  .scPartyName   { color: #1a1a1a; }
-  .scPartyLine   { color: rgba(0, 0, 0, 0.55); }
+  .scPartyLabel {
+    color: $gold-l;
+  }
+  .scPartyName {
+    color: #1a1a1a;
+  }
+  .scPartyLine {
+    color: rgba(0, 0, 0, 0.55);
+  }
 
   .scBankCard {
     background: $surface-0-l;
     border-color: $border-soft-l;
   }
-  .scBankLine       { color: rgba(0, 0, 0, 0.55); }
-  .scBankLineLabel  { color: #1a1a1a; }
+  .scBankLine {
+    color: rgba(0, 0, 0, 0.55);
+  }
+  .scBankLineLabel {
+    color: #1a1a1a;
+  }
 
   .scTableCard {
     background: $surface-1-l;
@@ -475,11 +487,19 @@ $shadow-sm-l:    0 2px 10px rgba(0, 0, 0, 0.06);
   .scTable {
     thead {
       background: $surface-2-l;
-      th { color: $gold-l; border-bottom-color: $border-gold-l; }
+      th {
+        color: $gold-l;
+        border-bottom-color: $border-gold-l;
+      }
     }
     tbody tr {
-      &:hover { background: $surface-2-l; }
-      td { border-bottom-color: $border-soft-l; color: #1a1a1a; }
+      &:hover {
+        background: $surface-2-l;
+      }
+      td {
+        border-bottom-color: $border-soft-l;
+        color: #1a1a1a;
+      }
     }
   }
 
@@ -489,8 +509,12 @@ $shadow-sm-l:    0 2px 10px rgba(0, 0, 0, 0.06);
     box-shadow: $shadow-sm-l;
   }
   .scDateRow {
-    span   { color: rgba(0, 0, 0, 0.45); }
-    strong { color: #1a1a1a; }
+    span {
+      color: rgba(0, 0, 0, 0.45);
+    }
+    strong {
+      color: #1a1a1a;
+    }
   }
 
   .scTotalsCard {
@@ -511,14 +535,16 @@ $shadow-sm-l:    0 2px 10px rgba(0, 0, 0, 0.06);
     border-color: $border-soft-l;
     box-shadow: $shadow-sm-l;
   }
-  .scThankYou        { color: $gold-l; }
-  .scSignatureLine   { color: rgba(0, 0, 0, 0.35); }
-  .scSignatureCaption { color: rgba(0, 0, 0, 0.40); }
+  .scThankYou {
+    color: $gold-l;
+  }
+  .scSignatureLine {
+    color: rgba(0, 0, 0, 0.35);
+  }
+  .scSignatureCaption {
+    color: rgba(0, 0, 0, 0.4);
+  }
 }
-
-
-
-
 
 @media (max-width: 860px) {
   .scHeader {
@@ -527,8 +553,12 @@ $shadow-sm-l:    0 2px 10px rgba(0, 0, 0, 0.06);
     gap: 0.8rem;
   }
 
-  .scInvoiceTitle { text-align: left; }
-  .scInvoiceNum   { text-align: left; }
+  .scInvoiceTitle {
+    text-align: left;
+  }
+  .scInvoiceNum {
+    text-align: left;
+  }
 
   .scMeta {
     flex-wrap: wrap;
@@ -536,7 +566,10 @@ $shadow-sm-l:    0 2px 10px rgba(0, 0, 0, 0.06);
 
   .scMetaItem {
     min-width: 140px;
-    & + & { border-left: none; border-top: 1px solid $border-soft; }
+    & + & {
+      border-left: none;
+      border-top: 1px solid $border-soft;
+    }
   }
 
   .scParties {
@@ -554,12 +587,11 @@ $shadow-sm-l:    0 2px 10px rgba(0, 0, 0, 0.06);
   }
 }
 
-
-
-
-
 @media print {
-  @page { size: A4; margin: 12mm 14mm; }
+  @page {
+    size: A4;
+    margin: 12mm 14mm;
+  }
 
   .scInvoice {
     max-width: none !important;
@@ -573,21 +605,36 @@ $shadow-sm-l:    0 2px 10px rgba(0, 0, 0, 0.06);
   .scHeader {
     flex-direction: row !important;
     align-items: center !important;
-    background: linear-gradient(135deg, rgba(201,168,76,0.06) 0%, #fff 100%) !important;
-    border-color: rgba(201,168,76,0.3) !important;
+    background: linear-gradient(
+      135deg,
+      rgba(201, 168, 76, 0.06) 0%,
+      #fff 100%
+    ) !important;
+    border-color: rgba(201, 168, 76, 0.3) !important;
     border-radius: 14px !important;
     box-shadow: none !important;
-    &::before { opacity: 0.06 !important; }
+    &::before {
+      opacity: 0.06 !important;
+    }
   }
-  .scInvoiceTitle { text-align: right !important; }
-  .scInvoiceTitle h1 { color: #111 !important; }
-  .scInvoiceNum  { color: #9a7a2e !important; text-align: right !important; }
+  .scInvoiceTitle {
+    text-align: right !important;
+  }
+  .scInvoiceTitle h1 {
+    color: #111 !important;
+  }
+  .scInvoiceNum {
+    color: #9a7a2e !important;
+    text-align: right !important;
+  }
   .scBrandName {
     -webkit-text-fill-color: #111 !important;
     background: none !important;
     color: #111 !important;
   }
-  .scBrandSub    { color: #9a7a2e !important; }
+  .scBrandSub {
+    color: #9a7a2e !important;
+  }
 
   .scMeta {
     flex-wrap: nowrap !important;
@@ -599,29 +646,51 @@ $shadow-sm-l:    0 2px 10px rgba(0, 0, 0, 0.06);
   .scMetaItem {
     min-width: 0 !important;
     flex: 1 !important;
-    & + & { border-left: 1px solid #e0e0e0 !important; border-top: none !important; }
+    & + & {
+      border-left: 1px solid #e0e0e0 !important;
+      border-top: none !important;
+    }
   }
-  .scMetaLabel   { color: #9a7a2e !important; }
-  .scMetaValue   { color: #111 !important; }
+  .scMetaLabel {
+    color: #9a7a2e !important;
+  }
+  .scMetaValue {
+    color: #111 !important;
+  }
 
-  .scParties     { grid-template-columns: 1.15fr 1fr !important; }
+  .scParties {
+    grid-template-columns: 1.15fr 1fr !important;
+  }
   .scPartyCard {
     background: #fff !important;
     border-color: #d8d8d8 !important;
     border-radius: 14px !important;
     box-shadow: none !important;
   }
-  .scPartyLabel  { color: #9a7a2e !important; }
-  .scPartyName   { color: #111 !important; }
-  .scPartyLine   { color: #555 !important; opacity: 1 !important; }
+  .scPartyLabel {
+    color: #9a7a2e !important;
+  }
+  .scPartyName {
+    color: #111 !important;
+  }
+  .scPartyLine {
+    color: #555 !important;
+    opacity: 1 !important;
+  }
 
   .scBankCard {
     background: #f5f5f5 !important;
     border-color: #d8d8d8 !important;
     border-radius: 10px !important;
   }
-  .scBankLine      { color: #555 !important; opacity: 1 !important; }
-  .scBankLineLabel { color: #111 !important; opacity: 1 !important; }
+  .scBankLine {
+    color: #555 !important;
+    opacity: 1 !important;
+  }
+  .scBankLineLabel {
+    color: #111 !important;
+    opacity: 1 !important;
+  }
 
   .scTableCard {
     background: #fff !important;
@@ -632,11 +701,19 @@ $shadow-sm-l:    0 2px 10px rgba(0, 0, 0, 0.06);
   .scTable {
     thead {
       background: #f5f5f5 !important;
-      th { color: #9a7a2e !important; border-bottom-color: #c9a84c !important; }
+      th {
+        color: #9a7a2e !important;
+        border-bottom-color: #c9a84c !important;
+      }
     }
     tbody tr {
-      &:hover { background: transparent !important; }
-      td { border-bottom-color: #e8e8e8 !important; color: #111 !important; }
+      &:hover {
+        background: transparent !important;
+      }
+      td {
+        border-bottom-color: #e8e8e8 !important;
+        color: #111 !important;
+      }
     }
   }
 
@@ -652,19 +729,35 @@ $shadow-sm-l:    0 2px 10px rgba(0, 0, 0, 0.06);
     min-width: 220px !important;
   }
   .scDateRow {
-    span   { color: #888 !important; opacity: 1 !important; }
-    strong { color: #111 !important; }
+    span {
+      color: #888 !important;
+      opacity: 1 !important;
+    }
+    strong {
+      color: #111 !important;
+    }
   }
 
   .scTotalsCard {
-    background: linear-gradient(135deg, rgba(201,168,76,0.06) 0%, #fff 100%) !important;
-    border-color: rgba(201,168,76,0.3) !important;
+    background: linear-gradient(
+      135deg,
+      rgba(201, 168, 76, 0.06) 0%,
+      #fff 100%
+    ) !important;
+    border-color: rgba(201, 168, 76, 0.3) !important;
     border-radius: 14px !important;
     box-shadow: none !important;
     min-width: 220px !important;
   }
-  .scTotalRow    { color: #555 !important; opacity: 1 !important; }
-  .scGrandTotal  { border-top-color: #c9a84c !important; color: #8a6820 !important; opacity: 1 !important; }
+  .scTotalRow {
+    color: #555 !important;
+    opacity: 1 !important;
+  }
+  .scGrandTotal {
+    border-top-color: #c9a84c !important;
+    color: #8a6820 !important;
+    opacity: 1 !important;
+  }
 
   .scFooter {
     background: #fff !important;
@@ -672,9 +765,17 @@ $shadow-sm-l:    0 2px 10px rgba(0, 0, 0, 0.06);
     border-radius: 14px !important;
     box-shadow: none !important;
   }
-  .scThankYou    { color: #9a7a2e !important; }
-  .scSignatureLine { color: #888 !important; opacity: 1 !important; }
-  .scSignatureCaption { color: #888 !important; opacity: 1 !important; }
+  .scThankYou {
+    color: #9a7a2e !important;
+  }
+  .scSignatureLine {
+    color: #888 !important;
+    opacity: 1 !important;
+  }
+  .scSignatureCaption {
+    color: #888 !important;
+    opacity: 1 !important;
+  }
 
   .scPartyCard,
   .scTableCard,

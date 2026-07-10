@@ -6,10 +6,9 @@ import { getCurrentUser } from '@utils/getCurrentUser'
 import { setupTestEnvironment } from '@utils/setupTestEnvironment'
 import { testDomainsData, testStreetsData } from './mockData'
 
-
 jest.mock('@pages/api/api.config', () => ({
   __esModule: true,
-  default: jest.fn(), 
+  default: jest.fn(),
 }))
 
 jest.mock('@utils/getCurrentUser', () => ({ getCurrentUser: jest.fn() }))
@@ -23,7 +22,7 @@ const createMockRequest = (overrides: Partial<any> = {}) =>
     method: 'GET',
     query: {},
     ...overrides,
-  } as any)
+  }) as any
 
 const createMockResponse = () => {
   const res: any = {}
@@ -131,7 +130,7 @@ describe('API Route - GET Method', () => {
     await (Street as any).insertMany(testStreetsData)
 
     const mockRequest = createMockRequest({
-      query: { domainId: '649324b7ff4981c7363ceb34' }, 
+      query: { domainId: '649324b7ff4981c7363ceb34' },
     })
     const mockResponse = createMockResponse()
 
@@ -159,7 +158,10 @@ describe('API Route - GET Method', () => {
 
     expect(mockResponse.status).toHaveBeenCalledWith(400)
     expect(mockResponse.json).toHaveBeenCalledWith(
-      expect.objectContaining({ success: false, message: 'Invalid user role or parameters' })
+      expect.objectContaining({
+        success: false,
+        message: 'Invalid user role or parameters',
+      })
     )
   })
 })

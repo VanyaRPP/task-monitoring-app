@@ -8,9 +8,21 @@ import {
 import az from './azure.module.scss'
 
 const AzureTemplate: FC<TemplateProps> = ({
-  data, componentRef, isEnglish, currencyLabel, modernInvoiceNumber, domainName,
-  rows, getQty, subtotal, taxPercent, taxAmount, total,
-  paymentInfoLines, issuedToLines, normalizedBankDetailsLines,
+  data,
+  componentRef,
+  isEnglish,
+  currencyLabel,
+  modernInvoiceNumber,
+  domainName,
+  rows,
+  getQty,
+  subtotal,
+  taxPercent,
+  taxAmount,
+  total,
+  paymentInfoLines,
+  issuedToLines,
+  normalizedBankDetailsLines,
 }) => {
   const { heading: paymentHeading, bodyLines: paymentBodyLines } =
     getBillFromHeadingAndBodyLines(data, paymentInfoLines)
@@ -35,7 +47,9 @@ const AzureTemplate: FC<TemplateProps> = ({
         </div>
         <div className={az.azInvoiceHead}>
           <h1>{isEnglish ? 'INVOICE' : 'РАХУНОК'}</h1>
-          <span className={az.azInvoiceNum}>№&thinsp;{modernInvoiceNumber}</span>
+          <span className={az.azInvoiceNum}>
+            №&thinsp;{modernInvoiceNumber}
+          </span>
         </div>
       </div>
 
@@ -47,17 +61,23 @@ const AzureTemplate: FC<TemplateProps> = ({
           </span>
         </div>
         <div className={az.azMetaItem}>
-          <span className={az.azMetaLabel}>{isEnglish ? 'Due date' : 'Строк оплати'}</span>
+          <span className={az.azMetaLabel}>
+            {isEnglish ? 'Due date' : 'Строк оплати'}
+          </span>
           <span className={az.azMetaValue}>
             {dayjs(data?.invoiceCreationDate).add(5, 'd').format('DD.MM.YYYY')}
           </span>
         </div>
         <div className={az.azMetaItem}>
-          <span className={az.azMetaLabel}>{isEnglish ? 'Invoice №' : 'Рахунок №'}</span>
+          <span className={az.azMetaLabel}>
+            {isEnglish ? 'Invoice №' : 'Рахунок №'}
+          </span>
           <span className={az.azMetaValue}>{modernInvoiceNumber}</span>
         </div>
         <div className={az.azMetaItem}>
-          <span className={az.azMetaLabel}>{isEnglish ? 'Currency' : 'Валюта'}</span>
+          <span className={az.azMetaLabel}>
+            {isEnglish ? 'Currency' : 'Валюта'}
+          </span>
           <span className={az.azMetaValue}>{currencyLabel}</span>
         </div>
       </div>
@@ -85,11 +105,17 @@ const AzureTemplate: FC<TemplateProps> = ({
               {normalizedBankDetailsLines.map((line: string, idx: number) => {
                 const sep = line.indexOf(':')
                 if (sep < 0) {
-                  return <div className={az.azBankLine} key={`bk-${idx}`}>{line}</div>
+                  return (
+                    <div className={az.azBankLine} key={`bk-${idx}`}>
+                      {line}
+                    </div>
+                  )
                 }
                 return (
                   <div className={az.azBankLine} key={`bk-${idx}`}>
-                    <span className={az.azBankLineLabel}>{line.slice(0, sep + 1)}</span>
+                    <span className={az.azBankLineLabel}>
+                      {line.slice(0, sep + 1)}
+                    </span>
                     {line.slice(sep + 1)}
                   </div>
                 )
@@ -133,14 +159,16 @@ const AzureTemplate: FC<TemplateProps> = ({
               const rate = Number.isFinite(Number(item?.price))
                 ? Number(item.price)
                 : qty
-                ? Number(item?.sum || 0) / qty
-                : Number(item?.sum || 0)
+                  ? Number(item?.sum || 0) / qty
+                  : Number(item?.sum || 0)
               return (
                 <tr key={`${item?.type || item?.name}-${index}`}>
                   <td>{item?.name || item?.type || '—'}</td>
                   <td>{rate.toFixed(2)}</td>
                   <td>{qty}</td>
-                  <td>{Number(item?.sum || 0).toFixed(2)}&nbsp;{currencyLabel}</td>
+                  <td>
+                    {Number(item?.sum || 0).toFixed(2)}&nbsp;{currencyLabel}
+                  </td>
                 </tr>
               )
             })}
@@ -152,11 +180,17 @@ const AzureTemplate: FC<TemplateProps> = ({
         <div className={az.azDates}>
           <div className={az.azDateRow}>
             <span>{isEnglish ? 'Issued' : 'Дата'}</span>
-            <strong>{dayjs(data?.invoiceCreationDate)?.format?.('DD.MM.YYYY')}</strong>
+            <strong>
+              {dayjs(data?.invoiceCreationDate)?.format?.('DD.MM.YYYY')}
+            </strong>
           </div>
           <div className={az.azDateRow}>
             <span>{isEnglish ? 'Due' : 'Строк'}</span>
-            <strong>{dayjs(data?.invoiceCreationDate).add(5, 'd').format('DD.MM.YYYY')}</strong>
+            <strong>
+              {dayjs(data?.invoiceCreationDate)
+                .add(5, 'd')
+                .format('DD.MM.YYYY')}
+            </strong>
           </div>
         </div>
         <div className={az.azTotalsCard}>
@@ -164,18 +198,23 @@ const AzureTemplate: FC<TemplateProps> = ({
             <>
               <div className={az.azTotalRow}>
                 <span>{isEnglish ? 'Subtotal' : 'Підсумок'}</span>
-                <strong>{subtotal.toFixed(2)}&nbsp;{currencyLabel}</strong>
+                <strong>
+                  {subtotal.toFixed(2)}&nbsp;{currencyLabel}
+                </strong>
               </div>
               <div className={az.azTotalRow}>
                 <span>VAT {taxPercent}%</span>
-                <strong>{taxAmount.toFixed(2)}&nbsp;{currencyLabel}</strong>
+                <strong>
+                  {taxAmount.toFixed(2)}&nbsp;{currencyLabel}
+                </strong>
               </div>
             </>
           )}
           <div className={`${az.azTotalRow} ${az.azGrandTotal}`}>
             <span>{isEnglish ? 'TOTAL DUE' : 'ДО СПЛАТИ'}</span>
             <strong>
-              {(+data?.generalSum || +data?.debit || total).toFixed(2)}&nbsp;{currencyLabel}
+              {(+data?.generalSum || +data?.debit || total).toFixed(2)}&nbsp;
+              {currencyLabel}
             </strong>
           </div>
         </div>

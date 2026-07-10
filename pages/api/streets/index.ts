@@ -25,10 +25,6 @@ export default async function handler(
         const { limit = 0, domainId } = req.query
         const options: Record<string, any> = {}
 
-        if (isUser) {
-          return res.status(200).json({ success: true, data: [] })
-        }
-
         if (domainId && typeof domainId === 'string') {
           if (mongoose.Types.ObjectId.isValid(domainId)) {
             options._id = new mongoose.Types.ObjectId(domainId)
@@ -73,12 +69,19 @@ export default async function handler(
             adminEmails: user.email,
           }).select('streets')
 
-          const adminStreetIds = adminDomains.flatMap((domain) => domain.streets)
+          const adminStreetIds = adminDomains.flatMap(
+            (domain) => domain.streets
+          )
 
           const allDomains = await Domain.find({}).select('streets')
-          const allUsedStreetIds = allDomains.flatMap((domain) => domain.streets)
+          const allUsedStreetIds = allDomains.flatMap(
+            (domain) => domain.streets
+          )
           const otherAdminsStreetIds = allUsedStreetIds.filter(
-            (id) => !adminStreetIds.some((adminId) => adminId.toString() === id.toString())
+            (id) =>
+              !adminStreetIds.some(
+                (adminId) => adminId.toString() === id.toString()
+              )
           )
 
           let streets
@@ -138,6 +141,31 @@ export default async function handler(
           })
         }
 
+        if (isUser) {
+          const allDomains = await Domain.find({}).select('streets')
+          const allUsedStreetIds = allDomains.flatMap(
+            (domain) => domain.streets
+          )
+
+          const freeStreets = await Street.find({
+            _id: { $nin: allUsedStreetIds },
+          }).limit(+limit)
+
+          const freeStreetIds = freeStreets.map((s) => s._id)
+          const servicesWithStreets = await Service.find({
+            street: { $in: freeStreetIds },
+          })
+
+          const result = freeStreets.map((street) => ({
+            ...street._doc,
+            hasService: servicesWithStreets.some(
+              (service) => service.street.toString() === street._id.toString()
+            ),
+          }))
+
+          return res.status(200).json({ success: true, data: result })
+        }
+
         return res.status(400).json({
           success: false,
           message: 'Invalid user role or parameters',
@@ -154,6 +182,11 @@ export default async function handler(
         }
 
         const street = await Street.create(req.body)
+        if (req.body.domain) {
+          await Domain.findByIdAndUpdate(req.body.domain, {
+            $addToSet: { streets: street._id },
+          })
+        }
         return res.status(200).json({ success: true, data: street })
       } catch (error) {
         return res.status(400).json({ success: false, error: error.message })

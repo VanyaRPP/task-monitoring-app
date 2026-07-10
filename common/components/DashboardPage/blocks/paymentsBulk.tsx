@@ -4,13 +4,17 @@ import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.a
 import { IExtendedRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
 import { IService } from '@common/api/serviceApi/service.api.types'
+import {
+  isMonthServicePlaceholder,
+  parseMonthServicePlaceholder,
+} from '@common/components/Forms/AddPaymentForm/month-service-placeholder'
 import InvoicesHeader from '@common/components/Tables/PaymentsBulk/Header'
 import InvoicesTable from '@common/components/Tables/PaymentsBulk/Table'
 import TableCard from '@common/components/UI/TableCard'
 import { Operations } from '@utils/constants'
 import { Form, FormInstance } from 'antd'
 import dayjs from 'dayjs'
-import { createContext, useContext } from 'react'
+import { createContext, useContext, useMemo } from 'react'
 
 export const InvoicesPaymentContext = createContext<{
   form: FormInstance
@@ -40,6 +44,11 @@ const PaymentBulkBlock: React.FC = () => {
   const streetId: string | undefined = Form.useWatch('street', form)
   const serviceId: string | undefined = Form.useWatch('monthService', form)
 
+  const isPlaceholder = isMonthServicePlaceholder(serviceId)
+  const placeholderDate = isPlaceholder
+    ? parseMonthServicePlaceholder(serviceId)
+    : null
+
   const {
     data: { data: companies } = { data: [] },
     isLoading: isCompaniesLoading,
@@ -50,15 +59,35 @@ const PaymentBulkBlock: React.FC = () => {
   )
 
   const {
-    data: { data: { 0: service } } = { data: [null] },
+    data: { data: { 0: realService } } = { data: [null] },
     isLoading: isServiceLoading,
     isError: isServiceError,
   } = useGetAllServicesQuery(
     { serviceId, limit: 1 },
-    { skip: !serviceId || !domainId || !streetId }
+    { skip: !serviceId || !domainId || !streetId || isPlaceholder }
   )
 
-  const previousServiceDate = dayjs(service?.date).subtract(1, 'month')
+  const placeholderService = useMemo<IService | null>(() => {
+    if (!isPlaceholder || !placeholderDate || !domainId || !streetId)
+      return null
+    return {
+      _id: serviceId,
+      date: placeholderDate.toDate(),
+      domain: { _id: domainId },
+      street: { _id: streetId },
+      rentPrice: 0,
+      electricityPrice: 0,
+      waterPrice: 0,
+      waterPriceTotal: 0,
+      customServices: [],
+    } as IService
+  }, [isPlaceholder, placeholderDate, domainId, streetId, serviceId])
+
+  const service = realService ?? placeholderService
+
+  const previousServiceDate = service?.date
+    ? dayjs(service.date).subtract(1, 'month')
+    : null
 
   const {
     data: { data: { 0: prevService } } = { data: [null] },
@@ -68,11 +97,18 @@ const PaymentBulkBlock: React.FC = () => {
     {
       streetId,
       domainId,
-      month: previousServiceDate.month() + 1,
-      year: previousServiceDate.year(),
+      month: previousServiceDate ? previousServiceDate.month() + 1 : undefined,
+      year: previousServiceDate ? previousServiceDate.year() : undefined,
       limit: 1,
     },
-    { skip: !serviceId || !domainId || !streetId || !service }
+    {
+      skip:
+        !serviceId ||
+        !domainId ||
+        !streetId ||
+        !service ||
+        !previousServiceDate,
+    }
   )
 
   const {

@@ -1,15 +1,18 @@
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons'
 import { useGetCustomServicesByDomainQuery } from '@common/api/customServicesApi/customServices.api'
 import { IPayment } from '@common/api/paymentApi/payment.api.types'
+import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
 import { ServiceType } from '@utils/constants'
+import { isNewEntityValue } from '@utils/inlineCreate'
 import {
   catalogRowToSelectOption,
   flattenDomainCatalogServices,
   IInvoiceLineAddPayload,
+  IInvoicePriceContext,
   invoiceLineExcludeKey,
 } from '@utils/domain/domain-invoice-selector'
-import { Form, FormInstance, Select, Table } from 'antd'
+import { Empty, Form, FormInstance, Select, Table } from 'antd'
 import React, { useCallback, useMemo } from 'react'
 
 import Cleaning from './Cleaning'
@@ -26,6 +29,9 @@ import WaterPart from './WaterPart'
 export interface TableProps {
   form?: FormInstance
   service?: IService
+  company?: IRealestate
+  prevPayment?: IPayment
+  domainId?: string
   editable?: boolean
   disabled?: boolean
 
@@ -64,6 +70,9 @@ export const EditInvoicesTable_unstable: React.FC<EditInvoicesTableProps> = ({
   disabled = false,
   loading = false,
   service,
+  company,
+  prevPayment,
+  domainId,
   ...props
 }) => {
   const [form] = Form.useForm(_form)
@@ -81,11 +90,11 @@ export const EditInvoicesTable_unstable: React.FC<EditInvoicesTableProps> = ({
           {
             title: 'Назва',
             width: 400,
-            render: (_: any, { name }: { name: number }) => (
+            render: (_: any, field: { name: number }) => (
               <Name
                 form={form}
-                name={name}
-                record={invoices[name]}
+                name={field.name}
+                record={form.getFieldValue(['invoice', field.name])}
                 editable={editable}
                 disabled={disabled}
               />
@@ -93,12 +102,12 @@ export const EditInvoicesTable_unstable: React.FC<EditInvoicesTableProps> = ({
           },
           {
             title: 'Кількість',
-            width: 500,
-            render: (_: any, { name }: { name: number }) => (
+            width: 250,
+            render: (_: any, field: { name: number }) => (
               <Amount
                 form={form}
-                name={name}
-                record={invoices[name]}
+                name={field.name}
+                record={form.getFieldValue(['invoice', field.name])}
                 editable={editable}
                 disabled={disabled}
               />
@@ -111,11 +120,11 @@ export const EditInvoicesTable_unstable: React.FC<EditInvoicesTableProps> = ({
                 : ''
             }`,
             width: 250,
-            render: (_: any, { name }: { name: number }) => (
+            render: (_: any, field: { name: number }) => (
               <Price
                 form={form}
-                name={name}
-                record={invoices[name]}
+                name={field.name}
+                record={form.getFieldValue(['invoice', field.name])}
                 editable={editable}
                 disabled={disabled}
               />
@@ -124,11 +133,11 @@ export const EditInvoicesTable_unstable: React.FC<EditInvoicesTableProps> = ({
           {
             title: 'Сума',
             width: 200,
-            render: (_: any, { name }: { name: number }) => (
+            render: (_: any, field: { name: number }) => (
               <Sum
                 form={form}
-                name={name}
-                record={invoices[name]}
+                name={field.name}
+                record={form.getFieldValue(['invoice', field.name])}
                 editable={editable}
                 disabled={disabled}
               />
@@ -136,10 +145,10 @@ export const EditInvoicesTable_unstable: React.FC<EditInvoicesTableProps> = ({
           },
           {
             width: 50,
-            render: (_: any, record: { name: number }) => (
+            render: (_: any, field: { name: number }) => (
               <MinusCircleOutlined
-                onClick={() => !disabled && remove(record.name)}
-                style={{ opacity: disabled ? 0.5 : 1 }}
+                onClick={() => !disabled && remove(field.name)}
+                style={{ opacity: disabled ? 0.5 : 1, fontSize: 16 }}
               />
             ),
             hidden: !editable,
@@ -148,16 +157,43 @@ export const EditInvoicesTable_unstable: React.FC<EditInvoicesTableProps> = ({
 
         return (
           <Table
-            rowKey="name"
+            rowKey={(field) => field.key}
             loading={loading}
             size="small"
             dataSource={fields}
             pagination={false}
+            locale={
+              editable
+                ? {
+                    emptyText: (
+                      <Empty
+                        image={Empty.PRESENTED_IMAGE_SIMPLE}
+                        description={
+                          <span
+                            style={{
+                              maxWidth: 360,
+                              display: 'inline-block',
+                            }}
+                          >
+                            Ще немає послуг. Додайте рядок нижче: оберіть з
+                            каталогу або «Власне», вкажіть назву, кількість і
+                            ціну — сума порахується автоматично (ціна ×
+                            кількість).
+                          </span>
+                        }
+                      />
+                    ),
+                  }
+                : undefined
+            }
             footer={
               editable
                 ? () => (
                     <InvoiceSelector
                       service={service}
+                      company={company}
+                      prevPayment={prevPayment}
+                      domainId={domainId}
                       excludeKeys={
                         invoices?.map((inv) => invoiceLineExcludeKey(inv)) ?? []
                       }
@@ -178,32 +214,54 @@ export const EditInvoicesTable_unstable: React.FC<EditInvoicesTableProps> = ({
 
 export const InvoiceSelector: React.FC<{
   service?: IService
+  company?: IRealestate
+  prevPayment?: IPayment
+  domainId?: string
   excludeKeys?: string[]
   onSelect?: (payload: IInvoiceLineAddPayload) => void
-}> = ({ service, excludeKeys, onSelect }) => {
-  const domainId = service?.domain?._id
+}> = ({ service, company, prevPayment, domainId, excludeKeys, onSelect }) => {
+  const rawDomainId = service?.domain?._id
     ? String(service.domain._id)
-    : undefined
+    : domainId
+      ? String(domainId)
+      : undefined
+
+  const isNewDomain = isNewEntityValue(rawDomainId)
+  const catalogDomainId = isNewDomain ? undefined : rawDomainId
+  const hasDomainContext = !!rawDomainId
 
   const { data: catalogRes, isLoading } = useGetCustomServicesByDomainQuery(
-    { domainId: domainId ? [domainId] : undefined },
-    { skip: !domainId }
+    { domainId: catalogDomainId ? [catalogDomainId] : undefined },
+    { skip: !catalogDomainId }
   )
 
   const options = useMemo(() => {
-    if (!domainId) return []
-    const groups = catalogRes?.data ?? []
+    if (!hasDomainContext) return []
+    const groups = catalogDomainId ? (catalogRes?.data ?? []) : []
     const rows = flattenDomainCatalogServices(groups)
-    const catalogOptions = rows.map(catalogRowToSelectOption).filter(
-      (opt) => !excludeKeys?.includes(opt.value)
-    )
+    const priceContext: IInvoicePriceContext = {
+      company,
+      service,
+      prevPayment,
+    }
+    const catalogOptions = rows
+      .map((row) => catalogRowToSelectOption(row, priceContext))
+      .filter((opt) => !excludeKeys?.includes(opt.value))
     const customOption = {
       value: ServiceType.Custom,
       label: 'Власне',
       payload: { type: ServiceType.Custom },
     }
     return [...catalogOptions, customOption]
-  }, [catalogRes, domainId, excludeKeys])
+  }, [
+    catalogRes,
+    catalogDomainId,
+    hasDomainContext,
+    excludeKeys,
+    company,
+    service,
+    prevPayment,
+  ])
 
   const handleSelect = useCallback(
     (value: string) => {
@@ -223,20 +281,20 @@ export const InvoiceSelector: React.FC<{
       style={{ width: '100%' }}
       suffixIcon={<PlusOutlined />}
       placeholder={
-        domainId
+        hasDomainContext
           ? 'Додати поле з каталогу домену...'
           : 'Немає домену в сервісі — каталог недоступний'
       }
-      onSelect={handleSelect}
-      value={undefined}
+      onChange={handleSelect}
+      value={null}
       options={options}
-      loading={!!domainId && isLoading}
-      disabled={!domainId || isLoading}
+      loading={!!catalogDomainId && isLoading}
+      disabled={!hasDomainContext || (!!catalogDomainId && isLoading)}
       allowClear
       showSearch
       optionFilterProp="label"
       notFoundContent={
-        domainId && !isLoading
+        catalogDomainId && !isLoading
           ? 'У групах домену немає послуг'
           : undefined
       }
@@ -277,31 +335,30 @@ const ComponentsCollection: {
   [ServiceType.Custom]: Custom,
 }
 
-const Component: React.FC<
-  InvoiceComponentProps & {
-    type: 'name' | 'amount' | 'price' | 'sum'
-  }
-> = ({ form, name, type, record, ...props }) => {
+type ColumnKey = 'name' | 'amount' | 'price' | 'sum'
+
+const COLUMN_TO_SLOT: Record<ColumnKey, 'Name' | 'Amount' | 'Price' | 'Sum'> = {
+  name: 'Name',
+  amount: 'Amount',
+  price: 'Price',
+  sum: 'Sum',
+}
+
+const Component: React.FC<InvoiceComponentProps & { type: ColumnKey }> = ({
+  form,
+  name,
+  type,
+  record,
+  ...props
+}) => {
   if (!record) return null
 
   const components =
     ComponentsCollection[record.type] ||
     ComponentsCollection[ServiceType.Custom]
 
-  if (!components) return null
-
-  const C =
-    type === 'name'
-      ? components.Name
-      : type === 'amount'
-      ? components.Amount
-      : type === 'price'
-      ? components.Price
-      : type === 'sum'
-      ? components.Sum
-      : null
-
+  const C = components?.[COLUMN_TO_SLOT[type]]
   if (!C) return null
 
-  return <C form={form} name={name} {...props} />
+  return <C form={form} name={name} record={record} {...props} />
 }

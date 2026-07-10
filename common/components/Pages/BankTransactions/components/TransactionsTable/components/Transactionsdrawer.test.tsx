@@ -2,6 +2,7 @@ import React from 'react'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import TransactionDrawer from './TransactionsDrawer'
+import { Operations } from '@utils/constants'
 
 let lastPaymentData: any = null
 
@@ -21,7 +22,13 @@ jest.mock('./useQuicksend', () => ({
 
 jest.mock('@components/AddPaymentModal', () => ({
   __esModule: true,
-  default: ({ closeModal, paymentData }: { closeModal: (success?: boolean) => void; paymentData: any }) => {
+  default: ({
+    closeModal,
+    paymentData,
+  }: {
+    closeModal: (success?: boolean) => void
+    paymentData: any
+  }) => {
     lastPaymentData = paymentData
     return (
       <div data-testid="add-payment-modal">
@@ -36,8 +43,9 @@ import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.a
 const mockUseGetAllRealEstateQuery = useGetAllRealEstateQuery as jest.Mock
 
 const getDropdownSendButton = () =>
-  Array.from(document.querySelectorAll('button')).find((btn) =>
-    btn.textContent?.includes('Send') && btn.querySelector('.anticon-down')
+  Array.from(document.querySelectorAll('button')).find(
+    (btn) =>
+      btn.textContent?.includes('Send') && btn.querySelector('.anticon-down')
   )
 
 const makeTransaction = (overrides = {}) => ({
@@ -107,13 +115,17 @@ beforeEach(() => {
 describe('Badge "Платіж є"', () => {
   it('is hidden when isMatchingPayment is false', () => {
     renderDrawer(makeTransaction({ isMatchingPayment: false }))
-    expect(document.querySelector('.ant-ribbon')).toHaveStyle({ visibility: 'hidden' })
+    expect(document.querySelector('.ant-ribbon')).toHaveStyle({
+      visibility: 'hidden',
+    })
   })
 
   it('is visible when isMatchingPayment is true', async () => {
     renderDrawer(makeTransaction({ isMatchingPayment: true }))
     await waitFor(() => {
-      expect(document.querySelector('.ant-ribbon')).toHaveStyle({ visibility: 'visible' })
+      expect(document.querySelector('.ant-ribbon')).toHaveStyle({
+        visibility: 'visible',
+      })
     })
   })
 
@@ -127,26 +139,34 @@ describe('Badge "Платіж є"', () => {
     await userEvent.click(await screen.findByText('ТОВ Тест'))
 
     await waitFor(() => {
-      expect(document.querySelector('.ant-ribbon')).toHaveStyle({ visibility: 'visible' })
+      expect(document.querySelector('.ant-ribbon')).toHaveStyle({
+        visibility: 'visible',
+      })
     })
   })
 
   it('updates when switching to a transaction with isMatchingPayment=false', async () => {
-    const { rerender } = renderDrawer(makeTransaction({ isMatchingPayment: true }))
+    const { rerender } = renderDrawer(
+      makeTransaction({ isMatchingPayment: true })
+    )
 
     rerender(
       <TransactionDrawer
-        transaction={makeTransaction({ TECHNICAL_TRANSACTION_ID: 'tx_002', isMatchingPayment: false })}
+        transaction={makeTransaction({
+          TECHNICAL_TRANSACTION_ID: 'tx_002',
+          isMatchingPayment: false,
+        })}
         domain={makeDomain() as any}
       />
     )
 
     await waitFor(() => {
-      expect(document.querySelector('.ant-ribbon')).toHaveStyle({ visibility: 'hidden' })
+      expect(document.querySelector('.ant-ribbon')).toHaveStyle({
+        visibility: 'hidden',
+      })
     })
   })
 })
-
 
 describe('State reset when transaction changes', () => {
   it('clears selectedCompany when TECHNICAL_TRANSACTION_ID changes', async () => {
@@ -158,12 +178,17 @@ describe('State reset when transaction changes', () => {
     await userEvent.click(screen.getByRole('combobox'))
     await userEvent.click(await screen.findByText('ТОВ Тест'))
     await waitFor(() => {
-      expect(document.querySelector('.ant-select-selection-item')).toHaveTextContent('ТОВ Тест')
+      expect(
+        document.querySelector('.ant-select-selection-item')
+      ).toHaveTextContent('ТОВ Тест')
     })
 
     rerender(
       <TransactionDrawer
-        transaction={makeTransaction({ TECHNICAL_TRANSACTION_ID: 'tx_002', AUT_CNTR_ACC: 'UNKNOWN' })}
+        transaction={makeTransaction({
+          TECHNICAL_TRANSACTION_ID: 'tx_002',
+          AUT_CNTR_ACC: 'UNKNOWN',
+        })}
         domain={makeDomain() as any}
       />
     )
@@ -184,7 +209,10 @@ describe('State reset when transaction changes', () => {
 
     rerender(
       <TransactionDrawer
-        transaction={makeTransaction({ TECHNICAL_TRANSACTION_ID: 'tx_002', AUT_CNTR_ACC: 'NO_MATCH_ACC' })}
+        transaction={makeTransaction({
+          TECHNICAL_TRANSACTION_ID: 'tx_002',
+          AUT_CNTR_ACC: 'NO_MATCH_ACC',
+        })}
         domain={makeDomain() as any}
       />
     )
@@ -196,18 +224,21 @@ describe('State reset when transaction changes', () => {
   })
 })
 
-
 describe('Account auto-match (AUT_CNTR_ACC)', () => {
   it('auto-selects company when company.account matches transaction.AUT_CNTR_ACC', async () => {
     renderDrawer()
     await waitFor(() => {
-      expect(document.querySelector('.ant-select-selection-item')).toHaveTextContent('ТОВ Тест')
+      expect(
+        document.querySelector('.ant-select-selection-item')
+      ).toHaveTextContent('ТОВ Тест')
     })
   })
 
   it('does not auto-select when account does not match', async () => {
     mockUseGetAllRealEstateQuery.mockReturnValue({
-      data: { data: [makeCompany({ account: 'UA000000000000000000000000000' })] },
+      data: {
+        data: [makeCompany({ account: 'UA000000000000000000000000000' })],
+      },
     })
     renderDrawer()
     await waitFor(() => {
@@ -219,16 +250,28 @@ describe('Account auto-match (AUT_CNTR_ACC)', () => {
     mockUseGetAllRealEstateQuery.mockReturnValue({
       data: {
         data: [
-          makeCompany({ _id: 'company_A', companyName: 'Компанія А', account: 'UA111111111111111111111111111' }),
-          makeCompany({ _id: 'company_B', companyName: 'Компанія Б', account: 'UA803220010000026001350058717' }),
+          makeCompany({
+            _id: 'company_A',
+            companyName: 'Компанія А',
+            account: 'UA111111111111111111111111111',
+          }),
+          makeCompany({
+            _id: 'company_B',
+            companyName: 'Компанія Б',
+            account: 'UA803220010000026001350058717',
+          }),
         ],
       },
     })
 
-    renderDrawer(makeTransaction({ AUT_CNTR_ACC: 'UA803220010000026001350058717' }))
+    renderDrawer(
+      makeTransaction({ AUT_CNTR_ACC: 'UA803220010000026001350058717' })
+    )
 
     await waitFor(() => {
-      expect(document.querySelector('.ant-select-selection-item')).toHaveTextContent('Компанія Б')
+      expect(
+        document.querySelector('.ant-select-selection-item')
+      ).toHaveTextContent('Компанія Б')
     })
   })
 
@@ -264,17 +307,23 @@ describe('Account auto-match (AUT_CNTR_ACC)', () => {
   })
 })
 
-
 describe('Auto-match fallback for old companies (via previousCompanyId)', () => {
   it('auto-selects company by previousCompanyId when company has no account saved', async () => {
     mockUseGetAllRealEstateQuery.mockReturnValue({
       data: { data: [makeCompany({ account: undefined })] },
     })
 
-    renderDrawer(makeTransaction({ isMatchingPayment: true, previousCompanyId: 'company_001' }))
+    renderDrawer(
+      makeTransaction({
+        isMatchingPayment: true,
+        previousCompanyId: 'company_001',
+      })
+    )
 
     await waitFor(() => {
-      expect(document.querySelector('.ant-select-selection-item')).toHaveTextContent('ТОВ Тест')
+      expect(
+        document.querySelector('.ant-select-selection-item')
+      ).toHaveTextContent('ТОВ Тест')
     })
   })
 
@@ -283,10 +332,17 @@ describe('Auto-match fallback for old companies (via previousCompanyId)', () => 
       data: { data: [makeCompany({ account: undefined })] },
     })
 
-    renderDrawer(makeTransaction({ isMatchingPayment: false, previousCompanyId: 'company_001' }))
+    renderDrawer(
+      makeTransaction({
+        isMatchingPayment: false,
+        previousCompanyId: 'company_001',
+      })
+    )
 
     await waitFor(() => {
-      expect(document.querySelector('.ant-select-selection-item')).toHaveTextContent('ТОВ Тест')
+      expect(
+        document.querySelector('.ant-select-selection-item')
+      ).toHaveTextContent('ТОВ Тест')
     })
   })
 
@@ -294,20 +350,32 @@ describe('Auto-match fallback for old companies (via previousCompanyId)', () => 
     mockUseGetAllRealEstateQuery.mockReturnValue({
       data: {
         data: [
-          makeCompany({ _id: 'company_acc', companyName: 'Account Company', account: 'UA803220010000026001350058717' }),
-          makeCompany({ _id: 'company_old', companyName: 'Old Company', account: undefined }),
+          makeCompany({
+            _id: 'company_acc',
+            companyName: 'Account Company',
+            account: 'UA803220010000026001350058717',
+          }),
+          makeCompany({
+            _id: 'company_old',
+            companyName: 'Old Company',
+            account: undefined,
+          }),
         ],
       },
     })
 
-    renderDrawer(makeTransaction({
-      AUT_CNTR_ACC: 'UA803220010000026001350058717',
-      isMatchingPayment: true,
-      previousCompanyId: 'company_old',
-    }))
+    renderDrawer(
+      makeTransaction({
+        AUT_CNTR_ACC: 'UA803220010000026001350058717',
+        isMatchingPayment: true,
+        previousCompanyId: 'company_old',
+      })
+    )
 
     await waitFor(() => {
-      expect(document.querySelector('.ant-select-selection-item')).toHaveTextContent('Account Company')
+      expect(
+        document.querySelector('.ant-select-selection-item')
+      ).toHaveTextContent('Account Company')
     })
   })
 
@@ -316,15 +384,19 @@ describe('Auto-match fallback for old companies (via previousCompanyId)', () => 
       data: { data: [makeCompany({ account: undefined })] },
     })
 
-    renderDrawer(makeTransaction({
-      AUT_CNTR_NAM: 'Транз.рахунок платежi_ DN, DG, DZ',
-      AUT_CNTR_ACC: 'UA300000000000000000000000002',
-      previousCompanyId: 'company_001',
-      isMatchingPayment: false,
-    }))
+    renderDrawer(
+      makeTransaction({
+        AUT_CNTR_NAM: 'Транз.рахунок платежi_ DN, DG, DZ',
+        AUT_CNTR_ACC: 'UA300000000000000000000000002',
+        previousCompanyId: 'company_001',
+        isMatchingPayment: false,
+      })
+    )
 
     await waitFor(() => {
-      expect(document.querySelector('.ant-select-selection-item')).toHaveTextContent('ТОВ Тест')
+      expect(
+        document.querySelector('.ant-select-selection-item')
+      ).toHaveTextContent('ТОВ Тест')
     })
   })
 
@@ -333,12 +405,14 @@ describe('Auto-match fallback for old companies (via previousCompanyId)', () => 
       data: { data: [makeCompany({ account: undefined })] },
     })
 
-    renderDrawer(makeTransaction({
-      AUT_CNTR_NAM: 'Транз.рахунок платежi_ DN, DG, DZ',
-      AUT_CNTR_ACC: 'UA300000000000000000000000002',
-      previousCompanyId: null,
-      isMatchingPayment: false,
-    }))
+    renderDrawer(
+      makeTransaction({
+        AUT_CNTR_NAM: 'Транз.рахунок платежi_ DN, DG, DZ',
+        AUT_CNTR_ACC: 'UA300000000000000000000000002',
+        previousCompanyId: null,
+        isMatchingPayment: false,
+      })
+    )
 
     await waitFor(() => {
       expect(document.querySelector('.ant-select-selection-item')).toBeNull()
@@ -346,13 +420,14 @@ describe('Auto-match fallback for old companies (via previousCompanyId)', () => 
   })
 })
 
-
 describe('transactionPayload passed to AddPaymentModal', () => {
   it('includes TECHNICAL_TRANSACTION_ID reconstructed to canonical final form (REF+REFN+date+time)', async () => {
     mockUseGetAllRealEstateQuery.mockReturnValue({
       data: { data: [makeCompany({ account: 'NO_MATCH' })] },
     })
-    renderDrawer(makeTransaction({ TECHNICAL_TRANSACTION_ID: 'tx_unique_001_online' }))
+    renderDrawer(
+      makeTransaction({ TECHNICAL_TRANSACTION_ID: 'tx_unique_001_online' })
+    )
 
     await userEvent.click(screen.getByRole('combobox'))
     await userEvent.click(await screen.findByText('ТОВ Тест'))
@@ -362,16 +437,20 @@ describe('transactionPayload passed to AddPaymentModal', () => {
       expect(screen.getByTestId('add-payment-modal')).toBeInTheDocument()
     })
 
-    expect(lastPaymentData?.transaction?.TECHNICAL_TRANSACTION_ID).toBe('HS4AP1222L05X7P22122025154500')
+    expect(lastPaymentData?.transaction?.TECHNICAL_TRANSACTION_ID).toBe(
+      'HS4AP1222L05X7P22122025154500'
+    )
   })
 
   it('includes OSND so future transit sibling lookups can find this payment', async () => {
     mockUseGetAllRealEstateQuery.mockReturnValue({
       data: { data: [makeCompany({ account: 'NO_MATCH' })] },
     })
-    renderDrawer(makeTransaction({
-      OSND: 'Сплата за послуги, Чорна Марина Євгеніївна',
-    }))
+    renderDrawer(
+      makeTransaction({
+        OSND: 'Сплата за послуги, Чорна Марина Євгеніївна',
+      })
+    )
 
     await userEvent.click(screen.getByRole('combobox'))
     await userEvent.click(await screen.findByText('ТОВ Тест'))
@@ -381,17 +460,53 @@ describe('transactionPayload passed to AddPaymentModal', () => {
       expect(screen.getByTestId('add-payment-modal')).toBeInTheDocument()
     })
 
-    expect(lastPaymentData?.transaction?.OSND).toBe('Сплата за послуги, Чорна Марина Євгеніївна')
+    expect(lastPaymentData?.transaction?.OSND).toBe(
+      'Сплата за послуги, Чорна Марина Євгеніївна'
+    )
   })
 })
+describe('Default operation type for AddPaymentModal (Send from Bank)', () => {
+  it('passes type=Credit when opening the modal via manual Send', async () => {
+    mockUseGetAllRealEstateQuery.mockReturnValue({
+      data: { data: [makeCompany({ account: 'NO_MATCH' })] },
+    })
+    renderDrawer(makeTransaction({ AUT_CNTR_ACC: 'NO_MATCH_ACC' }))
 
+    await userEvent.click(screen.getByRole('combobox'))
+    await userEvent.click(await screen.findByText('ТОВ Тест'))
+    await userEvent.click(screen.getByRole('button', { name: /Send/i }))
 
+    await waitFor(() => {
+      expect(screen.getByTestId('add-payment-modal')).toBeInTheDocument()
+    })
+
+    expect(lastPaymentData?.type).toBe(Operations.Credit) // see note below
+  })
+
+  it('passes type=Credit when opening the modal via "Швидке створення" (matched account)', async () => {
+    renderDrawer()
+
+    await waitFor(() => expect(getDropdownSendButton()).toBeTruthy())
+    const sendBtn = getDropdownSendButton()
+    if (!sendBtn) throw new Error('Send button not found')
+    await userEvent.click(sendBtn)
+    await userEvent.click(await screen.findByText('Швидке створення'))
+
+    await waitFor(() => {
+      expect(screen.getByTestId('add-payment-modal')).toBeInTheDocument()
+    })
+
+    expect(lastPaymentData?.type).toBe(Operations.Credit) // see note below
+  })
+})
 describe('saveAccountToCompany after successful payment creation', () => {
   it('calls editRealEstate with account when company was manually selected and success=true', async () => {
     mockUseGetAllRealEstateQuery.mockReturnValue({
       data: { data: [makeCompany({ account: undefined })] },
     })
-    renderDrawer(makeTransaction({ AUT_CNTR_ACC: 'UA803220010000026001350058717' }))
+    renderDrawer(
+      makeTransaction({ AUT_CNTR_ACC: 'UA803220010000026001350058717' })
+    )
 
     await userEvent.click(screen.getByRole('combobox'))
     await userEvent.click(await screen.findByText('ТОВ Тест'))
@@ -411,7 +526,9 @@ describe('saveAccountToCompany after successful payment creation', () => {
 
     await waitFor(() => expect(getDropdownSendButton()).toBeTruthy())
 
-    await userEvent.click(getDropdownSendButton()!)
+    const sendBtn = getDropdownSendButton()
+    if (!sendBtn) throw new Error('Send button not found')
+    await userEvent.click(sendBtn)
     await userEvent.click(await screen.findByText('Швидке створення'))
     await userEvent.click(await screen.findByText('Confirm'))
 
@@ -440,10 +557,12 @@ describe('saveAccountToCompany after successful payment creation', () => {
     mockUseGetAllRealEstateQuery.mockReturnValue({
       data: { data: [makeCompany({ account: undefined })] },
     })
-    renderDrawer(makeTransaction({
-      AUT_CNTR_NAM: 'Транз.рахунок платежi_ DN, DG, DZ',
-      AUT_CNTR_ACC: 'UA300000000000000000000000002',
-    }))
+    renderDrawer(
+      makeTransaction({
+        AUT_CNTR_NAM: 'Транз.рахунок платежi_ DN, DG, DZ',
+        AUT_CNTR_ACC: 'UA300000000000000000000000002',
+      })
+    )
 
     await userEvent.click(screen.getByRole('combobox'))
     await userEvent.click(await screen.findByText('ТОВ Тест'))
@@ -455,7 +574,6 @@ describe('saveAccountToCompany after successful payment creation', () => {
     })
   })
 })
-
 
 describe('refetchTransactions', () => {
   it('is called when modal closes with success=true', async () => {
@@ -469,7 +587,9 @@ describe('refetchTransactions', () => {
     )
 
     await waitFor(() => expect(getDropdownSendButton()).toBeTruthy())
-    await userEvent.click(getDropdownSendButton()!)
+    const sendBtn = getDropdownSendButton()
+    if (!sendBtn) throw new Error('Send button not found')
+    await userEvent.click(sendBtn)
     await userEvent.click(await screen.findByText('Швидке створення'))
     await userEvent.click(await screen.findByText('Confirm'))
 
@@ -489,7 +609,9 @@ describe('refetchTransactions', () => {
     )
 
     await waitFor(() => expect(getDropdownSendButton()).toBeTruthy())
-    await userEvent.click(getDropdownSendButton()!)
+    const sendBtn = getDropdownSendButton()
+    if (!sendBtn) throw new Error('Send button not found')
+    await userEvent.click(sendBtn)
     await userEvent.click(await screen.findByText('Швидке створення'))
     await userEvent.click(await screen.findByText('Cancel'))
 

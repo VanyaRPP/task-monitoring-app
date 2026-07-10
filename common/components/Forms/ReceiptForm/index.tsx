@@ -1,6 +1,6 @@
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import PaymentPricesTable from '@components/Forms/AddPaymentForm/PaymentPricesTable'
-import { usePaymentContext } from '@components/AddPaymentModal'
+import { useInvoiceCurrency } from '@modules/hooks/useInvoiceCurrency'
 import numberToTextNumber from '@utils/numberToText'
 import { getCurrencyShortLabel, normalizeCurrency } from '@utils/helpers'
 import dayjs from 'dayjs'
@@ -20,10 +20,8 @@ const ReceiptForm: FC<Props> = ({
   paymentData,
   paymentActions,
 }) => {
-  const { company } = usePaymentContext()
   const newData = currPayment || paymentData
-  const currency =
-    newData?.currency || newData?.company?.currency || company?.currency || newData?.domain?.currency
+  const currency = useInvoiceCurrency()
   const currencyLabel = getCurrencyShortLabel(currency)
   const isEnglish = normalizeCurrency(currency) !== 'UAH'
   const componentRef = useRef()
@@ -86,9 +84,7 @@ const ReceiptForm: FC<Props> = ({
 }
 
 function SumWithText({ data }) {
-  const { company } = usePaymentContext()
-  const currency =
-    data?.company?.currency || company?.currency || data?.domain?.currency
+  const currency = useInvoiceCurrency()
   const currencyLabel = getCurrencyShortLabel(currency)
   const isEnglish = normalizeCurrency(currency) !== 'UAH'
   const rest = numberToTextNumber(data?.generalSum || data?.debit)

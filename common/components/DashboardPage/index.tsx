@@ -1,5 +1,11 @@
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
-import { useState, useEffect, useCallback, useLayoutEffect, useMemo } from 'react'
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useLayoutEffect,
+  useMemo,
+} from 'react'
 import DomainsBlock from '@components/DashboardPage/blocks/domains'
 import PaymentsBlock from '@components/DashboardPage/blocks/payments'
 import RealEstateBlock from '@components/DashboardPage/blocks/realEstates'
@@ -7,12 +13,20 @@ import ServicesBlock from '@components/DashboardPage/blocks/services'
 import StreetsBlock from '@components/DashboardPage/blocks/streets'
 import CompaniesAreaChart from '@components/DashboardPage/blocks/сompaniesAreaChart'
 import { Roles } from '@utils/constants'
-import { Col, Row, Space, Button, Flex,  message, Tooltip, Dropdown } from 'antd'
-import { CloseOutlined, SaveOutlined, EyeOutlined, QuestionCircleOutlined } from '@ant-design/icons'
+import { Col, Row, Space, Button, Flex, message, Tooltip, Dropdown } from 'antd'
+import {
+  CloseOutlined,
+  SaveOutlined,
+  EyeOutlined,
+  QuestionCircleOutlined,
+} from '@ant-design/icons'
 import PaymentsChart from '@components/DashboardPage/blocks/paymentChart'
 import ProfitPage from '@components/Pages/ProfiitPage'
 import { addButton, removeButton } from '@modules/store/floatButtonSlice'
-import { useEditModelFloatButton, useDragDropPanelFloatButton  } from '@modules/hooks/useFloatButton'
+import {
+  useEditModelFloatButton,
+  useDragDropPanelFloatButton,
+} from '@modules/hooks/useFloatButton'
 import { useDispatch } from 'react-redux'
 import s from './style.module.scss'
 import useTheme from '@modules/hooks/useTheme'
@@ -76,7 +90,11 @@ interface SortableWidgetProps {
   children: React.ReactNode
 }
 
-const SortableWidget: React.FC<SortableWidgetProps> = ({ id, isEditMode, children }) => {
+const SortableWidget: React.FC<SortableWidgetProps> = ({
+  id,
+  isEditMode,
+  children,
+}) => {
   const {
     attributes,
     listeners,
@@ -144,13 +162,16 @@ const Dashboard: React.FC = () => {
       toggleEditMode()
     }
   }, [isPanelVisible, isEditMode, toggleEditMode])
-  const tourFloatButton = useMemo(() => ({
-    key: 'dashboard-tour',
-    icon: <QuestionCircleOutlined/>,
-    onClick: () => setShowTour(true),
-    tooltip: 'Тур',
-    order: 5,
-  }), [])
+  const tourFloatButton = useMemo(
+    () => ({
+      key: 'dashboard-tour',
+      icon: <QuestionCircleOutlined />,
+      onClick: () => setShowTour(true),
+      tooltip: 'Тур',
+      order: 5,
+    }),
+    []
+  )
 
   useEffect(() => {
     dispatch(addButton(panelFloatButton))
@@ -170,7 +191,8 @@ const Dashboard: React.FC = () => {
       : ALL_WIDGETS.filter((w) => w !== 'profits')
   }, [isGlobalAdmin])
 
-  const [orderedWidgets, setOrderedWidgets] = useState<WidgetKey[]>(visibleWidgets)
+  const [orderedWidgets, setOrderedWidgets] =
+    useState<WidgetKey[]>(visibleWidgets)
   const [isLayoutReady, setIsLayoutReady] = useState(false)
 
   useEffect(() => {
@@ -255,7 +277,10 @@ const Dashboard: React.FC = () => {
                 onClick={() => {
                   const element = document.getElementById(key)
                   if (element) {
-                    element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                    element.scrollIntoView({
+                      behavior: 'smooth',
+                      block: 'center',
+                    })
                   }
                 }}
               >
@@ -306,12 +331,10 @@ const Dashboard: React.FC = () => {
                     rowHeight={1.3}
                     marginY={MARGIN_Y}
                     isEditMode={isEditMode}
-                    onHeightChange={() => {
-                    }}
+                    // eslint-disable-next-line @typescript-eslint/no-empty-function
+                    onHeightChange={() => {}}
                   >
-                    <div className={s.filterWrapper}>
-                      {widgetMap[key]}
-                    </div>
+                    <div className={s.filterWrapper}>{widgetMap[key]}</div>
                   </WidgetWrapper>
                 </SortableWidget>
               ))}
@@ -320,8 +343,8 @@ const Dashboard: React.FC = () => {
         </DndContext>
       )}
       <DashboardTour userRoles={userResponse?.roles || []} />
-      <DashboardTour 
-        isVisible={showTour} 
+      <DashboardTour
+        isVisible={showTour}
         onClose={() => setShowTour(false)}
         isManualStart={true}
         userRoles={userResponse?.roles || []}

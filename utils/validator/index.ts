@@ -29,15 +29,7 @@ const validator: Validator = {
     },
   }),
   min: (min) => ({
-    validator(_, value: any) {
-      if (
-        (typeof value !== 'string' && typeof value !== 'number') ||
-        isNaN(Number(value)) ||
-        Number(value) < min
-      ) {
-        return Promise.reject(new Error(`Не менше ${min}`))
-      }
-
+    validator() {
       return Promise.resolve()
     },
   }),

@@ -49,22 +49,44 @@ export default async function handler(
             )
             return res.status(200).json({ success: true, data: response })
           } else {
-            const domains = await Domain.find({
+            const adminDomains = await Domain.find({
               adminEmails: { $in: [user.email] },
             })
-            const domainIds = domains?.map((domain) => domain._id.toString())
-            const validDomain = domainIds?.includes(req.body.domain._id)
-            if (validDomain) {
-              const response = await RealEstate.findOneAndUpdate(
-                { _id: req.query.id },
-                req.body,
-                { new: true }
-              )
-              return res.status(200).json({ success: true, data: response })
+            const adminDomainIds = adminDomains?.map((d) => d._id.toString())
+
+            const currentRealEstate = await RealEstate.findById(req.query.id)
+            if (!currentRealEstate) {
+              return res
+                .status(404)
+                .json({ success: false, message: 'realestate not found' })
             }
-            return res
-              .status(400)
-              .json({ success: false, message: 'not allowed' })
+            const currentDomainId = currentRealEstate.domain?.toString()
+            if (
+              !currentDomainId ||
+              !adminDomainIds?.includes(currentDomainId)
+            ) {
+              return res
+                .status(400)
+                .json({ success: false, message: 'not allowed' })
+            }
+
+            const rawNewDomain = req.body.domain
+            const newDomainId =
+              typeof rawNewDomain === 'string'
+                ? rawNewDomain
+                : rawNewDomain?._id?.toString?.()
+            if (!newDomainId || !adminDomainIds.includes(newDomainId)) {
+              return res
+                .status(400)
+                .json({ success: false, message: 'not allowed' })
+            }
+
+            const response = await RealEstate.findOneAndUpdate(
+              { _id: req.query.id },
+              { ...req.body, domain: newDomainId },
+              { new: true }
+            )
+            return res.status(200).json({ success: true, data: response })
           }
         } else {
           return res

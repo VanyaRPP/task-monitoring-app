@@ -23,12 +23,10 @@ const PaymentTotal: FC<Props> = ({ form }) => {
   }, [invoices, form])
 
   return (
-    <Form.Item
-      className={s.totalItem}
-      name={Operations.Debit}
-      initialValue={0}
-    >
-      <span>Сума: {(+total)?.toFixed(2)} {currencyLabel}</span>
+    <Form.Item className={s.totalItem} name={Operations.Debit} initialValue={0}>
+      <span>
+        Сума: {(+total)?.toFixed(2)} {currencyLabel}
+      </span>
     </Form.Item>
   )
 }

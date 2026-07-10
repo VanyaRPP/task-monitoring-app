@@ -41,7 +41,7 @@ describe('PaymentChangeLog API - Unsupported Methods', () => {
   it('should return 400 for DELETE request without changeLogId', async () => {
     const mockReq = {
       method: 'DELETE',
-      query: { id: validPaymentId }, 
+      query: { id: validPaymentId },
     } as any
 
     const mockRes = {

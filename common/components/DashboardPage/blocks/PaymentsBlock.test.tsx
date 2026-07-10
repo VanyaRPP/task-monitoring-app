@@ -3,7 +3,10 @@ import { useDispatch } from 'react-redux'
 import { useRouter } from 'next/router'
 import PaymentsBlock from './payments'
 import { paymentApi } from '@common/api/paymentApi/payment.api'
-import { useGetDebtorsQuery } from '@common/api/debtorsApi/debtors.api'
+import {
+  debtorsApi,
+  useGetDebtorsQuery,
+} from '@common/api/debtorsApi/debtors.api'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { useGetAllPaymentsQuery } from '@common/api/paymentApi/payment.api'
 
@@ -29,12 +32,23 @@ jest.mock('@common/api/paymentApi/payment.api', () => ({
   },
   useGetAllPaymentsQuery: jest.fn(),
   useDeletePaymentMutation: jest.fn(() => [jest.fn(), { isLoading: false }]),
-  useDeleteMultiplePaymentsMutation: jest.fn(() => [jest.fn(), { isLoading: false }]),
+  useDeleteMultiplePaymentsMutation: jest.fn(() => [
+    jest.fn(),
+    { isLoading: false },
+  ]),
+  useEditPaymentMutation: jest.fn(() => [jest.fn()]),
+  useMarkPaymentsPaidMutation: jest.fn(() => [jest.fn()]),
+  useDuplicatePaymentsMutation: jest.fn(() => [jest.fn()]),
   useAddPaymentMutation: jest.fn(() => [jest.fn()]),
   useGetPaymentNumberQuery: jest.fn(() => ({ data: 1, refetch: jest.fn() })),
 }))
 
 jest.mock('@common/api/debtorsApi/debtors.api', () => ({
+  debtorsApi: {
+    util: {
+      invalidateTags: jest.fn(),
+    },
+  },
   useGetDebtorsQuery: jest.fn(),
 }))
 
@@ -50,7 +64,9 @@ jest.mock('@common/api/filterApi/filter.api', () => ({
 }))
 
 jest.mock('@components/UI/TableCard', () => {
-  const MockTableCard = ({ children }: any) => <div data-testid="table-card">{children}</div>
+  const MockTableCard = ({ children }: any) => (
+    <div data-testid="table-card">{children}</div>
+  )
   MockTableCard.displayName = 'TableCard'
   return MockTableCard
 })
@@ -89,7 +105,6 @@ describe('PaymentsBlock Sync Logic', () => {
   beforeEach(() => {
     mockDispatch = jest.fn()
     ;(useDispatch as unknown as jest.Mock).mockReturnValue(mockDispatch)
-    
     ;(useRouter as jest.Mock).mockReturnValue({
       pathname: '/',
       query: {},
@@ -97,8 +112,13 @@ describe('PaymentsBlock Sync Logic', () => {
     })
 
     const defaultResponse = { data: [], isLoading: false, isError: false }
-    ;(useGetDebtorsQuery as jest.Mock).mockReturnValue(defaultResponse)
-    ;(useGetCurrentUserQuery as jest.Mock).mockReturnValue({ data: { roles: [] } })
+    ;(useGetDebtorsQuery as jest.Mock).mockReturnValue({
+      ...defaultResponse,
+      refetch: jest.fn(),
+    })
+    ;(useGetCurrentUserQuery as jest.Mock).mockReturnValue({
+      data: { roles: [] },
+    })
     ;(useGetAllPaymentsQuery as jest.Mock).mockReturnValue(defaultResponse)
 
     jest.clearAllMocks()
@@ -113,6 +133,10 @@ describe('PaymentsBlock Sync Logic', () => {
 
     expect(mockDispatch).toHaveBeenCalledWith(
       paymentApi.util.invalidateTags(['Payment'])
+    )
+    // debtors must refresh too — a bank payment can clear a debtor
+    expect(mockDispatch).toHaveBeenCalledWith(
+      debtorsApi.util.invalidateTags(['Debtors'])
     )
   })
 

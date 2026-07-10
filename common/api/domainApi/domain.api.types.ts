@@ -11,6 +11,7 @@ export interface IDomainModel {
   customServices: ICustomService[]
   domainTypeTemplateId?: string
   defaultTemplate?: string
+  archived?: boolean
 }
 
 export type DomainTypeTemplateCategory =
@@ -63,6 +64,15 @@ export interface IDomainBankToken {
 export interface IExtendedDomain extends IDomainModel {
   _id: string
   _v: number
+}
+
+export interface IArchivedDomain {
+  _id?: string
+  archived?: boolean
+}
+
+export interface IExtendedArchivedDomain extends IArchivedDomain {
+  _id: string
 }
 
 export interface IAddDomainResponse {

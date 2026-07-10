@@ -61,7 +61,11 @@ beforeEach(() => {
 describe('GET /api/domain-snapshots', () => {
   it('returns 403 for non-admin', async () => {
     ;(getCurrentUser as jest.Mock).mockResolvedValue({ isAdmin: false })
-    const req = { method: 'GET', query: { domainId: VALID_ID }, body: {} } as any
+    const req = {
+      method: 'GET',
+      query: { domainId: VALID_ID },
+      body: {},
+    } as any
     const res = makeRes()
     await indexHandler(req, res)
     expect(res.status).toHaveBeenCalledWith(403)
@@ -155,7 +159,8 @@ describe('POST /api/domain-snapshots', () => {
     await indexHandler(req, res)
 
     expect(res.status).toHaveBeenCalledWith(201)
-    const arg = (DomainCustomServicesSnapshot.create as jest.Mock).mock.calls[0][0]
+    const arg = (DomainCustomServicesSnapshot.create as jest.Mock).mock
+      .calls[0][0]
     expect(arg.templateName).toBe('IT')
     expect(arg.reason).toBe('template-switch')
     expect(arg.groups).toEqual([{ groupName: 'G', services: ['s1'] }])
@@ -191,7 +196,8 @@ describe('POST /api/domain-snapshots', () => {
     await indexHandler(req, res)
 
     expect(res.status).toHaveBeenCalledWith(201)
-    const arg = (DomainCustomServicesSnapshot.create as jest.Mock).mock.calls[0][0]
+    const arg = (DomainCustomServicesSnapshot.create as jest.Mock).mock
+      .calls[0][0]
     expect(arg.groups).toEqual([
       { groupName: 'Custom', services: ['sX', 'sY'] },
     ])
@@ -244,7 +250,8 @@ describe('POST /api/domain-snapshots', () => {
     const res = makeRes()
     await indexHandler(req, res)
 
-    const arg = (DomainCustomServicesSnapshot.create as jest.Mock).mock.calls[0][0]
+    const arg = (DomainCustomServicesSnapshot.create as jest.Mock).mock
+      .calls[0][0]
     expect(arg.templateId).toBeNull()
     expect(arg.templateName).toBeNull()
   })
@@ -290,7 +297,8 @@ describe('POST /api/domain-snapshots', () => {
     const res = makeRes()
     await indexHandler(req, res)
 
-    const arg = (DomainCustomServicesSnapshot.create as jest.Mock).mock.calls[0][0]
+    const arg = (DomainCustomServicesSnapshot.create as jest.Mock).mock
+      .calls[0][0]
     expect(arg.reason).toBe('manual')
   })
 })
@@ -298,9 +306,9 @@ describe('POST /api/domain-snapshots', () => {
 describe('DELETE /api/domain-snapshots/[id]', () => {
   it('returns 404 when snapshot missing', async () => {
     asAdmin()
-    ;(DomainCustomServicesSnapshot.findByIdAndDelete as jest.Mock).mockResolvedValue(
-      null
-    )
+    ;(
+      DomainCustomServicesSnapshot.findByIdAndDelete as jest.Mock
+    ).mockResolvedValue(null)
     const req = {
       method: 'DELETE',
       query: { id: VALID_ID },
@@ -313,9 +321,9 @@ describe('DELETE /api/domain-snapshots/[id]', () => {
 
   it('returns 200 on successful delete', async () => {
     asAdmin()
-    ;(DomainCustomServicesSnapshot.findByIdAndDelete as jest.Mock).mockResolvedValue(
-      { _id: VALID_ID }
-    )
+    ;(
+      DomainCustomServicesSnapshot.findByIdAndDelete as jest.Mock
+    ).mockResolvedValue({ _id: VALID_ID })
     const req = {
       method: 'DELETE',
       query: { id: VALID_ID },

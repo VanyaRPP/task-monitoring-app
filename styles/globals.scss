@@ -1,7 +1,74 @@
+@font-face {
+  font-family: 'Outfit';
+  src: url('/fonts/Outfit-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Outfit';
+  src: url('/fonts/Outfit-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Work Sans';
+  src: url('/fonts/WorkSans-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Work Sans';
+  src: url('/fonts/WorkSans-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+// Midnight Galaxy — shared theme-aware hero tokens (consumed by HomePage
+// and ScrollFactoryAnimation). Single source of truth, switched by data-theme.
+:root,
+[data-theme='light'] {
+  --hero-bg: #f4f2fa;
+  --hero-surface: rgba(255, 255, 255, 0.65);
+  --hero-border: rgba(43, 30, 62, 0.1);
+  --hero-shadow: rgba(43, 30, 62, 0.1);
+  --hero-text: #2b1e3e;
+  --hero-text-dim: rgba(43, 30, 62, 0.7);
+  --hero-glow: rgba(164, 144, 194, 0.25);
+  --hero-glow-2: rgba(114, 46, 209, 0.12);
+}
+
+[data-theme='dark'] {
+  --hero-bg: #2b1e3e;
+  --hero-surface: rgba(74, 78, 143, 0.18);
+  --hero-border: rgba(164, 144, 194, 0.3);
+  --hero-shadow: rgba(0, 0, 0, 0.35);
+  --hero-text: #e6e6fa;
+  --hero-text-dim: rgba(230, 230, 250, 0.72);
+  --hero-glow: rgba(74, 78, 143, 0.45);
+  --hero-glow-2: rgba(114, 46, 209, 0.25);
+}
+
 html,
 body {
-  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
-    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    Segoe UI,
+    Roboto,
+    Oxygen,
+    Ubuntu,
+    Cantarell,
+    Fira Sans,
+    Droid Sans,
+    Helvetica Neue,
+    sans-serif;
   overflow-x: hidden;
 }
 
@@ -19,7 +86,9 @@ body {
     border-radius: 6px;
     box-shadow: 0 12px 35px rgba(0, 0, 0, 0.35);
 
-    transition: background-color 0.3s ease, backdrop-filter 0.3s ease;
+    transition:
+      background-color 0.3s ease,
+      backdrop-filter 0.3s ease;
 
     @media (max-width: 320px) {
       background-color: #121212;
@@ -31,17 +100,18 @@ body {
     }
   }
 
-
   &.light {
     background-color: rgba(255, 255, 255, 0.65);
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
 
-    border: 1px solid rgba(20, 20, 40, 0.10);
+    border: 1px solid rgba(20, 20, 40, 0.1);
     border-radius: 6px;
-    box-shadow: 0 12px 35px rgba(20, 20, 40, 0.10);
+    box-shadow: 0 12px 35px rgba(20, 20, 40, 0.1);
 
-    transition: background-color 0.3s ease, backdrop-filter 0.3s ease;
+    transition:
+      background-color 0.3s ease,
+      backdrop-filter 0.3s ease;
 
     @media (max-width: 320px) {
       background-color: #ffffff;
@@ -79,6 +149,10 @@ body {
 
 *::-webkit-scrollbar-thumb:hover {
   background-color: rgba(0, 0, 0, 0.5);
+}
+
+.ant-transfer-list-content-item-text {
+  min-width: 0;
 }
 
 @media print {

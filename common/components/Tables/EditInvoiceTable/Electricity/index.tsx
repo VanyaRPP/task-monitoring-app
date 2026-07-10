@@ -1,14 +1,21 @@
 import { dateToMonthYear } from '@assets/features/formatDate'
 import { usePaymentContext } from '@components/AddPaymentModal'
+import { useInvoiceCurrency } from '@modules/hooks/useInvoiceCurrency'
 import { InvoiceComponentProps } from '@components/Tables/EditInvoiceTable'
 import { DividedSpace } from '@components/UI/DividedSpace'
-import { currencyWithUnit, toArray, toFirstUpperCase, toRoundFixed } from '@utils/helpers'
+import {
+  currencyWithUnit,
+  toArray,
+  toFirstUpperCase,
+  toRoundFixed,
+} from '@utils/helpers'
 import validator from '@utils/validator'
 import { ExclamationCircleOutlined } from '@ant-design/icons'
 import { Form, Input, Space, Typography, Tooltip } from 'antd'
-import { useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 import { ServiceType } from '@utils/constants'
-import UpdateInvoiceButton from '../UpdateInvoiceButton'
+import InvoiceRowName from '../InvoiceRowName'
+import useSyncSum from '../useSyncSum'
 
 export const Name: React.FC<InvoiceComponentProps> = ({
   form,
@@ -16,31 +23,25 @@ export const Name: React.FC<InvoiceComponentProps> = ({
   editable,
   disabled,
 }) => {
-  const { service, payment, company } = usePaymentContext()
+  const { service } = usePaymentContext()
   const name = useMemo(() => toArray<string>(_name), [_name])
   const losses = Form.useWatch(['invoice', ...name, 'losses'], form) ?? 0
 
   return (
-    <Space
-      direction="horizontal"
-      style={{ justifyContent: 'space-between', width: '100%' }}
-    >
-      <Space direction="vertical" size={0}>
-        <Typography.Text>Електропостачання</Typography.Text>
-        <Typography.Text type="secondary" style={{ fontSize: '0.75rem' }}>
+    <InvoiceRowName
+      form={form}
+      name={name}
+      serviceType={ServiceType.Electricity}
+      editable={editable}
+      disabled={disabled}
+      label="Електропостачання"
+      subtitle={
+        <>
           {toFirstUpperCase(dateToMonthYear(service?.date))}{' '}
           {losses > 0 ? `+ Втрати ${losses}%` : ''}
-        </Typography.Text>
-      </Space>
-      {editable && (
-        <UpdateInvoiceButton
-          form={form!}
-          name={name}
-          serviceType={ServiceType.Electricity}
-          disabled={disabled}
-        />
-      )}
-    </Space>
+        </>
+      }
+    />
   )
 }
 
@@ -51,7 +52,6 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
   disabled,
 }) => {
   const name = useMemo(() => toArray<string>(_name), [_name])
-  const { service, payment } = usePaymentContext()
   const losses = Form.useWatch(['invoice', ...name, 'losses'], form) ?? 0
 
   const lastAmount = Form.useWatch(['invoice', ...name, 'lastAmount'], form)
@@ -59,11 +59,11 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
 
   if (!editable) {
     const base = amount - lastAmount
-    const withLosses = base + base * (losses / 100)
+    const withLosses = Number(toRoundFixed(base + base * (losses / 100)))
 
     return losses > 0 ? (
       <DividedSpace>
-        <Typography.Text>{withLosses} кВт</Typography.Text>
+        <Typography.Text>{toRoundFixed(withLosses)} кВт</Typography.Text>
         <Tooltip
           title={
             <div>
@@ -71,10 +71,10 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
                 {toRoundFixed(lastAmount)} → {toRoundFixed(amount)}
               </div>
               <div>
-                <strong>Втрати:</strong> {(losses).toFixed(2)}%
+                <strong>Втрати:</strong> {losses.toFixed(2)}%
               </div>
               <div>
-                <strong>З втратами:</strong> {withLosses} кВт
+                <strong>З втратами:</strong> {toRoundFixed(withLosses)} кВт
               </div>
             </div>
           }
@@ -130,10 +130,10 @@ export const Price: React.FC<InvoiceComponentProps> = ({
 }) => {
   const name = useMemo(() => toArray<string>(_name), [_name])
   const price = Form.useWatch(['invoice', ...name, 'price'], form)
-  const {  company } = usePaymentContext()
+  const currency = useInvoiceCurrency()
 
   if (!editable) {
-    return <span>{currencyWithUnit(toRoundFixed(price), company, 'кВт')}</span>
+    return <span>{currencyWithUnit(toRoundFixed(price), currency, 'кВт')}</span>
   }
 
   return (
@@ -146,7 +146,7 @@ export const Price: React.FC<InvoiceComponentProps> = ({
         type="number"
         placeholder="Значення..."
         disabled={disabled}
-        suffix={currencyWithUnit('', company, 'кВт')}
+        suffix={currencyWithUnit('', currency, 'кВт')}
       />
     </Form.Item>
   )
@@ -154,7 +154,8 @@ export const Price: React.FC<InvoiceComponentProps> = ({
 
 export const Sum: React.FC<InvoiceComponentProps> = ({ form, name: _name }) => {
   const name = useMemo(() => toArray<string>(_name), [_name])
-  const { service, payment, company } = usePaymentContext()
+  const { service, payment } = usePaymentContext()
+  const currency = useInvoiceCurrency()
   const losses = Form.useWatch(['invoice', ...name, 'losses'], form)
 
   const lastAmount = Form.useWatch(['invoice', ...name, 'lastAmount'], form)
@@ -165,14 +166,9 @@ export const Sum: React.FC<InvoiceComponentProps> = ({ form, name: _name }) => {
   const costAmount = Math.max(+amount - +lastAmount, 0)
   const loss = costAmount + costAmount * (losses / 100)
 
-  useEffect(() => {
-    form.setFieldValue(
-      ['invoice', ...name, 'sum'],
-      losses > 0 ? loss * +price : costAmount * +price
-    )
-  }, [form, name, amount, lastAmount, price, losses])
+  useSyncSum(form!, name, losses > 0 ? loss * +price : costAmount * +price)
 
-  return <strong>{currencyWithUnit(toRoundFixed(sum), company)} </strong>
+  return <strong>{currencyWithUnit(toRoundFixed(sum), currency)} </strong>
 }
 
 const Electricity = {

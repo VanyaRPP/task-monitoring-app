@@ -1,9 +1,9 @@
-import { paymentApi } from '../paymentApi/payment.api';
-import { 
-  ICreatePaymentChangeLogResponse, 
-  IDeletePaymentChangeLogResponse, 
-  IGetPaymentChangeLogsResponse 
-} from '../paymentApi/payment.api.types';
+import { paymentApi } from '../paymentApi/payment.api'
+import {
+  ICreatePaymentChangeLogResponse,
+  IDeletePaymentChangeLogResponse,
+  IGetPaymentChangeLogsResponse,
+} from '../paymentApi/payment.api.types'
 
 export const changelogApi = paymentApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -39,10 +39,10 @@ export const changelogApi = paymentApi.injectEndpoints({
     }),
   }),
   overrideExisting: false,
-});
+})
 
 export const {
   useGetPaymentChangeLogsQuery,
   useCreatePaymentChangeLogMutation,
   useDeletePaymentChangeLogMutation,
-} = changelogApi;
+} = changelogApi

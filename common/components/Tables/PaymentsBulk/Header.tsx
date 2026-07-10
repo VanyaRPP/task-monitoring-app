@@ -1,11 +1,14 @@
 import { SelectOutlined, LoadingOutlined } from '@ant-design/icons'
+import { useGetDomainByPkQuery } from '@common/api/domainApi/domain.api'
 import {
   useAddPaymentMutation,
   useGetPaymentNumberQuery,
 } from '@common/api/paymentApi/payment.api'
 import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
+import { resolveTemplate } from '@common/components/AddPaymentModal/resolveTemplate'
 import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
 import MonthServiceSelect from '@common/components/Forms/AddPaymentForm/MonthServiceSelect'
+import { useResolveMonthServiceId } from '@common/components/Forms/AddPaymentForm/useResolveMonthServiceId'
 import AddressesSelect from '@common/components/UI/Reusable/AddressesSelect'
 import DomainsSelect from '@common/components/UI/Reusable/DomainsSelect'
 import { AppRoutes, Operations } from '@utils/constants'
@@ -22,6 +25,13 @@ const InvoicesHeader = () => {
   const [addPayment] = useAddPaymentMutation()
   const { data: newInvoiceNumber = 1 } = useGetPaymentNumberQuery({})
   const [isLoading, setIsLoading] = useState(false)
+  const resolveMonthServiceId = useResolveMonthServiceId()
+
+  const domainId = service?.domain?._id
+  const { data: domain } = useGetDomainByPkQuery(
+    { domainId },
+    { skip: !domainId }
+  )
 
   const handleClickSaveButton = async () => {
     try {
@@ -44,15 +54,36 @@ const InvoicesHeader = () => {
   const handleSave = async () => {
     const values = await form.validateFields()
 
-    const payments = values.payments?.map((payment, index) => {
-      const { provider, reciever } = getPaymentProviderAndReciever(
-        companies?.find(({ _id }) => payment.company?._id === _id)
+    const streetId = service?.street?._id
+
+    let monthServiceId: string
+    try {
+      monthServiceId = await resolveMonthServiceId(
+        service?._id,
+        domainId,
+        streetId
       )
+    } catch (e) {
+      console.error('resolveMonthServiceId failed', e)
+      message.error('Не вдалося підготувати місяць послуг')
+      return
+    }
+
+    const batchId = Array.from({ length: 24 }, () =>
+      Math.floor(Math.random() * 16).toString(16)
+    ).join('')
+
+    const payments = values.payments?.map((payment, index) => {
+      const matchedCompany = companies?.find(
+        ({ _id }) => payment.company?._id === _id
+      )
+      const { provider, reciever } =
+        getPaymentProviderAndReciever(matchedCompany)
 
       const invoice = Object.values(payment.invoice || {}).filter(
         ({ sum }) => sum
       )
-      const filteredInvoice = invoiceCSFilter(invoice);
+      const filteredInvoice = invoiceCSFilter(invoice)
 
       const generalSum = filteredInvoice.reduce(
         (acc: number, invoice: IPaymentField) => {
@@ -61,19 +92,28 @@ const InvoicesHeader = () => {
         0
       )
 
+      const template = resolveTemplate(
+        undefined,
+        matchedCompany?.defaultTemplate,
+        domain?.defaultTemplate
+      )
+
       return {
         invoiceNumber: newInvoiceNumber + index,
         type: Operations.Debit,
-        domain: service?.domain?._id,
-        street: service?.street?._id,
+        domain: domainId,
+        street: streetId,
         company: payment.company?._id,
-        monthService: service?._id,
+        monthService: monthServiceId,
         invoiceCreationDate: new Date(),
         description: '',
         generalSum: +toRoundFixed(generalSum),
         provider,
         reciever,
         invoice: filteredInvoice,
+        template,
+        _bulk: true,
+        _batchId: batchId,
       }
     })
 

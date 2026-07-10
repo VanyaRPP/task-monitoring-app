@@ -22,7 +22,7 @@ const getEntityId = (value?: { _id?: string } | string) => {
 }
 
 interface Props {
-  chosenRealEstate: { domain: string }
+  chosenRealEstate: { domain: string; street?: string } | null
   closeModal: VoidFunction
   currentRealEstate?: IExtendedRealestate
   editable?: boolean
@@ -40,7 +40,10 @@ const RealEstateModal: FC<Props> = ({
   const [addRealEstate, { isLoading: isAdding }] = useAddRealEstateMutation()
   const [editRealEstate, { isLoading: isEditing }] = useEditRealEstateMutation()
   const domainId = Form.useWatch('domain', form)
-  const currentDomainId = getEntityId(currentRealEstate?.domain) || domainId
+  const currentDomainId =
+    getEntityId(currentRealEstate?.domain) ||
+    domainId ||
+    chosenRealEstate?.domain
   const { data: customDomainServices } = useGetCustomServicesByDomainQuery(
     { domainId: currentDomainId },
     { skip: !currentDomainId }
@@ -61,18 +64,28 @@ const RealEstateModal: FC<Props> = ({
     )
   }, [customDomainServices])
 
+  const mergedCustomServices = useMemo(() => {
+    const saved = currentRealEstate?.customServices || []
+    const validSaved = saved.filter((s) =>
+      domainCustomServices.some((d) => d._id === s._id)
+    )
+    const newFromDomain = domainCustomServices.filter(
+      (d) => !validSaved.some((s) => s._id === d._id)
+    )
+    return [...validSaved, ...newFromDomain]
+  }, [currentRealEstate, domainCustomServices])
+
   useEffect(() => {
     if (initializedRef.current) return
     if (!currentDomainId) return
+    if (customDomainServices === undefined) return
 
     form.setFieldsValue({
       domain:
         chosenRealEstate?.domain ||
         getEntityId(currentRealEstate?.domain) ||
         currentDomainId,
-      street:
-        currentRealEstate?.street &&
-        `${currentRealEstate.street.address} (м. ${currentRealEstate.street.city})`,
+      street: getEntityId(currentRealEstate?.street),
       companyName: currentRealEstate?.companyName || '',
       description: currentRealEstate?.description || '',
       adminEmails: currentRealEstate?.adminEmails || [],
@@ -89,26 +102,33 @@ const RealEstateModal: FC<Props> = ({
       discount: currentRealEstate?.discount || 0,
       cleaning: currentRealEstate?.cleaning || 0,
       services: currentRealEstate?.services || [],
-      customServices:
-        currentRealEstate?.customServices?.length > 0
-          ? currentRealEstate.customServices
-          : [],
+      customServices: mergedCustomServices,
     })
 
     initializedRef.current = true
-  }, [currentDomainId, chosenRealEstate?.domain, currentRealEstate, form])
+  }, [
+    currentDomainId,
+    chosenRealEstate?.domain,
+    currentRealEstate,
+    form,
+    customDomainServices,
+    mergedCustomServices,
+  ])
 
   const handleSubmit = async () => {
     const formData: IRealestate = await form.validateFields()
 
     const filteredCustomServices =
       formData.customServices?.filter(
-        (s) => typeof s.price === 'number' && s.price > 0
+        (s) => typeof s.price === 'number' && s.price >= 0
       ) || []
 
     const realEstateData = {
-      domain: currentRealEstate?.domain || formData.domain,
-      street: currentRealEstate?.street || formData.street,
+      domain: getEntityId(formData.domain),
+      street:
+        getEntityId(formData.street) ||
+        getEntityId(currentRealEstate?.street) ||
+        undefined,
       companyName: formData.companyName,
       description: formData.description,
       adminEmails: formData.adminEmails,
@@ -144,8 +164,8 @@ const RealEstateModal: FC<Props> = ({
       ? await editRealEstate({
           _id: currentRealEstate?._id,
           ...realEstateData,
-        })
-      : await addRealEstate(realEstateData)
+        } as any)
+      : await addRealEstate(realEstateData as any)
 
     if ('data' in response) {
       form.resetFields()
@@ -154,7 +174,22 @@ const RealEstateModal: FC<Props> = ({
       message.success(action)
     } else {
       const action = currentRealEstate ? 'збереженні' : 'додаванні'
-      message.error(`Помилка при ${action}`)
+      // Surface the server's reason so the failure is diagnosable instead of a
+      // generic toast (e.g. "Domain is required", validation errors, etc.).
+      const errData = (response as { error?: { data?: { message?: unknown } } })
+        ?.error?.data
+      const serverMsg =
+        typeof errData?.message === 'string'
+          ? errData.message
+          : errData?.message
+            ? JSON.stringify(errData.message)
+            : undefined
+      console.error('addRealEstate failed:', response)
+      message.error(
+        serverMsg
+          ? `Помилка при ${action}: ${serverMsg}`
+          : `Помилка при ${action}`
+      )
     }
   }
 
@@ -177,6 +212,7 @@ const RealEstateModal: FC<Props> = ({
         editable={editable}
         setIsValueChanged={setIsValueChanged}
         customServices={domainCustomServices}
+        preselectedStreet={chosenRealEstate?.street}
       />
     </Modal>
   )

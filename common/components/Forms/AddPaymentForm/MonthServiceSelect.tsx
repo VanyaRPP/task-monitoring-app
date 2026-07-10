@@ -8,7 +8,7 @@ import {
 import { Form, FormInstance, Select } from 'antd'
 import dayjs from 'dayjs'
 import { useEffect, useMemo } from 'react'
-
+import { isNewEntityValue } from '@utils/inlineCreate'
 const ROLLING_MONTH_COUNT = 12
 
 export interface MonthServiceSelectProps {
@@ -33,16 +33,29 @@ const MonthServiceSelect: React.FC<MonthServiceSelectProps> = ({
       domainId,
       streetId,
     },
-    { skip: !domainId || !streetId }
+    { skip: !domainId || isNewEntityValue(domainId) }
   )
 
-  const options = useMemo(() => {
-    const byMonthKey = new Map<
-      string,
-      { value: string; label: string }
-    >()
+  const isCurrentValuePlaceholder = isMonthServicePlaceholder(monthService)
+  const currentValueMissing =
+    !!monthService &&
+    !isCurrentValuePlaceholder &&
+    !(services ?? []).some((s) => s._id === monthService)
 
-    for (const svc of services ?? []) {
+  const { data: { data: currentServiceRes } = { data: [] } } =
+    useGetAllServicesQuery(
+      { serviceId: monthService, limit: 1 },
+      { skip: !currentValueMissing }
+    )
+
+  const options = useMemo(() => {
+    const byMonthKey = new Map<string, { value: string; label: string }>()
+
+    const allServices = currentValueMissing
+      ? [...(services ?? []), ...(currentServiceRes ?? [])]
+      : services
+
+    for (const svc of allServices ?? []) {
       const key = dayjs(svc.date).startOf('month').format('YYYY-MM')
       byMonthKey.set(key, {
         value: svc._id,
@@ -70,7 +83,7 @@ const MonthServiceSelect: React.FC<MonthServiceSelectProps> = ({
     }
 
     return [...byMonthKey.values()].sort((a, b) => sortKey(b) - sortKey(a))
-  }, [services])
+  }, [services, currentValueMissing, currentServiceRes])
 
   useEffect(() => {
     if (!edit) {
@@ -89,6 +102,7 @@ const MonthServiceSelect: React.FC<MonthServiceSelectProps> = ({
     <Form.Item
       name="monthService"
       label="Місяць"
+      tooltip="Розрахунковий період, за який виставляється рахунок."
       rules={validateField('required')}
     >
       <Select
@@ -97,13 +111,10 @@ const MonthServiceSelect: React.FC<MonthServiceSelectProps> = ({
         placeholder="Місяць"
         status={isServicesError ? 'error' : undefined}
         loading={isServicesLoading}
-        disabled={
-          isServicesLoading || 
-          !streetId || 
-          !domainId
-        }
+        disabled={isServicesLoading || !domainId}
         allowClear
         showSearch
+        virtual={false}
       />
     </Form.Item>
   )

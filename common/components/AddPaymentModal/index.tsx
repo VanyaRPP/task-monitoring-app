@@ -1,36 +1,46 @@
 import { useGetCustomServicesByDomainQuery } from '@common/api/customServicesApi/customServices.api'
-import { useGetDomainByPkQuery } from '@common/api/domainApi/domain.api'
+import { useCreateCustomServiceMutation } from '@common/api/customServicesApi/customServices.api'
+import {
+  useAddDomainMutation,
+  useGetDomainByPkQuery,
+  useGetDomainTypeTemplatesQuery,
+} from '@common/api/domainApi/domain.api'
+import { useAddRealEstateMutation } from '@common/api/realestateApi/realestate.api'
+import { getNewEntityName, isNewEntityValue } from '@utils/inlineCreate'
+import { domainTypeTemplateToCustomServices } from '@utils/domain/domain-type-template-services'
+import { buildPaymentPayload } from './buildPaymentPayload'
+import { keepInvoiceRow } from './invoiceRowFilter'
 import { resolveTemplate, TemplateKey } from './resolveTemplate'
 import {
   useAddPaymentMutation,
   useEditPaymentMutation,
 } from '@common/api/paymentApi/payment.api'
-import { 
-  useGetPaymentChangeLogsQuery, 
-  useDeletePaymentChangeLogMutation 
+import {
+  useGetPaymentChangeLogsQuery,
+  useDeletePaymentChangeLogMutation,
 } from '@common/api/changelogApi/changelog.api'
 import {
   IExtendedPayment,
   IPayment,
+  TemplateScopeTarget,
 } from '@common/api/paymentApi/payment.api.types'
+import { useAddStreetMutation } from '@common/api/streetApi/street.api'
+import { makeNewEntityValue } from '@utils/inlineCreate'
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
-import {
-  serviceApi,
-  useAddServiceMutation,
-} from '@common/api/serviceApi/service.api'
 import { IService } from '@common/api/serviceApi/service.api.types'
 import PriceList from '@common/components/Forms/AddPaymentForm/PriceList'
-import {
-  isMonthServicePlaceholder,
-  parseMonthServicePlaceholder,
-} from '@common/components/Forms/AddPaymentForm/month-service-placeholder'
+import { useResolveMonthServiceId } from '@common/components/Forms/AddPaymentForm/useResolveMonthServiceId'
 import Modal from '@components/UI/ModalWindow'
 import { usePaymentFormData } from '@modules/hooks/usePaymentData'
-import { useAppDispatch } from '@modules/store/hooks'
-import { Operations, Currency } from '@utils/constants'
+import { Operations, Currency, ServiceType } from '@utils/constants'
 import { getInvoices } from '@utils/getInvoices'
-import { getPaymentProviderAndReciever } from '@utils/helpers'
-import { Form, Tabs, TabsProps, message, Tooltip } from 'antd'
+import {
+  getPaymentProviderAndReciever,
+  normalizeCurrency,
+} from '@utils/helpers'
+import { Button, Form, Tabs, TabsProps, message } from 'antd'
+import { QuestionCircleOutlined } from '@ant-design/icons'
+import InvoiceTour from './InvoiceTour'
 import { FormInstance } from 'antd/es/form/Form'
 import { useChangelogOptions } from './changelog/useChangelogOptions'
 import dayjs from 'dayjs'
@@ -45,19 +55,14 @@ import {
   useState,
 } from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
+import InvoiceTemplateTab from './InvoiceTemplateTab'
 import GroupedReceiptForm from '../Forms/GroupedReceiptForm'
+import { getPreviewQtyStorageKey } from '../Forms/GroupedReceiptForm/previewQtyStorage'
 import PaymentReceiptForm from '../Forms/PaymentReceiptForm'
 import ReceiptForm from '../Forms/ReceiptForm'
 import serviceFilter from './serviceFilter'
 import { normalizeTechnicalTransactionId } from '../Pages/BankTransactions/components/TransactionsTable/components/bankHelper'
 import s from './style.module.scss'
-
-const DEFAULT_INVOICES = [
-  'discount',
-  'maintenancePrice',
-  'garbageCollectorPrice',
-  'electricityPrice',
-]
 
 interface Props {
   closeModal: (success?: boolean) => void
@@ -76,8 +81,13 @@ export interface IPaymentContext {
   form: FormInstance
   template: TemplateKey
   setTemplate: (t: TemplateKey) => void
+  templateScope?: TemplateScopeTarget
+  setTemplateScope: (scope: TemplateScopeTarget | undefined) => void
   showQuantityInPreview: boolean
   setShowQuantityInPreview: (value: boolean) => void
+  invoiceLang: 'en' | 'uk'
+  setInvoiceLang: (lang: 'en' | 'uk') => void
+  registerTemplateSaver: (fn: (() => Promise<string | null>) | null) => void
 }
 
 export const PaymentContext = createContext<IPaymentContext>({
@@ -87,10 +97,15 @@ export const PaymentContext = createContext<IPaymentContext>({
   prevService: null,
   company: null,
   form: null,
-  template: 'classic', 
+  template: 'classic',
   setTemplate: () => void 0,
+  templateScope: undefined,
+  setTemplateScope: () => void 0,
   showQuantityInPreview: false,
   setShowQuantityInPreview: () => void 0,
+  invoiceLang: 'uk',
+  setInvoiceLang: () => void 0,
+  registerTemplateSaver: () => void 0,
 })
 
 export const usePaymentContext = () =>
@@ -101,11 +116,6 @@ const getId = (obj?: string | Partial<{ _id: string }>) => {
   if (typeof obj === 'string') return obj
   return obj._id
 }
-
-const getPreviewQtyStorageKey = (id?: string) =>
-  id
-    ? `addPayment:showQuantityInPreview:${id}`
-    : 'addPayment:showQuantityInPreview:draft'
 
 const AddPaymentModal: FC<Props> = ({
   closeModal,
@@ -120,9 +130,12 @@ const AddPaymentModal: FC<Props> = ({
   const [form] = Form.useForm()
   const firstRunRef = useRef(true)
   const restoringRef = useRef(false)
+  const autoSelectedChangelogRef = useRef(false)
   const lastLoadedCompanyId = useRef<string | null>(null)
   const [changed, setChanged] = useState(false)
   const [saved, setSaved] = useState(false)
+  // Bumping this re-opens the guided invoice tour from the "?" button.
+  const [tourSignal, setTourSignal] = useState(0)
   const [currPayment, setCurrPayment] = useState<IExtendedPayment>()
   const companyDefaultTemplate =
     typeof paymentData?.company === 'object'
@@ -131,17 +144,38 @@ const AddPaymentModal: FC<Props> = ({
   const paymentDomainId =
     typeof paymentData?.domain === 'object'
       ? paymentData.domain?._id
-      : (paymentData?.domain || preselectedDomain || undefined)
+      : paymentData?.domain || preselectedDomain || undefined
   const domainDefaultTemplate =
     typeof paymentData?.domain === 'object'
       ? (paymentData.domain as any)?.defaultTemplate
       : undefined
-const [template, setTemplate] = useState<TemplateKey>(
-    resolveTemplate(paymentData?.template, companyDefaultTemplate, domainDefaultTemplate)
+  const [template, setTemplate] = useState<TemplateKey>(
+    resolveTemplate(
+      paymentData?.template,
+      companyDefaultTemplate,
+      domainDefaultTemplate
+    )
   )
+  const [templateScope, setTemplateScope] = useState<
+    TemplateScopeTarget | undefined
+  >()
+
+  // Set by the "Шаблон" editor while mounted; called on save (see handleSubmit).
+  const templateSaverRef = useRef<(() => Promise<string | null>) | null>(null)
+  const registerTemplateSaver = useCallback(
+    (fn: (() => Promise<string | null>) | null) => {
+      templateSaverRef.current = fn
+    },
+    []
+  )
+
   const [showQuantityInPreview, setShowQuantityInPreviewState] = useState(false)
-  const [activeTabKey, setActiveTabKey] = useState(
-    getActiveTab(paymentData, preview)
+  const [activeTabKey, setActiveTabKey] = useState(preview ? '2' : '1')
+  const [invoiceLang, setInvoiceLang] = useState<'en' | 'uk'>(
+    paymentData?.invoiceLang ??
+      (paymentData?.currency && paymentData.currency !== Currency.UAH
+        ? 'en'
+        : 'uk')
   )
 
   const setShowQuantityInPreview = useCallback(
@@ -169,14 +203,19 @@ const [template, setTemplate] = useState<TemplateKey>(
   const activeDomainId = String(domainId || paymentDomainId || '')
   const { data: fetchedDomain } = useGetDomainByPkQuery(
     { domainId: activeDomainId },
-    { skip: !activeDomainId || typeof paymentData?.domain === 'object' }
+    {
+      skip:
+        !activeDomainId ||
+        isNewEntityValue(activeDomainId) ||
+        typeof paymentData?.domain === 'object',
+    }
   )
 
   useEffect(() => {
     if (paymentData?.template) return
     const resolved = fetchedDomain?.defaultTemplate
     if (resolved) setTemplate(resolved as TemplateKey)
-  }, [activeDomainId, fetchedDomain?.defaultTemplate])
+  }, [activeDomainId, fetchedDomain?.defaultTemplate, paymentData?.template])
 
   const { data: changelogRes, isLoading: changelogLoading } =
     useGetPaymentChangeLogsQuery(paymentId, { skip: !edit || !paymentId })
@@ -185,7 +224,7 @@ const [template, setTemplate] = useState<TemplateKey>(
 
   const handleDeleteChangeLog = async (logId: string) => {
     if (!logId || !paymentId) return
-    
+
     try {
       await deleteChangeLog({ paymentId, changeLogid: logId }).unwrap()
     } catch (error) {
@@ -193,10 +232,65 @@ const [template, setTemplate] = useState<TemplateKey>(
     }
   }
 
-  const changelogOptions = useChangelogOptions(changelogRes, handleDeleteChangeLog)
+  const changelogOptions = useChangelogOptions(
+    changelogRes,
+    handleDeleteChangeLog
+  )
 
-  const { company, service, payment, prevService, prevPayment } =
-    usePaymentFormData(form, paymentData)
+  useEffect(() => {
+    if (autoSelectedChangelogRef.current) return
+    const logs = changelogRes?.data
+    if (!logs?.length) return
+
+    const latestManualLog = logs.find((log) => log.reason === 'manual')
+    if (!latestManualLog) return
+
+    autoSelectedChangelogRef.current = true
+    form.setFieldsValue({ changelogId: latestManualLog._id })
+  }, [changelogRes?.data, form])
+
+  // `usePaymentFormData` currently returns paymentData unchanged as `payment`,
+  // so we destructure only the actual derived fields and use `paymentData`
+  // directly everywhere a saved payment is needed.
+  const {
+    company: fetchedCompany,
+    service,
+    prevService,
+    prevPayment,
+  } = usePaymentFormData(form, paymentData)
+
+  // The provider/company fields may hold a `new::<name>` sentinel for an entity
+  // the user is creating inline. Until it's materialized on submit there is
+  // nothing to fetch, so synthesize the company (and its provider/receiver
+  // block) from the typed values — this drives the live preview and the payload.
+  const companyValue = Form.useWatch('company', form)
+  const companyEmail = Form.useWatch('companyEmail', form)
+  const isNewCompany = isNewEntityValue(companyValue)
+  const isNewDomain = isNewEntityValue(domainId)
+
+  const company = useMemo(() => {
+    if (!isNewCompany) return fetchedCompany
+    const companyName = getNewEntityName(companyValue)
+    return {
+      companyName,
+      adminEmails: companyEmail ? [companyEmail] : [],
+      // Mirror materializeQuickEntities: a quick-created entity's description
+      // defaults to its name, so the live preview matches what gets saved.
+      description: companyName,
+      domain: isNewDomain
+        ? { description: getNewEntityName(domainId) }
+        : fetchedDomain,
+    } as unknown as IRealestate
+  }, [
+    isNewCompany,
+    fetchedCompany,
+    companyValue,
+    companyEmail,
+    isNewDomain,
+    domainId,
+    fetchedDomain,
+  ])
+
   const { provider, reciever } = getPaymentProviderAndReciever(company)
 
   const transaction = {
@@ -204,7 +298,9 @@ const [template, setTemplate] = useState<TemplateKey>(
     AUT_CNTR_NAM: paymentData?.transaction?.AUT_CNTR_NAM || '',
     AUT_CNTR_MFO: paymentData?.transaction?.AUT_CNTR_MFO || '',
     Description: paymentData?.transaction?.Description || '',
-    TECHNICAL_TRANSACTION_ID: normalizeTechnicalTransactionId(paymentData?.transaction?.TECHNICAL_TRANSACTION_ID),
+    TECHNICAL_TRANSACTION_ID: normalizeTechnicalTransactionId(
+      paymentData?.transaction?.TECHNICAL_TRANSACTION_ID
+    ),
   }
 
   useEffect(() => {
@@ -212,69 +308,32 @@ const [template, setTemplate] = useState<TemplateKey>(
       firstRunRef.current = false
       return
     }
-    if (preselectedCompany) return
     form.resetFields(['company'])
   }, [domainId, form])
 
-  const dispatch = useAppDispatch()
-  const [addService] = useAddServiceMutation()
   const [addPayment, { isLoading: isAddingLoading }] = useAddPaymentMutation()
   const [editPayment, { isLoading: isEditingLoading }] =
     useEditPaymentMutation()
-
-  const resolveMonthServiceId = useCallback(
-    async (raw: string, domain: string, street: string) => {
-      if (!isMonthServicePlaceholder(raw)) {
-        return raw
-      }
-      const monthStart = parseMonthServicePlaceholder(raw)
-      const year = monthStart.year()
-      const month = monthStart.month() + 1
-
-      const existing = await dispatch(
-        serviceApi.endpoints.getAllServices.initiate(
-          {
-            domainId: domain,
-            streetId: street,
-            year,
-            month,
-            limit: 1,
-          },
-          { subscribe: false, forceRefetch: true }
-        )
-      ).unwrap()
-
-      const found = existing.data?.[0]
-      if (found?._id) {
-        return found._id
-      }
-
-      const created = await addService({
-        domain,
-        street,
-        date: monthStart.startOf('month').toDate(),
-        rentPrice: 0,
-        electricityPrice: 0,
-        waterPrice: 0,
-        waterPriceTotal: 0,
-        description: '',
-        customServices: [],
-      }).unwrap()
-
-      return created.data._id
-    },
-    [dispatch, addService]
+  const [createCustomService] = useCreateCustomServiceMutation()
+  const [addDomain] = useAddDomainMutation()
+  const [addRealEstate] = useAddRealEstateMutation()
+  const [addStreet] = useAddStreetMutation()
+  const { data: typeTemplates = [] } = useGetDomainTypeTemplatesQuery(
+    undefined,
+    { skip: edit || preview }
   )
+
+  const resolveMonthServiceId = useResolveMonthServiceId()
   const { data: customDomainServices } = useGetCustomServicesByDomainQuery(
     { domainId },
-    { skip: !domainId }
+    { skip: !domainId || isNewEntityValue(domainId) }
   )
 
   const filteredInvoices = useMemo(() => {
     const allInvoices = getInvoices({
       company,
       service,
-      payment,
+      payment: paymentData,
       prevService,
       prevPayment,
     })
@@ -283,7 +342,9 @@ const [template, setTemplate] = useState<TemplateKey>(
     const allowedServices = groups.flatMap((group) => group.services)
 
     const serviceFilteredInvoices = serviceFilter(allInvoices, allowedServices)
-    const hasDiscount = serviceFilteredInvoices.some((inv) => inv.type === 'discount')
+    const hasDiscount = serviceFilteredInvoices.some(
+      (inv) => inv.type === 'discount'
+    )
 
     if (!hasDiscount && company?.discount) {
       serviceFilteredInvoices.push({
@@ -294,13 +355,11 @@ const [template, setTemplate] = useState<TemplateKey>(
       })
     }
 
-    return serviceFilteredInvoices?.filter(
-      (invoice) => invoice?.sum > 0 || DEFAULT_INVOICES.includes(invoice?.type)
-    )
+    return serviceFilteredInvoices?.filter(keepInvoiceRow)
   }, [
     company,
     service,
-    payment,
+    paymentData,
     prevService,
     prevPayment,
     customDomainServices,
@@ -329,6 +388,8 @@ const [template, setTemplate] = useState<TemplateKey>(
     })
   }, [selectedChangelogId, changelogRes, form])
 
+  const operation = Form.useWatch('operation', form)
+
   const items: TabsProps['items'] = []
   const shouldTabsEnabled = (edit && !changed) || preview || saved
 
@@ -343,6 +404,14 @@ const [template, setTemplate] = useState<TemplateKey>(
           changelogLoading={changelogLoading}
         />
       ),
+    })
+  }
+
+  if (!preview && operation !== Operations.Credit) {
+    items.push({
+      key: 'template',
+      label: 'Шаблон',
+      children: <InvoiceTemplateTab />,
     })
   }
 
@@ -372,16 +441,18 @@ const [template, setTemplate] = useState<TemplateKey>(
     })
   }
 
-  if (payment && paymentData?.type !== Operations.Credit && template !== 'olimp') {
+  if (
+    paymentData &&
+    paymentData?.type !== Operations.Credit &&
+    template !== 'olimp'
+  ) {
     items.push({
       key: '3',
       label: 'Акт',
       disabled: !shouldTabsEnabled,
-      children: <PriceList data={payment} />,
+      children: <PriceList data={currPayment ?? paymentData} />,
     })
   }
-
-  const operation = Form.useWatch('operation', form)
 
   const effectiveOperation = preview ? paymentData?.type : operation
 
@@ -406,6 +477,61 @@ const [template, setTemplate] = useState<TemplateKey>(
     setChanged(true)
   }
 
+  /**
+   * Resolve `monthService` (which may still be a placeholder like "month-2026-04")
+   * into a real id, sync it back into the form, and return it. Returns null if
+   * resolution fails (caller decides whether to surface an error).
+   */
+  const prepareMonthService = useCallback(
+    async (values: any): Promise<string | null> => {
+      try {
+        const monthServiceId = await resolveMonthServiceId(
+          values.monthService,
+          values.domain,
+          values.street
+        )
+        form.setFieldsValue({ monthService: monthServiceId })
+        return monthServiceId
+      } catch (e) {
+        console.error('resolveMonthServiceId failed', e)
+        message.error('Не вдалося підготувати місяць послуг')
+        return null
+      }
+    },
+    [resolveMonthServiceId, form]
+  )
+
+  const saveAdHocCustomServices = useCallback(
+    async (invoices: any[], currentDomainId: string) => {
+      if (!currentDomainId) return
+
+      const adHocInvoices = invoices.filter(
+        (inv) =>
+          inv?.type === ServiceType.Custom &&
+          !inv?.customService &&
+          inv?.saveToDomain === true &&
+          (inv?.name || inv?.description)
+      )
+
+      for (const inv of adHocInvoices) {
+        const name = (inv.name || inv.description || '').trim()
+        if (!name) continue
+
+        try {
+          await createCustomService({
+            name,
+            domainId: currentDomainId,
+          }).unwrap()
+        } catch (e: any) {
+          if (e?.status !== 409) {
+            console.warn('createCustomService failed for', name, e)
+          }
+        }
+      }
+    },
+    [createCustomService]
+  )
+
   const handleOk = async () => {
     setChanged(false)
     setSaved(true)
@@ -417,21 +543,19 @@ const [template, setTemplate] = useState<TemplateKey>(
       return
     }
 
+    // A brand-new provider isn't created until final submit, so its month
+    // service can't be resolved yet — keep the placeholder for the preview and
+    // let handleSubmit materialize the provider and resolve it for real.
     let monthServiceId = values.monthService
-    try {
-      monthServiceId = await resolveMonthServiceId(
-        values.monthService,
-        values.domain,
-        values.street
-      )
-    } catch (e) {
-      console.error('resolveMonthServiceId failed', e)
-      message.error('Не вдалося підготувати місяць послуг')
-      setSaved(false)
-      setChanged(true)
-      return
+    if (!isNewEntityValue(values.domain)) {
+      monthServiceId = await prepareMonthService(values)
+      if (monthServiceId === null) {
+        setSaved(false)
+        setChanged(true)
+        return
+      }
     }
-    form.setFieldsValue({ monthService: monthServiceId })
+
     setCurrPayment({
       ...values,
       monthService: monthServiceId,
@@ -441,66 +565,132 @@ const [template, setTemplate] = useState<TemplateKey>(
     setActiveTabKey('2')
   }
 
+  // Materialize any inline-created provider/company (held as `new::` sentinels)
+  // into real records before building the payment. Order matters: creating the
+  // domain promotes the user to its admin (server adds them to adminEmails), so
+  // the company create that follows is authorized.
+  const materializeQuickEntities = useCallback(
+    async (
+      formData: any
+    ): Promise<{ domain: string; company: string; street: string }> => {
+      let nextDomainId = formData.domain
+      let nextCompanyId = formData.company
+
+      if (isNewEntityValue(nextDomainId)) {
+        const name = getNewEntityName(nextDomainId).trim()
+        // Seed the provider's services from the chosen service-type template
+        // (e.g. «Комунальні»); empty when the user picked «Без послуг».
+        const templateId = formData.newDomainTemplateId || undefined
+        const template = templateId
+          ? typeTemplates.find((t) => t._id === templateId)
+          : undefined
+        const created = await addDomain({
+          name,
+          // `description` is required; seed it with the name so a quick-created
+          // provider is valid without an extra field (the DomainModal builds a
+          // richer description from IBAN/МФО/РНОКПП later, if edited).
+          description: name,
+          streets: [],
+          domainTypeTemplateId: templateId,
+          customServices: domainTypeTemplateToCustomServices(template),
+        } as any).unwrap()
+        nextDomainId = created.data._id
+        form.setFieldValue('domain', nextDomainId)
+      }
+
+      if (isNewEntityValue(nextCompanyId)) {
+        const companyName = getNewEntityName(nextCompanyId).trim()
+        const created = await addRealEstate({
+          companyName,
+          description: companyName,
+          domain: nextDomainId,
+          adminEmails: formData.companyEmail ? [formData.companyEmail] : [],
+        } as any).unwrap()
+        nextCompanyId = created.data._id
+        form.setFieldValue('company', nextCompanyId)
+      }
+      let nextStreetId = formData.street
+      if (isNewEntityValue(nextStreetId)) {
+        const streetData = getNewEntityName(nextStreetId)
+        // формат: "address::city"
+        const [address, city] = streetData.split('::')
+        const created = await addStreet({
+          address: address?.trim() || streetData,
+          city: city?.trim() || '',
+          domain: nextDomainId,
+        } as any).unwrap()
+        nextStreetId = (created as any).data?._id ?? (created as any)._id
+        form.setFieldValue('street', nextStreetId)
+      }
+      return {
+        domain: nextDomainId,
+        company: nextCompanyId,
+        street: nextStreetId,
+      }
+    },
+    [addDomain, addRealEstate, form, typeTemplates]
+  )
+
   const handleSubmit = async () => {
     const formData = await form.validateFields()
 
-    let monthServiceId = formData.monthService
+    let materialized: { domain: string; company: string; street: string }
     try {
-      monthServiceId = await resolveMonthServiceId(
-        formData.monthService,
-        formData.domain,
-        formData.street
-      )
+      materialized = await materializeQuickEntities(formData)
     } catch (e) {
-      console.error('resolveMonthServiceId failed', e)
-      message.error('Не вдалося підготувати місяць послуг')
+      console.error('quick-create failed', e)
+      message.error('Не вдалося створити надавача послуг або компанію')
       return
     }
-    form.setFieldsValue({ monthService: monthServiceId })
+    formData.domain = materialized.domain
+    formData.company = materialized.company
+    formData.street = materialized.street
 
-    const payment = {
-      invoiceNumber: formData.invoiceNumber,
-      type: formData.operation,
-      domain: formData.domain,
-      street: formData.street,
-      company: formData.company,
-      monthService: monthServiceId,
-      invoiceCreationDate: formData.invoiceCreationDate
-      ? (() => {    
-        const now = new Date()  
-        return new Date(    
-            Date.UTC(
-              formData.invoiceCreationDate.year(),
-              formData.invoiceCreationDate.month(),
-              formData.invoiceCreationDate.date(),
-              now.getUTCHours(),
-              now.getUTCMinutes(),
-              now.getUTCSeconds(),
-              now.getUTCMilliseconds()
-          )
-        )
-      })()
-      : new Date(),
-      description: formData.description || '',
-      generalSum: formData.generalSum || formData.debit,
-      currency: formData.currency || Currency.UAH,
+    const monthServiceId = await prepareMonthService(formData)
+    if (monthServiceId === null) return
+
+    let effectiveTemplate = template
+    try {
+      const savedTemplateId = await templateSaverRef.current?.()
+      if (savedTemplateId) {
+        effectiveTemplate = savedTemplateId as TemplateKey
+        setTemplate(effectiveTemplate)
+      }
+    } catch (e) {
+      console.error('template auto-save failed', e)
+      message.error('Не вдалося зберегти шаблон')
+      return
+    }
+
+    const payment = buildPaymentPayload({
+      formData,
+      monthServiceId,
       provider,
       reciever,
       transaction,
-      invoice: formData.debit
-        ? formData.invoice.filter((invoice) => +invoice.sum !== 0)
-        : [],
-      template,
-    }
+      template: effectiveTemplate,
+      invoiceLang,
+    })
+
+    const finalPayload = templateScope
+      ? { ...payment, _templateScope: templateScope }
+      : payment
 
     const response = edit
       ? await editPayment({
           _id: paymentData?._id,
-          ...payment,
+          ...finalPayload,
         })
-      : await addPayment(payment)
+      : await addPayment(finalPayload)
 
     if ('data' in response) {
+      const currentDomainId = String(
+        formData.domain || domainId || paymentDomainId || ''
+      )
+      if (currentDomainId && formData.invoice?.length) {
+        await saveAdHocCustomServices(formData.invoice, currentDomainId)
+      }
+
       const action = edit ? 'Збережено' : 'Додано'
       form.resetFields()
       message.success(action)
@@ -520,27 +710,29 @@ const [template, setTemplate] = useState<TemplateKey>(
     if (activeTabKey !== '1' || saved || !company || !company._id) return
 
     const isEditing = !!paymentId || edit
-    const currentInvoices = form.getFieldValue('invoice')
-    const hasCurrentInvoices =
-      Array.isArray(currentInvoices) && currentInvoices.length > 0
-    const hasFilteredInvoices =
-      Array.isArray(filteredInvoices) && filteredInvoices.length > 0
-
     if (isEditing) {
       lastLoadedCompanyId.current = company._id
+      if (!form.getFieldValue('currency')) {
+        form.setFieldValue('currency', normalizeCurrency(company.currency))
+      }
       return
     }
 
+    const hasFilteredInvoices =
+      Array.isArray(filteredInvoices) && filteredInvoices.length > 0
+    if (!hasFilteredInvoices) return
+    // Re-seed `invoice` whenever upstream data (company, service, prevService,
+    // prevPayment, customDomainServices) changes — that's exactly when
+    // `filteredInvoices` gets a new reference. Editing existing payments is
+    // already short-circuited above, so user input on a CREATE form is reset
+    // only when the user changes domain/street/company/month, which is the
+    // intended behavior.
+    form.setFieldsValue({ invoice: filteredInvoices })
+
     const isNewCompanySelected = lastLoadedCompanyId.current !== company._id
-    const shouldHydrateEmptyInvoices = !hasCurrentInvoices && hasFilteredInvoices
-
-    if (isNewCompanySelected || shouldHydrateEmptyInvoices) {
-      form.setFieldsValue({ invoice: filteredInvoices })
-      lastLoadedCompanyId.current = company._id
-    }
-
     if (isNewCompanySelected) {
-      form.setFieldValue('currency', company.currency || Currency.UAH)
+      form.setFieldValue('currency', normalizeCurrency(company.currency))
+      lastLoadedCompanyId.current = company._id
     }
   }, [company, filteredInvoices, paymentId, edit, activeTabKey, saved, form])
 
@@ -550,17 +742,40 @@ const [template, setTemplate] = useState<TemplateKey>(
         company,
         service,
         prevService,
-        payment,
+        payment: paymentData,
         prevPayment,
         form,
         template,
         setTemplate,
+        templateScope,
+        setTemplateScope,
         showQuantityInPreview,
         setShowQuantityInPreview,
+        invoiceLang,
+        setInvoiceLang,
+        registerTemplateSaver,
       }}
     >
       <Modal
-        title={edit ? 'Редагування рахунку' : !preview && 'Додавання рахунку'}
+        title={
+          edit ? (
+            'Редагування рахунку'
+          ) : !preview ? (
+            <span>
+              Додавання рахунку{' '}
+              <Button
+                type="text"
+                size="small"
+                icon={<QuestionCircleOutlined />}
+                onClick={() => setTourSignal((n) => n + 1)}
+                aria-label="Показати підказку"
+                title="Як заповнити рахунок"
+              />
+            </span>
+          ) : (
+            false
+          )
+        }
         onOk={activeTabKey === '1' ? handleOk : handleSubmit}
         okButtonProps={
           preview ? { style: { display: 'none' } } : edit ? {} : null
@@ -579,19 +794,22 @@ const [template, setTemplate] = useState<TemplateKey>(
         <Form
           initialValues={{
             changelogId: undefined,
-            domain: preselectedDomain || getId(payment?.domain),
-            street: getId(payment?.street),
-            company: preselectedCompany || getId(payment?.company),
-            monthService: getId(payment?.monthService),
-            invoice: (payment?.invoice && payment.invoice.length > 0) 
-              ? payment.invoice 
-              : filteredInvoices,
-            description: payment?.description,
-            generalSum: payment?.generalSum,
-            currency: payment?.currency || Currency.UAH,
-            invoiceNumber: payment?.invoiceNumber,
-            invoiceCreationDate: dayjs(payment?.invoiceCreationDate),
-            operation: payment?.type || Operations.Debit,
+            domain: preselectedDomain || getId(paymentData?.domain),
+            street: getId(paymentData?.street),
+            company: preselectedCompany || getId(paymentData?.company),
+            monthService: getId(paymentData?.monthService),
+            invoice:
+              paymentData?.invoice && paymentData.invoice.length > 0
+                ? paymentData.invoice
+                : filteredInvoices,
+            description: paymentData?.description,
+            generalSum: paymentData?.generalSum,
+            currency: paymentData?.currency
+              ? normalizeCurrency(paymentData.currency)
+              : Currency.UAH,
+            invoiceNumber: paymentData?.invoiceNumber,
+            invoiceCreationDate: dayjs(paymentData?.invoiceCreationDate),
+            operation: paymentData?.type || Operations.Debit,
           }}
           form={form}
           layout="vertical"
@@ -604,13 +822,10 @@ const [template, setTemplate] = useState<TemplateKey>(
             onChange={setActiveTabKey}
           />
         </Form>
+        {!edit && !preview && <InvoiceTour startSignal={tourSignal} />}
       </Modal>
     </PaymentContext.Provider>
   )
-}
-
-function getActiveTab(_paymentData: any, preview: boolean): string {
-  return preview ? '2' : '1'
 }
 
 export default AddPaymentModal

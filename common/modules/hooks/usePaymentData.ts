@@ -9,6 +9,7 @@ import {
   parseMonthServicePlaceholder,
 } from '@common/components/Forms/AddPaymentForm/month-service-placeholder'
 import { Operations } from '@utils/constants'
+import { isNewEntityValue } from '@utils/inlineCreate'
 import { Form, FormInstance } from 'antd'
 import dayjs from 'dayjs'
 
@@ -156,7 +157,10 @@ export function usePaymentFormData(
     : undefined
 
   const { data: { data: { 0: company } } = { data: [null] } } =
-    useGetAllRealEstateQuery({ companyId, limit: 1 }, { skip: !companyId })
+    useGetAllRealEstateQuery(
+      { companyId, limit: 1 },
+      { skip: !companyId || isNewEntityValue(companyId) }
+    )
 
   const { data: { data: { 0: serviceById } } = { data: [null] } } =
     useGetAllServicesQuery(
@@ -186,9 +190,7 @@ export function usePaymentFormData(
   const service = serviceById ?? serviceByMonth ?? null
 
   const anchorDate =
-    service?.date != null
-      ? dayjs(service.date)
-      : placeholderAnchor ?? null
+    service?.date != null ? dayjs(service.date) : (placeholderAnchor ?? null)
   const hasAnchor = anchorDate != null && anchorDate.isValid()
   const prevMonthMongo = !hasAnchor
     ? 0

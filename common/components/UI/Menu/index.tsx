@@ -7,21 +7,33 @@ import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import useKeyCode from '@modules/hooks/useKeyCode'
 import { AppRoutes, Roles } from '@utils/constants'
 import { isAdminCheck } from '@utils/helpers'
+import { RootState } from '@modules/store/store'
 import { Menu as AntdMenu, MenuProps as AntdMenuProps } from 'antd'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useRouter } from 'next/router'
 import { useMemo, useState } from 'react'
+import { useSelector } from 'react-redux'
 
 export type MenuProps = Omit<AntdMenuProps, 'selectedKeys' | 'mode' | 'items'>
 
-export const Menu: React.FC<MenuProps> = (props) => {
+export const Menu: React.FC<MenuProps> = ({ defaultOpenKeys, ...props }) => {
   const [isDevMode, setIsDevMode] = useState(false)
   const router = useRouter()
   const pathname = usePathname()
   const { data: session } = useSession()
   const { data: user } = useGetCurrentUserQuery()
+
+  const [userOpenKeys, setUserOpenKeys] = useState<string[]>(
+    (defaultOpenKeys as string[]) ?? []
+  )
+  const forcedOpenKeys = useSelector(
+    (state: RootState) => state.sidebar.forcedOpenKeys
+  )
+  const openKeys = forcedOpenKeys.length
+    ? Array.from(new Set([...userOpenKeys, ...forcedOpenKeys]))
+    : userOpenKeys
 
   const handleSequenceDetected = () => {
     setIsDevMode(!isDevMode)
@@ -149,7 +161,7 @@ export const Menu: React.FC<MenuProps> = (props) => {
             key: AppRoutes.ADMIN_PANEL,
             type: 'item',
             label: <Link href={AppRoutes.ADMIN_PANEL}>Адмін панель</Link>,
-            hidden: !isGlobalAdmin,
+            hidden: !isGlobalAdmin && !isDomainAdmin,
           },
         ].filter(({ hidden }) => !hidden),
       },
@@ -161,8 +173,10 @@ export const Menu: React.FC<MenuProps> = (props) => {
       selectedKeys={pathname ? [pathname] : []}
       mode="inline"
       items={items}
+      openKeys={openKeys}
+      onOpenChange={(keys) => setUserOpenKeys(keys as string[])}
       {...props}
       style={{ paddingBottom: '50px' }}
     />
   )
-} 
+}

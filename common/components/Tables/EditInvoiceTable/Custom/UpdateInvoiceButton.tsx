@@ -7,7 +7,11 @@ const normalizeComparableValue = (value: unknown) => {
     return Number.isNaN(value) ? value : value
   }
 
-  if (typeof value === 'string' && value.trim() !== '' && !Number.isNaN(+value)) {
+  if (
+    typeof value === 'string' &&
+    value.trim() !== '' &&
+    !Number.isNaN(+value)
+  ) {
     return +value
   }
 

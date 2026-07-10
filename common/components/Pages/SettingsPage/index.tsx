@@ -10,16 +10,27 @@ import { FeatureFlagsTable } from '@common/components/FeatureFlagsTable'
 import { Roles } from '@utils/constants'
 import { Button, Card, Flex, Space, Typography } from 'antd'
 import { Tabs } from 'antd'
-import {UsersTable} from '@common/components/Tables/UsersTable'
+import { UsersTable } from '@common/components/Tables/UsersTable'
 import { CustomServicesTable } from '@common/components/Tables/CustomService/Table'
 import { DomainTypeTemplatesTable } from '@common/components/Tables/DomainTypeTemplates'
+import { useGetDomainsByAdminQuery } from '@common/api/domainApi/domain.api'
+import PaymentAuditTable from '@common/components/Tables/PaymentAudit/Table'
 
 export const AdminPanelPage: React.FC = () => {
   const { data: user } = useGetCurrentUserQuery()
   const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
+  const isDomainAdmin = user?.roles?.includes(Roles.DOMAIN_ADMIN)
+
+  const { data: domains = [] } = useGetDomainsByAdminQuery(
+    { archived: false },
+    {
+      skip: !isDomainAdmin || isGlobalAdmin,
+    }
+  )
 
   const [modalOpen, setModalOpen] = useState(false)
   const [editingFlag, setEditingFlag] = useState(null)
+  if (!isGlobalAdmin && !isDomainAdmin) return null
 
   return (
     <Space
@@ -27,78 +38,102 @@ export const AdminPanelPage: React.FC = () => {
       style={{ width: '100%', position: 'relative' }}
       size="middle"
     >
-      {isGlobalAdmin && (
-        <>
-          <Card>
-            <Tabs
-              defaultActiveKey="users"
-              items={[
-                {
-                  key: 'users',
-                  label: 'Користувачі',
-                  children: (
-                    <>
-                      <Flex
-                        justify="space-between"
-                        align="center"
-                        style={{ marginBottom: 16 }}
-                      >
-                        <Typography.Title level={4} style={{ marginBottom: 16 }}>
-                          Користувачі
-                        </Typography.Title>
-                      </Flex>
-                      <UsersTable />
-                    </>
-                  ),
-                },
-                {
-                  key: 'flags',
-                  label: 'Фічефлаги',
-                  children: (
-                    <>
-                      <Flex
-                        justify="space-between"
-                        align="center"
-                        style={{ marginBottom: 16 }}
-                      >
-                        <Typography.Title level={4} style={{ margin: 0 }}>
-                          Фічефлаги
-                        </Typography.Title>
-                        <FeatureFlagModal
-                          open={modalOpen}
-                          onClose={() => {
-                            setModalOpen(false)
-                            setEditingFlag(null)
-                          }}
-                        />
-                        <Button
-                          type="primary"
-                          icon={<PlusOutlined />}
-                          onClick={() => setModalOpen(true)}
-                        ></Button>
-                      </Flex>
-
-                      <FeatureFlagsTable />
-                    </>
-                  ),
-                },
-                {
-                  key: 'customservices',
-                  label: 'Послуги',
-                  children: (
-                     <CustomServicesTable />
-                  ),
-                },
-                {
-                  key: 'templates',
-                  label: 'Шаблони типів',
-                  children: <DomainTypeTemplatesTable />,
-                },
-              ]}
-            />
-          </Card>
-        </>
-      )}
+      <Card>
+        <Tabs
+          defaultActiveKey="users"
+          items={[
+            {
+              key: 'users',
+              label: 'Користувачі',
+              children: (
+                <>
+                  <Flex
+                    justify="space-between"
+                    align="center"
+                    style={{ marginBottom: 16 }}
+                  >
+                    <Typography.Title level={4} style={{ marginBottom: 16 }}>
+                      Користувачі
+                    </Typography.Title>
+                  </Flex>
+                  <UsersTable domains={domains} isDomainAdmin={isDomainAdmin} />
+                </>
+              ),
+            },
+            ...(isGlobalAdmin || isDomainAdmin
+              ? [
+                  {
+                    key: 'customservices',
+                    label: 'Послуги',
+                    children: (
+                      <CustomServicesTable
+                        domains={domains}
+                        isDomainAdmin={isDomainAdmin}
+                      />
+                    ),
+                  },
+                ]
+              : []),
+            ...(isGlobalAdmin
+              ? [
+                  {
+                    key: 'flags',
+                    label: 'Фічефлаги',
+                    children: (
+                      <>
+                        <Flex
+                          justify="space-between"
+                          align="center"
+                          style={{ marginBottom: 16 }}
+                        >
+                          <Typography.Title level={4} style={{ margin: 0 }}>
+                            Фічефлаги
+                          </Typography.Title>
+                          <FeatureFlagModal
+                            open={modalOpen}
+                            onClose={() => {
+                              setModalOpen(false)
+                              setEditingFlag(null)
+                            }}
+                          />
+                          <Button
+                            type="primary"
+                            icon={<PlusOutlined />}
+                            onClick={() => setModalOpen(true)}
+                          ></Button>
+                        </Flex>
+                        <FeatureFlagsTable />
+                      </>
+                    ),
+                  },
+                  {
+                    key: 'templates',
+                    label: 'Шаблони типів',
+                    children: <DomainTypeTemplatesTable />,
+                  },
+                  {
+                    key: 'payment-audit',
+                    label: 'Логування',
+                    children: (
+                      <>
+                        <Flex
+                          justify="space-between"
+                          align="center"
+                          style={{ marginBottom: 16 }}
+                        >
+                          <Typography.Title level={4} style={{ margin: 0 }}>
+                            Логування
+                          </Typography.Title>
+                        </Flex>
+                        <PaymentAuditTable />
+                      </>
+                    ),
+                  },
+                ]
+              : []),
+          ]}
+        />
+      </Card>
     </Space>
   )
 }

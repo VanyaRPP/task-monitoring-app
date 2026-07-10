@@ -1,14 +1,17 @@
 import { useGetCustomServicesByDomainQuery } from '@common/api/customServicesApi/customServices.api'
 import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
+import { buildBulkInvoiceMap } from '@common/components/Tables/PaymentsBulk/buildInvoiceMap'
 import { getDefaultColumns } from '@common/components/Tables/PaymentsBulk/column.config'
 import serviceFilter from '@components/AddPaymentModal/serviceFilter'
 import { AppRoutes, Operations } from '@utils/constants'
 import { getInvoices } from '@utils/getInvoices'
-import { Alert, Empty, Form, Input, Table } from 'antd'
+import { Alert, Empty, Form, InputNumber, Table } from 'antd'
 import { useRouter } from 'next/router'
 import { useEffect, useMemo } from 'react'
 import { defaultServices } from '@utils/constants'
 import { findPrevPaymentMatch } from './hooks/usePrevPayment/usePrevPayment'
+import { Amount } from './cells/Amount'
+import styles from './stylestable.module.scss'
 
 const InvoicesTable: React.FC = () => {
   const router = useRouter()
@@ -26,12 +29,13 @@ const InvoicesTable: React.FC = () => {
 
   const domainId = Form.useWatch('domain', form)
 
-  const { data: customDomainServices } = useGetCustomServicesByDomainQuery(
-    { domainId },
-    { skip: !domainId }
-  )
+  const {
+    data: customDomainServices,
+    isFetching: isServicesFetching,
+    isError: isServicesError,
+    error: servicesError,
+  } = useGetCustomServicesByDomainQuery({ domainId }, { skip: !domainId })
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const groups = customDomainServices?.data ?? []
 
   const allowedServices = useMemo(
@@ -39,21 +43,62 @@ const InvoicesTable: React.FC = () => {
     [groups]
   )
 
+  useEffect(() => {
+    console.warn('[PaymentsBulk] diag', {
+      domainId,
+      isServicesFetching,
+      isServicesError,
+      servicesError,
+      rawResponse: customDomainServices,
+      groupsCount: groups.length,
+      allowedServices: allowedServices.map((s) => ({
+        _id: String((s as { _id?: unknown })?._id),
+        name: (s as { name?: string })?.name,
+        fieldName: (s as { fieldName?: string })?.fieldName,
+        serviceType: (s as { serviceType?: string })?.serviceType,
+      })),
+    })
+  }, [
+    domainId,
+    isServicesFetching,
+    isServicesError,
+    servicesError,
+    customDomainServices,
+    groups.length,
+    allowedServices,
+  ])
+
   const customServicesColumns = useMemo(
     () =>
       allowedServices
         .filter((s) => !defaultServices.includes(s?._id.toString()))
         .map((s) => ({
           title: s.name,
-          width: 160,
-          render: (_: any, { name }: { name: number }) => (
-            <Form.Item
-              name={[name, 'invoice', s.fieldName, 'sum']}
-              style={{ margin: 0 }}
-            >
-              <Input />
-            </Form.Item>
-          ),
+          children: [
+            {
+              title: 'Кількість',
+              width: 120,
+              render: (_: any, { name }: { name: number }) => (
+                <Amount name={name} fieldName={s.fieldName} />
+              ),
+            },
+            {
+              title: 'Ціна',
+              width: 140,
+              render: (_: any, { name }: { name: number }) => (
+                <Form.Item
+                  name={[name, 'invoice', s.fieldName, 'sum']}
+                  style={{ margin: 0 }}
+                >
+                  <InputNumber
+                    placeholder="Ціна"
+                    style={{ width: '100%' }}
+                    min={0}
+                  />
+                </Form.Item>
+              ),
+            },
+          ],
         })),
     [allowedServices]
   )
@@ -69,7 +114,8 @@ const InvoicesTable: React.FC = () => {
         domainId: prevService?.domain?._id,
       })
 
-      const validPrevPayment = prevPayment?.type === Operations.Debit ? prevPayment : undefined
+      const validPrevPayment =
+        prevPayment?.type === Operations.Debit ? prevPayment : undefined
 
       const allinvoice = getInvoices({
         company,
@@ -80,24 +126,23 @@ const InvoicesTable: React.FC = () => {
 
       const filteredInvoice = serviceFilter(allinvoice, allowedServices)
 
-      const invoiceObjectForTheAll = allinvoice.reduce((acc, inv) => {
-        acc[inv.name || inv.type] = inv
-        return acc
-      }, {} as Record<string, any>)
+      const invoice = buildBulkInvoiceMap(allinvoice, filteredInvoice)
 
-      const invoiceObjectForCustom = filteredInvoice.reduce((acc, inv) => {
-        acc[inv.fieldName || inv.type] = inv
-        return acc
-      }, {} as Record<string, any>)
-
-      const invoiceObject = {
-        ...invoiceObjectForTheAll,
-        ...invoiceObjectForCustom,
+      for (const s of allowedServices) {
+        if (defaultServices.includes(s?._id?.toString())) continue
+        const key = s.fieldName
+        if (!key) continue
+        const existing = invoice[key]
+        const amount = existing?.amount
+        invoice[key] = {
+          ...(existing || { type: 'custom', fieldName: key, name: s.name }),
+          amount: amount === undefined || amount === null ? 1 : amount,
+        } as (typeof invoice)[string]
       }
 
       return {
         company,
-        invoice: invoiceObject,
+        invoice,
       }
     })
   }, [companies, service, prevService, prevPayments, allowedServices])
@@ -117,6 +162,8 @@ const InvoicesTable: React.FC = () => {
     <Form.List name="payments">
       {(fields, { remove }) => (
         <Table
+          className={styles.customTable}
+          bordered
           rowKey="name"
           size="small"
           pagination={false}
