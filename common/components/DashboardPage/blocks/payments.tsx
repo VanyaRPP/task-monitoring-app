@@ -133,7 +133,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     }
   }, [filters?.domain, domainsFiltersData])
 
-  const { data: debtorsData } = useGetDebtorsQuery(
+  const { data: debtorsData, refetch: refetchDebtors } = useGetDebtorsQuery(
     { domainIds },
     { skip: !domainIds.length }
   )
@@ -170,6 +170,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     channel.onmessage = (event) => {
       if (event.data === 'PAYMENT_CREATED') {
         dispatch(paymentApi.util.invalidateTags(['Payment']))
+        dispatch(debtorsApi.util.invalidateTags(['Debtors']))
       }
     }
     return () => {
@@ -539,7 +540,11 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
       dispatch(setSelectedColumns(cols)),
     onBulkMarkPaid: handleBulkMarkPaid,
     onBulkDuplicate: handleBulkDuplicate,
-    onRefresh: () => refetchPayments(),
+    onRefresh: () =>
+      Promise.all([
+        refetchPayments(),
+        domainIds.length ? refetchDebtors() : Promise.resolve(),
+      ]),
     isRefreshing: paymentsFetching,
     domainFilter: filterProps.domainsFilter,
     realEstatesFilter: filterProps.companiesFilter,
