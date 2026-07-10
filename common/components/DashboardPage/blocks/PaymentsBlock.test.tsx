@@ -3,7 +3,10 @@ import { useDispatch } from 'react-redux'
 import { useRouter } from 'next/router'
 import PaymentsBlock from './payments'
 import { paymentApi } from '@common/api/paymentApi/payment.api'
-import { useGetDebtorsQuery } from '@common/api/debtorsApi/debtors.api'
+import {
+  debtorsApi,
+  useGetDebtorsQuery,
+} from '@common/api/debtorsApi/debtors.api'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { useGetAllPaymentsQuery } from '@common/api/paymentApi/payment.api'
 
@@ -41,6 +44,11 @@ jest.mock('@common/api/paymentApi/payment.api', () => ({
 }))
 
 jest.mock('@common/api/debtorsApi/debtors.api', () => ({
+  debtorsApi: {
+    util: {
+      invalidateTags: jest.fn(),
+    },
+  },
   useGetDebtorsQuery: jest.fn(),
 }))
 
@@ -104,7 +112,10 @@ describe('PaymentsBlock Sync Logic', () => {
     })
 
     const defaultResponse = { data: [], isLoading: false, isError: false }
-    ;(useGetDebtorsQuery as jest.Mock).mockReturnValue(defaultResponse)
+    ;(useGetDebtorsQuery as jest.Mock).mockReturnValue({
+      ...defaultResponse,
+      refetch: jest.fn(),
+    })
     ;(useGetCurrentUserQuery as jest.Mock).mockReturnValue({
       data: { roles: [] },
     })
@@ -122,6 +133,10 @@ describe('PaymentsBlock Sync Logic', () => {
 
     expect(mockDispatch).toHaveBeenCalledWith(
       paymentApi.util.invalidateTags(['Payment'])
+    )
+    // debtors must refresh too — a bank payment can clear a debtor
+    expect(mockDispatch).toHaveBeenCalledWith(
+      debtorsApi.util.invalidateTags(['Debtors'])
     )
   })
 

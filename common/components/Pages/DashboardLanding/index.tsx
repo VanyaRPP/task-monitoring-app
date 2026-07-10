@@ -1,47 +1,45 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
-import { Modal, Button, Typography, Space } from 'antd'
+import React, { useEffect, useMemo, useState } from 'react'
+import { Button } from 'antd'
+import { QuestionCircleOutlined } from '@ant-design/icons'
+import { useDispatch } from 'react-redux'
 import AddPaymentModal from '@components/AddPaymentModal'
 import ScrollFactoryAnimation from '@components/ScrollFactoryAnimation'
 import { Header } from '@components/Layouts/Header'
 import { Footer } from '@components/Layouts/Footer'
-import {
-  useGetCurrentUserQuery,
-  useGetUserByIdQuery,
-} from '@common/api/userApi/user.api'
+import DashboardTour from '@components/DashboardPage/DashboardTour'
+import { addButton, removeButton } from '@modules/store/floatButtonSlice'
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { useRouter } from 'next/router'
-import { Roles } from '@utils/constants'
 import s from './DashboardLanding.module.scss'
-
-const { Title, Text } = Typography
 
 const DashboardLanding = () => {
   const router = useRouter()
+  const dispatch = useDispatch()
   const { data: user } = useGetCurrentUserQuery()
-  // The by-id endpoint returns adminDomains/adminCompanies, which lets us
-  // decide modal visibility from what the user owns (data-driven) instead of a
-  // one-shot isFirstLogin flag.
-  const { data: fullUser } = useGetUserByIdQuery(user?._id as string, {
-    skip: !user?._id,
-  })
-  const [welcomeOpen, setWelcomeOpen] = useState(false)
   const [paymentModalOpen, setPaymentModalOpen] = useState(false)
+  const [showTour, setShowTour] = useState(false)
+
+  const tourFloatButton = useMemo(
+    () => ({
+      key: 'dashboard-tour',
+      icon: <QuestionCircleOutlined />,
+      onClick: () => setShowTour(true),
+      tooltip: 'Тур',
+      order: 5,
+    }),
+    []
+  )
 
   useEffect(() => {
-    if (!fullUser) return
-    const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
-    const scoped = fullUser as typeof fullUser & {
-      adminDomains?: unknown[]
-      adminCompanies?: unknown[]
+    dispatch(addButton(tourFloatButton))
+    return () => {
+      dispatch(removeButton(tourFloatButton.key))
     }
-    const ownsNothing =
-      !scoped.adminDomains?.length && !scoped.adminCompanies?.length
-    setWelcomeOpen(Boolean(ownsNothing && !isGlobalAdmin))
-  }, [fullUser, user])
+  }, [dispatch, tourFloatButton])
 
   const handleStartFirstInvoice = () => {
-    setWelcomeOpen(false)
     setPaymentModalOpen(true)
   }
 
@@ -96,7 +94,25 @@ const DashboardLanding = () => {
             className={s.grid}
             style={{ height: 'auto', overflow: 'visible', display: 'block' }}
           >
-            <ScrollFactoryAnimation />
+            <ScrollFactoryAnimation
+              action={
+                <Button
+                  type="primary"
+                  size="large"
+                  onClick={handleStartFirstInvoice}
+                  style={{
+                    marginTop: 24,
+                    height: 56,
+                    padding: '0 40px',
+                    fontSize: 18,
+                    fontWeight: 600,
+                    borderRadius: 12,
+                  }}
+                >
+                  Створити рахунок
+                </Button>
+              }
+            />
           </div>
         </div>
       </section>
@@ -105,40 +121,20 @@ const DashboardLanding = () => {
         <Footer style={{ borderTop: '1px solid rgba(118, 12, 206, 0.1)' }} />
       </div>
 
-      <Modal
-        open={welcomeOpen}
-        footer={null}
-        onCancel={() => setWelcomeOpen(false)}
-        centered
-        width={480}
-      >
-        <Space direction="vertical" size="large" style={{ width: '100%' }}>
-          <div style={{ textAlign: 'center' }}>
-            <Title level={3} style={{ marginBottom: 8 }}>
-              Вітаю у додатку E-Orenda
-            </Title>
-            <Text type="secondary">
-              де ви можете робити рахунки в один клік
-            </Text>
-          </div>
-
-          <Button
-            type="primary"
-            block
-            size="large"
-            onClick={handleStartFirstInvoice}
-          >
-            Створити перший рахунок
-          </Button>
-        </Space>
-      </Modal>
-
       {paymentModalOpen && (
         <AddPaymentModal
           paymentActions={{ edit: false, preview: false }}
           closeModal={handlePaymentModalClose}
         />
       )}
+
+      <DashboardTour userRoles={user?.roles || []} />
+      <DashboardTour
+        isVisible={showTour}
+        onClose={() => setShowTour(false)}
+        isManualStart
+        userRoles={user?.roles || []}
+      />
     </div>
   )
 }

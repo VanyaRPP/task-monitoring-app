@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
 import DomainTypeTemplate from '@modules/models/domain-type-template'
 import handler from '@pages/api/domain-type-templates'
@@ -48,12 +49,23 @@ beforeEach(() => {
 
 describe('API /api/domain-type-templates', () => {
   describe('GET', () => {
-    it('returns 403 for non-admin', async () => {
+    it('allows non-admin to read the catalog (200)', async () => {
+      // GET is a public read-only catalog: a brand-new user must be able to
+      // list provider-type templates in the invoice quick-create before they
+      // become a DomainAdmin. Mutations stay admin-only.
       asNonAdmin()
+      const sort = jest.fn(() => ({
+        lean: jest.fn().mockResolvedValue([{ name: 'A' }]),
+      }))
+      ;(DomainTypeTemplate.find as jest.Mock).mockReturnValue({ sort })
+
       const req = { method: 'GET', body: {}, query: {} } as any
       const res = makeRes()
       await handler(req, res)
-      expect(res.status).toHaveBeenCalledWith(403)
+
+      expect(res.status).toHaveBeenCalledWith(200)
+      const { data } = res.json.mock.calls[0][0]
+      expect(data).toEqual([{ name: 'A' }])
     })
 
     it('returns sorted list for admin', async () => {

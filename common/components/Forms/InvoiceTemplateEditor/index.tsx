@@ -15,7 +15,7 @@ import {
   InvoiceEditContext,
 } from '@components/Forms/GroupedReceiptForm/InvoiceEditContext'
 import { Button, Input, Radio, Select, Tooltip, message } from 'antd'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import s from './style.module.scss'
 
 interface Props {
@@ -35,6 +35,8 @@ interface Props {
   defaultName?: string
   onSaved?: (template: IInvoiceTemplate) => void
   onCancel?: () => void
+  registerSaver?: (fn: (() => Promise<string | null>) | null) => void
+  showBaseSelector?: boolean
 }
 
 const SAMPLE_PREVIEW = {
@@ -61,6 +63,8 @@ const InvoiceTemplateEditor = ({
   defaultName,
   onSaved,
   onCancel,
+  registerSaver,
+  showBaseSelector = true,
 }: Props) => {
   const [createInvoiceTemplate] = useCreateInvoiceTemplateMutation()
   const [updateInvoiceTemplate] = useUpdateInvoiceTemplateMutation()
@@ -88,17 +92,46 @@ const InvoiceTemplateEditor = ({
     isCustom ? 'update' : 'new'
   )
   const [isSaving, setIsSaving] = useState(false)
+  // Tracks whether the draft diverges from the saved template, so auto-save
+  // only writes when there is something to write.
+  const [dirty, setDirty] = useState(false)
 
-  const patchOverrides = (patch: Partial<IInvoiceTemplateOverrides>) =>
+  // Re-seed the draft when the edited template's identity changes *after* mount.
+  // A freshly saved copy often resolves only after the list refetch (or after a
+  // non-batched parent update), which would otherwise leave the editor stuck on
+  // the mount-time classic fallback. Keyed on _id (+ base for builtin switches)
+  // so refetches of the same template don't clobber live edits.
+  useEffect(() => {
+    setName(existingTemplate?.name ?? defaultName ?? 'Новий шаблон')
+    setBase(existingTemplate?.baseTemplateKey ?? baseTemplateKey)
+    setProviderDesc(
+      existingTemplate?.providerDescription ?? baseProviderDescription
+    )
+    setReceiverDesc(
+      existingTemplate?.receiverDescription ?? baseReceiverDescription
+    )
+    setOverrides(existingTemplate?.overrides ?? {})
+    setSaveMode(
+      existingTemplate && !existingTemplate.isBuiltIn ? 'update' : 'new'
+    )
+    setDirty(false)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [existingTemplate?._id, baseTemplateKey])
+
+  const patchOverrides = (patch: Partial<IInvoiceTemplateOverrides>) => {
+    setDirty(true)
     setOverrides((prev) => ({ ...prev, ...patch }))
+  }
   const patchLocalized = (
     field: 'invoiceTitle' | 'footerText',
     value: string
-  ) =>
+  ) => {
+    setDirty(true)
     setOverrides((prev) => ({
       ...prev,
       [field]: { ...prev[field], [lang]: value },
     }))
+  }
 
   // Inline-editing channel consumed by <EditableText> inside the template.
   const editCtx = {
@@ -123,20 +156,24 @@ const InvoiceTemplateEditor = ({
         case 'footerText':
           return patchLocalized('footerText', value)
         case 'providerDescription':
+          setDirty(true)
           return setProviderDesc(value)
         case 'receiverDescription':
+          setDirty(true)
           return setReceiverDesc(value)
       }
     },
     getLabel: (key: string) => overrides.labels?.[key]?.[lang],
-    setLabel: (key: string, value: string) =>
+    setLabel: (key: string, value: string) => {
+      setDirty(true)
       setOverrides((prev) => ({
         ...prev,
         labels: {
           ...prev.labels,
           [key]: { ...prev.labels?.[key], [lang]: value },
         },
-      })),
+      }))
+    },
   }
 
   const previewBase = previewData ?? SAMPLE_PREVIEW
@@ -158,53 +195,80 @@ const InvoiceTemplateEditor = ({
   })
   const TemplateComponent = templateMap[base] || templateMap.classic
 
-  const handleSave = async () => {
+  // Single persistence path (update existing custom vs create new/copy),
+  // returning the saved template so both the button and auto-save can reuse it.
+  const persist = async (): Promise<IInvoiceTemplate | null> => {
     if (!domainId) {
       message.error('Не вдалося визначити домен')
-      return
+      return null
     }
+    if (saveMode === 'update' && isCustom && existingTemplate) {
+      const result = await updateInvoiceTemplate({
+        _id: existingTemplate._id,
+        name: name.trim() || existingTemplate.name,
+        baseTemplateKey: base,
+        providerDescription: providerDesc,
+        receiverDescription: receiverDesc,
+        overrides,
+      })
+      if ('data' in result) return result.data.data
+      message.error('Помилка оновлення шаблону')
+      return null
+    }
+    const trimmedName = name.trim()
+    if (!trimmedName) {
+      message.error('Введіть назву шаблону')
+      return null
+    }
+    const result = await createInvoiceTemplate({
+      name: trimmedName,
+      baseTemplateKey: base,
+      providerDescription: providerDesc,
+      receiverDescription: receiverDesc,
+      overrides,
+      domainId,
+    })
+    if ('data' in result) return result.data.data
+    message.error('Помилка збереження шаблону')
+    return null
+  }
+
+  const handleSave = async () => {
     setIsSaving(true)
     try {
-      if (saveMode === 'update' && isCustom && existingTemplate) {
-        const result = await updateInvoiceTemplate({
-          _id: existingTemplate._id,
-          name: name.trim() || existingTemplate.name,
-          baseTemplateKey: base,
-          providerDescription: providerDesc,
-          receiverDescription: receiverDesc,
-          overrides,
-        })
-        if ('data' in result) {
-          message.success('Шаблон оновлено')
-          onSaved?.(result.data.data)
-        } else {
-          message.error('Помилка оновлення шаблону')
-        }
-      } else {
-        const trimmedName = name.trim()
-        if (!trimmedName) {
-          message.error('Введіть назву шаблону')
-          return
-        }
-        const result = await createInvoiceTemplate({
-          name: trimmedName,
-          baseTemplateKey: base,
-          providerDescription: providerDesc,
-          receiverDescription: receiverDesc,
-          overrides,
-          domainId,
-        })
-        if ('data' in result) {
-          message.success(`Шаблон «${trimmedName}» збережено`)
-          onSaved?.(result.data.data)
-        } else {
-          message.error('Помилка збереження шаблону')
-        }
-      }
+      const saved = await persist()
+      if (!saved) return
+      setDirty(false)
+      message.success(
+        saveMode === 'update' && isCustom
+          ? 'Шаблон оновлено'
+          : `Шаблон «${saved.name}» збережено`
+      )
+      onSaved?.(saved)
     } finally {
       setIsSaving(false)
     }
   }
+
+  // Called by the payment modal on invoice save: persist only when the draft
+  // changed, and hand back the resulting id (the host sets it as the payment's
+  // template). No message/onSaved here — the modal owns the follow-up.
+  const saveIfDirty = async (): Promise<string | null> => {
+    if (!dirty) return null
+    const saved = await persist()
+    if (!saved) return null
+    setDirty(false)
+    return saved._id
+  }
+
+  // Register a stable wrapper that always calls the latest saveIfDirty closure.
+  const saveIfDirtyRef = useRef(saveIfDirty)
+  saveIfDirtyRef.current = saveIfDirty
+  useEffect(() => {
+    if (!registerSaver) return
+    registerSaver(() => saveIfDirtyRef.current())
+    return () => registerSaver(null)
+  }, [registerSaver])
 
   return (
     <div className={s.editor}>
@@ -233,19 +297,29 @@ const InvoiceTemplateEditor = ({
         <div className={s.settings}>
           <Input
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => {
+              setDirty(true)
+              setName(e.target.value)
+            }}
             placeholder="Назва шаблону"
             className={s.nameInput}
           />
-          <Select
-            value={base}
-            onChange={setBase}
-            options={builtinTemplateItems.map((t) => ({
-              value: t.key,
-              label: t.label,
-            }))}
-            className={s.baseSelect}
-          />
+          {showBaseSelector && (
+            <Tooltip title="Базовий макет">
+              <Select
+                value={base}
+                onChange={(v) => {
+                  setDirty(true)
+                  setBase(v)
+                }}
+                options={builtinTemplateItems.map((t) => ({
+                  value: t.key,
+                  label: t.label,
+                }))}
+                className={s.baseSelect}
+              />
+            </Tooltip>
+          )}
           <Tooltip title="Акцентний колір">
             <span className={s.colorWrap}>
               <input

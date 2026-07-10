@@ -92,40 +92,86 @@ describe('dateShiftMs', () => {
 describe('combineDayWithCurrentTime', () => {
   beforeEach(() => {
     jest.useFakeTimers()
-    jest.setSystemTime(new Date('2026-05-08T16:15:15.123Z'))
   })
 
   afterEach(() => {
     jest.useRealTimers()
   })
 
-  it('бере день із вибраної дати, час із поточного моменту (UTC)', () => {
-    const result = combineDayWithCurrentTime(dayjs('2026-04-27'))
-    expect(result.getUTCFullYear()).toBe(2026)
-    expect(result.getUTCMonth()).toBe(3) // April = 3 in 0-indexed
-    expect(result.getUTCDate()).toBe(27)
-    expect(result.getUTCHours()).toBe(16)
-    expect(result.getUTCMinutes()).toBe(15)
-    expect(result.getUTCSeconds()).toBe(15)
-    expect(result.getUTCMilliseconds()).toBe(123)
+  it('бере день із вибраної дати, час із поточного моменту (локальний час)', () => {
+    jest.setSystemTime(new Date(2026, 4, 8, 16, 15, 15, 123))
+
+    const result = combineDayWithCurrentTime(dayjs(new Date(2026, 3, 27)))
+    expect(result.getFullYear()).toBe(2026)
+    expect(result.getMonth()).toBe(3)
+    expect(result.getDate()).toBe(27)
+    expect(result.getHours()).toBe(16)
+    expect(result.getMinutes()).toBe(15)
+    expect(result.getSeconds()).toBe(15)
+    expect(result.getMilliseconds()).toBe(123)
   })
 
   it('повертає поточний Date коли вхід undefined', () => {
-    expect(combineDayWithCurrentTime(undefined).toISOString()).toBe(
-      '2026-05-08T16:15:15.123Z'
-    )
+    const now = new Date(2026, 4, 8, 16, 15, 15, 123)
+    jest.setSystemTime(now)
+
+    expect(combineDayWithCurrentTime(undefined).getTime()).toBe(now.getTime())
   })
 
   it('повертає поточний Date коли вхід null', () => {
-    expect(combineDayWithCurrentTime(null).toISOString()).toBe(
-      '2026-05-08T16:15:15.123Z'
-    )
+    const now = new Date(2026, 4, 8, 16, 15, 15, 123)
+    jest.setSystemTime(now)
+
+    expect(combineDayWithCurrentTime(null).getTime()).toBe(now.getTime())
   })
 
   it('зберігає рік 2024 коли вибраний день у минулому році', () => {
-    const result = combineDayWithCurrentTime(dayjs('2024-12-31'))
-    expect(result.getUTCFullYear()).toBe(2024)
-    expect(result.getUTCMonth()).toBe(11)
-    expect(result.getUTCDate()).toBe(31)
+    jest.setSystemTime(new Date(2026, 4, 8, 16, 15, 15, 123))
+
+    const result = combineDayWithCurrentTime(dayjs(new Date(2024, 11, 31)))
+    expect(result.getFullYear()).toBe(2024)
+    expect(result.getMonth()).toBe(11)
+    expect(result.getDate()).toBe(31)
+  })
+
+  it('не зсуває дату під час повторного редагування одразу після півночі', () => {
+    const createdLocal = new Date(2026, 6, 4, 12, 0, 0)
+    const createdAt = combineDayWithCurrentTime(dayjs(createdLocal))
+    expect(dayjs(createdAt).date()).toBe(4)
+    expect(dayjs(createdAt).month()).toBe(6)
+
+    jest.setSystemTime(new Date(2026, 6, 5, 0, 30, 0))
+
+    let stored = createdAt
+    for (let i = 0; i < 5; i++) {
+      stored = combineDayWithCurrentTime(dayjs(stored))
+    }
+
+    expect(dayjs(stored).date()).toBe(4)
+    expect(dayjs(stored).month()).toBe(6)
+    expect(dayjs(stored).year()).toBe(2026)
+  })
+
+  it('не зсуває дату під час серії редагувань у різний час доби', () => {
+    const createdLocal = new Date(2026, 0, 14, 23, 0, 0)
+    const createdAt = combineDayWithCurrentTime(dayjs(createdLocal))
+    expect(dayjs(createdAt).date()).toBe(14)
+
+    const editTimes = [
+      new Date(2026, 0, 15, 0, 5, 0),
+      new Date(2026, 0, 15, 0, 45, 0),
+      new Date(2026, 0, 15, 8, 0, 0),
+      new Date(2026, 0, 15, 23, 59, 0),
+    ]
+
+    let stored = createdAt
+    for (const t of editTimes) {
+      jest.setSystemTime(t)
+      stored = combineDayWithCurrentTime(dayjs(stored))
+    }
+
+    expect(dayjs(stored).date()).toBe(14)
+    expect(dayjs(stored).month()).toBe(0)
+    expect(dayjs(stored).year()).toBe(2026)
   })
 })
