@@ -1,13 +1,13 @@
 .floatButton {
   z-index: 1000;
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  
+
   &:hover {
     transform: scale(1.1);
   }
 
   :global(.ant-float-btn-primary) {
-    background-color: #752FD6 !important;
+    background-color: #752fd6 !important;
   }
 }
 
@@ -46,7 +46,7 @@
 }
 
 .chatHeader {
-  background: #752FD6;
+  background: #752fd6;
   padding: 12px 16px;
   display: flex;
   justify-content: space-between;
@@ -103,7 +103,7 @@
 }
 
 .userBubble {
-  background: #752FD6;
+  background: #752fd6;
   color: white;
   border-bottom-right-radius: 2px;
 }
@@ -123,7 +123,7 @@
   color: #a87ffb;
   text-decoration: underline;
   font-weight: 600;
-  
+
   &:hover {
     color: #c0a0ff;
   }
@@ -131,7 +131,7 @@
 
 .recommendationBlock {
   background: rgba(117, 47, 214, 0.1);
-  border-left: 3px solid #752FD6;
+  border-left: 3px solid #752fd6;
   padding: 6px 10px;
   margin: 6px 0;
   border-radius: 4px;
@@ -156,9 +156,10 @@
     color: rgba(255, 255, 255, 0.45) !important;
   }
 
-  &:focus, &:hover {
+  &:focus,
+  &:hover {
     background: #303030 !important;
-    border-color: #752FD6 !important;
+    border-color: #752fd6 !important;
   }
 
   :global(.ant-input) {
@@ -168,12 +169,12 @@
 }
 
 .aiAvatar {
-  background: #752FD6;
+  background: #752fd6;
 }
 
 .userAvatar {
   background: #303030;
-  border: 1px solid #752FD6;
+  border: 1px solid #752fd6;
 }
 
 .errorMessage {
@@ -196,7 +197,7 @@
 }
 
 .hintContent {
-  background: #752FD6;
+  background: #752fd6;
   color: white;
   padding: 8px 12px;
   border-radius: 8px;
@@ -215,7 +216,7 @@
   height: 16px !important;
   width: 16px !important;
   opacity: 0.8;
-  
+
   &:hover {
     opacity: 1;
     background: rgba(255, 255, 255, 0.1) !important;
@@ -228,7 +229,7 @@
   right: 15px;
   width: 12px;
   height: 12px;
-  background: #752FD6;
+  background: #752fd6;
   transform: rotate(45deg);
 }
 

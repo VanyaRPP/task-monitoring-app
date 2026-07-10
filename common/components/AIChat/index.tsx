@@ -26,7 +26,7 @@ interface ChatMessageProps {
   message: UIMessage
 }
 
-/** 
+/**
  * Simple parser to render Markdown links [Text](/path) as Next.js Links
  * and handle recommendation blocks.
  */
@@ -34,7 +34,7 @@ const renderMessageContent = (content: string) => {
   const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g
   const parts = content.split(linkRegex)
   const elements = []
-  
+
   for (let i = 0; i < parts.length; i++) {
     if (i % 3 === 0) {
       const text = parts[i]
@@ -60,14 +60,16 @@ const renderMessageContent = (content: string) => {
       i++
     }
   }
-  
+
   return elements
 }
 
 const getMessageText = (message: UIMessage): string => {
   if (message.parts && message.parts.length > 0) {
     return message.parts
-      .filter((part): part is { type: 'text'; text: string } => part.type === 'text')
+      .filter(
+        (part): part is { type: 'text'; text: string } => part.type === 'text'
+      )
       .map((part) => part.text)
       .join('')
   }
@@ -94,9 +96,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
       <div
         className={`${styles.messageBubble} ${isUser ? styles.userBubble : styles.aiBubble}`}
       >
-        <div className={styles.messageText}>
-          {renderMessageContent(text)}
-        </div>
+        <div className={styles.messageText}>{renderMessageContent(text)}</div>
       </div>
       {isUser && (
         <Avatar
@@ -115,17 +115,17 @@ const AIChat: React.FC = () => {
   const [inputValue, setInputValue] = useState<string>('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  const {
-    messages,
-    sendMessage,
-    status,
-    error,
-  } = useChat({
+  const { messages, sendMessage, status, error } = useChat({
     messages: [
       {
         id: 'welcome',
         role: 'assistant',
-        parts: [{ type: 'text', text: 'Привіт! Я твій гід по E-ORENDA. Чим можу допомогти?' }],
+        parts: [
+          {
+            type: 'text',
+            text: 'Привіт! Я твій гід по E-ORENDA. Чим можу допомогти?',
+          },
+        ],
       },
     ],
   })
@@ -217,7 +217,9 @@ const AIChat: React.FC = () => {
                 icon={<RobotOutlined />}
                 className={styles.aiAvatar}
               />
-              <Text strong style={{ color: 'white' }}>AI Помічник</Text>
+              <Text strong style={{ color: 'white' }}>
+                AI Помічник
+              </Text>
             </Space>
             <Button
               type="text"
@@ -232,23 +234,24 @@ const AIChat: React.FC = () => {
               <ChatMessage key={message.id} message={message} />
             ))}
 
-            {isLoading && (messages[messages.length - 1]?.role as string) === 'user' && (
-              <div className={`${styles.messageRow} ${styles.aiRow}`}>
-                <Avatar
-                  size={24}
-                  icon={<RobotOutlined />}
-                  className={styles.aiAvatar}
-                />
-                <div className={`${styles.messageBubble} ${styles.aiBubble}`}>
-                  <Spin size="small" />
+            {isLoading &&
+              (messages[messages.length - 1]?.role as string) === 'user' && (
+                <div className={`${styles.messageRow} ${styles.aiRow}`}>
+                  <Avatar
+                    size={24}
+                    icon={<RobotOutlined />}
+                    className={styles.aiAvatar}
+                  />
+                  <div className={`${styles.messageBubble} ${styles.aiBubble}`}>
+                    <Spin size="small" />
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
             {error && (
               <div className={styles.errorMessage}>
                 <Text type="danger" style={{ fontSize: '12px' }}>
-                  Помилка з'єднання. Спробуйте ще раз.
+                  Помилка з&apos;єднання. Спробуйте ще раз.
                 </Text>
               </div>
             )}

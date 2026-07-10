@@ -1,4 +1,4 @@
-// @ts-nocheck
+import type { NextApiRequest, NextApiResponse } from 'next'
 import handler from '@pages/api/custom-services'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import { setupTestEnvironment } from '@utils/setupTestEnvironment'
@@ -21,12 +21,20 @@ jest.mock('@utils/getCurrentUser', () => ({
   getCurrentUser: jest.fn(),
 }))
 
+const mockGetCurrentUser = getCurrentUser as jest.Mock
+const mockCustomService = CustomService as unknown as {
+  create: jest.Mock
+  deleteMany: jest.Mock
+  find: jest.Mock
+  findOne: jest.Mock
+}
+
 setupTestEnvironment()
 
 describe('API Route - POST Method', () => {
   beforeEach(async () => {
     jest.clearAllMocks()
-    CustomService.deleteMany.mockResolvedValue({})
+    mockCustomService.deleteMany.mockResolvedValue({})
   })
 
   const testCases = [
@@ -38,13 +46,13 @@ describe('API Route - POST Method', () => {
 
   testCases.forEach(({ name, description }) => {
     it(`should not create when ${description}`, async () => {
-      getCurrentUser.mockResolvedValueOnce({
+      mockGetCurrentUser.mockResolvedValueOnce({
         isGlobalAdmin: true,
         isDomainAdmin: false,
         isUser: false,
       })
 
-      CustomService.findOne.mockResolvedValueOnce(null)
+      mockCustomService.findOne.mockResolvedValueOnce(null)
 
       const mockReq = {
         method: 'POST',
@@ -55,7 +63,7 @@ describe('API Route - POST Method', () => {
       const mockRes = {
         status: jest.fn().mockReturnThis(),
         json: jest.fn(),
-      }
+      } as unknown as NextApiResponse
 
       await handler(mockReq as any, mockRes)
 
@@ -68,10 +76,10 @@ describe('API Route - POST Method', () => {
       method: 'POST',
       query: { domainId: 'valid-domain-id' },
       body: { name: 'Test Service' },
-    }
+    } as unknown as NextApiRequest
 
     it('should block regular users', async () => {
-      getCurrentUser.mockResolvedValueOnce({
+      mockGetCurrentUser.mockResolvedValueOnce({
         isGlobalAdmin: false,
         isDomainAdmin: false,
         isUser: true,
@@ -80,7 +88,7 @@ describe('API Route - POST Method', () => {
       const mockRes = {
         status: jest.fn().mockReturnThis(),
         json: jest.fn(),
-      }
+      } as unknown as NextApiResponse
 
       await handler(validReq, mockRes)
 
@@ -92,15 +100,15 @@ describe('API Route - POST Method', () => {
     })
 
     it('should allow GlobalAdmin to create', async () => {
-      getCurrentUser.mockResolvedValueOnce({
+      mockGetCurrentUser.mockResolvedValueOnce({
         isGlobalAdmin: true,
         isDomainAdmin: false,
         isUser: false,
       })
 
-      CustomService.findOne.mockResolvedValueOnce(null)
+      mockCustomService.findOne.mockResolvedValueOnce(null)
 
-      CustomService.create.mockResolvedValueOnce({
+      mockCustomService.create.mockResolvedValueOnce({
         _id: 'mockedServiceId',
         name: 'Test Service',
         fieldName: 'testService',
@@ -114,7 +122,7 @@ describe('API Route - POST Method', () => {
       const mockRes = {
         status: jest.fn().mockReturnThis(),
         json: jest.fn(),
-      }
+      } as unknown as NextApiResponse
 
       await handler(validReq, mockRes)
 
@@ -130,15 +138,15 @@ describe('API Route - POST Method', () => {
     })
 
     it('should allow DomainAdmin to create', async () => {
-      getCurrentUser.mockResolvedValueOnce({
+      mockGetCurrentUser.mockResolvedValueOnce({
         isGlobalAdmin: false,
         isDomainAdmin: true,
         isUser: false,
       })
 
-      CustomService.findOne.mockResolvedValueOnce(null)
+      mockCustomService.findOne.mockResolvedValueOnce(null)
 
-      CustomService.create.mockResolvedValueOnce({
+      mockCustomService.create.mockResolvedValueOnce({
         _id: 'mockedServiceId',
         name: 'Test Service',
         fieldName: 'testService',
@@ -152,7 +160,7 @@ describe('API Route - POST Method', () => {
       const mockRes = {
         status: jest.fn().mockReturnThis(),
         json: jest.fn(),
-      }
+      } as unknown as NextApiResponse
 
       await handler(validReq, mockRes)
 
