@@ -60,10 +60,7 @@ const RealEstateForm: FC<Props> = ({
         ...service,
         enabled: true,
       }))
-
-      form.setFieldsValue({
-        services: servicesWithEnabled,
-      })
+      form.setFieldValue('services', servicesWithEnabled)
     }
   }, [services, currentRealEstate, form])
 
@@ -82,9 +79,7 @@ const RealEstateForm: FC<Props> = ({
       }
 
       setTimeout(() => {
-        form.setFieldsValue({
-          street: streetVal,
-        })
+        form.setFieldValue('street', streetVal)
       }, 0)
     }
   }, [domainId, currentRealEstate, form])
