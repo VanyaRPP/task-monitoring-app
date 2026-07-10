@@ -41,12 +41,10 @@ const typeAndBlur = (name: string) => {
   fireEvent.blur(input)
 }
 
-// Simulate typing a name and pressing Enter (without leaving the field).
-const typeAndEnter = (name: string) => {
+const typeOnly = (name: string) => {
   const input = getDomainInput()
   fireEvent.mouseDown(input)
   fireEvent.change(input, { target: { value: name } })
-  fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' })
 }
 
 describe('DomainsSelect — поле надавача послуг', () => {
@@ -118,7 +116,7 @@ describe('DomainsSelect — поле надавача послуг', () => {
     expect(screen.getByText('Напрямок послуг')).toBeInTheDocument()
   })
 
-  it('Enter створює нового надавача з введеної назви (не зтирає текст)', async () => {
+  it('живий перехід: щойно зникають збіги — одразу режим створення', async () => {
     mockDomains.mockReturnValue({
       data: [{ _id: 'd1', name: 'Alpha' }],
       isLoading: false,
@@ -126,7 +124,7 @@ describe('DomainsSelect — поле надавача послуг', () => {
     })
 
     render(<Wrapper allowCreate />)
-    typeAndEnter('Gamma')
+    typeOnly('Gamma')
 
     expect(domainValue()).toBe('new::Gamma')
     expect(
@@ -134,7 +132,7 @@ describe('DomainsSelect — поле надавача послуг', () => {
     ).toBeInTheDocument()
   })
 
-  it('Enter на назві наявного надавача обирає його', () => {
+  it('поки назва є підрядком наявного — лишаємось у режимі вибору', () => {
     mockDomains.mockReturnValue({
       data: [{ _id: 'd1', name: 'Alpha' }],
       isLoading: false,
@@ -142,9 +140,10 @@ describe('DomainsSelect — поле надавача послуг', () => {
     })
 
     render(<Wrapper allowCreate />)
-    typeAndEnter('Alpha')
+    typeOnly('Alp')
 
-    expect(domainValue()).toBe('d1')
+    expect(domainValue()).not.toContain('new::')
+    expect(screen.queryByPlaceholderText('Назва надавача')).toBeNull()
   })
 
   it('немає кнопки «Створити» у дропдауні', () => {

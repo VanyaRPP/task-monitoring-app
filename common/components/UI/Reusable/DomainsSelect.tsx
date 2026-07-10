@@ -83,18 +83,34 @@ const DomainsSelect: React.FC<DomainsSelectProps> = ({
     }
   }, [options, allowCreate, edit, isDomainsLoading, form])
 
+  const handleSearch = (value: string) => {
+    const trimmed = value.trim()
+    const hasMatch =
+      !trimmed ||
+      options.some((o) =>
+        o.label?.toLowerCase().includes(trimmed.toLowerCase())
+      )
+    if (allowCreate && !isDomainsLoading && trimmed && !hasMatch) {
+      form.setFieldsValue({
+        domain: makeNewEntityValue(value),
+        newDomainTemplateId: '',
+      })
+      setSearch('')
+      return
+    }
+    setSearch(value)
+  }
+
   const commitTypedValue = () => {
     const typed = search.trim()
     if (!typed) return
     const match = options.find(
       (o) => o.label?.trim().toLowerCase() === typed.toLowerCase()
     )
-    form.setFieldsValue(
-      match
-        ? { domain: match.value }
-        : { domain: makeNewEntityValue(typed), newDomainTemplateId: '' }
-    )
-    setSearch('')
+    if (match) {
+      form.setFieldsValue({ domain: match.value })
+      setSearch('')
+    }
   }
 
   const exitCreateMode = () => {
@@ -125,7 +141,7 @@ const DomainsSelect: React.FC<DomainsSelectProps> = ({
               },
             ]}
           >
-            <Input placeholder="Назва надавача" />
+            <Input placeholder="Назва надавача" autoFocus />
           </Form.Item>
           <Form.Item
             name="newDomainTemplateId"
@@ -180,21 +196,9 @@ const DomainsSelect: React.FC<DomainsSelectProps> = ({
         allowClear
         showSearch
         searchValue={search}
-        onSearch={setSearch}
+        onSearch={allowCreate ? handleSearch : setSearch}
         onChange={() => setSearch('')}
         onBlur={allowCreate ? commitTypedValue : undefined}
-        onInputKeyDown={
-          allowCreate
-            ? (e) => {
-                if (e.key === 'Enter') commitTypedValue()
-              }
-            : undefined
-        }
-        notFoundContent={
-          allowCreate && search.trim()
-            ? 'Немає збігів — натисніть Enter, щоб створити нового надавача'
-            : undefined
-        }
       />
     </Form.Item>
   )

@@ -2,7 +2,7 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { useEffect, useRef } from 'react'
 import { Form, Input } from 'antd'
 import CompanySelect from './CompanySelect'
-import { makeNewEntityValue } from '@utils/inlineCreate'
+import { isNewEntityValue, makeNewEntityValue } from '@utils/inlineCreate'
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 
 jest.mock('@common/api/realestateApi/realestate.api', () => ({
@@ -49,11 +49,10 @@ const typeAndBlur = (name: string) => {
   fireEvent.blur(input)
 }
 
-const typeAndEnter = (name: string) => {
+const typeOnly = (name: string) => {
   const input = getCompanyInput()
   fireEvent.mouseDown(input)
   fireEvent.change(input, { target: { value: name } })
-  fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' })
 }
 
 describe('CompanySelect — поле вибору компанії', () => {
@@ -127,7 +126,7 @@ describe('CompanySelect — поле вибору компанії', () => {
     expect(screen.getByText('Пошта компанії')).toBeInTheDocument()
   })
 
-  it('Enter створює нову компанію з введеної назви (не зтирає текст)', async () => {
+  it('живий перехід: щойно зникають збіги — одразу режим створення', async () => {
     mockedQuery.mockReturnValue({
       data: {
         data: [
@@ -139,7 +138,7 @@ describe('CompanySelect — поле вибору компанії', () => {
     })
 
     render(<Wrapper allowCreate />)
-    typeAndEnter('Newco')
+    typeOnly('Newco')
 
     expect(companyValue()).toBe('new::Newco')
     expect(
@@ -147,7 +146,7 @@ describe('CompanySelect — поле вибору компанії', () => {
     ).toBeInTheDocument()
   })
 
-  it('Enter на назві наявної компанії обирає її', () => {
+  it('поки назва є підрядком наявної компанії — лишаємось у режимі вибору', () => {
     mockedQuery.mockReturnValue({
       data: {
         data: [
@@ -159,9 +158,10 @@ describe('CompanySelect — поле вибору компанії', () => {
     })
 
     render(<Wrapper allowCreate />)
-    typeAndEnter('Globex')
+    typeOnly('Glob')
 
-    expect(companyValue()).toBe('c2')
+    expect(companyValue()).not.toContain('new::')
+    expect(screen.queryByPlaceholderText('Назва нової компанії')).toBeNull()
   })
 
   it('немає кнопки «Створити» у дропдауні', () => {
@@ -266,6 +266,8 @@ describe('CompanySelect — поле вибору компанії', () => {
           first.current = false
           return
         }
+
+        if (isNewEntityValue(domainId)) return
         form.resetFields(['company'])
       }, [domainId, form])
       return (
@@ -288,6 +290,14 @@ describe('CompanySelect — поле вибору компанії', () => {
           >
             go-new-domain
           </button>
+          <button
+            type="button"
+            onClick={() =>
+              form.setFieldValue('domain', makeNewEntityValue('Новий2'))
+            }
+          >
+            type-more-domain
+          </button>
           <div data-testid="company-value">
             {String(form.getFieldValue('company') ?? '')}
           </div>
@@ -297,6 +307,12 @@ describe('CompanySelect — поле вибору компанії', () => {
 
     render(<RaceWrapper />)
     fireEvent.click(screen.getByText('go-new-domain'))
+
+    expect(
+      await screen.findByPlaceholderText('Назва нової компанії')
+    ).toBeInTheDocument()
+
+    fireEvent.click(screen.getByText('type-more-domain'))
 
     expect(
       await screen.findByPlaceholderText('Назва нової компанії')

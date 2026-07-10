@@ -3,7 +3,7 @@ import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.a
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { Button, Form, Input, Select } from 'antd'
 import { FormInstance } from 'antd/es/form/Form'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   getNewEntityName,
   isNewEntityValue,
@@ -70,6 +70,7 @@ function CompanyPicker({
   const streetId = Form.useWatch('street', form)
   const companyValue = Form.useWatch('company', form)
   const [search, setSearch] = useState('')
+  const focusNameOnCreate = useRef(false)
 
   const isNewDomain = isNewEntityValue(domainId)
   const isNewCompany = isNewEntityValue(companyValue)
@@ -112,14 +113,32 @@ function CompanyPicker({
     [companies]
   )
 
+  const handleSearch = (value: string) => {
+    const trimmed = value.trim()
+    const hasMatch =
+      !trimmed ||
+      companies.some((c) =>
+        c.companyName?.toLowerCase().includes(trimmed.toLowerCase())
+      )
+    if (allowCreate && !isLoading && trimmed && !hasMatch) {
+      focusNameOnCreate.current = true
+      form.setFieldValue('company', makeNewEntityValue(value))
+      setSearch('')
+      return
+    }
+    setSearch(value)
+  }
+
   const commitTypedValue = () => {
     const typed = search.trim()
     if (!typed) return
     const match = companies.find(
       (c) => c.companyName?.trim().toLowerCase() === typed.toLowerCase()
     )
-    form.setFieldValue('company', match ? match._id : makeNewEntityValue(typed))
-    setSearch('')
+    if (match) {
+      form.setFieldValue('company', match._id)
+      setSearch('')
+    }
   }
 
   const exitCreateMode = () => {
@@ -149,7 +168,10 @@ function CompanyPicker({
               },
             ]}
           >
-            <Input placeholder="Назва нової компанії" />
+            <Input
+              placeholder="Назва нової компанії"
+              autoFocus={focusNameOnCreate.current}
+            />
           </Form.Item>
           <Form.Item
             name="companyEmail"
@@ -192,21 +214,9 @@ function CompanyPicker({
         showSearch
         allowClear
         searchValue={search}
-        onSearch={setSearch}
+        onSearch={allowCreate ? handleSearch : setSearch}
         onChange={() => setSearch('')}
         onBlur={allowCreate ? commitTypedValue : undefined}
-        onInputKeyDown={
-          allowCreate
-            ? (e) => {
-                if (e.key === 'Enter') commitTypedValue()
-              }
-            : undefined
-        }
-        notFoundContent={
-          allowCreate && search.trim()
-            ? 'Немає збігів — натисніть Enter, щоб створити нову компанію'
-            : undefined
-        }
       />
     </Form.Item>
   )

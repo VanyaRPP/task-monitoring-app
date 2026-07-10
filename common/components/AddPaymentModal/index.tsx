@@ -308,6 +308,7 @@ const AddPaymentModal: FC<Props> = ({
       firstRunRef.current = false
       return
     }
+    if (isNewEntityValue(domainId)) return
     form.resetFields(['company'])
   }, [domainId, form])
 
