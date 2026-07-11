@@ -22,6 +22,7 @@ export const serviceApi = createApi({
         domainId?: string
         streetId?: string
         serviceId?: string
+        companyId?: string | string[]
         year?: number
         month?: number
       }
@@ -32,12 +33,22 @@ export const serviceApi = createApi({
         domainId,
         streetId,
         serviceId,
+        companyId,
         year,
         month,
       }) => {
         return {
           url: `service`,
-          params: { limit, userId, domainId, streetId, serviceId, year, month },
+          params: {
+            limit,
+            userId,
+            domainId,
+            streetId,
+            serviceId,
+            companyId,
+            year,
+            month,
+          },
         }
       },
       providesTags: (response: IGetServiceResponse) => [

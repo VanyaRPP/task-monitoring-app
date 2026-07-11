@@ -19,6 +19,7 @@ import {
   useGetAddressFiltersQuery,
   useGetDateFiltersQuery,
   useGetDomainFiltersQuery,
+  useGetRealEstateFiltersQuery,
 } from '@common/api/filterApi/filter.api'
 import ModalDelete from '@components/UI/ModalDelete'
 import type { ColumnsType } from 'antd/es/table'
@@ -43,7 +44,7 @@ const ServicesBlock: React.FC<ServiceBlockProps> = ({ sepDomainID }) => {
 
   const domainFilteredCustomServices = useMemo(() => {
     if (!customServicesData?.data) return []
-    const domainIds = (filter?.domain as unknown) as string[] | null | undefined
+    const domainIds = filter?.domain as unknown as string[] | null | undefined
     if (!domainIds?.length) return customServicesData.data
     return customServicesData.data.filter((cs) =>
       domainIds.some((id) => String(cs.domain) === String(id))
@@ -54,8 +55,14 @@ const ServicesBlock: React.FC<ServiceBlockProps> = ({ sepDomainID }) => {
 
   const { data: domainsFilter } = useGetDomainFiltersQuery({
     streets: filter?.street,
+    realEstates: filter?.company,
   })
   const { data: streetsFilter } = useGetAddressFiltersQuery({
+    domains: filter?.domain,
+    realEstates: filter?.company,
+  })
+  const { data: companiesFilter } = useGetRealEstateFiltersQuery({
+    streets: filter?.street,
     domains: filter?.domain,
   })
   const { data: dateFilters } = useGetDateFiltersQuery({
@@ -103,6 +110,7 @@ const ServicesBlock: React.FC<ServiceBlockProps> = ({ sepDomainID }) => {
     limit: isOnPage ? 0 : 5,
     streetId: filter?.street || undefined,
     domainId: sepDomainID || filter?.domain || undefined,
+    companyId: filter?.company || undefined,
     year: filter?.year,
     month: filter?.month,
   })
@@ -126,6 +134,7 @@ const ServicesBlock: React.FC<ServiceBlockProps> = ({ sepDomainID }) => {
             user={user}
             domainsFilter={domainsFilter}
             streetsFilter={streetsFilter}
+            companiesFilter={companiesFilter}
           />
         }
       >

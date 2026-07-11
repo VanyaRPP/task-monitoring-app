@@ -28,8 +28,16 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
-        const { limit, skip, domainId, streetId, serviceId, year, month } =
-          req.query
+        const {
+          limit,
+          skip,
+          domainId,
+          streetId,
+          serviceId,
+          companyId,
+          year,
+          month,
+        } = req.query
 
         if (!isUser && !isDomainAdmin && !isGlobalAdmin) {
           return res.status(200).json({ success: false, data: [] })
@@ -53,6 +61,12 @@ export default async function handler(
             : serviceId.map((id) => decodeURIComponent(id))
           : null
 
+        const companiesIds: string[] | null = companyId
+          ? typeof companyId === 'string'
+            ? companyId.split(',').map((id) => decodeURIComponent(id))
+            : companyId.map((id) => decodeURIComponent(id))
+          : null
+
         const options: FilterQuery<typeof Service> = {}
         const filters: FilterQuery<typeof Service> = {}
 
@@ -66,6 +80,21 @@ export default async function handler(
 
         if (servicesIds) {
           filters._id = { $in: servicesIds }
+        }
+
+        if (companiesIds) {
+          const companies = await RealEstate.find({
+            _id: { $in: companiesIds },
+          }).select(['domain', 'street'])
+
+          filters.$or = companies.map(({ domain, street }) => ({
+            domain,
+            street,
+          }))
+
+          if (!filters.$or.length) {
+            filters.$or = [{ _id: null }]
+          }
         }
 
         if (year && year !== 'null') {

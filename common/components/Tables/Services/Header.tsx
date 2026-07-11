@@ -1,11 +1,12 @@
 import { PlusOutlined, SelectOutlined, DeleteOutlined } from '@ant-design/icons'
-import { Button, Space } from 'antd'
+import { Button, Select, Space } from 'antd'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
 import { IService } from '@common/api/serviceApi/service.api.types'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import AddServiceModal from '@components/AddServiceModal'
 import {
+  CompanyFilterTags,
   DomainFilterTags,
   StreetFilterTags,
 } from '@components/UI/Reusable/FilterTags'
@@ -31,6 +32,7 @@ export interface Props {
   user: any
   domainsFilter: any
   streetsFilter: any
+  companiesFilter?: any
 }
 
 const ServicesHeader: React.FC<Props> = ({
@@ -47,6 +49,7 @@ const ServicesHeader: React.FC<Props> = ({
   user,
   domainsFilter,
   streetsFilter,
+  companiesFilter,
 }) => {
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -60,24 +63,49 @@ const ServicesHeader: React.FC<Props> = ({
   if (router.query.email)
     return <span>Оплата від користувача {router.query.email}</span>
 
+  const handleCompanyChange = (values: string[]) => {
+    setFilter?.({ ...filter, company: values })
+  }
+
+  const isOnServicePage = router.pathname === AppRoutes.SERVICE
+
   return (
     <div className={s.headerBlock}>
       <div className={s.firstBlock}>
-        <Space wrap size={8} align="center">
-          <Button
-            type="link"
-            onClick={() => {
-              if (enableServiceButton) router.push(AppRoutes.SERVICE)
-            }}
-          >
-            Послуги <SelectOutlined />
-          </Button>
-        </Space>
+        <Button
+          type="link"
+          onClick={() => {
+            if (enableServiceButton) router.push(AppRoutes.SERVICE)
+          }}
+        >
+          Послуги <SelectOutlined />
+        </Button>
 
-        {router.pathname === AppRoutes.SERVICE && (
-          <Space direction="vertical" size={4} style={{ minWidth: 300 }}>
+        {isOnServicePage && (
+          <Select
+            className={s.companySelect}
+            mode="multiple"
+            allowClear
+            placeholder="Фільтр за компанією"
+            value={filter?.company || []}
+            onChange={handleCompanyChange}
+            maxTagCount="responsive"
+            options={companiesFilter?.realEstatesFilter?.map((c) => ({
+              label: c.text,
+              value: c.value,
+            }))}
+          />
+        )}
+
+        {isOnServicePage && (
+          <Space direction="vertical" size={4}>
             <DomainFilterTags
               collection={domainsFilter?.domainsFilter}
+              filters={filter}
+              setFilters={setFilter}
+            />
+            <CompanyFilterTags
+              collection={companiesFilter?.realEstatesFilter}
               filters={filter}
               setFilters={setFilter}
             />
@@ -90,18 +118,18 @@ const ServicesHeader: React.FC<Props> = ({
         )}
       </div>
       <div className={s.secondBlock}>
-        {showAddButton && isAdminCheck(user?.roles) && (
-          <Button className={s.firstBlock} type="link" onClick={openModal}>
-            <PlusOutlined /> Додати
-          </Button>
-        )}
         {isAdminCheck(user?.roles) &&
-          router.pathname === AppRoutes.SERVICE &&
+          isOnServicePage &&
           selectedServices.length > 0 && (
             <Button type="link" onClick={() => handleDeleteServices?.()}>
               <DeleteOutlined /> Видалити
             </Button>
           )}
+        {showAddButton && isAdminCheck(user?.roles) && (
+          <Button className={s.addButton} type="link" onClick={openModal}>
+            <PlusOutlined /> Додати
+          </Button>
+        )}
         {(isModalOpen || currentService) && (
           <AddServiceModal
             currentService={currentService ?? null}
