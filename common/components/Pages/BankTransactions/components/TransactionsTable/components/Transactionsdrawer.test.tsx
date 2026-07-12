@@ -480,7 +480,7 @@ describe('Default operation type for AddPaymentModal (Send from Bank)', () => {
       expect(screen.getByTestId('add-payment-modal')).toBeInTheDocument()
     })
 
-    expect(lastPaymentData?.type).toBe(Operations.Credit) // see note below
+    expect(lastPaymentData?.type).toBe(Operations.Credit)
   })
 
   it('passes type=Credit when opening the modal via "Швидке створення" (matched account)', async () => {
@@ -496,7 +496,7 @@ describe('Default operation type for AddPaymentModal (Send from Bank)', () => {
       expect(screen.getByTestId('add-payment-modal')).toBeInTheDocument()
     })
 
-    expect(lastPaymentData?.type).toBe(Operations.Credit) // see note below
+    expect(lastPaymentData?.type).toBe(Operations.Credit)
   })
 })
 describe('saveAccountToCompany after successful payment creation', () => {

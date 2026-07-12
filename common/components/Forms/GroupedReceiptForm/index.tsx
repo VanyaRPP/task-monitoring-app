@@ -31,7 +31,11 @@ interface Props {
   paymentActions: { preview: boolean; edit: boolean }
 }
 
-const GroupedReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
+const GroupedReceiptForm: FC<Props> = ({
+  currPayment,
+  paymentData,
+  paymentActions,
+}) => {
   const {
     form,
     template,
@@ -319,7 +323,14 @@ const GroupedReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
 
   return (
     <>
-      <div style={{ position: 'absolute', top: -85, right: 35, zIndex: 100 }}>
+      <div
+        style={{
+          position: 'absolute',
+          top: paymentActions?.preview ? -70 : -105,
+          right: 35,
+          zIndex: 100,
+        }}
+      >
         <Dropdown
           menu={{
             items: mainMenuItems,

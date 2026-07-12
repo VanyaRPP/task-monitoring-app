@@ -3,8 +3,7 @@ import {
   useGetDomainTypeTemplatesQuery,
 } from '@common/api/domainApi/domain.api'
 import { validateField } from '@assets/features/validators'
-import { PlusOutlined } from '@ant-design/icons'
-import { Button, Divider, Form, FormInstance, Input, Select } from 'antd'
+import { Button, Form, FormInstance, Input, Select } from 'antd'
 import { useEffect, useMemo, useState } from 'react'
 import {
   getNewEntityName,
@@ -37,22 +36,15 @@ const DomainsSelect: React.FC<DomainsSelectProps> = ({
   currentProfit,
   allowCreate,
 }) => {
-  const [domains, setDomains] = useState([])
   const [search, setSearch] = useState('')
   const {
-    data: fetchedDomains = [],
+    data: domains = [],
     isLoading: isDomainsLoading,
     isError: isDomainsError,
   } = useGetDomainsQuery({ archived: false })
 
   const { data: typeTemplates = [], isLoading: isTemplatesLoading } =
     useGetDomainTypeTemplatesQuery(undefined, { skip: !allowCreate })
-
-  useEffect(() => {
-    if (fetchedDomains.length) {
-      setDomains(fetchedDomains)
-    }
-  }, [fetchedDomains])
 
   const domainValue = Form.useWatch('domain', form)
   const isNew = isNewEntityValue(domainValue)
@@ -79,12 +71,46 @@ const DomainsSelect: React.FC<DomainsSelectProps> = ({
     }
   }, [form, options, edit, allowCreate])
 
-  const enterCreateMode = () => {
-    form.setFieldsValue({
-      domain: makeNewEntityValue(search.trim()),
-      newDomainTemplateId: '',
-    })
-    setSearch('')
+  // With no providers of their own, the user can only create one — drop straight
+  // into name-input mode so the extra fields show without any picking.
+  useEffect(() => {
+    if (edit || !allowCreate || isDomainsLoading) return
+    if (options.length === 0 && !form.getFieldValue('domain')) {
+      form.setFieldsValue({
+        domain: makeNewEntityValue(''),
+        newDomainTemplateId: '',
+      })
+    }
+  }, [options, allowCreate, edit, isDomainsLoading, form])
+
+  const handleSearch = (value: string) => {
+    const trimmed = value.trim()
+    const hasMatch =
+      !trimmed ||
+      options.some((o) =>
+        o.label?.toLowerCase().includes(trimmed.toLowerCase())
+      )
+    if (allowCreate && !isDomainsLoading && trimmed && !hasMatch) {
+      form.setFieldsValue({
+        domain: makeNewEntityValue(value),
+        newDomainTemplateId: '',
+      })
+      setSearch('')
+      return
+    }
+    setSearch(value)
+  }
+
+  const commitTypedValue = () => {
+    const typed = search.trim()
+    if (!typed) return
+    const match = options.find(
+      (o) => o.label?.trim().toLowerCase() === typed.toLowerCase()
+    )
+    if (match) {
+      form.setFieldsValue({ domain: match.value })
+      setSearch('')
+    }
   }
 
   const exitCreateMode = () => {
@@ -115,7 +141,7 @@ const DomainsSelect: React.FC<DomainsSelectProps> = ({
               },
             ]}
           >
-            <Input placeholder="Назва надавача" />
+            <Input placeholder="Назва надавача" autoFocus />
           </Form.Item>
           <Form.Item
             name="newDomainTemplateId"
@@ -132,14 +158,16 @@ const DomainsSelect: React.FC<DomainsSelectProps> = ({
             />
           </Form.Item>
         </div>
-        <Button
-          type="link"
-          size="small"
-          style={{ padding: 0, marginBottom: 8 }}
-          onClick={exitCreateMode}
-        >
-          ← обрати наявного
-        </Button>
+        {options.length > 0 && (
+          <Button
+            type="link"
+            size="small"
+            style={{ padding: 0, marginBottom: 8 }}
+            onClick={exitCreateMode}
+          >
+            ← обрати наявного
+          </Button>
+        )}
       </>
     )
   }
@@ -154,7 +182,11 @@ const DomainsSelect: React.FC<DomainsSelectProps> = ({
       <Select
         options={options}
         optionFilterProp="label"
-        placeholder="Пошук надавача послуг"
+        placeholder={
+          allowCreate
+            ? 'Пошук або назва нового надавача'
+            : 'Пошук надавача послуг'
+        }
         status={isDomainsError && 'error'}
         loading={isDomainsLoading}
         disabled={
@@ -164,30 +196,9 @@ const DomainsSelect: React.FC<DomainsSelectProps> = ({
         allowClear
         showSearch
         searchValue={search}
-        onSearch={setSearch}
+        onSearch={allowCreate ? handleSearch : setSearch}
         onChange={() => setSearch('')}
-        popupRender={
-          allowCreate
-            ? (menu) => (
-                <>
-                  {menu}
-                  <Divider style={{ margin: '8px 0' }} />
-                  <Button
-                    type="text"
-                    block
-                    icon={<PlusOutlined />}
-                    style={{ textAlign: 'left' }}
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={enterCreateMode}
-                  >
-                    {search.trim()
-                      ? `Створити «${search.trim()}»`
-                      : 'Створити нового надавача'}
-                  </Button>
-                </>
-              )
-            : undefined
-        }
+        onBlur={allowCreate ? commitTypedValue : undefined}
       />
     </Form.Item>
   )

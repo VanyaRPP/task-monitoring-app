@@ -57,7 +57,7 @@ const RealEstateModal: FC<Props> = ({
               _id: s._id,
               label: s.name,
               fieldName: s.fieldName,
-              price: 0,
+              price: undefined,
             }))
           : []
       ) || []
@@ -66,13 +66,9 @@ const RealEstateModal: FC<Props> = ({
 
   const mergedCustomServices = useMemo(() => {
     const saved = currentRealEstate?.customServices || []
-    const validSaved = saved.filter((s) =>
+    return saved.filter((s) =>
       domainCustomServices.some((d) => d._id === s._id)
     )
-    const newFromDomain = domainCustomServices.filter(
-      (d) => !validSaved.some((s) => s._id === d._id)
-    )
-    return [...validSaved, ...newFromDomain]
   }, [currentRealEstate, domainCustomServices])
 
   useEffect(() => {
@@ -102,7 +98,7 @@ const RealEstateModal: FC<Props> = ({
       discount: currentRealEstate?.discount || 0,
       cleaning: currentRealEstate?.cleaning || 0,
       services: currentRealEstate?.services || [],
-      customServices: mergedCustomServices,
+      customServices: currentRealEstate ? mergedCustomServices : [],
     })
 
     initializedRef.current = true

@@ -32,7 +32,7 @@ const CustomServicesCard: FC<CustomServicesCardProps> = ({
     _id: service?._id,
     label: service?.label,
     fieldName: service?.fieldName,
-    price: 0,
+    price: null,
   })
 
   const applyIds = (ids: string[]) => {
@@ -43,7 +43,7 @@ const CustomServicesCard: FC<CustomServicesCardProps> = ({
       const source = allCustomServices.find((s) => s?._id === id)
       return buildEntry(source)
     })
-    form.setFieldsValue({ customServices: next })
+    form.setFieldValue('customServices', next)
   }
 
   const handleSelectChange = (ids: string[]) => {
@@ -95,7 +95,7 @@ const CustomServicesCard: FC<CustomServicesCardProps> = ({
   const handleRemoveService = (index: number) => {
     const updated = [...customServices]
     updated.splice(index, 1)
-    form.setFieldsValue({ customServices: updated })
+    form.setFieldValue('customServices', updated)
   }
   const dashIfEmpty = (v: any) => (v === 0 || v ? v : '-')
 
@@ -111,9 +111,7 @@ const CustomServicesCard: FC<CustomServicesCardProps> = ({
       return
     }
 
-    form.setFieldsValue({
-      customServices: allCustomServices.map(buildEntry),
-    })
+    form.setFieldValue('customServices', allCustomServices.map(buildEntry))
     autoPopulatedRef.current = true
   }, [
     allCustomServices,
