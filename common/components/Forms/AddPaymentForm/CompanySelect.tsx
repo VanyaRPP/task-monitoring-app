@@ -1,10 +1,9 @@
 import { validateField } from '@assets/features/validators'
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
-import { PlusOutlined } from '@ant-design/icons'
-import { Button, Divider, Form, Input, Select } from 'antd'
+import { Button, Form, Input, Select } from 'antd'
 import { FormInstance } from 'antd/es/form/Form'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   getNewEntityName,
   isNewEntityValue,
@@ -71,6 +70,7 @@ function CompanyPicker({
   const streetId = Form.useWatch('street', form)
   const companyValue = Form.useWatch('company', form)
   const [search, setSearch] = useState('')
+  const focusNameOnCreate = useRef(false)
 
   const isNewDomain = isNewEntityValue(domainId)
   const isNewCompany = isNewEntityValue(companyValue)
@@ -97,21 +97,48 @@ function CompanyPicker({
   }, [companies, company, edit, form])
 
   useEffect(() => {
-    // A brand-new provider has no companies, so jump straight into create mode.
-    if (edit || !allowCreate || !isNewDomain) return
-    if (!form.getFieldValue('company')) {
-      form.setFieldValue('company', makeNewEntityValue(''))
-    }
-  }, [isNewDomain, allowCreate, edit, form])
+    // Force create mode when there's nothing to pick: a brand-new provider has
+    // no companies, and a user with no companies of their own can only create.
+    if (edit || !allowCreate || isLoading) return
+    if (!isNewDomain && companies.length > 0) return
+    queueMicrotask(() => {
+      if (!isNewEntityValue(form.getFieldValue('company'))) {
+        form.setFieldValue('company', makeNewEntityValue(''))
+      }
+    })
+  }, [isNewDomain, companies.length, allowCreate, edit, isLoading, form])
 
   const options = useMemo(
     () => companies.map((i) => ({ value: i._id, label: i.companyName })),
     [companies]
   )
 
-  const enterCreateMode = () => {
-    form.setFieldValue('company', makeNewEntityValue(search.trim()))
-    setSearch('')
+  const handleSearch = (value: string) => {
+    const trimmed = value.trim()
+    const hasMatch =
+      !trimmed ||
+      companies.some((c) =>
+        c.companyName?.toLowerCase().includes(trimmed.toLowerCase())
+      )
+    if (allowCreate && !isLoading && trimmed && !hasMatch) {
+      focusNameOnCreate.current = true
+      form.setFieldValue('company', makeNewEntityValue(value))
+      setSearch('')
+      return
+    }
+    setSearch(value)
+  }
+
+  const commitTypedValue = () => {
+    const typed = search.trim()
+    if (!typed) return
+    const match = companies.find(
+      (c) => c.companyName?.trim().toLowerCase() === typed.toLowerCase()
+    )
+    if (match) {
+      form.setFieldValue('company', match._id)
+      setSearch('')
+    }
   }
 
   const exitCreateMode = () => {
@@ -141,7 +168,10 @@ function CompanyPicker({
               },
             ]}
           >
-            <Input placeholder="Назва нової компанії" />
+            <Input
+              placeholder="Назва нової компанії"
+              autoFocus={focusNameOnCreate.current}
+            />
           </Form.Item>
           <Form.Item
             name="companyEmail"
@@ -153,7 +183,7 @@ function CompanyPicker({
             <Input placeholder="email@example.com" />
           </Form.Item>
         </div>
-        {!isNewDomain && (
+        {!isNewDomain && companies.length > 0 && (
           <Button
             type="link"
             size="small"
@@ -177,35 +207,16 @@ function CompanyPicker({
       <Select
         options={options}
         optionFilterProp="label"
-        placeholder="Пошук компанії"
+        placeholder={
+          allowCreate ? 'Пошук або назва нової компанії' : 'Пошук компанії'
+        }
         loading={isLoading}
         showSearch
         allowClear
         searchValue={search}
-        onSearch={setSearch}
+        onSearch={allowCreate ? handleSearch : setSearch}
         onChange={() => setSearch('')}
-        popupRender={
-          allowCreate
-            ? (menu) => (
-                <>
-                  {menu}
-                  <Divider style={{ margin: '8px 0' }} />
-                  <Button
-                    type="text"
-                    block
-                    icon={<PlusOutlined />}
-                    style={{ textAlign: 'left' }}
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={enterCreateMode}
-                  >
-                    {search.trim()
-                      ? `Створити «${search.trim()}»`
-                      : 'Створити нову компанію'}
-                  </Button>
-                </>
-              )
-            : undefined
-        }
+        onBlur={allowCreate ? commitTypedValue : undefined}
       />
     </Form.Item>
   )
