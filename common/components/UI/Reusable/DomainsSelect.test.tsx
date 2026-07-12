@@ -19,15 +19,32 @@ const Wrapper = ({ allowCreate = false }: { allowCreate?: boolean }) => {
   return (
     <Form form={form}>
       <DomainsSelect form={form} allowCreate={allowCreate} />
+      <Form.Item shouldUpdate>
+        {() => (
+          <div data-testid="domain-value">
+            {String(form.getFieldValue('domain') ?? '')}
+          </div>
+        )}
+      </Form.Item>
     </Form>
   )
 }
 
 const getDomainInput = () => screen.getByRole('combobox')
+const domainValue = () => screen.getByTestId('domain-value').textContent
 
-const startCreate = () => {
-  fireEvent.mouseDown(getDomainInput())
-  fireEvent.click(screen.getByText('Створити нового надавача'))
+// Simulate typing a name into the search box and leaving the field.
+const typeAndBlur = (name: string) => {
+  const input = getDomainInput()
+  fireEvent.mouseDown(input)
+  fireEvent.change(input, { target: { value: name } })
+  fireEvent.blur(input)
+}
+
+const typeOnly = (name: string) => {
+  const input = getDomainInput()
+  fireEvent.mouseDown(input)
+  fireEvent.change(input, { target: { value: name } })
 }
 
 describe('DomainsSelect — поле надавача послуг', () => {
@@ -36,47 +53,138 @@ describe('DomainsSelect — поле надавача послуг', () => {
   })
   afterEach(() => jest.clearAllMocks())
 
-  it('при allowCreate показує кнопку створення в дропдауні', () => {
-    mockDomains.mockReturnValue({ data: [], isLoading: false, isError: false })
+  it('рендерить наявних надавачів як опції', () => {
+    mockDomains.mockReturnValue({
+      data: [
+        { _id: 'd1', name: 'Alpha' },
+        { _id: 'd2', name: 'Beta' },
+      ],
+      isLoading: false,
+      isError: false,
+    })
 
     render(<Wrapper allowCreate />)
     fireEvent.mouseDown(getDomainInput())
 
-    expect(screen.getByText('Створити нового надавача')).toBeInTheDocument()
+    expect(screen.getByText('Alpha')).toBeInTheDocument()
+    expect(screen.getByText('Beta')).toBeInTheDocument()
   })
 
-  it('кнопка створення показує інпут назви та селектор напрямку', () => {
-    mockDomains.mockReturnValue({ data: [], isLoading: false, isError: false })
-    mockTemplates.mockReturnValue({
-      data: [{ _id: 't1', name: 'Комунальні', isBuiltIn: true, groups: [] }],
+  it('введення назви наявного надавача обирає його (не створює нового)', () => {
+    mockDomains.mockReturnValue({
+      data: [{ _id: 'd1', name: 'Alpha' }],
       isLoading: false,
+      isError: false,
     })
 
     render(<Wrapper allowCreate />)
-    startCreate()
+    typeAndBlur('Alpha')
 
-    expect(screen.getByPlaceholderText('Назва надавача')).toBeInTheDocument()
+    expect(domainValue()).toBe('d1')
+    // не перейшли в режим створення
+    expect(screen.queryByPlaceholderText('Назва надавача')).toBeNull()
+  })
+
+  it('збіг ігнорує регістр і зайві пробіли', () => {
+    mockDomains.mockReturnValue({
+      data: [{ _id: 'd1', name: 'Alpha' }],
+      isLoading: false,
+      isError: false,
+    })
+
+    render(<Wrapper allowCreate />)
+    typeAndBlur('  aLpHa  ')
+
+    expect(domainValue()).toBe('d1')
+  })
+
+  it('введення нової назви робить її новим надавачем без кнопки «Створити»', async () => {
+    mockDomains.mockReturnValue({
+      data: [{ _id: 'd1', name: 'Alpha' }],
+      isLoading: false,
+      isError: false,
+    })
+
+    render(<Wrapper allowCreate />)
+    typeAndBlur('Gamma')
+
+    expect(domainValue()).toBe('new::Gamma')
+    // автоматично показались додаткові поля
+    expect(
+      await screen.findByPlaceholderText('Назва надавача')
+    ).toBeInTheDocument()
     expect(screen.getByText('Напрямок послуг')).toBeInTheDocument()
-    // default value «Без послуг» is shown as the selected option
-    expect(screen.getByText('Без послуг')).toBeInTheDocument()
   })
 
-  it('у списку напрямків є вбудований шаблон', () => {
-    mockDomains.mockReturnValue({ data: [], isLoading: false, isError: false })
-    mockTemplates.mockReturnValue({
-      data: [{ _id: 't1', name: 'Комунальні', isBuiltIn: true, groups: [] }],
+  it('живий перехід: щойно зникають збіги — одразу режим створення', async () => {
+    mockDomains.mockReturnValue({
+      data: [{ _id: 'd1', name: 'Alpha' }],
       isLoading: false,
+      isError: false,
     })
 
     render(<Wrapper allowCreate />)
-    startCreate()
-    // the only combobox in create mode is the service-type select
-    fireEvent.mouseDown(screen.getByRole('combobox'))
+    typeOnly('Gamma')
 
-    expect(screen.getByText('Комунальні')).toBeInTheDocument()
+    expect(domainValue()).toBe('new::Gamma')
+    expect(
+      await screen.findByPlaceholderText('Назва надавача')
+    ).toBeInTheDocument()
   })
 
-  it('без allowCreate не показує кнопку створення', () => {
+  it('поки назва є підрядком наявного — лишаємось у режимі вибору', () => {
+    mockDomains.mockReturnValue({
+      data: [{ _id: 'd1', name: 'Alpha' }],
+      isLoading: false,
+      isError: false,
+    })
+
+    render(<Wrapper allowCreate />)
+    typeOnly('Alp')
+
+    expect(domainValue()).not.toContain('new::')
+    expect(screen.queryByPlaceholderText('Назва надавача')).toBeNull()
+  })
+
+  it('немає кнопки «Створити» у дропдауні', () => {
+    mockDomains.mockReturnValue({
+      data: [{ _id: 'd1', name: 'Alpha' }],
+      isLoading: false,
+      isError: false,
+    })
+
+    render(<Wrapper allowCreate />)
+    fireEvent.mouseDown(getDomainInput())
+
+    expect(screen.queryByText(/Створити/)).toBeNull()
+  })
+
+  it('коли у користувача ще немає надавачів — одразу показує поля створення', async () => {
+    mockDomains.mockReturnValue({ data: [], isLoading: false, isError: false })
+
+    render(<Wrapper allowCreate />)
+
+    expect(
+      await screen.findByPlaceholderText('Назва надавача')
+    ).toBeInTheDocument()
+    expect(domainValue()).toBe('new::')
+  })
+
+  it('пошук лише серед доступних користувачу: чужа назва вважається новою', () => {
+    // Beta існує в іншого користувача, тож його немає у відповіді запиту.
+    mockDomains.mockReturnValue({
+      data: [{ _id: 'd1', name: 'Alpha' }],
+      isLoading: false,
+      isError: false,
+    })
+
+    render(<Wrapper allowCreate />)
+    typeAndBlur('Beta')
+
+    expect(domainValue()).toBe('new::Beta')
+  })
+
+  it('без allowCreate введена нова назва не стає новим надавачем', () => {
     mockDomains.mockReturnValue({
       data: [
         { _id: 'd1', name: 'Alpha' },
@@ -87,10 +195,9 @@ describe('DomainsSelect — поле надавача послуг', () => {
     })
 
     render(<Wrapper />)
-    fireEvent.mouseDown(getDomainInput())
+    typeAndBlur('Gamma')
 
-    expect(
-      screen.queryByText('Створити нового надавача')
-    ).not.toBeInTheDocument()
+    expect(domainValue()).not.toContain('new::')
+    expect(screen.queryByPlaceholderText('Назва надавача')).toBeNull()
   })
 })
