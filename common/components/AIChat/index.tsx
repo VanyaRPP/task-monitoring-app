@@ -18,6 +18,7 @@ import {
   CloseOutlined,
 } from '@ant-design/icons'
 import Link from 'next/link'
+import { useIsAdmin } from '@modules/hooks/useIsAdmin'
 import styles from './style.module.scss'
 
 const { Text } = Typography
@@ -110,6 +111,10 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
 }
 
 const AIChat: React.FC = () => {
+  // Gate: the assistant is currently available to admins only (matches the
+  // server-side check in /api/chat). Non-admins never see the widget.
+  const { isAdmin } = useIsAdmin()
+
   const [open, setOpen] = useState<boolean>(false)
   const [showHint, setShowHint] = useState<boolean>(false)
   const [inputValue, setInputValue] = useState<string>('')
@@ -174,6 +179,9 @@ const AIChat: React.FC = () => {
       handleSend()
     }
   }
+
+  // Hidden for non-admins. Placed after all hooks so the Rules of Hooks hold.
+  if (!isAdmin) return null
 
   return (
     <>

@@ -1,52 +1,17 @@
 import { google } from '@ai-sdk/google'
-import { streamText, convertToModelMessages } from 'ai'
+import { streamText, convertToModelMessages, stepCountIs } from 'ai'
 import type { NextApiRequest, NextApiResponse } from 'next'
+import { getCurrentUser } from '@utils/getCurrentUser'
+import { SYSTEM_PROMPT } from '@common/services/aiAssistant/prompt'
+import { AI_MODEL, AI_MAX_STEPS } from '@common/services/aiAssistant/config'
+import { buildAssistantTools } from '@common/services/aiAssistant/tools'
+import type { UserContext } from '@common/services/paymentService/payment.service'
 
 export const config = {
   api: {
     bodyParser: true,
   },
 }
-
-const SYSTEM_PROMPT = `Ти — інтелектуальний бізнес-консультант та технічний помічник проекту "E-ORENDA". Твоє завдання — не просто показувати дорогу, а детально пояснювати, як працює система, як налаштувати дані та як вести щомісячний цикл розрахунків.
-
-### 🌟 Твої ключові навички та знання:
-
-#### 1. Налаштування базових сутностей (Setup)
-- **Домени (Провайдери)** [/domain]: Це юридичні особи, що надають послуги. Для створення натисніть "Додати". Обов'язково вкажіть IBAN, назву банку та контакти адмінів. Це критично для формування рахунків.
-- **Нерухомість (Об'єкти/Орендарі)** [/real-estate]: Фізичні об'єкти або орендарі. При створенні вони обов'язково прив'язуються до Домену та Вулиці. В полі "Опис" зазвичай вказуються реквізити договору (наприклад, "Директор Петренко...").
-- **Вулиці** [/streets]: Використовуються для групування об'єктів нерухомості.
-
-#### 2. Конфігурація тарифів (Services) [/service]
-- Щомісяця перед початком розрахунків потрібно створити запис "Послуги" для конкретного місяця та Домену.
-- Тут задаються ціни за одиницю: Електроенергія (кВт), Вода (м³), Утримання (за м²), Вивіз сміття (фіксовано).
-- Без налаштованих тарифів на поточний місяць система не дозволить створити рахунок орендарю.
-
-#### 3. Щомісячний платіжний цикл (Billing) [/payment]
-- **Створення рахунку**: Натисніть "Додати платіж". Виберіть послідовно: Домен -> Вулиця -> Місяць -> Компанія.
-- **Показники лічильників**: Введіть поточне значення ("Поточне значення"). Система автоматично вирахує споживання (Поточне - Попереднє) та помножить на тариф.
-- **Фіксовані послуги**: Оренда та обслуговування розраховуються автоматично на основі площі об'єкта.
-- **Масові операції**: Адміни можуть генерувати рахунки для всіх орендарів домену одним кліком через "Генерація масових рахунків".
-
-#### 4. Робота з банком та фінансами [/bank]
-- **Імпорт**: Можна завантажувати виписки з банку (наприклад, Приват24/Моно).
-- **Звірка**: Система допомагає знайти відповідність між банківським платежем та виставленим рахунком у системі.
-
-#### 5. Управління задачами (Tasks)
-- Задачі можна класифікувати за категоріями [/categories].
-- Використовуються для контролю технічного стану об'єктів (ремонт, прибирання тощо).
-
-### 🛠 Технічні підказки для користувача:
-- **Як додати запис?** Шукай синю кнопку з плюсом (+) зверху праворуч над таблицею.
-- **Як змінити ціну?** Перейди в [/service], знайди потрібний місяць і відредагуй тарифи.
-- **Де взяти рахунок у PDF?** У розділі [/payment] в таблиці є іконка PDF для кожного платежу.
-
-### 📜 Правила спілкування:
-1. **Експертність**: Якщо користувач запитує "Як створити рахунок?", давай покрокову інструкцію (Домен -> Вулиця -> Показники -> Зберегти).
-2. **Контекст**: Завжди згадуй, що без налаштованих тарифів у [/service] розрахунки неможливі.
-3. **Мова**: Тільки українська (або російська, якщо запит нею).
-4. **Посилання**: Використовуй формат [Текст](/path).
-5. **Форматування**: Використовуй списки та жирний текст для кращої читабельності інструкцій.`
 
 export default async function handler(
   req: NextApiRequest,
@@ -55,6 +20,24 @@ export default async function handler(
   if (req.method !== 'POST') {
     res.setHeader('Allow', ['POST'])
     res.status(405).json({ error: 'Method Not Allowed' })
+    return
+  }
+
+  // Access gate: the assistant can read the user's own data via tools, so it
+  // must run in an authenticated context. It is currently limited to admins
+  // (DomainAdmin / GlobalAdmin) — this both scopes the feature and prevents
+  // unauthenticated callers from burning the AI budget.
+  let ctx: Awaited<ReturnType<typeof getCurrentUser>>
+  try {
+    ctx = await getCurrentUser(req, res)
+  } catch {
+    // getCurrentUser throws 'no user found' when there is no valid session.
+    res.status(401).json({ error: 'Unauthorized' })
+    return
+  }
+
+  if (!ctx.isAdmin) {
+    res.status(403).json({ error: 'Forbidden' })
     return
   }
 
@@ -72,12 +55,24 @@ export default async function handler(
       return
     }
 
+    const userContext: UserContext = {
+      isUser: ctx.isUser,
+      isDomainAdmin: ctx.isDomainAdmin,
+      isGlobalAdmin: ctx.isGlobalAdmin,
+      user: { email: ctx.user.email },
+    }
+
     const modelMessages = await convertToModelMessages(uiMessages)
 
     const result = streamText({
-      model: google('gemini-1.5-flash'),
+      model: google(AI_MODEL),
       system: SYSTEM_PROMPT,
       messages: modelMessages,
+      tools: buildAssistantTools(userContext),
+      // Without this the SDK stops after the first step (a tool call) and never
+      // produces a textual answer. Allow a few steps so the model can call a
+      // tool and then respond based on its result.
+      stopWhen: stepCountIs(AI_MAX_STEPS),
     })
 
     res.socket?.setNoDelay(true)
