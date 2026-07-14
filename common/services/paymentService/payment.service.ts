@@ -8,7 +8,7 @@ import {
   getServiceTotalsPipeline,
   getTotalGeneralSumPipeline,
 } from '@pages/api/spacehub/payment/pipelines'
-import { quarters, SortOrder } from '@utils/constants'
+import { Operations, quarters, SortOrder } from '@utils/constants'
 import {
   sendInvoiceEmail,
   type InvoiceEmailPayment,
@@ -69,6 +69,37 @@ export interface UserContext {
   user: {
     email: string
   }
+}
+
+function toUtcDateKey(date: Date | string): string {
+  return new Date(date).toISOString().slice(0, 10)
+}
+
+export function sortCreditsBeforeDebitsPerDay<
+  T extends { invoiceCreationDate: Date | string; type: string },
+>(payments: T[]): T[] {
+  const result: T[] = []
+  let index = 0
+
+  while (index < payments.length) {
+    const dayKey = toUtcDateKey(payments[index].invoiceCreationDate)
+    let end = index + 1
+    while (
+      end < payments.length &&
+      toUtcDateKey(payments[end].invoiceCreationDate) === dayKey
+    ) {
+      end++
+    }
+
+    const dayGroup = payments.slice(index, end)
+    const credits = dayGroup.filter((p) => p.type === Operations.Credit)
+    const rest = dayGroup.filter((p) => p.type !== Operations.Credit)
+    result.push(...credits, ...rest)
+
+    index = end
+  }
+
+  return result
 }
 
 export async function getPayments(
@@ -184,14 +215,16 @@ export async function getPayments(
     }
   }
 
-  const payments = await Payment.find(options)
-    .sort({ invoiceCreationDate: SortOrder.DESC, type: SortOrder.ASC })
-    .skip(+skip)
-    .limit(+limit)
-    .populate('company')
-    .populate('street')
-    .populate('domain')
-    .populate('monthService')
+  const payments = sortCreditsBeforeDebitsPerDay(
+    await Payment.find(options)
+      .sort({ invoiceCreationDate: SortOrder.DESC, type: SortOrder.ASC })
+      .skip(+skip)
+      .limit(+limit)
+      .populate('company')
+      .populate('street')
+      .populate('domain')
+      .populate('monthService')
+  )
 
   const total = await Payment.countDocuments(options)
 

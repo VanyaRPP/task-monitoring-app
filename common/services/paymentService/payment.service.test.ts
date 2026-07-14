@@ -80,6 +80,7 @@ import {
   duplicatePayments,
   getNextInvoiceNumber,
   getPayments,
+  sortCreditsBeforeDebitsPerDay,
 } from './payment.service'
 import { SortOrder, Operations } from '@utils/constants'
 
@@ -111,6 +112,114 @@ describe('getPayments — sorting', () => {
     const sorted = [...types].sort((a, b) => a.localeCompare(b) * SortOrder.ASC)
     expect(sorted[0]).toBe(Operations.Credit)
     expect(sorted[1]).toBe(Operations.Debit)
+  })
+
+  it('returns credit above debit for the same day end-to-end, even when the debit has the later timestamp', async () => {
+    const data = [
+      {
+        _id: 'debit-late',
+        type: Operations.Debit,
+        invoiceCreationDate: new Date('2026-07-08T15:00:00.000Z'),
+      },
+      {
+        _id: 'credit-early',
+        type: Operations.Credit,
+        invoiceCreationDate: new Date('2026-07-08T09:00:00.000Z'),
+      },
+    ]
+    findMock.mockReturnValueOnce({
+      sort: sortMock,
+      skip: skipMock,
+      limit: limitMock,
+      populate: populateMock,
+      lean: leanMock,
+      then: (resolve: (v: unknown) => void) => resolve(data),
+    } as any)
+
+    const result = await getPayments({}, globalAdminContext)
+
+    expect(result.data.map((p: any) => p._id)).toEqual([
+      'credit-early',
+      'debit-late',
+    ])
+  })
+})
+
+describe('sortCreditsBeforeDebitsPerDay', () => {
+  const payment = (type: string, invoiceCreationDate: string, id: string) => ({
+    id,
+    type,
+    invoiceCreationDate: new Date(invoiceCreationDate),
+  })
+
+  it('keeps credit above debit when debit was created later the same day (the reported bug)', () => {
+    const input = [
+      payment(Operations.Debit, '2026-07-08T15:00:00.000Z', 'debit-late'),
+      payment(Operations.Credit, '2026-07-08T09:00:00.000Z', 'credit-early'),
+    ]
+
+    const result = sortCreditsBeforeDebitsPerDay(input)
+
+    expect(result.map((p) => p.id)).toEqual(['credit-early', 'debit-late'])
+  })
+
+  it('leaves already-correct same-day ordering untouched', () => {
+    const input = [
+      payment(Operations.Credit, '2026-07-03T09:00:00.000Z', 'credit'),
+      payment(Operations.Debit, '2026-07-03T08:00:00.000Z', 'debit'),
+    ]
+
+    const result = sortCreditsBeforeDebitsPerDay(input)
+
+    expect(result.map((p) => p.id)).toEqual(['credit', 'debit'])
+  })
+
+  it('applies the same fix consistently across every date, not just older ones', () => {
+    const input = [
+      payment(Operations.Debit, '2026-07-08T15:00:00.000Z', 'debit-8'),
+      payment(Operations.Credit, '2026-07-08T09:00:00.000Z', 'credit-8'),
+      payment(Operations.Debit, '2026-07-03T15:00:00.000Z', 'debit-3'),
+      payment(Operations.Credit, '2026-07-03T09:00:00.000Z', 'credit-3'),
+    ]
+
+    const result = sortCreditsBeforeDebitsPerDay(input)
+
+    expect(result.map((p) => p.id)).toEqual([
+      'credit-8',
+      'debit-8',
+      'credit-3',
+      'debit-3',
+    ])
+  })
+
+  it('preserves day-to-day (newest first) ordering, only reordering within a day', () => {
+    const input = [
+      payment(Operations.Credit, '2026-07-08T09:00:00.000Z', 'credit-8'),
+      payment(Operations.Debit, '2026-07-03T08:00:00.000Z', 'debit-3'),
+      payment(Operations.Credit, '2026-07-03T09:00:00.000Z', 'credit-3'),
+    ]
+
+    const result = sortCreditsBeforeDebitsPerDay(input)
+
+    expect(result.map((p) => p.id)).toEqual(['credit-8', 'credit-3', 'debit-3'])
+  })
+
+  it('keeps multiple same-type entries in their original relative order', () => {
+    const input = [
+      payment(Operations.Debit, '2026-07-03T15:00:00.000Z', 'debit-late'),
+      payment(Operations.Credit, '2026-07-03T12:00:00.000Z', 'credit-mid'),
+      payment(Operations.Debit, '2026-07-03T09:00:00.000Z', 'debit-early'),
+      payment(Operations.Credit, '2026-07-03T08:00:00.000Z', 'credit-earliest'),
+    ]
+
+    const result = sortCreditsBeforeDebitsPerDay(input)
+
+    expect(result.map((p) => p.id)).toEqual([
+      'credit-mid',
+      'credit-earliest',
+      'debit-late',
+      'debit-early',
+    ])
   })
 })
 
