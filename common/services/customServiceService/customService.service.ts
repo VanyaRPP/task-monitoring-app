@@ -597,13 +597,25 @@ export function assembleDomainServiceCatalog(
     servicesById.set(String(service._id), service)
   }
 
+  const seenNameKeys = new Set<string>()
+  const takeUniqueByName = (service: LeanCustomService): boolean => {
+    const nameKey = String(service?.name ?? '')
+      .trim()
+      .toLowerCase()
+    if (!nameKey) return true
+    if (seenNameKeys.has(nameKey)) return false
+    seenNameKeys.add(nameKey)
+    return true
+  }
+
   const groupedServices: DomainServiceGroup[] = (
     domainCustomServices || []
   ).map((group, index) => ({
     groupName: group?.groupName ?? `Група ${index + 1}`,
     services: (group?.services || [])
       .map((id) => servicesById.get(String(id)))
-      .filter((service): service is LeanCustomService => Boolean(service)),
+      .filter((service): service is LeanCustomService => Boolean(service))
+      .filter(takeUniqueByName),
   }))
 
   const groupedIds = new Set(
@@ -611,9 +623,9 @@ export function assembleDomainServiceCatalog(
       group.services.map((service) => String(service._id))
     )
   )
-  const ungroupedServices = domainScopedServices.filter(
-    (service) => !groupedIds.has(String(service._id))
-  )
+  const ungroupedServices = domainScopedServices
+    .filter((service) => !groupedIds.has(String(service._id)))
+    .filter(takeUniqueByName)
 
   const result: DomainServiceGroup[] = [...groupedServices]
   if (ungroupedServices.length > 0) {
