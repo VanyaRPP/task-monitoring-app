@@ -19,6 +19,8 @@ import {
 } from '@ant-design/icons'
 import Link from 'next/link'
 import { useIsAdmin } from '@modules/hooks/useIsAdmin'
+import AddPaymentModal from '@components/AddPaymentModal'
+import { message } from 'antd'
 import styles from './style.module.scss'
 
 const { Text } = Typography
@@ -120,6 +122,13 @@ const AIChat: React.FC = () => {
   const [inputValue, setInputValue] = useState<string>('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
+  // Invoice draft flow: previewInvoice tool returns a draft that opens the
+  // prefilled AddPaymentModal. `handledToolCalls` guards against the stream
+  // re-rendering and re-opening the modal for a tool call already handled.
+  const [invoiceDraft, setInvoiceDraft] = useState<any>(null)
+  const [invoiceModalOpen, setInvoiceModalOpen] = useState<boolean>(false)
+  const handledToolCallsRef = useRef<Set<string>>(new Set())
+
   const { messages, sendMessage, status, error } = useChat({
     messages: [
       {
@@ -141,6 +150,26 @@ const AIChat: React.FC = () => {
     }
   }, [error])
 
+  // Watch for a completed `previewInvoice` tool call and open the prefilled
+  // AddPaymentModal with its draft. Each toolCallId is handled at most once.
+  useEffect(() => {
+    for (const message of messages) {
+      for (const part of message.parts ?? []) {
+        const p = part as any
+        if (
+          p.type === 'tool-previewInvoice' &&
+          p.state === 'output-available' &&
+          p.output?.draft &&
+          !handledToolCallsRef.current.has(p.toolCallId)
+        ) {
+          handledToolCallsRef.current.add(p.toolCallId)
+          setInvoiceDraft(p.output.draft)
+          setInvoiceModalOpen(true)
+        }
+      }
+    }
+  }, [messages])
+
   const isLoading = status === 'streaming' || status === 'submitted'
 
   useEffect(() => {
@@ -159,7 +188,7 @@ const AIChat: React.FC = () => {
       }
     }, 1000)
     return () => clearTimeout(showTimer)
-  }, [])
+  }, [open])
 
   useEffect(() => {
     if (open) setShowHint(false)
@@ -288,6 +317,20 @@ const AIChat: React.FC = () => {
             />
           </div>
         </div>
+      )}
+
+      {invoiceModalOpen && invoiceDraft && (
+        <AddPaymentModal
+          paymentData={invoiceDraft}
+          paymentActions={{ edit: false, preview: false }}
+          closeModal={(success?: boolean) => {
+            setInvoiceModalOpen(false)
+            setInvoiceDraft(null)
+            if (success) {
+              message.success('Рахунок успішно створено!')
+            }
+          }}
+        />
       )}
     </>
   )

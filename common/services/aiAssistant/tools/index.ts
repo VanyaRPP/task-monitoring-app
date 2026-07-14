@@ -1,7 +1,6 @@
 import { tool, type ToolSet } from 'ai'
 import { z } from 'zod'
 import {
-  createPayment,
   getPayments,
   type UserContext,
 } from '@common/services/paymentService/payment.service'
@@ -22,8 +21,8 @@ import {
  * same pattern.
  */
 
-// Shared by previewInvoice and createInvoice so both take exactly the same
-// identifier-only input. The model supplies WHO/WHEN, never the final amounts.
+// Identifier-only input for previewInvoice. The model supplies WHO/WHEN, never
+// the final amounts — those are computed server-side from the Service record.
 const now = new Date()
 const previewInputSchema = z.object({
   companyId: z
@@ -63,7 +62,9 @@ function withDefaults(input: PreviewInput) {
   }
 }
 
-// Compact, model-friendly view of a draft — no raw mongoose docs.
+// Compact, model-friendly view of a draft — lets the model describe the invoice
+// in text without echoing the full payload. The full `draft` is returned
+// alongside this for the frontend to open the prefilled form.
 function toDraftSummary(draft: Awaited<ReturnType<typeof buildInvoiceDraft>>) {
   return {
     invoiceNumber: draft.invoiceNumber,
@@ -154,40 +155,19 @@ export function buildAssistantTools(userContext: UserContext): ToolSet {
 
     previewInvoice: tool({
       description:
-        'Порахувати ЧЕРНЕТКУ інвойсу для компанії за місяць — НІЧОГО не створює в базі. ' +
+        'Підготувати ЧЕРНЕТКУ інвойсу для компанії за місяць і ВІДКРИТИ форму ' +
+        'створення рахунку, заповнену цією чернеткою — НІЧОГО не зберігає в базі. ' +
         'Позиції та ціни беруться з Послуги за місяць (0, якщо не заповнено). ' +
-        'Завжди викликай перед створенням і покажи результат користувачу на підтвердження.',
+        'Користувач перевіряє форму і зберігає сам. Виклич, коли просять створити рахунок.',
       inputSchema: previewInputSchema,
       execute: async (input) => {
         const draft = await buildInvoiceDraft({
           ...withDefaults(input),
           ctx: userContext,
         })
-        return toDraftSummary(draft)
-      },
-    }),
-
-    createInvoice: tool({
-      description:
-        'СТВОРИТИ інвойс для компанії за місяць. Викликай ЛИШЕ після previewInvoice ' +
-        'і явного підтвердження користувача ("так"/"створюй"). Email клієнту наразі НЕ надсилається.',
-      inputSchema: previewInputSchema,
-      execute: async (input) => {
-        // Rebuild the draft deterministically from resolved ids — the model
-        // never supplies the final sums, so it cannot inflate/alter them.
-        const draft = await buildInvoiceDraft({
-          ...withDefaults(input),
-          ctx: userContext,
-        })
-        const payment = await createPayment(draft, true, {
-          sendInvoiceEmail: false,
-        })
-        return {
-          created: true,
-          invoiceNumber: payment.invoiceNumber,
-          id: payment.id?.toString?.(),
-          generalSum: payment.generalSum,
-        }
+        // `draft` is consumed by the frontend to open a prefilled AddPaymentModal;
+        // `summary` lets the model describe the invoice in its reply.
+        return { draft, summary: toDraftSummary(draft) }
       },
     }),
   }
