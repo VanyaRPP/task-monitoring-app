@@ -43,7 +43,15 @@ const LedgerTemplate: FC<TemplateProps> = ({
     <div
       className={lg.lgInvoice}
       ref={componentRef}
-      style={{ width: '100%', margin: '2em auto 1em' }}
+      style={{
+        width: '100%',
+        height: '100%',
+        boxSizing: 'border-box',
+        paddingTop: '2em',
+        paddingRight: '1.5em',
+        paddingLeft: '1.5em',
+        position: 'relative',
+      }}
     >
       <div className={lg.lgHeader}>
         <div className={lg.lgBrand}>

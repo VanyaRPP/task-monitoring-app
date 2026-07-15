@@ -103,8 +103,12 @@ const OlimpTemplate: FC<TemplateProps> = ({
       ref={componentRef}
       style={{
         width: '100%',
-        maxWidth: '980px',
-        margin: '2em auto 1em',
+        height: '100%',
+        boxSizing: 'border-box',
+        paddingTop: '2em',
+        paddingRight: '1.5em',
+        paddingLeft: '1.5em',
+        position: 'relative',
       }}
     >
       <div className={s.invoiceHeader}>
