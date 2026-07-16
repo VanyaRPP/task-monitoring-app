@@ -36,11 +36,11 @@ const toSnapshot = (
     : input
 }
 
-const extractDomainId = (snapshot?: Record<string, any>) => {
-  const domain = snapshot?.domain
-  if (!domain) return undefined
-  if (typeof domain === 'object' && domain._id) return domain._id
-  return domain
+/** Pull a ref id out of a snapshot field whether it's an ObjectId or populated. */
+const extractRefId = (value: any) => {
+  if (!value) return undefined
+  if (typeof value === 'object' && value._id) return value._id
+  return value
 }
 
 const buildInvoiceData = (snapshot: Record<string, any>) => ({
@@ -52,6 +52,7 @@ const buildInvoiceData = (snapshot: Record<string, any>) => ({
   generalSum: snapshot.generalSum,
   description: snapshot.description,
   type: snapshot.type,
+  currency: snapshot.currency,
 })
 
 /**
@@ -84,7 +85,8 @@ export async function logPaymentMutation(
       reason: args.reason,
       actorId: args.actor?._id,
       actorEmail: args.actor?.email,
-      domainId: extractDomainId(primary),
+      domainId: extractRefId(primary.domain),
+      companyId: extractRefId(primary.company),
       batchId: args.batchId ?? undefined,
       before,
       after,

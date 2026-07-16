@@ -36,6 +36,7 @@ export interface IPaymentChangeLogModel {
     generalSum: number
     description?: string
     type: string
+    currency?: string
   }
 }
 
@@ -120,6 +121,7 @@ const PaymentChangeLogSchema = new Schema<IPaymentChangeLogModel>(
       generalSum: { type: Number, required: true },
       description: { type: String },
       type: { type: String, required: true },
+      currency: { type: String },
     },
   },
   { timestamps: true }
