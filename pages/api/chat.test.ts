@@ -1,10 +1,16 @@
 import handler from './chat'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import { streamText } from 'ai'
+import { getModel } from '@common/services/aiAssistant/config'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 jest.mock('@utils/getCurrentUser', () => ({ getCurrentUser: jest.fn() }))
-jest.mock('@ai-sdk/google', () => ({ google: jest.fn(() => 'mock-model') }))
+// Mock config so the test doesn't pull real provider SDKs (Web Streams) and can
+// simulate a missing API key via getModel throwing.
+jest.mock('@common/services/aiAssistant/config', () => ({
+  getModel: jest.fn(() => 'mock-model'),
+  AI_MAX_STEPS: 5,
+}))
 jest.mock('@common/services/aiAssistant/tools', () => ({
   buildAssistantTools: jest.fn(() => ({})),
 }))
@@ -16,6 +22,7 @@ jest.mock('ai', () => ({
 
 const mockGetCurrentUser = getCurrentUser as jest.Mock
 const mockStreamText = streamText as jest.Mock
+const mockGetModel = getModel as jest.Mock
 
 const adminCtx = {
   isUser: false,
@@ -49,7 +56,7 @@ function req(overrides: Partial<NextApiRequest> = {}) {
 describe('/api/chat access gate', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    process.env.GOOGLE_GENERATIVE_AI_API_KEY = 'test-key'
+    mockGetModel.mockReturnValue('mock-model')
   })
 
   it('returns 405 for non-POST methods', async () => {
@@ -100,9 +107,11 @@ describe('/api/chat access gate', () => {
     expect(mockStreamText).not.toHaveBeenCalled()
   })
 
-  it('returns 500 when the API key is missing', async () => {
+  it('returns 500 when the provider API key is missing', async () => {
     mockGetCurrentUser.mockResolvedValueOnce(adminCtx)
-    delete process.env.GOOGLE_GENERATIVE_AI_API_KEY
+    mockGetModel.mockImplementationOnce(() => {
+      throw new Error('GROQ_API_KEY is missing or empty.')
+    })
     const res = buildRes()
     await handler(req(), res)
     expect(res.status).toHaveBeenCalledWith(500)

@@ -1,9 +1,8 @@
-import { google } from '@ai-sdk/google'
 import { streamText, convertToModelMessages, stepCountIs } from 'ai'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import { SYSTEM_PROMPT } from '@common/services/aiAssistant/prompt'
-import { AI_MODEL, AI_MAX_STEPS } from '@common/services/aiAssistant/config'
+import { AI_MAX_STEPS, getModel } from '@common/services/aiAssistant/config'
 import { buildAssistantTools } from '@common/services/aiAssistant/tools'
 import type { UserContext } from '@common/services/paymentService/payment.service'
 
@@ -49,11 +48,8 @@ export default async function handler(
       return
     }
 
-    const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY?.trim()
-    if (!apiKey) {
-      res.status(500).json({ error: 'API key is missing or empty' })
-      return
-    }
+    // Resolves the active provider's model; throws if its API key is missing.
+    const model = getModel()
 
     const userContext: UserContext = {
       isUser: ctx.isUser,
@@ -65,7 +61,7 @@ export default async function handler(
     const modelMessages = await convertToModelMessages(uiMessages)
 
     const result = streamText({
-      model: google(AI_MODEL),
+      model,
       system: SYSTEM_PROMPT,
       messages: modelMessages,
       tools: buildAssistantTools(userContext),
