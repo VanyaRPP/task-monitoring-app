@@ -71,7 +71,7 @@ const InvoiceTour: React.FC<InvoiceTourProps> = ({
       title: 'Адреса та місяць',
       description:
         'Адреса — об’єкт, за яким нараховується оплата (необов’язково). Місяць — розрахунковий період рахунку.',
-      target: () => getEl('month'),
+      target: () => getEl('address-month'),
     },
     {
       title: 'Тип оплати',
