@@ -412,7 +412,7 @@ $lightRoot: ":global(:root[data-theme='light'])";
 @media print {
   @page {
     size: A4;
-    margin: 12mm 14mm;
+    margin: 0;
   }
 
   .clInvoice {
@@ -443,6 +443,7 @@ $lightRoot: ":global(:root[data-theme='light'])";
   }
 
   .clMeta {
+    margin-bottom: 0;
     border-top-color: #e2e2e2 !important;
   }
   .clMetaRow {
@@ -459,24 +460,40 @@ $lightRoot: ":global(:root[data-theme='light'])";
     border-left-color: #e2e2e2 !important;
   }
 
+  .clTablePrintWrapper {
+    display: block !important;
+    padding-top: 1cm !important;
+    padding-bottom: 1cm !important;
+    box-decoration-break: clone !important;
+    -webkit-box-decoration-break: clone !important;
+  }
   .clTableWrap {
     border-color: #e2e2e2 !important;
+    break-inside: auto !important;
+    page-break-inside: auto !important;
   }
   .clTable {
+    display: table !important;
     thead {
+      display: table-header-group !important;
       background: #fafafa !important;
       th {
         color: #555 !important;
         border-bottom-color: #e2e2e2 !important;
       }
     }
-    tbody tr {
-      border-bottom-color: #e2e2e2 !important;
-      &:nth-child(even) {
-        background: #fafafa !important;
-      }
-      td {
-        color: #111 !important;
+    tbody {
+      display: table-row-group !important;
+      tr {
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+        border-bottom-color: #e2e2e2 !important;
+        &:nth-child(even) {
+          background: #fafafa !important;
+        }
+        td {
+          color: #111 !important;
+        }
       }
     }
   }
@@ -512,6 +529,7 @@ $lightRoot: ":global(:root[data-theme='light'])";
     page-break-inside: avoid;
     break-before: avoid;
     page-break-before: avoid;
+    margin-top: 0;
     margin-bottom: 1rem;
   }
   .clTotals {

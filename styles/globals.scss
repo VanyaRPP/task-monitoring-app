@@ -165,7 +165,10 @@ body {
     print-color-adjust: exact !important;
     margin: 0 !important;
     padding: 0 !important;
-    overflow: hidden !important;
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+    display: block !important;
   }
 
   * {
@@ -178,7 +181,7 @@ body {
     padding: 0 !important;
     width: 100% !important;
     box-sizing: border-box !important;
-    overflow: hidden !important;
+    overflow: visible !important;
   }
 
   .ant-table,
@@ -274,6 +277,6 @@ body {
   }
 
   @page {
-    margin: 0;
+    margin: 0 !important;
   }
 }

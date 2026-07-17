@@ -63,7 +63,7 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
     .filter((s) => s.length > 0)
     .join(' ')
 
-  const componentRef = useRef()
+  const componentRef = useRef<HTMLDivElement>(null)
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
     documentTitle:

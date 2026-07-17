@@ -379,7 +379,7 @@
 @media print {
   @page {
     size: A4;
-    margin: 12mm 14mm;
+    margin: 0;
   }
 
   .invoiceContainer,
@@ -418,6 +418,7 @@
     grid-template-columns: 1.2fr 1fr !important;
     gap: 1rem !important;
     align-items: stretch !important;
+    margin-bottom: 0;
   }
 
   .infoColumnStack {
@@ -475,7 +476,28 @@
     color: #111 !important;
   }
 
+  .tablePrintWrapper {
+    padding-top: 1cm !important;
+    padding-bottom: 1cm !important;
+    box-decoration-break: clone !important;
+    -webkit-box-decoration-break: clone !important;
+  }
+  .lgTableWrap {
+    break-inside: auto !important;
+    page-break-inside: auto !important;
+  }
   .invoiceTable {
+    display: table !important;
+    thead {
+      display: table-header-group !important;
+    }
+    tbody {
+      display: table-row-group !important;
+      tr {
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+      }
+    }
     th,
     td {
       font-size: 0.95rem;
@@ -508,6 +530,7 @@
     justify-content: space-between !important;
     align-items: flex-start !important;
     gap: 1.5rem !important;
+    margin-top: 0;
   }
 
   .invoiceDates {
@@ -539,7 +562,6 @@
   }
 
   .infoCard,
-  .invoiceTable tr,
   .summarySection,
   .footerNote {
     break-inside: avoid;
