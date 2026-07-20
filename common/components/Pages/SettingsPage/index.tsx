@@ -72,6 +72,24 @@ export const AdminPanelPage: React.FC = () => {
                       />
                     ),
                   },
+                  {
+                    key: 'payment-audit',
+                    label: 'Логування',
+                    children: (
+                      <>
+                        <Flex
+                          justify="space-between"
+                          align="center"
+                          style={{ marginBottom: 16 }}
+                        >
+                          <Typography.Title level={4} style={{ margin: 0 }}>
+                            Логування
+                          </Typography.Title>
+                        </Flex>
+                        <PaymentAuditTable />
+                      </>
+                    ),
+                  },
                 ]
               : []),
             ...(isGlobalAdmin
@@ -110,24 +128,6 @@ export const AdminPanelPage: React.FC = () => {
                     key: 'templates',
                     label: 'Шаблони типів',
                     children: <DomainTypeTemplatesTable />,
-                  },
-                  {
-                    key: 'payment-audit',
-                    label: 'Логування',
-                    children: (
-                      <>
-                        <Flex
-                          justify="space-between"
-                          align="center"
-                          style={{ marginBottom: 16 }}
-                        >
-                          <Typography.Title level={4} style={{ margin: 0 }}>
-                            Логування
-                          </Typography.Title>
-                        </Flex>
-                        <PaymentAuditTable />
-                      </>
-                    ),
                   },
                 ]
               : []),
