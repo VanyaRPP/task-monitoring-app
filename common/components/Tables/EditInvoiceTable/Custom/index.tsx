@@ -66,6 +66,8 @@ export const Name: React.FC<InvoiceComponentProps> = ({
     [company, service, prevPayment, fieldName]
   )
 
+  const hasName = Boolean(value && typeof value === 'string' && value.trim())
+
   if (!editable || type !== 'custom') {
     const displayName =
       record?.name && record.name !== 'custom'
@@ -131,7 +133,7 @@ export const Name: React.FC<InvoiceComponentProps> = ({
       </div>
 
       <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-        {!isCustomService && (
+        {!isCustomService && hasName && (
           <Form.Item
             name={[...name, 'saveToDomain']}
             valuePropName="checked"
