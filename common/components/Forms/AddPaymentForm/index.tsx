@@ -56,15 +56,13 @@ function AddPaymentForm({
       <div data-invoice-tour="domain">
         <DomainsSelect form={form} edit={edit} allowCreate={allowCreate} />
       </div>
-      <div data-invoice-tour="address">
+      <div data-invoice-tour="address-month">
         <AddressesSelect
           form={form}
           edit={edit}
           street={company?.street?._id}
           required={false}
         />
-      </div>
-      <div data-invoice-tour="month">
         <MonthServiceSelect form={form} edit={edit} />
       </div>
       <div data-invoice-tour="company">
