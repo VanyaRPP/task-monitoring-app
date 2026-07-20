@@ -40,11 +40,7 @@ const LedgerTemplate: FC<TemplateProps> = ({
     getLabel(overrides, key, def, isEnglish)
 
   return (
-    <div
-      className={lg.lgInvoice}
-      ref={componentRef}
-      style={{ width: '100%', margin: '2em auto 1em' }}
-    >
+    <div className={lg.lgInvoice} ref={componentRef}>
       <div className={lg.lgHeader}>
         <div className={lg.lgBrand}>
           <div className={lg.lgBrandName}>
