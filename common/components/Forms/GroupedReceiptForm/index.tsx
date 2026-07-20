@@ -346,7 +346,19 @@ const GroupedReceiptForm: FC<Props> = ({
         </Dropdown>
       </div>
 
-      <TemplateComponent {...templateProps} />
+      <div
+        style={{
+          width: '100%',
+          height: '100%',
+          boxSizing: 'border-box',
+          paddingTop: '2em',
+          paddingRight: '1.5em',
+          paddingLeft: '1.5em',
+          position: 'relative',
+        }}
+      >
+        <TemplateComponent {...templateProps} />
+      </div>
     </>
   )
 }

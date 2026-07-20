@@ -98,19 +98,7 @@ const OlimpTemplate: FC<TemplateProps> = ({
   }, [paymentInfoLines.length, paymentBodyLines.length, isEnglish])
 
   return (
-    <div
-      className={s.invoiceContainer}
-      ref={componentRef}
-      style={{
-        width: '100%',
-        height: '100%',
-        boxSizing: 'border-box',
-        paddingTop: '2em',
-        paddingRight: '1.5em',
-        paddingLeft: '1.5em',
-        position: 'relative',
-      }}
-    >
+    <div className={s.invoiceContainer} ref={componentRef}>
       <div className={s.invoiceHeader}>
         <div className={s.brandBlock}>
           <div className={s.brandText}>
