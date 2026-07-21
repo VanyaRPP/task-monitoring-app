@@ -13,7 +13,6 @@ import {
   dateToMonthYear,
 } from '@assets/features/formatDate'
 import { Operations, ServiceName, ServiceType } from '@utils/constants'
-import { ICustomServiceItem } from '@utils/servicesVisibility'
 import {
   formatDebt,
   getDebtorTooltipColor,
@@ -59,7 +58,6 @@ interface Params {
   onMarkPaid: (p: IExtendedPayment) => void
   onDuplicate: (p: IExtendedPayment) => void
   deleteLoading: boolean
-  visibleCustomServices?: ICustomServiceItem[]
 }
 
 function widenFilterDropdown(w = 240) {
@@ -87,13 +85,17 @@ function widenFilterDropdown(w = 240) {
 
 const CustomName = 'custom-name:'
 
-export function buildAutoCustomColumns({
+// Custom services are identified by their invoice `name` — the same key the
+// payments filter (ColumnSelect) uses — so the table columns and the filter
+// options are always derived from the same source and stay in sync. Only names
+// with a non-zero sum are surfaced (a 0-sum line renders no column). The
+// payments are already domain-narrowed server-side, so this list is implicitly
+// scoped to the selected domain(s).
+export function getInvoiceCustomServiceNames({
   payments,
-  sepDomainID,
 }: {
   payments?: IGetPaymentResponse
-  sepDomainID?: string
-}): ColumnType<IExtendedPayment>[] {
+}): string[] {
   if (!payments?.data?.length) return []
 
   const order: string[] = []
@@ -105,14 +107,31 @@ export function buildAutoCustomColumns({
       const sum = Number(field.sum ?? field.price ?? 0)
 
       if (sum === 0) return
-      const label = field.name
+      const label = field.name?.trim()
       if (!label || seenNames.has(label)) return
       seenNames.add(label)
       order.push(label)
     })
   })
 
-  return order.map((label) => {
+  return order
+}
+
+export function buildAutoCustomColumns({
+  payments,
+  sepDomainID,
+  selectedColumns,
+}: {
+  payments?: IGetPaymentResponse
+  sepDomainID?: string
+  selectedColumns?: string[]
+}): ColumnType<IExtendedPayment>[] {
+  const names = getInvoiceCustomServiceNames({ payments })
+  const visible = selectedColumns
+    ? names.filter((label) => selectedColumns.includes(label))
+    : names
+
+  return visible.map((label) => {
     const matches = (field: IExtendedPayment['invoice'][number]) =>
       field.type === ServiceType.Custom && field.name === label
     const sumFor = (payment: IExtendedPayment) =>
@@ -156,7 +175,6 @@ export function usePaymentColumns({
   onMarkPaid,
   onDuplicate,
   deleteLoading,
-  visibleCustomServices,
 }: Params): ColumnsType<IExtendedPayment> {
   const { token } = theme.useToken()
 
@@ -465,8 +483,7 @@ export function usePaymentColumns({
         },
       },
       ...(selectedColumns
-        .filter((value) => value !== ServiceType.Custom)
-        .filter((value) => !visibleCustomServices?.some((s) => s._id === value))
+        .filter((value) => value !== ServiceType.Custom && value in ServiceName)
         .map((value) => {
           const findItem = (payment: IExtendedPayment) =>
             payment.invoice.find((i) => i.type === value)
@@ -488,6 +505,7 @@ export function usePaymentColumns({
       ...(buildAutoCustomColumns({
         payments,
         sepDomainID,
+        selectedColumns,
       }) as ColumnType<IExtendedPayment>[]),
       {
         align: 'center',
