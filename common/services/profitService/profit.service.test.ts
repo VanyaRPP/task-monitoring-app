@@ -78,7 +78,9 @@ describe('ProfitService.create', () => {
   })
 
   it('wraps storage errors in a friendly message', async () => {
-    const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+    const errorSpy = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => undefined)
     create.mockRejectedValue(new Error('db down'))
 
     await expect(ProfitService.create(validInput)).rejects.toThrow(
