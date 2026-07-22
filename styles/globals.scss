@@ -184,6 +184,34 @@ body {
     overflow: visible !important;
   }
 
+  /* Shared invoice-table pagination. Every custom-table template marks its
+     wrapper with [data-invoice-table-wrap] and its <table> with
+     [data-invoice-table] so this lives in one place instead of being copied
+     into each template's module. Repeats the header on every page and keeps
+     rows from being split across the page break. */
+  [data-invoice-table-wrap] {
+    overflow: visible !important;
+    break-inside: auto !important;
+    page-break-inside: auto !important;
+  }
+
+  [data-invoice-table] {
+    display: table !important;
+  }
+
+  [data-invoice-table] thead {
+    display: table-header-group !important;
+  }
+
+  [data-invoice-table] tbody {
+    display: table-row-group !important;
+  }
+
+  [data-invoice-table] tbody tr {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
   .ant-table,
   .ant-table-container {
     background: white !important;
@@ -282,7 +310,11 @@ body {
     display: none !important;
   }
 
+  // Zero left/right margin gives the invoice the full page width (the task's
+  // "Margins: None" requirement); the top/bottom margin is applied on every
+  // printed page automatically, so no per-page padding hacks are needed.
   @page {
-    margin: 0 !important;
+    size: A4;
+    margin: 12mm 0 !important;
   }
 }

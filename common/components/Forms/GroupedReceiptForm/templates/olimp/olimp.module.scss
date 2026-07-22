@@ -377,11 +377,6 @@
 }
 
 @media print {
-  @page {
-    size: A4;
-    margin: 0;
-  }
-
   .invoiceContainer,
   .invoiceContainer * {
     -webkit-print-color-adjust: exact;
@@ -476,29 +471,7 @@
     color: #111 !important;
   }
 
-  .tablePrintWrapper {
-    padding-top: 1cm !important;
-    padding-bottom: 1cm !important;
-    box-decoration-break: clone !important;
-    -webkit-box-decoration-break: clone !important;
-  }
-  .tableWrapper {
-    overflow: visible !important;
-    break-inside: auto !important;
-    page-break-inside: auto !important;
-  }
   .invoiceTable {
-    display: table !important;
-    thead {
-      display: table-header-group !important;
-    }
-    tbody {
-      display: table-row-group !important;
-      tr {
-        break-inside: avoid !important;
-        page-break-inside: avoid !important;
-      }
-    }
     th,
     td {
       font-size: 0.95rem;
