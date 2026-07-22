@@ -144,9 +144,35 @@ describe('Payment Audit API - restore', () => {
     expect(restored).not.toBeNull()
   })
 
-  it('returns 400 for a non-DELETE log (e.g. UPDATE)', async () => {
+  it('returns 400 for a non-restorable log (e.g. MARK_PAID)', async () => {
     await mockLoginAs(users.globalAdmin)
     const paymentId = new mongoose.Types.ObjectId().toString()
+    const log = await createDeleteLog({
+      paymentId,
+      domainId: ownDomainId,
+      actionType: 'MARK_PAID',
+    })
+
+    const res = await performRequest(log._id)
+    expect(res.status).toHaveBeenCalledWith(400)
+  })
+
+  it('UPDATE restore reverts the payment to its before-state and logs a RESTORE', async () => {
+    await mockLoginAs(users.globalAdmin)
+    const paymentId = new mongoose.Types.ObjectId().toString()
+
+    await Payment.create({
+      _id: paymentId,
+      invoiceNumber: 7777,
+      type: 'debit',
+      invoiceCreationDate: new Date('2024-01-01'),
+      domain: ownDomainId,
+      generalSum: 999,
+      invoice: [],
+      provider: { description: 'p' },
+      reciever: { companyName: 'c', adminEmails: [], description: 'd' },
+    })
+
     const log = await createDeleteLog({
       paymentId,
       domainId: ownDomainId,
@@ -154,7 +180,31 @@ describe('Payment Audit API - restore', () => {
     })
 
     const res = await performRequest(log._id)
-    expect(res.status).toHaveBeenCalledWith(400)
+
+    expect(res.status).toHaveBeenCalledWith(200)
+
+    const reverted = await Payment.findById(paymentId)
+    expect(reverted?.generalSum).toBe(500)
+
+    const restoreLog = await PaymentChangeLog.findOne({
+      paymentId,
+      actionType: 'RESTORE',
+      source: 'admin-restore',
+    })
+    expect(restoreLog).not.toBeNull()
+  })
+
+  it('forbids a DOMAIN_ADMIN from reverting an UPDATE in a foreign domain', async () => {
+    await mockLoginAs(users.domainAdmin)
+    const paymentId = new mongoose.Types.ObjectId().toString()
+    const log = await createDeleteLog({
+      paymentId,
+      domainId: foreignDomainId,
+      actionType: 'UPDATE',
+    })
+
+    const res = await performRequest(log._id)
+    expect(res.status).toHaveBeenCalledWith(403)
   })
 
   it('returns 409 when a payment with that _id already exists', async () => {

@@ -1,6 +1,9 @@
 import { ServiceType } from '@utils/constants'
 import type { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
-import { buildAutoCustomColumns } from './usePaymentColumns'
+import {
+  buildAutoCustomColumns,
+  getInvoiceCustomServiceNames,
+} from './usePaymentColumns'
 
 const payment = (invoice: any[]): IExtendedPayment =>
   ({ _id: Math.random().toString(36).slice(2), invoice }) as any
@@ -62,5 +65,67 @@ describe('buildAutoCustomColumns', () => {
     const a = payment([{ type: ServiceType.Custom, name: 'Знижка', sum: -50 }])
     const b = payment([{ type: ServiceType.Custom, name: 'Знижка', sum: -20 }])
     expect((col as any).sorter(a, b)).toBeLessThan(0)
+  })
+
+  it('shows only custom columns present in selectedColumns when provided', () => {
+    const data = [
+      payment([
+        { type: ServiceType.Custom, name: 'Прибирання', sum: 100 },
+        { type: ServiceType.Custom, name: 'Вивіз сміття', sum: 50 },
+      ]),
+    ]
+    const cols = buildAutoCustomColumns({
+      payments: { data } as any,
+      selectedColumns: ['Прибирання'],
+    })
+    expect(titlesOf(cols)).toEqual(['Прибирання'])
+  })
+
+  it('hides every custom column when selectedColumns is empty', () => {
+    const data = [
+      payment([{ type: ServiceType.Custom, name: 'Прибирання', sum: 100 }]),
+    ]
+    expect(
+      buildAutoCustomColumns({ payments: { data } as any, selectedColumns: [] })
+    ).toEqual([])
+  })
+
+  it('shows all custom columns when selectedColumns is omitted', () => {
+    const data = [
+      payment([{ type: ServiceType.Custom, name: 'Прибирання', sum: 100 }]),
+    ]
+    expect(titlesOf(withData(data))).toEqual(['Прибирання'])
+  })
+})
+
+describe('getInvoiceCustomServiceNames', () => {
+  it('collects unique custom names with a non-zero sum', () => {
+    const data = [
+      payment([
+        { type: ServiceType.Custom, name: 'Прибирання', sum: 100 },
+        { type: ServiceType.Custom, name: 'Прибирання', sum: 20 },
+        { type: 'electricityPrice', name: 'Електро', sum: 5 },
+        { type: ServiceType.Custom, name: 'Порожня', sum: 0 },
+      ]),
+    ]
+    expect(getInvoiceCustomServiceNames({ payments: { data } as any })).toEqual(
+      ['Прибирання']
+    )
+  })
+
+  it('includes ad-hoc "Власне" fields that have no serviceId', () => {
+    const data = [
+      payment([{ type: ServiceType.Custom, name: 'Ремонт даху', sum: 10 }]),
+    ]
+    expect(getInvoiceCustomServiceNames({ payments: { data } as any })).toEqual(
+      ['Ремонт даху']
+    )
+  })
+
+  it('returns [] when there are no payments', () => {
+    expect(
+      getInvoiceCustomServiceNames({ payments: { data: [] } as any })
+    ).toEqual([])
+    expect(getInvoiceCustomServiceNames({})).toEqual([])
   })
 })

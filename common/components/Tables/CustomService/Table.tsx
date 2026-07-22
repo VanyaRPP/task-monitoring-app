@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import type React from 'react'
 import {
   Button,
@@ -28,7 +28,7 @@ import {
   useGetDomainTypeTemplatesQuery,
 } from '@common/api/domainApi/domain.api'
 import type { DomainTypeTemplateCategory } from '@common/api/domainApi/domain.api.types'
-import { defaultServices, Roles, ServiceType } from '@utils/constants'
+import { defaultServices, Roles } from '@utils/constants'
 import {
   getVisibleServices,
   type IDomainForVisibility,
@@ -37,6 +37,10 @@ import {
   getDomainTypeTemplateCategoryLabel,
   DOMAIN_TYPE_TEMPLATE_CATEGORY_OPTIONS,
 } from '@utils/domain/domain-type-template-categories'
+import {
+  getAssignableServiceTypeOptions,
+  UNDEFINED_SERVICE_TYPE_VALUE,
+} from '@utils/domain/service-type-categories'
 
 export interface CustomServicesTableProps {
   domains?: any[]
@@ -115,16 +119,17 @@ export const CustomServicesTable: React.FC<CustomServicesTableProps> = ({
 
   const defaultServiceIds = useMemo(() => new Set(defaultServices), [])
 
-  const resolveCategory = (
-    s: ICustomService
-  ): DomainTypeTemplateCategory | string | undefined =>
-    s.category ??
-    serviceIdToCategoryMap.get(String(s._id)) ??
-    (s.domain ? domainCategoryMap.get(s.domain) : undefined) ??
-    (defaultServiceIds.has(s._id)
-      ? ('utility' as DomainTypeTemplateCategory)
-      : undefined) ??
-    s.groupName
+  const resolveCategory = useCallback(
+    (s: ICustomService): DomainTypeTemplateCategory | string | undefined =>
+      s.category ??
+      serviceIdToCategoryMap.get(String(s._id)) ??
+      (s.domain ? domainCategoryMap.get(s.domain) : undefined) ??
+      (defaultServiceIds.has(s._id)
+        ? ('utility' as DomainTypeTemplateCategory)
+        : undefined) ??
+      s.groupName,
+    [serviceIdToCategoryMap, domainCategoryMap, defaultServiceIds]
+  )
 
   const [search, setSearch] = useState('')
   const [selectedDomain, setSelectedDomain] = useState<string | undefined>(
@@ -162,17 +167,29 @@ export const CustomServicesTable: React.FC<CustomServicesTableProps> = ({
   const [editingService, setEditingService] = useState<ICustomService | null>(
     null
   )
-  const [form] = Form.useForm<{ name: string }>()
+  const [form] = Form.useForm<{ name: string; serviceType: string }>()
+
+  const serviceTypeOptions = useMemo(
+    () => getAssignableServiceTypeOptions(),
+    []
+  )
 
   const openEdit = (record: ICustomService) => {
     setEditingService(record)
-    form.setFieldsValue({ name: record.name })
+    form.setFieldsValue({
+      name: record.name,
+      serviceType: record.serviceType ?? UNDEFINED_SERVICE_TYPE_VALUE,
+    })
   }
 
   const handleEdit = async () => {
     try {
-      const { name } = await form.validateFields()
-      await editService({ _id: editingService._id, name }).unwrap()
+      const { name, serviceType } = await form.validateFields()
+      await editService({
+        _id: editingService._id,
+        name,
+        serviceType: serviceType ? serviceType : null,
+      }).unwrap()
       message.success('Послугу оновлено')
       setEditingService(null)
     } catch {
@@ -222,15 +239,14 @@ export const CustomServicesTable: React.FC<CustomServicesTableProps> = ({
       key: 'actions',
       width: 100,
       render: (_: unknown, record: ICustomService) => {
-        const isStandard =
-          record.serviceType && record.serviceType !== ServiceType.Custom
+        const isSystem = defaultServiceIds.has(record._id)
         return (
           <Space>
             <Button
               type="text"
               icon={<EditOutlined />}
               onClick={() => openEdit(record)}
-              disabled={!!isStandard}
+              disabled={isSystem}
             />
             <Popconfirm
               title="Видалити послугу?"
@@ -238,13 +254,13 @@ export const CustomServicesTable: React.FC<CustomServicesTableProps> = ({
               onConfirm={() => handleDelete(record._id)}
               okText="Так"
               cancelText="Ні"
-              disabled={!!isStandard}
+              disabled={isSystem}
             >
               <Button
                 type="text"
                 icon={<DeleteOutlined />}
                 danger
-                disabled={!!isStandard}
+                disabled={isSystem}
               />
             </Popconfirm>
           </Space>
@@ -304,6 +320,9 @@ export const CustomServicesTable: React.FC<CustomServicesTableProps> = ({
             rules={[{ required: true, message: 'Введіть назву послуги' }]}
           >
             <Input />
+          </Form.Item>
+          <Form.Item name="serviceType" label="Тип послуги">
+            <Select options={serviceTypeOptions} />
           </Form.Item>
         </Form>
       </Modal>

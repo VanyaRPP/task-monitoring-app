@@ -9,7 +9,10 @@ import {
   PaymentActionType,
   PaymentMutationSource,
 } from '@common/api/paymentApi/payment.api.types'
-import { useGetPaymentAuditQuery } from '@common/api/paymentApi/payment.api'
+import {
+  useGetPaymentAuditQuery,
+  useGetPaymentAuditFacetsQuery,
+} from '@common/api/paymentApi/payment.api'
 import usePaymentAuditColumns from './usePaymentAuditColumns'
 import AuditDetailsModal from './AuditDetailsModal'
 
@@ -41,6 +44,9 @@ const PaymentAuditTable: React.FC = () => {
       actorEmail: (filters.actorEmail?.[0] as string) || undefined,
       actionType: (filters.actionType as PaymentActionType[]) || undefined,
       source: (filters.source as PaymentMutationSource[]) || undefined,
+      type: (filters.type as string[]) || undefined,
+      domainId: (filters.domainId?.[0] as string) || undefined,
+      companyId: (filters.company?.[0] as string) || undefined,
       from,
       to,
     }
@@ -48,6 +54,18 @@ const PaymentAuditTable: React.FC = () => {
 
   const { data, isFetching, isError, refetch } =
     useGetPaymentAuditQuery(queryArgs)
+
+  const { data: facets } = useGetPaymentAuditFacetsQuery()
+
+  const domainOptions = useMemo(
+    () => (facets?.domains ?? []).map((d) => ({ text: d.name, value: d._id })),
+    [facets]
+  )
+  const companyOptions = useMemo(
+    () =>
+      (facets?.companies ?? []).map((c) => ({ text: c.name, value: c._id })),
+    [facets]
+  )
 
   const openDetails = (record: IPaymentChangeLog) => {
     setActiveRecord(record)
@@ -57,6 +75,8 @@ const PaymentAuditTable: React.FC = () => {
   const columns = usePaymentAuditColumns({
     filters,
     onOpenDetails: openDetails,
+    domainOptions,
+    companyOptions,
   })
 
   const handleChange = (

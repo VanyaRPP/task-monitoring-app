@@ -323,3 +323,119 @@ describe('RealEstate API - PATCH', () => {
     expect(response.data.notValidField).toBe(undefined)
   })
 })
+
+describe('RealEstate API - DELETE', () => {
+  it('should be able to successfully remove the company as GlobalAdmin', async () => {
+    await mockLoginAs(users.globalAdmin)
+
+    const mockReq = {
+      method: 'DELETE',
+      query: { id: realEstates[0]._id },
+    } as any
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockReq, mockRes)
+
+    expect(mockRes.status).toHaveBeenCalledWith(200)
+    expect(mockRes.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: true,
+      })
+    )
+  })
+
+  it('should be able to successfully remove his company from his domain as DomainAdmin', async () => {
+    await mockLoginAs(users.domainAdmin)
+
+    const mockReq = {
+      method: 'DELETE',
+      query: { id: realEstates[0]._id },
+    } as any
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockReq, mockRes)
+
+    expect(mockRes.status).toHaveBeenCalledWith(200)
+    expect(mockRes.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: true,
+      })
+    )
+  })
+
+  it('should prevent a company from deleting another domain as DomainAdmin', async () => {
+    await mockLoginAs(users.domainAdmin)
+
+    const mockReq = {
+      method: 'DELETE',
+      query: { id: realEstates[1]._id },
+    } as any
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockReq, mockRes)
+
+    expect(mockRes.status).toHaveBeenCalledWith(403)
+    expect(mockRes.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: false,
+        message: expect.stringContaining('not allowed'),
+      })
+    )
+  })
+
+  it('should return a 404 error when attempting to delete a nonexistent company (DomainAdmin)', async () => {
+    await mockLoginAs(users.domainAdmin)
+
+    const fakeId = '64d68421d9ba2fc8fea79dff'
+    const mockReq = {
+      method: 'DELETE',
+      query: { id: fakeId },
+    } as any
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockReq, mockRes)
+
+    expect(mockRes.status).toHaveBeenCalledWith(404)
+    expect(mockRes.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: false,
+        message: 'realestate not found',
+      })
+    )
+  })
+
+  it('should prevent ordinary users from deleting the company (User)', async () => {
+    await mockLoginAs(users.user)
+
+    const mockReq = {
+      method: 'DELETE',
+      query: { id: realEstates[0]._id },
+    } as any
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockReq, mockRes)
+
+    expect(mockRes.status).toHaveBeenCalledWith(403)
+    expect(mockRes.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: false,
+        message: expect.stringContaining('not allowed'),
+      })
+    )
+  })
+})
