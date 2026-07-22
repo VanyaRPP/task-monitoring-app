@@ -189,75 +189,80 @@ const LedgerTemplate: FC<TemplateProps> = ({
         </div>
       </div>
 
-      <div className={lg.lgTableWrap} data-invoice-table-wrap>
-        <table className={lg.lgTable} data-invoice-table>
-          <thead>
-            <tr>
-              <th>
-                <EditableText
-                  fieldKey="col.description"
-                  defaultValue={L(
-                    'col.description',
-                    isEnglish ? 'Description' : 'Опис'
-                  )}
-                />
-              </th>
-              {showQuantityInPreview && (
-                <>
-                  <th className={lg.colRate}>
-                    <EditableText
-                      fieldKey="col.rate"
-                      defaultValue={L('col.rate', isEnglish ? 'Rate' : 'Ціна')}
-                    />
-                  </th>
-                  <th className={lg.colQty}>
-                    <EditableText
-                      fieldKey="col.qty"
-                      defaultValue={L('col.qty', isEnglish ? 'Qty' : 'К-сть')}
-                    />
-                  </th>
-                </>
-              )}
-              <th className={lg.colTotal}>
-                <EditableText
-                  fieldKey="col.total"
-                  defaultValue={L('col.total', isEnglish ? 'Total' : 'Сума')}
-                />
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((item: any, index: number) => {
-              const qty = getQty(item)
-              const rate = Number.isFinite(Number(item?.price))
-                ? Number(item.price)
-                : qty
-                  ? Number(item?.sum || 0) / qty
-                  : Number(item?.sum || 0)
-              return (
-                <tr key={`${item?.type || item?.name}-${index}`}>
-                  <td>
-                    {item?.name || item?.type || '—'}
-                    {item?.description ? (
-                      <div style={{ fontSize: '0.85em', opacity: 0.65 }}>
-                        {item.description}
-                      </div>
-                    ) : null}
-                  </td>
-                  {showQuantityInPreview && (
-                    <>
-                      <td className={lg.colRate}>{rate.toFixed(2)}</td>
-                      <td className={lg.colQty}>{qty}</td>
-                    </>
-                  )}
-                  <td className={lg.colTotal}>
-                    {Number(item?.sum || 0).toFixed(2)}&nbsp;{currencyLabel}
-                  </td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
+      <div className={lg.lgTablePrintWrapper}>
+        <div className={lg.lgTableWrap}>
+          <table className={lg.lgTable}>
+            <thead>
+              <tr>
+                <th>
+                  <EditableText
+                    fieldKey="col.description"
+                    defaultValue={L(
+                      'col.description',
+                      isEnglish ? 'Description' : 'Опис'
+                    )}
+                  />
+                </th>
+                {showQuantityInPreview && (
+                  <>
+                    <th className={lg.colRate}>
+                      <EditableText
+                        fieldKey="col.rate"
+                        defaultValue={L(
+                          'col.rate',
+                          isEnglish ? 'Rate' : 'Ціна'
+                        )}
+                      />
+                    </th>
+                    <th className={lg.colQty}>
+                      <EditableText
+                        fieldKey="col.qty"
+                        defaultValue={L('col.qty', isEnglish ? 'Qty' : 'К-сть')}
+                      />
+                    </th>
+                  </>
+                )}
+                <th className={lg.colTotal}>
+                  <EditableText
+                    fieldKey="col.total"
+                    defaultValue={L('col.total', isEnglish ? 'Total' : 'Сума')}
+                  />
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((item: any, index: number) => {
+                const qty = getQty(item)
+                const rate = Number.isFinite(Number(item?.price))
+                  ? Number(item.price)
+                  : qty
+                    ? Number(item?.sum || 0) / qty
+                    : Number(item?.sum || 0)
+                return (
+                  <tr key={`${item?.type || item?.name}-${index}`}>
+                    <td>
+                      {item?.name || item?.type || '—'}
+                      {item?.description ? (
+                        <div style={{ fontSize: '0.85em', opacity: 0.65 }}>
+                          {item.description}
+                        </div>
+                      ) : null}
+                    </td>
+                    {showQuantityInPreview && (
+                      <>
+                        <td className={lg.colRate}>{rate.toFixed(2)}</td>
+                        <td className={lg.colQty}>{qty}</td>
+                      </>
+                    )}
+                    <td className={lg.colTotal}>
+                      {Number(item?.sum || 0).toFixed(2)}&nbsp;{currencyLabel}
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <div className={lg.lgSummary}>

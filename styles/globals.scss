@@ -184,34 +184,6 @@ body {
     overflow: visible !important;
   }
 
-  /* Shared invoice-table pagination. Every custom-table template marks its
-     wrapper with [data-invoice-table-wrap] and its <table> with
-     [data-invoice-table] so this lives in one place instead of being copied
-     into each template's module. Repeats the header on every page and keeps
-     rows from being split across the page break. */
-  [data-invoice-table-wrap] {
-    overflow: visible !important;
-    break-inside: auto !important;
-    page-break-inside: auto !important;
-  }
-
-  [data-invoice-table] {
-    display: table !important;
-  }
-
-  [data-invoice-table] thead {
-    display: table-header-group !important;
-  }
-
-  [data-invoice-table] tbody {
-    display: table-row-group !important;
-  }
-
-  [data-invoice-table] tbody tr {
-    break-inside: avoid !important;
-    page-break-inside: avoid !important;
-  }
-
   .ant-table,
   .ant-table-container {
     background: white !important;
@@ -310,10 +282,6 @@ body {
     display: none !important;
   }
 
-  // Full-bleed print so the printed/downloaded invoice is 1-to-1 with the
-  // on-screen preview (which is a borderless, page-margin-free card). Adding
-  // @page margins here makes print less dense than the preview and also leaks
-  // (via !important) into the download path's own @page — so keep it at 0.
   @page {
     margin: 0 !important;
   }
