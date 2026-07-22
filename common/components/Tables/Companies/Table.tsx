@@ -602,7 +602,7 @@ const getDefaultColumns = ({
                   </Popconfirm>
                 ),
               },
-              isGlobalAdmin && {
+              (isGlobalAdmin || isAdmin) && {
                 key: 'delete',
                 label: (
                   <Popconfirm
