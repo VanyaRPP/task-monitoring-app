@@ -198,6 +198,7 @@ body {
   }
 
   .ant-table thead {
+    display: table-header-group !important;
     margin: 0 !important;
     padding: 0 !important;
     background-color: #fafafa !important;
@@ -226,6 +227,11 @@ body {
   .ant-table tbody {
     margin: 0 !important;
     padding: 0 !important;
+  }
+
+  .ant-table tbody > tr {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
   }
 
   .ant-table tbody > tr > td {

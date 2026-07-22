@@ -704,6 +704,7 @@ $surface-stripe-l: rgba(0, 0, 0, 0.02);
   .lgTableWrap {
     border-color: #ccc !important;
     border-radius: 4px !important;
+    overflow: visible !important;
     break-inside: auto !important;
     page-break-inside: auto !important;
   }

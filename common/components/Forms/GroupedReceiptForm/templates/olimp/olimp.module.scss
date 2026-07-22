@@ -482,7 +482,8 @@
     box-decoration-break: clone !important;
     -webkit-box-decoration-break: clone !important;
   }
-  .lgTableWrap {
+  .tableWrapper {
+    overflow: visible !important;
     break-inside: auto !important;
     page-break-inside: auto !important;
   }

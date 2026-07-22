@@ -469,6 +469,7 @@ $lightRoot: ":global(:root[data-theme='light'])";
   }
   .clTableWrap {
     border-color: #e2e2e2 !important;
+    overflow: visible !important;
     break-inside: auto !important;
     page-break-inside: auto !important;
   }
