@@ -310,11 +310,11 @@ body {
     display: none !important;
   }
 
-  // Zero left/right margin gives the invoice the full page width (the task's
-  // "Margins: None" requirement); the top/bottom margin is applied on every
-  // printed page automatically, so no per-page padding hacks are needed.
+  // Full-bleed print so the printed/downloaded invoice is 1-to-1 with the
+  // on-screen preview (which is a borderless, page-margin-free card). Adding
+  // @page margins here makes print less dense than the preview and also leaks
+  // (via !important) into the download path's own @page — so keep it at 0.
   @page {
-    size: A4;
-    margin: 12mm 0 !important;
+    margin: 0 !important;
   }
 }
