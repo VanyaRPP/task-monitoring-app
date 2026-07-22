@@ -50,7 +50,6 @@ import CollapsedTags from '@components/UI/CollapsedTags'
 import TableFilterLink from '@components/UI/Reusable/TableFilterLink'
 import {
   extractDomainsFromRealEstates,
-  getSelectedServiceIds,
   getVisibleServices,
 } from '@utils/servicesVisibility'
 
@@ -243,7 +242,9 @@ const CompaniesTable: React.FC<Props> = ({
   )
 
   const hasActiveFilters = !!(
-    filters?.domain?.length || filters?.company?.length
+    filters?.domain?.length ||
+    filters?.company?.length ||
+    filters?.street?.length
   )
 
   const filteredCustomServices = useMemo(() => {
@@ -251,24 +252,38 @@ const CompaniesTable: React.FC<Props> = ({
       return !STANDARD_SERVICE_NAMES.includes(custom.name)
     })
 
-    if (isGlobalAdmin && hasActiveFilters) {
-      const selectedIds = getSelectedServiceIds(visibleDomains)
-      if (!selectedIds.length) return []
-      const selectedSet = new Set(selectedIds)
-      return (withoutStandard ?? []).filter((s) => selectedSet.has(s._id))
+    if (!withoutStandard?.length) return []
+
+    if (hasActiveFilters) {
+      const activeServiceIds = new Set<string>()
+
+      filteredData.forEach((company: any) => {
+        if (
+          company.individualServices &&
+          Array.isArray(company.individualServices)
+        ) {
+          company.individualServices.forEach((service: any) => {
+            if (service && service._id) {
+              activeServiceIds.add(String(service._id))
+            }
+          })
+        }
+      })
+
+      return withoutStandard.filter((s) => activeServiceIds.has(String(s._id)))
     }
 
     return getVisibleServices(
       userResponse?.roles,
       visibleDomains,
-      withoutStandard ?? []
+      withoutStandard
     )
   }, [
     customServices,
     userResponse?.roles,
     visibleDomains,
+    filteredData,
     hasActiveFilters,
-    isGlobalAdmin,
   ])
 
   if (isError) return <Alert message="Помилка" type="error" showIcon closable />
