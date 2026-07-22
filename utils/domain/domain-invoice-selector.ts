@@ -102,7 +102,7 @@ export function buildInvoiceAddPayloadFromCatalogRow(
     fieldName: row.fieldName,
   })
   if (resolved) {
-    return { type: resolved, serviceId: id }
+    return { type: resolved, serviceId: id, customName: row.name }
   }
   const price = resolveCustomServicePrice(row.fieldName, context) ?? 0
   return {
