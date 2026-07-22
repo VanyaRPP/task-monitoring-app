@@ -75,6 +75,23 @@ export default function UpdateInvoiceButton({
   const { company, service, prevService, prevPayment } = usePaymentContext()
   const name = toArray<string>(_name)
 
+  const currentInvoice = Form.useWatch(['invoice', ...name], form)
+
+  // A Placing row with a valid area was created with the m²×price formula.
+  // If the company later gained inflicion=true, getPlacingInvoice would
+  // incorrectly switch to the inflicion formula for both comparison and refresh.
+  // Strip inflicion from the company view so the m²×price branch is used instead.
+  const effectiveCompany = useMemo(() => {
+    if (
+      serviceType !== ServiceType.Placing ||
+      isNaN(+(currentInvoice?.amount ?? NaN)) ||
+      +(currentInvoice?.amount ?? 0) <= 0
+    ) {
+      return company
+    }
+    return company ? { ...company, inflicion: false } : company
+  }, [serviceType, currentInvoice, company])
+
   const expectedInvoice = useMemo(() => {
     const getInvoice = invoiceGetters[serviceType]
     if (!getInvoice) return null
@@ -86,15 +103,13 @@ export default function UpdateInvoiceButton({
       }, {}) || {}
 
     return getInvoice({
-      company,
+      company: effectiveCompany,
       service,
       prevService,
       currInvoicesCollection: {},
       prevInvoicesCollection,
     })
-  }, [company, service, prevService, prevPayment, serviceType])
-
-  const currentInvoice = Form.useWatch(['invoice', ...name], form)
+  }, [effectiveCompany, service, prevService, prevPayment, serviceType])
 
   const hasChanges = useMemo(() => {
     if (!expectedInvoice) return false
@@ -143,7 +158,7 @@ export default function UpdateInvoiceButton({
         }, {}) || {}
 
       const updatedInvoice = getInvoice({
-        company,
+        company: effectiveCompany,
         service,
         prevService,
         currInvoicesCollection: {},

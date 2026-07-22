@@ -23,6 +23,7 @@ import {
   ICreatePaymentChangeLogResponse,
   IPaymentChangeLog,
   AuditFilters,
+  IPaymentAuditFacetsResponse,
 } from './payment.api.types'
 
 /**
@@ -291,6 +292,11 @@ export const paymentApi = createApi({
       providesTags: ['PaymentAudit'],
     }),
 
+    getPaymentAuditFacets: builder.query<IPaymentAuditFacetsResponse, void>({
+      query: () => ({ url: 'spacehub/payment-audit/facets' }),
+      providesTags: ['PaymentAudit'],
+    }),
+
     restorePayment: builder.mutation<IPayment, { logId: string }>({
       query: ({ logId }) => ({
         url: `spacehub/payment-audit/${logId}/restore`,
@@ -319,5 +325,6 @@ export const {
   useAddCostPaymentMutation,
   useGenerateExcelMutation,
   useGetPaymentAuditQuery,
+  useGetPaymentAuditFacetsQuery,
   useRestorePaymentMutation,
 } = paymentApi

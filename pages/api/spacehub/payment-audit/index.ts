@@ -3,6 +3,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import start from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import PaymentChangeLog from '@common/modules/models/PaymentChangeLog'
+import Payment from '@common/modules/models/Payment'
 import Domain from '@modules/models/Domain'
 import RealEstate from '@common/modules/models/RealEstate'
 
@@ -79,6 +80,11 @@ export default async function handler(
     query.source = { $in: source }
   }
 
+  const types = toArray(req.query.type)
+  if (types) {
+    query['invoiceData.type'] = { $in: types }
+  }
+
   // Date range filter on `date`.
   const dateFilter: Record<string, Date> = {}
   const from = firstString(req.query.from)
@@ -117,6 +123,14 @@ export default async function handler(
       ownedIds.some((id: any) => id.toString() === requestedDomainId)
 
     query.domainId = narrowToOwned ? requestedDomainId : { $in: ownedIds }
+  }
+
+  const requestedCompanyId = firstString(req.query.companyId)
+  if (
+    requestedCompanyId &&
+    mongoose.Types.ObjectId.isValid(requestedCompanyId)
+  ) {
+    query.companyId = requestedCompanyId
   }
 
   try {
@@ -177,6 +191,32 @@ export default async function handler(
       data.forEach((log: any) => {
         const id = companyIdOf(log)
         if (id) log.companyName = companyNameById.get(id)
+      })
+    }
+
+    const snapshotCurrency = (log: any) =>
+      log.before?.currency ?? log.after?.currency ?? log.invoiceData?.currency
+    const paymentIds = Array.from(
+      new Set(
+        data
+          .filter((log: any) => !snapshotCurrency(log))
+          .map((log: any) => log.paymentId?.toString())
+          .filter(Boolean)
+      )
+    )
+    if (paymentIds.length) {
+      const payments = await Payment.find({
+        _id: { $in: paymentIds },
+      }).select('currency')
+      const currencyById = new Map(
+        payments.map((p: any) => [p._id.toString(), p.currency])
+      )
+      data.forEach((log: any) => {
+        if (snapshotCurrency(log)) return
+        const currency = currencyById.get(log.paymentId?.toString())
+        if (currency) {
+          log.invoiceData = { ...log.invoiceData, currency }
+        }
       })
     }
 

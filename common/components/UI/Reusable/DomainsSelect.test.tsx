@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { Form } from 'antd'
 import DomainsSelect from './DomainsSelect'
 import {
@@ -30,7 +30,7 @@ const Wrapper = ({ allowCreate = false }: { allowCreate?: boolean }) => {
   )
 }
 
-const getDomainInput = () => screen.getByRole('combobox')
+const getDomainInput = () => screen.getAllByRole('combobox')[0]
 const domainValue = () => screen.getByTestId('domain-value').textContent
 
 // Simulate typing a name into the search box and leaving the field.
@@ -81,7 +81,6 @@ describe('DomainsSelect — поле надавача послуг', () => {
     typeAndBlur('Alpha')
 
     expect(domainValue()).toBe('d1')
-    // не перейшли в режим створення
     expect(screen.queryByPlaceholderText('Назва надавача')).toBeNull()
   })
 
@@ -109,7 +108,6 @@ describe('DomainsSelect — поле надавача послуг', () => {
     typeAndBlur('Gamma')
 
     expect(domainValue()).toBe('new::Gamma')
-    // автоматично показались додаткові поля
     expect(
       await screen.findByPlaceholderText('Назва надавача')
     ).toBeInTheDocument()
@@ -171,7 +169,6 @@ describe('DomainsSelect — поле надавача послуг', () => {
   })
 
   it('пошук лише серед доступних користувачу: чужа назва вважається новою', () => {
-    // Beta існує в іншого користувача, тож його немає у відповіді запиту.
     mockDomains.mockReturnValue({
       data: [{ _id: 'd1', name: 'Alpha' }],
       isLoading: false,
@@ -199,5 +196,40 @@ describe('DomainsSelect — поле надавача послуг', () => {
 
     expect(domainValue()).not.toContain('new::')
     expect(screen.queryByPlaceholderText('Назва надавача')).toBeNull()
+  })
+
+  it('формує список напрямків послуг за категорією, уникаючи дублікатів (замість name)', async () => {
+    mockTemplates.mockReturnValue({
+      data: [
+        { _id: 't1', name: 'IT template 1', category: 'IT' },
+        { _id: 't2', name: 'IT template 2', category: 'IT' },
+        { _id: 't3', name: 'Real Estate admin', category: 'real-estate' },
+        { _id: 't4', name: 'NoCategory' },
+      ],
+      isLoading: false,
+    })
+
+    mockDomains.mockReturnValue({ data: [], isLoading: false, isError: false })
+
+    render(<Wrapper allowCreate />)
+
+    expect(
+      await screen.findByPlaceholderText('Назва надавача')
+    ).toBeInTheDocument()
+
+    const templateInput = screen.getByRole('combobox')
+
+    fireEvent.mouseDown(templateInput)
+
+    await waitFor(() => {
+      expect(screen.getAllByText('Без послуг').length).toBeGreaterThan(0)
+      expect(screen.getByText('IT')).toBeInTheDocument()
+      expect(screen.getByText('real-estate')).toBeInTheDocument()
+      expect(screen.getByText('NoCategory')).toBeInTheDocument()
+    })
+
+    expect(screen.queryByText('IT template 1')).toBeNull()
+    expect(screen.queryByText('IT template 2')).toBeNull()
+    expect(screen.queryByText('Real Estate admin')).toBeNull()
   })
 })

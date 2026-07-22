@@ -1,4 +1,3 @@
-// @ts-nocheck
 import CustomService from '../common/modules/models/CustomService'
 import { ServiceType } from '../utils/constants'
 import { backfillUtilityServiceTypes } from './backfill-utility-service-types'

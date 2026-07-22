@@ -1,4 +1,3 @@
-// @ts-nocheck
 import DomainTypeTemplate from '../common/modules/models/domain-type-template'
 import { seedDomainTypeTemplates } from './seed-domain-type-templates'
 

@@ -56,11 +56,7 @@ const OfficialTemplate: FC<TemplateProps> = ({
       : `${isEnglish ? 'Invoice' : 'Рахунок'} ${modernInvoiceNumber}`)
 
   return (
-    <div
-      className={cl.clInvoice}
-      ref={componentRef}
-      style={{ width: '100%', margin: '2em auto 1em' }}
-    >
+    <div className={cl.clInvoice} ref={componentRef}>
       {/* ── Header ── */}
       <div className={cl.clHeader}>
         <div

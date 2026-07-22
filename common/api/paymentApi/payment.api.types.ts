@@ -200,6 +200,7 @@ export interface IPaymentInvoiceSnapshot {
   generalSum: number
   description?: string
   type: string
+  currency?: string
 }
 
 export type PaymentActionType =
@@ -225,9 +226,22 @@ export interface AuditFilters {
   actorEmail?: string
   actionType?: PaymentActionType | PaymentActionType[]
   source?: PaymentMutationSource | PaymentMutationSource[]
+  type?: string | string[]
   domainId?: string
+  companyId?: string
   from?: string
   to?: string
+}
+
+export interface IAuditFacet {
+  _id: string
+  name: string
+}
+
+export interface IPaymentAuditFacetsResponse {
+  success: boolean
+  domains: IAuditFacet[]
+  companies: IAuditFacet[]
 }
 
 export interface IPaymentChangeLog {

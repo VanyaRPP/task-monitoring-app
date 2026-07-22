@@ -18,7 +18,6 @@ export interface DomainsSelectProps {
   disabled?: boolean
   currentProfit?: any
   // When true the user can create a brand-new provider inline: a persistent
-  // "Створити нового надавача" button in the dropdown switches the field into a
   // name-input mode (+ a service-type picker). The value becomes a `new::`
   // sentinel that the owning form materializes into a real Domain on submit
   // (see AddPaymentModal).
@@ -53,16 +52,25 @@ const DomainsSelect: React.FC<DomainsSelectProps> = ({
     return domains.map((i) => ({ value: i._id, label: i.name }))
   }, [domains])
 
-  const templateOptions = useMemo(
-    () => [
-      { value: '', label: 'Без послуг' },
-      ...typeTemplates.map((t) => ({
-        value: t._id,
-        label: t.isBuiltIn ? t.name : `${t.name} (адмін)`,
-      })),
-    ],
-    [typeTemplates]
-  )
+  const templateOptions = useMemo(() => {
+    const uniqueCategories = new Map()
+
+    typeTemplates.forEach((t) => {
+      const categoryLabel = t.category || t.name
+      if (!uniqueCategories.has(categoryLabel)) {
+        uniqueCategories.set(categoryLabel, t._id)
+      }
+    })
+
+    const mappedOptions = Array.from(uniqueCategories.entries()).map(
+      ([label, id]) => ({
+        value: id,
+        label: label,
+      })
+    )
+
+    return [{ value: '', label: 'Без послуг' }, ...mappedOptions]
+  }, [typeTemplates])
 
   useEffect(() => {
     // Auto-pick the only existing provider, but never while quick-creating.

@@ -16,7 +16,7 @@ import {
   IPaymentChangeLog,
   PaymentActionType,
 } from '@common/api/paymentApi/payment.api.types'
-import { renderCurrency } from '@utils/helpers'
+import { renderCurrency, getCurrencySymbol } from '@utils/helpers'
 
 const { Text } = Typography
 const { RangePicker } = DatePicker
@@ -125,14 +125,28 @@ const actorSearchDropdown = ({
   </div>
 )
 
+interface FacetOption {
+  text: string
+  value: string
+}
+
 interface Params {
   filters: Record<string, FilterValue | null>
   onOpenDetails: (record: IPaymentChangeLog) => void
+  domainOptions: FacetOption[]
+  companyOptions: FacetOption[]
 }
+
+const TYPE_OPTIONS = [
+  { text: 'Дебет', value: 'debit' },
+  { text: 'Кредит', value: 'credit' },
+]
 
 export const usePaymentAuditColumns = ({
   filters,
   onOpenDetails,
+  domainOptions,
+  companyOptions,
 }: Params): ColumnsType<IPaymentChangeLog> => {
   return useMemo<ColumnsType<IPaymentChangeLog>>(
     () => [
@@ -186,6 +200,8 @@ export const usePaymentAuditColumns = ({
         key: 'type',
         width: 100,
         align: 'center',
+        filteredValue: filters.type ?? null,
+        filters: TYPE_OPTIONS,
         render: (_, record) => {
           const type =
             record.invoiceData?.type ??
@@ -208,12 +224,17 @@ export const usePaymentAuditColumns = ({
       {
         title: 'Сума',
         key: 'generalSum',
-        width: 110,
+        width: 120,
         align: 'center',
-        render: (_, record) =>
-          record.invoiceData?.generalSum != null
-            ? renderCurrency(record.invoiceData.generalSum)
-            : '—',
+        render: (_, record) => {
+          const sum = record.invoiceData?.generalSum
+          if (sum == null) return '—'
+          const currency =
+            record.invoiceData?.currency ||
+            (record.before as any)?.currency ||
+            (record.after as any)?.currency
+          return `${renderCurrency(sum)} ${getCurrencySymbol(currency)}`.trim()
+        },
       },
       {
         title: 'Домен',
@@ -221,6 +242,10 @@ export const usePaymentAuditColumns = ({
         width: 150,
         align: 'center',
         ellipsis: true,
+        filteredValue: filters.domainId ?? null,
+        filters: domainOptions,
+        filterMultiple: false,
+        filterSearch: true,
         render: (_, record) => {
           const rawDomain =
             record.domainId ??
@@ -246,6 +271,10 @@ export const usePaymentAuditColumns = ({
         width: 160,
         align: 'center',
         ellipsis: true,
+        filteredValue: filters.company ?? null,
+        filters: companyOptions,
+        filterMultiple: false,
+        filterSearch: true,
         render: (_, record) => {
           const rawCompany =
             record.companyId ??
@@ -280,7 +309,7 @@ export const usePaymentAuditColumns = ({
         ),
       },
     ],
-    [filters, onOpenDetails]
+    [filters, onOpenDetails, domainOptions, companyOptions]
   )
 }
 
