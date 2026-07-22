@@ -1,4 +1,3 @@
-// @ts-nocheck
 import CustomService from '@modules/models/CustomService'
 import Domain from '@modules/models/Domain'
 import handler from '@pages/api/custom-services/domain'
