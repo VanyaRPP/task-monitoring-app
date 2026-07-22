@@ -349,7 +349,8 @@ export async function updateCustomService(
   }
 
   // DomainAdmin path — per-domain scoping.
-  const access = await assertDomainAccess(input.domainId, ctx)
+  const resolvedDomainId = input.domainId ?? service.domain
+  const access = await assertDomainAccess(resolvedDomainId, ctx)
   if (isServiceErr(access)) return access
   const domainId = access.data
 
