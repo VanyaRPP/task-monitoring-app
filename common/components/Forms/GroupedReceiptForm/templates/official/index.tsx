@@ -130,85 +130,90 @@ const OfficialTemplate: FC<TemplateProps> = ({
         </div>
       </div>
 
-      <div className={cl.clTableWrap}>
-        <table className={cl.clTable}>
-          <thead>
-            <tr>
-              <th>
-                <EditableText
-                  fieldKey="col.description"
-                  defaultValue={L(
-                    'col.description',
-                    isEnglish ? 'Description' : 'Опис'
-                  )}
-                />
-              </th>
-              {showQuantityInPreview && (
-                <>
-                  <th className={`${cl.colNum} ${cl.colQty}`}>
-                    <EditableText
-                      fieldKey="col.quantity"
-                      defaultValue={L(
-                        'col.quantity',
-                        isEnglish ? 'Quantity' : 'Кількість'
-                      )}
-                    />
-                  </th>
-                  <th className={`${cl.colNum} ${cl.colUnit}`}>
-                    <EditableText
-                      fieldKey="col.unitPrice"
-                      defaultValue={L(
-                        'col.unitPrice',
-                        isEnglish ? 'Unit Price' : 'Ціна одиниці'
-                      )}
-                    />
-                  </th>
-                </>
-              )}
-              <th className={`${cl.colNum} ${cl.colAmount}`}>
-                <EditableText
-                  fieldKey="col.amount"
-                  defaultValue={L('col.amount', isEnglish ? 'Amount' : 'Сума')}
-                />
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((item: any, index: number) => {
-              const qty = getQty(item)
-              const rate = Number.isFinite(Number(item?.price))
-                ? Number(item.price)
-                : qty
-                  ? Number(item?.sum || 0) / qty
-                  : Number(item?.sum || 0)
-              return (
-                <tr key={`${item?.type || item?.name}-${index}`}>
-                  <td>
-                    {item?.name || item?.type || '—'}
-                    {item?.description ? (
-                      <div style={{ fontSize: '0.85em', opacity: 0.65 }}>
-                        {item.description}
-                      </div>
-                    ) : null}
-                  </td>
-                  {showQuantityInPreview && (
-                    <>
-                      <td className={`${cl.colNum} ${cl.colQty}`}>
-                        {qty?.toFixed?.(2) ?? qty}
-                      </td>
-                      <td className={`${cl.colNum} ${cl.colUnit}`}>
-                        {rate.toFixed(2)}
-                      </td>
-                    </>
-                  )}
-                  <td className={`${cl.colNum} ${cl.colAmount}`}>
-                    {Number(item?.sum || 0).toFixed(2)}
-                  </td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
+      <div className={cl.clTablePrintWrapper}>
+        <div className={cl.clTableWrap}>
+          <table className={cl.clTable}>
+            <thead>
+              <tr>
+                <th>
+                  <EditableText
+                    fieldKey="col.description"
+                    defaultValue={L(
+                      'col.description',
+                      isEnglish ? 'Description' : 'Опис'
+                    )}
+                  />
+                </th>
+                {showQuantityInPreview && (
+                  <>
+                    <th className={`${cl.colNum} ${cl.colQty}`}>
+                      <EditableText
+                        fieldKey="col.quantity"
+                        defaultValue={L(
+                          'col.quantity',
+                          isEnglish ? 'Quantity' : 'Кількість'
+                        )}
+                      />
+                    </th>
+                    <th className={`${cl.colNum} ${cl.colUnit}`}>
+                      <EditableText
+                        fieldKey="col.unitPrice"
+                        defaultValue={L(
+                          'col.unitPrice',
+                          isEnglish ? 'Unit Price' : 'Ціна одиниці'
+                        )}
+                      />
+                    </th>
+                  </>
+                )}
+                <th className={`${cl.colNum} ${cl.colAmount}`}>
+                  <EditableText
+                    fieldKey="col.amount"
+                    defaultValue={L(
+                      'col.amount',
+                      isEnglish ? 'Amount' : 'Сума'
+                    )}
+                  />
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((item: any, index: number) => {
+                const qty = getQty(item)
+                const rate = Number.isFinite(Number(item?.price))
+                  ? Number(item.price)
+                  : qty
+                    ? Number(item?.sum || 0) / qty
+                    : Number(item?.sum || 0)
+                return (
+                  <tr key={`${item?.type || item?.name}-${index}`}>
+                    <td>
+                      {item?.name || item?.type || '—'}
+                      {item?.description ? (
+                        <div style={{ fontSize: '0.85em', opacity: 0.65 }}>
+                          {item.description}
+                        </div>
+                      ) : null}
+                    </td>
+                    {showQuantityInPreview && (
+                      <>
+                        <td className={`${cl.colNum} ${cl.colQty}`}>
+                          {qty?.toFixed?.(2) ?? qty}
+                        </td>
+                        <td className={`${cl.colNum} ${cl.colUnit}`}>
+                          {rate.toFixed(2)}
+                        </td>
+                      </>
+                    )}
+                    <td className={`${cl.colNum} ${cl.colAmount}`}>
+                      {Number(item?.sum || 0).toFixed(2)}
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <div className={cl.clSummary}>
