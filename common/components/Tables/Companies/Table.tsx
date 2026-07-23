@@ -98,7 +98,7 @@ export interface Props {
     edit: boolean
   }
   isArchive: boolean
-  customServices?: { _id: string; name: string }[]
+  customServices?: { _id: string; name: string; fieldName?: string }[]
 }
 
 const CompaniesTable: React.FC<Props> = ({
@@ -255,22 +255,22 @@ const CompaniesTable: React.FC<Props> = ({
     if (!withoutStandard?.length) return []
 
     if (hasActiveFilters) {
-      const activeServiceIds = new Set<string>()
+      const activeServiceKeys = new Set<string>()
 
       filteredData.forEach((company: any) => {
-        if (
-          company.individualServices &&
-          Array.isArray(company.individualServices)
-        ) {
-          company.individualServices.forEach((service: any) => {
-            if (service && service._id) {
-              activeServiceIds.add(String(service._id))
+        if (company.customServices && Array.isArray(company.customServices)) {
+          company.customServices.forEach((service: any) => {
+            const key = service?.fieldName || service?._id
+            if (key) {
+              activeServiceKeys.add(String(key))
             }
           })
         }
       })
 
-      return withoutStandard.filter((s) => activeServiceIds.has(String(s._id)))
+      return withoutStandard.filter((s) =>
+        activeServiceKeys.has(String(s.fieldName || s._id))
+      )
     }
 
     return getVisibleServices(
@@ -418,7 +418,7 @@ const getDefaultColumns = ({
   debtorCompanies?: CompanyWithPayments[]
   isUser?: boolean
   isSingleCompanyByData?: boolean
-  customServices?: { _id: string; name: string }[]
+  customServices?: { _id: string; name: string; fieldName?: string }[]
   setFilters?: (filters: any) => void
 }): ColumnType<any>[] => {
   const isOnPage = pathname === AppRoutes.REAL_ESTATE
@@ -544,8 +544,10 @@ const getDefaultColumns = ({
         align: 'center',
         ellipsis: true,
         render: (_, record: IExtendedRealestate) => {
-          const match = (record as any).individualServices?.find(
-            (s) => String(s._id) === String(custom._id)
+          const match = record.customServices?.find((s) =>
+            custom.fieldName
+              ? s.fieldName === custom.fieldName
+              : String(s._id) === String(custom._id)
           )
           return match ? (
             renderCurrency(match.price)

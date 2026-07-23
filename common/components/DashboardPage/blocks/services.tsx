@@ -22,6 +22,7 @@ import {
 } from '@common/api/filterApi/filter.api'
 import ModalDelete from '@components/UI/ModalDelete'
 import type { ColumnsType } from 'antd/es/table'
+import { isGlobalAdmin } from '@utils/servicesVisibility'
 
 interface ServiceBlockProps {
   sepDomainID?: string
@@ -40,15 +41,6 @@ const ServicesBlock: React.FC<ServiceBlockProps> = ({ sepDomainID }) => {
   const [deleteService] = useDeleteServiceMutation()
   const { data: customServicesData } = useGetCustomServicesQuery({})
   const [filter, setFilter] = useState<IServiceFilter>()
-
-  const domainFilteredCustomServices = useMemo(() => {
-    if (!customServicesData?.data) return []
-    const domainIds = (filter?.domain as unknown) as string[] | null | undefined
-    if (!domainIds?.length) return customServicesData.data
-    return customServicesData.data.filter((cs) =>
-      domainIds.some((id) => String(cs.domain) === String(id))
-    )
-  }, [customServicesData?.data, filter?.domain])
   const router = useRouter()
   const isOnPage = router.pathname === AppRoutes.SERVICE
 
@@ -58,6 +50,35 @@ const ServicesBlock: React.FC<ServiceBlockProps> = ({ sepDomainID }) => {
   const { data: streetsFilter } = useGetAddressFiltersQuery({
     domains: filter?.domain,
   })
+
+  const domainFilteredCustomServices = useMemo(() => {
+    if (!customServicesData?.data) return []
+
+    const explicitDomainIds = filter?.domain as unknown as
+      | string[]
+      | null
+      | undefined
+    if (explicitDomainIds?.length) {
+      return customServicesData.data.filter((cs) =>
+        explicitDomainIds.some((id) => String(cs.domain) === String(id))
+      )
+    }
+
+    if (isGlobalAdmin(user?.roles)) return customServicesData.data
+
+    const ownDomainIds =
+      domainsFilter?.domainsFilter?.map((d) => String(d.value)) || []
+    if (!ownDomainIds.length) return []
+
+    return customServicesData.data.filter((cs) =>
+      ownDomainIds.includes(String(cs.domain))
+    )
+  }, [
+    customServicesData?.data,
+    filter?.domain,
+    user?.roles,
+    domainsFilter?.domainsFilter,
+  ])
   const { data: dateFilters } = useGetDateFiltersQuery({
     type: 'service',
   })
