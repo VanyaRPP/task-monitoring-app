@@ -25,7 +25,7 @@ const PaymentCardLabel = ({
   realEstatesFilter,
   isAdmin,
   allowedServices,
-  visibleCustomServices,
+  customServices,
 }: any) => {
   const router = useRouter()
   const { pathname } = router
@@ -63,7 +63,7 @@ const PaymentCardLabel = ({
               className={styles.select}
               onSelect={onColumnsSelect}
               allowedServices={allowedServices}
-              visibleCustomServices={visibleCustomServices}
+              customServices={customServices}
             />
             <PaymentCascader
               className={styles.select}

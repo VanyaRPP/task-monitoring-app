@@ -7,6 +7,7 @@ import { BreadcrumbPath } from '@components/UI/Breadcrumb'
 import { FloatButtonItem } from '@utils/types'
 import { Layout } from 'antd'
 import { FloatButtonsLayoutAddon } from './FloatButtonsLayoutAddon'
+import AIChat from '@components/AIChat'
 
 import styles from './style.module.scss'
 
@@ -37,6 +38,7 @@ const MainLayoutInner: React.FC<MainLayoutProps> = ({
         {!hideFloatButtons && (
           <FloatButtonsLayoutAddon buttons={floatButtons} />
         )}
+        <AIChat />
         <Layout.Content className={styles.Content}>{children}</Layout.Content>
       </Layout>
     )
@@ -45,6 +47,7 @@ const MainLayoutInner: React.FC<MainLayoutProps> = ({
   return (
     <Layout hasSider>
       {!hideFloatButtons && <FloatButtonsLayoutAddon buttons={floatButtons} />}
+      <AIChat />
       <Sidebar collapsible className={styles.Sidebar} />
       <Layout>
         {!hideHeader && (

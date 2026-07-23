@@ -66,11 +66,15 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
     return toRoundFixed(price) === toRoundFixed(calculatedInitialPrice)
   }, [price, calculatedInitialPrice])
 
-  if (company?.inflicion && !prevService?.inflicionPrice) {
+  // Old-style invoices (created before inflicion was enabled) carry a valid area
+  // in `amount`. Only apply inflicion UI to invoices that have no area field.
+  const hasAmount = !isNaN(+amount) && +amount > 0
+
+  if (company?.inflicion && !hasAmount && !prevService?.inflicionPrice) {
     return <span>Інфляція за попередній місяць невідома</span>
   }
 
-  if (company?.inflicion) {
+  if (company?.inflicion && !hasAmount) {
     if (!editable && !isInitial) return null
     return (
       <Typography.Text delete={!isInitial}>
@@ -119,7 +123,12 @@ export const Price: React.FC<InvoiceComponentProps> = ({
   const currency = useInvoiceCurrency()
   const invoices: InvoiceType[] = Form.useWatch(['invoice'], form)
   const watchedPrice = Form.useWatch(['invoice', ...name, 'price'], form)
+  const watchedAmount = Form.useWatch(['invoice', ...name, 'amount'], form)
   const changed = Form.useWatch(['invoiceMeta', 'changed'], form) ?? false
+
+  // Old-style invoice: has a valid area field → was created with m²×price formula.
+  // Do not apply inflicion-formula overrides to these rows.
+  const hasAmount = !isNaN(+watchedAmount) && +watchedAmount > 0
   const inflicionInvoice = useMemo(() => {
     return invoices?.find((invoice) => invoice.type === ServiceType.Inflicion)
   }, [invoices])
@@ -146,6 +155,7 @@ export const Price: React.FC<InvoiceComponentProps> = ({
   useEffect(() => {
     if (
       company?.inflicion &&
+      !hasAmount &&
       editable &&
       !changed &&
       inflicionInvoice?.sum !== undefined
@@ -159,6 +169,7 @@ export const Price: React.FC<InvoiceComponentProps> = ({
     }
   }, [
     company,
+    hasAmount,
     editable,
     changed,
     inflicionInvoice?.sum,
@@ -168,14 +179,14 @@ export const Price: React.FC<InvoiceComponentProps> = ({
   ])
 
   const suffix = useMemo(() => {
-    return company?.inflicion ? (
+    return company?.inflicion && !hasAmount ? (
       <span>{currencyWithUnit('', currency)}</span>
     ) : (
       <span>
         {currencyWithUnit('', currency)}/м<sup>2</sup>
       </span>
     )
-  }, [company, currency])
+  }, [company, hasAmount, currency])
 
   if (!editable) {
     return (
@@ -207,14 +218,17 @@ export const Price: React.FC<InvoiceComponentProps> = ({
 
 export const Sum: React.FC<InvoiceComponentProps> = ({ form, name: _name }) => {
   const name = useMemo(() => toArray<string>(_name), [_name])
-  const { company } = usePaymentContext()
   const currency = useInvoiceCurrency()
 
   const price = Form.useWatch(['invoice', ...name, 'price'], form)
   const amount = Form.useWatch(['invoice', ...name, 'amount'], form)
   const sum = Form.useWatch(['invoice', ...name, 'sum'], form)
 
-  useSyncSum(form!, name, company?.inflicion ? +price : +price * +amount)
+  // If the row has a valid area (m²) it was created with the m²×price formula —
+  // use price×amount regardless of whether the company now has inflicion enabled.
+  // Inflicion-style rows have no amount, so fall back to price directly.
+  const hasAmount = !isNaN(+amount) && +amount > 0
+  useSyncSum(form!, name, hasAmount ? +price * +amount : +price)
 
   return <strong>{currencyWithUnit(toRoundFixed(sum), currency)}</strong>
 }

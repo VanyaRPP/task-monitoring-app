@@ -165,7 +165,10 @@ body {
     print-color-adjust: exact !important;
     margin: 0 !important;
     padding: 0 !important;
-    overflow: hidden !important;
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+    display: block !important;
   }
 
   * {
@@ -178,7 +181,7 @@ body {
     padding: 0 !important;
     width: 100% !important;
     box-sizing: border-box !important;
-    overflow: hidden !important;
+    overflow: visible !important;
   }
 
   .ant-table,
@@ -195,6 +198,7 @@ body {
   }
 
   .ant-table thead {
+    display: table-header-group !important;
     margin: 0 !important;
     padding: 0 !important;
     background-color: #fafafa !important;
@@ -223,6 +227,11 @@ body {
   .ant-table tbody {
     margin: 0 !important;
     padding: 0 !important;
+  }
+
+  .ant-table tbody > tr {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
   }
 
   .ant-table tbody > tr > td {
@@ -274,6 +283,6 @@ body {
   }
 
   @page {
-    margin: 0;
+    margin: 0 !important;
   }
 }

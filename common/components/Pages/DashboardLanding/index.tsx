@@ -117,10 +117,11 @@ const DashboardLanding = () => {
         </div>
       </section>
 
-      <div style={{ position: 'relative', zIndex: 10, width: '100%' }}>
-        <Footer style={{ borderTop: '1px solid rgba(118, 12, 206, 0.1)' }} />
+      <div style={{ position: 'sticky', bottom: 0, zIndex: 10, width: '100%' }}>
+        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }}>
+          <Footer style={{ borderTop: '1px solid rgba(118, 12, 206, 0.1)' }} />
+        </div>
       </div>
-
       {paymentModalOpen && (
         <AddPaymentModal
           paymentActions={{ edit: false, preview: false }}
