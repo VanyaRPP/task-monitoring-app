@@ -154,4 +154,53 @@ describe('CustomServicesCard', () => {
       },
     ])
   })
+
+  test('marks allServices=true when every service is selected', () => {
+    renderWithForm(
+      <CustomServicesCard
+        form={{ setFieldValue: setFieldValueMock }}
+        allCustomServices={ALL_CUSTOM_SERVICES}
+        disabled={false}
+        isServiceForm={false}
+      />
+    )
+
+    // auto-populate selects all → the company opted into "all services"
+    expect(setFieldValueMock).toHaveBeenCalledWith('allServices', true)
+  })
+
+  test('marks allServices=false when the selection is cleared', () => {
+    useWatchSpy.mockReturnValue([
+      { _id: '1', label: 'Послуга 1', fieldName: 'service1', price: 100 },
+    ])
+
+    renderWithForm(
+      <CustomServicesCard
+        form={{ setFieldValue: setFieldValueMock }}
+        allCustomServices={ALL_CUSTOM_SERVICES}
+        disabled={false}
+        isServiceForm={false}
+      />
+    )
+
+    fireEvent.click(screen.getByText('Скасувати вибір'))
+
+    expect(setFieldValueMock).toHaveBeenCalledWith('allServices', false)
+  })
+
+  test('does not touch allServices in a service form', () => {
+    renderWithForm(
+      <CustomServicesCard
+        form={{ setFieldValue: setFieldValueMock }}
+        allCustomServices={ALL_CUSTOM_SERVICES}
+        disabled={false}
+        isServiceForm={true}
+      />
+    )
+
+    const touchedAllServices = setFieldValueMock.mock.calls.some(
+      ([field]) => field === 'allServices'
+    )
+    expect(touchedAllServices).toBe(false)
+  })
 })

@@ -190,8 +190,9 @@ async function attachServiceToDomainCompanies(
     fieldName: string
   }
 ): Promise<void> {
+  // Companies with a deliberately chosen subset are left untouched.
   await RealEstate.updateMany(
-    { domain: domainId, archived: { $ne: true } },
+    { domain: domainId, archived: { $ne: true }, allServices: true },
     {
       $push: {
         customServices: {

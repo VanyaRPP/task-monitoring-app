@@ -99,6 +99,7 @@ const RealEstateModal: FC<Props> = ({
       cleaning: currentRealEstate?.cleaning || 0,
       services: currentRealEstate?.services || [],
       customServices: currentRealEstate ? mergedCustomServices : [],
+      allServices: currentRealEstate?.allServices ?? false,
     })
 
     initializedRef.current = true
@@ -154,6 +155,7 @@ const RealEstateModal: FC<Props> = ({
           (custom) => custom.fieldName === 'cleaningPrice'
         )?.price ?? formData.cleaning,
       customServices: filteredCustomServices,
+      allServices: form.getFieldValue('allServices') ?? false,
     }
 
     const response = currentRealEstate

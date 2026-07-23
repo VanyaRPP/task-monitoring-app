@@ -24,6 +24,7 @@ export interface IRealEstateModel {
   defaultTemplate?: string
   services: IDomainService[]
   customServices?: ICustomService[]
+  allServices?: boolean
 }
 interface ICustomService {
   _id: ObjectId
@@ -49,6 +50,7 @@ export const RealEstateSchema = new Schema<IRealEstateModel>({
   inflicion: { type: Boolean, required: false, default: false },
   garbageCollector: { type: Boolean, required: false, default: false },
   archived: { type: Boolean, required: false, default: false },
+  allServices: { type: Boolean, required: false, default: false },
   account: { type: String, required: false, default: '' },
   rnokpp: { type: String, required: false, default: '' },
   defaultTemplate: { type: String, required: false },
