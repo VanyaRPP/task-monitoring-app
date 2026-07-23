@@ -258,7 +258,7 @@ describe('createCustomService', () => {
     )
   })
 
-  it('cascades the new service to every active company of the domain', async () => {
+  it('cascades the new service only to active companies with allServices enabled', async () => {
     asMock(CustomService.findOne).mockResolvedValueOnce(null)
     asMock(CustomService.create).mockResolvedValueOnce({
       _id: serviceId,
@@ -278,7 +278,7 @@ describe('createCustomService', () => {
     )
 
     expect(asMock(RealEstate.updateMany)).toHaveBeenCalledWith(
-      { domain: expect.anything(), archived: { $ne: true } },
+      { domain: expect.anything(), archived: { $ne: true }, allServices: true },
       {
         $push: {
           customServices: {
@@ -290,6 +290,29 @@ describe('createCustomService', () => {
         },
       }
     )
+  })
+
+  it('does not cascade to companies that chose a subset (allServices filter present)', async () => {
+    asMock(CustomService.findOne).mockResolvedValueOnce(null)
+    asMock(CustomService.create).mockResolvedValueOnce({
+      _id: serviceId,
+      name: 'Foo',
+      fieldName: 'foo',
+      domain: ownDomainId,
+      toObject: () => ({
+        _id: serviceId,
+        name: 'Foo',
+        fieldName: 'foo',
+      }),
+    })
+
+    await createCustomService(
+      { name: 'Foo', domainId: String(ownDomainId) },
+      ctxGlobal
+    )
+
+    const [[filter]] = asMock(RealEstate.updateMany).mock.calls
+    expect(filter).toMatchObject({ allServices: true })
   })
 })
 
