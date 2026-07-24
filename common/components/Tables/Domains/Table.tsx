@@ -26,8 +26,9 @@ import {
   useUpdateArchivedDomainMutation,
 } from '@common/api/domainApi/domain.api'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import StreetsBlock from '@components/DashboardPage/blocks/streets'
-import { AppRoutes } from '@utils/constants'
+import { AppRoutes, Roles } from '@utils/constants'
 
 export interface Props {
   domainId?: string
@@ -47,6 +48,9 @@ const DomainsTable: React.FC<Props> = ({
 }) => {
   const router = useRouter()
   const isOnPage = router.pathname === AppRoutes.DOMAIN
+
+  const { data: userResponse } = useGetCurrentUserQuery()
+  const isUser = userResponse?.roles?.includes(Roles.USER)
 
   const { data, isLoading, isError } = useGetDomainsQuery({
     domainId,
@@ -102,6 +106,7 @@ const DomainsTable: React.FC<Props> = ({
         setDomainActions,
         handleArchive,
         archiveLoading,
+        isUser: !!isUser,
       })}
       expandable={{
         expandedRowRender: ({ _id: domainId }) => (
@@ -121,6 +126,7 @@ const getDefaultColumns = ({
   setDomainActions,
   handleArchive,
   archiveLoading,
+  isUser,
 }: {
   handleDelete: (id: string) => void
   deleteLoading: boolean
@@ -128,6 +134,7 @@ const getDefaultColumns = ({
   setDomainActions?: React.Dispatch<React.SetStateAction<{ edit: boolean }>>
   handleArchive: (id: string, archived: boolean) => void
   archiveLoading: boolean
+  isUser: boolean
 }): ColumnType<any>[] => [
   {
     fixed: 'left',
@@ -181,82 +188,88 @@ const getDefaultColumns = ({
         >
           <EyeOutlined />
         </Button>
-        <Button
-          style={{ padding: 0 }}
-          type="link"
-          onClick={() => {
-            if (setCurrentDomain) setCurrentDomain(domain)
-            if (setDomainActions) setDomainActions({ edit: true })
-          }}
-        >
-          <EditOutlined />
-        </Button>
-        <Dropdown
-          menu={{
-            items: [
-              {
-                key: 'archive',
-                label: (
-                  <Popconfirm
-                    title={`Ви впевнені, що хочете ${
-                      domain.archived ? 'розархівувати' : 'архівувати'
-                    } цей домен?`}
-                    onConfirm={(e) => {
-                      e?.stopPropagation()
-                      handleArchive(domain._id, !domain.archived)
-                    }}
-                    onCancel={(e) => e?.stopPropagation()}
-                    disabled={archiveLoading}
-                    okText={domain.archived ? 'Розархівувати' : 'Архівувати'}
-                    cancelText="Ні"
-                  >
-                    <Button
-                      type="text"
-                      icon={<InboxOutlined />}
-                      onClick={(e) => e.stopPropagation()}
-                      style={{
-                        padding: '4px 8px',
-                        color: domain.archived ? '#722ed1' : '#ff4d4f',
-                      }}
-                    >
-                      {domain.archived ? 'Розархівувати' : 'Архівувати'}
-                    </Button>
-                  </Popconfirm>
-                ),
-              },
-              {
-                key: 'delete',
-                label: (
-                  <Popconfirm
-                    title="Ви впевнені, що хочете видалити домен?"
-                    onConfirm={(e) => {
-                      e?.stopPropagation()
-                      handleDelete(domain._id)
-                    }}
-                    onCancel={(e) => e?.stopPropagation()}
-                    disabled={deleteLoading}
-                    okText="Видалити"
-                    cancelText="Ні"
-                  >
-                    <Button
-                      type="text"
-                      icon={<DeleteOutlined />}
-                      onClick={(e) => e.stopPropagation()}
-                      style={{ padding: '4px 8px', color: '#ff4d4f' }}
-                    >
-                      Видалити
-                    </Button>
-                  </Popconfirm>
-                ),
-              },
-            ],
-          }}
-          placement="bottomRight"
-        >
-          <Button style={{ padding: 0 }} type="link">
-            <MoreOutlined />
-          </Button>
-        </Dropdown>
+        {!isUser && (
+          <>
+            <Button
+              style={{ padding: 0 }}
+              type="link"
+              onClick={() => {
+                if (setCurrentDomain) setCurrentDomain(domain)
+                if (setDomainActions) setDomainActions({ edit: true })
+              }}
+            >
+              <EditOutlined />
+            </Button>
+            <Dropdown
+              menu={{
+                items: [
+                  {
+                    key: 'archive',
+                    label: (
+                      <Popconfirm
+                        title={`Ви впевнені, що хочете ${
+                          domain.archived ? 'розархівувати' : 'архівувати'
+                        } цей домен?`}
+                        onConfirm={(e) => {
+                          e?.stopPropagation()
+                          handleArchive(domain._id, !domain.archived)
+                        }}
+                        onCancel={(e) => e?.stopPropagation()}
+                        disabled={archiveLoading}
+                        okText={
+                          domain.archived ? 'Розархівувати' : 'Архівувати'
+                        }
+                        cancelText="Ні"
+                      >
+                        <Button
+                          type="text"
+                          icon={<InboxOutlined />}
+                          onClick={(e) => e.stopPropagation()}
+                          style={{
+                            padding: '4px 8px',
+                            color: domain.archived ? '#722ed1' : '#ff4d4f',
+                          }}
+                        >
+                          {domain.archived ? 'Розархівувати' : 'Архівувати'}
+                        </Button>
+                      </Popconfirm>
+                    ),
+                  },
+                  {
+                    key: 'delete',
+                    label: (
+                      <Popconfirm
+                        title="Ви впевнені, що хочете видалити домен?"
+                        onConfirm={(e) => {
+                          e?.stopPropagation()
+                          handleDelete(domain._id)
+                        }}
+                        onCancel={(e) => e?.stopPropagation()}
+                        disabled={deleteLoading}
+                        okText="Видалити"
+                        cancelText="Ні"
+                      >
+                        <Button
+                          type="text"
+                          icon={<DeleteOutlined />}
+                          onClick={(e) => e.stopPropagation()}
+                          style={{ padding: '4px 8px', color: '#ff4d4f' }}
+                        >
+                          Видалити
+                        </Button>
+                      </Popconfirm>
+                    ),
+                  },
+                ],
+              }}
+              placement="bottomRight"
+            >
+              <Button style={{ padding: 0 }} type="link">
+                <MoreOutlined />
+              </Button>
+            </Dropdown>
+          </>
+        )}
       </div>
     ),
   },
