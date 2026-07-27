@@ -498,8 +498,19 @@ export async function listCustomServicesForDomain(
   ctx: UserContext
 ): Promise<ServiceResult<unknown[]>> {
   if (ctx.isUser) {
-    // Match legacy contract: User-level access returns 400 with 'Не дозволено'.
     return err('invalid', 'Не дозволено')
+  }
+
+  // DomainAdmin must always provide a domainId — returning the global pool
+  // would expose services from other domains.
+  if (ctx.isDomainAdmin && !ctx.isGlobalAdmin) {
+    const hasDomainId =
+      query.domainId !== undefined &&
+      query.domainId !== null &&
+      query.domainId !== ''
+    if (!hasDomainId) {
+      return err('forbidden', 'DomainAdmin повинен вказати domainId')
+    }
   }
 
   const filter: Record<string, unknown> = {}
@@ -517,6 +528,17 @@ export async function listCustomServicesForDomain(
     }
     const domainObjectId = new mongoose.Types.ObjectId(domainIdStr)
 
+    // DomainAdmin: verify they actually administer the requested domain.
+    if (ctx.isDomainAdmin && !ctx.isGlobalAdmin) {
+      const allowed = await Domain.exists({
+        _id: domainObjectId,
+        adminEmails: ctx.user.email,
+      })
+      if (!allowed) {
+        return err('forbidden', 'Ви не є адміністратором цього домену')
+      }
+    }
+
     const category = parseTemplateCategory(query.templateCategory)
     if (category) {
       const defaultIds = await getDefaultServiceIdsForCategory(category)
@@ -530,11 +552,17 @@ export async function listCustomServicesForDomain(
           : []),
       ]
     } else {
-      filter.$or = [
-        { domain: domainObjectId },
-        { domain: { $in: [null, undefined] } },
-        { domain: { $exists: false } },
-      ]
+      // DomainAdmin sees only their domain's services (no legacy global pool).
+      // GlobalAdmin keeps the legacy union for back-compat.
+      if (ctx.isDomainAdmin && !ctx.isGlobalAdmin) {
+        filter.domain = domainObjectId
+      } else {
+        filter.$or = [
+          { domain: domainObjectId },
+          { domain: { $in: [null, undefined] } },
+          { domain: { $exists: false } },
+        ]
+      }
     }
   }
 
