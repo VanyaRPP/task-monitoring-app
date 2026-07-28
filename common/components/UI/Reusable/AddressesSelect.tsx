@@ -133,6 +133,9 @@ const AddressesSelect: React.FC<AddressesSelectProps> = ({
           />
 
           <div style={{ display: 'flex', gap: 4 }}>
+            <Button size="small" block onClick={exitCreateMode}>
+              ← обрати наявну
+            </Button>
             <Button
               type="primary"
               size="small"
@@ -157,9 +160,6 @@ const AddressesSelect: React.FC<AddressesSelectProps> = ({
               }}
             >
               Зберегти
-            </Button>
-            <Button size="small" block onClick={exitCreateMode}>
-              ← обрати наявну
             </Button>
           </div>
         </div>
