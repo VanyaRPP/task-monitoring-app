@@ -40,7 +40,7 @@ interface Props {
   filter?: any
   setFilter?: (filters: any) => void
   setSelectedServices?: (service: IService[]) => void
-  customServices?: { _id: string; name: string }[]
+  customServices?: { _id: string; name: string; fieldName?: string }[]
   user: any
   domainsFilter: any
   streetsFilter: any
@@ -126,11 +126,14 @@ const ServicesTable: React.FC<Props> = ({
     activeMonths,
   ])
 
-  const filteredCustomServices = customServices?.filter(
-    (custom) =>
-      !filteredData.some((service) =>
-        service.customServices?.some((s) => String(s._id) === custom._id)
+  const filteredCustomServices = customServices?.filter((custom) =>
+    filteredData.some((service) =>
+      service.customServices?.some((s) =>
+        custom.fieldName
+          ? s.fieldName === custom.fieldName
+          : String(s._id) === String(custom._id)
       )
+    )
   )
 
   if (isError) return <Alert message="Помилка" type="error" showIcon closable />
@@ -229,7 +232,7 @@ const getDefaultColumns = (
     edit: boolean
     preview: boolean
   },
-  customServices?: { _id: string; name: string }[],
+  customServices?: { _id: string; name: string; fieldName?: string }[],
   setFilter?: (filters: any) => void
 ): ColumnType<any>[] => {
   const columns: ColumnType<any>[] = [
@@ -377,8 +380,10 @@ const getDefaultColumns = (
         width: 120,
         ellipsis: true,
         render: (_, record: IService) => {
-          const match = record.customServices?.find(
-            (s) => String(s._id) === String(custom._id)
+          const match = record.customServices?.find((s) =>
+            custom.fieldName
+              ? s.fieldName === custom.fieldName
+              : String(s._id) === String(custom._id)
           )
           return match ? renderCurrency(match.price) : '-'
         },

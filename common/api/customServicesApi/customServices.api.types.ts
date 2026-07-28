@@ -5,6 +5,7 @@ export interface ICustomService {
   _id: string
   groupName?: string
   name: string
+  fieldName?: string
   services?: string
   serviceType?: string
   domain?: string

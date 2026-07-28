@@ -51,7 +51,6 @@ import CollapsedTags from '@components/UI/CollapsedTags'
 import TableFilterLink from '@components/UI/Reusable/TableFilterLink'
 import {
   extractDomainsFromRealEstates,
-  getSelectedServiceIds,
   getVisibleServices,
   shouldShowStandardServices,
 } from '@utils/servicesVisibility'
@@ -101,7 +100,7 @@ export interface Props {
     edit: boolean
   }
   isArchive: boolean
-  customServices?: { _id: string; name: string }[]
+  customServices?: { _id: string; name: string; fieldName?: string }[]
 }
 
 const CompaniesTable: React.FC<Props> = ({
@@ -245,7 +244,9 @@ const CompaniesTable: React.FC<Props> = ({
   )
   const { data: domainTypeTemplates = [] } = useGetDomainTypeTemplatesQuery()
   const hasActiveFilters = !!(
-    filters?.domain?.length || filters?.company?.length
+    filters?.domain?.length ||
+    filters?.company?.length ||
+    filters?.street?.length
   )
   const showStandardServices = useMemo(
     () => shouldShowStandardServices(visibleDomains, domainTypeTemplates),
@@ -256,24 +257,38 @@ const CompaniesTable: React.FC<Props> = ({
       return !STANDARD_SERVICE_NAMES.includes(custom.name)
     })
 
-    if (isGlobalAdmin && hasActiveFilters) {
-      const selectedIds = getSelectedServiceIds(visibleDomains)
-      if (!selectedIds.length) return []
-      const selectedSet = new Set(selectedIds)
-      return (withoutStandard ?? []).filter((s) => selectedSet.has(s._id))
+    if (!withoutStandard?.length) return []
+
+    if (hasActiveFilters) {
+      const activeServiceKeys = new Set<string>()
+
+      filteredData.forEach((company: any) => {
+        if (company.customServices && Array.isArray(company.customServices)) {
+          company.customServices.forEach((service: any) => {
+            const key = service?.fieldName || service?._id
+            if (key) {
+              activeServiceKeys.add(String(key))
+            }
+          })
+        }
+      })
+
+      return withoutStandard.filter((s) =>
+        activeServiceKeys.has(String(s.fieldName || s._id))
+      )
     }
 
     return getVisibleServices(
       userResponse?.roles,
       visibleDomains,
-      withoutStandard ?? []
+      withoutStandard
     )
   }, [
     customServices,
     userResponse?.roles,
     visibleDomains,
+    filteredData,
     hasActiveFilters,
-    isGlobalAdmin,
   ])
 
   if (isError) return <Alert message="Помилка" type="error" showIcon closable />
@@ -410,7 +425,7 @@ const getDefaultColumns = ({
   debtorCompanies?: CompanyWithPayments[]
   isUser?: boolean
   isSingleCompanyByData?: boolean
-  customServices?: { _id: string; name: string }[]
+  customServices?: { _id: string; name: string; fieldName?: string }[]
   setFilters?: (filters: any) => void
   showStandardServices?: boolean
 }): ColumnType<any>[] => {
@@ -546,8 +561,10 @@ const getDefaultColumns = ({
         align: 'center',
         ellipsis: true,
         render: (_, record: IExtendedRealestate) => {
-          const match = (record as any).individualServices?.find(
-            (s) => String(s._id) === String(custom._id)
+          const match = record.customServices?.find((s) =>
+            custom.fieldName
+              ? s.fieldName === custom.fieldName
+              : String(s._id) === String(custom._id)
           )
           return match ? (
             renderCurrency(match.price)
