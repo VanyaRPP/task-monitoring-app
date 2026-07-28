@@ -1,5 +1,8 @@
 import { Roles } from '@utils/constants'
-
+import type {
+  DomainTypeTemplateCategory,
+  IDomainTypeTemplate,
+} from '@common/api/domainApi/domain.api.types'
 export interface IDomainServiceGroup {
   groupName: string
   services: string[]
@@ -93,4 +96,25 @@ export function extractDomainsFromRealEstates(
   }
 
   return result
+}
+export const STANDARD_SERVICE_CATEGORIES: DomainTypeTemplateCategory[] = [
+  'utility',
+  'real-estate',
+]
+
+export function shouldShowStandardServices(
+  domains: IDomainForVisibility[],
+  templates: IDomainTypeTemplate[]
+): boolean {
+  if (!domains?.length || !templates?.length) return false
+
+  const templateMap = new Map(templates.map((t) => [String(t._id), t]))
+
+  return domains.some((domain) => {
+    const templateId = String((domain as any).domainTypeTemplateId ?? '')
+    const template = templateMap.get(templateId)
+    return template
+      ? STANDARD_SERVICE_CATEGORIES.includes(template.category)
+      : false
+  })
 }

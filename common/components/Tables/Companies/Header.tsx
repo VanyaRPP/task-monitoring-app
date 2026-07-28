@@ -20,11 +20,13 @@ import {
   useGetRealEstateFiltersQuery,
 } from '@common/api/filterApi/filter.api'
 import { useGetCustomServicesQuery } from '@common/api/customServicesApi/customServices.api'
+import { useGetDomainTypeTemplatesQuery } from '@common/api/domainApi/domain.api'
 import {
   extractDomainsFromRealEstates,
   getSelectedServiceIds,
   getVisibleServices,
   isGlobalAdmin,
+  shouldShowStandardServices,
 } from '@utils/servicesVisibility'
 
 export interface Props {
@@ -73,7 +75,11 @@ const CompaniesHeader: React.FC<Props> = ({
     () => extractDomainsFromRealEstates(realEstates?.data),
     [realEstates?.data]
   )
-
+  const { data: domainTypeTemplates = [] } = useGetDomainTypeTemplatesQuery()
+  const showStandardServices = useMemo(
+    () => shouldShowStandardServices(visibleDomains, domainTypeTemplates),
+    [visibleDomains, domainTypeTemplates]
+  )
   const hasActiveFilters = !!(
     filters?.domain?.length || filters?.company?.length
   )
