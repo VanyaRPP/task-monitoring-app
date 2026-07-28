@@ -55,20 +55,29 @@ export const CustomServicesTable: React.FC<CustomServicesTableProps> = ({
   const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
   const isDomainAdmin = user?.roles?.includes(Roles.DOMAIN_ADMIN)
 
-  const { data: customServicesResponse, isLoading } = useGetCustomServicesQuery(
-    {}
-  )
-  const allServices = useMemo(
-    () => customServicesResponse?.data ?? [],
-    [customServicesResponse?.data]
-  )
-
   const { data: adminDomains = [] } = useGetDomainsByAdminQuery(undefined, {
     skip: !isDomainAdmin || isGlobalAdmin,
   })
   const { data: allDomains = [] } = useGetDomainsQuery(
     {},
     { skip: !isGlobalAdmin }
+  )
+
+  const adminDomainId = (adminDomains as any[])[0]?._id
+    ? String((adminDomains as any[])[0]._id)
+    : undefined
+
+  const customServicesDomainId =
+    isDomainAdmin && !isGlobalAdmin ? adminDomainId : undefined
+
+  const { data: customServicesResponse, isLoading } = useGetCustomServicesQuery(
+    customServicesDomainId ? { domainId: customServicesDomainId } : {},
+    { skip: isDomainAdmin && !isGlobalAdmin && !adminDomainId }
+  )
+
+  const allServices = useMemo(
+    () => customServicesResponse?.data ?? [],
+    [customServicesResponse?.data]
   )
 
   const domains = useMemo(

@@ -45,8 +45,8 @@ export default async function handler(
           })
         }
 
-        const customServiceIds = company.customServices || []
-
+        const customServiceIds =
+          company.customServices || [].map((s: any) => s?._id).filter(Boolean)
         const customServices = await CustomService.find({
           _id: { $in: customServiceIds },
         }).lean()
