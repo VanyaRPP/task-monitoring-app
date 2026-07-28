@@ -746,4 +746,49 @@ describe('assembleDomainServiceCatalog', () => {
     const result = assembleDomainServiceCatalog([{ services: [] }], [], [])
     expect(result[0].groupName).toBe('Група 1')
   })
+
+  it('collapses a domain-scoped copy that duplicates a grouped default by name', () => {
+    const seededDefault = { _id: 'default-maintenance', name: 'Утримання' }
+    const domainCopy = { _id: 'domain-maintenance', name: 'Утримання' }
+
+    const result = assembleDomainServiceCatalog(
+      [{ groupName: 'Комунальні', services: ['default-maintenance'] }],
+      [domainCopy],
+      [seededDefault]
+    )
+
+    expect(result).toEqual([
+      { groupName: 'Комунальні', services: [seededDefault] },
+    ])
+  })
+
+  it('de-dupes by name case-insensitively across separate groups', () => {
+    const first = { _id: 'a', name: 'Електропостачання' }
+    const second = { _id: 'b', name: 'електропостачання' }
+
+    const result = assembleDomainServiceCatalog(
+      [
+        { groupName: 'G1', services: ['a'] },
+        { groupName: 'G2', services: ['b'] },
+      ],
+      [],
+      [first, second]
+    )
+
+    expect(result[0].services).toEqual([first])
+    expect(result[1].services).toEqual([])
+  })
+
+  it('keeps services that have no name (nothing to key on)', () => {
+    const nameless1 = { _id: 'n1' }
+    const nameless2 = { _id: 'n2' }
+
+    const result = assembleDomainServiceCatalog(
+      [{ groupName: 'A', services: ['n1', 'n2'] }],
+      [],
+      [nameless1, nameless2]
+    )
+
+    expect(result[0].services).toEqual([nameless1, nameless2])
+  })
 })

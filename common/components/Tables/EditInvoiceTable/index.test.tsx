@@ -306,6 +306,58 @@ describe('<InvoiceSelector> price-context wiring (catalog → payload)', () => {
   })
 })
 
+describe('<InvoiceSelector> typed-line ServiceType exclusion', () => {
+  const setCatalogToMaintenanceRow = () => {
+    mockUseGetCustomServicesByDomainQuery.mockReturnValue({
+      data: {
+        data: [
+          {
+            groupName: 'Комунальні',
+            services: [
+              {
+                _id: '677d414283b6ef93c6b8ea2c',
+                name: 'Утримання',
+                fieldName: 'rentPrice',
+              },
+            ],
+          },
+        ],
+      },
+      isLoading: false,
+    })
+  }
+
+  it('hides a utility option already represented by a typed invoice line', () => {
+    setCatalogToMaintenanceRow()
+
+    render(
+      <InvoiceSelector
+        domainId="d-1"
+        excludeKeys={['stype:maintenancePrice']}
+        excludeServiceTypes={new Set([ServiceType.Maintenance])}
+      />
+    )
+
+    fireEvent.mouseDown(screen.getByRole('combobox'))
+    expect(screen.queryByText('Утримання')).toBeNull()
+  })
+
+  it('shows the utility option when no line owns its ServiceType', () => {
+    setCatalogToMaintenanceRow()
+
+    render(
+      <InvoiceSelector
+        domainId="d-1"
+        excludeKeys={[]}
+        excludeServiceTypes={new Set([ServiceType.Electricity])}
+      />
+    )
+
+    fireEvent.mouseDown(screen.getByRole('combobox'))
+    expect(screen.queryByText('Утримання')).not.toBeNull()
+  })
+})
+
 describe('<EditInvoicesTable_unstable> domainId wiring', () => {
   // Регресія-перевірка: проп domainId на обгортці повинен доходити до
   // InvoiceSelector — інакше placeholder-режим знову зламається

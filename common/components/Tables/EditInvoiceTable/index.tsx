@@ -11,6 +11,8 @@ import {
   IInvoiceLineAddPayload,
   IInvoicePriceContext,
   invoiceLineExcludeKey,
+  isCatalogOptionExcluded,
+  typedServiceTypesOnInvoice,
 } from '@utils/domain/domain-invoice-selector'
 import { Empty, Form, FormInstance, Select, Table } from 'antd'
 import React, { useCallback, useMemo } from 'react'
@@ -197,6 +199,7 @@ export const EditInvoicesTable_unstable: React.FC<EditInvoicesTableProps> = ({
                       excludeKeys={
                         invoices?.map((inv) => invoiceLineExcludeKey(inv)) ?? []
                       }
+                      excludeServiceTypes={typedServiceTypesOnInvoice(invoices)}
                       onSelect={(payload) => add(payload)}
                     />
                   )
@@ -218,8 +221,9 @@ export const InvoiceSelector: React.FC<{
   prevPayment?: IPayment
   domainId?: string
   excludeKeys?: string[]
+  excludeServiceTypes?: Set<string>
   onSelect?: (payload: IInvoiceLineAddPayload) => void
-}> = ({ service, company, prevPayment, domainId, excludeKeys, onSelect }) => {
+}> = ({ service, company, prevPayment, domainId, excludeKeys, excludeServiceTypes, onSelect }) => {
   const rawDomainId = service?.domain?._id
     ? String(service.domain._id)
     : domainId
@@ -246,7 +250,10 @@ export const InvoiceSelector: React.FC<{
     }
     const catalogOptions = rows
       .map((row) => catalogRowToSelectOption(row, priceContext))
-      .filter((opt) => !excludeKeys?.includes(opt.value))
+      .filter(
+        (opt) =>
+          !isCatalogOptionExcluded(opt, excludeKeys, excludeServiceTypes)
+      )
     const customOption = {
       value: ServiceType.Custom,
       label: 'Власне',
@@ -258,6 +265,7 @@ export const InvoiceSelector: React.FC<{
     catalogDomainId,
     hasDomainContext,
     excludeKeys,
+    excludeServiceTypes,
     company,
     service,
     prevPayment,
@@ -270,10 +278,10 @@ export const InvoiceSelector: React.FC<{
         return
       }
       const opt = options.find((o) => o.value === value)
-      if (!opt || excludeKeys?.includes(opt.value)) return
+      if (!opt || isCatalogOptionExcluded(opt, excludeKeys, excludeServiceTypes)) return
       onSelect?.(opt.payload)
     },
-    [excludeKeys, onSelect, options]
+    [excludeKeys, excludeServiceTypes, onSelect, options]
   )
 
   return (
