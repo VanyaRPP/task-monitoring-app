@@ -132,6 +132,17 @@ jest.mock('./DomainForm', () => ({
         >
           seed-touched
         </button>
+        <button
+          data-testid="seed-template"
+          type="button"
+          onClick={() =>
+            form.setFieldsValue({
+              domainTypeTemplateId: 'tpl-it-1',
+            })
+          }
+        >
+          seed-template
+        </button>
       </Form>
     )
   },
@@ -189,6 +200,7 @@ describe('DomainModal — save flow', () => {
       />
     )
 
+    fireEvent.click(screen.getByTestId('seed-template'))
     fireEvent.change(screen.getByTestId('name-input'), {
       target: { value: 'Renamed Provider' },
     })
@@ -197,9 +209,14 @@ describe('DomainModal — save flow', () => {
     await waitFor(() => {
       expect(editDomainMock).toHaveBeenCalledTimes(1)
     })
-    const payload = editDomainMock.mock.calls[0][0]
-    expect(payload._id).toBe('existing-id')
-    expect(payload.name).toBe('Renamed Provider')
+
+    expect(editDomainMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        _id: 'existing-id',
+        name: 'Renamed Provider',
+        domainTypeTemplateId: 'tpl-it-1',
+      })
+    )
     expect(addDomainMock).not.toHaveBeenCalled()
     expect(closeModal).toHaveBeenCalled()
   })

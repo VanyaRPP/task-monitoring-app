@@ -55,20 +55,29 @@ export const CustomServicesTable: React.FC<CustomServicesTableProps> = ({
   const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
   const isDomainAdmin = user?.roles?.includes(Roles.DOMAIN_ADMIN)
 
-  const { data: customServicesResponse, isLoading } = useGetCustomServicesQuery(
-    {}
-  )
-  const allServices = useMemo(
-    () => customServicesResponse?.data ?? [],
-    [customServicesResponse?.data]
-  )
-
   const { data: adminDomains = [] } = useGetDomainsByAdminQuery(undefined, {
     skip: !isDomainAdmin || isGlobalAdmin,
   })
   const { data: allDomains = [] } = useGetDomainsQuery(
     {},
     { skip: !isGlobalAdmin }
+  )
+
+  const adminDomainId = (adminDomains as any[])[0]?._id
+    ? String((adminDomains as any[])[0]._id)
+    : undefined
+
+  const customServicesDomainId =
+    isDomainAdmin && !isGlobalAdmin ? adminDomainId : undefined
+
+  const { data: customServicesResponse, isLoading } = useGetCustomServicesQuery(
+    customServicesDomainId ? { domainId: customServicesDomainId } : {},
+    { skip: isDomainAdmin && !isGlobalAdmin && !adminDomainId }
+  )
+
+  const allServices = useMemo(
+    () => customServicesResponse?.data ?? [],
+    [customServicesResponse?.data]
   )
 
   const domains = useMemo(
@@ -108,6 +117,24 @@ export const CustomServicesTable: React.FC<CustomServicesTableProps> = ({
   }, [domains, templateCategoryMap])
 
   const visibleServices = useMemo<ICustomService[]>(() => {
+    if (isGlobalAdmin) return allServices
+
+    if (isDomainAdmin) {
+      const adminDomainIds = new Set(
+        (adminDomains as any[]).map((d) => String(d._id))
+      )
+      const assignedIds = new Set<string>(
+        (adminDomains as IDomainForVisibility[]).flatMap((d) =>
+          (d.customServices ?? []).flatMap((g) => g.services ?? [])
+        )
+      )
+      return allServices.filter(
+        (s) =>
+          (s.domain && adminDomainIds.has(String(s.domain))) ||
+          assignedIds.has(String(s._id))
+      )
+    }
+
     const visible = getVisibleServices(
       user?.roles,
       adminDomains as IDomainForVisibility[],
@@ -115,7 +142,7 @@ export const CustomServicesTable: React.FC<CustomServicesTableProps> = ({
     )
     const visibleIds = new Set(visible.map((s) => s._id))
     return allServices.filter((s) => visibleIds.has(s._id))
-  }, [user?.roles, adminDomains, allServices])
+  }, [user?.roles, isGlobalAdmin, isDomainAdmin, adminDomains, allServices])
 
   const defaultServiceIds = useMemo(() => new Set(defaultServices), [])
 
@@ -299,8 +326,11 @@ export const CustomServicesTable: React.FC<CustomServicesTableProps> = ({
         dataSource={filtered}
         columns={columns}
         loading={isLoading}
-        size="small"
-        pagination={{ position: ['bottomCenter'], hideOnSinglePage: true }}
+        pagination={{
+          showSizeChanger: true,
+          showTotal: (total) => `Усього: ${total}`,
+          position: ['bottomCenter'],
+        }}
       />
 
       <Modal

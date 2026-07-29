@@ -44,14 +44,15 @@ import {
   useGetDomainFiltersQuery,
   useGetRealEstateFiltersQuery,
 } from '@common/api/filterApi/filter.api'
+import { useGetDomainTypeTemplatesQuery } from '@common/api/domainApi/domain.api'
 import { useEffect, useState, useMemo } from 'react'
 import { useGetDebtorsQuery } from '@common/api/debtorsApi/debtors.api'
 import CollapsedTags from '@components/UI/CollapsedTags'
 import TableFilterLink from '@components/UI/Reusable/TableFilterLink'
 import {
   extractDomainsFromRealEstates,
-  getSelectedServiceIds,
   getVisibleServices,
+  shouldShowStandardServices,
 } from '@utils/servicesVisibility'
 
 type DebtPerMonth = {
@@ -99,7 +100,7 @@ export interface Props {
     edit: boolean
   }
   isArchive: boolean
-  customServices?: { _id: string; name: string }[]
+  customServices?: { _id: string; name: string; fieldName?: string }[]
 }
 
 const CompaniesTable: React.FC<Props> = ({
@@ -241,34 +242,53 @@ const CompaniesTable: React.FC<Props> = ({
     () => extractDomainsFromRealEstates(filteredData),
     [filteredData]
   )
-
+  const { data: domainTypeTemplates = [] } = useGetDomainTypeTemplatesQuery()
   const hasActiveFilters = !!(
-    filters?.domain?.length || filters?.company?.length
+    filters?.domain?.length ||
+    filters?.company?.length ||
+    filters?.street?.length
   )
-
+  const showStandardServices = useMemo(
+    () => shouldShowStandardServices(visibleDomains, domainTypeTemplates),
+    [visibleDomains, domainTypeTemplates]
+  )
   const filteredCustomServices = useMemo(() => {
     const withoutStandard = customServices?.filter((custom) => {
       return !STANDARD_SERVICE_NAMES.includes(custom.name)
     })
 
-    if (isGlobalAdmin && hasActiveFilters) {
-      const selectedIds = getSelectedServiceIds(visibleDomains)
-      if (!selectedIds.length) return []
-      const selectedSet = new Set(selectedIds)
-      return (withoutStandard ?? []).filter((s) => selectedSet.has(s._id))
+    if (!withoutStandard?.length) return []
+
+    if (hasActiveFilters) {
+      const activeServiceKeys = new Set<string>()
+
+      filteredData.forEach((company: any) => {
+        if (company.customServices && Array.isArray(company.customServices)) {
+          company.customServices.forEach((service: any) => {
+            const key = service?.fieldName || service?._id
+            if (key) {
+              activeServiceKeys.add(String(key))
+            }
+          })
+        }
+      })
+
+      return withoutStandard.filter((s) =>
+        activeServiceKeys.has(String(s.fieldName || s._id))
+      )
     }
 
     return getVisibleServices(
       userResponse?.roles,
       visibleDomains,
-      withoutStandard ?? []
+      withoutStandard
     )
   }, [
     customServices,
     userResponse?.roles,
     visibleDomains,
+    filteredData,
     hasActiveFilters,
-    isGlobalAdmin,
   ])
 
   if (isError) return <Alert message="Помилка" type="error" showIcon closable />
@@ -331,6 +351,7 @@ const CompaniesTable: React.FC<Props> = ({
         isSingleCompanyByData,
         customServices: filteredCustomServices,
         setFilters,
+        showStandardServices,
       })}
       dataSource={filteredData}
       scroll={{ x: tableWidth }}
@@ -383,6 +404,7 @@ const getDefaultColumns = ({
   isSingleCompanyByData,
   customServices,
   setFilters,
+  showStandardServices,
 }: {
   domainId?: string
   streetId?: string
@@ -403,8 +425,9 @@ const getDefaultColumns = ({
   debtorCompanies?: CompanyWithPayments[]
   isUser?: boolean
   isSingleCompanyByData?: boolean
-  customServices?: { _id: string; name: string }[]
+  customServices?: { _id: string; name: string; fieldName?: string }[]
   setFilters?: (filters: any) => void
+  showStandardServices?: boolean
 }): ColumnType<any>[] => {
   const isOnPage = pathname === AppRoutes.REAL_ESTATE
 
@@ -430,92 +453,101 @@ const getDefaultColumns = ({
       align: 'center',
       render: renderTooltip,
     },
-    shouldShowService('totalArea') && {
-      title: 'Площа (м²)',
-      dataIndex: 'totalArea',
-      width: 120,
-      align: 'center',
-      sorter: isOnPage ? (a, b) => a.totalArea - b.totalArea : null,
-    },
-    shouldShowService('pricePerMeter') && {
-      title: 'Ціна (грн/м²)',
-      dataIndex: 'pricePerMeter',
-      width: 120,
-      align: 'center',
-      sorter: isOnPage ? (a, b) => a.pricePerMeter - b.pricePerMeter : null,
-      render: (value) => (
-        <span className={s.currency}>{renderPrice(value)}</span>
-      ),
-    },
-    shouldShowService('servicePricePerMeter') && {
-      title: 'Індивідуальне утримання (грн/м²)',
-      dataIndex: 'servicePricePerMeter',
-      width: 200,
-      align: 'center',
-      sorter: isOnPage
-        ? (a, b) => a.servicePricePerMeter - b.servicePricePerMeter
-        : null,
-      render: (value) =>
-        value !== null && value !== undefined && value !== 0 ? (
-          renderCurrency(value)
-        ) : (
-          <span className={s.currency}>-</span>
+    shouldShowService('totalArea') &&
+      showStandardServices && {
+        title: 'Площа (м²)',
+        dataIndex: 'totalArea',
+        width: 120,
+        align: 'center',
+        sorter: isOnPage ? (a, b) => a.totalArea - b.totalArea : null,
+      },
+    shouldShowService('pricePerMeter') &&
+      showStandardServices && {
+        title: 'Ціна (грн/м²)',
+        dataIndex: 'pricePerMeter',
+        width: 120,
+        align: 'center',
+        sorter: isOnPage ? (a, b) => a.pricePerMeter - b.pricePerMeter : null,
+        render: (value) => (
+          <span className={s.currency}>{renderPrice(value)}</span>
         ),
-    },
-    shouldShowService('rentPart') && {
-      title: 'Частка загальної площі',
-      dataIndex: 'rentPart',
-      width: 180,
-      align: 'center',
-      sorter: isOnPage ? (a, b) => a.rentPart - b.rentPart : null,
-    },
-    shouldShowService('waterPart') && {
-      title: 'Частка водопостачання',
-      dataIndex: 'waterPart',
-      width: 180,
-      align: 'center',
-      sorter: isOnPage ? (a, b) => a.waterPart - b.waterPart : null,
-    },
-    shouldShowService('cleaning') && {
-      title: 'Прибирання (грн)',
-      dataIndex: 'cleaning',
-      width: 150,
-      align: 'center',
-      sorter: isOnPage ? (a, b) => a.cleaning - b.cleaning : null,
-      render: (value) =>
-        value !== null && value !== undefined && value !== 0 ? (
-          renderCurrency(value)
-        ) : (
-          <span className={s.currency}>-</span>
-        ),
-    },
-    shouldShowService('discount') && {
-      title: 'Знижка',
-      dataIndex: 'discount',
-      width: 150,
-      align: 'center',
-      sorter: isOnPage ? (a, b) => a.discount - b.discount : null,
-      render: (value) =>
-        value !== null && value !== undefined && value !== 0 ? (
-          renderCurrency(value)
-        ) : (
-          <span className={s.currency}>-</span>
-        ),
-    },
-    shouldShowService('garbageCollector') && {
-      align: 'center',
-      title: 'Вивіз сміття',
-      dataIndex: 'garbageCollector',
-      width: 150,
-      render: (value) => <Checkbox checked={value} disabled />,
-    },
-    shouldShowService('inflicion') && {
-      align: 'center',
-      title: 'Нарахування інд. інф.',
-      dataIndex: 'inflicion',
-      width: 170,
-      render: (value) => <Checkbox checked={value} disabled />,
-    },
+      },
+    shouldShowService('servicePricePerMeter') &&
+      showStandardServices && {
+        title: 'Індивідуальне утримання (грн/м²)',
+        dataIndex: 'servicePricePerMeter',
+        width: 200,
+        align: 'center',
+        sorter: isOnPage
+          ? (a, b) => a.servicePricePerMeter - b.servicePricePerMeter
+          : null,
+        render: (value) =>
+          value !== null && value !== undefined && value !== 0 ? (
+            renderCurrency(value)
+          ) : (
+            <span className={s.currency}>-</span>
+          ),
+      },
+    shouldShowService('rentPart') &&
+      showStandardServices && {
+        title: 'Частка загальної площі',
+        dataIndex: 'rentPart',
+        width: 180,
+        align: 'center',
+        sorter: isOnPage ? (a, b) => a.rentPart - b.rentPart : null,
+      },
+    shouldShowService('waterPart') &&
+      showStandardServices && {
+        title: 'Частка водопостачання',
+        dataIndex: 'waterPart',
+        width: 180,
+        align: 'center',
+        sorter: isOnPage ? (a, b) => a.waterPart - b.waterPart : null,
+      },
+    shouldShowService('cleaning') &&
+      showStandardServices && {
+        title: 'Прибирання (грн)',
+        dataIndex: 'cleaning',
+        width: 150,
+        align: 'center',
+        sorter: isOnPage ? (a, b) => a.cleaning - b.cleaning : null,
+        render: (value) =>
+          value !== null && value !== undefined && value !== 0 ? (
+            renderCurrency(value)
+          ) : (
+            <span className={s.currency}>-</span>
+          ),
+      },
+    shouldShowService('discount') &&
+      showStandardServices && {
+        title: 'Знижка',
+        dataIndex: 'discount',
+        width: 150,
+        align: 'center',
+        sorter: isOnPage ? (a, b) => a.discount - b.discount : null,
+        render: (value) =>
+          value !== null && value !== undefined && value !== 0 ? (
+            renderCurrency(value)
+          ) : (
+            <span className={s.currency}>-</span>
+          ),
+      },
+    shouldShowService('garbageCollector') &&
+      showStandardServices && {
+        align: 'center',
+        title: 'Вивіз сміття',
+        dataIndex: 'garbageCollector',
+        width: 150,
+        render: (value) => <Checkbox checked={value} disabled />,
+      },
+    shouldShowService('inflicion') &&
+      showStandardServices && {
+        align: 'center',
+        title: 'Нарахування інд. інф.',
+        dataIndex: 'inflicion',
+        width: 170,
+        render: (value) => <Checkbox checked={value} disabled />,
+      },
   ].filter(Boolean) as ColumnType<any>[]
 
   if (customServices?.length) {
@@ -529,8 +561,10 @@ const getDefaultColumns = ({
         align: 'center',
         ellipsis: true,
         render: (_, record: IExtendedRealestate) => {
-          const match = (record as any).individualServices?.find(
-            (s) => String(s._id) === String(custom._id)
+          const match = record.customServices?.find((s) =>
+            custom.fieldName
+              ? s.fieldName === custom.fieldName
+              : String(s._id) === String(custom._id)
           )
           return match ? (
             renderCurrency(match.price)

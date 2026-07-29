@@ -258,7 +258,7 @@ describe('createCustomService', () => {
     )
   })
 
-  it('cascades the new service to every active company of the domain', async () => {
+  it('cascades the new service only to active companies with allServices enabled', async () => {
     asMock(CustomService.findOne).mockResolvedValueOnce(null)
     asMock(CustomService.create).mockResolvedValueOnce({
       _id: serviceId,
@@ -278,7 +278,7 @@ describe('createCustomService', () => {
     )
 
     expect(asMock(RealEstate.updateMany)).toHaveBeenCalledWith(
-      { domain: expect.anything(), archived: { $ne: true } },
+      { domain: expect.anything(), archived: { $ne: true }, allServices: true },
       {
         $push: {
           customServices: {
@@ -290,6 +290,29 @@ describe('createCustomService', () => {
         },
       }
     )
+  })
+
+  it('does not cascade to companies that chose a subset (allServices filter present)', async () => {
+    asMock(CustomService.findOne).mockResolvedValueOnce(null)
+    asMock(CustomService.create).mockResolvedValueOnce({
+      _id: serviceId,
+      name: 'Foo',
+      fieldName: 'foo',
+      domain: ownDomainId,
+      toObject: () => ({
+        _id: serviceId,
+        name: 'Foo',
+        fieldName: 'foo',
+      }),
+    })
+
+    await createCustomService(
+      { name: 'Foo', domainId: String(ownDomainId) },
+      ctxGlobal
+    )
+
+    const [[filter]] = asMock(RealEstate.updateMany).mock.calls
+    expect(filter).toMatchObject({ allServices: true })
   })
 })
 
@@ -722,5 +745,50 @@ describe('assembleDomainServiceCatalog', () => {
   it('falls back to a positional group name when none is set', () => {
     const result = assembleDomainServiceCatalog([{ services: [] }], [], [])
     expect(result[0].groupName).toBe('Група 1')
+  })
+
+  it('collapses a domain-scoped copy that duplicates a grouped default by name', () => {
+    const seededDefault = { _id: 'default-maintenance', name: 'Утримання' }
+    const domainCopy = { _id: 'domain-maintenance', name: 'Утримання' }
+
+    const result = assembleDomainServiceCatalog(
+      [{ groupName: 'Комунальні', services: ['default-maintenance'] }],
+      [domainCopy],
+      [seededDefault]
+    )
+
+    expect(result).toEqual([
+      { groupName: 'Комунальні', services: [seededDefault] },
+    ])
+  })
+
+  it('de-dupes by name case-insensitively across separate groups', () => {
+    const first = { _id: 'a', name: 'Електропостачання' }
+    const second = { _id: 'b', name: 'електропостачання' }
+
+    const result = assembleDomainServiceCatalog(
+      [
+        { groupName: 'G1', services: ['a'] },
+        { groupName: 'G2', services: ['b'] },
+      ],
+      [],
+      [first, second]
+    )
+
+    expect(result[0].services).toEqual([first])
+    expect(result[1].services).toEqual([])
+  })
+
+  it('keeps services that have no name (nothing to key on)', () => {
+    const nameless1 = { _id: 'n1' }
+    const nameless2 = { _id: 'n2' }
+
+    const result = assembleDomainServiceCatalog(
+      [{ groupName: 'A', services: ['n1', 'n2'] }],
+      [],
+      [nameless1, nameless2]
+    )
+
+    expect(result[0].services).toEqual([nameless1, nameless2])
   })
 })

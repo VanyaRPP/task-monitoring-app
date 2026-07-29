@@ -190,8 +190,9 @@ async function attachServiceToDomainCompanies(
     fieldName: string
   }
 ): Promise<void> {
+  // Companies with a deliberately chosen subset are left untouched.
   await RealEstate.updateMany(
-    { domain: domainId, archived: { $ne: true } },
+    { domain: domainId, archived: { $ne: true }, allServices: true },
     {
       $push: {
         customServices: {
@@ -497,8 +498,19 @@ export async function listCustomServicesForDomain(
   ctx: UserContext
 ): Promise<ServiceResult<unknown[]>> {
   if (ctx.isUser) {
-    // Match legacy contract: User-level access returns 400 with 'Не дозволено'.
     return err('invalid', 'Не дозволено')
+  }
+
+  // DomainAdmin must always provide a domainId — returning the global pool
+  // would expose services from other domains.
+  if (ctx.isDomainAdmin && !ctx.isGlobalAdmin) {
+    const hasDomainId =
+      query.domainId !== undefined &&
+      query.domainId !== null &&
+      query.domainId !== ''
+    if (!hasDomainId) {
+      return err('forbidden', 'DomainAdmin повинен вказати domainId')
+    }
   }
 
   const filter: Record<string, unknown> = {}
@@ -516,6 +528,17 @@ export async function listCustomServicesForDomain(
     }
     const domainObjectId = new mongoose.Types.ObjectId(domainIdStr)
 
+    // DomainAdmin: verify they actually administer the requested domain.
+    if (ctx.isDomainAdmin && !ctx.isGlobalAdmin) {
+      const allowed = await Domain.exists({
+        _id: domainObjectId,
+        adminEmails: ctx.user.email,
+      })
+      if (!allowed) {
+        return err('forbidden', 'Ви не є адміністратором цього домену')
+      }
+    }
+
     const category = parseTemplateCategory(query.templateCategory)
     if (category) {
       const defaultIds = await getDefaultServiceIdsForCategory(category)
@@ -529,11 +552,17 @@ export async function listCustomServicesForDomain(
           : []),
       ]
     } else {
-      filter.$or = [
-        { domain: domainObjectId },
-        { domain: { $in: [null, undefined] } },
-        { domain: { $exists: false } },
-      ]
+      // DomainAdmin sees only their domain's services (no legacy global pool).
+      // GlobalAdmin keeps the legacy union for back-compat.
+      if (ctx.isDomainAdmin && !ctx.isGlobalAdmin) {
+        filter.domain = domainObjectId
+      } else {
+        filter.$or = [
+          { domain: domainObjectId },
+          { domain: { $in: [null, undefined] } },
+          { domain: { $exists: false } },
+        ]
+      }
     }
   }
 
@@ -598,13 +627,25 @@ export function assembleDomainServiceCatalog(
     servicesById.set(String(service._id), service)
   }
 
+  const seenNameKeys = new Set<string>()
+  const takeUniqueByName = (service: LeanCustomService): boolean => {
+    const nameKey = String(service?.name ?? '')
+      .trim()
+      .toLowerCase()
+    if (!nameKey) return true
+    if (seenNameKeys.has(nameKey)) return false
+    seenNameKeys.add(nameKey)
+    return true
+  }
+
   const groupedServices: DomainServiceGroup[] = (
     domainCustomServices || []
   ).map((group, index) => ({
     groupName: group?.groupName ?? `Група ${index + 1}`,
     services: (group?.services || [])
       .map((id) => servicesById.get(String(id)))
-      .filter((service): service is LeanCustomService => Boolean(service)),
+      .filter((service): service is LeanCustomService => Boolean(service))
+      .filter(takeUniqueByName),
   }))
 
   const groupedIds = new Set(
@@ -612,9 +653,9 @@ export function assembleDomainServiceCatalog(
       group.services.map((service) => String(service._id))
     )
   )
-  const ungroupedServices = domainScopedServices.filter(
-    (service) => !groupedIds.has(String(service._id))
-  )
+  const ungroupedServices = domainScopedServices
+    .filter((service) => !groupedIds.has(String(service._id)))
+    .filter(takeUniqueByName)
 
   const result: DomainServiceGroup[] = [...groupedServices]
   if (ungroupedServices.length > 0) {

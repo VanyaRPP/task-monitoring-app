@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 import Domain from '@modules/models/Domain'
+import RealEstate from '@modules/models/RealEstate'
 import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
@@ -13,7 +14,10 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  const { isDomainAdmin, isGlobalAdmin, user } = await getCurrentUser(req, res)
+  const { isDomainAdmin, isGlobalAdmin, isUser, user } = await getCurrentUser(
+    req,
+    res
+  )
 
   const SECURE_TOKEN = process.env.NEXT_PUBLIC_MONGODB_SECRET_TOKEN
 
@@ -42,11 +46,34 @@ export default async function handler(
         const streetIds = typeof streetId === 'string' ? [streetId] : streetId
         const options: any = {}
 
-        if (!isDomainAdmin && !isGlobalAdmin) {
+        if (!isDomainAdmin && !isGlobalAdmin && !isUser) {
           return res.status(200).json({ success: true, data: [] })
         }
 
         const isArchived = archived ? archived === 'true' : undefined
+
+        if (isUser) {
+          const userRealEstates = await RealEstate.find(
+            { adminEmails: user.email },
+            { domain: 1 }
+          ).lean()
+          const domainIds = [
+            ...new Set(
+              userRealEstates.map((re) => re.domain?.toString()).filter(Boolean)
+            ),
+          ]
+          const userDomainFilter: any = { _id: { $in: domainIds } }
+          if (isArchived === true) {
+            userDomainFilter.archived = true
+          } else if (isArchived === false) {
+            userDomainFilter.archived = { $ne: true }
+          }
+          const domains = await Domain.find(userDomainFilter)
+            .limit(+limit)
+            .populate('streets')
+          return res.status(200).json({ success: true, data: domains })
+        }
+
         if (isArchived === true) {
           options.archived = true
         } else if (isArchived === false) {

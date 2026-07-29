@@ -132,8 +132,99 @@ describe('API Route - GET Method', () => {
       } as any
 
       await handler(mockRequest, mockResponse)
-      expect(mockResponse.status).toHaveBeenCalledWith(200)
-      expect(mockResponse.json.mock.calls[0][0].data).toHaveLength(1)
+      expect(mockResponse.status).toHaveBeenCalledWith(403)
     })
+  })
+  it('returns empty array when no services exist', async () => {
+    const mockRequest = { method: 'GET', query: {} } as any
+    const mockResponse = {
+      status: jest.fn(() => mockResponse),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockRequest, mockResponse)
+    expect(mockResponse.status).toHaveBeenCalledWith(200)
+    expect(mockResponse.json.mock.calls[0][0].data).toHaveLength(0)
+  })
+
+  it('returns empty array when _id does not match any service', async () => {
+    const mockRequest = {
+      method: 'GET',
+      query: { _id: '507f191e810c19729de860ea' },
+    } as any
+    const mockResponse = {
+      status: jest.fn(() => mockResponse),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockRequest, mockResponse)
+    expect(mockResponse.status).toHaveBeenCalledWith(200)
+    expect(mockResponse.json.mock.calls[0][0].data).toHaveLength(0)
+  })
+
+  it('returns only domain-scoped services when domainId is passed', async () => {
+    await CustomService.create({
+      name: 'Domain Service',
+      fieldName: 'domainService',
+      domain: domains[0]._id,
+    })
+    await CustomService.create({
+      name: 'Legacy Service',
+      fieldName: 'legacyService',
+    })
+
+    const mockRequest = {
+      method: 'GET',
+      query: { domainId: domains[0]._id.toString() },
+    } as any
+    const mockResponse = {
+      status: jest.fn(() => mockResponse),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockRequest, mockResponse)
+    expect(mockResponse.status).toHaveBeenCalledWith(200)
+    // має повернути і domain service і legacy (без domain)
+    const data = mockResponse.json.mock.calls[0][0].data
+    expect(data.some((s: any) => s.name === 'Domain Service')).toBe(true)
+    expect(data.some((s: any) => s.name === 'Legacy Service')).toBe(true)
+  })
+
+  it('returns 400 when domainId is invalid', async () => {
+    const mockRequest = {
+      method: 'GET',
+      query: { domainId: 'not-a-valid-id' },
+    } as any
+    const mockResponse = {
+      status: jest.fn(() => mockResponse),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockRequest, mockResponse)
+    expect(mockResponse.status).toHaveBeenCalledWith(400)
+  })
+
+  it('deduplicates services with the same name', async () => {
+    await CustomService.create({
+      name: 'Duplicate Name',
+      fieldName: 'duplicateName1',
+    })
+    await CustomService.create({
+      name: 'Duplicate Name',
+      fieldName: 'duplicateName2',
+    })
+
+    const mockRequest = { method: 'GET', query: {} } as any
+    const mockResponse = {
+      status: jest.fn(() => mockResponse),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockRequest, mockResponse)
+    expect(mockResponse.status).toHaveBeenCalledWith(200)
+    const data = mockResponse.json.mock.calls[0][0].data
+    const names = data.map((s: any) => s.name)
+    const unique = new Set(names)
+    expect(unique.size).toBe(names.length)
   })
 })
