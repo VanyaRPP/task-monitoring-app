@@ -8,6 +8,7 @@ import Domain from '@modules/models/Domain'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import {
   buildFinalTechnicalTransactionId,
+  isSelfTransaction,
   normalizeTechnicalTransactionId,
   technicalTransactionIdMatchCandidates,
 } from '@components/Pages/BankTransactions/components/TransactionsTable/components/bankHelper'
@@ -54,7 +55,7 @@ export async function checkTransaction({ transaction, domainId }) {
       }
     }
 
-    if (!isTransit) {
+    if (!isTransit && !isSelfTransaction(transaction)) {
       const acc = normalizeBankAccount(transaction.AUT_CNTR_ACC)
       if (domainId && acc) {
         const payment = await Payment.findOne({

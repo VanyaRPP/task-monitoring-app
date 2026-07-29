@@ -47,6 +47,23 @@ export enum MatchType {
   PREVIOUS = 'previous',
 }
 
+/**
+ * A self-transaction is money the domain owner moves to/from themselves
+ * (returns, own card top-ups, own transfers). The counterparty tax code then
+ * equals the owner's own code (AUT_CNTR_CRF === AUT_MY_CRF), so it must never
+ * be used to auto-select the owner's own company onto such a row.
+ */
+export const isSelfTransaction = (
+  transaction:
+    | Pick<ITransaction, 'AUT_CNTR_CRF' | 'AUT_MY_CRF'>
+    | null
+    | undefined
+): boolean => {
+  const counterparty = transaction?.AUT_CNTR_CRF?.trim()
+  const owner = transaction?.AUT_MY_CRF?.trim()
+  return Boolean(counterparty && owner && counterparty === owner)
+}
+
 type MatchResult = { companyId: string | null; matchedBy: MatchType | null }
 
 export const matchByAccount = (
@@ -66,10 +83,29 @@ export const matchByRnokpp = (
   transaction: ITransaction,
   companies: IRealestate[]
 ): MatchResult | null => {
-  if (!transaction.RECIPIENT_ULTMT_NCEO) return null
-  const nceo = transaction.RECIPIENT_ULTMT_NCEO
-  const company = companies.find(
-    (c) => (c.rnokpp && c.rnokpp === nceo) || c.description?.includes(nceo)
+  const codes: string[] = []
+  // Transit accounts carry the ultimate recipient's tax code here.
+  if (transaction.RECIPIENT_ULTMT_NCEO) {
+    codes.push(transaction.RECIPIENT_ULTMT_NCEO)
+  }
+  // Direct (non-transit) payments carry the counterparty's tax code in
+  // AUT_CNTR_CRF. It's account-independent, so it matches the same payer even
+  // when they pay from a different bank account. Transit rows put the
+  // transit/bank code here (handled via NCEO above), and self-transactions
+  // carry the owner's own code — skip both.
+  const cntrCrf = transaction.AUT_CNTR_CRF?.trim()
+  if (
+    cntrCrf &&
+    !transaction.AUT_CNTR_NAM?.includes('Транз') &&
+    !isSelfTransaction(transaction)
+  ) {
+    codes.push(cntrCrf)
+  }
+  if (codes.length === 0) return null
+  const company = companies.find((c) =>
+    codes.some(
+      (code) => (c.rnokpp && c.rnokpp === code) || c.description?.includes(code)
+    )
   )
   return company?._id
     ? { companyId: company._id, matchedBy: MatchType.RNOKPP }

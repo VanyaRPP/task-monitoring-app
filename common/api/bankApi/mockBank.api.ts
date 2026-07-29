@@ -2,6 +2,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import { ITransaction } from '@components/Pages/BankTransactions/components/TransactionsTable/components/transactionTypes'
 import { IBalance } from '@components/Pages/BankTransactions/components/DomainbankBalance/DomainBankBalance'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
+import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 
 interface IBalancesData {
   exist_next_page: boolean
@@ -209,6 +210,138 @@ export const MOCK_TRANSACTIONS: ITransaction[] = [
     isMatchingPayment: false,
     previousCompanyId: null,
   },
+  // --- AUT_CNTR_CRF fix demo ---------------------------------------------
+  // Same payer (tax code 2534567890) pays from two DIFFERENT accounts, and
+  // neither matches the account stored on the company (…006). Account and
+  // previous matching both fail, so these auto-select only via AUT_CNTR_CRF.
+  // Pair them with MOCK_COMPANIES below to verify the fix by hand.
+  {
+    AUT_MY_CRF: '0000000000',
+    AUT_MY_MFO: '300000',
+    AUT_MY_ACC: 'UA300000000000000000000000001',
+    AUT_MY_NAM: 'Тест Т. Є. ФОП',
+    AUT_MY_MFO_NAME: 'АТ КБ "ПРИВАТБАНК"',
+    AUT_MY_MFO_CITY: 'ДНІПРО',
+    AUT_CNTR_CRF: '2534567890',
+    AUT_CNTR_MFO: '300001',
+    AUT_CNTR_ACC: 'UA300000000000000000000000004',
+    AUT_CNTR_NAM: 'ФОП Тест Платник Іван',
+    AUT_CNTR_MFO_NAME: 'АТ "ТЕСТ БАНК"',
+    AUT_CNTR_MFO_CITY: 'КИЇВ',
+    CCY: 'UAH',
+    FL_REAL: 'r',
+    PR_PR: 'r',
+    DOC_TYP: 'p',
+    NUM_DOC: '18',
+    DAT_KL: '25.07.2026',
+    DAT_OD: '25.07.2026',
+    OSND: 'оплата згідно рахунку #1208',
+    SUM: '17474.96',
+    SUM_E: '17474.96',
+    REF: 'HS43Q0725K07W4',
+    REFN: 'P',
+    TIM_P: '15:07',
+    DATE_TIME_DAT_OD_TIM_P: '25.07.2026 15:07:00',
+    ID: 'HS43Q0725K07W4P25072026150700C',
+    TRANTYPE: 'C',
+    DLR: '',
+    TECHNICAL_TRANSACTION_ID: 'HS43Q0725K07W4P25072026150700C',
+    RECIPIENT_ULTMT_NCEO: '',
+    isMatchingPayment: false,
+    previousCompanyId: null,
+  },
+  {
+    AUT_MY_CRF: '0000000000',
+    AUT_MY_MFO: '300000',
+    AUT_MY_ACC: 'UA300000000000000000000000001',
+    AUT_MY_NAM: 'Тест Т. Є. ФОП',
+    AUT_MY_MFO_NAME: 'АТ КБ "ПРИВАТБАНК"',
+    AUT_MY_MFO_CITY: 'ДНІПРО',
+    AUT_CNTR_CRF: '2534567890',
+    AUT_CNTR_MFO: '300001',
+    AUT_CNTR_ACC: 'UA300000000000000000000000005',
+    AUT_CNTR_NAM: 'КАРТКОВИЙ - ФОП Тест Платник Іван',
+    AUT_CNTR_MFO_NAME: 'АТ "ТЕСТ БАНК"',
+    AUT_CNTR_MFO_CITY: 'КИЇВ',
+    CCY: 'UAH',
+    FL_REAL: 'r',
+    PR_PR: 'r',
+    DOC_TYP: 'p',
+    NUM_DOC: '17',
+    DAT_KL: '25.07.2026',
+    DAT_OD: '25.07.2026',
+    OSND: 'РАХУНОК № 1302',
+    SUM: '18265.00',
+    SUM_E: '18265.00',
+    REF: 'HS42Q0725K096B',
+    REFN: 'P',
+    TIM_P: '15:03',
+    DATE_TIME_DAT_OD_TIM_P: '25.07.2026 15:03:00',
+    ID: 'HS42Q0725K096BP25072026150300C',
+    TRANTYPE: 'C',
+    DLR: '',
+    TECHNICAL_TRANSACTION_ID: 'HS42Q0725K096BP25072026150300C',
+    RECIPIENT_ULTMT_NCEO: '',
+    isMatchingPayment: false,
+    previousCompanyId: null,
+  },
+  // Self-transaction: counterparty tax code == owner tax code (0000000000).
+  // Must NOT auto-select the owner's own company (guard against false positive).
+  {
+    AUT_MY_CRF: '0000000000',
+    AUT_MY_MFO: '300000',
+    AUT_MY_ACC: 'UA300000000000000000000000001',
+    AUT_MY_NAM: 'Тест Т. Є. ФОП',
+    AUT_MY_MFO_NAME: 'АТ КБ "ПРИВАТБАНК"',
+    AUT_MY_MFO_CITY: 'ДНІПРО',
+    AUT_CNTR_CRF: '0000000000',
+    AUT_CNTR_MFO: '300000',
+    AUT_CNTR_ACC: 'UA300000000000000000000000009',
+    AUT_CNTR_NAM: 'ТЕСТ ТЕТЯНА ЄВГЕНІВНА',
+    AUT_CNTR_MFO_NAME: 'АТ КБ "ПРИВАТБАНК"',
+    AUT_CNTR_MFO_CITY: 'ДНІПРО',
+    CCY: 'UAH',
+    FL_REAL: 'r',
+    PR_PR: 'r',
+    DOC_TYP: 'p',
+    NUM_DOC: '324',
+    DAT_KL: '20.05.2026',
+    DAT_OD: '20.05.2026',
+    OSND: 'повернення коштів',
+    SUM: '1560.00',
+    SUM_E: '1560.00',
+    REF: 'JBKLQ6MOE4R6KZ',
+    REFN: '1',
+    TIM_P: '17:21',
+    DATE_TIME_DAT_OD_TIM_P: '20.05.2026 17:21:00',
+    ID: 'JBKLQ6MOE4R6KZ120052026172100D',
+    TRANTYPE: 'D',
+    DLR: '',
+    TECHNICAL_TRANSACTION_ID: 'JBKLQ6MOE4R6KZ120052026172100D',
+    isMatchingPayment: false,
+    previousCompanyId: null,
+  },
+]
+
+// Companies to pair with MOCK_TRANSACTIONS when verifying auto-select by hand.
+// - "ФОП Тест Платник Іван" has rnokpp === the payer's AUT_CNTR_CRF but a
+//   stored account (…006) that differs from both incoming accounts → it can
+//   only be matched via AUT_CNTR_CRF (the fix).
+// - "Тест Т. Є. ФОП" is the owner's own company; the self-transaction must NOT
+//   auto-select it even though its rnokpp equals the counterparty code.
+export const MOCK_COMPANIES: IRealestate[] = [
+  {
+    _id: '64d0e6440fa634ae54087001',
+    companyName: 'ФОП Тест Платник Іван',
+    rnokpp: '2534567890',
+    account: 'UA300000000000000000000000006',
+  } as IRealestate,
+  {
+    _id: '64d0e6440fa634ae54087002',
+    companyName: 'Тест Т. Є. ФОП',
+    rnokpp: '0000000000',
+    account: 'UA300000000000000000000000001',
+  } as IRealestate,
 ]
 
 export const mockBankApi = createApi({
