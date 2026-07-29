@@ -500,9 +500,9 @@ describe('Default operation type for AddPaymentModal (Send from Bank)', () => {
   })
 })
 describe('saveAccountToCompany after successful payment creation', () => {
-  it('calls editRealEstate with account when company was manually selected and success=true', async () => {
+  it('saves account and back-fills rnokpp when company was manually selected and success=true', async () => {
     mockUseGetAllRealEstateQuery.mockReturnValue({
-      data: { data: [makeCompany({ account: undefined })] },
+      data: { data: [makeCompany({ account: undefined, rnokpp: '' })] },
     })
     renderDrawer(
       makeTransaction({ AUT_CNTR_ACC: 'UA803220010000026001350058717' })
@@ -517,11 +517,37 @@ describe('saveAccountToCompany after successful payment creation', () => {
       expect(mockEditRealEstate).toHaveBeenCalledWith({
         _id: 'company_001',
         account: 'UA803220010000026001350058717',
+        rnokpp: '2359317190',
       })
     })
   })
 
-  it('does NOT call editRealEstate when company was auto-matched by account (already saved)', async () => {
+  it('back-fills rnokpp (only) when company was auto-matched by account but has no rnokpp', async () => {
+    mockUseGetAllRealEstateQuery.mockReturnValue({
+      data: { data: [makeCompany({ rnokpp: '' })] },
+    })
+    renderDrawer()
+
+    await waitFor(() => expect(getDropdownSendButton()).toBeTruthy())
+
+    const sendBtn = getDropdownSendButton()
+    if (!sendBtn) throw new Error('Send button not found')
+    await userEvent.click(sendBtn)
+    await userEvent.click(await screen.findByText('Швидке створення'))
+    await userEvent.click(await screen.findByText('Confirm'))
+
+    await waitFor(() => {
+      expect(mockEditRealEstate).toHaveBeenCalledWith({
+        _id: 'company_001',
+        rnokpp: '2359317190',
+      })
+    })
+  })
+
+  it('does NOT call editRealEstate when account matched and rnokpp already stored', async () => {
+    mockUseGetAllRealEstateQuery.mockReturnValue({
+      data: { data: [makeCompany({ rnokpp: '2359317190' })] },
+    })
     renderDrawer()
 
     await waitFor(() => expect(getDropdownSendButton()).toBeTruthy())
