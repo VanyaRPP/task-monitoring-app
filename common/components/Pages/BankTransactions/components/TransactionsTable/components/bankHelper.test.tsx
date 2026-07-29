@@ -3,8 +3,10 @@ import {
   matchByAccount,
   matchByRnokpp,
   matchByPrevious,
+  matchByName,
   getResolvedDescription,
   isSelfTransaction,
+  normalizeCounterpartyName,
 } from './bankHelper'
 import { ITransaction } from './transactionTypes'
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
@@ -337,6 +339,92 @@ describe('isSelfTransaction', () => {
   })
 })
 
+describe('normalizeCounterpartyName', () => {
+  it('strips ФОП and КАРТКОВИЙ, punctuation and case', () => {
+    expect(
+      normalizeCounterpartyName('КАРТКОВИЙ - ФОП Шмакова Крістіна Василівна')
+    ).toBe('ШМАКОВА КРІСТІНА ВАСИЛІВНА')
+    expect(normalizeCounterpartyName('ФОП Шмакова Крістіна Василівна')).toBe(
+      'ШМАКОВА КРІСТІНА ВАСИЛІВНА'
+    )
+  })
+
+  it('returns empty string for empty/invalid input', () => {
+    expect(normalizeCounterpartyName('')).toBe('')
+    expect(normalizeCounterpartyName(undefined)).toBe('')
+    expect(normalizeCounterpartyName(null)).toBe('')
+  })
+})
+
+describe('matchByName', () => {
+  const payer = {
+    _id: 'payer-id',
+    companyName: 'Шмакова Крістіна Василівна',
+  } as IRealestate
+
+  it('matches by full normalized name across ФОП/КАРТКОВИЙ prefixes', () => {
+    expect(
+      matchByName(
+        { AUT_CNTR_NAM: 'ФОП Шмакова Крістіна Василівна' } as ITransaction,
+        [payer]
+      )
+    ).toEqual({ companyId: 'payer-id', matchedBy: 'name' })
+
+    expect(
+      matchByName(
+        {
+          AUT_CNTR_NAM: 'КАРТКОВИЙ - ФОП Шмакова Крістіна Василівна',
+        } as ITransaction,
+        [payer]
+      )
+    ).toEqual({ companyId: 'payer-id', matchedBy: 'name' })
+  })
+
+  it('does not match a different name', () => {
+    expect(
+      matchByName(
+        { AUT_CNTR_NAM: 'ФОП Іваненко Іван Іванович' } as ITransaction,
+        [payer]
+      )
+    ).toBeNull()
+  })
+
+  it('does not match on a single token (needs surname + name)', () => {
+    expect(
+      matchByName({ AUT_CNTR_NAM: 'ФОП Шмакова' } as ITransaction, [
+        { _id: 'x', companyName: 'ФОП Шмакова' } as IRealestate,
+      ])
+    ).toBeNull()
+  })
+
+  it('never matches transit transactions', () => {
+    expect(
+      matchByName(
+        { AUT_CNTR_NAM: 'Транз.рахунок платежi_ DN' } as ITransaction,
+        [{ _id: 'x', companyName: 'Транз рахунок платежi DN' } as IRealestate]
+      )
+    ).toBeNull()
+  })
+
+  it('never matches self-transactions (initials vs full name also differ)', () => {
+    expect(
+      matchByName(
+        {
+          AUT_MY_CRF: '2479002623',
+          AUT_CNTR_CRF: '2479002623',
+          AUT_CNTR_NAM: 'ЄРШОВА ЛЮДМИЛА МИХАЙЛІВНА',
+        } as ITransaction,
+        [
+          {
+            _id: 'owner',
+            companyName: 'ЄРШОВА ЛЮДМИЛА МИХАЙЛІВНА',
+          } as IRealestate,
+        ]
+      )
+    ).toBeNull()
+  })
+})
+
 describe('matchByPrevious', () => {
   it('should return match when previousCompanyId is present', () => {
     expect(
@@ -413,6 +501,36 @@ describe('matchCompany', () => {
       companyId: 'sport-space-id',
       matchedBy: 'previous',
     })
+  })
+
+  it('should fall through to name match when account/rnokpp/previous all miss', () => {
+    const transaction = {
+      AUT_CNTR_ACC: 'UA000000000000000000000000001',
+      AUT_CNTR_NAM: 'ФОП Payer One',
+      AUT_CNTR_CRF: '1111111111',
+      RECIPIENT_ULTMT_NCEO: '',
+    } as ITransaction
+
+    // Company has NO rnokpp and a different account — only the name lines up.
+    expect(
+      matchCompany(transaction, [
+        { _id: 'payer-id', companyName: 'Payer One' } as IRealestate,
+      ])
+    ).toEqual({ companyId: 'payer-id', matchedBy: 'name' })
+  })
+
+  it('should prioritize previousCompanyId over name', () => {
+    const transaction = {
+      AUT_CNTR_ACC: 'UA000000000000000000000000001',
+      AUT_CNTR_NAM: 'ФОП Payer One',
+      previousCompanyId: 'prev-id',
+    } as ITransaction
+
+    expect(
+      matchCompany(transaction, [
+        { _id: 'payer-id', companyName: 'Payer One' } as IRealestate,
+      ])
+    ).toEqual({ companyId: 'prev-id', matchedBy: 'previous' })
   })
 
   it('should return null result when nothing matches', () => {
@@ -506,12 +624,25 @@ describe('payer uses multiple bank accounts', () => {
     expect(matchByPrevious(paymentCase2)).toBeNull()
   })
 
-  it('WHY IT DID NOT WORK: without a rnokpp on the company, nothing matches', () => {
+  it('without a rnokpp on the company, still matches via name fallback', () => {
     expect(matchCompany(paymentCase1, [payerCompanyNoRnokpp])).toEqual({
-      companyId: null,
-      matchedBy: null,
+      companyId: 'payer-id',
+      matchedBy: 'name',
     })
     expect(matchCompany(paymentCase2, [payerCompanyNoRnokpp])).toEqual({
+      companyId: 'payer-id',
+      matchedBy: 'name',
+    })
+  })
+
+  it('no rnokpp AND a non-matching company name → nothing matches', () => {
+    const otherCompany = {
+      _id: 'other-id',
+      companyName: 'ФОП Різна Людина',
+      account: 'UA000000000000000000000000003',
+    } as IRealestate
+
+    expect(matchCompany(paymentCase1, [otherCompany])).toEqual({
       companyId: null,
       matchedBy: null,
     })

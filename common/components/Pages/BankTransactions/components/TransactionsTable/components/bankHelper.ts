@@ -45,6 +45,29 @@ export enum MatchType {
   ACCOUNT = 'account',
   RNOKPP = 'rnokpp',
   PREVIOUS = 'previous',
+  NAME = 'name',
+}
+
+// Legal-form / wrapper tokens that carry no identity and must be stripped
+// before comparing counterparty names.
+const NAME_NOISE_TOKENS = new Set(['ФОП', 'КАРТКОВИЙ', 'ТОВ', 'ПП'])
+
+/**
+ * Normalizes a counterparty / company name for equality comparison: upper case,
+ * punctuation removed, legal-form words dropped, whitespace collapsed.
+ * "КАРТКОВИЙ - ФОП Шмакова Крістіна Василівна" → "ШМАКОВА КРІСТІНА ВАСИЛІВНА".
+ */
+export const normalizeCounterpartyName = (
+  name: string | undefined | null
+): string => {
+  if (!name || typeof name !== 'string') return ''
+  return name
+    .toUpperCase()
+    .replace(/[«»"'`.,/\\()\-–—]/g, ' ')
+    .split(/\s+/)
+    .filter((token) => token && !NAME_NOISE_TOKENS.has(token))
+    .join(' ')
+    .trim()
 }
 
 /**
@@ -112,6 +135,28 @@ export const matchByRnokpp = (
     : null
 }
 
+/**
+ * Last-resort match: the same payer keeps changing bank accounts and has no tax
+ * code stored on the company, but the counterparty name is stable. Requires a
+ * FULL normalized-name equality (≥2 tokens) to avoid loose false positives, and
+ * never fires for transit or self-transactions.
+ */
+export const matchByName = (
+  transaction: ITransaction,
+  companies: IRealestate[]
+): MatchResult | null => {
+  if (transaction.AUT_CNTR_NAM?.includes('Транз')) return null
+  if (isSelfTransaction(transaction)) return null
+  const target = normalizeCounterpartyName(transaction.AUT_CNTR_NAM)
+  if (target.split(' ').filter(Boolean).length < 2) return null
+  const company = companies.find(
+    (c) => normalizeCounterpartyName(c.companyName) === target
+  )
+  return company?._id
+    ? { companyId: company._id, matchedBy: MatchType.NAME }
+    : null
+}
+
 export const matchByPrevious = (
   transaction: ITransaction
 ): MatchResult | null => {
@@ -129,7 +174,8 @@ export const matchCompany = (
   return (
     matchByAccount(transaction, companies) ??
     matchByRnokpp(transaction, companies) ??
-    matchByPrevious(transaction) ?? { companyId: null, matchedBy: null }
+    matchByPrevious(transaction) ??
+    matchByName(transaction, companies) ?? { companyId: null, matchedBy: null }
   )
 }
 
