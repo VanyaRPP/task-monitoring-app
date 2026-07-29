@@ -3,10 +3,12 @@ import type { FloatButtonItem } from '@utils/types'
 
 interface FloatButtonState {
   buttons: FloatButtonItem[]
+  menuOffset: number
 }
 
 const initialState: FloatButtonState = {
   buttons: [],
+  menuOffset: 0,
 }
 
 const floatButtonSlice = createSlice({
@@ -26,9 +28,19 @@ const floatButtonSlice = createSlice({
     clearButtons(state) {
       state.buttons = []
     },
+    setMenuOffset(state, action: PayloadAction<number>) {
+      if (state.menuOffset !== action.payload) {
+        state.menuOffset = action.payload
+      }
+    },
   },
 })
 
-export const { setButtons, addButton, removeButton, clearButtons } =
-  floatButtonSlice.actions
+export const {
+  setButtons,
+  addButton,
+  removeButton,
+  clearButtons,
+  setMenuOffset,
+} = floatButtonSlice.actions
 export default floatButtonSlice.reducer
