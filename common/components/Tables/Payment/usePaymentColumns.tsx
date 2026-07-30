@@ -85,12 +85,6 @@ function widenFilterDropdown(w = 240) {
 
 const CustomName = 'custom-name:'
 
-// Custom services are identified by their invoice `name` — the same key the
-// payments filter (ColumnSelect) uses — so the table columns and the filter
-// options are always derived from the same source and stay in sync. Only names
-// with a non-zero sum are surfaced (a 0-sum line renders no column). The
-// payments are already domain-narrowed server-side, so this list is implicitly
-// scoped to the selected domain(s).
 export function getInvoiceCustomServiceNames({
   payments,
 }: {
@@ -236,26 +230,30 @@ export function usePaymentColumns({
         onFilterDropdownOpenChange: widenFilterDropdown(240),
         render: (
           company: { _id: string; companyName: string },
-          _record: IExtendedPayment,
-          index: number
+          _record: IExtendedPayment
         ) => {
           if (!company) return null
-          const companyName = company?.companyName
+
+          const companyName = company?.companyName?.trim()
           const companyId = company?._id
-          const debtor = debtorCompanies.find(
-            (d) => d.companyName === companyName
+
+          const debtor = debtorCompanies?.find(
+            (d) => d.companyName?.trim() === companyName
           )
-          const isFirstOccurrence =
-            payments?.data?.findIndex(
-              (item) =>
-                item.company != null &&
-                typeof item.company === 'object' &&
-                (item.company as any).companyName === companyName
-            ) === index
+
+          const firstPaymentForCompany = payments?.data?.find(
+            (item) =>
+              item.company &&
+              (item.company as any).companyName?.trim() === companyName
+          )
+          const isFirstOccurrence = Boolean(
+            firstPaymentForCompany?._id &&
+            firstPaymentForCompany._id === _record._id
+          )
 
           const companyLabel = (
             <TableFilterLink
-              label={companyName}
+              label={company.companyName}
               filterKey="company"
               filterId={companyId}
               filters={filters}
@@ -263,14 +261,20 @@ export function usePaymentColumns({
             />
           )
 
+          const rawTotalDebt = debtor ? Number(debtor.totalDebt) : 0
+
           const hasDebt = Boolean(
-            !isUser && debtor && isFirstOccurrence && debtor.totalDebt > 1
+            !isUser &&
+            debtor &&
+            isFirstOccurrence &&
+            Math.abs(rawTotalDebt) >= 0.01
           )
 
           return (
             <Badge
-              count={hasDebt && debtor ? formatDebt(debtor.totalDebt) : 0}
-              title=""
+              count={hasDebt ? formatDebt(rawTotalDebt) : 0}
+              showZero={false}
+              title={rawTotalDebt < 0 ? 'Переплата' : 'Борг'}
               color={debtor ? getDebtorTooltipColor(debtor) : '#d9d9d9'}
               overflowCount={Infinity}
               style={{ cursor: 'pointer' }}

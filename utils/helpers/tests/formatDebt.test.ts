@@ -8,6 +8,7 @@ describe('formatDebt', () => {
   test('rounds up values smaller than 0.01', () => {
     expect(formatDebt(0.001)).toBe('0.10')
     expect(formatDebt(0.009)).toBe('0.90')
+    expect(formatDebt(-0.001)).toBe('0.10') // Додано перевірку для дрібних переплат
   })
 
   test('formats values equal or greater than 0.01 with two decimals', () => {
@@ -16,16 +17,17 @@ describe('formatDebt', () => {
     expect(formatDebt(10.456)).toBe('10.46')
   })
 
-  test('formats negative values correctly', () => {
-    expect(formatDebt(-5)).toBe('-5.00')
-    expect(formatDebt(-3.456)).toBe('-3.46')
+  test('formats negative values correctly as absolute values (Math.abs)', () => {
+    expect(formatDebt(-5)).toBe('5.00')
+    expect(formatDebt(-3.456)).toBe('3.46')
   })
 
-  test('returns "NaN" when amount is NaN', () => {
-    expect(formatDebt(NaN)).toBe('NaN')
+  test('returns "0.00" when amount is NaN', () => {
+    expect(formatDebt(NaN)).toBe('0.00')
   })
 
-  test('throws error when amount is undefined', () => {
-    expect(() => formatDebt(undefined as any)).toThrow()
+  test('returns "0.00" when amount is undefined', () => {
+    // В новій логіці Number(undefined) дає NaN, що безпечно повертає '0.00'
+    expect(formatDebt(undefined as any)).toBe('0.00')
   })
 })

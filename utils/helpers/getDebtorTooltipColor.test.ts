@@ -17,16 +17,21 @@ describe('getDebtorTooltipColor', () => {
     expect(getDebtorTooltipColor({ totalDebt: 50000 })).toBe('red')
   })
 
-  test('returns undefined when debt is 0 or negative', () => {
-    expect(getDebtorTooltipColor({ totalDebt: 0 })).toBeUndefined()
-    expect(getDebtorTooltipColor({ totalDebt: -100 })).toBeUndefined()
-  })
-  test('returns undefined when totalDebt is NaN', () => {
-    expect(getDebtorTooltipColor({ totalDebt: NaN })).toBeUndefined()
+  test('returns green (#52c41a) when debt is negative (overpayment)', () => {
+    expect(getDebtorTooltipColor({ totalDebt: -1 })).toBe('#52c41a')
+    expect(getDebtorTooltipColor({ totalDebt: -100 })).toBe('#52c41a')
   })
 
-  test('returns undefined when totalDebt is null', () => {
-    expect(getDebtorTooltipColor({ totalDebt: null as any })).toBeUndefined()
+  test('returns default color (#d9d9d9) when debt is 0', () => {
+    expect(getDebtorTooltipColor({ totalDebt: 0 })).toBe('#d9d9d9')
+  })
+
+  test('returns default color (#d9d9d9) when totalDebt is NaN', () => {
+    expect(getDebtorTooltipColor({ totalDebt: NaN })).toBe('#d9d9d9')
+  })
+
+  test('returns default color (#d9d9d9) when totalDebt is null', () => {
+    expect(getDebtorTooltipColor({ totalDebt: null as any })).toBe('#d9d9d9')
   })
 
   test('throws error when debtor is undefined', () => {

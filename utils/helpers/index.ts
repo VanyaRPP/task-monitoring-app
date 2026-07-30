@@ -276,10 +276,6 @@ const monthsUaGenitiveCapitalized = [
   'Грудня',
 ]
 
-/**
- * Форматує дату в формат: 20 Червня 2025
- * з використанням родового відмінка і великої літери
- */
 export const formatDateWithGenitiveMonthCapitalized = (
   date: dayjs.Dayjs | Date
 ): string => {
@@ -839,30 +835,32 @@ export function calculatePermissions(userDate: any, user: IUser) {
   }
 }
 
-export function formatDebt(amount: number): string {
-  if (amount === 0) return '0.00'
-  if (amount > 0 && amount < 0.01) {
-    const roundedUp = (Math.ceil(amount * 10000) / 10000) * 100
+export function formatDebt(amount: number | string): string {
+  const numAmount = Number(amount)
+  if (isNaN(numAmount) || numAmount === 0) return '0.00'
+
+  const absAmount = Math.abs(numAmount)
+  if (absAmount > 0 && absAmount < 0.01) {
+    const roundedUp = (Math.ceil(absAmount * 10000) / 10000) * 100
     return roundedUp.toFixed(2)
   }
-  return amount.toFixed(2)
+
+  return absAmount.toFixed(2)
 }
 
 export const getDebtorTooltipColor = (debtor: {
-  totalDebt: number
+  totalDebt: number | string
 }): string => {
-  if (debtor.totalDebt > 0 && debtor.totalDebt < 5000) {
+  const totalDebt = Number(debtor.totalDebt)
+
+  if (totalDebt < 0) {
+    return '#52c41a' // Зелений колір для переплати
+  } else if (totalDebt > 0 && totalDebt < 5000) {
     return 'gray'
-  } else if (debtor.totalDebt >= 5000 && debtor.totalDebt < 20000) {
+  } else if (totalDebt >= 5000 && totalDebt < 20000) {
     return 'yellow'
-  } else if (debtor.totalDebt >= 20000) {
+  } else if (totalDebt >= 20000) {
     return 'red'
   }
-  return undefined
-}
-export const defaultServicesSet = new Set(defaultServices)
-
-export const isProtectedService = (id?: string): boolean => {
-  if (!id) return false
-  return defaultServicesSet.has(id)
+  return '#d9d9d9'
 }
