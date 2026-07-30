@@ -11,6 +11,23 @@
   .aiBubble {
     background: #262626;
   }
+
+  .chatInput {
+    color: white !important;
+
+    &::placeholder {
+      color: rgba(255, 255, 255, 0.45) !important;
+    }
+
+    &:focus,
+    &:hover {
+      background: #303030 !important;
+    }
+
+    :global(.ant-input) {
+      color: white !important;
+    }
+  }
 }
 
 .floatButton {
@@ -43,6 +60,7 @@
   animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border: 1px solid rgba(117, 47, 214, 0.2);
   transition: bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: #ffffff;
 
   @media (max-width: 576px) {
     width: calc(100% - 40px);
@@ -78,6 +96,7 @@
   flex-direction: column;
   gap: 12px;
   height: 350px;
+  background: #f7f5fa;
 
   /* Custom Scrollbar */
   &::-webkit-scrollbar {
@@ -126,6 +145,7 @@
 .aiBubble {
   border-bottom-left-radius: 2px;
   border: 1px solid rgba(117, 47, 214, 0.1);
+  background: #ffffff;
 }
 
 .messageText {
@@ -156,26 +176,20 @@
 .chatFooter {
   padding: 12px;
   border-top: 1px solid rgba(117, 47, 214, 0.2);
+  background: #f7f5fa;
 }
 
 .chatInput {
   border-radius: 20px !important;
   border: 1px solid rgba(117, 47, 214, 0.2) !important;
-  color: white !important;
-
-  &::placeholder {
-    color: rgba(255, 255, 255, 0.45) !important;
-  }
 
   &:focus,
   &:hover {
-    background: #303030 !important;
     border-color: #752fd6 !important;
   }
 
   :global(.ant-input) {
     background: transparent !important;
-    color: white !important;
   }
 }
 

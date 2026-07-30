@@ -222,6 +222,7 @@ const AIChat: React.FC = () => {
   return (
     <>
       <FloatButton
+        data-ai-chat
         icon={<RobotOutlined />}
         type="primary"
         tooltip={{ title: 'AI Помічник', placement: 'left' }}
@@ -235,6 +236,7 @@ const AIChat: React.FC = () => {
 
       {showHint && !open && (
         <div
+          data-ai-chat
           className={styles.welcomeHint}
           style={windowStyle}
           onClick={() => setOpen(true)}
@@ -257,7 +259,7 @@ const AIChat: React.FC = () => {
       )}
 
       {open && (
-        <div className={styles.chatWindow} style={windowStyle}>
+        <div data-ai-chat className={styles.chatWindow} style={windowStyle}>
           <div className={styles.chatHeader}>
             <Space>
               <Avatar

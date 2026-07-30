@@ -17,11 +17,26 @@ export const FloatButtonsLayoutAddon: React.FC<FloatButtonPlacementProps> = ({
   const themeBtn = useThemeFloatButton()
   const storedButtons = useAppSelector((state) => state.floatButtons.buttons)
   const containerRef = useRef<HTMLDivElement>(null)
+  const pointerTargetRef = useRef<HTMLElement | null>(null)
   const [open, setOpen] = useState(false)
 
   const allButtons = [...buttons, ...storedButtons, themeBtn]
   const buttonsCount = allButtons.length
   const isGroup = buttonsCount > 1
+
+  useEffect(() => {
+    const remember = (e: PointerEvent) => {
+      pointerTargetRef.current = e.target as HTMLElement | null
+    }
+
+    document.addEventListener('pointerdown', remember, true)
+    return () => document.removeEventListener('pointerdown', remember, true)
+  }, [])
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen && pointerTargetRef.current?.closest('[data-ai-chat]')) return
+    setOpen(nextOpen)
+  }
 
   useEffect(() => {
     const root = containerRef.current
@@ -71,7 +86,7 @@ export const FloatButtonsLayoutAddon: React.FC<FloatButtonPlacementProps> = ({
           shape="square"
           trigger="click"
           open={open}
-          onOpenChange={setOpen}
+          onOpenChange={handleOpenChange}
           icon={<SettingFilled />}
         >
           {allButtons.map((btn) => (
