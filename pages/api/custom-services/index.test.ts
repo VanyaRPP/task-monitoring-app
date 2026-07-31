@@ -117,9 +117,18 @@ describe('CustomServices API', () => {
 
       expect(res.status).toHaveBeenCalledWith(200)
 
-      expect(CustomService.find).toHaveBeenCalledWith({
-        _id: { $in: ['64d68421d9ba2fc8fea79d14', '64d68421d9ba2fc8fea79d15'] },
-      })
+      // The explicit id filter is applied…
+      expect(CustomService.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          _id: {
+            $in: ['64d68421d9ba2fc8fea79d14', '64d68421d9ba2fc8fea79d15'],
+          },
+        })
+      )
+      // …AND it is intersected with the caller's domain access, so a DomainAdmin
+      // can never fetch ids outside the domains they administer.
+      const filter = (CustomService.find as jest.Mock).mock.calls[0][0]
+      expect(filter.$or).toBeDefined()
     })
   })
 })

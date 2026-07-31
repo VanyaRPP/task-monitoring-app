@@ -28,6 +28,7 @@ jest.mock('@modules/models/Domain', () => ({
     exists: jest.fn(),
     updateOne: jest.fn(),
     findById: jest.fn(),
+    find: jest.fn(),
   },
 }))
 
@@ -651,6 +652,57 @@ describe('listCustomServicesForDomain', () => {
     expect(result.ok).toBe(true)
     if (result.ok) expect(result.data).toEqual([])
     expect(asMock(CustomService.find)).not.toHaveBeenCalled()
+  })
+
+  describe('DomainAdmin scoping (Option A — auto-scope, never 403)', () => {
+    const mockOwnedDomains = (docs: any[]) => {
+      asMock(Domain.find).mockReturnValueOnce({
+        select: jest.fn().mockReturnValue({
+          lean: jest.fn().mockResolvedValue(docs),
+        }),
+      })
+    }
+
+    it('without domainId → auto-scopes to the union of their domains', async () => {
+      mockOwnedDomains([
+        { _id: ownDomainId, customServices: [] },
+        { _id: otherDomainId, customServices: [] },
+      ])
+      findMock()
+
+      const result = await listCustomServicesForDomain({}, ctxDomain)
+
+      expect(result.ok).toBe(true)
+      const filter = asMock(CustomService.find).mock.calls[0][0]
+      expect(filter.$or[0].domain.$in).toHaveLength(2)
+    })
+
+    it('with a domainId they administer → only that domain (no legacy pool)', async () => {
+      mockOwnedDomains([{ _id: ownDomainId, customServices: [] }])
+      findMock()
+
+      await listCustomServicesForDomain(
+        { domainId: String(ownDomainId) },
+        ctxDomain
+      )
+
+      const filter = asMock(CustomService.find).mock.calls[0][0]
+      expect(filter).toEqual({ domain: expect.anything() })
+      expect(filter.$or).toBeUndefined()
+    })
+
+    it('with a domainId they do NOT administer → forbidden, no query', async () => {
+      mockOwnedDomains([{ _id: ownDomainId, customServices: [] }])
+
+      const result = await listCustomServicesForDomain(
+        { domainId: String(otherDomainId) },
+        ctxDomain
+      )
+
+      expect(result.ok).toBe(false)
+      if (isServiceErr(result)) expect(result.code).toBe('forbidden')
+      expect(asMock(CustomService.find)).not.toHaveBeenCalled()
+    })
   })
 })
 
