@@ -124,6 +124,25 @@ describe('Payment API Endpoint - mark-paid', () => {
     expect(ProfitService.updatePayment).toHaveBeenCalledTimes(2)
   })
 
+  it('creates the credit payment with an empty invoice array, not the source services', async () => {
+    await mockLoginAs(users.globalAdmin)
+    const sourceWithServices = {
+      ...debitPayments[0],
+      invoice: [{ service: 'test-service', sum: 100 }],
+    }
+    ;(Payment.find as jest.Mock).mockResolvedValue([sourceWithServices])
+    ;(Payment.create as jest.Mock).mockImplementation((data: any) =>
+      Promise.resolve({ ...data, _id: 'credit-id' })
+    )
+    ;(PaymentChangeLog.create as jest.Mock).mockResolvedValue({})
+    ;(ProfitService.updatePayment as jest.Mock).mockResolvedValue({})
+
+    await performRequest('POST', { ids: [sourceWithServices._id] })
+
+    const createArg = (Payment.create as jest.Mock).mock.calls[0][0]
+    expect(createArg.invoice).toEqual([])
+  })
+
   it('skips already-paid (credit) payments — only debit can be marked', async () => {
     await mockLoginAs(users.globalAdmin)
     ;(Payment.find as jest.Mock).mockResolvedValue([creditPayment])

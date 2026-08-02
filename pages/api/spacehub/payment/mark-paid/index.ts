@@ -17,7 +17,6 @@ const COPYABLE_PAYMENT_FIELDS = [
   'company',
   'monthService',
   'description',
-  'invoice',
   'provider',
   'reciever',
   'generalSum',
@@ -87,6 +86,7 @@ export default async function handler(
         type: Operations.Credit,
         invoiceCreationDate: dateShiftMs(source.invoiceCreationDate, 1),
         invoiceNumber: await getNextInvoiceNumber(),
+        invoice: [],
       }
       for (const field of COPYABLE_PAYMENT_FIELDS) {
         if (source[field] !== undefined) {
