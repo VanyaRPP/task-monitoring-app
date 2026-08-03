@@ -102,7 +102,10 @@ export default async function handler(
               totalDebt: (totalDebitFixed - totalCreditFixed).toFixed(2),
             }
           })
-          .filter((company) => Number(company?.totalDebt) > 0)
+          .filter((company) => {
+            const totalDebt = Number(company?.totalDebt)
+            return Number.isFinite(totalDebt) && totalDebt !== 0
+          })
           .map((company) => ({
             ...company,
             totalDebt: Number(company.totalDebt),

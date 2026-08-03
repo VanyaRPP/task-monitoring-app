@@ -18,7 +18,8 @@ import {
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { AppRoutes, Roles } from '@utils/constants'
 import {
-  formatDebt,
+  formatDebtAmount,
+  getDebtSide,
   isAdminCheck,
   renderCurrency,
   renderPrice,
@@ -316,9 +317,12 @@ const CompaniesTable: React.FC<Props> = ({
                 onChange={(checked) => {
                   if (checked) {
                     setFilters((prev) => ({
-                      company: debtorCompanies?.map(
-                        (company) => company.companyId
-                      ),
+                      company: debtorCompanies
+                        ?.filter(
+                          (company) =>
+                            getDebtSide(company.totalDebt) === 'company'
+                        )
+                        .map((company) => company.companyId),
                     }))
                   } else {
                     setFilters(undefined)
@@ -688,13 +692,19 @@ const getDefaultColumns = ({
         )
 
         if (debtor) {
+          const isCompanyDebtor = getDebtSide(debtor.totalDebt) === 'company'
           const tooltipDebtor = (
             <div>
               <p>
-                <b>Компанія боржник</b>
+                <b>
+                  {isCompanyDebtor ? 'Компанія боржник' : 'Переплата компанії'}
+                </b>
               </p>
               <p>Назва компанії: {i}</p>
-              <p>Сума боргу: {formatDebt(debtor.totalDebt)}</p>
+              <p>
+                {isCompanyDebtor ? 'Сума боргу' : 'Сума переплати'}:{' '}
+                {formatDebtAmount(debtor.totalDebt)}
+              </p>
             </div>
           )
 
@@ -714,7 +724,7 @@ const getDefaultColumns = ({
           return (
             <Tooltip title={tooltipDebtor} placement="top">
               <Badge
-                count={formatDebt(debtor.totalDebt)}
+                count={formatDebtAmount(debtor.totalDebt)}
                 title=""
                 color={getDebtorTooltipColor(debtor)}
                 overflowCount={Infinity}
