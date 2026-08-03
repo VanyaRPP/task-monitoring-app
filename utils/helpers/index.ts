@@ -858,6 +858,11 @@ export const getDebtSide = (totalDebt: number): DebtSide => {
 export const formatDebtAmount = (totalDebt: number): string =>
   formatDebt(Math.abs(totalDebt))
 
+export const formatSignedDebt = (totalDebt: number): string => {
+  const amount = formatDebtAmount(totalDebt)
+  return getDebtSide(totalDebt) === 'domain' ? `-${amount}` : amount
+}
+
 export const getDebtorTooltipColor = (debtor: {
   totalDebt: number
 }): string => {

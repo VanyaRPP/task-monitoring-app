@@ -1,4 +1,4 @@
-import { formatDebtAmount, getDebtSide } from '..'
+import { formatDebtAmount, formatSignedDebt, getDebtSide } from '..'
 
 describe('getDebtSide', () => {
   it('returns "company" when totalDebt is positive', () => {
@@ -48,5 +48,23 @@ describe('formatDebtAmount', () => {
   it('applies the sub-cent rounding to negative amounts too', () => {
     expect(formatDebtAmount(-0.001)).toBe(formatDebtAmount(0.001))
     expect(formatDebtAmount(-0.001)).toBe('0.10')
+  })
+})
+
+describe('formatSignedDebt', () => {
+  it('keeps a debt owed by the company unsigned', () => {
+    expect(formatSignedDebt(10)).toBe('10.00')
+    expect(formatSignedDebt(12345.67)).toBe('12345.67')
+  })
+
+  it('marks a debt owed by the domain with a minus', () => {
+    expect(formatSignedDebt(-10)).toBe('-10.00')
+    expect(formatSignedDebt(-12345.67)).toBe('-12345.67')
+    expect(formatSignedDebt(-0.001)).toBe('-0.10')
+  })
+
+  it('leaves a settled balance without a sign', () => {
+    expect(formatSignedDebt(0)).toBe('0.00')
+    expect(formatSignedDebt(-0)).toBe('0.00')
   })
 })

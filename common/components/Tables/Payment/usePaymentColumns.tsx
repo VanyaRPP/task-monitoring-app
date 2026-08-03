@@ -14,7 +14,7 @@ import {
 } from '@assets/features/formatDate'
 import { Operations, ServiceName, ServiceType } from '@utils/constants'
 import {
-  formatDebtAmount,
+  formatSignedDebt,
   getDebtorTooltipColor,
   isEmpty,
   renderCurrency,
@@ -272,7 +272,7 @@ export function usePaymentColumns({
 
           return (
             <Badge
-              count={hasDebt && debtor ? formatDebtAmount(debtor.totalDebt) : 0}
+              count={hasDebt && debtor ? formatSignedDebt(debtor.totalDebt) : 0}
               title=""
               color={debtor ? getDebtorTooltipColor(debtor) : '#d9d9d9'}
               overflowCount={Infinity}

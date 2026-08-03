@@ -19,6 +19,7 @@ import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { AppRoutes, Roles } from '@utils/constants'
 import {
   formatDebtAmount,
+  formatSignedDebt,
   getDebtSide,
   isAdminCheck,
   renderCurrency,
@@ -724,7 +725,7 @@ const getDefaultColumns = ({
           return (
             <Tooltip title={tooltipDebtor} placement="top">
               <Badge
-                count={formatDebtAmount(debtor.totalDebt)}
+                count={formatSignedDebt(debtor.totalDebt)}
                 title=""
                 color={getDebtorTooltipColor(debtor)}
                 overflowCount={Infinity}

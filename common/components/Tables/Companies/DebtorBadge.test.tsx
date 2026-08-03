@@ -146,13 +146,12 @@ describe('CompaniesTable debtor badge', () => {
     expect(badgeColor()).toBe('gray')
   })
 
-  test('renders the absolute amount when the domain owes the company', () => {
+  test('renders a signed amount when the domain owes the company', () => {
     mockDebtors(-1500)
     render(<CompaniesTable {...mockProps} />)
 
     expect(document.querySelector('.ant-badge')).toBeInTheDocument()
-    expect(badgeCount()).toBe('1500.00')
-    expect(badgeCount()).not.toContain('-')
+    expect(badgeCount()).toBe('-1500.00')
   })
 
   test('uses a different badge color for each debt direction', () => {

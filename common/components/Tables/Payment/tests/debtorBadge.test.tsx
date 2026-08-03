@@ -94,11 +94,10 @@ describe('payments company column debtor badge', () => {
     expect(badgeColor()).toBe('gray')
   })
 
-  it('shows the absolute amount when the domain owes the company', () => {
+  it('shows a signed amount when the domain owes the company', () => {
     renderCompanyCell({ debtorCompanies: [makeDebtor(-1500)] })
 
-    expect(badgeCount()).toBe('1500.00')
-    expect(badgeCount()).not.toContain('-')
+    expect(badgeCount()).toBe('-1500.00')
   })
 
   it('colors the two debt directions differently', () => {
