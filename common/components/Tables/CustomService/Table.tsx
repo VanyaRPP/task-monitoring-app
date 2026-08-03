@@ -19,8 +19,8 @@ import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import {
   useDeleteCustomServiceMutation,
   useEditCustomServiceMutation,
-  useGetCustomServicesQuery,
 } from '@common/api/customServicesApi/customServices.api'
+import { useAccessibleCustomServices } from '@common/api/customServicesApi/useAccessibleCustomServices'
 import type { ICustomService } from '@common/api/customServicesApi/customServices.api.types'
 import {
   useGetDomainsByAdminQuery,
@@ -29,10 +29,6 @@ import {
 } from '@common/api/domainApi/domain.api'
 import type { DomainTypeTemplateCategory } from '@common/api/domainApi/domain.api.types'
 import { defaultServices, Roles } from '@utils/constants'
-import {
-  getVisibleServices,
-  type IDomainForVisibility,
-} from '@utils/servicesVisibility'
 import {
   getDomainTypeTemplateCategoryLabel,
   DOMAIN_TYPE_TEMPLATE_CATEGORY_OPTIONS,
@@ -63,22 +59,10 @@ export const CustomServicesTable: React.FC<CustomServicesTableProps> = ({
     { skip: !isGlobalAdmin }
   )
 
-  const adminDomainId = (adminDomains as any[])[0]?._id
-    ? String((adminDomains as any[])[0]._id)
-    : undefined
-
-  const customServicesDomainId =
-    isDomainAdmin && !isGlobalAdmin ? adminDomainId : undefined
-
-  const { data: customServicesResponse, isLoading } = useGetCustomServicesQuery(
-    customServicesDomainId ? { domainId: customServicesDomainId } : {},
-    { skip: isDomainAdmin && !isGlobalAdmin && !adminDomainId }
-  )
-
-  const allServices = useMemo(
-    () => customServicesResponse?.data ?? [],
-    [customServicesResponse?.data]
-  )
+  // Backend auto-scopes the catalog to the caller's access (resolveAccessScope):
+  // GlobalAdmin → everything; DomainAdmin → the union of ALL their domains (no
+  // more "first admin domain only" bug, no client-side visibility filtering).
+  const { services: allServices, isLoading } = useAccessibleCustomServices()
 
   const domains = useMemo(
     () => (isGlobalAdmin ? allDomains : adminDomains),
@@ -116,34 +100,6 @@ export const CustomServicesTable: React.FC<CustomServicesTableProps> = ({
     return map
   }, [domains, templateCategoryMap])
 
-  const visibleServices = useMemo<ICustomService[]>(() => {
-    if (isGlobalAdmin) return allServices
-
-    if (isDomainAdmin) {
-      const adminDomainIds = new Set(
-        (adminDomains as any[]).map((d) => String(d._id))
-      )
-      const assignedIds = new Set<string>(
-        (adminDomains as IDomainForVisibility[]).flatMap((d) =>
-          (d.customServices ?? []).flatMap((g) => g.services ?? [])
-        )
-      )
-      return allServices.filter(
-        (s) =>
-          (s.domain && adminDomainIds.has(String(s.domain))) ||
-          assignedIds.has(String(s._id))
-      )
-    }
-
-    const visible = getVisibleServices(
-      user?.roles,
-      adminDomains as IDomainForVisibility[],
-      allServices
-    )
-    const visibleIds = new Set(visible.map((s) => s._id))
-    return allServices.filter((s) => visibleIds.has(s._id))
-  }, [user?.roles, isGlobalAdmin, isDomainAdmin, adminDomains, allServices])
-
   const defaultServiceIds = useMemo(() => new Set(defaultServices), [])
 
   const resolveCategory = useCallback(
@@ -173,14 +129,14 @@ export const CustomServicesTable: React.FC<CustomServicesTableProps> = ({
   )
 
   const filtered = useMemo(() => {
-    let result = visibleServices
+    let result = allServices
     if (selectedDomain) {
       result = result.filter((s) => s.domain === selectedDomain)
     }
     if (!search.trim()) return result
     const q = search.toLowerCase()
     return result.filter((s) => s.name.toLowerCase().includes(q))
-  }, [visibleServices, search, selectedDomain])
+  }, [allServices, search, selectedDomain])
 
   const categoryFilters = useMemo(() => {
     return DOMAIN_TYPE_TEMPLATE_CATEGORY_OPTIONS.map((opt) => ({
