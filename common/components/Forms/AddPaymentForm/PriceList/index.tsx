@@ -48,21 +48,6 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
     company?.companyName
   )
 
-  const formatActNarrowSpace = (value: string | undefined) =>
-    (value?.trim() || '').replace(/(:\s)/g, ':\u00A0')
-  const introCustomerText = [
-    customerHeading,
-    formatActNarrowSpace(payment?.reciever?.description),
-  ]
-    .filter((s) => s.length > 0)
-    .join(' ')
-  const introProviderText = [
-    domainHeading,
-    formatActNarrowSpace(payment?.provider?.description),
-  ]
-    .filter((s) => s.length > 0)
-    .join(' ')
-
   const componentRef = useRef<HTMLDivElement>(null)
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
@@ -125,12 +110,6 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
                 <div>
                   <strong>{isEnglish ? 'APPROVED' : 'ЗАТВЕРДЖУЮ'}</strong>
                   <br />
-                  {!!domainHeading && (
-                    <>
-                      <strong>{domainHeading}</strong>
-                      <br />
-                    </>
-                  )}
                   <pre>{payment.provider.description?.trim()}</pre>
                 </div>
               </div>
@@ -138,12 +117,6 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
                 <div>
                   <strong>{isEnglish ? 'APPROVED' : 'ЗАТВЕРДЖУЮ'}</strong>
                   <br />
-                  {!!customerHeading && (
-                    <>
-                      <strong>{customerHeading}</strong>
-                      <br />
-                    </>
-                  )}
                   <pre>
                     {payment?.reciever?.description?.trim()} <br />
                     {payment?.reciever?.adminEmails?.map((email) => (
@@ -189,19 +162,18 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
             <p>
               {isEnglish ? (
                 <>
-                  We, the undersigned, the representative of the Customer{' '}
-                  {introCustomerText}, on one side, and the representative of
-                  the Provider {introProviderText}, on the other side, have
-                  executed this Act confirming that, under the agreement, the
-                  Provider performed the following services:
+                  We, the undersigned, the Customer — {customerHeading}, of the
+                  one part, and the Provider — {domainHeading}, of the other
+                  part, have executed this Act stating that, in accordance with
+                  the Agreement, the Provider has provided, and the Customer has
+                  accepted, the following services:
                 </>
               ) : (
                 <>
-                  Ми, що нижче підписалися, представник Замовника{' '}
-                  {introCustomerText}, з одного боку, і представник Виконавця{' '}
-                  {introProviderText}, з іншого боку, склали цей акт про те, що
-                  на підставі договору, Виконавцем були виконані наступні роботи
-                  (надані такі послуги):
+                  Ми, що нижче підписалися, Замовник — {customerHeading}, з
+                  однієї сторони, та Виконавець — {domainHeading}, з іншої
+                  сторони, склали цей Акт про те, що відповідно до Договору
+                  Виконавцем надано, а Замовником прийнято такі послуги:
                 </>
               )}
             </p>
