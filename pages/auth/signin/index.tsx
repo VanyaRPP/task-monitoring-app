@@ -1,5 +1,5 @@
 import { authOptions } from '../../api/auth/[...nextauth]'
-import { BuiltInProviderType } from 'next-auth/providers'
+import { BuiltInProviderType } from 'next-auth/providers/index'
 import SignInPage from '@components/Pages/SignInPage'
 import MainLayout from '@components/Layouts/Main'
 import { getServerSession } from 'next-auth'
