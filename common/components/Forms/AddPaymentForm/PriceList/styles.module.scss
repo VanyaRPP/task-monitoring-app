@@ -64,12 +64,44 @@
 .signaturesSection {
   display: flex;
   justify-content: space-between;
+  // Stretch both columns to the taller one so the signatures below can share a
+  // single baseline instead of following each party's requisites length.
+  align-items: stretch;
 }
 
 .signatureBlock {
   pre {
     word-break: break-all;
     white-space: pre-wrap;
+    // <pre> ships with a 1em block margin, which showed up as a blank line
+    // between the party label and its requisites.
+    margin: 0.3em 0 0;
   }
   width: 45%;
+  display: flex;
+  flex-direction: column;
+}
+
+// Mirrors the signature block used by the invoice templates (ledger, editorial,
+// techstudio): a rule to sign on, right-aligned, captioned underneath.
+.signatureSign {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.2rem;
+  // Pin to the bottom of the stretched column: both signatures then land on the
+  // level of whichever party has the longer requisites.
+  margin-top: auto;
+}
+
+.signatureLine {
+  // A drawn rule rather than repeated underscores: the glyphs leave visible
+  // gaps between them, especially in the monospace print styling.
+  width: 180px;
+  margin-top: 52px;
+  border-bottom: 1px solid currentColor;
+}
+
+.signatureCaption {
+  font-size: 0.85em;
 }

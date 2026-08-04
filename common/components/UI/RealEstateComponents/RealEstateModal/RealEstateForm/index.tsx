@@ -4,6 +4,7 @@ import { IExtendedRealestate } from '@common/api/realestateApi/realestate.api.ty
 import EmailSelect from '@components/UI/Reusable/EmailSelect'
 import {
   Checkbox,
+  DatePicker,
   Form,
   FormInstance,
   Input,
@@ -212,6 +213,33 @@ const RealEstateForm: FC<Props> = ({
     </>
   )
 
+  const renderContract = () => (
+    <>
+      <div style={{ marginBottom: 16 }}>
+        <Typography.Text type="secondary">
+          Номер договору з цією компанією. Використовується в акті надання
+          послуг.
+        </Typography.Text>
+      </div>
+      <Form.Item name="contractNumber" label="Номер договору">
+        <Input
+          placeholder="Наприклад, 15"
+          maxLength={64}
+          className={s.formInput}
+          disabled={!editable}
+        />
+      </Form.Item>
+      <Form.Item name="contractDate" label="Дата договору">
+        <DatePicker
+          format="DD.MM.YYYY"
+          placeholder="Оберіть дату"
+          className={s.formInput}
+          disabled={!editable}
+        />
+      </Form.Item>
+    </>
+  )
+
   const renderServices = () => (
     <>
       <div style={{ marginBottom: 16 }}>
@@ -241,6 +269,11 @@ const RealEstateForm: FC<Props> = ({
       key: '2',
       label: 'Послуги',
       children: renderServices(),
+    },
+    {
+      key: '3',
+      label: 'Договір',
+      children: renderContract(),
     },
   ]
 

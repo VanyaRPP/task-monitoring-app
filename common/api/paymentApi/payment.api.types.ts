@@ -33,6 +33,8 @@ export interface IReciever {
   companyName: string
   adminEmails: string[]
   description: string
+  contractNumber?: string
+  contractDate?: string | Date
 }
 
 export interface IPayment {

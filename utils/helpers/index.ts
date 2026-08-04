@@ -314,6 +314,8 @@ export const getPaymentProviderAndReciever = (company) => {
     companyName: company?.companyName,
     adminEmails: company?.adminEmails,
     description: company?.description,
+    contractNumber: company?.contractNumber,
+    contractDate: company?.contractDate,
   }
 
   return { provider, reciever }

@@ -140,6 +140,29 @@ describe('getPaymentProviderAndReciever', () => {
     })
   })
 
+  it('snapshots the company contract number onto the reciever', () => {
+    const company = {
+      companyName: 'Acme',
+      adminEmails: [],
+      description: 'desc',
+      contractNumber: '15',
+      domain: { description: 'domain desc' },
+    }
+
+    expect(getPaymentProviderAndReciever(company).reciever.contractNumber).toBe(
+      '15'
+    )
+  })
+
+  it('leaves the contract number undefined when the company has none', () => {
+    const { reciever } = getPaymentProviderAndReciever({
+      companyName: 'Acme',
+      description: 'desc',
+    })
+
+    expect(reciever.contractNumber).toBeUndefined()
+  })
+
   it('falls back to an empty provider description when domain is missing', () => {
     const { provider } = getPaymentProviderAndReciever({ companyName: 'C' })
     expect(provider).toEqual({ description: '' })

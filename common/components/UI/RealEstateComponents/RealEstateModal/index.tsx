@@ -8,6 +8,7 @@ import {
   IRealestate,
 } from '@common/api/realestateApi/realestate.api.types'
 import { Form, message } from 'antd'
+import dayjs from 'dayjs'
 import Modal from '../../ModalWindow'
 import RealEstateForm from './RealEstateForm'
 import { IDomain } from '@modules/models/Domain'
@@ -92,6 +93,11 @@ const RealEstateModal: FC<Props> = ({
       garbageCollector: currentRealEstate?.garbageCollector || false,
       archived: currentRealEstate?.archived || false,
       account: currentRealEstate?.account || '',
+      contractNumber: currentRealEstate?.contractNumber || '',
+      // DatePicker expects a dayjs instance, not the raw ISO string from the API.
+      contractDate: currentRealEstate?.contractDate
+        ? dayjs(currentRealEstate.contractDate)
+        : undefined,
       rentPart: currentRealEstate?.rentPart || 0,
       inflicion: currentRealEstate?.inflicion || false,
       waterPart: currentRealEstate?.waterPart || 0,
@@ -135,6 +141,10 @@ const RealEstateModal: FC<Props> = ({
       garbageCollector: formData.garbageCollector,
       archived: formData.archived,
       account: formData.account,
+      contractNumber: formData.contractNumber,
+      contractDate: formData.contractDate
+        ? dayjs(formData.contractDate).toISOString()
+        : undefined,
       inflicion: formData.inflicion,
       discount:
         formData.discount > 0 ? formData.discount * -1 : formData.discount,
