@@ -6,3 +6,13 @@
 .streetSelector {
   min-width: 200px;
 }
+
+.streetDropdown {
+  min-width: 250px !important;
+  max-width: 300px !important;
+
+  :global(.ant-select-item-option-content) {
+    white-space: normal;
+    word-break: break-word;
+  }
+}
