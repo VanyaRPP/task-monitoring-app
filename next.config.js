@@ -15,15 +15,11 @@ const withPWA = require('@ducanh2912/next-pwa').default({
 const nextConfig = {
   reactStrictMode: true,
   i18n,
-  experimental: {
-    // Chromium itself is fetched at runtime from a remote pack via
-    // @sparticuz/chromium-min (see utils/pdf/bufferGenerators.ts), so we only
-    // need to keep these out of the webpack bundle — no asset tracing required.
-    serverComponentsExternalPackages: [
-      '@sparticuz/chromium-min',
-      'puppeteer-core',
-    ],
-  },
+  // Chromium itself is fetched at runtime from a remote pack via
+  // @sparticuz/chromium-min (see utils/pdf/bufferGenerators.ts), so we only
+  // need to keep these out of the webpack bundle — no asset tracing required.
+  // Promoted out of `experimental` in Next 15.
+  serverExternalPackages: ['@sparticuz/chromium-min', 'puppeteer-core'],
   transpilePackages: [
     'antd',
     '@ant-design/icons',

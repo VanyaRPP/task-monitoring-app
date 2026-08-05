@@ -28,9 +28,7 @@ jobs:
           set -e
           # yarn v1 exits with a bitmask: 1=info 2=low 4=moderate 8=high 16=critical.
           # `--level` only filters what gets printed, so the threshold is checked here.
-          # TODO: tighten to `& 24` (high + critical) once Next 15 lands — every open
-          # high today is `next`, and the 14.x line gets no security backports.
-          if [ $(( CODE & 16 )) -ne 0 ]; then
-            echo "::error::Critical vulnerabilities found — see audit output above."
+          if [ $(( CODE & 24 )) -ne 0 ]; then
+            echo "::error::High or critical vulnerabilities found — see audit output above."
             exit 1
           fi
