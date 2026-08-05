@@ -13,9 +13,24 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version-file: .nvmrc
           cache: yarn
       - run: yarn install --frozen-lockfile
       - run: yarn lint:check
       - run: yarn types:check
       - run: yarn test:coverage
+
+      - name: Security audit
+        run: |
+          set +e
+          yarn audit
+          CODE=$?
+          set -e
+          # yarn v1 exits with a bitmask: 1=info 2=low 4=moderate 8=high 16=critical.
+          # `--level` only filters what gets printed, so the threshold is checked here.
+          # TODO: tighten to `& 24` (high + critical) once Next 15 lands — every open
+          # high today is `next`, and the 14.x line gets no security backports.
+          if [ $(( CODE & 16 )) -ne 0 ]; then
+            echo "::error::Critical vulnerabilities found — see audit output above."
+            exit 1
+          fi
