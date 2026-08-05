@@ -1,9 +1,14 @@
 const { i18n } = require('./next-i18next.config')
-const withPWA = require('next-pwa')({
+// next-pwa has been unmaintained since 2022; @ducanh2912/next-pwa is the
+// maintained fork with the same plugin shape. `skipWaiting` moved under
+// `workboxOptions`, and the CJS entry point exposes the plugin as `.default`.
+const withPWA = require('@ducanh2912/next-pwa').default({
   dest: 'public',
   disable: process.env.NODE_ENV === 'development',
   register: true,
-  skipWaiting: true,
+  workboxOptions: {
+    skipWaiting: true,
+  },
 })
 
 /** @type {import('next').NextConfig} */
