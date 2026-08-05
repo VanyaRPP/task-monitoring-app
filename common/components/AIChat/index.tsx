@@ -19,6 +19,7 @@ import {
 } from '@ant-design/icons'
 import Link from 'next/link'
 import { useIsAdmin } from '@modules/hooks/useIsAdmin'
+import { useAppSelector } from '@modules/store/hooks'
 import AddPaymentModal from '@components/AddPaymentModal'
 import { message } from 'antd'
 import styles from './style.module.scss'
@@ -116,6 +117,12 @@ const AIChat: React.FC = () => {
   // Gate: the assistant is currently available to admins only (matches the
   // server-side check in /api/chat). Non-admins never see the widget.
   const { isAdmin } = useIsAdmin()
+
+  const menuOffset = useAppSelector((state) => state.floatButtons.menuOffset)
+  const bubbleBottom = 88 + menuOffset
+  const windowStyle = {
+    '--ai-chat-window-bottom': `${144 + menuOffset}px`,
+  } as React.CSSProperties
 
   const [open, setOpen] = useState<boolean>(false)
   const [showHint, setShowHint] = useState<boolean>(false)
@@ -215,6 +222,7 @@ const AIChat: React.FC = () => {
   return (
     <>
       <FloatButton
+        data-ai-chat
         icon={<RobotOutlined />}
         type="primary"
         tooltip={{ title: 'AI Помічник', placement: 'left' }}
@@ -223,11 +231,16 @@ const AIChat: React.FC = () => {
           setShowHint(false)
         }}
         className={styles.floatButton}
-        style={{ insetInlineEnd: 24, bottom: 88 }}
+        style={{ insetInlineEnd: 24, bottom: bubbleBottom }}
       />
 
       {showHint && !open && (
-        <div className={styles.welcomeHint} onClick={() => setOpen(true)}>
+        <div
+          data-ai-chat
+          className={styles.welcomeHint}
+          style={windowStyle}
+          onClick={() => setOpen(true)}
+        >
           <div className={styles.hintContent}>
             Якщо потрібна допомога натискайте на мене
             <Button
@@ -246,7 +259,7 @@ const AIChat: React.FC = () => {
       )}
 
       {open && (
-        <div className={styles.chatWindow}>
+        <div data-ai-chat className={styles.chatWindow} style={windowStyle}>
           <div className={styles.chatHeader}>
             <Space>
               <Avatar

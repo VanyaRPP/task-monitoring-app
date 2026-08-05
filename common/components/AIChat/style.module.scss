@@ -1,6 +1,40 @@
+:global([data-theme='dark']) {
+  .chatWindow {
+    background: #141414;
+  }
+
+  .messagesContainer,
+  .chatFooter {
+    background: #1a1a1a;
+  }
+
+  .aiBubble {
+    background: #262626;
+  }
+
+  .chatInput {
+    color: white !important;
+
+    &::placeholder {
+      color: rgba(255, 255, 255, 0.45) !important;
+    }
+
+    &:focus,
+    &:hover {
+      background: #303030 !important;
+    }
+
+    :global(.ant-input) {
+      color: white !important;
+    }
+  }
+}
+
 .floatButton {
   z-index: 1000;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition:
+    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
   &:hover {
     transform: scale(1.1);
@@ -13,11 +47,10 @@
 
 .chatWindow {
   position: fixed;
-  bottom: 144px;
+  bottom: var(--ai-chat-window-bottom, 144px);
   right: 24px;
   width: 380px;
   max-height: 500px;
-  background: #141414;
   border-radius: 16px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
   display: flex;
@@ -26,11 +59,12 @@
   overflow: hidden;
   animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border: 1px solid rgba(117, 47, 214, 0.2);
+  transition: bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: #ffffff;
 
   @media (max-width: 576px) {
     width: calc(100% - 40px);
     right: 20px;
-    bottom: 144px;
   }
 }
 
@@ -61,8 +95,8 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  background: #1a1a1a;
   height: 350px;
+  background: #f7f5fa;
 
   /* Custom Scrollbar */
   &::-webkit-scrollbar {
@@ -109,10 +143,9 @@
 }
 
 .aiBubble {
-  background: #262626;
-  color: rgba(255, 255, 255, 0.85);
   border-bottom-left-radius: 2px;
   border: 1px solid rgba(117, 47, 214, 0.1);
+  background: #ffffff;
 }
 
 .messageText {
@@ -142,29 +175,21 @@
 
 .chatFooter {
   padding: 12px;
-  background: #141414;
   border-top: 1px solid rgba(117, 47, 214, 0.2);
+  background: #f7f5fa;
 }
 
 .chatInput {
   border-radius: 20px !important;
-  background: #262626 !important;
   border: 1px solid rgba(117, 47, 214, 0.2) !important;
-  color: white !important;
-
-  &::placeholder {
-    color: rgba(255, 255, 255, 0.45) !important;
-  }
 
   &:focus,
   &:hover {
-    background: #303030 !important;
     border-color: #752fd6 !important;
   }
 
   :global(.ant-input) {
     background: transparent !important;
-    color: white !important;
   }
 }
 
@@ -184,12 +209,13 @@
 
 .welcomeHint {
   position: fixed;
-  bottom: 144px;
+  bottom: var(--ai-chat-window-bottom, 144px);
   right: 24px;
   z-index: 1001;
   animation: fadeInHint 0.5s ease-out;
   cursor: pointer;
   max-width: 220px;
+  transition: bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
   @media (max-width: 576px) {
     right: 20px;
