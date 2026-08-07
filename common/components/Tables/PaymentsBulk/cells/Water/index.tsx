@@ -5,6 +5,10 @@ import { ServiceType } from '@utils/constants'
 import { toRoundFixed, inputNumberParser } from '@utils/helpers'
 import validator from '@utils/validator'
 
+// Invoice key these cells read/write. Defaults to ServiceType.Water for the
+// native column; a per-domain custom "water" service passes its own key.
+type Keyed = { name: number; fieldName?: string }
+
 export const WaterSumTitle: React.FC = () => {
   const { service } = useInvoicesPaymentContext()
 
@@ -20,8 +24,9 @@ export const WaterSumTitle: React.FC = () => {
   )
 }
 
-export const WaterAmount: React.FC<{ name: number; last?: boolean }> = ({
+export const WaterAmount: React.FC<Keyed & { last?: boolean }> = ({
   name,
+  fieldName = ServiceType.Water,
   last = false,
 }) => {
   const { form } = useInvoicesPaymentContext()
@@ -29,62 +34,57 @@ export const WaterAmount: React.FC<{ name: number; last?: boolean }> = ({
   const waterPart: number =
     Form.useWatch(['payments', name, 'company', 'waterPart'], form) ?? 0
 
-  if (!waterPart) {
-    return (
-      <Form.Item
-        name={[
-          name,
-          'invoice',
-          ServiceType.Water,
-          last ? 'lastAmount' : 'amount',
-        ]}
-        style={{ margin: 0 }}
-        rules={[validator.required(), validator.min(0)]}
-      >
-        <InputNumber parser={inputNumberParser} />
-      </Form.Item>
-    )
-  }
+  // The waterPart split only hides the NATIVE water meter (WaterPart takes over).
+  // Custom water services are independent meters and always render.
+  const gated = fieldName === ServiceType.Water && !!waterPart
+  if (gated) return null
+
+  return (
+    <Form.Item
+      name={[name, 'invoice', fieldName, last ? 'lastAmount' : 'amount']}
+      style={{ margin: 0 }}
+      rules={[validator.required(), validator.min(0)]}
+    >
+      <InputNumber parser={inputNumberParser} />
+    </Form.Item>
+  )
 }
 
-export const WaterSum: React.FC<{ name: number }> = ({ name }) => {
+export const WaterSum: React.FC<Keyed> = ({
+  name,
+  fieldName = ServiceType.Water,
+}) => {
   const { form, service } = useInvoicesPaymentContext()
 
   const lastAmount: number =
     Form.useWatch(
-      ['payments', name, 'invoice', ServiceType.Water, 'lastAmount'],
+      ['payments', name, 'invoice', fieldName, 'lastAmount'],
       form
     ) ?? 0
   const amount: number =
-    Form.useWatch(
-      ['payments', name, 'invoice', ServiceType.Water, 'amount'],
-      form
-    ) ?? 0
+    Form.useWatch(['payments', name, 'invoice', fieldName, 'amount'], form) ?? 0
 
   const waterPart: number =
     Form.useWatch(['payments', name, 'company', 'waterPart'], form) ?? 0
 
+  const gated = fieldName === ServiceType.Water && !!waterPart
+
   useEffect(() => {
-    if (!waterPart) {
-      const price = service?.waterPrice ?? 0
-      const sum = +toRoundFixed((+amount - +lastAmount) * price)
+    if (gated) return
+    const price = service?.waterPrice ?? 0
+    const sum = +toRoundFixed((+amount - +lastAmount) * price)
+    form.setFieldValue(['payments', name, 'invoice', fieldName, 'sum'], sum)
+  }, [form, name, fieldName, amount, lastAmount, service, gated])
 
-      form.setFieldValue(
-        ['payments', name, 'invoice', ServiceType.Water, 'sum'],
-        sum
-      )
-    }
-  }, [form, name, amount, lastAmount, service, waterPart])
+  if (gated) return null
 
-  if (!waterPart) {
-    return (
-      <Form.Item
-        name={[name, 'invoice', ServiceType.Water, 'sum']}
-        style={{ margin: 0 }}
-        rules={[validator.required(), validator.min(0)]}
-      >
-        <Input type="number" disabled />
-      </Form.Item>
-    )
-  }
+  return (
+    <Form.Item
+      name={[name, 'invoice', fieldName, 'sum']}
+      style={{ margin: 0 }}
+      rules={[validator.required(), validator.min(0)]}
+    >
+      <Input type="number" disabled />
+    </Form.Item>
+  )
 }
