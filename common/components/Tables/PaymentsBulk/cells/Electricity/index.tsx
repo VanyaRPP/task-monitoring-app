@@ -5,18 +5,24 @@ import { ServiceType } from '@utils/constants'
 import { inputNumberParser, toRoundFixed } from '@utils/helpers'
 import validator from '@utils/validator'
 
-export const LossElectricitySum: React.FC<{ name: number }> = ({ name }) => {
+// The invoice key these cells read/write. Defaults to ServiceType.Electricity so
+// the native communal column is unchanged; a per-domain custom "electricity"
+// service passes its own fieldName so several meters can coexist while sharing
+// the domain's electricity tariff + losses.
+type Keyed = { name: number; fieldName?: string }
+
+export const LossElectricitySum: React.FC<Keyed> = ({
+  name,
+  fieldName = ServiceType.Electricity,
+}) => {
   const { form, service } = useInvoicesPaymentContext()
   const lastAmount: number =
     Form.useWatch(
-      ['payments', name, 'invoice', ServiceType.Electricity, 'lastAmount'],
+      ['payments', name, 'invoice', fieldName, 'lastAmount'],
       form
     ) ?? 0
   const amount: number =
-    Form.useWatch(
-      ['payments', name, 'invoice', ServiceType.Electricity, 'amount'],
-      form
-    ) ?? 0
+    Form.useWatch(['payments', name, 'invoice', fieldName, 'amount'], form) ?? 0
   return (
     <Space>
       {service?.losses && amount > 0 && (
@@ -33,19 +39,18 @@ export const LossElectricitySum: React.FC<{ name: number }> = ({ name }) => {
   )
 }
 
-export const LossElectricityPrice: React.FC<{ name: number }> = ({ name }) => {
+export const LossElectricityPrice: React.FC<Keyed> = ({
+  name,
+  fieldName = ServiceType.Electricity,
+}) => {
   const { form, service } = useInvoicesPaymentContext()
-  // const test = Form.useWatch(['service', name], form)
   const lastAmount: number =
     Form.useWatch(
-      ['payments', name, 'invoice', ServiceType.Electricity, 'lastAmount'],
+      ['payments', name, 'invoice', fieldName, 'lastAmount'],
       form
     ) ?? 0
   const amount: number =
-    Form.useWatch(
-      ['payments', name, 'invoice', ServiceType.Electricity, 'amount'],
-      form
-    ) ?? 0
+    Form.useWatch(['payments', name, 'invoice', fieldName, 'amount'], form) ?? 0
   return (
     <Space>
       {service?.losses && amount > 0 && (
@@ -72,18 +77,14 @@ export const ElectricitySumTitle: React.FC = () => {
   )
 }
 
-export const ElectricityAmount: React.FC<{ name: number; last?: boolean }> = ({
+export const ElectricityAmount: React.FC<Keyed & { last?: boolean }> = ({
   name,
+  fieldName = ServiceType.Electricity,
   last = false,
 }) => {
   return (
     <Form.Item
-      name={[
-        name,
-        'invoice',
-        ServiceType.Electricity,
-        last ? 'lastAmount' : 'amount',
-      ]}
+      name={[name, 'invoice', fieldName, last ? 'lastAmount' : 'amount']}
       style={{ margin: 0 }}
       rules={[validator.required(), validator.min(0)]}
     >
@@ -92,19 +93,19 @@ export const ElectricityAmount: React.FC<{ name: number; last?: boolean }> = ({
   )
 }
 
-export const ElectricitySum: React.FC<{ name: number }> = ({ name }) => {
+export const ElectricitySum: React.FC<Keyed> = ({
+  name,
+  fieldName = ServiceType.Electricity,
+}) => {
   const { form, service } = useInvoicesPaymentContext()
 
   const lastAmount: number =
     Form.useWatch(
-      ['payments', name, 'invoice', ServiceType.Electricity, 'lastAmount'],
+      ['payments', name, 'invoice', fieldName, 'lastAmount'],
       form
     ) ?? 0
   const amount: number =
-    Form.useWatch(
-      ['payments', name, 'invoice', ServiceType.Electricity, 'amount'],
-      form
-    ) ?? 0
+    Form.useWatch(['payments', name, 'invoice', fieldName, 'amount'], form) ?? 0
   const costAmount = amount - lastAmount
   const loss = costAmount + costAmount * (service?.losses / 100)
 
@@ -115,15 +116,12 @@ export const ElectricitySum: React.FC<{ name: number }> = ({ name }) => {
         ? +toRoundFixed(loss * +price.toFixed(2))
         : +toRoundFixed((+amount - +lastAmount) * price)
 
-    form.setFieldValue(
-      ['payments', name, 'invoice', ServiceType.Electricity, 'sum'],
-      sum
-    )
-  }, [form, name, amount, lastAmount, service])
+    form.setFieldValue(['payments', name, 'invoice', fieldName, 'sum'], sum)
+  }, [form, name, fieldName, amount, lastAmount, service, loss])
 
   return (
     <Form.Item
-      name={[name, 'invoice', ServiceType.Electricity, 'sum']}
+      name={[name, 'invoice', fieldName, 'sum']}
       style={{ margin: 0 }}
       rules={[validator.required(), validator.min(0)]}
     >
