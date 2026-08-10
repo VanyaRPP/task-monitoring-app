@@ -45,6 +45,16 @@ const buildPayment = (overrides: Record<string, any> = {}) => ({
   ...overrides,
 })
 
+const getIntroParagraph = () =>
+  screen.getByText((_, node) => {
+    if (!node || node.tagName.toLowerCase() !== 'p') return false
+    const text = node.textContent ?? ''
+    return (
+      text.includes('Ми, що нижче підписалися') ||
+      text.includes('We, the undersigned')
+    )
+  })
+
 describe('PriceList act intro paragraph', () => {
   beforeEach(() => {
     mockedUseInvoiceCurrency.mockReturnValue('UAH')
@@ -72,10 +82,7 @@ describe('PriceList act intro paragraph', () => {
   it('does not repeat the customer/provider name inside the intro paragraph', () => {
     render(<PriceList data={buildPayment() as any} />)
 
-    const introParagraph = screen.getByText((_, node) => {
-      if (!node || node.tagName.toLowerCase() !== 'p') return false
-      return (node.textContent ?? '').includes('Ми, що нижче підписалися')
-    })
+    const introParagraph = getIntroParagraph()
 
     const occurrences = (
       introParagraph.textContent?.match(/Футбольний клуб «Полісся»/g) || []
@@ -105,5 +112,252 @@ describe('PriceList act intro paragraph', () => {
         )
       })
     ).toBeInTheDocument()
+  })
+})
+
+describe('PriceList signature blocks', () => {
+  beforeEach(() => {
+    mockedUseInvoiceCurrency.mockReturnValue('UAH')
+    mockedUsePaymentContext.mockReturnValue({
+      form: { getFieldValue: jest.fn() },
+      company: { companyName: undefined, domain: undefined },
+      showQuantityInPreview: false,
+      setShowQuantityInPreview: jest.fn(),
+    })
+  })
+
+  it('captions one signature line per party at the bottom', () => {
+    render(<PriceList data={buildPayment() as any} />)
+
+    expect(screen.getAllByText('(підпис)')).toHaveLength(2)
+  })
+
+  it('captions the signature lines in English when currency is not UAH', () => {
+    mockedUseInvoiceCurrency.mockReturnValue('USD')
+    render(<PriceList data={buildPayment({ currency: 'USD' }) as any} />)
+
+    expect(screen.getAllByText('(signature)')).toHaveLength(2)
+    expect(screen.queryByText('(підпис)')).not.toBeInTheDocument()
+  })
+
+  it('draws a solid rule to sign on for each party', () => {
+    const { container } = render(<PriceList data={buildPayment() as any} />)
+
+    expect(container.querySelectorAll('.signatureLine')).toHaveLength(2)
+    // Drawn with a border, not underscore glyphs, which show gaps when printed.
+    expect(container.textContent).not.toContain('___')
+  })
+
+  it('names each party once, from the description, without a separate heading', () => {
+    const { container } = render(<PriceList data={buildPayment() as any} />)
+
+    const [providerBlock, customerBlock] =
+      container.querySelectorAll('.signatureBlock')
+
+    expect(
+      (
+        providerBlock.textContent?.match(
+          /Український центр дуальної освіти/g
+        ) || []
+      ).length
+    ).toBe(1)
+    expect(
+      (customerBlock.textContent?.match(/Футбольний клуб «Полісся»/g) || [])
+        .length
+    ).toBe(1)
+  })
+
+  it('does not repeat the invoice date inside the signature blocks', () => {
+    const { container } = render(<PriceList data={buildPayment() as any} />)
+
+    const blocks = container.querySelectorAll('.signatureBlock')
+    expect(blocks).toHaveLength(2)
+    blocks.forEach((block) => {
+      expect(block.textContent).not.toMatch(/\d{1,2}[./]\d{1,2}[./]\d{4}/)
+    })
+  })
+
+  it('keeps the approval header free of duplicate signature lines', () => {
+    const { container } = render(<PriceList data={buildPayment() as any} />)
+
+    // Guard against the assertion below passing vacuously if the class is
+    // renamed: the header must exist, and only the two bottom signature blocks
+    // may carry a rule to sign on — the ЗАТВЕРДЖУЮ header used to repeat them.
+    const approvalHeader = container.querySelector('.approvalSectionWrapper')
+    expect(approvalHeader).not.toBeNull()
+    expect(approvalHeader?.querySelectorAll('hr')).toHaveLength(0)
+  })
+})
+
+describe('PriceList service month', () => {
+  beforeEach(() => {
+    mockedUseInvoiceCurrency.mockReturnValue('UAH')
+    mockedUsePaymentContext.mockReturnValue({
+      form: { getFieldValue: jest.fn() },
+      company: { companyName: undefined, domain: undefined },
+      showQuantityInPreview: false,
+      setShowQuantityInPreview: jest.fn(),
+    })
+  })
+
+  it('shows the picked service month in Ukrainian', () => {
+    const data = buildPayment({
+      monthService: { date: '2026-07-15' },
+    })
+
+    render(<PriceList data={data as any} />)
+
+    expect(screen.getByText(/Послуги надані за/)).toHaveTextContent(
+      'Послуги надані за липень 2026'
+    )
+  })
+
+  it('falls back to the invoice date when no service month is picked', () => {
+    render(<PriceList data={buildPayment() as any} />)
+
+    expect(screen.getByText(/Послуги надані за/)).toHaveTextContent(
+      'Послуги надані за січень 2026'
+    )
+  })
+
+  it('renders the service month in English when currency is not UAH', () => {
+    mockedUseInvoiceCurrency.mockReturnValue('USD')
+    const data = buildPayment({
+      currency: 'USD',
+      monthService: { date: '2026-07-15' },
+    })
+
+    render(<PriceList data={data as any} />)
+
+    expect(screen.getByText(/Services rendered for/)).toHaveTextContent(
+      'Services rendered for July 2026'
+    )
+  })
+})
+
+describe('PriceList contract reference', () => {
+  beforeEach(() => {
+    mockedUseInvoiceCurrency.mockReturnValue('UAH')
+    mockedUsePaymentContext.mockReturnValue({
+      form: { getFieldValue: jest.fn() },
+      company: { companyName: undefined, domain: undefined },
+      showQuantityInPreview: false,
+      setShowQuantityInPreview: jest.fn(),
+    })
+  })
+
+  it('renders the contract number from the payment snapshot', () => {
+    const data = buildPayment()
+    data.reciever = { ...data.reciever, contractNumber: '15' } as any
+
+    render(<PriceList data={data as any} />)
+
+    expect(getIntroParagraph().textContent).toContain(
+      'відповідно до Договору № 15 Виконавцем надано, а Замовником прийнято такі послуги:'
+    )
+  })
+
+  it('falls back to the company contract number for an unsaved act', () => {
+    mockedUsePaymentContext.mockReturnValue({
+      form: { getFieldValue: jest.fn() },
+      company: {
+        companyName: undefined,
+        domain: undefined,
+        contractNumber: '7',
+      },
+      showQuantityInPreview: false,
+      setShowQuantityInPreview: jest.fn(),
+    })
+
+    render(<PriceList data={buildPayment() as any} />)
+
+    expect(getIntroParagraph().textContent).toContain('Договору № 7')
+  })
+
+  it('prefers the payment snapshot over the current company value', () => {
+    mockedUsePaymentContext.mockReturnValue({
+      form: { getFieldValue: jest.fn() },
+      company: {
+        companyName: undefined,
+        domain: undefined,
+        contractNumber: 'new-99',
+      },
+      showQuantityInPreview: false,
+      setShowQuantityInPreview: jest.fn(),
+    })
+    const data = buildPayment()
+    data.reciever = { ...data.reciever, contractNumber: 'old-15' } as any
+
+    render(<PriceList data={data as any} />)
+
+    const text = getIntroParagraph().textContent ?? ''
+    expect(text).toContain('Договору № old-15')
+    expect(text).not.toContain('new-99')
+  })
+
+  it('does not print a number when no contract is set anywhere', () => {
+    render(<PriceList data={buildPayment() as any} />)
+
+    const text = getIntroParagraph().textContent ?? ''
+    expect(text).toContain('відповідно до Договору Виконавцем надано')
+    expect(text).not.toContain('№ ')
+  })
+
+  it('renders the contract number together with its date', () => {
+    const data = buildPayment()
+    data.reciever = {
+      ...data.reciever,
+      contractNumber: '15',
+      contractDate: '2026-03-01',
+    } as any
+
+    render(<PriceList data={data as any} />)
+
+    expect(getIntroParagraph().textContent).toContain(
+      'відповідно до Договору № 15 від 01.03.2026 Виконавцем надано'
+    )
+  })
+
+  it('falls back to the company contract date for an unsaved act', () => {
+    mockedUsePaymentContext.mockReturnValue({
+      form: { getFieldValue: jest.fn() },
+      company: {
+        companyName: undefined,
+        domain: undefined,
+        contractNumber: '7',
+        contractDate: '2026-03-01',
+      },
+      showQuantityInPreview: false,
+      setShowQuantityInPreview: jest.fn(),
+    })
+
+    render(<PriceList data={buildPayment() as any} />)
+
+    expect(getIntroParagraph().textContent).toContain(
+      'Договору № 7 від 01.03.2026'
+    )
+  })
+
+  it('strips a leading № so it is not rendered twice', () => {
+    const data = buildPayment()
+    data.reciever = { ...data.reciever, contractNumber: '№ 15' } as any
+
+    render(<PriceList data={data as any} />)
+
+    const text = getIntroParagraph().textContent ?? ''
+    expect(text).toContain('Договору № 15')
+    expect(text).not.toContain('№ № 15')
+  })
+
+  it('renders the English contract reference when currency is not UAH', () => {
+    mockedUseInvoiceCurrency.mockReturnValue('USD')
+    const data = buildPayment({ currency: 'USD' })
+    data.reciever = { ...data.reciever, contractNumber: '15' } as any
+
+    render(<PriceList data={data as any} />)
+
+    expect(getIntroParagraph().textContent).toContain(
+      'in accordance with the Agreement No. 15, the Provider has provided'
+    )
   })
 })
