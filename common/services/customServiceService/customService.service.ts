@@ -3,6 +3,8 @@ import Domain from '@modules/models/Domain'
 import RealEstate from '@modules/models/RealEstate'
 import { DomainTypeTemplateCategory } from '@modules/models/domain-type-template'
 import { getDefaultServiceIdsForCategory } from '@common/services/domainTypeTemplateService/domainTypeTemplate.service'
+import { buildServiceFilter, isFilterFailure } from './access/accessScope'
+import { resolveAccessScope } from './access/resolveAccessScope'
 import { ServiceType } from '@utils/constants'
 import { escapeRegexForMongo } from '@utils/escape-regex/escape-regex'
 import { defaultServicesSet } from '@utils/helpers'
@@ -482,39 +484,31 @@ function parseIds(raw: unknown): string[] | null {
 }
 
 /**
- * Lists CustomServices visible to the caller in a given UI context.
+ * Lists CustomServices the caller is allowed to see, in a given UI context.
  *
- * - User callers → forbidden.
- * - `domainId` scopes to per-domain services. Combined with `templateCategory`
- *   the response is `(own-domain) ∪ (defaults for this category)`. Without
- *   `templateCategory`, falls back to legacy behavior `(own-domain) ∪ (all
- *   legacy)` for back-compat.
- * - Without `domainId`, returns the global pool (legacy + per-domain), gated
- *   only by role.
+ * Access is resolved once into an {@link AccessScope} and the Mongo filter is
+ * built from it, so the response can never exceed the caller's scope:
+ * - User → forbidden.
+ * - GlobalAdmin → the whole catalog; `domainId` narrows to `domain ∪ legacy`
+ *   (or `domain ∪ category-defaults` when `templateCategory` is given).
+ * - DomainAdmin → only their own domains' services. Without `domainId` the
+ *   response auto-scopes to the union of ALL their domains (+ shared services
+ *   those domains reference); with `domainId` it must be one they administer,
+ *   otherwise forbidden. The legacy global pool is never exposed to them.
  * - `ids` further restricts the result to a list of explicit `_id`s.
  */
 export async function listCustomServicesForDomain(
   query: ListCustomServicesQuery,
   ctx: UserContext
 ): Promise<ServiceResult<unknown[]>> {
-  if (ctx.isUser) {
+  const scope = await resolveAccessScope(ctx)
+  if (scope.kind === 'none') {
+    // Keep the legacy contract: non-admin callers get 400 'Не дозволено'.
     return err('invalid', 'Не дозволено')
   }
 
-  // DomainAdmin must always provide a domainId — returning the global pool
-  // would expose services from other domains.
-  if (ctx.isDomainAdmin && !ctx.isGlobalAdmin) {
-    const hasDomainId =
-      query.domainId !== undefined &&
-      query.domainId !== null &&
-      query.domainId !== ''
-    if (!hasDomainId) {
-      return err('forbidden', 'DomainAdmin повинен вказати domainId')
-    }
-  }
-
-  const filter: Record<string, unknown> = {}
-
+  // Validate an explicit domainId before anything else touches it.
+  let domainId: string | null = null
   if (
     query.domainId !== undefined &&
     query.domainId !== null &&
@@ -526,53 +520,29 @@ export async function listCustomServicesForDomain(
     if (!mongoose.Types.ObjectId.isValid(domainIdStr)) {
       return err('invalid', 'Невалідний domainId')
     }
-    const domainObjectId = new mongoose.Types.ObjectId(domainIdStr)
-
-    // DomainAdmin: verify they actually administer the requested domain.
-    if (ctx.isDomainAdmin && !ctx.isGlobalAdmin) {
-      const allowed = await Domain.exists({
-        _id: domainObjectId,
-        adminEmails: ctx.user.email,
-      })
-      if (!allowed) {
-        return err('forbidden', 'Ви не є адміністратором цього домену')
-      }
-    }
-
-    const category = parseTemplateCategory(query.templateCategory)
-    if (category) {
-      const defaultIds = await getDefaultServiceIdsForCategory(category)
-      const defaultObjectIds = defaultIds
-        .filter((id) => mongoose.Types.ObjectId.isValid(id))
-        .map((id) => new mongoose.Types.ObjectId(id))
-      filter.$or = [
-        { domain: domainObjectId },
-        ...(defaultObjectIds.length
-          ? [{ _id: { $in: defaultObjectIds } }]
-          : []),
-      ]
-    } else {
-      // DomainAdmin sees only their domain's services (no legacy global pool).
-      // GlobalAdmin keeps the legacy union for back-compat.
-      if (ctx.isDomainAdmin && !ctx.isGlobalAdmin) {
-        filter.domain = domainObjectId
-      } else {
-        filter.$or = [
-          { domain: domainObjectId },
-          { domain: { $in: [null, undefined] } },
-          { domain: { $exists: false } },
-        ]
-      }
-    }
+    domainId = domainIdStr
   }
 
-  const validIds = parseIds(query.ids)
-  if (validIds !== null) {
-    if (validIds.length === 0) return ok([])
-    filter._id = { $in: validIds }
+  const ids = parseIds(query.ids)
+
+  // Resolve category defaults (IO) only when a valid category was supplied.
+  let categoryDefaultIds: string[] | null = null
+  const category = parseTemplateCategory(query.templateCategory)
+  if (category) {
+    const defaultIds = await getDefaultServiceIdsForCategory(category)
+    categoryDefaultIds = defaultIds.filter((id) =>
+      mongoose.Types.ObjectId.isValid(id)
+    )
   }
 
-  const services = await CustomService.find(filter).lean()
+  const built = buildServiceFilter(scope, { domainId, ids, categoryDefaultIds })
+  if (isFilterFailure(built)) {
+    return built.code === 'empty'
+      ? ok([])
+      : err('forbidden', 'Немає доступу до вказаного домену')
+  }
+
+  const services = await CustomService.find(built.filter).lean()
   const seenIds = new Set<string>()
   const seenNames = new Set<string>()
   const unique = services.filter((s: any) => {

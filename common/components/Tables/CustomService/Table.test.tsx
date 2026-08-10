@@ -5,17 +5,6 @@ import '@testing-library/jest-dom'
 import { CustomServicesTable } from './Table'
 import { Roles, defaultServices, ServiceType } from '@utils/constants'
 
-jest.mock('@utils/servicesVisibility', () => ({
-  getVisibleServices: jest.fn((roles, adminDomains, allServices) => {
-    if (roles?.includes(Roles.DOMAIN_ADMIN)) {
-      const validDomainIds = adminDomains.map((d: any) => d._id)
-      return allServices.filter((s: any) => validDomainIds.includes(s.domain))
-    }
-    return allServices
-  }),
-  getDomainTypeTemplateCategoryLabel: jest.fn((cat) => cat),
-}))
-
 jest.mock('@common/api/userApi/user.api', () => ({
   useGetCurrentUserQuery: jest.fn(),
 }))
@@ -23,7 +12,6 @@ jest.mock('@common/api/userApi/user.api', () => ({
 const editServiceMock = jest.fn(() => ({ unwrap: () => Promise.resolve({}) }))
 
 jest.mock('@common/api/customServicesApi/customServices.api', () => ({
-  useGetCustomServicesQuery: jest.fn(),
   useDeleteCustomServiceMutation: jest.fn(() => [jest.fn()]),
   useEditCustomServiceMutation: jest.fn(() => [
     editServiceMock,
@@ -31,11 +19,32 @@ jest.mock('@common/api/customServicesApi/customServices.api', () => ({
   ]),
 }))
 
+// Visibility is now the backend's job (resolveAccessScope): the hook hands the
+// component an already-scoped catalog. Tests drive that hook directly.
+jest.mock('@common/api/customServicesApi/useAccessibleCustomServices', () => ({
+  useAccessibleCustomServices: jest.fn(),
+}))
+
 jest.mock('@common/api/domainApi/domain.api', () => ({
   useGetDomainsByAdminQuery: jest.fn(),
   useGetDomainsQuery: jest.fn(),
   useGetDomainTypeTemplatesQuery: jest.fn(() => ({ data: [] })),
 }))
+
+const mockUseGetCurrentUserQuery =
+  require('@common/api/userApi/user.api').useGetCurrentUserQuery
+const mockUseAccessibleCustomServices =
+  require('@common/api/customServicesApi/useAccessibleCustomServices').useAccessibleCustomServices
+const mockUseGetDomainsByAdminQuery =
+  require('@common/api/domainApi/domain.api').useGetDomainsByAdminQuery
+const mockUseGetDomainsQuery =
+  require('@common/api/domainApi/domain.api').useGetDomainsQuery
+
+const setCatalog = (services: any[]) =>
+  mockUseAccessibleCustomServices.mockReturnValue({
+    services,
+    isLoading: false,
+  })
 
 const mockServices = [
   {
@@ -50,70 +59,36 @@ const mockServices = [
     domain: 'domain-own',
     category: 'utility',
   },
-  {
-    _id: 's3',
-    name: 'Service Foreign',
-    domain: 'domain-foreign',
-    category: 'utility',
-  },
 ]
 
 const mockAdminDomains = [{ _id: 'domain-own', name: 'My Domain' }]
 
-describe('CustomServicesTable - Права доступу Domain Admin', () => {
-  const mockUseGetCurrentUserQuery =
-    require('@common/api/userApi/user.api').useGetCurrentUserQuery
-  const mockUseGetCustomServicesQuery =
-    require('@common/api/customServicesApi/customServices.api').useGetCustomServicesQuery
-  const mockUseGetDomainsByAdminQuery =
-    require('@common/api/domainApi/domain.api').useGetDomainsByAdminQuery
-  const mockUseGetDomainsQuery =
-    require('@common/api/domainApi/domain.api').useGetDomainsQuery
-
+describe('CustomServicesTable - Domain Admin (backend-scoped catalog)', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-
-    mockUseGetCustomServicesQuery.mockReturnValue({
-      data: { data: mockServices },
-      isLoading: false,
-    })
-
+    // The backend already excluded foreign-domain services — the hook only ever
+    // returns the caller's own. The component renders them verbatim.
+    setCatalog(mockServices)
     mockUseGetDomainsByAdminQuery.mockReturnValue({ data: mockAdminDomains })
     mockUseGetDomainsQuery.mockReturnValue({ data: [] })
-  })
-
-  it('Тест-кейс 1: Domain Admin бачить послуги своїх доменів', () => {
     mockUseGetCurrentUserQuery.mockReturnValue({
       data: { roles: [Roles.DOMAIN_ADMIN] },
     })
+  })
 
+  it('renders every service the accessible-catalog hook returns', () => {
     render(<CustomServicesTable />)
-
     expect(screen.getByText('Service Own 1')).toBeInTheDocument()
     expect(screen.getByText('Service Own 2')).toBeInTheDocument()
   })
 
-  it('Тест-кейс 2: Domain Admin не бачить послуги чужих доменів', () => {
-    mockUseGetCurrentUserQuery.mockReturnValue({
-      data: { roles: [Roles.DOMAIN_ADMIN] },
-    })
-
+  it('shows nothing the hook did not return (foreign services never arrive)', () => {
     render(<CustomServicesTable />)
-
     expect(screen.queryByText('Service Foreign')).not.toBeInTheDocument()
   })
 })
 
 describe('CustomServicesTable - Тип послуги (serviceType)', () => {
-  const mockUseGetCurrentUserQuery =
-    require('@common/api/userApi/user.api').useGetCurrentUserQuery
-  const mockUseGetCustomServicesQuery =
-    require('@common/api/customServicesApi/customServices.api').useGetCustomServicesQuery
-  const mockUseGetDomainsByAdminQuery =
-    require('@common/api/domainApi/domain.api').useGetDomainsByAdminQuery
-  const mockUseGetDomainsQuery =
-    require('@common/api/domainApi/domain.api').useGetDomainsQuery
-
   const utilityCustomWithType = {
     _id: 'custom-elec',
     name: 'Електропостачання (кастом)',
@@ -138,10 +113,7 @@ describe('CustomServicesTable - Тип послуги (serviceType)', () => {
     mockUseGetCurrentUserQuery.mockReturnValue({
       data: { roles: [Roles.GLOBAL_ADMIN] },
     })
-    mockUseGetCustomServicesQuery.mockReturnValue({
-      data: { data: services },
-      isLoading: false,
-    })
+    setCatalog(services)
     mockUseGetDomainsByAdminQuery.mockReturnValue({ data: [] })
     mockUseGetDomainsQuery.mockReturnValue({ data: [] })
     return render(<CustomServicesTable />)
