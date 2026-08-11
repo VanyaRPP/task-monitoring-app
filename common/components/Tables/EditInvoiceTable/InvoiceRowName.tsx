@@ -64,9 +64,7 @@ const InvoiceRowName: React.FC<InvoiceRowNameProps> = ({
             />
           </Form.Item>
         ) : (
-          <Typography.Text>
-            {record?.customName || label}
-          </Typography.Text>
+          <Typography.Text>{record?.customName || label}</Typography.Text>
         )}
         {middle ? (
           <Typography.Text type="secondary" style={{ fontSize: '0.9rem' }}>
@@ -91,8 +89,8 @@ const InvoiceRowName: React.FC<InvoiceRowNameProps> = ({
       </Space>
       {editable && (
         <UpdateInvoiceButton
-          form={form!}
-          name={name!}
+          form={form}
+          name={name}
           serviceType={serviceType}
           disabled={disabled}
         />

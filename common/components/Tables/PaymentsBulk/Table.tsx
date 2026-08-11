@@ -1,16 +1,24 @@
 import { useGetCustomServicesByDomainQuery } from '@common/api/customServicesApi/customServices.api'
 import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
 import { buildBulkInvoiceMap } from '@common/components/Tables/PaymentsBulk/buildInvoiceMap'
-import { getDefaultColumns } from '@common/components/Tables/PaymentsBulk/column.config'
+import {
+  buildTypedCustomColumn,
+  getDefaultColumns,
+  hasTypedColumn,
+  resolveServiceType,
+  withCompanyGate,
+} from '@common/components/Tables/PaymentsBulk/column.config'
+import { resolvePrevReading } from '@common/components/Tables/PaymentsBulk/prevReading'
 import serviceFilter from '@components/AddPaymentModal/serviceFilter'
 import { AppRoutes, Operations } from '@utils/constants'
 import { getInvoices } from '@utils/getInvoices'
-import { Alert, Empty, Form, Input, Table } from 'antd'
+import { Alert, Empty, Form, InputNumber, Table } from 'antd'
 import { useRouter } from 'next/router'
 import { useEffect, useMemo } from 'react'
 import { defaultServices } from '@utils/constants'
 import { findPrevPaymentMatch } from './hooks/usePrevPayment/usePrevPayment'
 import { Amount } from './cells/Amount'
+import styles from './stylestable.module.scss'
 
 const InvoicesTable: React.FC = () => {
   const router = useRouter()
@@ -42,7 +50,6 @@ const InvoicesTable: React.FC = () => {
     [groups]
   )
 
-  // TEMP DIAGNOSTIC — remove after confirming communal columns render.
   useEffect(() => {
     console.warn('[PaymentsBulk] diag', {
       domainId,
@@ -72,30 +79,55 @@ const InvoicesTable: React.FC = () => {
     () =>
       allowedServices
         .filter((s) => !defaultServices.includes(s?._id.toString()))
-        .map((s) => ({
-          title: s.name,
-          children: [
-            {
-              title: 'Кількість',
-              width: 140,
-              render: (_: any, { name }: { name: number }) => (
-                <Amount name={name} fieldName={s.fieldName} />
-              ),
-            },
-            {
-              width: 160,
-              render: (_: any, { name }: { name: number }) => (
-                <Form.Item
-                  name={[name, 'invoice', s.fieldName, 'sum']}
-                  style={{ margin: 0 }}
-                >
-                  <Input />
-                </Form.Item>
-              ),
-            },
-          ],
-        })),
-    [allowedServices]
+        .map((s) => {
+          // Key each custom column by the service _id, NOT fieldName: two
+          // services whose names differ only in parentheses ("електрика(1)")
+          // transliterate to the SAME fieldName and would otherwise share inputs.
+          const key = String(s._id)
+
+          // A typed custom service (e.g. serviceType === Electricity) renders
+          // with the SAME builder as the native communal column of that type.
+          // Untyped services keep the plain Кількість/Ціна pair. Either way the
+          // cells only show on rows whose company actually uses the service.
+          const gateOpts = { serviceKey: key, fieldName: s.fieldName }
+
+          const typedColumn = buildTypedCustomColumn(s, {
+            key,
+            losses: service?.losses,
+          })
+          if (typedColumn) return withCompanyGate(typedColumn, gateOpts)
+
+          const genericColumn = {
+            title: s.name,
+            children: [
+              {
+                title: 'Кількість',
+                width: 120,
+                render: (_: any, { name }: { name: number }) => (
+                  <Amount name={name} fieldName={key} />
+                ),
+              },
+              {
+                title: 'Ціна',
+                width: 140,
+                render: (_: any, { name }: { name: number }) => (
+                  <Form.Item
+                    name={[name, 'invoice', key, 'sum']}
+                    style={{ margin: 0 }}
+                  >
+                    <InputNumber
+                      placeholder="Ціна"
+                      style={{ width: '100%' }}
+                      min={0}
+                    />
+                  </Form.Item>
+                ),
+              },
+            ],
+          }
+          return withCompanyGate(genericColumn, gateOpts)
+        }),
+    [allowedServices, service?.losses]
   )
 
   const paymentsValue = useMemo(() => {
@@ -125,14 +157,50 @@ const InvoicesTable: React.FC = () => {
 
       for (const s of allowedServices) {
         if (defaultServices.includes(s?._id?.toString())) continue
-        const key = s.fieldName
+        // Unique per-service key (see the columns above) — fieldName can collide.
+        const key = String(s?._id ?? '')
         if (!key) continue
-        const existing = invoice[key]
-        const amount = existing?.amount
-        invoice[key] = {
-          ...(existing || { type: 'custom', fieldName: key, name: s.name }),
-          amount: amount === undefined || amount === null ? 1 : amount,
-        } as (typeof invoice)[string]
+
+        const fieldKey = s.fieldName
+        // getInvoices seeds a base custom entry keyed by fieldName; adopt it and
+        // re-key to the unique _id, dropping the fieldName copy so a service is
+        // never submitted twice.
+        const existing =
+          invoice[key] ?? (fieldKey ? invoice[fieldKey] : undefined)
+        if (fieldKey && fieldKey !== key && invoice[fieldKey]) {
+          delete invoice[fieldKey]
+        }
+
+        const base = {
+          ...(existing || { type: 'custom' }),
+          fieldName: fieldKey,
+          name: s.name,
+          serviceId: key,
+        }
+
+        if (hasTypedColumn(resolveServiceType(s))) {
+          // Reading-based type (e.g. electricity): carry over the previous
+          // period's meter reading as this period's "Стара" — matched by the
+          // stable serviceId (fieldName can collide), exactly like the native
+          // electricity column. Загальне is recomputed by the cell.
+          const prevReading = resolvePrevReading(validPrevPayment, {
+            serviceId: key,
+            fieldName: fieldKey,
+          })
+
+          invoice[key] = {
+            ...base,
+            lastAmount: prevReading,
+            amount: prevReading,
+            sum: (existing as any)?.sum ?? 0,
+          } as (typeof invoice)[string]
+        } else {
+          const amount = (existing as any)?.amount
+          invoice[key] = {
+            ...base,
+            amount: amount === undefined || amount === null ? 1 : amount,
+          } as (typeof invoice)[string]
+        }
       }
 
       return {
@@ -157,6 +225,8 @@ const InvoicesTable: React.FC = () => {
     <Form.List name="payments">
       {(fields, { remove }) => (
         <Table
+          className={styles.customTable}
+          bordered
           rowKey="name"
           size="small"
           pagination={false}

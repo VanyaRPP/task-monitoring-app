@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import React, { useMemo, useEffect, useState } from 'react'
 import { Badge, Button, List, Tooltip, Typography, theme } from 'antd'
 import { ColumnType, ColumnsType } from 'antd/es/table'
 import { IPaymentFilterResponse } from '@common/api/filterApi/filter.api.types'
@@ -13,7 +13,6 @@ import {
   dateToMonthYear,
 } from '@assets/features/formatDate'
 import { Operations, ServiceName, ServiceType } from '@utils/constants'
-import { ICustomServiceItem } from '@utils/servicesVisibility'
 import {
   formatDebt,
   getDebtorTooltipColor,
@@ -21,6 +20,7 @@ import {
   renderCurrency,
   toFirstUpperCase,
 } from '@utils/helpers'
+import TableFilterLink from '@components/UI/Reusable/TableFilterLink'
 import DateFilterDropdown from './DateFilter/DateFilterDropdown'
 import PaymentDropdown from '@components/PaymentDropDown'
 import s from './style.module.scss'
@@ -58,7 +58,6 @@ interface Params {
   onMarkPaid: (p: IExtendedPayment) => void
   onDuplicate: (p: IExtendedPayment) => void
   deleteLoading: boolean
-  visibleCustomServices?: ICustomServiceItem[]
 }
 
 function widenFilterDropdown(w = 240) {
@@ -86,13 +85,17 @@ function widenFilterDropdown(w = 240) {
 
 const CustomName = 'custom-name:'
 
-export function buildAutoCustomColumns({
+// Custom services are identified by their invoice `name` — the same key the
+// payments filter (ColumnSelect) uses — so the table columns and the filter
+// options are always derived from the same source and stay in sync. Only names
+// with a non-zero sum are surfaced (a 0-sum line renders no column). The
+// payments are already domain-narrowed server-side, so this list is implicitly
+// scoped to the selected domain(s).
+export function getInvoiceCustomServiceNames({
   payments,
-  sepDomainID,
 }: {
   payments?: IGetPaymentResponse
-  sepDomainID?: string
-}): ColumnType<IExtendedPayment>[] {
+}): string[] {
   if (!payments?.data?.length) return []
 
   const order: string[] = []
@@ -102,17 +105,33 @@ export function buildAutoCustomColumns({
     payment.invoice?.forEach((field) => {
       if (field.type !== ServiceType.Custom) return
       const sum = Number(field.sum ?? field.price ?? 0)
-      // skip only empty (zero) custom rows; a service that is always negative
-      // (e.g. a discount) must still get its own column
+
       if (sum === 0) return
-      const label = field.name
+      const label = field.name?.trim()
       if (!label || seenNames.has(label)) return
       seenNames.add(label)
       order.push(label)
     })
   })
 
-  return order.map((label) => {
+  return order
+}
+
+export function buildAutoCustomColumns({
+  payments,
+  sepDomainID,
+  selectedColumns,
+}: {
+  payments?: IGetPaymentResponse
+  sepDomainID?: string
+  selectedColumns?: string[]
+}): ColumnType<IExtendedPayment>[] {
+  const names = getInvoiceCustomServiceNames({ payments })
+  const visible = selectedColumns
+    ? names.filter((label) => selectedColumns.includes(label))
+    : names
+
+  return visible.map((label) => {
     const matches = (field: IExtendedPayment['invoice'][number]) =>
       field.type === ServiceType.Custom && field.name === label
     const sumFor = (payment: IExtendedPayment) =>
@@ -156,7 +175,6 @@ export function usePaymentColumns({
   onMarkPaid,
   onDuplicate,
   deleteLoading,
-  visibleCustomServices,
 }: Params): ColumnsType<IExtendedPayment> {
   const { token } = theme.useToken()
 
@@ -196,15 +214,13 @@ export function usePaymentColumns({
           sepDomainID ? (
             domain.name
           ) : (
-            <Tooltip title="Додати в фільтри">
-              <Typography.Link
-                onClick={() =>
-                  setFilters({ ...filters, domain: [domain?._id] })
-                }
-              >
-                {domain?.name}
-              </Typography.Link>
-            </Tooltip>
+            <TableFilterLink
+              label={domain?.name}
+              filterKey="domain"
+              filterId={domain?._id}
+              filters={filters}
+              setFilters={setFilters}
+            />
           ),
         hidden: isDomainAdmin
           ? isSingleCompanyByData && !filters?.company
@@ -223,43 +239,46 @@ export function usePaymentColumns({
           _record: IExtendedPayment,
           index: number
         ) => {
-          const companyName = company.companyName
-          const companyId = company._id
+          if (!company) return null
+          const companyName = company?.companyName
+          const companyId = company?._id
           const debtor = debtorCompanies.find(
             (d) => d.companyName === companyName
           )
           const isFirstOccurrence =
             payments?.data?.findIndex(
               (item) =>
+                item.company != null &&
                 typeof item.company === 'object' &&
                 (item.company as any).companyName === companyName
             ) === index
 
           const companyLabel = (
-            <Tooltip title="Додати в фільтри">
-              <Typography.Link
-                onClick={() => setFilters({ ...filters, company: [companyId] })}
-              >
-                {companyName}
-              </Typography.Link>
-            </Tooltip>
+            <TableFilterLink
+              label={companyName}
+              filterKey="company"
+              filterId={companyId}
+              filters={filters}
+              setFilters={setFilters}
+            />
           )
 
-          if (!isUser && debtor && isFirstOccurrence && debtor.totalDebt > 1) {
-            return (
-              <Badge
-                count={formatDebt(debtor.totalDebt)}
-                title=""
-                color={getDebtorTooltipColor(debtor)}
-                overflowCount={Infinity}
-                style={{ cursor: 'pointer' }}
-                size="small"
-              >
-                {companyLabel}
-              </Badge>
-            )
-          }
-          return companyLabel
+          const hasDebt = Boolean(
+            !isUser && debtor && isFirstOccurrence && debtor.totalDebt > 1
+          )
+
+          return (
+            <Badge
+              count={hasDebt && debtor ? formatDebt(debtor.totalDebt) : 0}
+              title=""
+              color={debtor ? getDebtorTooltipColor(debtor) : '#d9d9d9'}
+              overflowCount={Infinity}
+              style={{ cursor: 'pointer' }}
+              size="small"
+            >
+              {companyLabel}
+            </Badge>
+          )
         },
         hidden: isDomainAdmin
           ? isSingleCompanyByData && !filters?.domain
@@ -464,10 +483,7 @@ export function usePaymentColumns({
         },
       },
       ...(selectedColumns
-        .filter((value) => value !== ServiceType.Custom)
-        .filter(
-          (value) => !visibleCustomServices?.some((s) => s._id === value)
-        )
+        .filter((value) => value !== ServiceType.Custom && value in ServiceName)
         .map((value) => {
           const findItem = (payment: IExtendedPayment) =>
             payment.invoice.find((i) => i.type === value)
@@ -489,6 +505,7 @@ export function usePaymentColumns({
       ...(buildAutoCustomColumns({
         payments,
         sepDomainID,
+        selectedColumns,
       }) as ColumnType<IExtendedPayment>[]),
       {
         align: 'center',

@@ -1,5 +1,6 @@
 import { Select } from 'antd'
 import { IFilter } from '@common/api/paymentApi/payment.api.types'
+import styles from './style.module.scss'
 
 interface StreetsSelectorProps {
   streets: IFilter[]
@@ -38,8 +39,9 @@ const StreetsSelector: React.FC<StreetsSelectorProps> = ({
       }}
       allowClear
       className={className}
+      popupMatchSelectWidth={false}
+      dropdownClassName={styles.streetDropdown}
       options={options}
-      dropdownStyle={{ width: 'max-content' }}
       {...props}
     />
   )

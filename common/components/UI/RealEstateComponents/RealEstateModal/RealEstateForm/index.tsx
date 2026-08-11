@@ -3,18 +3,18 @@ import { validateField } from '@assets/features/validators'
 import { IExtendedRealestate } from '@common/api/realestateApi/realestate.api.types'
 import EmailSelect from '@components/UI/Reusable/EmailSelect'
 import {
-  Button,
-  Card,
   Checkbox,
-  Flex,
+  DatePicker,
   Form,
   FormInstance,
   Input,
   InputNumber,
   Select,
+  Tabs,
   Typography,
 } from 'antd'
-import { FC, useEffect } from 'react'
+import type { TabsProps } from 'antd'
+import { FC, useEffect, useState } from 'react'
 import AddressesSelect from '../../../Reusable/AddressesSelect'
 import DomainsSelect from '../../../Reusable/DomainsSelect'
 import s from './style.module.scss'
@@ -23,7 +23,6 @@ import { IDomain } from '@modules/models/Domain'
 import { inputNumberParser } from '@utils/helpers'
 import { CURRENCY_SELECT_OPTIONS, Currency } from '@utils/constants'
 import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
-import DomainsServices from '@components/UI/DomainsComponents/DomainModal/DomainForm/DomainsServices'
 import CustomServicesCard from '../../../CustomServicesCard'
 
 interface Props {
@@ -46,11 +45,7 @@ const RealEstateForm: FC<Props> = ({
   const watchedDomainId = Form.useWatch('domain', form)
   const domainId = watchedDomainId || currentRealEstate?.domain?._id
   const streetId = currentRealEstate?.street?._id
-  const {
-    data: domain = {} as IDomain,
-    isLoading: isDomainLoading,
-    isError: isDomainError,
-  } = useGetDomainByPkQuery(
+  const { data: domain = {} as IDomain } = useGetDomainByPkQuery(
     { domainId: domainId || currentRealEstate?.domain?._id },
     { skip: !domainId && !currentRealEstate?.domain?._id }
   )
@@ -66,29 +61,32 @@ const RealEstateForm: FC<Props> = ({
         ...service,
         enabled: true,
       }))
-
-      form.setFieldsValue({
-        services: servicesWithEnabled,
-        // discount: currentRealEstate?.discount || 0,
-      })
+      form.setFieldValue('services', servicesWithEnabled)
     }
   }, [services, currentRealEstate, form])
 
   useEffect(() => {
     if (!domainId) return
 
-    if (currentRealEstate?.street?._id) {
+    if (currentRealEstate?.street) {
+      let streetVal =
+        typeof currentRealEstate.street === 'object' &&
+        currentRealEstate.street !== null
+          ? currentRealEstate.street._id
+          : currentRealEstate.street
+
+      if (streetVal && !/^[0-9a-fA-F]{24}$/.test(String(streetVal))) {
+        streetVal = undefined
+      }
+
       setTimeout(() => {
-        form.setFieldsValue({
-          street: currentRealEstate.street._id,
-        })
+        form.setFieldValue('street', streetVal)
       }, 0)
     }
   }, [domainId, currentRealEstate, form])
 
   const isServiceExistById = (serviceId: string) => {
     if (!domain?.customServices?.length) return false
-
     return domain.customServices.some((group) =>
       group.services?.includes(serviceId)
     )
@@ -100,47 +98,40 @@ const RealEstateForm: FC<Props> = ({
     return existedValues.includes(true)
   }
 
-  const latestGarbageService = [...(services ?? [])]
-    .filter(
-      (s) =>
-        s.garbageCollectorPrice &&
-        s.garbageCollectorPrice > 0 &&
-        String(s.domain?._id) === String(domainId) &&
-        String(s.street?._id) === String(streetId)
-    )
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0]
-
   const isMeterBasedServiceExist =
     isServiceExistById('677d414283b6ef93c6b8ea2c') ||
     isServiceExistById('682dd48d9665126611c81950')
 
-  return (
-    <Form
-      form={form}
-      requiredMark={editable}
-      layout="vertical"
-      className={s.Form}
-      onValuesChange={() => setIsValueChanged(true)}
-      initialValues={{
-        currency: currentRealEstate?.currency || Currency.UAH,
-      }}
-    >
+  const getSafeStreetId = () => {
+    const val =
+      typeof currentRealEstate?.street === 'object' &&
+      currentRealEstate?.street !== null
+        ? currentRealEstate.street._id
+        : currentRealEstate?.street
+    return val && /^[0-9a-fA-F]{24}$/.test(String(val)) ? val : undefined
+  }
+
+  const renderMainInfo = () => (
+    <>
       <DomainsSelect form={form} edit={!!currentRealEstate} />
-      <Form.Item name="street" hidden>
+      <Form.Item
+        name="street"
+        hidden
+        normalize={(value) =>
+          typeof value === 'object' && value !== null ? value._id : value
+        }
+      >
         <Input />
       </Form.Item>
-      {currentRealEstate ? (
-        <Form.Item label="Адреса">
-          <Input disabled value={currentRealEstate?.street?.address || ''} />
-        </Form.Item>
-      ) : (
-        <AddressesSelect
-          form={form}
-          key={domainId}
-          street={preselectedStreet}
-          required={false}
-        />
-      )}
+
+      <AddressesSelect
+        form={form}
+        key={domainId}
+        street={preselectedStreet}
+        required={false}
+        edit={!!currentRealEstate}
+      />
+
       <Form.Item
         name="companyName"
         label="Назва компанії"
@@ -180,19 +171,6 @@ const RealEstateForm: FC<Props> = ({
         />
       </Form.Item>
       <EmailSelect form={form} disabled={!editable} required={false} />
-      {/*<Form.Item name="discount" label="Знижка" rules={validateField('number')}>
-        <InputNumber
-          min={0}
-          max={100}
-          precision={2}
-          formatter={(value) => `${value}`}
-          placeholder="Вкажіть знижку"
-          className={s.formInput}
-          disabled={!editable}
-          style={{ width: '100%' }}
-        />
-      </Form.Item>
-      */}
 
       {isMeterBasedServiceExist && (
         <>
@@ -222,22 +200,6 @@ const RealEstateForm: FC<Props> = ({
           </Form.Item>
         </>
       )}
-      <Form.Item label="Індивідуальні послуги">
-        <CustomServicesCard
-          form={form}
-          disabled={!editable}
-          allCustomServices={customServices}
-          skipAutoPopulate
-        />
-      </Form.Item>
-      {/*<Form.Item
-        valuePropName="checked"
-        name="garbageCollector"
-        label="Вивіз сміття"
-      >
-        <Checkbox disabled={!editable} />
-      </Form.Item>
-      */}
 
       {isServiceExist('inflicionPrice') && (
         <Form.Item
@@ -248,6 +210,86 @@ const RealEstateForm: FC<Props> = ({
           <Checkbox disabled={!editable} />
         </Form.Item>
       )}
+    </>
+  )
+
+  const renderContract = () => (
+    <>
+      <div style={{ marginBottom: 16 }}>
+        <Typography.Text type="secondary">
+          Номер договору з цією компанією. Використовується в акті надання
+          послуг.
+        </Typography.Text>
+      </div>
+      <Form.Item name="contractNumber" label="Номер договору">
+        <Input
+          placeholder="Наприклад, 15"
+          maxLength={64}
+          className={s.formInput}
+          disabled={!editable}
+        />
+      </Form.Item>
+      <Form.Item name="contractDate" label="Дата договору">
+        <DatePicker
+          format="DD.MM.YYYY"
+          placeholder="Оберіть дату"
+          className={s.formInput}
+          disabled={!editable}
+        />
+      </Form.Item>
+    </>
+  )
+
+  const renderServices = () => (
+    <>
+      <div style={{ marginBottom: 16 }}>
+        <Typography.Text type="secondary">
+          Оберіть послуги, які будуть доступні для цієї компанії, та вкажіть
+          їхню вартість.
+        </Typography.Text>
+      </div>
+      <Form.Item style={{ marginBottom: 0 }}>
+        <CustomServicesCard
+          form={form}
+          disabled={!editable}
+          allCustomServices={customServices}
+          skipAutoPopulate={!!currentRealEstate}
+        />
+      </Form.Item>
+    </>
+  )
+
+  const tabItems: TabsProps['items'] = [
+    {
+      key: '1',
+      label: 'Основна інформація',
+      children: renderMainInfo(),
+    },
+    {
+      key: '2',
+      label: 'Послуги',
+      children: renderServices(),
+    },
+    {
+      key: '3',
+      label: 'Договір',
+      children: renderContract(),
+    },
+  ]
+
+  return (
+    <Form
+      form={form}
+      requiredMark={editable}
+      layout="vertical"
+      className={s.Form}
+      onValuesChange={() => setIsValueChanged(true)}
+      initialValues={{
+        currency: currentRealEstate?.currency || Currency.UAH,
+        street: getSafeStreetId(),
+      }}
+    >
+      <Tabs defaultActiveKey="1" items={tabItems} />
     </Form>
   )
 }

@@ -37,20 +37,19 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
   }, [path])
 
   const paths = useMemo(() => {
-    return (
-      normalizedPath.map((item) => {
-        const path = item.path
-        return {
-        title: item.title,
-        ...(item.path && {
-          onClick: () => {
-            if (onPathClick) onPathClick(item.path!)
-            else router.push(item.path!)
-          },
-        }),
+    return normalizedPath.map((item) => {
+      const itemPath = item.path
+      if (!itemPath) {
+        return { title: item.title }
       }
-      }) ?? []
-    )
+      return {
+        title: item.title,
+        onClick: () => {
+          if (onPathClick) onPathClick(itemPath)
+          else router.push(itemPath)
+        },
+      }
+    })
   }, [router, normalizedPath, onPathClick])
 
   const showCrumbs = paths.length > 0

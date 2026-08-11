@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import type React from 'react'
 import {
   Button,
@@ -19,8 +19,8 @@ import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import {
   useDeleteCustomServiceMutation,
   useEditCustomServiceMutation,
-  useGetCustomServicesQuery,
 } from '@common/api/customServicesApi/customServices.api'
+import { useAccessibleCustomServices } from '@common/api/customServicesApi/useAccessibleCustomServices'
 import type { ICustomService } from '@common/api/customServicesApi/customServices.api.types'
 import {
   useGetDomainsByAdminQuery,
@@ -28,26 +28,28 @@ import {
   useGetDomainTypeTemplatesQuery,
 } from '@common/api/domainApi/domain.api'
 import type { DomainTypeTemplateCategory } from '@common/api/domainApi/domain.api.types'
-import { defaultServices, Roles, ServiceType } from '@utils/constants'
-import {
-  getVisibleServices,
-  type IDomainForVisibility,
-} from '@utils/servicesVisibility'
+import { defaultServices, Roles } from '@utils/constants'
 import {
   getDomainTypeTemplateCategoryLabel,
   DOMAIN_TYPE_TEMPLATE_CATEGORY_OPTIONS,
 } from '@utils/domain/domain-type-template-categories'
+import {
+  getAssignableServiceTypeOptions,
+  UNDEFINED_SERVICE_TYPE_VALUE,
+} from '@utils/domain/service-type-categories'
 
-export const CustomServicesTable: React.FC = () => {
+export interface CustomServicesTableProps {
+  domains?: any[]
+  isDomainAdmin?: boolean
+}
+
+export const CustomServicesTable: React.FC<CustomServicesTableProps> = ({
+  domains: passedDomains,
+  isDomainAdmin: passedIsDomainAdmin,
+}) => {
   const { data: user } = useGetCurrentUserQuery()
   const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
   const isDomainAdmin = user?.roles?.includes(Roles.DOMAIN_ADMIN)
-
-  const { data: customServicesResponse, isLoading } = useGetCustomServicesQuery({})
-  const allServices = useMemo(
-    () => customServicesResponse?.data ?? [],
-    [customServicesResponse?.data]
-  )
 
   const { data: adminDomains = [] } = useGetDomainsByAdminQuery(undefined, {
     skip: !isDomainAdmin || isGlobalAdmin,
@@ -56,6 +58,11 @@ export const CustomServicesTable: React.FC = () => {
     {},
     { skip: !isGlobalAdmin }
   )
+
+  // Backend auto-scopes the catalog to the caller's access (resolveAccessScope):
+  // GlobalAdmin → everything; DomainAdmin → the union of ALL their domains (no
+  // more "first admin domain only" bug, no client-side visibility filtering).
+  const { services: allServices, isLoading } = useAccessibleCustomServices()
 
   const domains = useMemo(
     () => (isGlobalAdmin ? allDomains : adminDomains),
@@ -93,27 +100,24 @@ export const CustomServicesTable: React.FC = () => {
     return map
   }, [domains, templateCategoryMap])
 
-  const visibleServices = useMemo<ICustomService[]>(() => {
-    const visible = getVisibleServices(
-      user?.roles,
-      adminDomains as IDomainForVisibility[],
-      allServices
-    )
-    const visibleIds = new Set(visible.map((s) => s._id))
-    return allServices.filter((s) => visibleIds.has(s._id))
-  }, [user?.roles, adminDomains, allServices])
-
   const defaultServiceIds = useMemo(() => new Set(defaultServices), [])
 
-  const resolveCategory = (s: ICustomService): DomainTypeTemplateCategory | string | undefined =>
-    s.category
-    ?? serviceIdToCategoryMap.get(String(s._id))
-    ?? (s.domain ? domainCategoryMap.get(s.domain) : undefined)
-    ?? (defaultServiceIds.has(s._id) ? ('utility' as DomainTypeTemplateCategory) : undefined)
-    ?? s.groupName
+  const resolveCategory = useCallback(
+    (s: ICustomService): DomainTypeTemplateCategory | string | undefined =>
+      s.category ??
+      serviceIdToCategoryMap.get(String(s._id)) ??
+      (s.domain ? domainCategoryMap.get(s.domain) : undefined) ??
+      (defaultServiceIds.has(s._id)
+        ? ('utility' as DomainTypeTemplateCategory)
+        : undefined) ??
+      s.groupName,
+    [serviceIdToCategoryMap, domainCategoryMap, defaultServiceIds]
+  )
 
   const [search, setSearch] = useState('')
-  const [selectedDomain, setSelectedDomain] = useState<string | undefined>(undefined)
+  const [selectedDomain, setSelectedDomain] = useState<string | undefined>(
+    undefined
+  )
 
   const domainOptions = useMemo(
     () =>
@@ -125,14 +129,14 @@ export const CustomServicesTable: React.FC = () => {
   )
 
   const filtered = useMemo(() => {
-    let result = visibleServices
+    let result = allServices
     if (selectedDomain) {
       result = result.filter((s) => s.domain === selectedDomain)
     }
     if (!search.trim()) return result
     const q = search.toLowerCase()
     return result.filter((s) => s.name.toLowerCase().includes(q))
-  }, [visibleServices, search, selectedDomain])
+  }, [allServices, search, selectedDomain])
 
   const categoryFilters = useMemo(() => {
     return DOMAIN_TYPE_TEMPLATE_CATEGORY_OPTIONS.map((opt) => ({
@@ -143,18 +147,32 @@ export const CustomServicesTable: React.FC = () => {
 
   const [deleteService] = useDeleteCustomServiceMutation()
   const [editService, { isLoading: isEditing }] = useEditCustomServiceMutation()
-  const [editingService, setEditingService] = useState<ICustomService | null>(null)
-  const [form] = Form.useForm<{ name: string }>()
+  const [editingService, setEditingService] = useState<ICustomService | null>(
+    null
+  )
+  const [form] = Form.useForm<{ name: string; serviceType: string }>()
+
+  const serviceTypeOptions = useMemo(
+    () => getAssignableServiceTypeOptions(),
+    []
+  )
 
   const openEdit = (record: ICustomService) => {
     setEditingService(record)
-    form.setFieldsValue({ name: record.name })
+    form.setFieldsValue({
+      name: record.name,
+      serviceType: record.serviceType ?? UNDEFINED_SERVICE_TYPE_VALUE,
+    })
   }
 
   const handleEdit = async () => {
     try {
-      const { name } = await form.validateFields()
-      await editService({ _id: editingService._id, name }).unwrap()
+      const { name, serviceType } = await form.validateFields()
+      await editService({
+        _id: editingService._id,
+        name,
+        serviceType: serviceType ? serviceType : null,
+      }).unwrap()
       message.success('Послугу оновлено')
       setEditingService(null)
     } catch {
@@ -191,7 +209,9 @@ export const CustomServicesTable: React.FC = () => {
         return (
           <Tag color={cat ? 'blue' : 'default'}>
             {cat
-              ? getDomainTypeTemplateCategoryLabel(cat as DomainTypeTemplateCategory)
+              ? getDomainTypeTemplateCategoryLabel(
+                  cat as DomainTypeTemplateCategory
+                )
               : 'Інше'}
           </Tag>
         )
@@ -202,15 +222,14 @@ export const CustomServicesTable: React.FC = () => {
       key: 'actions',
       width: 100,
       render: (_: unknown, record: ICustomService) => {
-        const isStandard =
-          record.serviceType && record.serviceType !== ServiceType.Custom
+        const isSystem = defaultServiceIds.has(record._id)
         return (
           <Space>
             <Button
               type="text"
               icon={<EditOutlined />}
               onClick={() => openEdit(record)}
-              disabled={!!isStandard}
+              disabled={isSystem}
             />
             <Popconfirm
               title="Видалити послугу?"
@@ -218,13 +237,13 @@ export const CustomServicesTable: React.FC = () => {
               onConfirm={() => handleDelete(record._id)}
               okText="Так"
               cancelText="Ні"
-              disabled={!!isStandard}
+              disabled={isSystem}
             >
               <Button
                 type="text"
                 icon={<DeleteOutlined />}
                 danger
-                disabled={!!isStandard}
+                disabled={isSystem}
               />
             </Popconfirm>
           </Space>
@@ -263,8 +282,11 @@ export const CustomServicesTable: React.FC = () => {
         dataSource={filtered}
         columns={columns}
         loading={isLoading}
-        size="small"
-        pagination={{ position: ['bottomCenter'], hideOnSinglePage: true }}
+        pagination={{
+          showSizeChanger: true,
+          showTotal: (total) => `Усього: ${total}`,
+          position: ['bottomCenter'],
+        }}
       />
 
       <Modal
@@ -284,6 +306,9 @@ export const CustomServicesTable: React.FC = () => {
             rules={[{ required: true, message: 'Введіть назву послуги' }]}
           >
             <Input />
+          </Form.Item>
+          <Form.Item name="serviceType" label="Тип послуги">
+            <Select options={serviceTypeOptions} />
           </Form.Item>
         </Form>
       </Modal>

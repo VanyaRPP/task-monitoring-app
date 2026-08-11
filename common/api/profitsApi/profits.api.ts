@@ -69,7 +69,7 @@ export const profitApi = createApi({
         method: 'PATCH',
         body,
       }),
-      invalidatesTags: (_result, _err, { id }) => [{ type: 'Profit', id }],
+      invalidatesTags: ['Profit'],
     }),
 
     deleteProfit: builder.mutation<void, string>({

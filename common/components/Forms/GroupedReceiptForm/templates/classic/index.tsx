@@ -47,17 +47,7 @@ const ClassicTemplate: FC<TemplateProps> = ({
     getLabel(overrides, key, def, isEnglish)
 
   return (
-    <div
-      className={cs.invoiceContainer}
-      ref={componentRef}
-      style={{
-        width: '100%',
-        height: '100%',
-        marginTop: '2em',
-        marginRight: '1.5em',
-        marginLeft: '1.5em',
-      }}
-    >
+    <div className={cs.invoiceContainer} ref={componentRef}>
       <div className={cs.providerInfo}>
         <div className={cs.label}>
           <EditableText

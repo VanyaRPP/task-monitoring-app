@@ -85,7 +85,9 @@ const ProfitPage = () => {
         >
           {contentList[activeTabKey]}
         </Card>
-        {isModalOpen && <AddCostModal closeModal={closeModal} />}
+        {isModalOpen && (
+          <AddCostModal closeModal={closeModal} activeDomain={activeTabKey} />
+        )}
       </Space>
     </FullScreenWrapper>
   )

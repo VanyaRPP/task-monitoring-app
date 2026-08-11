@@ -199,6 +199,61 @@ describe('checkTransaction', () => {
     })
   })
 
+  it('REGRESSION: account fallback queries only the incoming account — a prior payment stored under a different account of the same payer is invisible', async () => {
+    // The payer paid before from account …003, now pays from account …001.
+    // The fallback queries by the *incoming* account, so the older payment
+    // (stored under the other account) is never found → previousCompanyId=null.
+    mockedFind.mockResolvedValue([]) // brand-new tx, never invoiced
+    mockedFindOne.mockReturnValue({
+      sort: jest.fn().mockReturnValue({
+        lean: jest.fn().mockResolvedValue(null),
+      }),
+    })
+
+    const result = await checkTransaction({
+      transaction: {
+        ...transaction,
+        TECHNICAL_TRANSACTION_ID: undefined,
+        AUT_CNTR_ACC: 'UA000000000000000000000000001',
+        AUT_CNTR_NAM: 'ФОП Payer One',
+      },
+      domainId: 'domain-xyz',
+    })
+
+    expect(mockedFindOne).toHaveBeenCalledWith({
+      domain: 'domain-xyz',
+      $or: [{ 'transaction.AUT_CNTR_ACC': 'UA000000000000000000000000001' }],
+    })
+    expect(result).toEqual({
+      isMatchingPayment: false,
+      previousCompanyId: null,
+    })
+  })
+
+  it('does NOT run the account fallback for a self-transaction (AUT_CNTR_CRF === AUT_MY_CRF)', async () => {
+    // Owner pays themselves — must not match the owner's own company via the
+    // account fallback.
+    mockedFind.mockResolvedValue([]) // brand-new tx, never invoiced
+
+    const result = await checkTransaction({
+      transaction: {
+        ...transaction,
+        TECHNICAL_TRANSACTION_ID: undefined,
+        AUT_MY_CRF: '9999999999',
+        AUT_CNTR_CRF: '9999999999',
+        AUT_CNTR_NAM: 'DOMAIN OWNER',
+        OSND: 'return of funds',
+      },
+      domainId: 'domain-xyz',
+    })
+
+    expect(mockedFindOne).not.toHaveBeenCalled()
+    expect(result).toEqual({
+      isMatchingPayment: false,
+      previousCompanyId: null,
+    })
+  })
+
   it('does NOT fall back to AUT_CNTR_ACC for транзитний рахунок', async () => {
     const result = await checkTransaction({
       transaction: {

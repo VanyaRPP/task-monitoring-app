@@ -18,7 +18,9 @@ const Home: React.FC<PageProps> = ({ isAuth }) => {
     <>
       <Head>
         <title>
-          {isAuth ? 'Персональний кабінет' : 'Комуналка в E-ORENDA'}
+          {isAuth
+            ? 'Персональний кабінет'
+            : 'E-ORENDA — автоматизація виставлення рахунків'}
         </title>
       </Head>
       {isAuth ? (

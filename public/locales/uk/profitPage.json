@@ -53,6 +53,7 @@
     "confirm": "Підтвердити",
     "cancel": "Скасувати",
     "successMessage": "Успішно збережено",
+    "editSuccess": "Запис успішно оновлено",
     "errorMessage": "Не вдалося зберегти зміни",
     "previewTitle": "Перегляд запису",
     "closeText": "Закрити"

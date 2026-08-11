@@ -32,8 +32,22 @@ const CustomServicesCard: FC<CustomServicesCardProps> = ({
     _id: service?._id,
     label: service?.label,
     fieldName: service?.fieldName,
-    price: 0,
+    price: null,
   })
+
+  // Persist the company's services together with the "all services" flag. The
+  // flag mirrors whether every domain service is currently selected — it is the
+  // signal the backend uses to decide if a newly added domain service should be
+  // auto-cascaded to this company. Service forms don't own this flag.
+  const commitServices = (next: any[]) => {
+    form.setFieldValue('customServices', next)
+    if (!isServiceForm) {
+      form.setFieldValue(
+        'allServices',
+        allCustomServices.length > 0 && next.length === allCustomServices.length
+      )
+    }
+  }
 
   const applyIds = (ids: string[]) => {
     const uniqueIds = Array.from(new Set(ids))
@@ -43,7 +57,7 @@ const CustomServicesCard: FC<CustomServicesCardProps> = ({
       const source = allCustomServices.find((s) => s?._id === id)
       return buildEntry(source)
     })
-    form.setFieldsValue({ customServices: next })
+    commitServices(next)
   }
 
   const handleSelectChange = (ids: string[]) => {
@@ -95,7 +109,7 @@ const CustomServicesCard: FC<CustomServicesCardProps> = ({
   const handleRemoveService = (index: number) => {
     const updated = [...customServices]
     updated.splice(index, 1)
-    form.setFieldsValue({ customServices: updated })
+    commitServices(updated)
   }
   const dashIfEmpty = (v: any) => (v === 0 || v ? v : '-')
 
@@ -111,10 +125,11 @@ const CustomServicesCard: FC<CustomServicesCardProps> = ({
       return
     }
 
-    form.setFieldsValue({
-      customServices: allCustomServices.map(buildEntry),
-    })
+    commitServices(allCustomServices.map(buildEntry))
     autoPopulatedRef.current = true
+    // Runs once (guarded by autoPopulatedRef); commitServices is stable enough
+    // for this one-shot population.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     allCustomServices,
     customServices.length,

@@ -207,7 +207,9 @@ const DomainsServices: FC<Props> = ({
       <DomainModalType
         templates={templates}
         editable={editable}
-        onTemplateChange={editable ? handleTemplateChange : handleViewTemplateChange}
+        onTemplateChange={
+          editable ? handleTemplateChange : handleViewTemplateChange
+        }
       />
       {editable && renderSnapshotsList && (
         <DomainSnapshotsList domainId={domainId} onRestored={handleRestored} />

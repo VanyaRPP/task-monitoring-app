@@ -1,4 +1,8 @@
-import { getStreetId, buildTransactionPayload } from './quickSendHelpers'
+import {
+  getStreetId,
+  buildTransactionPayload,
+  buildCompanyIdentifierPatch,
+} from './quickSendHelpers'
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { ITransaction } from './transactionTypes'
 
@@ -141,5 +145,95 @@ describe('buildTransactionPayload', () => {
     ]
     const result = buildTransactionPayload(tx, companies)
     expect(result.Description).toBe('UA300000000000000000000000002')
+  })
+})
+
+describe('buildCompanyIdentifierPatch', () => {
+  const notMatched = { accountAlreadyMatched: false }
+
+  it('stores both account and rnokpp for a fresh non-transit payer', () => {
+    const tx = makeTransaction({
+      AUT_CNTR_ACC: 'UA300000000000000000000000004',
+      AUT_CNTR_CRF: '2534567890',
+      AUT_CNTR_NAM: 'ФОП Payer One',
+    })
+    const company = makeCompany({ _id: 'comp-1', rnokpp: '' })
+
+    expect(
+      buildCompanyIdentifierPatch(tx, company, 'comp-1', notMatched)
+    ).toEqual({
+      _id: 'comp-1',
+      account: 'UA300000000000000000000000004',
+      rnokpp: '2534567890',
+    })
+  })
+
+  it('skips account when it already matched, still back-fills rnokpp', () => {
+    const tx = makeTransaction({
+      AUT_CNTR_ACC: 'UA300000000000000000000000004',
+      AUT_CNTR_CRF: '2534567890',
+      AUT_CNTR_NAM: 'ФОП Payer One',
+    })
+    const company = makeCompany({ _id: 'comp-1', rnokpp: '' })
+
+    expect(
+      buildCompanyIdentifierPatch(tx, company, 'comp-1', {
+        accountAlreadyMatched: true,
+      })
+    ).toEqual({ _id: 'comp-1', rnokpp: '2534567890' })
+  })
+
+  it('does not overwrite an rnokpp the company already has', () => {
+    const tx = makeTransaction({
+      AUT_CNTR_ACC: 'UA300000000000000000000000004',
+      AUT_CNTR_CRF: '2534567890',
+      AUT_CNTR_NAM: 'ФОП Payer One',
+    })
+    const company = makeCompany({ _id: 'comp-1', rnokpp: '9999999999' })
+
+    expect(
+      buildCompanyIdentifierPatch(tx, company, 'comp-1', notMatched)
+    ).toEqual({ _id: 'comp-1', account: 'UA300000000000000000000000004' })
+  })
+
+  it('does not store rnokpp for a self-transaction (AUT_CNTR_CRF === AUT_MY_CRF)', () => {
+    const tx = makeTransaction({
+      AUT_MY_CRF: '0000000000',
+      AUT_CNTR_CRF: '0000000000',
+      AUT_CNTR_ACC: 'UA300000000000000000000000009',
+      AUT_CNTR_NAM: 'DOMAIN OWNER',
+    })
+    const company = makeCompany({ _id: 'comp-1', rnokpp: '' })
+
+    expect(
+      buildCompanyIdentifierPatch(tx, company, 'comp-1', notMatched)
+    ).toEqual({ _id: 'comp-1', account: 'UA300000000000000000000000009' })
+  })
+
+  it('returns null for transit transactions', () => {
+    const tx = makeTransaction({
+      AUT_CNTR_NAM: 'Транз.рахунок платежi_ DN',
+      AUT_CNTR_CRF: '2534567890',
+    })
+    const company = makeCompany({ _id: 'comp-1', rnokpp: '' })
+
+    expect(
+      buildCompanyIdentifierPatch(tx, company, 'comp-1', notMatched)
+    ).toBeNull()
+  })
+
+  it('returns null when there is nothing to persist (no account, rnokpp already set)', () => {
+    const tx = makeTransaction({
+      AUT_CNTR_ACC: '',
+      AUT_CNTR_CRF: '2534567890',
+      AUT_CNTR_NAM: 'ФОП Payer One',
+    })
+    const company = makeCompany({ _id: 'comp-1', rnokpp: '2534567890' })
+
+    expect(
+      buildCompanyIdentifierPatch(tx, company, 'comp-1', {
+        accountAlreadyMatched: true,
+      })
+    ).toBeNull()
   })
 })

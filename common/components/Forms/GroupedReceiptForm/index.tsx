@@ -31,7 +31,11 @@ interface Props {
   paymentActions: { preview: boolean; edit: boolean }
 }
 
-const GroupedReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
+const GroupedReceiptForm: FC<Props> = ({
+  currPayment,
+  paymentData,
+  paymentActions,
+}) => {
   const {
     form,
     template,
@@ -319,7 +323,14 @@ const GroupedReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
 
   return (
     <>
-      <div style={{ position: 'absolute', top: -85, right: 35, zIndex: 100 }}>
+      <div
+        style={{
+          position: 'absolute',
+          top: paymentActions?.preview ? -70 : -105,
+          right: 35,
+          zIndex: 100,
+        }}
+      >
         <Dropdown
           menu={{
             items: mainMenuItems,
@@ -328,14 +339,26 @@ const GroupedReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
           trigger={['click']}
         >
           <Button
-            type="default" 
+            type="default"
             style={{ borderColor: 'rgba(150, 150, 150, 0.4)' }}
             icon={<MoreOutlined style={{ fontSize: 20, color: 'inherit' }} />}
           />
         </Dropdown>
       </div>
 
-      <TemplateComponent {...templateProps} />
+      <div
+        style={{
+          width: '100%',
+          height: '100%',
+          boxSizing: 'border-box',
+          paddingTop: '2em',
+          paddingRight: '1.5em',
+          paddingLeft: '1.5em',
+          position: 'relative',
+        }}
+      >
+        <TemplateComponent {...templateProps} />
+      </div>
     </>
   )
 }

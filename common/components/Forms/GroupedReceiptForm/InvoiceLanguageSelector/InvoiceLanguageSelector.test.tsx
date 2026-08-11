@@ -5,13 +5,13 @@ import InvoiceLanguageSelector from './index'
 
 describe('InvoiceLanguageSelector', () => {
   it('renders both UA and EN buttons', () => {
-    render(<InvoiceLanguageSelector lang="uk" onChange={() => {}} />)
+    render(<InvoiceLanguageSelector lang="uk" onChange={jest.fn()} />)
     expect(screen.getByRole('button', { name: 'UA' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'EN' })).toBeInTheDocument()
   })
 
   it('UA button has active class when lang=uk', () => {
-    render(<InvoiceLanguageSelector lang="uk" onChange={() => {}} />)
+    render(<InvoiceLanguageSelector lang="uk" onChange={jest.fn()} />)
     expect(screen.getByRole('button', { name: 'UA' }).className).toMatch(
       /active/
     )
@@ -21,7 +21,7 @@ describe('InvoiceLanguageSelector', () => {
   })
 
   it('EN button has active class when lang=en', () => {
-    render(<InvoiceLanguageSelector lang="en" onChange={() => {}} />)
+    render(<InvoiceLanguageSelector lang="en" onChange={jest.fn()} />)
     expect(screen.getByRole('button', { name: 'EN' }).className).toMatch(
       /active/
     )

@@ -14,8 +14,8 @@ import { UsersTable } from '@common/components/Tables/UsersTable'
 import { CustomServicesTable } from '@common/components/Tables/CustomService/Table'
 import { DomainTypeTemplatesTable } from '@common/components/Tables/DomainTypeTemplates'
 import { useGetDomainsByAdminQuery } from '@common/api/domainApi/domain.api'
+import PaymentAuditTable from '@common/components/Tables/PaymentAudit/Table'
 
-import { LogsConsole } from '@components/Tables/LogConsoleTable/Table'
 export const AdminPanelPage: React.FC = () => {
   const { data: user } = useGetCurrentUserQuery()
   const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
@@ -60,6 +60,38 @@ export const AdminPanelPage: React.FC = () => {
                 </>
               ),
             },
+            ...(isGlobalAdmin || isDomainAdmin
+              ? [
+                  {
+                    key: 'customservices',
+                    label: 'Послуги',
+                    children: (
+                      <CustomServicesTable
+                        domains={domains}
+                        isDomainAdmin={isDomainAdmin}
+                      />
+                    ),
+                  },
+                  {
+                    key: 'payment-audit',
+                    label: 'Логування',
+                    children: (
+                      <>
+                        <Flex
+                          justify="space-between"
+                          align="center"
+                          style={{ marginBottom: 16 }}
+                        >
+                          <Typography.Title level={4} style={{ margin: 0 }}>
+                            Логування
+                          </Typography.Title>
+                        </Flex>
+                        <PaymentAuditTable />
+                      </>
+                    ),
+                  },
+                ]
+              : []),
             ...(isGlobalAdmin
               ? [
                   {
@@ -88,35 +120,15 @@ export const AdminPanelPage: React.FC = () => {
                             onClick={() => setModalOpen(true)}
                           ></Button>
                         </Flex>
-
                         <FeatureFlagsTable />
                       </>
                     ),
-                  },
-                  {
-                    key: 'customservices',
-                    label: 'Послуги',
-                    children: <CustomServicesTable />,
                   },
                   {
                     key: 'templates',
                     label: 'Шаблони типів',
                     children: <DomainTypeTemplatesTable />,
                   },
-                  {
-                    key: 'logs',
-                    label: 'Логування',
-                    children: (
-                    <>
-                    <Flex justify="space-between" align="center" style={{ marginBottom: 16 }}>
-                      <Typography.Title level={4} style={{ margin: 0 }}>
-                        Логування
-                        </Typography.Title>
-                        </Flex>
-                        <LogsConsole />
-                        </>
-                      ),
-                    },
                 ]
               : []),
           ]}

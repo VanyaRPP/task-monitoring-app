@@ -10,11 +10,11 @@ import TableCard from '@components/UI/TableCard'
 import { AppRoutes } from '@utils/constants'
 import { isAdminCheck } from '@utils/helpers'
 import { useRouter } from 'next/router'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useDeleteServiceMutation } from '@common/api/serviceApi/service.api'
 import { message } from 'antd'
 import { dateToMonthYear } from '@assets/features/formatDate'
-import { useGetCustomServicesQuery } from '@common/api/customServicesApi/customServices.api'
+import { useAccessibleCustomServices } from '@common/api/customServicesApi/useAccessibleCustomServices'
 import {
   useGetAddressFiltersQuery,
   useGetDateFiltersQuery,
@@ -38,8 +38,10 @@ const ServicesBlock: React.FC<ServiceBlockProps> = ({ sepDomainID }) => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
 
   const [deleteService] = useDeleteServiceMutation()
-  const { data: customServicesData } = useGetCustomServicesQuery({})
-
+  // Backend-scoped catalog: for a DomainAdmin this is already only their
+  // domains' services (resolveAccessScope), so no client-side security filter
+  // is needed — only the presentational "selected domain" narrowing below.
+  const { services: customServices } = useAccessibleCustomServices()
   const [filter, setFilter] = useState<IServiceFilter>()
   const router = useRouter()
   const isOnPage = router.pathname === AppRoutes.SERVICE
@@ -50,6 +52,19 @@ const ServicesBlock: React.FC<ServiceBlockProps> = ({ sepDomainID }) => {
   const { data: streetsFilter } = useGetAddressFiltersQuery({
     domains: filter?.domain,
   })
+
+  const domainFilteredCustomServices = useMemo(() => {
+    const explicitDomainIds = filter?.domain as unknown as
+      | string[]
+      | null
+      | undefined
+    if (explicitDomainIds?.length) {
+      return customServices.filter((cs) =>
+        explicitDomainIds.some((id) => String(cs.domain) === String(id))
+      )
+    }
+    return customServices
+  }, [customServices, filter?.domain])
   const { data: dateFilters } = useGetDateFiltersQuery({
     type: 'service',
   })
@@ -89,6 +104,7 @@ const ServicesBlock: React.FC<ServiceBlockProps> = ({ sepDomainID }) => {
   const {
     data: servicesData,
     isLoading,
+    isFetching,
     isError,
   } = useGetAllServicesQuery({
     limit: isOnPage ? 0 : 5,
@@ -125,8 +141,8 @@ const ServicesBlock: React.FC<ServiceBlockProps> = ({ sepDomainID }) => {
           setServiceActions={setServiceActions}
           serviceActions={serviceActions}
           services={servicesData}
-          customServices={customServicesData?.data}
-          isLoading={isLoading}
+          customServices={domainFilteredCustomServices}
+          isLoading={isLoading || isFetching}
           isError={isError}
           filter={filter}
           setFilter={setFilter}

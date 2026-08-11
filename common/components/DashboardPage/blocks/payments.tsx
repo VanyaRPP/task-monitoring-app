@@ -133,7 +133,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     }
   }, [filters?.domain, domainsFiltersData])
 
-  const { data: debtorsData } = useGetDebtorsQuery(
+  const { data: debtorsData, refetch: refetchDebtors } = useGetDebtorsQuery(
     { domainIds },
     { skip: !domainIds.length }
   )
@@ -170,9 +170,9 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     channel.onmessage = (event) => {
       if (event.data === 'PAYMENT_CREATED') {
         dispatch(paymentApi.util.invalidateTags(['Payment']))
+        dispatch(debtorsApi.util.invalidateTags(['Debtors']))
       }
     }
-
     return () => {
       channel.close()
     }
@@ -217,6 +217,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     async (id: string) => {
       const removed = payments?.data?.find((p) => p._id === id)
       const response = await deletePaymentMutation(id)
+
       if ('data' in response) {
         if (removed) {
           patchDebtorsCache([
@@ -226,12 +227,33 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
             },
           ])
         }
+
+        dispatch(
+          setSelectedPayments(
+            selectedPayments.filter((p: IExtendedPayment) => p._id !== id)
+          )
+        )
+        dispatch(
+          setPaymentsDeleteItems(
+            paymentsDeleteItems.filter(
+              (item: PaymentDeleteItem) => item.id !== id
+            )
+          )
+        )
+
         message.success('Видалено!')
       } else {
         message.error('Помилка при видаленні рахунку')
       }
     },
-    [deletePaymentMutation, patchDebtorsCache, payments]
+    [
+      deletePaymentMutation,
+      patchDebtorsCache,
+      payments,
+      selectedPayments,
+      paymentsDeleteItems,
+      dispatch,
+    ]
   )
   const handleMarkPaid = useCallback(
     async (source: IExtendedPayment) => {
@@ -321,7 +343,8 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
         } else {
           message.error(
             many
-              ? 'Не вдалося продублювати обрані рахунки' : 'Не вдалося продублювати рахунок'
+              ? 'Не вдалося продублювати обрані рахунки'
+              : 'Не вдалося продублювати рахунок'
           )
         }
       } else {
@@ -517,7 +540,11 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
       dispatch(setSelectedColumns(cols)),
     onBulkMarkPaid: handleBulkMarkPaid,
     onBulkDuplicate: handleBulkDuplicate,
-    onRefresh: () => refetchPayments(),
+    onRefresh: () =>
+      Promise.all([
+        refetchPayments(),
+        domainIds.length ? refetchDebtors() : Promise.resolve(),
+      ]),
     isRefreshing: paymentsFetching,
     domainFilter: filterProps.domainsFilter,
     realEstatesFilter: filterProps.companiesFilter,

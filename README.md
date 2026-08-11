@@ -32,16 +32,16 @@ MongoDB/Mongoose data layer and an API implemented as Next.js API routes.
 
 ## Tech stack
 
-| Area     | Tech                                                        |
-| -------- | ----------------------------------------------------------- |
-| Runtime  | Node **22.x**, Yarn 1.22                                    |
-| Framework| Next.js 14 (Pages Router), React 18, TypeScript 5           |
-| Data     | MongoDB + Mongoose 7                                         |
-| Auth     | NextAuth (credentials + GitHub/Google/Facebook OAuth)       |
-| State    | Redux Toolkit + RTK Query                                   |
-| UI       | Ant Design 5, SCSS modules, Chart.js / @ant-design/plots    |
-| Other    | i18n (next-i18next), PWA (next-pwa), Puppeteer PDF, Telegram bot (grammy) |
-| Testing  | Jest, Testing Library, MSW, mongodb-memory-server           |
+| Area      | Tech                                                                      |
+| --------- | ------------------------------------------------------------------------- |
+| Runtime   | Node **22.x**, Yarn 1.22                                                  |
+| Framework | Next.js 14 (Pages Router), React 18, TypeScript 5                         |
+| Data      | MongoDB + Mongoose 7                                                      |
+| Auth      | NextAuth (credentials + GitHub/Google/Facebook OAuth)                     |
+| State     | Redux Toolkit + RTK Query                                                 |
+| UI        | Ant Design 5, SCSS modules, Chart.js / @ant-design/plots                  |
+| Other     | i18n (next-i18next), PWA (next-pwa), Puppeteer PDF, Telegram bot (grammy) |
+| Testing   | Jest, Testing Library, MSW, mongodb-memory-server                         |
 
 ## Quick start
 
@@ -65,15 +65,15 @@ yarn dev                     # http://localhost:3000
 
 ## Scripts
 
-| Script              | Purpose                                  |
-| ------------------- | ---------------------------------------- |
-| `yarn dev`          | Start the dev server on port 3000        |
-| `yarn build`        | Production build                         |
-| `yarn start`        | Run the production build                 |
-| `yarn test`         | Run Jest tests (`test:watch` for watch)  |
-| `yarn lint`         | ESLint (`lint:fix` autofixes)            |
-| `yarn prettier`     | Prettier check + write                   |
-| `yarn types:check`  | TypeScript type-check (`tsc --noEmit`)   |
+| Script             | Purpose                                 |
+| ------------------ | --------------------------------------- |
+| `yarn dev`         | Start the dev server on port 3000       |
+| `yarn build`       | Production build                        |
+| `yarn start`       | Run the production build                |
+| `yarn test`        | Run Jest tests (`test:watch` for watch) |
+| `yarn lint`        | ESLint (`lint:fix` autofixes)           |
+| `yarn prettier`    | Prettier check + write                  |
+| `yarn types:check` | TypeScript type-check (`tsc --noEmit`)  |
 
 A Husky pre-commit hook runs linting/formatting on staged files.
 

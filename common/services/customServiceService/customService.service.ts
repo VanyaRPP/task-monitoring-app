@@ -3,6 +3,8 @@ import Domain from '@modules/models/Domain'
 import RealEstate from '@modules/models/RealEstate'
 import { DomainTypeTemplateCategory } from '@modules/models/domain-type-template'
 import { getDefaultServiceIdsForCategory } from '@common/services/domainTypeTemplateService/domainTypeTemplate.service'
+import { buildServiceFilter, isFilterFailure } from './access/accessScope'
+import { resolveAccessScope } from './access/resolveAccessScope'
 import { ServiceType } from '@utils/constants'
 import { escapeRegexForMongo } from '@utils/escape-regex/escape-regex'
 import { defaultServicesSet } from '@utils/helpers'
@@ -190,8 +192,9 @@ async function attachServiceToDomainCompanies(
     fieldName: string
   }
 ): Promise<void> {
+  // Companies with a deliberately chosen subset are left untouched.
   await RealEstate.updateMany(
-    { domain: domainId, archived: { $ne: true } },
+    { domain: domainId, archived: { $ne: true }, allServices: true },
     {
       $push: {
         customServices: {
@@ -349,7 +352,8 @@ export async function updateCustomService(
   }
 
   // DomainAdmin path — per-domain scoping.
-  const access = await assertDomainAccess(input.domainId, ctx)
+  const resolvedDomainId = input.domainId ?? service.domain
+  const access = await assertDomainAccess(resolvedDomainId, ctx)
   if (isServiceErr(access)) return access
   const domainId = access.data
 
@@ -480,28 +484,31 @@ function parseIds(raw: unknown): string[] | null {
 }
 
 /**
- * Lists CustomServices visible to the caller in a given UI context.
+ * Lists CustomServices the caller is allowed to see, in a given UI context.
  *
- * - User callers → forbidden.
- * - `domainId` scopes to per-domain services. Combined with `templateCategory`
- *   the response is `(own-domain) ∪ (defaults for this category)`. Without
- *   `templateCategory`, falls back to legacy behavior `(own-domain) ∪ (all
- *   legacy)` for back-compat.
- * - Without `domainId`, returns the global pool (legacy + per-domain), gated
- *   only by role.
+ * Access is resolved once into an {@link AccessScope} and the Mongo filter is
+ * built from it, so the response can never exceed the caller's scope:
+ * - User → forbidden.
+ * - GlobalAdmin → the whole catalog; `domainId` narrows to `domain ∪ legacy`
+ *   (or `domain ∪ category-defaults` when `templateCategory` is given).
+ * - DomainAdmin → only their own domains' services. Without `domainId` the
+ *   response auto-scopes to the union of ALL their domains (+ shared services
+ *   those domains reference); with `domainId` it must be one they administer,
+ *   otherwise forbidden. The legacy global pool is never exposed to them.
  * - `ids` further restricts the result to a list of explicit `_id`s.
  */
 export async function listCustomServicesForDomain(
   query: ListCustomServicesQuery,
   ctx: UserContext
 ): Promise<ServiceResult<unknown[]>> {
-  if (ctx.isUser) {
-    // Match legacy contract: User-level access returns 400 with 'Не дозволено'.
+  const scope = await resolveAccessScope(ctx)
+  if (scope.kind === 'none') {
+    // Keep the legacy contract: non-admin callers get 400 'Не дозволено'.
     return err('invalid', 'Не дозволено')
   }
 
-  const filter: Record<string, unknown> = {}
-
+  // Validate an explicit domainId before anything else touches it.
+  let domainId: string | null = null
   if (
     query.domainId !== undefined &&
     query.domainId !== null &&
@@ -513,42 +520,37 @@ export async function listCustomServicesForDomain(
     if (!mongoose.Types.ObjectId.isValid(domainIdStr)) {
       return err('invalid', 'Невалідний domainId')
     }
-    const domainObjectId = new mongoose.Types.ObjectId(domainIdStr)
-
-    const category = parseTemplateCategory(query.templateCategory)
-    if (category) {
-      const defaultIds = await getDefaultServiceIdsForCategory(category)
-      const defaultObjectIds = defaultIds
-        .filter((id) => mongoose.Types.ObjectId.isValid(id))
-        .map((id) => new mongoose.Types.ObjectId(id))
-      filter.$or = [
-        { domain: domainObjectId },
-        ...(defaultObjectIds.length
-          ? [{ _id: { $in: defaultObjectIds } }]
-          : []),
-      ]
-    } else {
-      filter.$or = [
-        { domain: domainObjectId },
-        { domain: { $in: [null, undefined] } },
-        { domain: { $exists: false } },
-      ]
-    }
+    domainId = domainIdStr
   }
 
-  const validIds = parseIds(query.ids)
-  if (validIds !== null) {
-    if (validIds.length === 0) return ok([])
-    filter._id = { $in: validIds }
+  const ids = parseIds(query.ids)
+
+  // Resolve category defaults (IO) only when a valid category was supplied.
+  let categoryDefaultIds: string[] | null = null
+  const category = parseTemplateCategory(query.templateCategory)
+  if (category) {
+    const defaultIds = await getDefaultServiceIdsForCategory(category)
+    categoryDefaultIds = defaultIds.filter((id) =>
+      mongoose.Types.ObjectId.isValid(id)
+    )
   }
 
-  const services = await CustomService.find(filter).lean()
+  const built = buildServiceFilter(scope, { domainId, ids, categoryDefaultIds })
+  if (isFilterFailure(built)) {
+    return built.code === 'empty'
+      ? ok([])
+      : err('forbidden', 'Немає доступу до вказаного домену')
+  }
+
+  const services = await CustomService.find(built.filter).lean()
   const seenIds = new Set<string>()
   const seenNames = new Set<string>()
   const unique = services.filter((s: any) => {
     const id = String(s?._id ?? '')
     if (!id || seenIds.has(id)) return false
-    const nameKey = String(s?.name ?? '').trim().toLowerCase()
+    const nameKey = String(s?.name ?? '')
+      .trim()
+      .toLowerCase()
     if (nameKey && seenNames.has(nameKey)) return false
     seenIds.add(id)
     if (nameKey) seenNames.add(nameKey)
@@ -595,13 +597,25 @@ export function assembleDomainServiceCatalog(
     servicesById.set(String(service._id), service)
   }
 
+  const seenNameKeys = new Set<string>()
+  const takeUniqueByName = (service: LeanCustomService): boolean => {
+    const nameKey = String(service?.name ?? '')
+      .trim()
+      .toLowerCase()
+    if (!nameKey) return true
+    if (seenNameKeys.has(nameKey)) return false
+    seenNameKeys.add(nameKey)
+    return true
+  }
+
   const groupedServices: DomainServiceGroup[] = (
     domainCustomServices || []
   ).map((group, index) => ({
     groupName: group?.groupName ?? `Група ${index + 1}`,
     services: (group?.services || [])
       .map((id) => servicesById.get(String(id)))
-      .filter((service): service is LeanCustomService => Boolean(service)),
+      .filter((service): service is LeanCustomService => Boolean(service))
+      .filter(takeUniqueByName),
   }))
 
   const groupedIds = new Set(
@@ -609,9 +623,9 @@ export function assembleDomainServiceCatalog(
       group.services.map((service) => String(service._id))
     )
   )
-  const ungroupedServices = domainScopedServices.filter(
-    (service) => !groupedIds.has(String(service._id))
-  )
+  const ungroupedServices = domainScopedServices
+    .filter((service) => !groupedIds.has(String(service._id)))
+    .filter(takeUniqueByName)
 
   const result: DomainServiceGroup[] = [...groupedServices]
   if (ungroupedServices.length > 0) {

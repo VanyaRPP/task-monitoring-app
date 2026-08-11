@@ -3,7 +3,10 @@ import {
   matchByAccount,
   matchByRnokpp,
   matchByPrevious,
+  matchByName,
   getResolvedDescription,
+  isSelfTransaction,
+  normalizeCounterpartyName,
 } from './bankHelper'
 import { ITransaction } from './transactionTypes'
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
@@ -202,6 +205,224 @@ describe('matchByRnokpp', () => {
       matchedBy: 'rnokpp',
     })
   })
+
+  it('should match a non-transit payment by counterparty tax code AUT_CNTR_CRF', () => {
+    const transaction = {
+      AUT_CNTR_ACC: 'UA000000000000000000000000001',
+      AUT_CNTR_NAM: 'ФОП Payer One',
+      AUT_CNTR_CRF: '1111111111',
+      RECIPIENT_ULTMT_NCEO: '',
+    } as ITransaction
+
+    expect(matchByRnokpp(transaction, [kincalCompany])).toBeNull()
+    expect(
+      matchByRnokpp(transaction, [
+        { _id: 'payer-id', rnokpp: '1111111111' } as IRealestate,
+      ])
+    ).toEqual({ companyId: 'payer-id', matchedBy: 'rnokpp' })
+  })
+
+  it('should match by AUT_CNTR_CRF found in company description', () => {
+    const transaction = {
+      AUT_CNTR_NAM: 'ФОП Payer One',
+      AUT_CNTR_CRF: '1111111111',
+    } as ITransaction
+
+    expect(
+      matchByRnokpp(transaction, [
+        {
+          _id: 'payer-desc',
+          rnokpp: '',
+          description: 'Payer One\n1111111111\n+380...',
+        } as IRealestate,
+      ])
+    ).toEqual({ companyId: 'payer-desc', matchedBy: 'rnokpp' })
+  })
+
+  it('should trim AUT_CNTR_CRF before comparing', () => {
+    const transaction = {
+      AUT_CNTR_NAM: 'ФОП Payer One',
+      AUT_CNTR_CRF: '  1111111111  ',
+    } as ITransaction
+
+    expect(
+      matchByRnokpp(transaction, [
+        { _id: 'payer-id', rnokpp: '1111111111' } as IRealestate,
+      ])
+    ).toEqual({ companyId: 'payer-id', matchedBy: 'rnokpp' })
+  })
+
+  it('should NOT use AUT_CNTR_CRF for transit transactions (bank/transit code lives there)', () => {
+    const transaction = {
+      AUT_CNTR_NAM: 'Транз.рахунок платежi_ DN',
+      AUT_CNTR_CRF: '1111111111',
+      RECIPIENT_ULTMT_NCEO: '',
+    } as ITransaction
+
+    expect(
+      matchByRnokpp(transaction, [
+        { _id: 'payer-id', rnokpp: '1111111111' } as IRealestate,
+      ])
+    ).toBeNull()
+  })
+
+  it('should NOT match by AUT_CNTR_CRF for a self-transaction (AUT_CNTR_CRF === AUT_MY_CRF)', () => {
+    // The owner pays themselves (return of funds, own card top-up): the
+    // counterparty tax code equals the domain owner's own code — must never
+    // auto-select the owner's own company.
+    const transaction = {
+      AUT_MY_CRF: '9999999999',
+      AUT_CNTR_CRF: '9999999999',
+      AUT_CNTR_NAM: 'DOMAIN OWNER',
+      OSND: 'return of funds',
+    } as ITransaction
+
+    expect(
+      matchByRnokpp(transaction, [
+        { _id: 'owner-id', rnokpp: '9999999999' } as IRealestate,
+      ])
+    ).toBeNull()
+  })
+
+  it('should return null when neither NCEO nor AUT_CNTR_CRF is present', () => {
+    const transaction = {
+      AUT_CNTR_NAM: 'ФОП Payer One',
+      AUT_CNTR_CRF: '',
+      RECIPIENT_ULTMT_NCEO: '',
+    } as ITransaction
+
+    expect(
+      matchByRnokpp(transaction, [
+        { _id: 'payer-id', rnokpp: '1111111111' } as IRealestate,
+      ])
+    ).toBeNull()
+  })
+})
+
+describe('isSelfTransaction', () => {
+  it('is true when counterparty tax code equals owner tax code', () => {
+    expect(
+      isSelfTransaction({
+        AUT_MY_CRF: '9999999999',
+        AUT_CNTR_CRF: '9999999999',
+      } as ITransaction)
+    ).toBe(true)
+  })
+
+  it('trims both codes before comparing', () => {
+    expect(
+      isSelfTransaction({
+        AUT_MY_CRF: ' 9999999999 ',
+        AUT_CNTR_CRF: '9999999999',
+      } as ITransaction)
+    ).toBe(true)
+  })
+
+  it('is false for a different counterparty', () => {
+    expect(
+      isSelfTransaction({
+        AUT_MY_CRF: '9999999999',
+        AUT_CNTR_CRF: '1111111111',
+      } as ITransaction)
+    ).toBe(false)
+  })
+
+  it('is false when either code is missing (avoids empty === empty match)', () => {
+    expect(
+      isSelfTransaction({ AUT_MY_CRF: '9999999999' } as ITransaction)
+    ).toBe(false)
+    expect(
+      isSelfTransaction({ AUT_CNTR_CRF: '9999999999' } as ITransaction)
+    ).toBe(false)
+    expect(isSelfTransaction({} as ITransaction)).toBe(false)
+    expect(isSelfTransaction(null)).toBe(false)
+  })
+})
+
+describe('normalizeCounterpartyName', () => {
+  it('strips ФОП and КАРТКОВИЙ, punctuation and case', () => {
+    expect(
+      normalizeCounterpartyName('КАРТКОВИЙ - ФОП Шмакова Крістіна Василівна')
+    ).toBe('ШМАКОВА КРІСТІНА ВАСИЛІВНА')
+    expect(normalizeCounterpartyName('ФОП Шмакова Крістіна Василівна')).toBe(
+      'ШМАКОВА КРІСТІНА ВАСИЛІВНА'
+    )
+  })
+
+  it('returns empty string for empty/invalid input', () => {
+    expect(normalizeCounterpartyName('')).toBe('')
+    expect(normalizeCounterpartyName(undefined)).toBe('')
+    expect(normalizeCounterpartyName(null)).toBe('')
+  })
+})
+
+describe('matchByName', () => {
+  const payer = {
+    _id: 'payer-id',
+    companyName: 'Шмакова Крістіна Василівна',
+  } as IRealestate
+
+  it('matches by full normalized name across ФОП/КАРТКОВИЙ prefixes', () => {
+    expect(
+      matchByName(
+        { AUT_CNTR_NAM: 'ФОП Шмакова Крістіна Василівна' } as ITransaction,
+        [payer]
+      )
+    ).toEqual({ companyId: 'payer-id', matchedBy: 'name' })
+
+    expect(
+      matchByName(
+        {
+          AUT_CNTR_NAM: 'КАРТКОВИЙ - ФОП Шмакова Крістіна Василівна',
+        } as ITransaction,
+        [payer]
+      )
+    ).toEqual({ companyId: 'payer-id', matchedBy: 'name' })
+  })
+
+  it('does not match a different name', () => {
+    expect(
+      matchByName(
+        { AUT_CNTR_NAM: 'ФОП Іваненко Іван Іванович' } as ITransaction,
+        [payer]
+      )
+    ).toBeNull()
+  })
+
+  it('does not match on a single token (needs surname + name)', () => {
+    expect(
+      matchByName({ AUT_CNTR_NAM: 'ФОП Шмакова' } as ITransaction, [
+        { _id: 'x', companyName: 'ФОП Шмакова' } as IRealestate,
+      ])
+    ).toBeNull()
+  })
+
+  it('never matches transit transactions', () => {
+    expect(
+      matchByName(
+        { AUT_CNTR_NAM: 'Транз.рахунок платежi_ DN' } as ITransaction,
+        [{ _id: 'x', companyName: 'Транз рахунок платежi DN' } as IRealestate]
+      )
+    ).toBeNull()
+  })
+
+  it('never matches self-transactions (initials vs full name also differ)', () => {
+    expect(
+      matchByName(
+        {
+          AUT_MY_CRF: '2479002623',
+          AUT_CNTR_CRF: '2479002623',
+          AUT_CNTR_NAM: 'ЄРШОВА ЛЮДМИЛА МИХАЙЛІВНА',
+        } as ITransaction,
+        [
+          {
+            _id: 'owner',
+            companyName: 'ЄРШОВА ЛЮДМИЛА МИХАЙЛІВНА',
+          } as IRealestate,
+        ]
+      )
+    ).toBeNull()
+  })
 })
 
 describe('matchByPrevious', () => {
@@ -282,6 +503,36 @@ describe('matchCompany', () => {
     })
   })
 
+  it('should fall through to name match when account/rnokpp/previous all miss', () => {
+    const transaction = {
+      AUT_CNTR_ACC: 'UA000000000000000000000000001',
+      AUT_CNTR_NAM: 'ФОП Payer One',
+      AUT_CNTR_CRF: '1111111111',
+      RECIPIENT_ULTMT_NCEO: '',
+    } as ITransaction
+
+    // Company has NO rnokpp and a different account — only the name lines up.
+    expect(
+      matchCompany(transaction, [
+        { _id: 'payer-id', companyName: 'Payer One' } as IRealestate,
+      ])
+    ).toEqual({ companyId: 'payer-id', matchedBy: 'name' })
+  })
+
+  it('should prioritize previousCompanyId over name', () => {
+    const transaction = {
+      AUT_CNTR_ACC: 'UA000000000000000000000000001',
+      AUT_CNTR_NAM: 'ФОП Payer One',
+      previousCompanyId: 'prev-id',
+    } as ITransaction
+
+    expect(
+      matchCompany(transaction, [
+        { _id: 'payer-id', companyName: 'Payer One' } as IRealestate,
+      ])
+    ).toEqual({ companyId: 'prev-id', matchedBy: 'previous' })
+  })
+
   it('should return null result when nothing matches', () => {
     expect(
       matchCompany(
@@ -322,5 +573,89 @@ describe('getResolvedDescription', () => {
     const transaction = { AUT_CNTR_ACC: 'UNKNOWN', OSND: '' } as ITransaction
 
     expect(getResolvedDescription(transaction, mockCompanies)).toBe('')
+  })
+})
+
+// Regression: the same counterparty pays from several different bank accounts.
+// All account-based matching fails, but AUT_CNTR_CRF (counterparty tax code)
+// stays constant across the payments.
+describe('payer uses multiple bank accounts', () => {
+  const paymentCase1 = {
+    AUT_CNTR_CRF: '1111111111',
+    AUT_CNTR_MFO: '300001',
+    AUT_CNTR_ACC: 'UA000000000000000000000000001',
+    AUT_CNTR_NAM: 'ФОП Payer One',
+    RECIPIENT_ULTMT_NCEO: '',
+    isMatchingPayment: false,
+    previousCompanyId: null,
+  } as unknown as ITransaction
+
+  const paymentCase2 = {
+    AUT_CNTR_CRF: '1111111111',
+    AUT_CNTR_MFO: '300001',
+    AUT_CNTR_ACC: 'UA000000000000000000000000002',
+    AUT_CNTR_NAM: 'КАРТКОВИЙ - ФОП Payer One',
+    RECIPIENT_ULTMT_NCEO: '',
+    isMatchingPayment: false,
+    previousCompanyId: null,
+  } as unknown as ITransaction
+
+  // Company was seen before under a *different* account (…000003).
+  const payerCompanyWithRnokpp = {
+    _id: 'payer-id',
+    companyName: 'ФОП Payer One',
+    account: 'UA000000000000000000000000003',
+    rnokpp: '1111111111',
+  } as IRealestate
+
+  const payerCompanyNoRnokpp = {
+    _id: 'payer-id',
+    companyName: 'ФОП Payer One',
+    account: 'UA000000000000000000000000003',
+  } as IRealestate
+
+  it('account matching fails: incoming accounts differ from the stored one', () => {
+    expect(matchByAccount(paymentCase1, [payerCompanyWithRnokpp])).toBeNull()
+    expect(matchByAccount(paymentCase2, [payerCompanyWithRnokpp])).toBeNull()
+  })
+
+  it('previous matching fails: server sends previousCompanyId=null', () => {
+    expect(matchByPrevious(paymentCase1)).toBeNull()
+    expect(matchByPrevious(paymentCase2)).toBeNull()
+  })
+
+  it('without a rnokpp on the company, still matches via name fallback', () => {
+    expect(matchCompany(paymentCase1, [payerCompanyNoRnokpp])).toEqual({
+      companyId: 'payer-id',
+      matchedBy: 'name',
+    })
+    expect(matchCompany(paymentCase2, [payerCompanyNoRnokpp])).toEqual({
+      companyId: 'payer-id',
+      matchedBy: 'name',
+    })
+  })
+
+  it('no rnokpp AND a non-matching company name → nothing matches', () => {
+    const otherCompany = {
+      _id: 'other-id',
+      companyName: 'ФОП Різна Людина',
+      account: 'UA000000000000000000000000003',
+    } as IRealestate
+
+    expect(matchCompany(paymentCase1, [otherCompany])).toEqual({
+      companyId: null,
+      matchedBy: null,
+    })
+  })
+
+  it('FIX: matches both payments by AUT_CNTR_CRF regardless of account', () => {
+    expect(matchCompany(paymentCase1, [payerCompanyWithRnokpp])).toEqual({
+      companyId: 'payer-id',
+      matchedBy: 'rnokpp',
+    })
+    expect(matchCompany(paymentCase2, [payerCompanyWithRnokpp])).toEqual({
+      companyId: 'payer-id',
+      matchedBy: 'rnokpp',
+    })
   })
 })

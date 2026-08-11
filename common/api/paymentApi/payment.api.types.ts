@@ -33,6 +33,8 @@ export interface IReciever {
   companyName: string
   adminEmails: string[]
   description: string
+  contractNumber?: string
+  contractDate?: string | Date
 }
 
 export interface IPayment {
@@ -40,7 +42,8 @@ export interface IPayment {
   type: string
   invoiceCreationDate: Date
   domain: Partial<IDomain> | any
-  street: Partial<IStreet> | string
+  // optional: street-less companies omit it (sending '' fails the ObjectId cast)
+  street?: Partial<IStreet> | string
   company: Partial<IRealestate> | string
   monthService: Partial<IService> | string
   description?: string
@@ -54,6 +57,8 @@ export interface IPayment {
   template?: string
   _templateScope?: TemplateScopeTarget
   invoiceLang?: 'en' | 'uk'
+  _bulk?: boolean
+  _batchId?: string
 }
 
 export interface IExtendedPayment extends IPayment {
@@ -197,6 +202,48 @@ export interface IPaymentInvoiceSnapshot {
   generalSum: number
   description?: string
   type: string
+  currency?: string
+}
+
+export type PaymentActionType =
+  | 'CREATE'
+  | 'BULK_CREATE'
+  | 'UPDATE'
+  | 'DELETE'
+  | 'BULK_DELETE'
+  | 'MARK_PAID'
+  | 'RESTORE'
+
+export type PaymentMutationSource =
+  | 'single'
+  | 'bulk'
+  | 'quick-pay'
+  | 'admin-restore'
+
+export type IPaymentSnapshot = Omit<IPayment, '_id'> & { _id: string }
+
+export interface AuditFilters {
+  page?: number
+  limit?: number
+  actorEmail?: string
+  actionType?: PaymentActionType | PaymentActionType[]
+  source?: PaymentMutationSource | PaymentMutationSource[]
+  type?: string | string[]
+  domainId?: string
+  companyId?: string
+  from?: string
+  to?: string
+}
+
+export interface IAuditFacet {
+  _id: string
+  name: string
+}
+
+export interface IPaymentAuditFacetsResponse {
+  success: boolean
+  domains: IAuditFacet[]
+  companies: IAuditFacet[]
 }
 
 export interface IPaymentChangeLog {
@@ -206,6 +253,15 @@ export interface IPaymentChangeLog {
   reason?: string
   actorId?: string
   actorEmail?: string
+  actionType?: PaymentActionType
+  source?: PaymentMutationSource
+  before?: IPaymentSnapshot
+  after?: IPaymentSnapshot
+  domainId?: string
+  companyId?: string
+  domainName?: string
+  companyName?: string
+  batchId?: string
   invoiceData: IPaymentInvoiceSnapshot
 }
 

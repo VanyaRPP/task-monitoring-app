@@ -23,8 +23,11 @@ export type IRealestate = {
   cleaning?: number
   services: IDomainService[]
   customServices?: CustomServices[]
+  allServices?: boolean
   account?: string
   rnokpp?: string
+  contractNumber?: string
+  contractDate?: string | Date
   defaultTemplate?: string
 }
 

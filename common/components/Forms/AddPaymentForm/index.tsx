@@ -47,25 +47,43 @@ function AddPaymentForm({
 
   const showChangelog = changelogOptions.length > 0
 
+  // On a fresh invoice the user may type a brand-new provider/company name and
+  // have it created on submit (see AddPaymentModal). Disabled while editing.
+  const allowCreate = !edit && !preview
+
   return (
     <>
-      <DomainsSelect form={form} edit={edit} />
-      <AddressesSelect
-        form={form}
-        edit={edit}
-        street={company?.street?._id}
-        required={false}
-      />
-      <MonthServiceSelect form={form} edit={edit} />
-      <CompanySelect form={form} edit={edit} company={payment?.company} />
-      <PaymentTypeSelect />
-      <div className={s.invoiceRow}>
+      <div data-invoice-tour="domain">
+        <DomainsSelect form={form} edit={edit} allowCreate={allowCreate} />
+      </div>
+      <div data-invoice-tour="address-month">
+        <AddressesSelect
+          form={form}
+          edit={edit}
+          street={company?.street?._id}
+          required={false}
+        />
+        <MonthServiceSelect form={form} edit={edit} />
+      </div>
+      <div data-invoice-tour="company">
+        <CompanySelect
+          form={form}
+          edit={edit}
+          company={payment?.company}
+          allowCreate={allowCreate}
+        />
+      </div>
+      <div data-invoice-tour="operation">
+        <PaymentTypeSelect />
+      </div>
+      <div className={s.invoiceRow} data-invoice-tour="invoice-meta">
         <InvoiceNumber form={form} paymentActions={selectedActions} />
-        <Form.Item name="currency" label=" ">
+        <Form.Item name="currency" label="Валюта">
           <Select
             className={s.currencySelect}
             options={CURRENCY_SELECT_OPTIONS}
             disabled={preview}
+            popupMatchSelectWidth={false}
           />
         </Form.Item>
       </div>
@@ -96,10 +114,11 @@ function AddPaymentForm({
       ) : null}
 
       {operation === Operations.Credit ? (
-        <>
+        <div data-invoice-tour="amount">
           <Form.Item
             name="generalSum"
             label="Сума"
+            tooltip="Загальна сума оплати."
             rules={validateField('paymentPrice')}
           >
             <InputNumber
@@ -112,6 +131,7 @@ function AddPaymentForm({
           <Form.Item
             name="description"
             label="Опис"
+            tooltip="Призначення платежу."
             rules={validateField('required')}
           >
             <Input.TextArea
@@ -120,12 +140,12 @@ function AddPaymentForm({
               disabled={preview}
             />
           </Form.Item>
-        </>
+        </div>
       ) : (
-        <>
+        <div data-invoice-tour="amount">
           <PaymentPricesTable preview={preview} service={service} />
           <PaymentTotal form={form} />
-        </>
+        </div>
       )}
     </>
   )

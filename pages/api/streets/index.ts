@@ -182,6 +182,11 @@ export default async function handler(
         }
 
         const street = await Street.create(req.body)
+        if (req.body.domain) {
+          await Domain.findByIdAndUpdate(req.body.domain, {
+            $addToSet: { streets: street._id },
+          })
+        }
         return res.status(200).json({ success: true, data: street })
       } catch (error) {
         return res.status(400).json({ success: false, error: error.message })

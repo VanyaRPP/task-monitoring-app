@@ -314,6 +314,8 @@ export const getPaymentProviderAndReciever = (company) => {
     companyName: company?.companyName,
     adminEmails: company?.adminEmails,
     description: company?.description,
+    contractNumber: company?.contractNumber,
+    contractDate: company?.contractDate,
   }
 
   return { provider, reciever }
@@ -811,7 +813,7 @@ export function usePermissions(user?: IUser): IPermissions | null {
         isAdmin: false,
       })
     }
-  }, [isLoading, userData, isGlobalAdminUser, isDomainAdminUser])
+  }, [isLoading, userData, isGlobalAdminUser, isDomainAdminUser, isAdmin])
 
   return permissions
 }

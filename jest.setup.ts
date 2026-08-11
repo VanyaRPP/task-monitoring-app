@@ -9,7 +9,26 @@ process.env.MONGODB_URI =
   process.env.MONGODB_URI ?? 'mongodb://test-placeholder/jest'
 ;(global as any).TextEncoder = TextEncoder
 ;(global as any).TextDecoder = TextDecoder
+// jsdom (our testEnvironment) ships without fetch/Request, unlike the Node
+// runtime — polyfill them so code that touches the Fetch API can run in tests.
+if (typeof global.fetch === 'undefined') {
+  // Why: a jest.fn() stub can't structurally match the full `fetch` type.
+  ;(global as any).fetch = jest.fn(() =>
+    Promise.resolve({
+      ok: true,
+      status: 200,
+      json: () => Promise.resolve({}),
+      text: () => Promise.resolve(''),
+    })
+  ) as unknown as typeof fetch
+}
 
+if (typeof global.Request === 'undefined') {
+  const { Request, Response, Headers } = require('node-fetch')
+  ;(global as any).Request = Request
+  ;(global as any).Response = Response
+  ;(global as any).Headers = Headers
+}
 process.env.SUPPRESS_JEST_WARNINGS = 'true'
 
 if (typeof window !== 'undefined') {

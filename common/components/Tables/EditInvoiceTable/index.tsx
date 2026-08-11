@@ -4,14 +4,17 @@ import { IPayment } from '@common/api/paymentApi/payment.api.types'
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
 import { ServiceType } from '@utils/constants'
+import { isNewEntityValue } from '@utils/inlineCreate'
 import {
   catalogRowToSelectOption,
   flattenDomainCatalogServices,
   IInvoiceLineAddPayload,
   IInvoicePriceContext,
   invoiceLineExcludeKey,
+  isCatalogOptionExcluded,
+  typedServiceTypesOnInvoice,
 } from '@utils/domain/domain-invoice-selector'
-import { Form, FormInstance, Select, Table } from 'antd'
+import { Empty, Form, FormInstance, Select, Table } from 'antd'
 import React, { useCallback, useMemo } from 'react'
 
 import Cleaning from './Cleaning'
@@ -89,11 +92,11 @@ export const EditInvoicesTable_unstable: React.FC<EditInvoicesTableProps> = ({
           {
             title: 'Назва',
             width: 400,
-            render: (_: any, { name }: { name: number }) => (
+            render: (_: any, field: { name: number }) => (
               <Name
                 form={form}
-                name={name}
-                record={invoices[name]}
+                name={field.name}
+                record={form.getFieldValue(['invoice', field.name])}
                 editable={editable}
                 disabled={disabled}
               />
@@ -102,11 +105,11 @@ export const EditInvoicesTable_unstable: React.FC<EditInvoicesTableProps> = ({
           {
             title: 'Кількість',
             width: 250,
-            render: (_: any, { name }: { name: number }) => (
+            render: (_: any, field: { name: number }) => (
               <Amount
                 form={form}
-                name={name}
-                record={invoices[name]}
+                name={field.name}
+                record={form.getFieldValue(['invoice', field.name])}
                 editable={editable}
                 disabled={disabled}
               />
@@ -119,11 +122,11 @@ export const EditInvoicesTable_unstable: React.FC<EditInvoicesTableProps> = ({
                 : ''
             }`,
             width: 250,
-            render: (_: any, { name }: { name: number }) => (
+            render: (_: any, field: { name: number }) => (
               <Price
                 form={form}
-                name={name}
-                record={invoices[name]}
+                name={field.name}
+                record={form.getFieldValue(['invoice', field.name])}
                 editable={editable}
                 disabled={disabled}
               />
@@ -132,11 +135,11 @@ export const EditInvoicesTable_unstable: React.FC<EditInvoicesTableProps> = ({
           {
             title: 'Сума',
             width: 200,
-            render: (_: any, { name }: { name: number }) => (
+            render: (_: any, field: { name: number }) => (
               <Sum
                 form={form}
-                name={name}
-                record={invoices[name]}
+                name={field.name}
+                record={form.getFieldValue(['invoice', field.name])}
                 editable={editable}
                 disabled={disabled}
               />
@@ -144,10 +147,10 @@ export const EditInvoicesTable_unstable: React.FC<EditInvoicesTableProps> = ({
           },
           {
             width: 50,
-            render: (_: any, record: { name: number }) => (
+            render: (_: any, field: { name: number }) => (
               <MinusCircleOutlined
-                onClick={() => !disabled && remove(record.name)}
-                style={{ opacity: disabled ? 0.5 : 1 }}
+                onClick={() => !disabled && remove(field.name)}
+                style={{ opacity: disabled ? 0.5 : 1, fontSize: 16 }}
               />
             ),
             hidden: !editable,
@@ -156,11 +159,35 @@ export const EditInvoicesTable_unstable: React.FC<EditInvoicesTableProps> = ({
 
         return (
           <Table
-            rowKey="name"
+            rowKey={(field) => field.key}
             loading={loading}
             size="small"
             dataSource={fields}
             pagination={false}
+            locale={
+              editable
+                ? {
+                    emptyText: (
+                      <Empty
+                        image={Empty.PRESENTED_IMAGE_SIMPLE}
+                        description={
+                          <span
+                            style={{
+                              maxWidth: 360,
+                              display: 'inline-block',
+                            }}
+                          >
+                            Ще немає послуг. Додайте рядок нижче: оберіть з
+                            каталогу або «Власне», вкажіть назву, кількість і
+                            ціну — сума порахується автоматично (ціна ×
+                            кількість).
+                          </span>
+                        }
+                      />
+                    ),
+                  }
+                : undefined
+            }
             footer={
               editable
                 ? () => (
@@ -172,6 +199,7 @@ export const EditInvoicesTable_unstable: React.FC<EditInvoicesTableProps> = ({
                       excludeKeys={
                         invoices?.map((inv) => invoiceLineExcludeKey(inv)) ?? []
                       }
+                      excludeServiceTypes={typedServiceTypesOnInvoice(invoices)}
                       onSelect={(payload) => add(payload)}
                     />
                   )
@@ -193,29 +221,27 @@ export const InvoiceSelector: React.FC<{
   prevPayment?: IPayment
   domainId?: string
   excludeKeys?: string[]
+  excludeServiceTypes?: Set<string>
   onSelect?: (payload: IInvoiceLineAddPayload) => void
-}> = ({
-  service,
-  company,
-  prevPayment,
-  domainId,
-  excludeKeys,
-  onSelect,
-}) => {
-  const resolvedDomainId = service?.domain?._id
+}> = ({ service, company, prevPayment, domainId, excludeKeys, excludeServiceTypes, onSelect }) => {
+  const rawDomainId = service?.domain?._id
     ? String(service.domain._id)
     : domainId
       ? String(domainId)
       : undefined
 
+  const isNewDomain = isNewEntityValue(rawDomainId)
+  const catalogDomainId = isNewDomain ? undefined : rawDomainId
+  const hasDomainContext = !!rawDomainId
+
   const { data: catalogRes, isLoading } = useGetCustomServicesByDomainQuery(
-    { domainId: resolvedDomainId ? [resolvedDomainId] : undefined },
-    { skip: !resolvedDomainId }
+    { domainId: catalogDomainId ? [catalogDomainId] : undefined },
+    { skip: !catalogDomainId }
   )
 
   const options = useMemo(() => {
-    if (!resolvedDomainId) return []
-    const groups = catalogRes?.data ?? []
+    if (!hasDomainContext) return []
+    const groups = catalogDomainId ? (catalogRes?.data ?? []) : []
     const rows = flattenDomainCatalogServices(groups)
     const priceContext: IInvoicePriceContext = {
       company,
@@ -224,14 +250,26 @@ export const InvoiceSelector: React.FC<{
     }
     const catalogOptions = rows
       .map((row) => catalogRowToSelectOption(row, priceContext))
-      .filter((opt) => !excludeKeys?.includes(opt.value))
+      .filter(
+        (opt) =>
+          !isCatalogOptionExcluded(opt, excludeKeys, excludeServiceTypes)
+      )
     const customOption = {
       value: ServiceType.Custom,
       label: 'Власне',
       payload: { type: ServiceType.Custom },
     }
     return [...catalogOptions, customOption]
-  }, [catalogRes, resolvedDomainId, excludeKeys, company, service, prevPayment])
+  }, [
+    catalogRes,
+    catalogDomainId,
+    hasDomainContext,
+    excludeKeys,
+    excludeServiceTypes,
+    company,
+    service,
+    prevPayment,
+  ])
 
   const handleSelect = useCallback(
     (value: string) => {
@@ -240,10 +278,10 @@ export const InvoiceSelector: React.FC<{
         return
       }
       const opt = options.find((o) => o.value === value)
-      if (!opt || excludeKeys?.includes(opt.value)) return
+      if (!opt || isCatalogOptionExcluded(opt, excludeKeys, excludeServiceTypes)) return
       onSelect?.(opt.payload)
     },
-    [excludeKeys, onSelect, options]
+    [excludeKeys, excludeServiceTypes, onSelect, options]
   )
 
   return (
@@ -251,20 +289,20 @@ export const InvoiceSelector: React.FC<{
       style={{ width: '100%' }}
       suffixIcon={<PlusOutlined />}
       placeholder={
-        resolvedDomainId
+        hasDomainContext
           ? 'Додати поле з каталогу домену...'
           : 'Немає домену в сервісі — каталог недоступний'
       }
-      onSelect={handleSelect}
-      value={undefined}
+      onChange={handleSelect}
+      value={null}
       options={options}
-      loading={!!resolvedDomainId && isLoading}
-      disabled={!resolvedDomainId || isLoading}
+      loading={!!catalogDomainId && isLoading}
+      disabled={!hasDomainContext || (!!catalogDomainId && isLoading)}
       allowClear
       showSearch
       optionFilterProp="label"
       notFoundContent={
-        resolvedDomainId && !isLoading
+        catalogDomainId && !isLoading
           ? 'У групах домену немає послуг'
           : undefined
       }

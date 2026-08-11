@@ -1,0 +1,15 @@
+.createRow {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.nameField {
+  flex: 1;
+  min-width: 0;
+}
+
+.templateField {
+  flex: 1.6;
+  min-width: 0;
+}

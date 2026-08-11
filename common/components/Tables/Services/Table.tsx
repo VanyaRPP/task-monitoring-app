@@ -15,11 +15,12 @@ import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { dateToYear } from '@common/assets/features/formatDate'
 import { AppRoutes, Roles, ServiceName } from '@utils/constants'
 import { isAdminCheck, renderCurrency } from '@utils/helpers'
+import TableFilterLink from '@components/UI/Reusable/TableFilterLink'
 import { Alert, Button, Popconfirm, Table, Tooltip, message } from 'antd'
 import { ColumnType } from 'antd/lib/table'
 import { useRouter } from 'next/router'
 import React from 'react'
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 
 interface Props {
   setServiceActions: React.Dispatch<
@@ -39,7 +40,7 @@ interface Props {
   filter?: any
   setFilter?: (filters: any) => void
   setSelectedServices?: (service: IService[]) => void
-  customServices?: { _id: string; name: string }[]
+  customServices?: { _id: string; name: string; fieldName?: string }[]
   user: any
   domainsFilter: any
   streetsFilter: any
@@ -85,21 +86,61 @@ const ServicesTable: React.FC<Props> = ({
     [deleteService]
   )
 
+  const activeDomainIds = filter?.domain as string[] | null | undefined
+  const activeStreetIds = filter?.street as string[] | null | undefined
+  const activeYears = filter?.year as number[] | null | undefined
+  const activeMonths = filter?.month as number[] | null | undefined
+
+  const filteredData = useMemo(() => {
+    let data = services?.data ?? []
+    if (activeDomainIds?.length) {
+      data = data.filter((s) =>
+        activeDomainIds.some(
+          (id) => String((s.domain as any)?._id) === String(id)
+        )
+      )
+    }
+    if (activeStreetIds?.length) {
+      data = data.filter((s) =>
+        activeStreetIds.some(
+          (id) => String((s.street as any)?._id) === String(id)
+        )
+      )
+    }
+    if (activeYears?.length) {
+      data = data.filter((s) =>
+        activeYears.some((y) => new Date(s.date).getFullYear() === Number(y))
+      )
+    }
+    if (activeMonths?.length) {
+      data = data.filter((s) =>
+        activeMonths.some((m) => new Date(s.date).getMonth() + 1 === Number(m))
+      )
+    }
+    return data
+  }, [
+    services?.data,
+    activeDomainIds,
+    activeStreetIds,
+    activeYears,
+    activeMonths,
+  ])
+
+  const filteredCustomServices = customServices?.filter((custom) =>
+    filteredData.some((service) =>
+      service.customServices?.some((s) =>
+        custom.fieldName
+          ? s.fieldName === custom.fieldName
+          : String(s._id) === String(custom._id)
+      )
+    )
+  )
+
   if (isError) return <Alert message="Помилка" type="error" showIcon closable />
 
-  const handlePagination = (pagination) => {
-    setPageData({
-      pageSize: pagination.pageSize,
-      currentPage: pagination.current,
-    })
+  const handlePagination = (page: number, pageSize: number) => {
+    setPageData({ pageSize, currentPage: page })
   }
-
-  const filteredCustomServices = customServices?.filter(
-    (custom) =>
-      !services?.data.some((service) =>
-        service.customServices?.some((s) => String(s._id) === custom._id)
-      )
-  )
 
   return (
     <>
@@ -138,9 +179,10 @@ const ServicesTable: React.FC<Props> = ({
           isOnPage,
           setServiceActions,
           serviceActions,
-          filteredCustomServices
+          filteredCustomServices,
+          setFilter
         )}
-        dataSource={services?.data}
+        dataSource={filteredData}
         scroll={{ x: 1750 }}
         onChange={(__, filter) => {
           setFilter(filter)
@@ -156,6 +198,17 @@ const renderTooltip = (text: string) => {
       <QuestionCircleOutlined />
     </Tooltip>
   )
+}
+
+const formatStreetValue = (address?: string, city?: string): string => {
+  const trimmedAddress = address?.trim()
+  const trimmedCity = city?.trim()
+
+  if (!trimmedAddress && !trimmedCity) return '-'
+  if (!trimmedAddress) return trimmedCity ? `м. ${trimmedCity}` : '-'
+  if (!trimmedCity) return trimmedAddress
+
+  return `${trimmedAddress} (м. ${trimmedCity})`
 }
 
 const getDefaultColumns = (
@@ -179,7 +232,8 @@ const getDefaultColumns = (
     edit: boolean
     preview: boolean
   },
-  customServices?: { _id: string; name: string }[]
+  customServices?: { _id: string; name: string; fieldName?: string }[],
+  setFilter?: (filters: any) => void
 ): ColumnType<any>[] => {
   const columns: ColumnType<any>[] = [
     {
@@ -189,7 +243,19 @@ const getDefaultColumns = (
       width: 180,
       filters: isOnPage ? domainFilter : null,
       filteredValue: filter?.domain || null,
-      render: (i) => i?.name,
+      onFilter: (value, record) => String(record.domain?._id) === String(value),
+      render: (i) =>
+        isOnPage && setFilter ? (
+          <TableFilterLink
+            label={i?.name}
+            filterKey="domain"
+            filterId={i?._id}
+            filters={filter}
+            setFilters={setFilter}
+          />
+        ) : (
+          i?.name
+        ),
       filterSearch: true,
     },
     {
@@ -198,6 +264,8 @@ const getDefaultColumns = (
       width: 120,
       filters: isOnPage ? yearFilter : null,
       filteredValue: filter?.year || null,
+      onFilter: (value, record) =>
+        new Date(record.date).getFullYear() === Number(value),
       render: (_, record: IService) => dateToYear(record.date),
       filterSearch: true,
     },
@@ -207,7 +275,8 @@ const getDefaultColumns = (
       width: 250,
       filters: isOnPage ? addressFilter : null,
       filteredValue: filter?.street || null,
-      render: (i) => `${i?.address} (м. ${i?.city})`,
+      onFilter: (value, record) => String(record.street?._id) === String(value),
+      render: (i) => formatStreetValue(i?.address, i?.city),
       filterSearch: true,
     },
     {
@@ -216,6 +285,8 @@ const getDefaultColumns = (
       width: 120,
       filters: isOnPage ? monthFilter : null,
       filteredValue: filter?.month || null,
+      onFilter: (value, record) =>
+        new Date(record.date).getMonth() + 1 === Number(value),
       render: (_, record: IService) => getFormattedDate(record.date),
       filterSearch: true,
     },
@@ -309,8 +380,10 @@ const getDefaultColumns = (
         width: 120,
         ellipsis: true,
         render: (_, record: IService) => {
-          const match = record.customServices?.find(
-            (s) => String(s._id) === String(custom._id)
+          const match = record.customServices?.find((s) =>
+            custom.fieldName
+              ? s.fieldName === custom.fieldName
+              : String(s._id) === String(custom._id)
           )
           return match ? renderCurrency(match.price) : '-'
         },

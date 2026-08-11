@@ -69,6 +69,10 @@ const InvoicesHeader = () => {
       return
     }
 
+    const batchId = Array.from({ length: 24 }, () =>
+      Math.floor(Math.random() * 16).toString(16)
+    ).join('')
+
     const payments = values.payments?.map((payment, index) => {
       const matchedCompany = companies?.find(
         ({ _id }) => payment.company?._id === _id
@@ -108,6 +112,8 @@ const InvoicesHeader = () => {
         reciever,
         invoice: filteredInvoice,
         template,
+        _bulk: true,
+        _batchId: batchId,
       }
     })
 
