@@ -21,6 +21,7 @@ import {
   debtorsApi,
   useGetDebtorsQuery,
 } from '@common/api/debtorsApi/debtors.api'
+import { applyDebtDeltas } from '@common/api/debtorsApi/debtorsCache'
 
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 
@@ -192,15 +193,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
           { domainIds },
           (draft) => {
             if (!draft.companies) return
-            for (const { companyId, debtDelta } of changes) {
-              const company = draft.companies.find(
-                (c) => c.companyId === companyId
-              )
-              if (company) {
-                company.totalDebt += debtDelta
-              }
-            }
-            draft.companies = draft.companies.filter((c) => c.totalDebt > 0)
+            draft.companies = applyDebtDeltas(draft.companies, changes)
           }
         )
       )
