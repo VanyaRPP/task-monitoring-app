@@ -31,12 +31,17 @@ export function resolvePrevReading(
       !!service.serviceId && String(f?.serviceId ?? '') === service.serviceId
   )
 
+  // fieldName only speaks for legacy rows saved before `serviceId` was persisted
+  // — a row that carries its own serviceId already answered above or belongs to
+  // a different meter that happens to share this fieldName.
   const match =
     byId ??
     (service.fieldName
       ? fields.find(
           (f) =>
-            f?.type === ServiceType.Custom && f?.fieldName === service.fieldName
+            !f?.serviceId &&
+            f?.type === ServiceType.Custom &&
+            f?.fieldName === service.fieldName
         )
       : undefined)
 

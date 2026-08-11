@@ -79,7 +79,13 @@ export const resolveCommunalType = (
 // communal column (fieldName = the ServiceType value) and any per-domain custom
 // service tagged with that type (fieldName = the service's own fieldName). One
 // implementation per type — add a builder here and both paths pick it up.
-type TypedColumnArgs = { title: ReactNode; fieldName: string; losses?: number }
+type TypedColumnArgs = {
+  title: ReactNode
+  fieldName: string
+  losses?: number
+  /** Тариф послуги для підпису "Загальне" (нативна колонка бере його з місячної послуги). */
+  price?: number
+}
 type TypedColumnBuilder = (args: TypedColumnArgs) => TableColumnsType[number]
 
 const withLosses = (title: ReactNode, losses?: number): ReactNode =>
@@ -89,6 +95,7 @@ const electricityColumn: TypedColumnBuilder = ({
   title,
   fieldName,
   losses,
+  price,
 }) => ({
   title: withLosses(title, losses),
   children: [
@@ -121,7 +128,7 @@ const electricityColumn: TypedColumnBuilder = ({
       ),
     },
     {
-      title: <ElectricitySumTitle />,
+      title: <ElectricitySumTitle price={price} />,
       width: 200,
       render: (_, { name }: { name: number }) => (
         <ElectricitySum name={name} fieldName={fieldName} />
@@ -130,7 +137,7 @@ const electricityColumn: TypedColumnBuilder = ({
   ],
 })
 
-const waterColumn: TypedColumnBuilder = ({ title, fieldName }) => ({
+const waterColumn: TypedColumnBuilder = ({ title, fieldName, price }) => ({
   title,
   children: [
     {
@@ -148,7 +155,7 @@ const waterColumn: TypedColumnBuilder = ({ title, fieldName }) => ({
       ),
     },
     {
-      title: <WaterSumTitle />,
+      title: <WaterSumTitle price={price} />,
       width: 200,
       render: (_, { name }: { name: number }) => (
         <WaterSum name={name} fieldName={fieldName} />
@@ -203,7 +210,7 @@ export const withCompanyGate = (
 
 export const buildTypedCustomColumn = (
   service: AllowedService,
-  opts: { key: string; losses?: number }
+  opts: { key: string; losses?: number; price?: number }
 ): TableColumnsType[number] | null => {
   const type = resolveServiceType(service)
   const builder = type ? TYPED_COLUMN_BUILDERS[type] : undefined
@@ -214,6 +221,7 @@ export const buildTypedCustomColumn = (
     title: service.name ?? '',
     fieldName: opts.key,
     losses: opts.losses,
+    price: opts.price,
   })
 }
 

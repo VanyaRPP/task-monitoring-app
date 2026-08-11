@@ -25,6 +25,29 @@ describe('companyHasCustomService', () => {
     ).toBe(true)
   })
 
+  it('does not let another meter with the same fieldName answer for this one', () => {
+    // "електрика(0)" / "електрика(1)" transliterate to the same fieldName, so
+    // only the _id can tell them apart.
+    expect(
+      companyHasCustomService(
+        [{ _id: 'svc-2', fieldName: 'elektryka', price: 15 }],
+        target
+      )
+    ).toBe(false)
+  })
+
+  it('prefers the _id match over a legacy fieldName entry', () => {
+    expect(
+      companyHasCustomService(
+        [
+          { fieldName: 'elektryka', price: 15 },
+          { _id: 'svc-1', fieldName: 'elektryka', price: null },
+        ],
+        target
+      )
+    ).toBe(false)
+  })
+
   it('is false when the company has a different service', () => {
     expect(
       companyHasCustomService(
