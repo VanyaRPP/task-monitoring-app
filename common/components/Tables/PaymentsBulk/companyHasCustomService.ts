@@ -19,12 +19,22 @@ export function companyHasCustomService(
   target: { serviceKey: string; fieldName?: string }
 ): boolean {
   if (!Array.isArray(companyCustoms)) return false
-  return companyCustoms.some((cs: CompanyCustomService) => {
-    const matchesId =
-      !!target.serviceKey && String(cs?._id ?? '') === target.serviceKey
-    const matchesField =
-      !!target.fieldName && cs?.fieldName === target.fieldName
-    // `!= null` is intentional: 0 is a set price (render), undefined/null is not.
-    return (matchesId || matchesField) && cs?.price != null
-  })
+  const entries = companyCustoms as CompanyCustomService[]
+
+  // The _id match is authoritative and is looked up across the WHOLE list first:
+  // another meter whose name differs only in parentheses shares this fieldName,
+  // so a per-entry `id || fieldName` check would let it answer for this one.
+  const byId = target.serviceKey
+    ? entries.find((cs) => String(cs?._id ?? '') === target.serviceKey)
+    : undefined
+
+  // fieldName only speaks for legacy entries that carry no _id of their own.
+  const match =
+    byId ??
+    (target.fieldName
+      ? entries.find((cs) => !cs?._id && cs?.fieldName === target.fieldName)
+      : undefined)
+
+  // `!= null` is intentional: 0 is a set price (render), undefined/null is not.
+  return !!match && match.price != null
 }

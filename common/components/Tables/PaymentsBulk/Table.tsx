@@ -8,7 +8,9 @@ import {
   resolveServiceType,
   withCompanyGate,
 } from '@common/components/Tables/PaymentsBulk/column.config'
+import { buildTypedInvoiceEntry } from '@common/components/Tables/PaymentsBulk/buildTypedInvoiceEntry'
 import { resolvePrevReading } from '@common/components/Tables/PaymentsBulk/prevReading'
+import { resolveTypedServiceTariff } from '@common/components/Tables/PaymentsBulk/typedServiceTariff'
 import serviceFilter from '@components/AddPaymentModal/serviceFilter'
 import { AppRoutes, Operations } from '@utils/constants'
 import { getInvoices } from '@utils/getInvoices'
@@ -36,44 +38,17 @@ const InvoicesTable: React.FC = () => {
 
   const domainId = Form.useWatch('domain', form)
 
-  const {
-    data: customDomainServices,
-    isFetching: isServicesFetching,
-    isError: isServicesError,
-    error: servicesError,
-  } = useGetCustomServicesByDomainQuery({ domainId }, { skip: !domainId })
-
-  const groups = customDomainServices?.data ?? []
-
-  const allowedServices = useMemo(
-    () => groups.flatMap((group) => group.services),
-    [groups]
+  const { data: customDomainServices } = useGetCustomServicesByDomainQuery(
+    { domainId },
+    { skip: !domainId }
   )
 
-  useEffect(() => {
-    console.warn('[PaymentsBulk] diag', {
-      domainId,
-      isServicesFetching,
-      isServicesError,
-      servicesError,
-      rawResponse: customDomainServices,
-      groupsCount: groups.length,
-      allowedServices: allowedServices.map((s) => ({
-        _id: String((s as { _id?: unknown })?._id),
-        name: (s as { name?: string })?.name,
-        fieldName: (s as { fieldName?: string })?.fieldName,
-        serviceType: (s as { serviceType?: string })?.serviceType,
-      })),
-    })
-  }, [
-    domainId,
-    isServicesFetching,
-    isServicesError,
-    servicesError,
-    customDomainServices,
-    groups.length,
-    allowedServices,
-  ])
+  // Мемоїзація по відповіді, а не по `?? []`: інакше кожен рендер давав новий
+  // масив -> нове paymentsValue -> setFieldsValue затирав уже введені показники.
+  const allowedServices = useMemo(
+    () => (customDomainServices?.data ?? []).flatMap((group) => group.services),
+    [customDomainServices]
+  )
 
   const customServicesColumns = useMemo(
     () =>
@@ -94,6 +69,12 @@ const InvoicesTable: React.FC = () => {
           const typedColumn = buildTypedCustomColumn(s, {
             key,
             losses: service?.losses,
+            // Тариф із місячної послуги — для підпису колонки. Індивідуальна
+            // ціна компанії враховується вже в рядку кожної компанії.
+            price: resolveTypedServiceTariff(
+              { service },
+              { serviceId: key, fieldName: s.fieldName }
+            ),
           })
           if (typedColumn) return withCompanyGate(typedColumn, gateOpts)
 
@@ -127,7 +108,7 @@ const InvoicesTable: React.FC = () => {
           }
           return withCompanyGate(genericColumn, gateOpts)
         }),
-    [allowedServices, service?.losses]
+    [allowedServices, service]
   )
 
   const paymentsValue = useMemo(() => {
@@ -178,7 +159,9 @@ const InvoicesTable: React.FC = () => {
           serviceId: key,
         }
 
-        if (hasTypedColumn(resolveServiceType(s))) {
+        const serviceType = resolveServiceType(s)
+
+        if (hasTypedColumn(serviceType)) {
           // Reading-based type (e.g. electricity): carry over the previous
           // period's meter reading as this period's "Стара" — matched by the
           // stable serviceId (fieldName can collide), exactly like the native
@@ -188,12 +171,14 @@ const InvoicesTable: React.FC = () => {
             fieldName: fieldKey,
           })
 
-          invoice[key] = {
-            ...base,
-            lastAmount: prevReading,
-            amount: prevReading,
-            sum: (existing as any)?.sum ?? 0,
-          } as (typeof invoice)[string]
+          invoice[key] = buildTypedInvoiceEntry({
+            customService: s,
+            serviceType,
+            company,
+            service,
+            prevReading,
+            base,
+          }) as (typeof invoice)[string]
         } else {
           const amount = (existing as any)?.amount
           invoice[key] = {

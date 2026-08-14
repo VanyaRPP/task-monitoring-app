@@ -9,15 +9,18 @@ import validator from '@utils/validator'
 // native column; a per-domain custom "water" service passes its own key.
 type Keyed = { name: number; fieldName?: string }
 
-export const WaterSumTitle: React.FC = () => {
+// `price` — тариф конкретної послуги (для кастомної колонки передається з
+// column.config); без нього показує тариф води місячної послуги.
+export const WaterSumTitle: React.FC<{ price?: number }> = ({ price }) => {
   const { service } = useInvoicesPaymentContext()
+  const tariff = price ?? service?.waterPrice
 
   return (
     <Space>
       <Typography.Text>Загальне</Typography.Text>
-      {!!service?.waterPrice && (
+      {!!tariff && (
         <Typography.Text type="secondary" style={{ fontWeight: 'lighter' }}>
-          {toRoundFixed(service.waterPrice)} грн/м<sup>3</sup>
+          {toRoundFixed(tariff)} грн/м<sup>3</sup>
         </Typography.Text>
       )}
     </Space>
@@ -67,14 +70,21 @@ export const WaterSum: React.FC<Keyed> = ({
   const waterPart: number =
     Form.useWatch(['payments', name, 'company', 'waterPart'], form) ?? 0
 
+  // Тариф — із самого рядка інвойсу: нативний лічильник несе service.waterPrice,
+  // кастомний — свій тариф (ціна компанії > ціна з місячної послуги).
+  const rowPrice = Form.useWatch(
+    ['payments', name, 'invoice', fieldName, 'price'],
+    form
+  )
+  const price = Number(rowPrice ?? service?.waterPrice ?? 0) || 0
+
   const gated = fieldName === ServiceType.Water && !!waterPart
 
   useEffect(() => {
     if (gated) return
-    const price = service?.waterPrice ?? 0
     const sum = +toRoundFixed((+amount - +lastAmount) * price)
     form.setFieldValue(['payments', name, 'invoice', fieldName, 'sum'], sum)
-  }, [form, name, fieldName, amount, lastAmount, service, gated])
+  }, [form, name, fieldName, amount, lastAmount, price, gated])
 
   if (gated) return null
 

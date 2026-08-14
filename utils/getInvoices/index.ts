@@ -28,6 +28,24 @@ export interface IGetInvoiceByTypeProps {
   prevInvoicesCollection: InvoicesCollection
 }
 
+const SCOPED_KEY_PREFIX = 'sid:'
+
+/**
+ * Ключ рядка в колекції поточного платежу.
+ *
+ * Рядок із `serviceId` — це per-domain копія типізованої послуги (власний
+ * лічильник електрики/води тощо). Таких рядків на інвойсі може бути кілька
+ * одного типу, тому вони НЕ можуть жити під ключем свого ServiceType: вони б
+ * перетирали один одного і нативний рядок. Даємо їм власний простір ключів, а
+ * назад у список їх повертає getScopedTypedInvoices — без перерахунку, як є.
+ */
+const invoiceCollectionKey = (invoice: IPaymentField): string => {
+  if (invoice?.serviceId && invoice?.type !== ServiceType.Custom) {
+    return `${SCOPED_KEY_PREFIX}${invoice.serviceId}`
+  }
+  return invoice.name || invoice.type
+}
+
 /**
  * Generating initial invoices data, based on received props.
  *
@@ -71,7 +89,7 @@ export const getInvoices = ({
 
   const currInvoicesCollection =
     payment?.invoice?.reduce((acc, invoice) => {
-      acc[invoice.name || invoice.type] = invoice
+      acc[invoiceCollectionKey(invoice)] = invoice
       return acc
     }, {} as InvoicesCollection) || {}
 
@@ -103,6 +121,7 @@ export const getInvoices = ({
         prevInvoicesCollection,
       })
     ),
+    ...getScopedTypedInvoices({ currInvoicesCollection }),
     ...getCustomInvoices({
       company,
       service,
@@ -495,6 +514,24 @@ export const getDiscountInvoice = ({
     sum: +toRoundFixed(company?.discount),
   }
 }
+
+/**
+ * Рядки per-domain типізованих послуг (власний лічильник) із поточного платежу.
+ *
+ * Повертаються як є: у них уже лежить свій тариф, показники, втрати і
+ * `serviceId`, за яким рядок прив'язаний до послуги каталогу. Перерахунок за
+ * тарифом місячної послуги тут зіпсував би саме те, заради чого послуга й
+ * заведена окремо.
+ */
+export const getScopedTypedInvoices = ({
+  currInvoicesCollection,
+}: Pick<
+  IGetInvoiceByTypeProps,
+  'currInvoicesCollection'
+>): Array<IPaymentField> =>
+  Object.entries(currInvoicesCollection)
+    .filter(([key]) => key.startsWith(SCOPED_KEY_PREFIX))
+    .map(([, invoice]) => invoice)
 
 export const getCustomInvoices = ({
   company,
