@@ -14,7 +14,7 @@ import { useMemo, useState } from 'react'
 import { useDeleteServiceMutation } from '@common/api/serviceApi/service.api'
 import { message } from 'antd'
 import { dateToMonthYear } from '@assets/features/formatDate'
-import { useGetCustomServicesQuery } from '@common/api/customServicesApi/customServices.api'
+import { useAccessibleCustomServices } from '@common/api/customServicesApi/useAccessibleCustomServices'
 import {
   useGetAddressFiltersQuery,
   useGetDateFiltersQuery,
@@ -22,7 +22,6 @@ import {
 } from '@common/api/filterApi/filter.api'
 import ModalDelete from '@components/UI/ModalDelete'
 import type { ColumnsType } from 'antd/es/table'
-import { isGlobalAdmin } from '@utils/servicesVisibility'
 
 interface ServiceBlockProps {
   sepDomainID?: string
@@ -39,7 +38,10 @@ const ServicesBlock: React.FC<ServiceBlockProps> = ({ sepDomainID }) => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
 
   const [deleteService] = useDeleteServiceMutation()
-  const { data: customServicesData } = useGetCustomServicesQuery({})
+  // Backend-scoped catalog: for a DomainAdmin this is already only their
+  // domains' services (resolveAccessScope), so no client-side security filter
+  // is needed — only the presentational "selected domain" narrowing below.
+  const { services: customServices } = useAccessibleCustomServices()
   const [filter, setFilter] = useState<IServiceFilter>()
   const router = useRouter()
   const isOnPage = router.pathname === AppRoutes.SERVICE
@@ -52,33 +54,17 @@ const ServicesBlock: React.FC<ServiceBlockProps> = ({ sepDomainID }) => {
   })
 
   const domainFilteredCustomServices = useMemo(() => {
-    if (!customServicesData?.data) return []
-
     const explicitDomainIds = filter?.domain as unknown as
       | string[]
       | null
       | undefined
     if (explicitDomainIds?.length) {
-      return customServicesData.data.filter((cs) =>
+      return customServices.filter((cs) =>
         explicitDomainIds.some((id) => String(cs.domain) === String(id))
       )
     }
-
-    if (isGlobalAdmin(user?.roles)) return customServicesData.data
-
-    const ownDomainIds =
-      domainsFilter?.domainsFilter?.map((d) => String(d.value)) || []
-    if (!ownDomainIds.length) return []
-
-    return customServicesData.data.filter((cs) =>
-      ownDomainIds.includes(String(cs.domain))
-    )
-  }, [
-    customServicesData?.data,
-    filter?.domain,
-    user?.roles,
-    domainsFilter?.domainsFilter,
-  ])
+    return customServices
+  }, [customServices, filter?.domain])
   const { data: dateFilters } = useGetDateFiltersQuery({
     type: 'service',
   })

@@ -95,6 +95,12 @@ describe('buildTransactionPayload', () => {
     expect(result.AUT_CNTR_MFO).toBe('123456')
   })
 
+  it('copies AUT_CNTR_CRF so future payments can match the payer by tax code', () => {
+    const tx = makeTransaction({ AUT_CNTR_CRF: '2534567890' })
+    const result = buildTransactionPayload(tx, [])
+    expect(result.AUT_CNTR_CRF).toBe('2534567890')
+  })
+
   it('copies OSND from transaction', () => {
     const tx = makeTransaction({ OSND: 'Invoice payment' })
     const result = buildTransactionPayload(tx, [])

@@ -72,11 +72,10 @@ const ChartComponent: React.FC<ChartComponentProps> = ({
             />
           )}
           {onSizeChange && (
-            <SizeSelector
-              value={size}
-              onChange={onSizeChange}
-              style={{ fontWeight: 'normal' }}
-            />
+            <Space>
+              <span style={{ fontWeight: 'normal' }}>Кількість платежів:</span>
+              <SizeSelector value={size} onChange={onSizeChange} />
+            </Space>
           )}
         </Space>
       }

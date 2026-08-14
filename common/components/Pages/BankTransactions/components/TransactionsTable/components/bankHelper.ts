@@ -55,7 +55,7 @@ const NAME_NOISE_TOKENS = new Set(['ФОП', 'КАРТКОВИЙ', 'ТОВ', 'П
 /**
  * Normalizes a counterparty / company name for equality comparison: upper case,
  * punctuation removed, legal-form words dropped, whitespace collapsed.
- * "КАРТКОВИЙ - ФОП Шмакова Крістіна Василівна" → "ШМАКОВА КРІСТІНА ВАСИЛІВНА".
+ * "КАРТКОВИЙ - ФОП Петренко Петро Петрович" → "ПЕТРЕНКО ПЕТРО ПЕТРОВИЧ".
  */
 export const normalizeCounterpartyName = (
   name: string | undefined | null
@@ -68,6 +68,22 @@ export const normalizeCounterpartyName = (
     .filter((token) => token && !NAME_NOISE_TOKENS.has(token))
     .join(' ')
     .trim()
+}
+
+/**
+ * Builds a case-insensitive regex source that matches a counterparty name as
+ * stored on past payments, regardless of ФОП/КАРТКОВИЙ prefixes or spacing:
+ * "КАРТКОВИЙ - ФОП Петренко Петро Петрович" → "ПЕТРЕНКО\s+ПЕТРО\s+ПЕТРОВИЧ".
+ * Returns null when there are fewer than two identifying tokens (too weak).
+ */
+export const buildCounterpartyNameRegexSource = (
+  name: string | undefined | null
+): string | null => {
+  const tokens = normalizeCounterpartyName(name).split(' ').filter(Boolean)
+  if (tokens.length < 2) return null
+  return tokens
+    .map((token) => token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+    .join('\\s+')
 }
 
 /**

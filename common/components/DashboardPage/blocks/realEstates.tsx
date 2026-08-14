@@ -8,7 +8,7 @@ import { AppRoutes } from '@utils/constants'
 import { isAdminCheck } from '@utils/helpers'
 import { useRouter } from 'next/router'
 import { createContext, useContext, useMemo, useState } from 'react'
-import { useGetCustomServicesQuery } from '@common/api/customServicesApi/customServices.api'
+import { useAccessibleCustomServices } from '@common/api/customServicesApi/useAccessibleCustomServices'
 
 export const CompanyPageContext = createContext<{
   domainId?: string
@@ -36,16 +36,17 @@ const RealEstateBlock: React.FC<Props> = ({
   const [isArchive, setIsArchive] = useState(false)
   const [realEstateActions, setRealEstateActions] = useState({ edit: false })
 
-  const { data: customServicesData } = useGetCustomServicesQuery({})
+  // Already scoped to the caller's domains by the backend; the memo only applies
+  // the presentational "selected domain" narrowing.
+  const { services: customServices } = useAccessibleCustomServices()
 
   const domainFilteredCustomServices = useMemo(() => {
-    if (!customServicesData?.data) return []
     const domainIds = filters?.domain as string[] | null | undefined
-    if (!domainIds?.length) return customServicesData.data
-    return customServicesData.data.filter((cs) =>
+    if (!domainIds?.length) return customServices
+    return customServices.filter((cs) =>
       domainIds.some((id) => String(cs.domain) === String(id))
     )
-  }, [customServicesData?.data, filters?.domain])
+  }, [customServices, filters?.domain])
 
   const {
     data: realEstates,

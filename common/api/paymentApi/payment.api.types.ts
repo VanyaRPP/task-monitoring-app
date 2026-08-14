@@ -33,6 +33,8 @@ export interface IReciever {
   companyName: string
   adminEmails: string[]
   description: string
+  contractNumber?: string
+  contractDate?: string | Date
 }
 
 export interface IPayment {
@@ -188,6 +190,7 @@ export interface IPaymentTransactions {
   AUT_CNTR_ACC: string
   AUT_CNTR_NAM: string
   AUT_CNTR_MFO: string
+  AUT_CNTR_CRF?: string
   Description: string
 }
 

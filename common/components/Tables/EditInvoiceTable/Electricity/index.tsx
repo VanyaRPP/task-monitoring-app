@@ -22,6 +22,7 @@ export const Name: React.FC<InvoiceComponentProps> = ({
   name: _name,
   editable,
   disabled,
+  record,
 }) => {
   const { service } = usePaymentContext()
   const name = useMemo(() => toArray<string>(_name), [_name])
@@ -31,6 +32,7 @@ export const Name: React.FC<InvoiceComponentProps> = ({
     <InvoiceRowName
       form={form}
       name={name}
+      record={record}
       serviceType={ServiceType.Electricity}
       editable={editable}
       disabled={disabled}
