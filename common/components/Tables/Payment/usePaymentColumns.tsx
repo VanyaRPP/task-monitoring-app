@@ -85,7 +85,11 @@ function widenFilterDropdown(w = 240) {
 
 const CustomName = 'custom-name:'
 
-// Custom services are identified by their invoice `name` — the same key the
+const hasOwnColumn = (
+  field: Pick<IExtendedPayment['invoice'][number], 'type' | 'serviceId'>
+): boolean => field.type === ServiceType.Custom || !!field.serviceId
+
+// Such services are identified by their invoice `name` — the same key the
 // payments filter (ColumnSelect) uses — so the table columns and the filter
 // options are always derived from the same source and stay in sync. Only names
 // with a non-zero sum are surfaced (a 0-sum line renders no column). The
@@ -103,11 +107,11 @@ export function getInvoiceCustomServiceNames({
 
   payments.data.forEach((payment) => {
     payment.invoice?.forEach((field) => {
-      if (field.type !== ServiceType.Custom) return
+      if (!hasOwnColumn(field)) return
       const sum = Number(field.sum ?? field.price ?? 0)
 
       if (sum === 0) return
-      const label = field.name?.trim()
+      const label = (field.name || field.customName)?.trim()
       if (!label || seenNames.has(label)) return
       seenNames.add(label)
       order.push(label)
@@ -133,7 +137,7 @@ export function buildAutoCustomColumns({
 
   return visible.map((label) => {
     const matches = (field: IExtendedPayment['invoice'][number]) =>
-      field.type === ServiceType.Custom && field.name === label
+      hasOwnColumn(field) && (field.name || field.customName) === label
     const sumFor = (payment: IExtendedPayment) =>
       payment.invoice?.reduce(
         (acc, field) =>
@@ -486,7 +490,7 @@ export function usePaymentColumns({
         .filter((value) => value !== ServiceType.Custom && value in ServiceName)
         .map((value) => {
           const findItem = (payment: IExtendedPayment) =>
-            payment.invoice.find((i) => i.type === value)
+            payment.invoice.find((i) => i.type === value && !i.serviceId)
           return {
             title: ServiceName[value],
             dataIndex: value,
