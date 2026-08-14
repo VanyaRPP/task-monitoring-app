@@ -7,6 +7,7 @@ import {
   getResolvedDescription,
   isSelfTransaction,
   normalizeCounterpartyName,
+  buildCounterpartyNameRegexSource,
 } from './bankHelper'
 import { ITransaction } from './transactionTypes'
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
@@ -342,10 +343,10 @@ describe('isSelfTransaction', () => {
 describe('normalizeCounterpartyName', () => {
   it('strips ФОП and КАРТКОВИЙ, punctuation and case', () => {
     expect(
-      normalizeCounterpartyName('КАРТКОВИЙ - ФОП Шмакова Крістіна Василівна')
-    ).toBe('ШМАКОВА КРІСТІНА ВАСИЛІВНА')
-    expect(normalizeCounterpartyName('ФОП Шмакова Крістіна Василівна')).toBe(
-      'ШМАКОВА КРІСТІНА ВАСИЛІВНА'
+      normalizeCounterpartyName('КАРТКОВИЙ - ФОП Петренко Петро Петрович')
+    ).toBe('ПЕТРЕНКО ПЕТРО ПЕТРОВИЧ')
+    expect(normalizeCounterpartyName('ФОП Петренко Петро Петрович')).toBe(
+      'ПЕТРЕНКО ПЕТРО ПЕТРОВИЧ'
     )
   })
 
@@ -356,16 +357,41 @@ describe('normalizeCounterpartyName', () => {
   })
 })
 
+describe('buildCounterpartyNameRegexSource', () => {
+  it('builds a spacing-tolerant regex from the identifying tokens', () => {
+    const src = buildCounterpartyNameRegexSource(
+      'КАРТКОВИЙ - ФОП Петренко Петро Петрович'
+    )
+    expect(src).toBe('ПЕТРЕНКО\\s+ПЕТРО\\s+ПЕТРОВИЧ')
+  })
+
+  it('matches all name variants of the same payer (case-insensitive)', () => {
+    const src = buildCounterpartyNameRegexSource(
+      'КАРТКОВИЙ - ФОП Петренко Петро Петрович'
+    )
+    const re = new RegExp(src as string, 'i')
+    expect(re.test('Петренко Петро Петрович')).toBe(true)
+    expect(re.test('ФОП Петренко Петро Петрович')).toBe(true)
+    expect(re.test('Іваненко Іван Іванович')).toBe(false)
+  })
+
+  it('returns null when there are fewer than two tokens', () => {
+    expect(buildCounterpartyNameRegexSource('ФОП Петренко')).toBeNull()
+    expect(buildCounterpartyNameRegexSource('')).toBeNull()
+    expect(buildCounterpartyNameRegexSource(undefined)).toBeNull()
+  })
+})
+
 describe('matchByName', () => {
   const payer = {
     _id: 'payer-id',
-    companyName: 'Шмакова Крістіна Василівна',
+    companyName: 'Петренко Петро Петрович',
   } as IRealestate
 
   it('matches by full normalized name across ФОП/КАРТКОВИЙ prefixes', () => {
     expect(
       matchByName(
-        { AUT_CNTR_NAM: 'ФОП Шмакова Крістіна Василівна' } as ITransaction,
+        { AUT_CNTR_NAM: 'ФОП Петренко Петро Петрович' } as ITransaction,
         [payer]
       )
     ).toEqual({ companyId: 'payer-id', matchedBy: 'name' })
@@ -373,7 +399,7 @@ describe('matchByName', () => {
     expect(
       matchByName(
         {
-          AUT_CNTR_NAM: 'КАРТКОВИЙ - ФОП Шмакова Крістіна Василівна',
+          AUT_CNTR_NAM: 'КАРТКОВИЙ - ФОП Петренко Петро Петрович',
         } as ITransaction,
         [payer]
       )
@@ -391,8 +417,8 @@ describe('matchByName', () => {
 
   it('does not match on a single token (needs surname + name)', () => {
     expect(
-      matchByName({ AUT_CNTR_NAM: 'ФОП Шмакова' } as ITransaction, [
-        { _id: 'x', companyName: 'ФОП Шмакова' } as IRealestate,
+      matchByName({ AUT_CNTR_NAM: 'ФОП Петренко' } as ITransaction, [
+        { _id: 'x', companyName: 'ФОП Петренко' } as IRealestate,
       ])
     ).toBeNull()
   })

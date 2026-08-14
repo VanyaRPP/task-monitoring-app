@@ -190,6 +190,7 @@ export interface IPaymentTransactions {
   AUT_CNTR_ACC: string
   AUT_CNTR_NAM: string
   AUT_CNTR_MFO: string
+  AUT_CNTR_CRF?: string
   Description: string
 }
 
