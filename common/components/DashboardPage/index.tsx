@@ -45,6 +45,7 @@ import {
 import {
   SortableContext,
   verticalListSortingStrategy,
+  horizontalListSortingStrategy,
   useSortable,
   arrayMove,
 } from '@dnd-kit/sortable'
@@ -105,9 +106,10 @@ const SortableWidget: React.FC<SortableWidgetProps> = ({
   } = useSortable({ id, disabled: !isEditMode })
 
   const style: React.CSSProperties = {
-    transform: CSS.Transform.toString(transform),
-    transition,
+    transform: CSS.Translate.toString(transform),
+    transition: isDragging ? 'none' : transition,
     opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 999 : 'auto',
     marginBottom: MARGIN_Y,
     cursor: isEditMode ? (isDragging ? 'grabbing' : 'grab') : 'default',
     userSelect: 'none',
@@ -115,6 +117,7 @@ const SortableWidget: React.FC<SortableWidgetProps> = ({
     maxWidth: '100%',
     boxSizing: 'border-box',
     overflow: 'hidden',
+    willChange: 'transform',
   }
   return (
     <div
@@ -125,6 +128,52 @@ const SortableWidget: React.FC<SortableWidgetProps> = ({
       {...(isEditMode ? { ...attributes, ...listeners } : {})}
     >
       {children}
+    </div>
+  )
+}
+
+interface SortableToolbarButtonProps {
+  id: string
+  onClick: () => void
+  children: React.ReactNode
+}
+
+const SortableToolbarButton: React.FC<SortableToolbarButtonProps> = ({
+  id,
+  onClick,
+  children,
+}) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id })
+
+  const style: React.CSSProperties = {
+    transform: transform
+      ? CSS.Translate.toString({ ...transform, y: 0 })
+      : undefined,
+    transition: isDragging ? 'none' : transition,
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 999 : 'auto',
+    cursor: isDragging ? 'grabbing' : 'grab',
+    touchAction: 'none',
+    display: 'flex',
+    willChange: 'transform',
+  }
+
+  return (
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+      <Button
+        type="link"
+        onClick={onClick}
+        style={{ pointerEvents: isDragging ? 'none' : 'auto' }}
+      >
+        {children}
+      </Button>
     </div>
   )
 }
@@ -142,18 +191,6 @@ const Dashboard: React.FC = () => {
 
   const [theme] = useTheme()
   const isDark = theme === 'dark'
-
-  const [hiddenWidget, setHiddenWidget] = useState<WidgetKey[]>([])
-  const menu = (
-    <div style={{ padding: 8 }}>
-      <WidgetVisibilityMenu
-        hidden={hiddenWidget}
-        onChange={setHiddenWidget}
-        available={[...ALL_WIDGETS]}
-        labels={widgetLabels}
-      />
-    </div>
-  )
 
   useEffect(() => {
     if (isPanelVisible && !isEditMode) {
@@ -191,6 +228,7 @@ const Dashboard: React.FC = () => {
       : ALL_WIDGETS.filter((w) => w !== 'profits')
   }, [isGlobalAdmin])
 
+  const [hiddenWidget, setHiddenWidget] = useState<WidgetKey[]>([])
   const [orderedWidgets, setOrderedWidgets] =
     useState<WidgetKey[]>(visibleWidgets)
   const [isLayoutReady, setIsLayoutReady] = useState(false)
@@ -222,6 +260,17 @@ const Dashboard: React.FC = () => {
     [orderedWidgets, hiddenWidget]
   )
 
+  const menu = (
+    <div style={{ padding: 8 }}>
+      <WidgetVisibilityMenu
+        hidden={hiddenWidget}
+        onChange={setHiddenWidget}
+        available={orderedWidgets}
+        labels={widgetLabels}
+      />
+    </div>
+  )
+
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 5 },
@@ -235,6 +284,9 @@ const Dashboard: React.FC = () => {
     document.body.style.cursor = 'grabbing'
   }, [])
 
+  const getWidgetKey = (id: string | number): WidgetKey =>
+    String(id).replace('toolbar-', '') as WidgetKey
+
   const handleDragEnd = useCallback((event: DragEndEvent) => {
     setIsDraggingActive(false)
     document.body.style.cursor = ''
@@ -242,9 +294,12 @@ const Dashboard: React.FC = () => {
     const { active, over } = event
     if (!over || active.id === over.id) return
 
+    const activeKey = getWidgetKey(active.id)
+    const overKey = getWidgetKey(over.id)
+
     setOrderedWidgets((prev) => {
-      const oldIndex = prev.indexOf(active.id as WidgetKey)
-      const newIndex = prev.indexOf(over.id as WidgetKey)
+      const oldIndex = prev.indexOf(activeKey)
+      const newIndex = prev.indexOf(overKey)
       return arrayMove(prev, oldIndex, newIndex)
     })
   }, [])
@@ -269,25 +324,36 @@ const Dashboard: React.FC = () => {
     <div className={s.wrapper}>
       {isPanelVisible && (
         <div className={`${s.toolbar} ${isDark ? s.dark : s.light}`}>
-          <div className={s.buttonsBlock}>
-            {orderedWidgets.map((key) => (
-              <Button
-                key={key}
-                type="link"
-                onClick={() => {
-                  const element = document.getElementById(key)
-                  if (element) {
-                    element.scrollIntoView({
-                      behavior: 'smooth',
-                      block: 'center',
-                    })
-                  }
-                }}
-              >
-                {widgetLabels[key]}
-              </Button>
-            ))}
-          </div>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={renderedWidgets.map((k) => `toolbar-${k}`)}
+              strategy={horizontalListSortingStrategy}
+            >
+              <div className={s.buttonsBlock}>
+                {renderedWidgets.map((key) => (
+                  <SortableToolbarButton
+                    key={`toolbar-${key}`}
+                    id={`toolbar-${key}`}
+                    onClick={() => {
+                      const element = document.getElementById(key)
+                      if (element) {
+                        element.scrollIntoView({
+                          behavior: 'smooth',
+                          block: 'center',
+                        })
+                      }
+                    }}
+                  >
+                    {widgetLabels[key]}
+                  </SortableToolbarButton>
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
           <div className={s.actions}>
             <div
               className={s.divider}
