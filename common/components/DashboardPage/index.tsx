@@ -17,6 +17,7 @@ import { Col, Row, Space, Button, Flex, message, Tooltip, Dropdown } from 'antd'
 import {
   CloseOutlined,
   SaveOutlined,
+  UndoOutlined,
   EyeOutlined,
   QuestionCircleOutlined,
 } from '@ant-design/icons'
@@ -55,33 +56,33 @@ const MARGIN_Y = 12
 const ALL_WIDGETS = [
   'payments',
   'paymentsChart',
-  'services',
+  'profits',
   'streets',
   'domain',
   'realEstate',
-  'profits',
+  'services',
   'companies',
 ] as const
 export type WidgetKey = (typeof ALL_WIDGETS)[number]
 const widgetLabels: Record<WidgetKey, string> = {
   payments: 'Платежі',
   paymentsChart: 'Графік платежів',
-  services: 'Послуги',
+  profits: 'Прибутки',
   streets: 'Адреси',
   domain: 'Надавачі послуг',
   realEstate: 'Компанії',
-  profits: 'Прибутки',
+  services: 'Послуги',
   companies: 'Займані площі',
 }
 
 const widgetMap: Record<WidgetKey, React.ReactNode> = {
   payments: <PaymentsBlock />,
   paymentsChart: <PaymentsChart />,
-  services: <ServicesBlock />,
+  profits: <ProfitPage />,
   streets: <StreetsBlock />,
   domain: <DomainsBlock />,
   realEstate: <RealEstateBlock />,
-  profits: <ProfitPage />,
+  services: <ServicesBlock />,
   companies: <CompaniesAreaChart />,
 }
 
@@ -309,16 +310,27 @@ const Dashboard: React.FC = () => {
     document.body.style.cursor = ''
   }, [])
 
-  const handleSave = useCallback(() => {
-    const userId = userResponse?._id?.toString()
-    if (!userId) return
-    localStorage.setItem(
-      getLayoutStorageKey(userId),
-      JSON.stringify({ layout: orderedWidgets, hidden: hiddenWidget })
-    )
-    message.success('Збережено!')
-    togglePanelVisible()
-  }, [userResponse?._id, orderedWidgets, hiddenWidget, togglePanelVisible])
+  const handleLayoutAction = useCallback(
+    (mode: 'save' | 'revert') => {
+      const userId = userResponse?._id?.toString()
+      if (!userId) return
+
+      if (mode === 'save') {
+        localStorage.setItem(
+          getLayoutStorageKey(userId),
+          JSON.stringify({ layout: orderedWidgets, hidden: hiddenWidget })
+        )
+        message.success('Збережено!')
+      } else {
+        localStorage.removeItem(getLayoutStorageKey(userId))
+        setOrderedWidgets(visibleWidgets)
+        setHiddenWidget([])
+        message.success('Відновлено!')
+      }
+      togglePanelVisible()
+    },
+    [userResponse?._id, orderedWidgets, hiddenWidget, togglePanelVisible]
+  )
 
   return (
     <div className={s.wrapper}>
@@ -365,8 +377,17 @@ const Dashboard: React.FC = () => {
               </Tooltip>
             </Dropdown>
 
+            <Tooltip title="Відновати">
+              <Button
+                icon={<UndoOutlined />}
+                onClick={() => handleLayoutAction('revert')}
+              />
+            </Tooltip>
             <Tooltip title="Зберегти">
-              <Button icon={<SaveOutlined />} onClick={handleSave} />
+              <Button
+                icon={<SaveOutlined />}
+                onClick={() => handleLayoutAction('save')}
+              />
             </Tooltip>
             <Tooltip title="Вийти з режиму редагування">
               <Button icon={<CloseOutlined />} onClick={togglePanelVisible} />
