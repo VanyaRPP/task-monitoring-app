@@ -61,7 +61,7 @@ const ALL_WIDGETS = [
   'domain',
   'realEstate',
   'services',
-  'companies',
+  // 'companies',
 ] as const
 export type WidgetKey = (typeof ALL_WIDGETS)[number]
 const widgetLabels: Record<WidgetKey, string> = {
@@ -72,7 +72,7 @@ const widgetLabels: Record<WidgetKey, string> = {
   domain: 'Надавачі послуг',
   realEstate: 'Компанії',
   services: 'Послуги',
-  companies: 'Займані площі',
+  // companies: 'Займані площі',
 }
 
 const widgetMap: Record<WidgetKey, React.ReactNode> = {
@@ -83,7 +83,7 @@ const widgetMap: Record<WidgetKey, React.ReactNode> = {
   domain: <DomainsBlock />,
   realEstate: <RealEstateBlock />,
   services: <ServicesBlock />,
-  companies: <CompaniesAreaChart />,
+  // companies: <CompaniesAreaChart />,
 }
 
 interface SortableWidgetProps {
