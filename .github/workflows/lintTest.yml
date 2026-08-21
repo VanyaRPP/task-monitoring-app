@@ -18,6 +18,17 @@ jobs:
       - run: yarn install --frozen-lockfile
       - run: yarn lint:check
       - run: yarn types:check
+
+      # `next build` is the only check that exercises next.config.js, the PWA
+      # plugin and the webpack graph — lint, types and tests all pass without
+      # it. Page-data collection imports common/lib/mongodb.ts, which throws at
+      # import time when MONGODB_URI is unset; nothing actually connects during
+      # a build, so a placeholder value is enough.
+      - name: Build
+        run: yarn build
+        env:
+          MONGODB_URI: mongodb://127.0.0.1:27017/ci-build
+
       - run: yarn test:coverage
 
       - name: Security audit
