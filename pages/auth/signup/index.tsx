@@ -4,7 +4,7 @@ import { AppRoutes, errors } from '@utils/constants'
 import { Alert } from 'antd'
 import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
-import { BuiltInProviderType } from 'next-auth/providers'
+import { BuiltInProviderType } from 'next-auth/providers/index'
 import {
   ClientSafeProvider,
   getCsrfToken,
