@@ -14,15 +14,19 @@ import {
   Typography,
 } from 'antd'
 import type { TabsProps } from 'antd'
-import { FC, useEffect, useState } from 'react'
+import { FC, useEffect, useMemo, useState } from 'react'
 import AddressesSelect from '../../../Reusable/AddressesSelect'
 import DomainsSelect from '../../../Reusable/DomainsSelect'
 import s from './style.module.scss'
-import { useGetDomainByPkQuery } from '@common/api/domainApi/domain.api'
+import {
+  useGetDomainByPkQuery,
+  useGetDomainTypeTemplatesQuery,
+} from '@common/api/domainApi/domain.api'
 import { IDomain } from '@modules/models/Domain'
 import { inputNumberParser } from '@utils/helpers'
 import { CURRENCY_SELECT_OPTIONS, Currency } from '@utils/constants'
 import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
+import { shouldShowStandardServices } from '@utils/servicesVisibility'
 import CustomServicesCard from '../../../CustomServicesCard'
 
 interface Props {
@@ -54,6 +58,16 @@ const RealEstateForm: FC<Props> = ({
     domainId: domain?._id || currentRealEstate?.domain?._id,
   })
   const services = servicesData?.data
+
+  const { data: domainTypeTemplates = [] } = useGetDomainTypeTemplatesQuery()
+
+  const showStandardServices = useMemo(
+    () =>
+      domain?._id
+        ? shouldShowStandardServices([domain], domainTypeTemplates)
+        : false,
+    [domain, domainTypeTemplates]
+  )
 
   useEffect(() => {
     if (services) {
@@ -199,6 +213,16 @@ const RealEstateForm: FC<Props> = ({
             />
           </Form.Item>
         </>
+      )}
+
+      {showStandardServices && (
+        <Form.Item
+          valuePropName="checked"
+          name="garbageCollector"
+          label="Вивіз сміття"
+        >
+          <Checkbox disabled={!editable} />
+        </Form.Item>
       )}
 
       {isServiceExist('inflicionPrice') && (
