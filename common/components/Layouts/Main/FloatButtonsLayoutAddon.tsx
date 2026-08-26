@@ -91,7 +91,7 @@ export const FloatButtonsLayoutAddon: React.FC<FloatButtonPlacementProps> = ({
         >
           {allButtons.map((btn) => (
             <FloatButton
-              key={btn.key}
+              key={`${btn.key}-${btn.tooltip ?? ''}`}
               icon={btn.icon}
               onClick={btn.onClick}
               tooltip={{
