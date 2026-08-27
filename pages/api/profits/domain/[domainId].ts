@@ -13,7 +13,8 @@ export default async function handler(
 
   try {
     if (req.method === 'GET') {
-      const { page = '1', limit = '10' } = req.query
+      // limit counts MONTHS, not individual records
+      const { page = '1', limit = '12' } = req.query
       const data = await ProfitService.getByDomainWithMonthSeparation(
         domainId as string,
         +page,
