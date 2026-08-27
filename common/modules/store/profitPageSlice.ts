@@ -13,7 +13,8 @@ const initialState: ProfitState = {
   activeTabKey: 'tab1',
   transactionTablePagination: {
     currentPage: 1,
-    pageSize: 30,
+    // months per page, not records
+    pageSize: 12,
   },
 }
 
