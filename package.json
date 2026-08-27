@@ -74,7 +74,7 @@
     "mockingoose": "^2.16.2",
     "mongodb": "^4.16.0",
     "mongoose": "^7.8.11",
-    "next": "^15.5.22",
+    "next": "^16.3.2",
     "next-auth": "^4.24.15",
     "next-i18next": "^15.4.2",
     "nextjs-progressbar": "^0.0.14",
