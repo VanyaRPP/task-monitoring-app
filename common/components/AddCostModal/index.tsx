@@ -10,7 +10,8 @@ import { Form, Tabs, message } from 'antd'
 import type { TabsProps } from 'antd'
 import { FC, useState, useEffect } from 'react'
 import s from './style.module.scss'
-import dayjs from 'dayjs'
+import dayjs, { Dayjs } from 'dayjs'
+import { Currency } from '@utils/constants'
 
 interface Props {
   closeModal: VoidFunction
@@ -25,9 +26,11 @@ interface Props {
 type FormData = {
   domain: string
   date: Date
+  periodMonth?: Dayjs
   sum: number
   description: string
   type: string
+  currency?: string
   categories: string[]
 }
 
@@ -60,6 +63,12 @@ const AddCostModal: FC<Props> = ({
       description: formData.description || '',
       type: type,
       categories: formData.categories || [],
+      // Default to the month of the payment date, which is right for most
+      // costs; the picker is there for the ones it is not.
+      periodMonth: dayjs(formData.periodMonth ?? formData.date).format(
+        'YYYY-MM'
+      ),
+      currency: formData.currency || Currency.UAH,
     }
 
     let response
@@ -118,6 +127,10 @@ const AddCostModal: FC<Props> = ({
       form.setFieldsValue({
         domain: currentProfit.domain,
         date: dayjs(currentProfit.date),
+        periodMonth: currentProfit.periodMonth
+          ? dayjs(currentProfit.periodMonth)
+          : dayjs(currentProfit.date),
+        currency: currentProfit.currency || Currency.UAH,
         sum: currentProfit.amount,
         description: currentProfit.description,
         categories: currentProfit.categories || [],
@@ -127,6 +140,7 @@ const AddCostModal: FC<Props> = ({
       form.setFieldsValue({
         domain: activeDomain,
         date: dayjs(),
+        currency: Currency.UAH,
       })
     }
   }, [currentProfit, form, activeDomain])

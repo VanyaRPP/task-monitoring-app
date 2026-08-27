@@ -1,5 +1,5 @@
 import { useFeatureFlag } from '@modules/hooks/useFeatureFlag'
-import { BuiltInProviderType } from 'next-auth/providers'
+import { BuiltInProviderType } from 'next-auth/providers/index'
 import { ClientSafeProvider, LiteralUnion } from 'next-auth/react'
 import { FC } from 'react'
 import SignInForm from '@components/Forms/AddSingInForm'

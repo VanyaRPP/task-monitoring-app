@@ -106,6 +106,7 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
           placeholder="Значення..."
           disabled={disabled}
           suffix="кВт"
+          style={{ width: 140 }}
         />
       </Form.Item>
       <Form.Item
@@ -118,6 +119,7 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
           placeholder="Значення..."
           disabled={disabled}
           suffix="кВт"
+          style={{ width: 140 }}
         />
       </Form.Item>
     </Space>

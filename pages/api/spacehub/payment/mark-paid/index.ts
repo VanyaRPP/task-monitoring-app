@@ -1,7 +1,6 @@
 import Payment from '@common/modules/models/Payment'
 import Domain from '@modules/models/Domain'
 import start, { Data } from '@pages/api/api.config'
-import ProfitService from '@common/services/profitService/profit.service'
 import { getNextInvoiceNumber } from '@common/services/paymentService/payment.service'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import { Operations } from '@utils/constants'
@@ -84,7 +83,12 @@ export default async function handler(
 
       const creditData: Record<string, any> = {
         type: Operations.Credit,
+        // Keep the +1ms shift so the credit stays next to its invoice in the
+        // payments list, which sorts by invoiceCreationDate.
         invoiceCreationDate: dateShiftMs(source.invoiceCreationDate, 1),
+        // When the money actually arrived. Defaults to now; once the confirm
+        // dialog offers a date picker this reads it from the request body.
+        paidAt: new Date(),
         invoiceNumber: await getNextInvoiceNumber(),
         invoice: [],
       }
@@ -108,16 +112,6 @@ export default async function handler(
         before: source,
         after: created,
       })
-
-      if (isGlobalAdmin) {
-        await ProfitService.updatePayment(created._id.toString(), {
-          type: Operations.Credit,
-          date: created.invoiceCreationDate,
-          amount: created.generalSum,
-          description: created.description,
-          invoiceNumber: String(created.invoiceNumber),
-        })
-      }
 
       createdIds.push(created._id.toString())
     }

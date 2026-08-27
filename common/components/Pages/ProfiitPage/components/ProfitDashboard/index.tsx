@@ -8,13 +8,22 @@ import {
   Select,
   Space,
   Statistic,
+  Tooltip,
   Typography,
   theme,
 } from 'antd'
-import { ArrowDownOutlined, ArrowUpOutlined } from '@ant-design/icons'
 import { Column, Pie } from '@ant-design/plots'
 import { useTranslation } from 'next-i18next'
-import dayjs from 'dayjs'
+import dayjs, { Dayjs } from 'dayjs'
+import type { ProfitMonthRow } from '@common/api/profitsApi/profits.type'
+import useTheme from '@modules/hooks/useTheme'
+import { Currency, CURRENCY_SELECT_OPTIONS } from '@utils/constants'
+import {
+  getCurrencySymbol,
+  getCurrencyShortLabel,
+  normalizeCurrency,
+} from '@utils/helpers'
+import { money } from '../ProfitTable/tableConfig'
 import 'dayjs/locale/uk'
 
 dayjs.locale('uk')
@@ -23,7 +32,93 @@ const { Text } = Typography
 const { useToken } = theme
 
 interface ProfitDashboardProps {
-  dataSource: any[]
+  dataSource: ProfitMonthRow[]
+}
+
+type PeriodTotals = ReturnType<typeof sumPeriod>
+
+/**
+ * Axis labels get one line and a lot of ticks, so full precision would not
+ * fit: 150000 reads as "₴ 150 тис".
+ */
+const compactMoney = (value: number, currency: string) => {
+  const symbol = getCurrencySymbol(currency)
+  const abs = Math.abs(value)
+  if (abs >= 1_000_000) return `${symbol} ${(value / 1_000_000).toFixed(1)} млн`
+  if (abs >= 1_000) return `${symbol} ${Math.round(value / 1_000)} тис`
+  return `${symbol} ${value}`
+}
+
+const periodKeyOf = (d: Dayjs, periodType: string) => {
+  if (periodType === 'Month') return d.format('YYYY-MM')
+  if (periodType === 'Quarter')
+    return `${d.year()}-Q${Math.ceil((d.month() + 1) / 3)}`
+  return `${d.year()}`
+}
+
+// Scoped to one currency: adding UAH to USD would produce a number that means
+// nothing. The picker above the cards chooses which one is on screen.
+const sumPeriod = (rows: ProfitMonthRow[], currency: string) => {
+  let expected = 0
+  let actual = 0
+  let expenses = 0
+
+  rows.forEach((item) => {
+    const totals = item.byCurrency?.[currency]
+    if (!totals) return
+    expected += totals.expected || 0
+    actual += totals.actual || 0
+    expenses += totals.expenses || 0
+  })
+
+  return {
+    expected,
+    actual,
+    expenses,
+    net: actual - expenses,
+    // How much of what we invoiced actually came in.
+    collectionRate: expected ? (actual / expected) * 100 : 0,
+    outstanding: expected - actual,
+  }
+}
+
+/**
+ * Percentage change against the same figure one period back. `higherIsBetter`
+ * flips the colour for expenses, where growth is not good news.
+ */
+const PeriodDelta: React.FC<{
+  current: number
+  previous?: number
+  higherIsBetter?: boolean
+}> = ({ current, previous, higherIsBetter = true }) => {
+  const { t } = useTranslation()
+  if (previous == null) return null
+
+  // Going from nothing to something has no meaningful percentage.
+  if (!previous) {
+    return current ? (
+      <Text type="secondary" style={{ fontSize: 12 }}>
+        {t('profitPage:dashboard.noPrevious')}
+      </Text>
+    ) : null
+  }
+
+  const change = ((current - previous) / Math.abs(previous)) * 100
+  if (Math.abs(change) < 0.1) {
+    return (
+      <Text type="secondary" style={{ fontSize: 12 }}>
+        {t('profitPage:dashboard.unchanged')}
+      </Text>
+    )
+  }
+
+  const isGood = change > 0 === higherIsBetter
+  return (
+    <Text type={isGood ? 'success' : 'danger'} style={{ fontSize: 12 }}>
+      {change > 0 ? '▲' : '▼'} {Math.abs(change).toFixed(1)}%{' '}
+      {t('profitPage:dashboard.vsPrevious')}
+    </Text>
+  )
 }
 
 const ProfitDashboard: React.FC<ProfitDashboardProps> = ({ dataSource }) => {
@@ -33,10 +128,10 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({ dataSource }) => {
 
   const { token } = useToken()
 
-  const isDarkMode =
-    token.colorBgBase === '#000' ||
-    token.colorBgLayout === '#141414' ||
-    String(token.colorText).includes('255')
+  // The app already tracks the active theme; guessing it by string-matching
+  // token colours broke as soon as a token value changed.
+  const [appTheme] = useTheme()
+  const isDarkMode = appTheme === 'dark'
 
   const periodOptions = useMemo(() => {
     const options = new Set<string>()
@@ -93,34 +188,60 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({ dataSource }) => {
     })
   }, [dataSource, periodType, selectedPeriod])
 
-  const aggregatedData = useMemo(() => {
-    let actualProfit = 0
-    let actualExpense = 0
-
-    filteredData.forEach((item) => {
-      actualProfit += item.credit || 0
-      actualExpense += item.debit || 0
+  // Currencies present anywhere on the page, busiest first.
+  const availableCurrencies = useMemo(() => {
+    const volume: Record<string, number> = {}
+    dataSource.forEach((row) => {
+      row.currencies?.forEach((c) => {
+        const t = row.byCurrency[c]
+        volume[c] =
+          (volume[c] ?? 0) +
+          Math.abs(t.expected) +
+          Math.abs(t.actual) +
+          Math.abs(t.expenses)
+      })
     })
+    return Object.keys(volume).sort((a, b) => volume[b] - volume[a])
+  }, [dataSource])
 
-    const plannedProfit = actualProfit > 0 ? actualProfit * 1.05 : 39064.52
-    const plannedExpense = actualExpense > 0 ? actualExpense * 1.1 : 91149.45
+  const [currency, setCurrency] = useState<string>(Currency.UAH)
 
-    const profitDiff = plannedProfit
-      ? ((actualProfit - plannedProfit) / plannedProfit) * 100
-      : 0
-    const expenseDiff = plannedExpense
-      ? ((actualExpense - plannedExpense) / plannedExpense) * 100
-      : 0
-
-    return {
-      actualProfit,
-      actualExpense,
-      plannedProfit,
-      plannedExpense,
-      profitDiff,
-      expenseDiff,
+  useEffect(() => {
+    if (availableCurrencies.length && !availableCurrencies.includes(currency)) {
+      setCurrency(availableCurrencies[0])
     }
-  }, [filteredData])
+  }, [availableCurrencies, currency])
+
+  const aggregatedData = useMemo(
+    () => sumPeriod(filteredData, currency),
+    [filteredData, currency]
+  )
+
+  // Same period, one step back. Without it every figure on this page is a
+  // number with nothing to compare against - the old cards faked that with an
+  // invented "forecast"; this is the honest version.
+  const previousData = useMemo(() => {
+    if (!filteredData.length) return null
+
+    const ref = dayjs(filteredData[0].month)
+    const prevRef =
+      periodType === 'Month'
+        ? ref.subtract(1, 'month')
+        : periodType === 'Quarter'
+          ? ref.subtract(3, 'month')
+          : ref.subtract(1, 'year')
+
+    const prevKey = periodKeyOf(prevRef, periodType)
+    const rows = dataSource.filter(
+      (item) =>
+        dayjs(item.month).isValid() &&
+        periodKeyOf(dayjs(item.month), periodType) === prevKey
+    )
+
+    // The previous period may simply be off the current page. Showing nothing
+    // beats showing a delta against a period we only partly loaded.
+    return rows.length ? sumPeriod(rows, currency) : null
+  }, [dataSource, filteredData, periodType, currency])
 
   const columnData = useMemo(() => {
     const data: any[] = []
@@ -131,52 +252,50 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({ dataSource }) => {
     chartData.forEach((item) => {
       const d = dayjs(item.month)
       const monthName = d.isValid() ? d.format('MMM') : item.month
-      const actProfit = item.credit || 0
-      const actExpense = item.debit || 0
+      const totals = item.byCurrency?.[currency]
 
       data.push({
         period: monthName,
-        type: t('profitPage:dashboard.plannedProfit'),
-        value: actProfit * 1.05,
+        type: t('profitPage:dashboard.expected'),
+        value: totals?.expected || 0,
       })
       data.push({
         period: monthName,
-        type: t('profitPage:dashboard.actualProfit'),
-        value: actProfit,
+        type: t('profitPage:dashboard.actual'),
+        value: totals?.actual || 0,
       })
       data.push({
         period: monthName,
-        type: t('profitPage:dashboard.plannedExpense'),
-        value: actExpense * 0.95,
-      })
-      data.push({
-        period: monthName,
-        type: t('profitPage:dashboard.actualExpense'),
-        value: actExpense,
+        type: t('profitPage:dashboard.expenses'),
+        value: totals?.expenses || 0,
       })
     })
     return data
-  }, [filteredData, t])
+  }, [filteredData, t, currency])
 
+  // Expense breakdown, driven by the `categories` field the add-cost form
+  // already writes - no guessing the category from the description text.
   const pieData = useMemo(() => {
     const categoriesMap: Record<string, number> = {}
 
     filteredData.forEach((month) => {
-      month.transactions?.forEach((tr: any) => {
-        if (tr.type === 'credit') {
-          let cat = tr.categories?.[0]
-
-          if (!cat) {
-            const desc = (tr.description || '').toLowerCase()
-            if (desc.includes('коворкінг')) cat = 'Коворкінг'
-            else if (desc.includes('оренд')) cat = 'Оренда'
-            else if (desc.includes('іт') || desc.includes('it'))
-              cat = 'ІТ-послуги'
-            else cat = 'Інше'
-          }
-
-          categoriesMap[cat] = (categoriesMap[cat] || 0) + tr.amount
+      month.transactions?.forEach((tr) => {
+        if (tr.type !== 'debit') return
+        // Each expense carries its own currency; without this filter 100 USD
+        // and 100 UAH would both add 100 to the same slice, and the pie would
+        // silently disagree with the (currency-scoped) expenses card.
+        if (normalizeCurrency(tr.currency) !== normalizeCurrency(currency)) {
+          return
         }
+        const cats = tr.categories?.length
+          ? tr.categories
+          : [t('profitPage:dashboard.uncategorized')]
+        // Split evenly when a record carries several categories, so the pie
+        // still sums to the month's expenses.
+        const share = tr.amount / cats.length
+        cats.forEach((cat) => {
+          categoriesMap[cat] = (categoriesMap[cat] || 0) + share
+        })
       })
     })
 
@@ -184,15 +303,21 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({ dataSource }) => {
       type,
       value,
     }))
-  }, [filteredData])
+  }, [filteredData, t, currency])
 
   const columnConfig = {
     data: columnData,
     xField: 'period',
     yField: 'value',
     colorField: 'type',
-    isGroup: true,
-    color: ['#1890ff', '#13c2c2', '#fa8c16', '#b37feb'],
+    // G2 v5 groups bars via the dodgeX transform; the v1 `isGroup` flag is
+    // ignored, which would stack these three unrelated series into one bar.
+    transform: [{ type: 'dodgeX' }],
+    scale: {
+      color: {
+        range: [token.colorInfo, token.colorSuccess, token.colorWarning],
+      },
+    },
     theme: isDarkMode ? 'dark' : 'light',
     axis: {
       x: {
@@ -202,13 +327,22 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({ dataSource }) => {
       y: {
         labelFill: token.colorTextSecondary,
         gridStroke: token.colorSplit,
+        // Bare numbers stopped being self-explanatory the moment a domain
+        // could bill in more than one currency.
+        labelFormatter: (value: number) => compactMoney(value, currency),
       },
     },
+    tooltip: {
+      items: [
+        {
+          channel: 'y',
+          valueFormatter: (value: number) =>
+            `${getCurrencySymbol(currency)} ${money(value)}`,
+        },
+      ],
+    },
     legend: {
-      color: {
-        position: 'bottom',
-        itemLabelFill: token.colorText,
-      },
+      color: { position: 'bottom', itemLabelFill: token.colorText },
     },
   }
 
@@ -220,20 +354,26 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({ dataSource }) => {
     innerRadius: 0.6,
     theme: isDarkMode ? 'dark' : 'light',
     label: {
-      text: 'value',
-      style: {
-        fill: '#fff',
-        textAlign: 'center',
-        fontWeight: 'bold',
-      },
+      text: 'type',
+      position: 'outside',
+      style: { fill: token.colorText, textAlign: 'center' },
+    },
+    tooltip: {
+      items: [
+        {
+          channel: 'y',
+          valueFormatter: (value: number) =>
+            `${getCurrencySymbol(currency)} ${money(value)}`,
+        },
+      ],
     },
     legend: {
-      color: {
-        position: 'left',
-        itemLabelFill: token.colorText,
-      },
+      color: { position: 'left', itemLabelFill: token.colorText },
     },
   }
+
+  const currencySuffix =
+    availableCurrencies.length > 1 ? `, ${getCurrencyShortLabel(currency)}` : ''
 
   return (
     <div
@@ -244,118 +384,116 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({ dataSource }) => {
         gap: '16px',
       }}
     >
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}
-      >
-        <Space>
+      <Space>
+        <Select
+          value={periodType}
+          onChange={setPeriodType}
+          options={[
+            { value: 'Month', label: t('profitPage:dashboard.periodMonth') },
+            {
+              value: 'Quarter',
+              label: t('profitPage:dashboard.periodQuarter'),
+            },
+            { value: 'Year', label: t('profitPage:dashboard.periodYear') },
+          ]}
+          style={{ width: 120 }}
+        />
+        <Select
+          value={selectedPeriod}
+          onChange={setSelectedPeriod}
+          options={periodOptions}
+          style={{ width: 150 }}
+          disabled={periodOptions.length === 0}
+        />
+        {/* Pointless when the domain only ever bills in one currency. */}
+        {availableCurrencies.length > 1 && (
           <Select
-            value={periodType}
-            onChange={setPeriodType}
-            options={[
-              { value: 'Month', label: t('profitPage:dashboard.periodMonth') },
-              {
-                value: 'Quarter',
-                label: t('profitPage:dashboard.periodQuarter'),
-              },
-              { value: 'Year', label: t('profitPage:dashboard.periodYear') },
-            ]}
-            style={{ width: 120 }}
+            value={currency}
+            onChange={setCurrency}
+            options={CURRENCY_SELECT_OPTIONS.filter((o) =>
+              availableCurrencies.includes(o.value)
+            )}
+            style={{ width: 130 }}
           />
-          <Select
-            value={selectedPeriod}
-            onChange={setSelectedPeriod}
-            options={periodOptions}
-            style={{ width: 150 }}
-            disabled={periodOptions.length === 0}
-          />
-        </Space>
-      </div>
+        )}
+      </Space>
 
       <Row gutter={[16, 16]}>
         <Col span={6}>
           <Card size="small">
-            <Text type="secondary">
-              {t('profitPage:dashboard.plannedProfit')}
-            </Text>
+            <Text type="secondary">{t('profitPage:dashboard.expected')}</Text>
             <Statistic
-              value={aggregatedData.plannedProfit}
+              value={aggregatedData.expected}
               precision={2}
-              suffix="грн"
+              suffix={getCurrencyShortLabel(currency)}
             />
-            <Text type="secondary" style={{ fontSize: '12px' }}>
-              {t('profitPage:dashboard.details')} ↗
-            </Text>
+            <PeriodDelta
+              current={aggregatedData.expected}
+              previous={previousData?.expected}
+            />
           </Card>
         </Col>
         <Col span={6}>
           <Card size="small">
-            <Text type="secondary">
-              {t('profitPage:dashboard.actualProfit')}
-            </Text>
+            <Text type="secondary">{t('profitPage:dashboard.actual')}</Text>
             <Statistic
-              value={aggregatedData.actualProfit}
+              value={aggregatedData.actual}
               precision={2}
-              suffix="грн"
+              suffix={getCurrencyShortLabel(currency)}
               valueStyle={{
-                color: aggregatedData.profitDiff >= 0 ? '#3f8600' : '#cf1322',
+                color:
+                  aggregatedData.outstanding <= 0
+                    ? token.colorSuccess
+                    : token.colorError,
               }}
-              prefix={
-                aggregatedData.profitDiff >= 0 ? (
-                  <ArrowUpOutlined />
-                ) : (
-                  <ArrowDownOutlined />
-                )
-              }
             />
-            <Text type="secondary" style={{ fontSize: '12px' }}>
-              {aggregatedData.profitDiff.toFixed(1)}%{' '}
-              {t('profitPage:dashboard.vsForecast')}
-            </Text>
+            <Space direction="vertical" size={0}>
+              <Tooltip title={t('profitPage:dashboard.collectedHint')}>
+                <Text type="secondary" style={{ fontSize: 12 }}>
+                  {aggregatedData.collectionRate.toFixed(1)}%{' '}
+                  {t('profitPage:dashboard.collected')}
+                </Text>
+              </Tooltip>
+              <PeriodDelta
+                current={aggregatedData.actual}
+                previous={previousData?.actual}
+              />
+            </Space>
           </Card>
         </Col>
         <Col span={6}>
           <Card size="small">
-            <Text type="secondary">
-              {t('profitPage:dashboard.plannedExpense')}
-            </Text>
+            <Text type="secondary">{t('profitPage:dashboard.expenses')}</Text>
             <Statistic
-              value={aggregatedData.plannedExpense}
+              value={aggregatedData.expenses}
               precision={2}
-              suffix="грн"
+              suffix={getCurrencyShortLabel(currency)}
             />
-            <Text type="secondary" style={{ fontSize: '12px' }}>
-              {t('profitPage:dashboard.details')} ↗
-            </Text>
+            <PeriodDelta
+              current={aggregatedData.expenses}
+              previous={previousData?.expenses}
+              higherIsBetter={false}
+            />
           </Card>
         </Col>
         <Col span={6}>
           <Card size="small">
-            <Text type="secondary">
-              {t('profitPage:dashboard.actualExpense')}
-            </Text>
+            <Text type="secondary">{t('profitPage:dashboard.net')}</Text>
             <Statistic
-              value={aggregatedData.actualExpense}
+              value={aggregatedData.net}
               precision={2}
-              suffix="грн"
+              suffix={getCurrencyShortLabel(currency)}
               valueStyle={{
-                color: aggregatedData.expenseDiff <= 0 ? '#3f8600' : '#cf1322',
+                color:
+                  aggregatedData.net >= 0
+                    ? token.colorSuccess
+                    : token.colorError,
               }}
-              prefix={
-                aggregatedData.expenseDiff <= 0 ? (
-                  <ArrowDownOutlined />
-                ) : (
-                  <ArrowUpOutlined />
-                )
-              }
             />
-            <Text type="secondary" style={{ fontSize: '12px' }}>
-              {Math.abs(aggregatedData.expenseDiff).toFixed(1)}%{' '}
-              {t('profitPage:dashboard.vsForecast')}
-            </Text>
+            <PeriodDelta
+              current={aggregatedData.net}
+              previous={previousData?.net}
+            />
           </Card>
         </Col>
       </Row>
@@ -363,7 +501,7 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({ dataSource }) => {
       <Row gutter={[16, 16]}>
         <Col span={14}>
           <Card
-            title={t('profitPage:dashboard.trendTitle')}
+            title={`${t('profitPage:dashboard.trendTitle')}${currencySuffix}`}
             size="small"
             style={{ height: '100%' }}
           >
@@ -371,14 +509,16 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({ dataSource }) => {
               {columnData.length > 0 ? (
                 <Column {...columnConfig} />
               ) : (
-                <Text type="secondary">Недостатньо даних</Text>
+                <Text type="secondary">
+                  {t('profitPage:dashboard.notEnoughData')}
+                </Text>
               )}
             </div>
           </Card>
         </Col>
         <Col span={10}>
           <Card
-            title={t('profitPage:dashboard.structureTitle')}
+            title={`${t('profitPage:dashboard.structureTitle')}${currencySuffix}`}
             size="small"
             style={{ height: '100%' }}
           >
@@ -386,7 +526,9 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({ dataSource }) => {
               {pieData.length > 0 ? (
                 <Pie {...pieConfig} />
               ) : (
-                <Text type="secondary">Недостатньо даних</Text>
+                <Text type="secondary">
+                  {t('profitPage:dashboard.notEnoughData')}
+                </Text>
               )}
             </div>
           </Card>
