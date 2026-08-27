@@ -100,19 +100,32 @@ export default async function handler(
             }
 
             const rawNewDomain = req.body.domain
-            const newDomainId =
-              typeof rawNewDomain === 'string'
-                ? rawNewDomain
-                : rawNewDomain?._id?.toString?.()
-            if (!newDomainId || !adminDomainIds.includes(newDomainId)) {
-              return res
-                .status(400)
-                .json({ success: false, message: 'not allowed' })
+            const isRelocation =
+              rawNewDomain !== undefined && rawNewDomain !== null
+
+            if (isRelocation) {
+              const newDomainId =
+                typeof rawNewDomain === 'string'
+                  ? rawNewDomain
+                  : rawNewDomain?._id?.toString?.()
+              if (!newDomainId || !adminDomainIds.includes(newDomainId)) {
+                return res
+                  .status(400)
+                  .json({ success: false, message: 'not allowed' })
+              }
+
+              const response = await RealEstate.findOneAndUpdate(
+                { _id: req.query.id },
+                { ...req.body, domain: newDomainId },
+                { new: true }
+              )
+              return res.status(200).json({ success: true, data: response })
             }
 
+            const { domain, ...bodyWithoutDomain } = req.body
             const response = await RealEstate.findOneAndUpdate(
               { _id: req.query.id },
-              { ...req.body, domain: newDomainId },
+              bodyWithoutDomain,
               { new: true }
             )
             return res.status(200).json({ success: true, data: response })
