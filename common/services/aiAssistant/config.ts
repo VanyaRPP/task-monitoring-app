@@ -61,13 +61,29 @@ const PROVIDERS: Record<ProviderId, ProviderConfig> = {
   },
 }
 
-/** Active provider id, from `AI_PROVIDER` env (defaults to google). */
+const PROVIDER_IDS = Object.keys(PROVIDERS) as ProviderId[]
+
+function hasApiKey(config: ProviderConfig): boolean {
+  return !!process.env[config.apiKeyEnv]?.trim()
+}
+
+/**
+ * Active provider id.
+ *
+ * An explicit `AI_PROVIDER` always wins, even when its key is missing, so a
+ * deliberate choice fails loudly instead of quietly running on the other
+ * provider. With `AI_PROVIDER` unset we pick the first provider that actually
+ * has its API key configured: hardcoding `google` here meant an environment
+ * that had only configured Groq still reported `Google Gemini is selected`,
+ * naming a provider nobody had chosen. Falling back to the first id keeps the
+ * error message deterministic when nothing at all is configured.
+ */
 export function getActiveProviderId(): ProviderId {
   const raw = process.env.AI_PROVIDER?.trim().toLowerCase()
   if (raw && raw in PROVIDERS) {
     return raw as ProviderId
   }
-  return 'google'
+  return PROVIDER_IDS.find((id) => hasApiKey(PROVIDERS[id])) ?? PROVIDER_IDS[0]
 }
 
 export function getActiveProvider(): ProviderConfig & { id: ProviderId } {
@@ -88,8 +104,12 @@ export function getModel(): LanguageModel {
   const provider = getActiveProvider()
   const apiKey = process.env[provider.apiKeyEnv]?.trim()
   if (!apiKey) {
+    const known = PROVIDER_IDS.map(
+      (id) => `${id} -> ${PROVIDERS[id].apiKeyEnv}`
+    ).join(', ')
     throw new Error(
-      `AI provider "${provider.label}" is selected but ${provider.apiKeyEnv} is missing or empty.`
+      `AI provider "${provider.label}" is selected but ${provider.apiKeyEnv} is missing or empty. ` +
+        `Set ${provider.apiKeyEnv}, or set AI_PROVIDER to a provider whose key is configured (${known}).`
     )
   }
   return provider.create(apiKey, provider.model)
