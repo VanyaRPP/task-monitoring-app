@@ -84,10 +84,9 @@ const RealEstateModal: FC<Props> = ({
     if (initializedForRef.current === targetId) return
 
     form.setFieldsValue({
-      domain:
-        chosenRealEstate?.domain ||
-        getEntityId(currentRealEstate?.domain) ||
-        currentDomainId,
+      domain: currentRealEstate
+        ? getEntityId(currentRealEstate?.domain)
+        : chosenRealEstate?.domain || currentDomainId,
       street: getEntityId(currentRealEstate?.street),
       companyName: currentRealEstate?.companyName || '',
       description: currentRealEstate?.description || '',
