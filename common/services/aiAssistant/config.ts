@@ -11,6 +11,15 @@ import type { LanguageModel } from 'ai'
  * `AI_PROVIDER` env var (defaults to `google`), so switching — e.g. to dodge
  * Gemini free-tier limits — is a one-line `.env` change plus a restart, no code
  * edit. Add a new provider by adding one entry here.
+ *
+ * Each provider's model id can also be overridden via its `modelEnv` var
+ * (`GOOGLE_MODEL` / `GROQ_MODEL`). Providers retire model ids without notice —
+ * Groq dropped the whole Llama 3.x family, which is why the default here had to
+ * change — and the failure is a hard 404 that takes the assistant down. There is
+ * deliberately no automatic fallback to an "older version": ids are not a
+ * version ladder (there was no llama-3.1 to fall back to either), and silently
+ * downgrading would hide a degraded model for months. The override exists so a
+ * retirement can be fixed by editing an env var instead of shipping a deploy.
  */
 
 export type ProviderId = 'google' | 'groq'
@@ -20,6 +29,8 @@ interface ProviderConfig {
   label: string
   /** Env var that holds this provider's API key. */
   apiKeyEnv: string
+  /** Env var that overrides `model`, so a retired id is a config change. */
+  modelEnv: string
   /** Default model id for this provider (good tool-calling for invoice flow). */
   model: string
   /** Builds a LanguageModel for `streamText`, given the resolved API key. */
@@ -32,14 +43,20 @@ const PROVIDERS: Record<ProviderId, ProviderConfig> = {
   google: {
     label: 'Google Gemini',
     apiKeyEnv: 'GOOGLE_GENERATIVE_AI_API_KEY',
+    modelEnv: 'GOOGLE_MODEL',
     model: 'gemini-flash-latest',
     create: (apiKey, model) => createGoogleGenerativeAI({ apiKey })(model),
   },
-  // Groq — generous free tier and strong tool-calling on Llama 3.3 70B.
+  // Groq — generous free tier and strong tool-calling. gpt-oss-120b is the
+  // largest general model Groq still serves; the previous default
+  // (llama-3.3-70b-versatile) was retired along with the rest of Llama 3.x.
+  // Avoid the `groq/compound*` ids here: they run their own built-in tools,
+  // which collide with the assistant's own tool set.
   groq: {
     label: 'Groq',
     apiKeyEnv: 'GROQ_API_KEY',
-    model: 'llama-3.3-70b-versatile',
+    modelEnv: 'GROQ_MODEL',
+    model: 'openai/gpt-oss-120b',
     create: (apiKey, model) => createGroq({ apiKey })(model),
   },
 }
@@ -55,7 +72,12 @@ export function getActiveProviderId(): ProviderId {
 
 export function getActiveProvider(): ProviderConfig & { id: ProviderId } {
   const id = getActiveProviderId()
-  return { id, ...PROVIDERS[id] }
+  const config = PROVIDERS[id]
+  return {
+    id,
+    ...config,
+    model: process.env[config.modelEnv]?.trim() || config.model,
+  }
 }
 
 /**
