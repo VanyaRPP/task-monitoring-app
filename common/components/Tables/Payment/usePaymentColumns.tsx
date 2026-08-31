@@ -89,12 +89,6 @@ const hasOwnColumn = (
   field: Pick<IExtendedPayment['invoice'][number], 'type' | 'serviceId'>
 ): boolean => field.type === ServiceType.Custom || !!field.serviceId
 
-// Such services are identified by their invoice `name` — the same key the
-// payments filter (ColumnSelect) uses — so the table columns and the filter
-// options are always derived from the same source and stay in sync. Only names
-// with a non-zero sum are surfaced (a 0-sum line renders no column). The
-// payments are already domain-narrowed server-side, so this list is implicitly
-// scoped to the selected domain(s).
 export function getInvoiceCustomServiceNames({
   payments,
 }: {
@@ -158,6 +152,44 @@ export function buildAutoCustomColumns({
         sumFor(a) - sumFor(b),
     }
   })
+}
+
+export function buildDateFilters(dateFilters?: IPaymentFilterResponse) {
+  if (!dateFilters) return []
+
+  const monthItems = (dateFilters.monthFilter ?? [])
+    .filter((f) => f.value != null)
+    .map((f) => ({
+      num: Number(f.value),
+      label: toFirstUpperCase(
+        dateToMonth(new Date(2000, Number(f.value) - 1))
+      ),
+    }))
+
+  const MIN_YEAR = 2025
+  const currentYear = new Date().getFullYear()
+  const backendYears: number[] = (dateFilters.yearFilter ?? [])
+    .filter((y) => y?.value != null)
+    .map((y) => Number(y.value))
+
+  const years = Array.from(
+    new Set([
+      ...backendYears,
+      ...Array.from(
+        { length: currentYear - MIN_YEAR + 1 },
+        (_, i) => currentYear - i
+      ),
+    ])
+  ).sort((a, b) => b - a)
+
+  return years.map((y) => ({
+    text: String(y),
+    value: String(y),
+    children: monthItems.map((m) => ({
+      text: m.label,
+      value: `${y}-month-${m.num}`,
+    })),
+  }))
 }
 
 export function usePaymentColumns({
@@ -296,44 +328,7 @@ export function usePaymentColumns({
         dataIndex: 'invoiceCreationDate',
         render: (date: string) => dateToDefaultFormat(date),
         width: sepDomainID ? 70 : 170,
-        filters:
-          !sepDomainID && dateFilters
-            ? (() => {
-                const monthItems = (dateFilters.monthFilter ?? [])
-                  .filter((f) => f.value != null)
-                  .map((f) => ({
-                    num: Number(f.value),
-                    label: toFirstUpperCase(
-                      dateToMonth(new Date(2000, Number(f.value) - 1))
-                    ),
-                  }))
-
-                const MIN_YEAR = 2025
-                const currentYear = new Date().getFullYear()
-                const backendYears: number[] = (dateFilters.yearFilter ?? [])
-                  .filter((y) => y?.value != null)
-                  .map((y) => Number(y.value))
-
-                const years = Array.from(
-                  new Set([
-                    ...backendYears,
-                    ...Array.from(
-                      { length: currentYear - MIN_YEAR + 1 },
-                      (_, i) => currentYear - i
-                    ),
-                  ])
-                ).sort((a, b) => b - a)
-
-                return years.map((y) => ({
-                  text: String(y),
-                  value: String(y),
-                  children: monthItems.map((m) => ({
-                    text: m.label,
-                    value: `${y}-month-${m.num}`,
-                  })),
-                }))
-              })()
-            : [],
+        filters: !sepDomainID ? buildDateFilters(dateFilters) : [],
         filteredValue: filters?.invoiceCreationDate || null,
         filterDropdown: (ddProps) => (
           <DateFilterDropdown
@@ -394,6 +389,14 @@ export function usePaymentColumns({
         dataIndex: 'monthService',
         align: 'center',
         width: sepDomainID ? 75 : 164,
+        filters: !sepDomainID ? buildDateFilters(dateFilters) : [],
+        filteredValue: filters?.monthService || null,
+        filterDropdown: (ddProps) => (
+          <DateFilterDropdown
+            data={(ddProps.filters as any) ?? []}
+            {...ddProps}
+          />
+        ),
         render: (
           monthService: Partial<IExtendedPayment> | string | null,
           payment: IExtendedPayment
