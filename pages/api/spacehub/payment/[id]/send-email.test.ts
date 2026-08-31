@@ -38,11 +38,12 @@ const globalAdmin = {
 const performRequest = async (
   method: string,
   query: any,
-  payment?: unknown
+  payment?: unknown,
+  body: any = {}
 ) => {
   if (payment !== undefined) mockFindById(payment)
 
-  const req = { method, query } as any
+  const req = { method, query, body } as any
   const res = {
     status: jest.fn(() => res),
     json: jest.fn(() => res),
@@ -93,8 +94,43 @@ describe('POST /spacehub/payment/[id]/send-email', () => {
         reciever: expect.objectContaining({
           adminEmails: ['client@real.com'],
         }),
-      })
+      }),
+      { html: undefined }
     )
+  })
+
+  it('forwards the client-rendered html so the PDF gets attached', async () => {
+    const res = await performRequest(
+      'POST',
+      { id: 'p1' },
+      {
+        invoiceNumber: 5,
+        reciever: { companyName: 'Acme', adminEmails: ['client@real.com'] },
+        domain: { name: 'D', adminEmails: [] },
+      },
+      { html: '<html>invoice</html>' }
+    )
+
+    expect(res.status).toHaveBeenCalledWith(200)
+    expect(sendInvoiceEmailMock).toHaveBeenCalledWith(expect.any(Object), {
+      html: '<html>invoice</html>',
+    })
+  })
+
+  it('returns 400 when html is not a string', async () => {
+    const res = await performRequest(
+      'POST',
+      { id: 'p1' },
+      {
+        invoiceNumber: 5,
+        reciever: { companyName: 'Acme', adminEmails: ['client@real.com'] },
+        domain: { name: 'D', adminEmails: [] },
+      },
+      { html: 42 }
+    )
+
+    expect(res.status).toHaveBeenCalledWith(400)
+    expect(sendInvoiceEmailMock).not.toHaveBeenCalled()
   })
 
   it('falls back to domain admins when the receiver has no recipients', async () => {
@@ -114,7 +150,8 @@ describe('POST /spacehub/payment/[id]/send-email', () => {
         reciever: expect.objectContaining({
           adminEmails: ['domain@real.com'],
         }),
-      })
+      }),
+      { html: undefined }
     )
   })
 

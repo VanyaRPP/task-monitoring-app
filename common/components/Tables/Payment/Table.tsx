@@ -45,7 +45,10 @@ interface ActionProps {
   onDelete: (id: string) => void
   onMarkPaid: (p: IExtendedPayment) => void
   onDuplicate: (p: IExtendedPayment) => void
-  onSendPaymentEmail: (paymentId: string) => Promise<{ success: boolean }>
+  onSendPaymentEmail: (
+    paymentId: string,
+    html?: string
+  ) => Promise<{ success: boolean }>
   onUpdatePaymentStatus: (args: {
     _id: string
     status: 'draft' | 'sent'

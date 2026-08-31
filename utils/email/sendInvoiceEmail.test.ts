@@ -1,11 +1,19 @@
 const sendMailMock = jest.fn()
-const createTransportMock = jest.fn(() => ({ sendMail: sendMailMock }))
+const createTransportMock = jest.fn((..._args: unknown[]) => ({
+  sendMail: sendMailMock,
+}))
+const generatePdfFromHtmlMock = jest.fn()
 
 jest.mock('nodemailer', () => ({
   __esModule: true,
   default: {
     createTransport: (...args: unknown[]) => createTransportMock(...args),
   },
+}))
+
+jest.mock('@utils/pdf/bufferGenerators', () => ({
+  __esModule: true,
+  generatePdfFromHtml: (...args: unknown[]) => generatePdfFromHtmlMock(...args),
 }))
 
 import { sendInvoiceEmail, type InvoiceEmailPayment } from './sendInvoiceEmail'
@@ -52,6 +60,7 @@ describe('sendInvoiceEmail', () => {
       rejected: [],
       response: '250 OK',
     })
+    generatePdfFromHtmlMock.mockResolvedValue(Buffer.from('%PDF-1.4 fake'))
   })
 
   afterAll(() => {
@@ -141,6 +150,45 @@ describe('sendInvoiceEmail', () => {
     expect(sendMailMock).toHaveBeenCalledWith(
       expect.objectContaining({ from: 'smtp-user' })
     )
+  })
+
+  it('renders the supplied html and attaches it as a PDF', async () => {
+    const result = await sendInvoiceEmail(buildPayment(), {
+      html: '<html>invoice</html>',
+    })
+
+    expect(result).toBe(true)
+    expect(generatePdfFromHtmlMock).toHaveBeenCalledWith('<html>invoice</html>')
+    expect(sendMailMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        text: 'Invoice INV-101 is attached to this email.',
+        attachments: [
+          {
+            filename: 'Acme-inv-101.pdf',
+            content: expect.any(Buffer),
+            contentType: 'application/pdf',
+          },
+        ],
+      })
+    )
+  })
+
+  it('sends a plain notification with no attachment when html is absent', async () => {
+    await sendInvoiceEmail(buildPayment())
+
+    expect(generatePdfFromHtmlMock).not.toHaveBeenCalled()
+    const sent = sendMailMock.mock.calls[0][0]
+    expect(sent.text).toBe('Invoice INV-101 notification.')
+    expect(sent.attachments).toBeUndefined()
+  })
+
+  it('does not send at all when the PDF render fails', async () => {
+    generatePdfFromHtmlMock.mockRejectedValue(new Error('chromium missing'))
+
+    await expect(
+      sendInvoiceEmail(buildPayment(), { html: '<html>invoice</html>' })
+    ).rejects.toThrow('chromium missing')
+    expect(sendMailMock).not.toHaveBeenCalled()
   })
 
   it('propagates the error when sendMail fails', async () => {

@@ -204,10 +204,14 @@ export const paymentApi = createApi({
       invalidatesTags: (response) => (response ? ['Payment'] : []),
       onQueryStarted: invalidatePaymentSideEffects,
     }),
-    sendPaymentEmail: builder.mutation<{ success: boolean }, string>({
-      query: (id) => ({
+    sendPaymentEmail: builder.mutation<
+      { success: boolean },
+      { id: string; html?: string }
+    >({
+      query: ({ id, html }) => ({
         url: `spacehub/payment/${id}/send-email`,
         method: 'POST',
+        body: { html },
       }),
     }),
     markPaymentsPaid: builder.mutation<

@@ -491,8 +491,8 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     deleteLoading,
     onMarkPaid: handleMarkPaid,
     onDuplicate: handleDuplicate,
-    onSendPaymentEmail: async (paymentId: string) =>
-      sendPaymentEmail(paymentId).unwrap(),
+    onSendPaymentEmail: async (paymentId: string, html?: string) =>
+      sendPaymentEmail({ id: paymentId, html }).unwrap(),
     onUpdatePaymentStatus: async ({
       _id,
       status,

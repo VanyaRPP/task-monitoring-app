@@ -1,6 +1,9 @@
 import { Operations } from '@utils/constants'
-import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
-import { render, screen, fireEvent } from '@testing-library/react'
+import {
+  IExtendedPayment,
+  PaymentStatus,
+} from '@common/api/paymentApi/payment.api.types'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import PaymentDropdown from '@components/PaymentDropDown'
 import { Modal } from 'antd'
 
@@ -16,16 +19,31 @@ jest.mock('@assets/features/formatDate', () => ({
   dateToDefaultFormat: jest.fn(() => '01.01.2025'),
 }))
 
+jest.mock('react-i18next', () => ({
+  useTranslation: () => ({ t: (key: string) => key }),
+}))
+
 jest.mock('@common/api/paymentApi/payment.api', () => ({
   useHtmlToPdfMutation: () => [jest.fn(), { isLoading: false }],
 }))
 
 jest.mock(
   '@components/Forms/GroupedReceiptForm/HeadlessReceiptRenderer',
-  () => ({
-    __esModule: true,
-    default: () => null,
-  })
+  () => {
+    const React = jest.requireActual('react')
+    const MockHeadlessReceiptRenderer = ({
+      onCapture,
+    }: {
+      onCapture: (html: string) => void
+    }) => {
+      React.useEffect(() => {
+        onCapture('<html>captured invoice</html>')
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+      }, [])
+      return null
+    }
+    return { __esModule: true, default: MockHeadlessReceiptRenderer }
+  }
 )
 
 const modalConfirmMock = Modal.confirm as jest.Mock
@@ -49,6 +67,8 @@ const setup = (paymentOverride = {}, isAdmin = true) => {
   const onDelete = jest.fn()
   const onMarkPaid = jest.fn()
   const onDuplicate = jest.fn()
+  const onSendPaymentEmail = jest.fn().mockResolvedValue({ success: true })
+  const onUpdatePaymentStatus = jest.fn().mockResolvedValue(undefined)
 
   render(
     <PaymentDropdown
@@ -59,11 +79,21 @@ const setup = (paymentOverride = {}, isAdmin = true) => {
       onDelete={onDelete}
       onMarkPaid={onMarkPaid}
       onDuplicate={onDuplicate}
+      onSendPaymentEmail={onSendPaymentEmail}
+      onUpdatePaymentStatus={onUpdatePaymentStatus}
       deleteLoading={false}
     />
   )
 
-  return { onView, onEdit, onDelete, onMarkPaid, onDuplicate }
+  return {
+    onView,
+    onEdit,
+    onDelete,
+    onMarkPaid,
+    onDuplicate,
+    onSendPaymentEmail,
+    onUpdatePaymentStatus,
+  }
 }
 
 const openDropdown = () => fireEvent.click(screen.getByRole('button'))
@@ -128,6 +158,43 @@ describe('PaymentDropdown', () => {
     openDropdown()
 
     expect(screen.queryByText('Видалити платіж')).not.toBeInTheDocument()
+  })
+
+  it('sends the rendered invoice html so the email can attach a PDF', async () => {
+    const { onSendPaymentEmail, onUpdatePaymentStatus } = setup()
+    openDropdown()
+    fireEvent.click(screen.getByText('payments.statuses.draft'))
+
+    await waitFor(() =>
+      expect(onSendPaymentEmail).toHaveBeenCalledWith(
+        '1',
+        '<html>captured invoice</html>'
+      )
+    )
+    await waitFor(() =>
+      expect(onUpdatePaymentStatus).toHaveBeenCalledWith({
+        _id: '1',
+        status: PaymentStatus.Sent,
+      })
+    )
+  })
+
+  it('does not resend an already-sent payment', () => {
+    const { onSendPaymentEmail } = setup({ status: PaymentStatus.Sent })
+    openDropdown()
+    fireEvent.click(screen.getByText('payments.statuses.sent'))
+
+    expect(onSendPaymentEmail).not.toHaveBeenCalled()
+  })
+
+  it('leaves the status untouched when sending fails', async () => {
+    const { onSendPaymentEmail, onUpdatePaymentStatus } = setup()
+    onSendPaymentEmail.mockResolvedValue({ success: false })
+    openDropdown()
+    fireEvent.click(screen.getByText('payments.statuses.draft'))
+
+    await waitFor(() => expect(onSendPaymentEmail).toHaveBeenCalled())
+    expect(onUpdatePaymentStatus).not.toHaveBeenCalled()
   })
 
   it('calls onDelete via Modal.confirm', () => {

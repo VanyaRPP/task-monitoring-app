@@ -6,6 +6,13 @@ import { sendInvoiceEmail } from '@utils/email/sendInvoiceEmail'
 
 start()
 
+export const config = {
+  maxDuration: 60,
+  api: {
+    bodyParser: { sizeLimit: '8mb' },
+  },
+}
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
@@ -71,16 +78,26 @@ export default async function handler(
         currentReceiver.description || payment.domain?.description || '',
     }
 
-    const result = await sendInvoiceEmail({
-      invoiceNumber: payment.invoiceNumber,
-      invoiceCreationDate: payment.invoiceCreationDate,
-      invoice: payment.invoice,
-      provider: payment.provider,
-      reciever,
-      generalSum: payment.generalSum,
-      type: payment.type,
-      company: payment.company,
-    })
+    const html = req.body?.html
+    if (html !== undefined && typeof html !== 'string') {
+      return res
+        .status(400)
+        .json({ success: false, message: "'html' must be a string" })
+    }
+
+    const result = await sendInvoiceEmail(
+      {
+        invoiceNumber: payment.invoiceNumber,
+        invoiceCreationDate: payment.invoiceCreationDate,
+        invoice: payment.invoice,
+        provider: payment.provider,
+        reciever,
+        generalSum: payment.generalSum,
+        type: payment.type,
+        company: payment.company,
+      },
+      { html: html || undefined }
+    )
 
     if (!result)
       return res

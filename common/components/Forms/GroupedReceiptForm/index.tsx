@@ -11,6 +11,7 @@ import { useReactToPrint } from 'react-to-print'
 import { useReceiptTemplateProps } from './useReceiptTemplateProps'
 import { useInvoiceTemplateDescriptions } from './useInvoiceTemplateDescriptions'
 import { applyDescriptionOverrides } from './applyDescriptionOverrides'
+import { captureInvoiceHtml } from './captureInvoiceHtml'
 import { builtinTemplateItems } from './builtinTemplates'
 import {
   PrinterOutlined,
@@ -172,7 +173,8 @@ const GroupedReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
     if (!data?._id || isSent) return
 
     try {
-      const response = await sendPaymentEmail(data._id).unwrap()
+      const html = captureInvoiceHtml(componentRef.current)
+      const response = await sendPaymentEmail({ id: data._id, html }).unwrap()
       if (!response?.success) {
         message.error(t('payments.messages.sendFailed'))
         return

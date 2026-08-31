@@ -6,9 +6,14 @@ import {
   EyeOutlined,
   MoreOutlined,
   DownloadOutlined,
+  MailOutlined,
 } from '@ant-design/icons'
 import { Button, Dropdown, MenuProps, Modal, message } from 'antd'
-import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
+import { useTranslation } from 'react-i18next'
+import {
+  IExtendedPayment,
+  PaymentStatus,
+} from '@common/api/paymentApi/payment.api.types'
 import { Operations } from '@utils/constants'
 import { dateToDefaultFormat } from '@assets/features/formatDate'
 import { useHtmlToPdfMutation } from '@common/api/paymentApi/payment.api'
@@ -25,8 +30,18 @@ interface Props {
   onDelete: (id: string) => void
   onMarkPaid: (p: IExtendedPayment) => void
   onDuplicate: (p: IExtendedPayment) => void
+  onSendPaymentEmail: (
+    paymentId: string,
+    html?: string
+  ) => Promise<{ success: boolean }>
+  onUpdatePaymentStatus: (args: {
+    _id: string
+    status: PaymentStatus
+  }) => Promise<unknown>
   deleteLoading: boolean
 }
+
+type CaptureIntent = 'download' | 'send'
 
 function buildPaymentFileName(payment: IExtendedPayment): string {
   const companyName = (payment as any)?.reciever?.companyName ?? 'invoice'
@@ -45,17 +60,24 @@ const PaymentDropdown: React.FC<Props> = ({
   onDelete,
   onMarkPaid,
   onDuplicate,
+  onSendPaymentEmail,
+  onUpdatePaymentStatus,
   deleteLoading,
 }) => {
+  const { t } = useTranslation()
   const [htmlToPdf, { isLoading: pdfLoading }] = useHtmlToPdfMutation()
-  const [isCapturing, setIsCapturing] = useState(false)
+  const [captureIntent, setCaptureIntent] = useState<CaptureIntent | null>(null)
+  const [isSending, setIsSending] = useState(false)
+
+  const isCapturing = captureIntent !== null
+  const isSent = payment.status === PaymentStatus.Sent
 
   const handleDownloadPdf = () => {
     if (isCapturing || pdfLoading) return
-    setIsCapturing(true)
+    setCaptureIntent('download')
   }
 
-  const handleCapture = async (html: string) => {
+  const handleDownloadCapture = async (html: string) => {
     try {
       const fileName = buildPaymentFileName(payment)
       const response = await htmlToPdf({ html, fileName })
@@ -91,15 +113,54 @@ const PaymentDropdown: React.FC<Props> = ({
         `PDF: ${(error as Error)?.message ?? 'несподівана помилка'}`
       )
     } finally {
-      setIsCapturing(false)
+      setCaptureIntent(null)
     }
+  }
+
+  const handleSendCapture = async (html: string) => {
+    setCaptureIntent(null)
+    setIsSending(true)
+    try {
+      const response = await onSendPaymentEmail(payment._id, html)
+      if (!response?.success) {
+        message.error(t('payments.messages.sendFailed'))
+        return
+      }
+
+      await onUpdatePaymentStatus({
+        _id: payment._id,
+        status: PaymentStatus.Sent,
+      })
+      message.success(t('payments.messages.sendSuccess'))
+    } catch {
+      message.error(t('payments.messages.sendFailed'))
+    } finally {
+      setIsSending(false)
+    }
+  }
+
+  const handleCapture = (html: string) => {
+    if (captureIntent === 'send') {
+      handleSendCapture(html)
+      return
+    }
+    handleDownloadCapture(html)
   }
 
   const handleCaptureError = (error: Error) => {
     // eslint-disable-next-line no-console
     console.error('HeadlessReceiptRenderer failed:', error)
-    message.error('Не вдалося згенерувати макет PDF')
-    setIsCapturing(false)
+    message.error(
+      captureIntent === 'send'
+        ? t('payments.messages.sendFailed')
+        : 'Не вдалося згенерувати макет PDF'
+    )
+    setCaptureIntent(null)
+  }
+
+  const handleSend = () => {
+    if (isSent || isSending || isCapturing) return
+    setCaptureIntent('send')
   }
 
   const adminItems: MenuProps['items'] = isAdmin
@@ -144,6 +205,14 @@ const PaymentDropdown: React.FC<Props> = ({
       icon: <DownloadOutlined />,
       disabled: pdfLoading || isCapturing,
     },
+    {
+      key: 'send',
+      label: isSent
+        ? t('payments.statuses.sent')
+        : t('payments.statuses.draft'),
+      icon: <MailOutlined />,
+      disabled: isSent || isSending || isCapturing,
+    },
     ...adminDeleteItems,
   ]
 
@@ -153,6 +222,7 @@ const PaymentDropdown: React.FC<Props> = ({
     if (key === 'mark') onMarkPaid(payment)
     if (key === 'duplicate') onDuplicate(payment)
     if (key === 'download') handleDownloadPdf()
+    if (key === 'send') handleSend()
     if (key === 'delete') {
       Modal.confirm({
         title: `Видалити оплату від ${dateToDefaultFormat(
