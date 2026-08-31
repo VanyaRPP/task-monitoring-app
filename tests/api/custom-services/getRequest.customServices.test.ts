@@ -1,16 +1,19 @@
 import CustomService from '@modules/models/CustomService'
+import Domain from '@modules/models/Domain'
 import handler from '@pages/api/custom-services'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import { setupTestEnvironment } from '@utils/setupTestEnvironment'
 import { domains } from '@utils/testData'
 
 jest.mock('@pages/api/api.config', () => jest.fn())
+// Default caller is a GlobalAdmin: the generic list tests below assert the
+// "sees the whole catalog" behaviour. Role-specific tests override per-case.
 jest.mock('@utils/getCurrentUser', () => ({
   getCurrentUser: jest.fn().mockResolvedValue({
-    isGlobalAdmin: false,
+    isGlobalAdmin: true,
     isDomainAdmin: false,
     isUser: false,
-    email: '',
+    user: { email: 'admin@example.com' },
   }),
 }))
 
@@ -112,19 +115,72 @@ describe('API Route - GET Method', () => {
       expect(mockResponse.json.mock.calls[0][0].data).toHaveLength(1)
     })
 
-    it('should allow DomainAdmin to access any domain (temp implementation)', async () => {
+    it('auto-scopes a DomainAdmin (no domainId) to only their own domains', async () => {
+      // Option A: instead of 403, the backend resolves the caller's domains and
+      // returns exactly — and only — their services. No leak, no empty catalog.
+      const ownDomain = await Domain.create({
+        name: 'Own Domain',
+        adminEmails: ['domainadmin@example.com'],
+        streets: [],
+        description: 'own',
+        customServices: [],
+      })
+      const foreignDomain = await Domain.create({
+        name: 'Foreign Domain',
+        adminEmails: ['someoneelse@example.com'],
+        streets: [],
+        description: 'foreign',
+        customServices: [],
+      })
+      await CustomService.create({
+        name: 'Own Service',
+        fieldName: 'ownService',
+        domain: ownDomain._id,
+      })
+      await CustomService.create({
+        name: 'Foreign Service',
+        fieldName: 'foreignService',
+        domain: foreignDomain._id,
+      })
       ;(getCurrentUser as jest.Mock).mockResolvedValueOnce({
         isGlobalAdmin: false,
         isDomainAdmin: true,
         isUser: false,
-        email: 'domainadmin@example.com',
+        user: { email: 'domainadmin@example.com' },
       })
 
-      await mockServiceCreation()
+      const mockRequest = { method: 'GET', query: {} } as any
+      const mockResponse = {
+        status: jest.fn(() => mockResponse),
+        json: jest.fn(),
+      } as any
+
+      await handler(mockRequest, mockResponse)
+      expect(mockResponse.status).toHaveBeenCalledWith(200)
+      const data = mockResponse.json.mock.calls[0][0].data
+      expect(data.some((s: any) => s.name === 'Own Service')).toBe(true)
+      expect(data.some((s: any) => s.name === 'Foreign Service')).toBe(false)
+    })
+
+    it('forbids a DomainAdmin from a domain they do not administer', async () => {
+      const foreignDomain = await Domain.create({
+        name: 'Foreign Domain',
+        adminEmails: ['someoneelse@example.com'],
+        streets: [],
+        description: 'foreign',
+        customServices: [],
+      })
+
+      ;(getCurrentUser as jest.Mock).mockResolvedValueOnce({
+        isGlobalAdmin: false,
+        isDomainAdmin: true,
+        isUser: false,
+        user: { email: 'domainadmin@example.com' },
+      })
 
       const mockRequest = {
         method: 'GET',
-        query: {},
+        query: { domainId: foreignDomain._id.toString() },
       } as any
       const mockResponse = {
         status: jest.fn(() => mockResponse),

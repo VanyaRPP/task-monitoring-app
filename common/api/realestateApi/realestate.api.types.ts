@@ -26,6 +26,8 @@ export type IRealestate = {
   allServices?: boolean
   account?: string
   rnokpp?: string
+  contractNumber?: string
+  contractDate?: string | Date
   defaultTemplate?: string
 }
 

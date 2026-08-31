@@ -11,6 +11,12 @@ export interface IPaymentModel {
   invoiceNumber: number
   type: string
   invoiceCreationDate: Date
+  /**
+   * When the money actually arrived. Set on `credit` payments created by
+   * mark-paid. Absent on older records and on `debit` invoices - readers must
+   * fall back to `invoiceCreationDate`.
+   */
+  paidAt?: Date
   domain: ObjectId
   street: ObjectId
   company: ObjectId
@@ -31,6 +37,7 @@ export const PaymentSchema = new Schema<IPaymentModel>({
   invoiceNumber: { type: Number, required: true },
   type: { type: String },
   invoiceCreationDate: { type: Date, required: true, default: Date.now },
+  paidAt: { type: Date, required: false },
   domain: { type: Schema.Types.ObjectId, ref: 'Domain' },
   street: { type: Schema.Types.ObjectId, ref: 'Street' },
   company: { type: Schema.Types.ObjectId, ref: 'RealEstate' },

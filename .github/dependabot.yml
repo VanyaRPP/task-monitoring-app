@@ -1,0 +1,53 @@
+version: 2
+
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '06:00'
+      timezone: Europe/Kyiv
+    open-pull-requests-limit: 5
+    versioning-strategy: increase
+    labels:
+      - dependencies
+    commit-message:
+      prefix: chore(deps)
+      prefix-development: chore(deps-dev)
+
+    groups:
+      # All outstanding security fixes land as ONE pull request instead of one
+      # per advisory — this is what stops alerts accumulating faster than they
+      # get merged.
+      security:
+        applies-to: security-updates
+        patterns:
+          - '*'
+
+      # Routine drift, split prod/dev so a broken dev tool never blocks a
+      # production patch. Majors stay ungrouped: they get their own PR and
+      # their own review.
+      production:
+        applies-to: version-updates
+        dependency-type: production
+        update-types:
+          - minor
+          - patch
+      development:
+        applies-to: version-updates
+        dependency-type: development
+        update-types:
+          - minor
+          - patch
+
+    ignore:
+      # @next-auth/mongodb-adapter@1.x declares peer `mongodb: ^4 || ^5`.
+      - dependency-name: mongodb
+        update-types:
+          - version-update:semver-major
+      # @next-auth/mongodb-adapter@1.x declares peer `next-auth: ^4`;
+      # next-auth v5 is the Auth.js rewrite and needs a deliberate migration.
+      - dependency-name: next-auth
+        update-types:
+          - version-update:semver-major

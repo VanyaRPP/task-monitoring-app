@@ -136,7 +136,7 @@ describe('Debtors API - Debt Calculation Logic', () => {
     )
   })
 
-  it('should not include company when credit > debit (totalDebt < 0)', async () => {
+  it('should include company with a negative totalDebt when credit > debit', async () => {
     await mockLoginAs(users.globalAdmin)
     ;(Payment.find as jest.Mock).mockResolvedValue([
       {
@@ -178,7 +178,13 @@ describe('Debtors API - Debt Calculation Logic', () => {
     expect(mockRes.json).toHaveBeenCalledWith(
       expect.objectContaining({
         success: true,
-        companies: [],
+        companies: expect.arrayContaining([
+          expect.objectContaining({
+            companyId: 'company1',
+            companyName: 'Test Company',
+            totalDebt: -300,
+          }),
+        ]),
       })
     )
   })
@@ -250,7 +256,7 @@ describe('Debtors API - Debt Calculation Logic', () => {
     )
   })
 
-  it('should handle multiple companies with different debt amounts', async () => {
+  it('should handle multiple companies with debt in both directions', async () => {
     await mockLoginAs(users.globalAdmin)
     ;(Payment.find as jest.Mock).mockResolvedValue([
       {
@@ -341,14 +347,10 @@ describe('Debtors API - Debt Calculation Logic', () => {
             companyName: 'Company Two',
             totalDebt: 500,
           }),
-        ]),
-      })
-    )
-    expect(mockRes.json).toHaveBeenCalledWith(
-      expect.objectContaining({
-        companies: expect.not.arrayContaining([
           expect.objectContaining({
             companyId: 'company3',
+            companyName: 'Company Three',
+            totalDebt: -100, // 300 - 400, the domain owes the company
           }),
         ]),
       })
@@ -408,7 +410,7 @@ describe('Debtors API - Debt Calculation Logic', () => {
     )
   })
 
-  it('should handle company with only credit payments', async () => {
+  it('should handle company with only credit payments as a fully negative debt', async () => {
     await mockLoginAs(users.globalAdmin)
     ;(Payment.find as jest.Mock).mockResolvedValue([
       {
@@ -450,7 +452,127 @@ describe('Debtors API - Debt Calculation Logic', () => {
     expect(mockRes.json).toHaveBeenCalledWith(
       expect.objectContaining({
         success: true,
-        companies: [],
+        companies: expect.arrayContaining([
+          expect.objectContaining({
+            companyId: 'company1',
+            companyName: 'Test Company',
+            totalDebt: -1500, // 0 - 1500
+          }),
+        ]),
+      })
+    )
+  })
+
+  it('should keep fractional negative debts with two-decimal precision', async () => {
+    await mockLoginAs(users.globalAdmin)
+    ;(Payment.find as jest.Mock).mockResolvedValue([
+      {
+        _id: 'payment1',
+        company: 'company1',
+        type: 'debit',
+        generalSum: 100.1,
+        monthService: 'service1',
+      },
+      {
+        _id: 'payment2',
+        company: 'company1',
+        type: 'credit',
+        generalSum: 100.35,
+        monthService: 'service1',
+      },
+    ])
+    ;(RealEstate.find as jest.Mock).mockResolvedValue([
+      {
+        _id: 'company1',
+        companyName: 'Test Company',
+        domain: realDomainId,
+      },
+    ])
+
+    const mockReq = {
+      method: 'GET',
+      query: { domainIds: [realDomainId] },
+    } as any
+
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockReq, mockRes)
+
+    expect(mockRes.status).toHaveBeenCalledWith(200)
+    expect(mockRes.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: true,
+        companies: expect.arrayContaining([
+          expect.objectContaining({
+            companyId: 'company1',
+            totalDebt: -0.25,
+          }),
+        ]),
+      })
+    )
+  })
+
+  it('should exclude a settled company while keeping both debt directions', async () => {
+    await mockLoginAs(users.globalAdmin)
+    ;(Payment.find as jest.Mock).mockResolvedValue([
+      {
+        _id: 'payment1',
+        company: 'company1',
+        type: 'debit',
+        generalSum: 700,
+        monthService: 'service1',
+      },
+      {
+        _id: 'payment2',
+        company: 'company2',
+        type: 'credit',
+        generalSum: 250,
+        monthService: 'service1',
+      },
+      {
+        _id: 'payment3',
+        company: 'company3',
+        type: 'debit',
+        generalSum: 400,
+        monthService: 'service1',
+      },
+      {
+        _id: 'payment4',
+        company: 'company3',
+        type: 'credit',
+        generalSum: 400,
+        monthService: 'service1',
+      },
+    ])
+    ;(RealEstate.find as jest.Mock).mockResolvedValue([
+      { _id: 'company1', companyName: 'Debtor', domain: realDomainId },
+      { _id: 'company2', companyName: 'Overpaid', domain: realDomainId },
+      { _id: 'company3', companyName: 'Settled', domain: realDomainId },
+    ])
+
+    const mockReq = {
+      method: 'GET',
+      query: { domainIds: [realDomainId] },
+    } as any
+
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockReq, mockRes)
+
+    expect(mockRes.status).toHaveBeenCalledWith(200)
+    expect(mockRes.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: true,
+        companies: [
+          expect.objectContaining({ companyId: 'company1', totalDebt: 700 }),
+          expect.objectContaining({ companyId: 'company2', totalDebt: -250 }),
+        ],
       })
     )
   })

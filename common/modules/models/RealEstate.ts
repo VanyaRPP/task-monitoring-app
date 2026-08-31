@@ -21,6 +21,8 @@ export interface IRealEstateModel {
   archived?: boolean
   account?: string
   rnokpp?: string
+  contractNumber?: string
+  contractDate?: Date
   defaultTemplate?: string
   services: IDomainService[]
   customServices?: ICustomService[]
@@ -53,6 +55,8 @@ export const RealEstateSchema = new Schema<IRealEstateModel>({
   allServices: { type: Boolean, required: false, default: false },
   account: { type: String, required: false, default: '' },
   rnokpp: { type: String, required: false, default: '' },
+  contractNumber: { type: String, required: false, default: '' },
+  contractDate: { type: Date, required: false },
   defaultTemplate: { type: String, required: false },
   services: { type: [Object] },
   customServices: {

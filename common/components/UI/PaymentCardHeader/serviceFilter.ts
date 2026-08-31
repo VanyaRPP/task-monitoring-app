@@ -19,7 +19,7 @@ export function getAllowedServices(
   const types = new Set<string>()
   payments.data.forEach((payment) => {
     payment.invoice?.forEach((field) => {
-      if (field.type && field.type !== ServiceType.Custom) {
+      if (field.type && field.type !== ServiceType.Custom && !field.serviceId) {
         types.add(field.type)
       }
     })

@@ -4,6 +4,7 @@ import { IExtendedRealestate } from '@common/api/realestateApi/realestate.api.ty
 import EmailSelect from '@components/UI/Reusable/EmailSelect'
 import {
   Checkbox,
+  DatePicker,
   Form,
   FormInstance,
   Input,
@@ -13,15 +14,19 @@ import {
   Typography,
 } from 'antd'
 import type { TabsProps } from 'antd'
-import { FC, useEffect, useState } from 'react'
+import { FC, useEffect, useMemo, useState } from 'react'
 import AddressesSelect from '../../../Reusable/AddressesSelect'
 import DomainsSelect from '../../../Reusable/DomainsSelect'
 import s from './style.module.scss'
-import { useGetDomainByPkQuery } from '@common/api/domainApi/domain.api'
+import {
+  useGetDomainByPkQuery,
+  useGetDomainTypeTemplatesQuery,
+} from '@common/api/domainApi/domain.api'
 import { IDomain } from '@modules/models/Domain'
 import { inputNumberParser } from '@utils/helpers'
 import { CURRENCY_SELECT_OPTIONS, Currency } from '@utils/constants'
 import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
+import { shouldShowStandardServices } from '@utils/servicesVisibility'
 import CustomServicesCard from '../../../CustomServicesCard'
 
 interface Props {
@@ -53,6 +58,16 @@ const RealEstateForm: FC<Props> = ({
     domainId: domain?._id || currentRealEstate?.domain?._id,
   })
   const services = servicesData?.data
+
+  const { data: domainTypeTemplates = [] } = useGetDomainTypeTemplatesQuery()
+
+  const showStandardServices = useMemo(
+    () =>
+      domain?._id
+        ? shouldShowStandardServices([domain], domainTypeTemplates)
+        : false,
+    [domain, domainTypeTemplates]
+  )
 
   useEffect(() => {
     if (services) {
@@ -200,6 +215,16 @@ const RealEstateForm: FC<Props> = ({
         </>
       )}
 
+      {showStandardServices && (
+        <Form.Item
+          valuePropName="checked"
+          name="garbageCollector"
+          label="Вивіз сміття"
+        >
+          <Checkbox disabled={!editable} />
+        </Form.Item>
+      )}
+
       {isServiceExist('inflicionPrice') && (
         <Form.Item
           valuePropName="checked"
@@ -209,6 +234,33 @@ const RealEstateForm: FC<Props> = ({
           <Checkbox disabled={!editable} />
         </Form.Item>
       )}
+    </>
+  )
+
+  const renderContract = () => (
+    <>
+      <div style={{ marginBottom: 16 }}>
+        <Typography.Text type="secondary">
+          Номер договору з цією компанією. Використовується в акті надання
+          послуг.
+        </Typography.Text>
+      </div>
+      <Form.Item name="contractNumber" label="Номер договору">
+        <Input
+          placeholder="Наприклад, 15"
+          maxLength={64}
+          className={s.formInput}
+          disabled={!editable}
+        />
+      </Form.Item>
+      <Form.Item name="contractDate" label="Дата договору">
+        <DatePicker
+          format="DD.MM.YYYY"
+          placeholder="Оберіть дату"
+          className={s.formInput}
+          disabled={!editable}
+        />
+      </Form.Item>
     </>
   )
 
@@ -241,6 +293,11 @@ const RealEstateForm: FC<Props> = ({
       key: '2',
       label: 'Послуги',
       children: renderServices(),
+    },
+    {
+      key: '3',
+      label: 'Договір',
+      children: renderContract(),
     },
   ]
 
