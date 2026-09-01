@@ -16,12 +16,12 @@ type Data = {
   message?: string
 }
 
-start()
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
+  await start()
+
   switch (req.method) {
     case 'GET':
       try {

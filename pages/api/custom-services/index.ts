@@ -12,8 +12,6 @@ import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
-start()
-
 const CODE_TO_STATUS: Record<ServiceErrorCode, number> = {
   invalid: 400,
   forbidden: 403,
@@ -43,6 +41,8 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
+  await start()
+
   const ctx = (await getCurrentUser(req, res)) as UserContext
 
   switch (req.method) {

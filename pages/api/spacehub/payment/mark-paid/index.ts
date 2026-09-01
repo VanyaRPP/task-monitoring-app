@@ -8,8 +8,6 @@ import { dateShiftMs } from '@common/assets/features/formatDate'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { logPaymentMutation } from '@common/modules/services/paymentAudit'
 
-start()
-
 const COPYABLE_PAYMENT_FIELDS = [
   'domain',
   'street',
@@ -28,6 +26,8 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
+  await start()
+
   if (req.method !== 'POST') {
     return res
       .status(405)

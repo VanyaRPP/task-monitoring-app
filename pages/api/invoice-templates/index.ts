@@ -1,11 +1,9 @@
 import InvoiceTemplate from '@common/modules/models/InvoiceTemplate'
-import start, { Data } from '@pages/api/api.config'
+import { Data } from '@pages/api/api.config'
 import { withErrorHandler } from '@utils/api-handler'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import mongoose from 'mongoose'
 import type { NextApiRequest, NextApiResponse } from 'next'
-
-start()
 
 async function invoiceTemplatesHandler(
   req: NextApiRequest,

@@ -6,8 +6,6 @@ import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { logPaymentMutation } from '@common/modules/services/paymentAudit'
 
-start()
-
 const isNonEmptyStringArray = (value: unknown): value is string[] =>
   Array.isArray(value) &&
   value.length > 0 &&
@@ -17,6 +15,8 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
+  await start()
+
   if (req.method !== 'DELETE') {
     return res
       .status(405)

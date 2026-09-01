@@ -8,12 +8,12 @@ import { isValidEmail } from '@common/assets/features/validators'
 import { FilterQuery } from 'mongoose'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
-start()
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ExtendedData>
 ) {
+  await start()
+
   const { isGlobalAdmin, isDomainAdmin, isAdmin, isUser, user } =
     await getCurrentUser(req, res)
 
@@ -125,7 +125,8 @@ export default async function handler(
 
         const realEstates = await RealEstate.find({ $and: [options, filters] })
           .limit(+limit)
-          .populate('domain')
+          // bank tokens are admin-only: never ship them inside an embedded domain
+          .populate('domain', '-domainBankToken')
           .populate('street')
 
         const { distinctDomains, distinctCompanies } =
