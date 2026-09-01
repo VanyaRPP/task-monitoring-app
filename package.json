@@ -20,6 +20,11 @@
     "prepare": "husky",
     "types:check": "tsc --noEmit"
   },
+  "config": {
+    "mongodbMemoryServer": {
+      "version": "6.0.14"
+    }
+  },
   "engines": {
     "node": "22.x"
   },
