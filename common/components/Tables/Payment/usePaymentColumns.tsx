@@ -6,6 +6,7 @@ import {
   IExtendedPayment,
   IFilter,
   IGetPaymentResponse,
+  PaymentStatus,
 } from '@common/api/paymentApi/payment.api.types'
 import {
   dateToDefaultFormat,
@@ -57,6 +58,14 @@ interface Params {
   onDelete: (id: string) => void
   onMarkPaid: (p: IExtendedPayment) => void
   onDuplicate: (p: IExtendedPayment) => void
+  onSendPaymentEmail: (
+    paymentId: string,
+    html?: string
+  ) => Promise<{ success: boolean }>
+  onUpdatePaymentStatus: (args: {
+    _id: string
+    status: PaymentStatus
+  }) => Promise<unknown>
   deleteLoading: boolean
 }
 
@@ -178,6 +187,8 @@ export function usePaymentColumns({
   onDelete,
   onMarkPaid,
   onDuplicate,
+  onSendPaymentEmail,
+  onUpdatePaymentStatus,
   deleteLoading,
 }: Params): ColumnsType<IExtendedPayment> {
   const { token } = theme.useToken()
@@ -528,6 +539,8 @@ export function usePaymentColumns({
             onDelete={onDelete}
             onMarkPaid={onMarkPaid}
             onDuplicate={onDuplicate}
+            onSendPaymentEmail={onSendPaymentEmail}
+            onUpdatePaymentStatus={onUpdatePaymentStatus}
             deleteLoading={deleteLoading}
           />
         ),
@@ -549,6 +562,8 @@ export function usePaymentColumns({
       onDelete,
       onMarkPaid,
       onDuplicate,
+      onSendPaymentEmail,
+      onUpdatePaymentStatus,
       isGlobalAdmin,
       isDomainAdmin,
       isUser,

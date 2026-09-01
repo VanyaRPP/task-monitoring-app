@@ -5,8 +5,7 @@ import PaymentChangeLog from '@common/modules/models/PaymentChangeLog'
 import Payment from '@common/modules/models/Payment'
 
 type ApiResponse =
-  | { success: true; data: any }
-  | { success: false; message: string }
+  { success: true; data: any } | { success: false; message: string }
 
 export default async function handler(
   req: NextApiRequest,

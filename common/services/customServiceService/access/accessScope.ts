@@ -40,8 +40,7 @@ export type BuildServiceFilterFailure = {
 }
 
 export type BuildServiceFilterResult =
-  | { ok: true; filter: Record<string, unknown> }
-  | BuildServiceFilterFailure
+  { ok: true; filter: Record<string, unknown> } | BuildServiceFilterFailure
 
 /** Type guard so callers narrow reliably regardless of tsconfig strictness. */
 export function isFilterFailure(
