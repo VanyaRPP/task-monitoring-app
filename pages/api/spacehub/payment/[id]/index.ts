@@ -42,7 +42,8 @@ export default async function handler(
         }
 
         const payment: any = await Payment.findById(req.query.id)
-          .populate('domain')
+          // bank tokens are admin-only: never ship them inside an embedded domain
+          .populate('domain', '-domainBankToken')
           .populate('company')
           .populate('street')
           .populate('monthService')

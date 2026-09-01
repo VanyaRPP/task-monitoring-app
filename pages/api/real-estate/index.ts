@@ -125,7 +125,8 @@ export default async function handler(
 
         const realEstates = await RealEstate.find({ $and: [options, filters] })
           .limit(+limit)
-          .populate('domain')
+          // bank tokens are admin-only: never ship them inside an embedded domain
+          .populate('domain', '-domainBankToken')
           .populate('street')
 
         const { distinctDomains, distinctCompanies } =
