@@ -41,12 +41,17 @@ let bootstrap: Promise<void> | null = null
  */
 const start = async (): Promise<void> => {
   if (!bootstrap) {
-    bootstrap = dbConnect()
-      .then(() => undefined)
-      .catch((error) => {
+    // `await` rather than a `.then()` chain: dbConnect is replaced by a plain
+    // jest.fn() in several suites, which returns undefined, and chaining off
+    // that throws before the handler ever runs.
+    bootstrap = (async () => {
+      try {
+        await dbConnect()
+      } catch (error) {
         bootstrap = null
         throw error
-      })
+      }
+    })()
   }
 
   return bootstrap
