@@ -15,7 +15,6 @@ import {
 } from '@utils/email/sendInvoiceEmail'
 import { PaymentStatus } from '@common/api/paymentApi/payment.api.types'
 import { FilterQuery } from 'mongoose'
-import ProfitService from '@common/services/profitService/profit.service'
 import { isDev } from '@utils/env'
 
 function isEmailDebugEnabled() {
@@ -61,7 +60,7 @@ export interface PaymentQueryParams {
   month?: string | number | (string | number)[]
   quarter?: string | number
   day?: string | number
-  dateField?: 'invoiceCreationDate' | 'date'
+  dateField?: 'invoiceCreationDate' | 'date' | 'paidAt'
 }
 
 export interface UserContext {
@@ -220,7 +219,30 @@ export async function getPayments(
       }).select('_id')
 
       const serviceIds = services.map((service) => service._id.toString())
-      options.monthService = { $in: serviceIds }
+
+      // Payments with no month service would otherwise vanish from a period
+      // filter entirely. The profit ledger files them by their own date, so
+      // match that here too - a drill-down must list exactly the payments its
+      // figure was built from.
+      const invoiceExpr = filterPeriodOptions({
+        ...reqQuery,
+        dateField: 'invoiceCreationDate',
+      })
+
+      options.$or = [
+        { monthService: { $in: serviceIds } },
+        {
+          $and: [
+            {
+              $or: [
+                { monthService: { $exists: false } },
+                { monthService: null },
+              ],
+            },
+            { $expr: { $and: invoiceExpr } },
+          ],
+        },
+      ]
     } else {
       options.$expr = { $and: expr }
     }
@@ -287,23 +309,6 @@ export async function createPayment(
   const { sendInvoiceEmail: shouldSendInvoiceEmail = true } = options
 
   const payment = await Payment.create(body)
-
-  const description =
-    payment.type === 'debit'
-      ? `Інвойс №${payment.invoiceNumber}`
-      : payment.description
-
-  const profitObject = {
-    domain: payment.domain.toString(),
-    payment: payment.id.toString(),
-    amount: payment.generalSum,
-    type: payment.type as 'debit' | 'credit',
-    date: payment.invoiceCreationDate,
-    description,
-    invoiceNumber: payment.invoiceNumber.toString(),
-  }
-
-  await ProfitService.create(profitObject)
 
   if (shouldSendInvoiceEmail && payment.type === 'debit') {
     try {
@@ -454,16 +459,30 @@ export async function duplicatePayments(
 }
 
 function filterPeriodOptions(args) {
-  const { year, quarter, day, dateField = 'invoiceCreationDate' } = args
-  let { month } = args
-  const field = `$${dateField}`
+  const { year, quarter, day, month, dateField = 'invoiceCreationDate' } = args
+  // `paidAt` only exists on credits created after it was introduced, so period
+  // filtering has to use the same fallback the profit ledger aggregates on -
+  // otherwise a drill-down would list a different set than the total it came
+  // from. $year/$month/$dayOfMonth accept any expression, not just a path.
+  const field =
+    dateField === 'paidAt'
+      ? { $ifNull: ['$paidAt', '$invoiceCreationDate'] }
+      : `$${dateField}`
 
-  if (typeof month === 'string') {
-    month = month
-      .split(',')
-      .map(Number)
-      .filter((m) => !isNaN(m))
-  }
+  // `month` arrives as a number, a string, a comma-joined string or an array
+  // depending on the caller. Normalise all four to number[]; a bare number
+  // used to fall through both branches below and be silently dropped.
+  const months: number[] = (
+    Array.isArray(month)
+      ? month
+      : typeof month === 'string'
+        ? month.split(',')
+        : month == null
+          ? []
+          : [month]
+  )
+    .map(Number)
+    .filter((m) => !isNaN(m))
 
   const filterByDateOptions = []
 
@@ -473,9 +492,9 @@ function filterPeriodOptions(args) {
     })
   }
 
-  if (Array.isArray(month) && month.length > 0) {
+  if (months.length > 0) {
     filterByDateOptions.push({
-      $in: [{ $month: field }, month],
+      $in: [{ $month: field }, months],
     })
   }
 

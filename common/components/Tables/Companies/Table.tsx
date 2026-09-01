@@ -18,7 +18,9 @@ import {
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { AppRoutes, Roles } from '@utils/constants'
 import {
-  formatDebt,
+  formatDebtAmount,
+  formatSignedDebt,
+  getDebtSide,
   isAdminCheck,
   renderCurrency,
   renderPrice,
@@ -44,13 +46,15 @@ import {
   useGetDomainFiltersQuery,
   useGetRealEstateFiltersQuery,
 } from '@common/api/filterApi/filter.api'
+import { useGetDomainTypeTemplatesQuery } from '@common/api/domainApi/domain.api'
 import { useEffect, useState, useMemo } from 'react'
 import { useGetDebtorsQuery } from '@common/api/debtorsApi/debtors.api'
 import CollapsedTags from '@components/UI/CollapsedTags'
+import TableFilterLink from '@components/UI/Reusable/TableFilterLink'
 import {
   extractDomainsFromRealEstates,
-  getSelectedServiceIds,
   getVisibleServices,
+  shouldShowStandardServices,
 } from '@utils/servicesVisibility'
 
 type DebtPerMonth = {
@@ -67,7 +71,6 @@ type CompanyWithPayments = {
   totalDebt: number
 }
 
-// Human-readable names of standard service columns — used to exclude duplicates from customServices
 const STANDARD_SERVICE_NAMES = [
   'Опис',
   'Площа (м²)',
@@ -99,7 +102,7 @@ export interface Props {
     edit: boolean
   }
   isArchive: boolean
-  customServices?: { _id: string; name: string }[]
+  customServices?: { _id: string; name: string; fieldName?: string }[]
 }
 
 const CompaniesTable: React.FC<Props> = ({
@@ -199,38 +202,95 @@ const CompaniesTable: React.FC<Props> = ({
     return realEstateData?.realEstatesFilter?.length === 1
   }, [realEstateData?.realEstatesFilter?.length])
 
+  const filteredData = useMemo(() => {
+    if (!realEstates?.data?.length) return realEstates?.data ?? []
+    let data = realEstates.data
+
+    const domainIds: string[] = Array.isArray(filters?.domain)
+      ? filters.domain
+      : filters?.domain
+        ? [String(filters.domain)]
+        : []
+    if (domainIds.length) {
+      data = data.filter((r) =>
+        domainIds.includes(String((r as any).domain?._id))
+      )
+    }
+
+    const companyIds: string[] = Array.isArray(filters?.company)
+      ? filters.company
+      : filters?.company
+        ? [String(filters.company)]
+        : []
+    if (companyIds.length) {
+      data = data.filter((r) => companyIds.includes(String(r._id)))
+    }
+
+    const streetIds: string[] = Array.isArray(filters?.street)
+      ? filters.street
+      : filters?.street
+        ? [String(filters.street)]
+        : []
+    if (streetIds.length) {
+      data = data.filter((r) =>
+        streetIds.includes(String((r as any).street?._id))
+      )
+    }
+
+    return data
+  }, [realEstates?.data, filters])
+
   const visibleDomains = useMemo(
-    () => extractDomainsFromRealEstates(realEstates?.data),
-    [realEstates?.data]
+    () => extractDomainsFromRealEstates(filteredData),
+    [filteredData]
   )
-
+  const { data: domainTypeTemplates = [] } = useGetDomainTypeTemplatesQuery()
   const hasActiveFilters = !!(
-    filters?.domain?.length || filters?.company?.length
+    filters?.domain?.length ||
+    filters?.company?.length ||
+    filters?.street?.length
   )
-
+  const showStandardServices = useMemo(
+    () => shouldShowStandardServices(visibleDomains, domainTypeTemplates),
+    [visibleDomains, domainTypeTemplates]
+  )
   const filteredCustomServices = useMemo(() => {
     const withoutStandard = customServices?.filter((custom) => {
       return !STANDARD_SERVICE_NAMES.includes(custom.name)
     })
 
-    if (isGlobalAdmin && hasActiveFilters) {
-      const selectedIds = getSelectedServiceIds(visibleDomains)
-      if (!selectedIds.length) return []
-      const selectedSet = new Set(selectedIds)
-      return (withoutStandard ?? []).filter((s) => selectedSet.has(s._id))
+    if (!withoutStandard?.length) return []
+
+    if (hasActiveFilters) {
+      const activeServiceKeys = new Set<string>()
+
+      filteredData.forEach((company: any) => {
+        if (company.customServices && Array.isArray(company.customServices)) {
+          company.customServices.forEach((service: any) => {
+            const key = service?.fieldName || service?._id
+            if (key) {
+              activeServiceKeys.add(String(key))
+            }
+          })
+        }
+      })
+
+      return withoutStandard.filter((s) =>
+        activeServiceKeys.has(String(s.fieldName || s._id))
+      )
     }
 
     return getVisibleServices(
       userResponse?.roles,
       visibleDomains,
-      withoutStandard ?? []
+      withoutStandard
     )
   }, [
     customServices,
     userResponse?.roles,
     visibleDomains,
+    filteredData,
     hasActiveFilters,
-    isGlobalAdmin,
   ])
 
   if (isError) return <Alert message="Помилка" type="error" showIcon closable />
@@ -258,9 +318,12 @@ const CompaniesTable: React.FC<Props> = ({
                 onChange={(checked) => {
                   if (checked) {
                     setFilters((prev) => ({
-                      company: debtorCompanies?.map(
-                        (company) => company.companyId
-                      ),
+                      company: debtorCompanies
+                        ?.filter(
+                          (company) =>
+                            getDebtSide(company.totalDebt) === 'company'
+                        )
+                        .map((company) => company.companyId),
                     }))
                   } else {
                     setFilters(undefined)
@@ -292,8 +355,10 @@ const CompaniesTable: React.FC<Props> = ({
         isUser,
         isSingleCompanyByData,
         customServices: filteredCustomServices,
+        setFilters,
+        showStandardServices,
       })}
-      dataSource={realEstates?.data}
+      dataSource={filteredData}
       scroll={{ x: tableWidth }}
       onChange={(__, tableFilters) => {
         const newFilters: any = {
@@ -343,6 +408,8 @@ const getDefaultColumns = ({
   isUser,
   isSingleCompanyByData,
   customServices,
+  setFilters,
+  showStandardServices,
 }: {
   domainId?: string
   streetId?: string
@@ -363,7 +430,9 @@ const getDefaultColumns = ({
   debtorCompanies?: CompanyWithPayments[]
   isUser?: boolean
   isSingleCompanyByData?: boolean
-  customServices?: { _id: string; name: string }[]
+  customServices?: { _id: string; name: string; fieldName?: string }[]
+  setFilters?: (filters: any) => void
+  showStandardServices?: boolean
 }): ColumnType<any>[] => {
   const isOnPage = pathname === AppRoutes.REAL_ESTATE
 
@@ -389,93 +458,101 @@ const getDefaultColumns = ({
       align: 'center',
       render: renderTooltip,
     },
-    // TODO: enum
-    shouldShowService('totalArea') && {
-      title: 'Площа (м²)',
-      dataIndex: 'totalArea',
-      width: 120,
-      align: 'center',
-      sorter: isOnPage ? (a, b) => a.totalArea - b.totalArea : null,
-    },
-    shouldShowService('pricePerMeter') && {
-      title: 'Ціна (грн/м²)',
-      dataIndex: 'pricePerMeter',
-      width: 120,
-      align: 'center',
-      sorter: isOnPage ? (a, b) => a.pricePerMeter - b.pricePerMeter : null,
-      render: (value) => (
-        <span className={s.currency}>{renderPrice(value)}</span>
-      ),
-    },
-    shouldShowService('servicePricePerMeter') && {
-      title: 'Індивідуальне утримання (грн/м²)',
-      dataIndex: 'servicePricePerMeter',
-      width: 200,
-      align: 'center',
-      sorter: isOnPage
-        ? (a, b) => a.servicePricePerMeter - b.servicePricePerMeter
-        : null,
-      render: (value) =>
-        value !== null && value !== undefined && value !== 0 ? (
-          renderCurrency(value)
-        ) : (
-          <span className={s.currency}>-</span>
+    shouldShowService('totalArea') &&
+      showStandardServices && {
+        title: 'Площа (м²)',
+        dataIndex: 'totalArea',
+        width: 120,
+        align: 'center',
+        sorter: isOnPage ? (a, b) => a.totalArea - b.totalArea : null,
+      },
+    shouldShowService('pricePerMeter') &&
+      showStandardServices && {
+        title: 'Ціна (грн/м²)',
+        dataIndex: 'pricePerMeter',
+        width: 120,
+        align: 'center',
+        sorter: isOnPage ? (a, b) => a.pricePerMeter - b.pricePerMeter : null,
+        render: (value) => (
+          <span className={s.currency}>{renderPrice(value)}</span>
         ),
-    },
-    shouldShowService('rentPart') && {
-      title: 'Частка загальної площі',
-      dataIndex: 'rentPart',
-      width: 180,
-      align: 'center',
-      sorter: isOnPage ? (a, b) => a.rentPart - b.rentPart : null,
-    },
-    shouldShowService('waterPart') && {
-      title: 'Частка водопостачання',
-      dataIndex: 'waterPart',
-      width: 180,
-      align: 'center',
-      sorter: isOnPage ? (a, b) => a.waterPart - b.waterPart : null,
-    },
-    shouldShowService('cleaning') && {
-      title: 'Прибирання (грн)',
-      dataIndex: 'cleaning',
-      width: 150,
-      align: 'center',
-      sorter: isOnPage ? (a, b) => a.cleaning - b.cleaning : null,
-      render: (value) =>
-        value !== null && value !== undefined && value !== 0 ? (
-          renderCurrency(value)
-        ) : (
-          <span className={s.currency}>-</span>
-        ),
-    },
-    shouldShowService('discount') && {
-      title: 'Знижка',
-      dataIndex: 'discount',
-      width: 150,
-      align: 'center',
-      sorter: isOnPage ? (a, b) => a.discount - b.discount : null,
-      render: (value) =>
-        value !== null && value !== undefined && value !== 0 ? (
-          renderCurrency(value)
-        ) : (
-          <span className={s.currency}>-</span>
-        ),
-    },
-    shouldShowService('garbageCollector') && {
-      align: 'center',
-      title: 'Вивіз сміття',
-      dataIndex: 'garbageCollector',
-      width: 150,
-      render: (value) => <Checkbox checked={value} disabled />,
-    },
-    shouldShowService('inflicion') && {
-      align: 'center',
-      title: 'Нарахування інд. інф.',
-      dataIndex: 'inflicion',
-      width: 170,
-      render: (value) => <Checkbox checked={value} disabled />,
-    },
+      },
+    shouldShowService('servicePricePerMeter') &&
+      showStandardServices && {
+        title: 'Індивідуальне утримання (грн/м²)',
+        dataIndex: 'servicePricePerMeter',
+        width: 200,
+        align: 'center',
+        sorter: isOnPage
+          ? (a, b) => a.servicePricePerMeter - b.servicePricePerMeter
+          : null,
+        render: (value) =>
+          value !== null && value !== undefined && value !== 0 ? (
+            renderCurrency(value)
+          ) : (
+            <span className={s.currency}>-</span>
+          ),
+      },
+    shouldShowService('rentPart') &&
+      showStandardServices && {
+        title: 'Частка загальної площі',
+        dataIndex: 'rentPart',
+        width: 180,
+        align: 'center',
+        sorter: isOnPage ? (a, b) => a.rentPart - b.rentPart : null,
+      },
+    shouldShowService('waterPart') &&
+      showStandardServices && {
+        title: 'Частка водопостачання',
+        dataIndex: 'waterPart',
+        width: 180,
+        align: 'center',
+        sorter: isOnPage ? (a, b) => a.waterPart - b.waterPart : null,
+      },
+    shouldShowService('cleaning') &&
+      showStandardServices && {
+        title: 'Прибирання (грн)',
+        dataIndex: 'cleaning',
+        width: 150,
+        align: 'center',
+        sorter: isOnPage ? (a, b) => a.cleaning - b.cleaning : null,
+        render: (value) =>
+          value !== null && value !== undefined && value !== 0 ? (
+            renderCurrency(value)
+          ) : (
+            <span className={s.currency}>-</span>
+          ),
+      },
+    shouldShowService('discount') &&
+      showStandardServices && {
+        title: 'Знижка',
+        dataIndex: 'discount',
+        width: 150,
+        align: 'center',
+        sorter: isOnPage ? (a, b) => a.discount - b.discount : null,
+        render: (value) =>
+          value !== null && value !== undefined && value !== 0 ? (
+            renderCurrency(value)
+          ) : (
+            <span className={s.currency}>-</span>
+          ),
+      },
+    shouldShowService('garbageCollector') &&
+      showStandardServices && {
+        align: 'center',
+        title: 'Вивіз сміття',
+        dataIndex: 'garbageCollector',
+        width: 150,
+        render: (value) => <Checkbox checked={value} disabled />,
+      },
+    shouldShowService('inflicion') &&
+      showStandardServices && {
+        align: 'center',
+        title: 'Нарахування інд. інф.',
+        dataIndex: 'inflicion',
+        width: 170,
+        render: (value) => <Checkbox checked={value} disabled />,
+      },
   ].filter(Boolean) as ColumnType<any>[]
 
   if (customServices?.length) {
@@ -489,8 +566,10 @@ const getDefaultColumns = ({
         align: 'center',
         ellipsis: true,
         render: (_, record: IExtendedRealestate) => {
-          const match = (record as any).individualServices?.find(
-            (s) => String(s._id) === String(custom._id)
+          const match = record.customServices?.find((s) =>
+            custom.fieldName
+              ? s.fieldName === custom.fieldName
+              : String(s._id) === String(custom._id)
           )
           return match ? (
             renderCurrency(match.price)
@@ -562,12 +641,12 @@ const getDefaultColumns = ({
                   </Popconfirm>
                 ),
               },
-              isGlobalAdmin && {
+              (isGlobalAdmin || isAdmin) && {
                 key: 'delete',
                 label: (
                   <Popconfirm
                     id="popconfirm_custom"
-                    title={`Ви впевнені що хочете видалити нерухомість?`}
+                    title={`Ви впевнені що хочете видалити компанію?`}
                     onConfirm={() => handleDelete(realEstate?._id)}
                     okText="Видалити"
                     cancelText="Ні"
@@ -604,37 +683,73 @@ const getDefaultColumns = ({
     width: 200,
     filterSearch: true,
     render: (i: string) => {
-      if (isUser || !debtorCompanies) return i
-      const debtor = debtorCompanies?.find(
-        (companie) => companie?.companyName === i
-      )
+      const companyId = realEstatesFilter?.find((f) => f.text === i)?.value
+      const canFilter =
+        isOnPage && setFilters && companyId && !isSingleCompanyByData
 
-      if (!debtor) return i
+      if (!isUser && debtorCompanies) {
+        const debtor = debtorCompanies?.find(
+          (companie) => companie?.companyName === i
+        )
 
-      const tooltipDebtor = (
-        <div>
-          <p>
-            <b>Компанія боржник</b>
-          </p>
-          <p>Назва компанії: {i}</p>
-          <p>Сума боргу: {formatDebt(debtor.totalDebt)}</p>
-        </div>
-      )
+        if (debtor) {
+          const isCompanyDebtor = getDebtSide(debtor.totalDebt) === 'company'
+          const tooltipDebtor = (
+            <div>
+              <p>
+                <b>
+                  {isCompanyDebtor ? 'Компанія боржник' : 'Переплата компанії'}
+                </b>
+              </p>
+              <p>Назва компанії: {i}</p>
+              <p>
+                {isCompanyDebtor ? 'Сума боргу' : 'Сума переплати'}:{' '}
+                {formatDebtAmount(debtor.totalDebt)}
+              </p>
+            </div>
+          )
 
-      return (
-        <Badge
-          count={formatDebt(debtor.totalDebt)}
-          title=""
-          color={getDebtorTooltipColor(debtor)}
-          overflowCount={Infinity}
-          style={{ cursor: 'pointer' }}
-          size="small"
-          offset={[3, -8]}
-        >
-          <Tooltip title={tooltipDebtor}>
-            <span style={{ cursor: 'pointer' }}>{i}</span>
-          </Tooltip>
-        </Badge>
+          const companyLabel = canFilter ? (
+            <TableFilterLink
+              label={i}
+              filterKey="company"
+              filterId={String(companyId)}
+              filters={filters}
+              setFilters={setFilters}
+              tooltipTitle=""
+            />
+          ) : (
+            i
+          )
+
+          return (
+            <Tooltip title={tooltipDebtor} placement="top">
+              <Badge
+                count={formatSignedDebt(debtor.totalDebt)}
+                title=""
+                color={getDebtorTooltipColor(debtor)}
+                overflowCount={Infinity}
+                style={{ cursor: 'pointer' }}
+                size="small"
+                offset={[10, 0]}
+              >
+                {companyLabel}
+              </Badge>
+            </Tooltip>
+          )
+        }
+      }
+
+      return canFilter ? (
+        <TableFilterLink
+          label={i}
+          filterKey="company"
+          filterId={String(companyId)}
+          filters={filters}
+          setFilters={setFilters}
+        />
+      ) : (
+        i
       )
     },
   }
@@ -642,7 +757,18 @@ const getDefaultColumns = ({
     title: 'Надавач послуг',
     dataIndex: 'domain',
     width: 200,
-    render: (i) => i?.name,
+    render: (i) =>
+      isOnPage && setFilters ? (
+        <TableFilterLink
+          label={i?.name}
+          filterKey="domain"
+          filterId={i?._id}
+          filters={filters}
+          setFilters={setFilters}
+        />
+      ) : (
+        i?.name
+      ),
     hidden: domainsFilter?.length <= 1,
     filterSearch: true,
   }

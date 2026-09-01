@@ -1,85 +1,59 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
-import { Modal, Button, Typography, Space } from 'antd'
+import React, { useEffect, useMemo, useState } from 'react'
+import { Button } from 'antd'
+import { QuestionCircleOutlined } from '@ant-design/icons'
+import { useDispatch } from 'react-redux'
 import AddPaymentModal from '@components/AddPaymentModal'
 import ScrollFactoryAnimation from '@components/ScrollFactoryAnimation'
 import { Header } from '@components/Layouts/Header'
 import { Footer } from '@components/Layouts/Footer'
-import {
-  useGetCurrentUserQuery,
-  useGetUserByIdQuery,
-  userApi,
-} from '@common/api/userApi/user.api'
-import { useAppDispatch } from '@modules/store/hooks'
+import DashboardTour from '@components/DashboardPage/DashboardTour'
+import { addButton, removeButton } from '@modules/store/floatButtonSlice'
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { useRouter } from 'next/router'
-import { Roles } from '@utils/constants'
-import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
-import DomainModal from '@components/UI/DomainsComponents/DomainModal'
 import s from './DashboardLanding.module.scss'
 
-const { Title, Text } = Typography
-
 const DashboardLanding = () => {
-  const dispatch = useAppDispatch()
   const router = useRouter()
+  const dispatch = useDispatch()
   const { data: user } = useGetCurrentUserQuery()
-  // The by-id endpoint returns adminDomains/adminCompanies, which lets us
-  // decide modal visibility from what the user owns (data-driven) instead of a
-  // one-shot isFirstLogin flag.
-  const { data: fullUser } = useGetUserByIdQuery(user?._id as string, {
-    skip: !user?._id,
-  })
-  const [welcomeOpen, setWelcomeOpen] = useState(false)
-  const [domainModalOpen, setDomainModalOpen] = useState(false)
-  const [invoicePromptOpen, setInvoicePromptOpen] = useState(false)
   const [paymentModalOpen, setPaymentModalOpen] = useState(false)
-  const [createdDomainId, setCreatedDomainId] = useState<string>()
+  const [showTour, setShowTour] = useState(false)
+
+  const tourFloatButton = useMemo(
+    () => ({
+      key: 'dashboard-tour',
+      icon: <QuestionCircleOutlined />,
+      onClick: () => setShowTour(true),
+      tooltip: 'Тур',
+      order: 5,
+    }),
+    []
+  )
 
   useEffect(() => {
-    if (!fullUser) return
-    const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
-    const scoped = fullUser as typeof fullUser & {
-      adminDomains?: unknown[]
-      adminCompanies?: unknown[]
+    dispatch(addButton(tourFloatButton))
+    return () => {
+      dispatch(removeButton(tourFloatButton.key))
     }
-    const ownsNothing =
-      !scoped.adminDomains?.length && !scoped.adminCompanies?.length
-    setWelcomeOpen(Boolean(ownsNothing && !isGlobalAdmin))
-  }, [fullUser, user])
-
-  const handleCreateProvider = () => {
-    setWelcomeOpen(false)
-    setDomainModalOpen(true)
-  }
-
-  const handleDomainModalClose = (createdDomain?: IExtendedDomain) => {
-    setDomainModalOpen(false)
-    // Creating a domain adds the user to its adminEmails, which promotes them
-    // to DomainAdmin on the next getCurrentUser call. Refresh the user so the
-    // new role (and the data-driven modal visibility) updates without a reload.
-    dispatch(userApi.util.invalidateTags(['User']))
-    if (createdDomain?._id) {
-      setCreatedDomainId(createdDomain._id)
-      setInvoicePromptOpen(true)
-    }
-  }
+  }, [dispatch, tourFloatButton])
 
   const handleStartFirstInvoice = () => {
-    setInvoicePromptOpen(false)
     setPaymentModalOpen(true)
   }
 
-  const handleDeclineFirstInvoice = () => {
-    setInvoicePromptOpen(false)
-    router.reload()
-  }
-
-  const handlePaymentModalClose = () => {
+  const handlePaymentModalClose = (success?: boolean) => {
     setPaymentModalOpen(false)
+    if (success) {
+      router.push('/payment')
+    } else {
+      router.reload()
+    }
+    // The first invoice creates a provider+company on the fly, which promotes
+    // the user to DomainAdmin. Reload so the new role and data take effect.
     router.reload()
   }
-
   return (
     <div
       style={{
@@ -120,80 +94,48 @@ const DashboardLanding = () => {
             className={s.grid}
             style={{ height: 'auto', overflow: 'visible', display: 'block' }}
           >
-            <ScrollFactoryAnimation />
+            <ScrollFactoryAnimation
+              action={
+                <Button
+                  type="primary"
+                  size="large"
+                  onClick={handleStartFirstInvoice}
+                  style={{
+                    marginTop: 24,
+                    height: 56,
+                    padding: '0 40px',
+                    fontSize: 18,
+                    fontWeight: 600,
+                    borderRadius: 12,
+                  }}
+                >
+                  Створити рахунок
+                </Button>
+              }
+            />
           </div>
         </div>
       </section>
 
-      <div style={{ position: 'relative', zIndex: 10, width: '100%' }}>
-        <Footer style={{ borderTop: '1px solid rgba(118, 12, 206, 0.1)' }} />
+      <div style={{ position: 'sticky', bottom: 0, zIndex: 10, width: '100%' }}>
+        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }}>
+          <Footer style={{ borderTop: '1px solid rgba(118, 12, 206, 0.1)' }} />
+        </div>
       </div>
-
-      <Modal
-        open={welcomeOpen}
-        footer={null}
-        onCancel={() => setWelcomeOpen(false)}
-        centered
-        width={480}
-      >
-        <Space direction="vertical" size="large" style={{ width: '100%' }}>
-          <div style={{ textAlign: 'center' }}>
-            <Title level={3} style={{ marginBottom: 8 }}>
-              Вітаю у додатку E-Orenda
-            </Title>
-            <Text type="secondary">
-              де ви можете робити рахунки в один клік
-            </Text>
-          </div>
-
-          <Button
-            type="primary"
-            block
-            size="large"
-            onClick={handleCreateProvider}
-          >
-            Створити надавача послуг
-          </Button>
-        </Space>
-      </Modal>
-
-      {domainModalOpen && (
-        <DomainModal
-          currentDomain={null as unknown as IExtendedDomain}
-          editable
-          closeModal={handleDomainModalClose}
-        />
-      )}
-
-      <Modal
-        open={invoicePromptOpen}
-        centered
-        width={420}
-        onCancel={handleDeclineFirstInvoice}
-        footer={[
-          <Button key="later" onClick={handleDeclineFirstInvoice}>
-            Пізніше
-          </Button>,
-          <Button key="yes" type="primary" onClick={handleStartFirstInvoice}>
-            Так
-          </Button>,
-        ]}
-      >
-        <Space direction="vertical" size="small" style={{ width: '100%' }}>
-          <Title level={4} style={{ marginBottom: 0 }}>
-            Надавача послуг створено!
-          </Title>
-          <Text type="secondary">Створити перший рахунок?</Text>
-        </Space>
-      </Modal>
-
       {paymentModalOpen && (
         <AddPaymentModal
           paymentActions={{ edit: false, preview: false }}
-          preselectedDomain={createdDomainId}
           closeModal={handlePaymentModalClose}
         />
       )}
+
+      <DashboardTour userRoles={user?.roles || []} />
+      <DashboardTour
+        isVisible={showTour}
+        onClose={() => setShowTour(false)}
+        isManualStart
+        userRoles={user?.roles || []}
+      />
     </div>
   )
 }

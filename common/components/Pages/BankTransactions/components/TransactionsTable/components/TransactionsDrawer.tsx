@@ -19,7 +19,11 @@ import {
   useEditRealEstateMutation,
 } from '@common/api/realestateApi/realestate.api'
 import { useQuickSend } from './useQuicksend'
-import { buildTransactionPayload } from './quickSendHelpers'
+import { Operations } from '@utils/constants'
+import {
+  buildTransactionPayload,
+  buildCompanyIdentifierPatch,
+} from './quickSendHelpers'
 import styles from './style.module.scss'
 
 interface TransactionDrawerProps {
@@ -77,9 +81,11 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
   }
 
   const saveAccountToCompany = async (companyId: string) => {
-    if (!transaction.AUT_CNTR_ACC) return
-    if (transaction.AUT_CNTR_NAM?.includes('Транз')) return
-    await editRealEstate({ _id: companyId, account: transaction.AUT_CNTR_ACC })
+    const company = relatedCompanies.find((c) => c._id === companyId)
+    const patch = buildCompanyIdentifierPatch(transaction, company, companyId, {
+      accountAlreadyMatched: isAccountMatched,
+    })
+    if (patch) await editRealEstate(patch)
   }
 
   const showModal = () => setModalVisible(true)
@@ -88,7 +94,7 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
     setModalVisible(false)
     if (success === true) {
       message.success('Рахунок успішно створено!')
-      if (selectedCompany && !isAccountMatched) {
+      if (selectedCompany) {
         await saveAccountToCompany(selectedCompany)
       }
       refetchTransactions?.()
@@ -216,6 +222,7 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
             company: selectedCompany,
             domain: domain,
             transaction: transactionPayload,
+            type: Operations.Credit,
           }}
           paymentActions={{
             edit: false,

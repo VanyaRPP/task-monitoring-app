@@ -45,8 +45,17 @@ jest.mock('@modules/models/Payment', () => ({
   },
 }))
 
+jest.mock('@modules/models/RealEstate', () => ({
+  __esModule: true,
+  default: { find: jest.fn() },
+}))
+
 import Payment from '@modules/models/Payment'
-import { checkTransaction, normalizeBankAccount } from './index'
+import {
+  checkTransaction,
+  matchCompanyByIdentity,
+  normalizeBankAccount,
+} from './index'
 
 describe('normalizeBankAccount', () => {
   it('trims whitespace', () => {
@@ -199,6 +208,124 @@ describe('checkTransaction', () => {
     })
   })
 
+  it('fallback query matches a prior payment by BOTH account and payer name', async () => {
+    // A new account for a known payer: the query must also try the name so the
+    // older payment (stored under a different account) can be found.
+    mockedFind.mockResolvedValue([]) // brand-new tx, never invoiced
+    mockedFindOne.mockReturnValue({
+      sort: jest.fn().mockReturnValue({
+        lean: jest.fn().mockResolvedValue(null),
+      }),
+    })
+
+    await checkTransaction({
+      transaction: {
+        ...transaction,
+        TECHNICAL_TRANSACTION_ID: undefined,
+        AUT_CNTR_ACC: 'UA000000000000000000000000001',
+        AUT_CNTR_NAM: 'КАРТКОВИЙ - ФОП Петренко Петро Петрович',
+      },
+      domainId: 'domain-xyz',
+    })
+
+    expect(mockedFindOne).toHaveBeenCalledWith({
+      domain: 'domain-xyz',
+      $or: [
+        { 'transaction.AUT_CNTR_ACC': 'UA000000000000000000000000001' },
+        {
+          'transaction.AUT_CNTR_NAM': {
+            $regex: 'ПЕТРЕНКО\\s+ПЕТРО\\s+ПЕТРОВИЧ',
+            $options: 'i',
+          },
+        },
+      ],
+    })
+  })
+
+  it('fallback query matches a prior payment by tax code (AUT_CNTR_CRF) too', async () => {
+    mockedFind.mockResolvedValue([]) // no txid match
+    mockedFindOne.mockReturnValue({
+      sort: jest.fn().mockReturnValue({
+        lean: jest.fn().mockResolvedValue(null),
+      }),
+    })
+
+    await checkTransaction({
+      transaction: {
+        ...transaction,
+        TECHNICAL_TRANSACTION_ID: undefined,
+        AUT_CNTR_ACC: 'UA000000000000000000000000001',
+        AUT_CNTR_CRF: '2534567890',
+        AUT_CNTR_NAM: 'ФОП Payer One',
+      },
+      domainId: 'domain-xyz',
+    })
+
+    expect(mockedFindOne).toHaveBeenCalledWith({
+      domain: 'domain-xyz',
+      $or: [
+        { 'transaction.AUT_CNTR_ACC': 'UA000000000000000000000000001' },
+        { 'transaction.AUT_CNTR_CRF': '2534567890' },
+        {
+          'transaction.AUT_CNTR_NAM': {
+            $regex: 'PAYER\\s+ONE',
+            $options: 'i',
+          },
+        },
+      ],
+    })
+  })
+
+  it('ON-AIR by name history: resolves company from a prior payment of the same payer on a NEW account', async () => {
+    mockedFind.mockResolvedValue([]) // no txid match
+    mockedFindOne.mockReturnValue({
+      sort: jest.fn().mockReturnValue({
+        lean: jest
+          .fn()
+          .mockResolvedValue({ company: 'company-from-name-history' }),
+      }),
+    })
+
+    const result = await checkTransaction({
+      transaction: {
+        ...transaction,
+        TECHNICAL_TRANSACTION_ID: undefined,
+        AUT_CNTR_ACC: 'UA813348510000000026000253475',
+        AUT_CNTR_NAM: 'КАРТКОВИЙ - ФОП Петренко Петро Петрович',
+      },
+      domainId: 'domain-xyz',
+    })
+
+    expect(result).toEqual({
+      isMatchingPayment: false,
+      previousCompanyId: 'company-from-name-history',
+    })
+  })
+
+  it('does NOT run the account fallback for a self-transaction (AUT_CNTR_CRF === AUT_MY_CRF)', async () => {
+    // Owner pays themselves — must not match the owner's own company via the
+    // account fallback.
+    mockedFind.mockResolvedValue([]) // brand-new tx, never invoiced
+
+    const result = await checkTransaction({
+      transaction: {
+        ...transaction,
+        TECHNICAL_TRANSACTION_ID: undefined,
+        AUT_MY_CRF: '9999999999',
+        AUT_CNTR_CRF: '9999999999',
+        AUT_CNTR_NAM: 'DOMAIN OWNER',
+        OSND: 'return of funds',
+      },
+      domainId: 'domain-xyz',
+    })
+
+    expect(mockedFindOne).not.toHaveBeenCalled()
+    expect(result).toEqual({
+      isMatchingPayment: false,
+      previousCompanyId: null,
+    })
+  })
+
   it('does NOT fall back to AUT_CNTR_ACC for транзитний рахунок', async () => {
     const result = await checkTransaction({
       transaction: {
@@ -344,5 +471,117 @@ describe('checkTransaction', () => {
     await expect(
       checkTransaction({ transaction, domainId: null })
     ).rejects.toThrow('DB down')
+  })
+
+  it('ON-AIR: resolves company from the domain company list by tax code when no saved payment exists', async () => {
+    // First-ever payment from a new account: no txid/account history, but the
+    // company carries the payer tax code → identity match sets previousCompanyId.
+    mockedFind.mockResolvedValue([]) // no txid match
+
+    const result = await checkTransaction({
+      transaction: {
+        ...transaction,
+        TECHNICAL_TRANSACTION_ID: undefined,
+        AUT_CNTR_CRF: '3440713349',
+        AUT_CNTR_ACC: 'UA000000000000000000000000001',
+        AUT_CNTR_NAM: 'ФОП Payer One',
+      },
+      domainId: 'domain-xyz',
+      companies: [
+        {
+          _id: 'company-identity',
+          companyName: 'ФОП Payer One',
+          rnokpp: '3440713349',
+        },
+      ],
+    })
+
+    expect(result).toEqual({
+      isMatchingPayment: false,
+      previousCompanyId: 'company-identity',
+    })
+  })
+
+  it('ON-AIR: does not identity-match a self-transaction', async () => {
+    mockedFind.mockResolvedValue([])
+
+    const result = await checkTransaction({
+      transaction: {
+        ...transaction,
+        TECHNICAL_TRANSACTION_ID: undefined,
+        AUT_MY_CRF: '2479002623',
+        AUT_CNTR_CRF: '2479002623',
+        AUT_CNTR_NAM: 'DOMAIN OWNER',
+      },
+      domainId: 'domain-xyz',
+      companies: [
+        {
+          _id: 'owner-company',
+          companyName: 'DOMAIN OWNER',
+          rnokpp: '2479002623',
+        },
+      ],
+    })
+
+    expect(result).toEqual({
+      isMatchingPayment: false,
+      previousCompanyId: null,
+    })
+  })
+})
+
+describe('matchCompanyByIdentity', () => {
+  const base = {
+    AUT_MY_CRF: '2479002623',
+    AUT_CNTR_CRF: '3440713349',
+    AUT_CNTR_ACC: 'UA000000000000000000000000001',
+    AUT_CNTR_NAM: 'ФОП Payer One',
+    RECIPIENT_ULTMT_NCEO: '',
+  }
+
+  it('matches by counterparty tax code (AUT_CNTR_CRF)', () => {
+    expect(
+      matchCompanyByIdentity(base, [
+        { _id: 'c1', companyName: 'Хтось інший', rnokpp: '3440713349' },
+      ])
+    ).toBe('c1')
+  })
+
+  it('matches by full name when company has no rnokpp', () => {
+    expect(
+      matchCompanyByIdentity({ ...base, AUT_CNTR_CRF: '' }, [
+        { _id: 'c2', companyName: 'ФОП Payer One', rnokpp: '' },
+      ])
+    ).toBe('c2')
+  })
+
+  it('stringifies a non-string company id', () => {
+    expect(
+      matchCompanyByIdentity(base, [
+        {
+          _id: { toString: () => 'obj-id' },
+          companyName: 'X',
+          rnokpp: '3440713349',
+        },
+      ])
+    ).toBe('obj-id')
+  })
+
+  it('returns null for a self-transaction even if a company matches', () => {
+    expect(
+      matchCompanyByIdentity(
+        { ...base, AUT_CNTR_CRF: '2479002623', AUT_CNTR_NAM: 'DOMAIN OWNER' },
+        [{ _id: 'own', companyName: 'DOMAIN OWNER', rnokpp: '2479002623' }]
+      )
+    ).toBeNull()
+  })
+
+  it('returns null when nothing matches or the list is empty', () => {
+    expect(matchCompanyByIdentity(base, [])).toBeNull()
+    expect(
+      matchCompanyByIdentity(base, [
+        { _id: 'x', companyName: 'Різна Людина', rnokpp: '0000000000' },
+      ])
+    ).toBeNull()
   })
 })

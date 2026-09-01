@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React from 'react'
 import { Alert, Empty, Table } from 'antd'
 import { ColumnType } from 'antd/es/table'
 import { useRouter } from 'next/router'
@@ -11,12 +11,6 @@ import {
 import { AppRoutes, Roles, ServiceType } from '@utils/constants'
 import { usePaymentColumns, CompanyWithPayments } from './usePaymentColumns'
 import PaymentTableSummary from './PaymentTableSummary'
-import { useGetCustomServicesQuery } from '@common/api/customServicesApi/customServices.api'
-import {
-  ICustomServiceItem,
-  extractDomainsFromRealEstates,
-  getVisibleServices,
-} from '@utils/servicesVisibility'
 
 export interface PaymentDeleteItem {
   id: string
@@ -149,25 +143,6 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
   const isDomainAdmin = currUserRoles.includes(Roles.DOMAIN_ADMIN)
   const isUser = currUserRoles.includes(Roles.USER)
 
-  const { data: customServicesData } = useGetCustomServicesQuery({})
-  const allCustomServices = useMemo(
-    () => (customServicesData?.data ?? []) as ICustomServiceItem[],
-    [customServicesData?.data]
-  )
-
-  const visibleDomains = useMemo(
-    () =>
-      extractDomainsFromRealEstates(
-        payments?.data?.map((p) => ({ domain: p.domain })) ?? []
-      ),
-    [payments?.data]
-  )
-
-  const visibleCustomServices = useMemo(
-    () => getVisibleServices(currUserRoles, visibleDomains, allCustomServices),
-    [currUserRoles, visibleDomains, allCustomServices]
-  )
-
   const allColumns = usePaymentColumns({
     sepDomainID,
     filters,
@@ -189,7 +164,6 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
     onSendPaymentEmail,
     onUpdatePaymentStatus,
     deleteLoading,
-    visibleCustomServices,
   })
 
   const visibleColumns = (allColumns as ColumnType<IExtendedPayment>[]).filter(

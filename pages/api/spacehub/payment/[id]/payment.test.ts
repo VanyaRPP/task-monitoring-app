@@ -8,7 +8,6 @@ import Payment from '@common/modules/models/Payment'
 import Domain from '@modules/models/Domain'
 import RealEstate from '@common/modules/models/RealEstate'
 import PaymentChangeLog from '@common/modules/models/PaymentChangeLog'
-import ProfitService from '@common/services/profitService/profit.service'
 
 jest.mock('next-auth', () => ({ getServerSession: jest.fn() }))
 jest.mock('@pages/api/auth/[...nextauth]', () => ({ authOptions: {} }))
@@ -18,7 +17,6 @@ jest.mock('@common/modules/models/Payment')
 jest.mock('@common/modules/models/PaymentChangeLog')
 jest.mock('@modules/models/Domain')
 jest.mock('@common/modules/models/RealEstate')
-jest.mock('@common/services/profitService/profit.service')
 
 setupTestEnvironment()
 
@@ -134,7 +132,6 @@ describe('Payment API Endpoint - [id]', () => {
         ...updateData,
       })
       ;(PaymentChangeLog.create as jest.Mock).mockResolvedValue({})
-      ;(ProfitService.updatePayment as jest.Mock).mockResolvedValue({})
 
       const res = await performRequest('PATCH', debitPayment._id, updateData)
 
@@ -143,8 +140,14 @@ describe('Payment API Endpoint - [id]', () => {
       expect(jsonResponse.success).toBe(true)
       expect(jsonResponse.data.description).toBe('Updated')
 
-      expect(PaymentChangeLog.create).toHaveBeenCalled()
-      expect(ProfitService.updatePayment).toHaveBeenCalled()
+      expect(PaymentChangeLog.create).toHaveBeenCalledWith(
+        expect.objectContaining({ actionType: 'UPDATE', source: 'single' })
+      )
+      const auditArg = (PaymentChangeLog.create as jest.Mock).mock.calls[0][0]
+      expect(auditArg.before).toBeDefined()
+      expect(auditArg.after).toBeDefined()
+      expect(auditArg.after.description).toBe('Updated')
+      expect(auditArg.before.description).not.toBe(auditArg.after.description)
     })
 
     it('should return 403 for regular User', async () => {
@@ -325,13 +328,16 @@ describe('Payment API Endpoint - [id]', () => {
       await mockLoginAs(users.globalAdmin)
       ;(Payment.findById as jest.Mock).mockResolvedValue(debitPayment)
       ;(Payment.findByIdAndRemove as jest.Mock).mockResolvedValue(debitPayment)
-      ;(ProfitService.deleteByIdPayment as jest.Mock).mockResolvedValue({})
 
       const res = await performRequest('DELETE', debitPayment._id)
 
       expect(res.status).toHaveBeenCalledWith(200)
-      expect(ProfitService.deleteByIdPayment).toHaveBeenCalledWith(
-        debitPayment._id.toString()
+      expect(PaymentChangeLog.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          actionType: 'DELETE',
+          source: 'single',
+          before: expect.objectContaining({ _id: debitPayment._id }),
+        })
       )
     })
 

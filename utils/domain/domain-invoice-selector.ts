@@ -70,6 +70,42 @@ export function invoiceLineExcludeKey(
   return `stype:${t}`
 }
 
+export function typedServiceTypesOnInvoice(
+  invoices:
+    | ReadonlyArray<
+        Pick<IPaymentField, 'type' | 'serviceId'> | null | undefined
+      >
+    | undefined
+): Set<string> {
+  const types = new Set<string>()
+  for (const inv of invoices ?? []) {
+    if (!inv || inv.serviceId) continue
+    const type = inv.type
+    if (!type || type === ServiceType.Custom || type === 'custom') continue
+    types.add(String(type))
+  }
+  return types
+}
+
+export function isCatalogOptionExcluded(
+  option: { value: string; payload: IInvoiceLineAddPayload },
+  excludeKeys: ReadonlyArray<string> | undefined,
+  excludeServiceTypes?: ReadonlySet<string>
+): boolean {
+  if (excludeKeys?.includes(option.value)) return true
+  const type = option.payload?.type
+  if (
+    excludeServiceTypes &&
+    type &&
+    type !== ServiceType.Custom &&
+    type !== 'custom' &&
+    excludeServiceTypes.has(String(type))
+  ) {
+    return true
+  }
+  return false
+}
+
 export function resolveCustomServicePrice(
   fieldName: string | undefined,
   ctx: IInvoicePriceContext
@@ -102,7 +138,7 @@ export function buildInvoiceAddPayloadFromCatalogRow(
     fieldName: row.fieldName,
   })
   if (resolved) {
-    return { type: resolved, serviceId: id }
+    return { type: resolved, serviceId: id, customName: row.name }
   }
   const price = resolveCustomServicePrice(row.fieldName, context) ?? 0
   return {

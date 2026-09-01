@@ -7,7 +7,6 @@ import handler from '.'
 import Payment from '@common/modules/models/Payment'
 import Domain from '@modules/models/Domain'
 import PaymentChangeLog from '@common/modules/models/PaymentChangeLog'
-import ProfitService from '@common/services/profitService/profit.service'
 import { Operations } from '@utils/constants'
 
 jest.mock('next-auth', () => ({ getServerSession: jest.fn() }))
@@ -17,7 +16,6 @@ jest.mock('@pages/api/api.config', () => jest.fn())
 jest.mock('@common/modules/models/Payment')
 jest.mock('@common/modules/models/PaymentChangeLog')
 jest.mock('@modules/models/Domain')
-jest.mock('@common/services/profitService/profit.service')
 
 setupTestEnvironment()
 
@@ -89,7 +87,6 @@ describe('Payment API Endpoint - mark-paid', () => {
       Promise.resolve({ ...data, _id: `credit-${data.invoiceNumber}` })
     )
     ;(PaymentChangeLog.create as jest.Mock).mockResolvedValue({})
-    ;(ProfitService.updatePayment as jest.Mock).mockResolvedValue({})
 
     const res = await performRequest('POST', { ids })
 
@@ -120,8 +117,48 @@ describe('Payment API Endpoint - mark-paid', () => {
       new Date(debitPayments[0].invoiceCreationDate).getTime() + 1
     )
 
+    // paidAt records when the money actually arrived, independent of the
+    // invoice date the credit is filed under.
+    expect(firstCreateArg.paidAt).toBeInstanceOf(Date)
+    expect(secondCreateArg.paidAt).toBeInstanceOf(Date)
+
     expect(PaymentChangeLog.create).toHaveBeenCalledTimes(2)
-    expect(ProfitService.updatePayment).toHaveBeenCalledTimes(2)
+  })
+
+  it('creates the credit payment with an empty invoice array, not the source services', async () => {
+    await mockLoginAs(users.globalAdmin)
+    const sourceWithServices = {
+      ...debitPayments[0],
+      invoice: [{ service: 'test-service', sum: 100 }],
+    }
+    ;(Payment.find as jest.Mock).mockResolvedValue([sourceWithServices])
+    ;(Payment.create as jest.Mock).mockImplementation((data: any) =>
+      Promise.resolve({ ...data, _id: 'credit-id' })
+    )
+    ;(PaymentChangeLog.create as jest.Mock).mockResolvedValue({})
+
+    await performRequest('POST', { ids: [sourceWithServices._id] })
+
+    const createArg = (Payment.create as jest.Mock).mock.calls[0][0]
+    expect(createArg.invoice).toEqual([])
+  })
+
+  it('creates the credit payment with an empty invoice array, not the source services', async () => {
+    await mockLoginAs(users.globalAdmin)
+    const sourceWithServices = {
+      ...debitPayments[0],
+      invoice: [{ service: 'test-service', sum: 100 }],
+    }
+    ;(Payment.find as jest.Mock).mockResolvedValue([sourceWithServices])
+    ;(Payment.create as jest.Mock).mockImplementation((data: any) =>
+      Promise.resolve({ ...data, _id: 'credit-id' })
+    )
+    ;(PaymentChangeLog.create as jest.Mock).mockResolvedValue({})
+
+    await performRequest('POST', { ids: [sourceWithServices._id] })
+
+    const createArg = (Payment.create as jest.Mock).mock.calls[0][0]
+    expect(createArg.invoice).toEqual([])
   })
 
   it('skips already-paid (credit) payments — only debit can be marked', async () => {
@@ -168,7 +205,6 @@ describe('Payment API Endpoint - mark-paid', () => {
     expect(json.data.createdIds).toHaveLength(1)
     expect(json.data.skippedIds).toContain(foreignDomainPayment._id.toString())
     expect(Payment.create).toHaveBeenCalledTimes(1)
-    expect(ProfitService.updatePayment).not.toHaveBeenCalled()
   })
 
   it('domain admin: handles multi-domain admin correctly', async () => {
@@ -204,7 +240,6 @@ describe('Payment API Endpoint - mark-paid', () => {
       Promise.resolve({ ...data, _id: 'credit-id' })
     )
     ;(PaymentChangeLog.create as jest.Mock).mockResolvedValue({})
-    ;(ProfitService.updatePayment as jest.Mock).mockResolvedValue({})
 
     const res = await performRequest('POST', {
       ids: [debitPayments[0]._id, 'nonexistent-id'],
@@ -226,13 +261,15 @@ describe('Payment API Endpoint - mark-paid', () => {
       description: '',
     })
     ;(PaymentChangeLog.create as jest.Mock).mockResolvedValue({})
-    ;(ProfitService.updatePayment as jest.Mock).mockResolvedValue({})
 
     await performRequest('POST', { ids: [debitPayments[0]._id] })
 
     const logArg = (PaymentChangeLog.create as jest.Mock).mock.calls[0][0]
     expect(logArg.paymentId).toBe(debitPayments[0]._id)
+    expect(logArg.actionType).toBe('MARK_PAID')
+    expect(logArg.source).toBe('quick-pay')
     expect(logArg.reason).toBe('mark-paid')
-    expect(logArg.invoiceData.creditPaymentId).toBe('new-credit-id')
+    expect(logArg.before._id).toBe(debitPayments[0]._id)
+    expect(logArg.after._id).toBe('new-credit-id')
   })
 })

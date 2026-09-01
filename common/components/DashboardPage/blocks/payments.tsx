@@ -23,6 +23,7 @@ import {
   debtorsApi,
   useGetDebtorsQuery,
 } from '@common/api/debtorsApi/debtors.api'
+import { applyDebtDeltas } from '@common/api/debtorsApi/debtorsCache'
 
 import {
   IExtendedPayment,
@@ -138,7 +139,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     }
   }, [filters?.domain, domainsFiltersData])
 
-  const { data: debtorsData } = useGetDebtorsQuery(
+  const { data: debtorsData, refetch: refetchDebtors } = useGetDebtorsQuery(
     { domainIds },
     { skip: !domainIds.length }
   )
@@ -176,9 +177,9 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     channel.onmessage = (event) => {
       if (event.data === 'PAYMENT_CREATED') {
         dispatch(paymentApi.util.invalidateTags(['Payment']))
+        dispatch(debtorsApi.util.invalidateTags(['Debtors']))
       }
     }
-
     return () => {
       channel.close()
     }
@@ -200,15 +201,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
           { domainIds },
           (draft) => {
             if (!draft.companies) return
-            for (const { companyId, debtDelta } of changes) {
-              const company = draft.companies.find(
-                (c) => c.companyId === companyId
-              )
-              if (company) {
-                company.totalDebt += debtDelta
-              }
-            }
-            draft.companies = draft.companies.filter((c) => c.totalDebt > 0)
+            draft.companies = applyDebtDeltas(draft.companies, changes)
           }
         )
       )
@@ -225,6 +218,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     async (id: string) => {
       const removed = payments?.data?.find((p) => p._id === id)
       const response = await deletePaymentMutation(id)
+
       if ('data' in response) {
         if (removed) {
           patchDebtorsCache([
@@ -234,12 +228,33 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
             },
           ])
         }
+
+        dispatch(
+          setSelectedPayments(
+            selectedPayments.filter((p: IExtendedPayment) => p._id !== id)
+          )
+        )
+        dispatch(
+          setPaymentsDeleteItems(
+            paymentsDeleteItems.filter(
+              (item: PaymentDeleteItem) => item.id !== id
+            )
+          )
+        )
+
         message.success('Видалено!')
       } else {
         message.error('Помилка при видаленні рахунку')
       }
     },
-    [deletePaymentMutation, patchDebtorsCache, payments]
+    [
+      deletePaymentMutation,
+      patchDebtorsCache,
+      payments,
+      selectedPayments,
+      paymentsDeleteItems,
+      dispatch,
+    ]
   )
   const handleMarkPaid = useCallback(
     async (source: IExtendedPayment) => {
@@ -535,7 +550,11 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
       dispatch(setSelectedColumns(cols)),
     onBulkMarkPaid: handleBulkMarkPaid,
     onBulkDuplicate: handleBulkDuplicate,
-    onRefresh: () => refetchPayments(),
+    onRefresh: () =>
+      Promise.all([
+        refetchPayments(),
+        domainIds.length ? refetchDebtors() : Promise.resolve(),
+      ]),
     isRefreshing: paymentsFetching,
     domainFilter: filterProps.domainsFilter,
     realEstatesFilter: filterProps.companiesFilter,

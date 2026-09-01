@@ -22,6 +22,7 @@ import { useTranslation } from 'next-i18next'
 import s from './style.module.scss'
 import { formatDateWithGenitiveMonthCapitalized } from '@utils/helpers'
 import { useMemo, useState } from 'react'
+import { CURRENCY_SELECT_OPTIONS } from '@utils/constants'
 
 dayjs.locale('uk')
 
@@ -256,6 +257,25 @@ const AddCostForm: React.FC<Props> = ({
           />
         </Form.Item>
 
+        {/*
+          Which month the cost belongs to, which is often not the month it was
+          paid in - June utilities are usually settled in July. The profit
+          ledger groups on this, so it has to be stated rather than inferred.
+        */}
+        <Form.Item
+          name="periodMonth"
+          label={t('profitPage:form.periodMonth')}
+          tooltip={t('profitPage:form.periodMonthHint')}
+        >
+          <DatePicker
+            picker="month"
+            format="MMMM YYYY"
+            placeholder={t('profitPage:form.periodMonthPlaceholder')}
+            className={s.formInput}
+            disabled={isPreview}
+          />
+        </Form.Item>
+
         {isPreview ? (
           <Form.Item
             name="sum"
@@ -291,6 +311,18 @@ const AddCostForm: React.FC<Props> = ({
             />
           </Form.Item>
         )}
+
+        {/*
+          A domain that invoices in USD also pays some costs in USD; without
+          this the expense side could only ever be UAH.
+        */}
+        <Form.Item name="currency" label={t('profitPage:form.currency')}>
+          <Select
+            options={CURRENCY_SELECT_OPTIONS}
+            className={s.formInput}
+            disabled={isPreview}
+          />
+        </Form.Item>
 
         <Form.Item name="description" label={t('profitPage:form.description')}>
           <Input.TextArea

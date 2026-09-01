@@ -4,6 +4,7 @@ import { useReactToPrint } from 'react-to-print'
 import { PrinterOutlined, TableOutlined } from '@ant-design/icons'
 import { Tooltip } from 'antd'
 import dayjs from 'dayjs'
+import 'dayjs/locale/uk'
 import styles from './styles.module.scss'
 import GroupedPricesTable from '@components/Forms/GroupedReceiptForm/GroupedPricesTable'
 import { IPayment } from '@common/api/paymentApi/payment.api.types'
@@ -14,6 +15,8 @@ import {
   getDomainHeading,
   getRecipientCompanyHeading,
 } from '@common/components/Forms/GroupedReceiptForm/templates/invoice-party-headings'
+import { resolveServiceMonth } from '@common/components/Forms/GroupedReceiptForm/templates/official/resolveServiceMonth'
+import { getContractReference } from './contract-reference'
 
 const PriceList: FC<{ data: IPayment }> = ({ data }) => {
   const { form, company, showQuantityInPreview, setShowQuantityInPreview } =
@@ -48,22 +51,28 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
     company?.companyName
   )
 
-  const formatActNarrowSpace = (value: string | undefined) =>
-    (value?.trim() || '').replace(/(:\s)/g, ':\u00A0')
-  const introCustomerText = [
-    customerHeading,
-    formatActNarrowSpace(payment?.reciever?.description),
-  ]
-    .filter((s) => s.length > 0)
-    .join(' ')
-  const introProviderText = [
-    domainHeading,
-    formatActNarrowSpace(payment?.provider?.description),
-  ]
-    .filter((s) => s.length > 0)
-    .join(' ')
+  // The contract lives on the company. The payment snapshot wins so a saved act
+  // keeps the contract it was issued under even if the company is edited later.
+  const contractReference = getContractReference(
+    payment?.reciever?.contractNumber || company?.contractNumber,
+    payment?.reciever?.contractDate || company?.contractDate,
+    isEnglish
+  )
 
-  const componentRef = useRef()
+  // Same source the "official" template uses: the picked service month when the
+  // payment has one, otherwise the invoice date. Locale is applied per-instance
+  // so the act does not depend on a global dayjs.locale() side effect.
+  const serviceMonth = resolveServiceMonth(
+    payment?.monthService,
+    payment?.invoiceCreationDate
+  )
+  const serviceMonthLabel = serviceMonth
+    ? dayjs(serviceMonth)
+        .locale(isEnglish ? 'en' : 'uk')
+        .format('MMMM YYYY')
+    : ''
+
+  const componentRef = useRef<HTMLDivElement>(null)
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
     documentTitle:
@@ -124,45 +133,19 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
               <div className={styles.approvalSection}>
                 <div>
                   <strong>{isEnglish ? 'APPROVED' : 'ЗАТВЕРДЖУЮ'}</strong>
-                  <br />
-                  {!!domainHeading && (
-                    <>
-                      <strong>{domainHeading}</strong>
-                      <br />
-                    </>
-                  )}
                   <pre>{payment.provider.description?.trim()}</pre>
                 </div>
               </div>
               <div className={styles.approvalSection}>
                 <div>
                   <strong>{isEnglish ? 'APPROVED' : 'ЗАТВЕРДЖУЮ'}</strong>
-                  <br />
-                  {!!customerHeading && (
-                    <>
-                      <strong>{customerHeading}</strong>
-                      <br />
-                    </>
-                  )}
                   <pre>
-                    {payment?.reciever?.description?.trim()} <br />
+                    {payment?.reciever?.description?.trim()}
                     {payment?.reciever?.adminEmails?.map((email) => (
-                      <div key={email}>
-                        {email} <br />
-                      </div>
+                      <div key={email}>{email}</div>
                     ))}
                   </pre>
                 </div>
-              </div>
-              <div className={styles.approvalSection}>
-                <br />
-                <br />
-                <hr />
-              </div>
-              <div className={styles.approvalSection}>
-                <br />
-                <br />
-                <hr />
               </div>
             </div>
           </div>
@@ -181,6 +164,12 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
                 {isEnglish ? '.' : ' року.'}
               </b>
             </p>
+            {!!serviceMonthLabel && (
+              <p>
+                {isEnglish ? 'Services rendered for' : 'Послуги надані за'}{' '}
+                {serviceMonthLabel}
+              </p>
+            )}
             <br />
             <hr />
           </div>
@@ -189,19 +178,19 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
             <p>
               {isEnglish ? (
                 <>
-                  We, the undersigned, the representative of the Customer{' '}
-                  {introCustomerText}, on one side, and the representative of
-                  the Provider {introProviderText}, on the other side, have
-                  executed this Act confirming that, under the agreement, the
-                  Provider performed the following services:
+                  We, the undersigned, the Customer — {customerHeading}, of the
+                  one part, and the Provider — {domainHeading}, of the other
+                  part, have executed this Act stating that, in accordance with{' '}
+                  {contractReference}, the Provider has provided, and the
+                  Customer has accepted, the following services:
                 </>
               ) : (
                 <>
-                  Ми, що нижче підписалися, представник Замовника{' '}
-                  {introCustomerText}, з одного боку, і представник Виконавця{' '}
-                  {introProviderText}, з іншого боку, склали цей акт про те, що
-                  на підставі договору, Виконавцем були виконані наступні роботи
-                  (надані такі послуги):
+                  Ми, що нижче підписалися, Замовник — {customerHeading}, з
+                  однієї сторони, та Виконавець — {domainHeading}, з іншої
+                  сторони, склали цей Акт про те, що відповідно до{' '}
+                  {contractReference} Виконавцем надано, а Замовником прийнято
+                  такі послуги:
                 </>
               )}
             </p>
@@ -254,43 +243,23 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
             <br />
             <div className={styles.signaturesSection}>
               <div className={styles.signatureBlock}>
-                <div>
-                  <b>{isEnglish ? 'Provider' : 'Від Виконавця'}</b>
-                  <br />
-                  {!!domainHeading && (
-                    <>
-                      <b>{domainHeading}</b>
-                      <br />
-                    </>
-                  )}
-                  <br />
-                  <hr />
-                  <br />
-                  <b>
-                    {new Date(payment.invoiceCreationDate).toLocaleDateString()}
-                  </b>
-                  <br />
-                  <pre>{payment.provider.description?.trim()}</pre>
+                <b>{isEnglish ? 'Provider' : 'Від Виконавця'}</b>
+                <pre>{payment.provider.description?.trim()}</pre>
+                <div className={styles.signatureSign}>
+                  <div className={styles.signatureLine} />
+                  <div className={styles.signatureCaption}>
+                    {isEnglish ? '(signature)' : '(підпис)'}
+                  </div>
                 </div>
               </div>
               <div className={styles.signatureBlock}>
-                <div>
-                  <b>{isEnglish ? 'Customer' : 'Від Замовника'}</b>
-                  <br />
-                  {!!customerHeading && (
-                    <>
-                      <b>{customerHeading}</b>
-                      <br />
-                    </>
-                  )}
-                  <br />
-                  <hr />
-                  <br />
-                  <b>
-                    {new Date(payment.invoiceCreationDate).toLocaleDateString()}
-                  </b>
-                  <br />
-                  <pre>{payment.reciever.description?.trim()}</pre>
+                <b>{isEnglish ? 'Customer' : 'Від Замовника'}</b>
+                <pre>{payment.reciever.description?.trim()}</pre>
+                <div className={styles.signatureSign}>
+                  <div className={styles.signatureLine} />
+                  <div className={styles.signatureCaption}>
+                    {isEnglish ? '(signature)' : '(підпис)'}
+                  </div>
                 </div>
               </div>
             </div>

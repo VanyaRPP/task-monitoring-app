@@ -5,8 +5,7 @@ import PaymentChangeLog from '@common/modules/models/PaymentChangeLog'
 import Payment from '@common/modules/models/Payment'
 
 type ApiResponse =
-  | { success: true; data: any }
-  | { success: false; message: string }
+  { success: true; data: any } | { success: false; message: string }
 
 export default async function handler(
   req: NextApiRequest,
@@ -49,6 +48,8 @@ export default async function handler(
     const log = await PaymentChangeLog.create({
       paymentId,
       invoiceData,
+      actionType: 'UPDATE',
+      source: 'single',
       reason: reason ?? 'manual',
       actorId: (req as any).user?._id,
       actorEmail: (req as any).user?.email,

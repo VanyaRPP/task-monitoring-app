@@ -314,6 +314,8 @@ export const getPaymentProviderAndReciever = (company) => {
     companyName: company?.companyName,
     adminEmails: company?.adminEmails,
     description: company?.description,
+    contractNumber: company?.contractNumber,
+    contractDate: company?.contractDate,
   }
 
   return { provider, reciever }
@@ -848,17 +850,38 @@ export function formatDebt(amount: number): string {
   return amount.toFixed(2)
 }
 
+export type DebtSide = 'company' | 'domain' | null
+
+export const getDebtSide = (totalDebt: number): DebtSide => {
+  if (!Number.isFinite(totalDebt) || totalDebt === 0) return null
+  return totalDebt > 0 ? 'company' : 'domain'
+}
+
+export const formatDebtAmount = (totalDebt: number): string =>
+  formatDebt(Math.abs(totalDebt))
+
+export const formatSignedDebt = (totalDebt: number): string => {
+  const amount = formatDebtAmount(totalDebt)
+  return getDebtSide(totalDebt) === 'domain' ? `-${amount}` : amount
+}
+
 export const getDebtorTooltipColor = (debtor: {
   totalDebt: number
 }): string => {
-  if (debtor.totalDebt > 0 && debtor.totalDebt < 5000) {
-    return 'gray'
-  } else if (debtor.totalDebt >= 5000 && debtor.totalDebt < 20000) {
-    return 'yellow'
-  } else if (debtor.totalDebt >= 20000) {
-    return 'red'
+  const side = getDebtSide(debtor.totalDebt)
+  if (!side) return undefined
+
+  const amount = Math.abs(debtor.totalDebt)
+
+  if (side === 'domain') {
+    if (amount < 5000) return 'cyan'
+    if (amount < 20000) return 'blue'
+    return 'geekblue'
   }
-  return undefined
+
+  if (amount < 5000) return 'gray'
+  if (amount < 20000) return 'yellow'
+  return 'red'
 }
 export const defaultServicesSet = new Set(defaultServices)
 

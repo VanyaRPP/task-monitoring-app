@@ -8,6 +8,7 @@ import {
   IRealestate,
 } from '@common/api/realestateApi/realestate.api.types'
 import { Form, message } from 'antd'
+import dayjs from 'dayjs'
 import Modal from '../../ModalWindow'
 import RealEstateForm from './RealEstateForm'
 import { IDomain } from '@modules/models/Domain'
@@ -57,7 +58,7 @@ const RealEstateModal: FC<Props> = ({
               _id: s._id,
               label: s.name,
               fieldName: s.fieldName,
-              price: 0,
+              price: undefined,
             }))
           : []
       ) || []
@@ -66,13 +67,9 @@ const RealEstateModal: FC<Props> = ({
 
   const mergedCustomServices = useMemo(() => {
     const saved = currentRealEstate?.customServices || []
-    const validSaved = saved.filter((s) =>
+    return saved.filter((s) =>
       domainCustomServices.some((d) => d._id === s._id)
     )
-    const newFromDomain = domainCustomServices.filter(
-      (d) => !validSaved.some((s) => s._id === d._id)
-    )
-    return [...validSaved, ...newFromDomain]
   }, [currentRealEstate, domainCustomServices])
 
   useEffect(() => {
@@ -96,13 +93,19 @@ const RealEstateModal: FC<Props> = ({
       garbageCollector: currentRealEstate?.garbageCollector || false,
       archived: currentRealEstate?.archived || false,
       account: currentRealEstate?.account || '',
+      contractNumber: currentRealEstate?.contractNumber || '',
+      // DatePicker expects a dayjs instance, not the raw ISO string from the API.
+      contractDate: currentRealEstate?.contractDate
+        ? dayjs(currentRealEstate.contractDate)
+        : undefined,
       rentPart: currentRealEstate?.rentPart || 0,
       inflicion: currentRealEstate?.inflicion || false,
       waterPart: currentRealEstate?.waterPart || 0,
       discount: currentRealEstate?.discount || 0,
       cleaning: currentRealEstate?.cleaning || 0,
       services: currentRealEstate?.services || [],
-      customServices: mergedCustomServices,
+      customServices: currentRealEstate ? mergedCustomServices : [],
+      allServices: currentRealEstate?.allServices ?? false,
     })
 
     initializedRef.current = true
@@ -138,6 +141,10 @@ const RealEstateModal: FC<Props> = ({
       garbageCollector: formData.garbageCollector,
       archived: formData.archived,
       account: formData.account,
+      contractNumber: formData.contractNumber,
+      contractDate: formData.contractDate
+        ? dayjs(formData.contractDate).toISOString()
+        : undefined,
       inflicion: formData.inflicion,
       discount:
         formData.discount > 0 ? formData.discount * -1 : formData.discount,
@@ -158,6 +165,7 @@ const RealEstateModal: FC<Props> = ({
           (custom) => custom.fieldName === 'cleaningPrice'
         )?.price ?? formData.cleaning,
       customServices: filteredCustomServices,
+      allServices: form.getFieldValue('allServices') ?? false,
     }
 
     const response = currentRealEstate

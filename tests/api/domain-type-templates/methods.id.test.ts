@@ -1,4 +1,3 @@
-// @ts-nocheck
 import Domain from '@modules/models/Domain'
 import DomainTypeTemplate from '@modules/models/domain-type-template'
 import handler from '@pages/api/domain-type-templates/[id]'

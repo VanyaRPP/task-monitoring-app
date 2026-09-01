@@ -17,8 +17,6 @@ jest.mock('@utils/helpers', () => ({
   ),
 }))
 
-// antd Select's virtualised popup doesn't open in jsdom; stub it with a flat
-// list of buttons so we can drive onChange via real clicks.
 jest.mock('antd', () => {
   const actual = jest.requireActual('antd')
   const React = require('react')
@@ -27,6 +25,7 @@ jest.mock('antd', () => {
     value = [],
     onChange,
     placeholder,
+    popupRender,
   }: any) =>
     React.createElement(
       'div',
@@ -37,6 +36,7 @@ jest.mock('antd', () => {
           { 'data-testid': 'placeholder' },
           placeholder
         ),
+      popupRender && popupRender(null),
       options.map((o: any) =>
         React.createElement(
           'button',
@@ -69,13 +69,13 @@ const renderWithForm = (ui: React.ReactElement) => {
 }
 
 describe('CustomServicesCard', () => {
-  const setFieldsValueMock = jest.fn()
+  const setFieldValueMock = jest.fn()
   const defaultMockUser = { data: { roles: [Roles.DOMAIN_ADMIN] } }
 
   beforeEach(() => {
     mockUseGetCurrentUserQuery.mockReturnValue(defaultMockUser)
     useWatchSpy.mockReturnValue([])
-    setFieldsValueMock.mockClear()
+    setFieldValueMock.mockClear()
   })
 
   afterEach(() => {
@@ -85,7 +85,7 @@ describe('CustomServicesCard', () => {
   test('renders add button when not disabled and not service form', () => {
     renderWithForm(
       <CustomServicesCard
-        form={{ setFieldsValue: setFieldsValueMock }}
+        form={{ setFieldValue: setFieldValueMock }}
         allCustomServices={ALL_CUSTOM_SERVICES}
         disabled={false}
         isServiceForm={false}
@@ -95,28 +95,112 @@ describe('CustomServicesCard', () => {
     expect(screen.getByText('Індивідуальні послуги')).toBeInTheDocument()
   })
 
-  test('adds custom service from dropdown', () => {
+  test('auto-populates all services with null price on init', () => {
     renderWithForm(
       <CustomServicesCard
-        form={{ setFieldsValue: setFieldsValueMock }}
+        form={{ setFieldValue: setFieldValueMock }}
+        allCustomServices={ALL_CUSTOM_SERVICES}
+        disabled={false}
+        skipAutoPopulate={false}
+      />
+    )
+
+    expect(setFieldValueMock).toHaveBeenCalledWith('customServices', [
+      {
+        _id: '1',
+        label: 'Послуга 1',
+        fieldName: 'service1',
+        price: null,
+      },
+    ])
+  })
+
+  test('clears all services when "Скасувати вибір" is clicked', () => {
+    useWatchSpy.mockReturnValue([
+      { _id: '1', label: 'Послуга 1', fieldName: 'service1', price: 100 },
+    ])
+
+    renderWithForm(
+      <CustomServicesCard
+        form={{ setFieldValue: setFieldValueMock }}
+        allCustomServices={ALL_CUSTOM_SERVICES}
+        disabled={false}
+      />
+    )
+
+    fireEvent.click(screen.getByText('Скасувати вибір'))
+
+    expect(setFieldValueMock).toHaveBeenCalledWith('customServices', [])
+  })
+
+  test('adds custom service from dropdown with null price', () => {
+    renderWithForm(
+      <CustomServicesCard
+        form={{ setFieldValue: setFieldValueMock }}
         allCustomServices={ALL_CUSTOM_SERVICES}
         disabled={false}
         isServiceForm={false}
       />
     )
 
-    fireEvent.click(screen.getByText('Індивідуальні послуги'))
     fireEvent.click(screen.getByText('Послуга 1'))
 
-    expect(setFieldsValueMock).toHaveBeenCalledWith({
-      customServices: [
-        {
-          _id: '1',
-          label: 'Послуга 1',
-          fieldName: 'service1',
-          price: 0,
-        },
-      ],
-    })
+    expect(setFieldValueMock).toHaveBeenCalledWith('customServices', [
+      {
+        _id: '1',
+        label: 'Послуга 1',
+        fieldName: 'service1',
+        price: null,
+      },
+    ])
+  })
+
+  test('marks allServices=true when every service is selected', () => {
+    renderWithForm(
+      <CustomServicesCard
+        form={{ setFieldValue: setFieldValueMock }}
+        allCustomServices={ALL_CUSTOM_SERVICES}
+        disabled={false}
+        isServiceForm={false}
+      />
+    )
+
+    // auto-populate selects all → the company opted into "all services"
+    expect(setFieldValueMock).toHaveBeenCalledWith('allServices', true)
+  })
+
+  test('marks allServices=false when the selection is cleared', () => {
+    useWatchSpy.mockReturnValue([
+      { _id: '1', label: 'Послуга 1', fieldName: 'service1', price: 100 },
+    ])
+
+    renderWithForm(
+      <CustomServicesCard
+        form={{ setFieldValue: setFieldValueMock }}
+        allCustomServices={ALL_CUSTOM_SERVICES}
+        disabled={false}
+        isServiceForm={false}
+      />
+    )
+
+    fireEvent.click(screen.getByText('Скасувати вибір'))
+
+    expect(setFieldValueMock).toHaveBeenCalledWith('allServices', false)
+  })
+
+  test('does not touch allServices in a service form', () => {
+    renderWithForm(
+      <CustomServicesCard
+        form={{ setFieldValue: setFieldValueMock }}
+        allCustomServices={ALL_CUSTOM_SERVICES}
+        disabled={false}
+        isServiceForm={true}
+      />
+    )
+
+    const touchedAllServices = setFieldValueMock.mock.calls.some(
+      ([field]) => field === 'allServices'
+    )
+    expect(touchedAllServices).toBe(false)
   })
 })

@@ -1,11 +1,10 @@
-import PaymentChangeLog from '@common/modules/models/PaymentChangeLog'
 import Payment from '@common/modules/models/Payment'
 import Domain from '@modules/models/Domain'
 import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import ProfitService from '@common/services/profitService/profit.service'
 import { applyTemplateScope } from '@common/services/paymentService/templateScope.service'
+import { logPaymentMutation } from '@common/modules/services/paymentAudit'
 
 start()
 
@@ -107,9 +106,19 @@ export default async function handler(
             .json({ success: false, message: 'failed to delete' })
         }
 
-        if (isGlobalAdmin) {
-          await ProfitService.deleteByIdPayment(req.query.id as string)
-        }
+        await logPaymentMutation({
+          actionType: 'DELETE',
+          source: 'single',
+          actor: user,
+          before: payment,
+        })
+
+        await logPaymentMutation({
+          actionType: 'DELETE',
+          source: 'single',
+          actor: user,
+          before: payment,
+        })
 
         return res.status(200).json({ success: true, data: deleted })
       } catch (error: any) {
@@ -190,39 +199,14 @@ export default async function handler(
           { new: true }
         )
 
-        await PaymentChangeLog.create({
-          paymentId: current._id,
-          date: new Date(),
+        await logPaymentMutation({
+          actionType: 'UPDATE',
+          source: 'single',
+          actor: user,
           reason: 'edit-payment',
-          actorId: user?._id,
-          actorEmail: user?.email,
-          invoiceData: {
-            invoiceNumber: current.invoiceNumber,
-            invoiceCreationDate: current.invoiceCreationDate,
-            invoice: current.invoice,
-            provider: current.provider,
-            reciever: current.reciever,
-            generalSum: current.generalSum,
-            description: current.description,
-            type: current.type,
-            template: current.template,
-          },
+          before: current,
+          after: response,
         })
-
-        if (isGlobalAdmin) {
-          const description =
-            response.type === 'debit'
-              ? `Інвойс №${response.invoiceNumber}`
-              : response.description
-
-          await ProfitService.updatePayment(req.query.id as string, {
-            type: response.type as 'debit' | 'credit',
-            date: response.invoiceCreationDate,
-            amount: response.generalSum,
-            description,
-            invoiceNumber: String(response.invoiceNumber),
-          })
-        }
 
         return res.status(200).json({ success: true, data: response })
       } catch (error: any) {

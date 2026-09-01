@@ -7,12 +7,16 @@ import { domains, payments, realEstates, users } from '@utils/testData'
 import { sendInvoiceEmail } from '@utils/email/sendInvoiceEmail'
 import Domain from '@modules/models/Domain'
 import RealEstate from '@common/modules/models/RealEstate'
+import { logPaymentMutation } from '@common/modules/services/paymentAudit'
 
 jest.mock('next-auth', () => ({ getServerSession: jest.fn() }))
 jest.mock('@pages/api/auth/[...nextauth]', () => ({ authOptions: {} }))
 jest.mock('@pages/api/api.config', () => jest.fn())
 jest.mock('@utils/email/sendInvoiceEmail', () => ({
   sendInvoiceEmail: jest.fn(),
+}))
+jest.mock('@common/modules/services/paymentAudit', () => ({
+  logPaymentMutation: jest.fn(),
 }))
 
 setupTestEnvironment()
@@ -501,6 +505,60 @@ describe('Payments API - POST', () => {
         }),
       })
     )
+  })
+
+  it('writes a CREATE audit log on payment creation', async () => {
+    await mockLoginAs(users.globalAdmin)
+    const { _id, ...data } = payments[0]
+    ;(logPaymentMutation as jest.Mock).mockClear()
+
+    const mockReq = { method: 'POST', body: data } as any
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockReq, mockRes)
+
+    expect(mockRes.status).toHaveBeenLastCalledWith(200)
+    expect(logPaymentMutation).toHaveBeenCalledWith(
+      expect.objectContaining({ actionType: 'CREATE', source: 'single' })
+    )
+    // CREATE carries the new state in `after`; there is no prior state.
+    const auditArg = (logPaymentMutation as jest.Mock).mock.calls[0][0]
+    expect(auditArg.after).toBeDefined()
+    expect(auditArg.before).toBeUndefined()
+  })
+
+  it('writes a BULK_CREATE audit log when created via the bulk page', async () => {
+    await mockLoginAs(users.globalAdmin)
+    const { _id, ...data } = payments[0]
+    ;(logPaymentMutation as jest.Mock).mockClear()
+    const batchId = 'aaaaaaaaaaaaaaaaaaaaaaaa' // valid 24-hex ObjectId
+
+    const mockReq = {
+      method: 'POST',
+      body: { ...data, _bulk: true, _batchId: batchId },
+    } as any
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockReq, mockRes)
+
+    expect(mockRes.status).toHaveBeenLastCalledWith(200)
+    expect(logPaymentMutation).toHaveBeenCalledWith(
+      expect.objectContaining({
+        actionType: 'BULK_CREATE',
+        source: 'bulk',
+        batchId,
+      })
+    )
+    // The internal markers must not be persisted on the payment.
+    const created = (mockRes.json as jest.Mock).mock.lastCall[0].data
+    expect(created._bulk).toBeUndefined()
+    expect(created._batchId).toBeUndefined()
   })
 
   it('POST as non-admin user returns 403', async () => {

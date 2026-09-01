@@ -19,12 +19,14 @@ import {
   useGetDomainFiltersQuery,
   useGetRealEstateFiltersQuery,
 } from '@common/api/filterApi/filter.api'
-import { useGetCustomServicesQuery } from '@common/api/customServicesApi/customServices.api'
+import { useAccessibleCustomServices } from '@common/api/customServicesApi/useAccessibleCustomServices'
+import { useGetDomainTypeTemplatesQuery } from '@common/api/domainApi/domain.api'
 import {
   extractDomainsFromRealEstates,
   getSelectedServiceIds,
   getVisibleServices,
   isGlobalAdmin,
+  shouldShowStandardServices,
 } from '@utils/servicesVisibility'
 
 export interface Props {
@@ -63,8 +65,9 @@ const CompaniesHeader: React.FC<Props> = ({
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  const { data: customServicesResponse } = useGetCustomServicesQuery({})
-  const allCustomServices = customServicesResponse?.data || []
+  // Backend-scoped to the caller's domains; the memo below only narrows it
+  // presentationally to the domains currently visible on screen.
+  const { services: allCustomServices } = useAccessibleCustomServices()
 
   const { data: user } = useGetCurrentUserQuery()
   const isAdmin = isAdminCheck(user?.roles)
@@ -73,7 +76,11 @@ const CompaniesHeader: React.FC<Props> = ({
     () => extractDomainsFromRealEstates(realEstates?.data),
     [realEstates?.data]
   )
-
+  const { data: domainTypeTemplates = [] } = useGetDomainTypeTemplatesQuery()
+  const showStandardServices = useMemo(
+    () => shouldShowStandardServices(visibleDomains, domainTypeTemplates),
+    [visibleDomains, domainTypeTemplates]
+  )
   const hasActiveFilters = !!(
     filters?.domain?.length || filters?.company?.length
   )

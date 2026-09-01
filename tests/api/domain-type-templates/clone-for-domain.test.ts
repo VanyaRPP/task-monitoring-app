@@ -1,4 +1,3 @@
-// @ts-nocheck
 import CustomService from '@modules/models/CustomService'
 import Domain from '@modules/models/Domain'
 import DomainTypeTemplate from '@modules/models/domain-type-template'
@@ -41,6 +40,19 @@ const makeRes = () => {
   res.status = jest.fn(() => res)
   res.json = jest.fn(() => res)
   return res
+}
+
+const mockCustomServiceFind = (opts: {
+  originals: any[]
+  existingDomain?: any[]
+}) => {
+  ;(CustomService.find as jest.Mock).mockImplementation((filter: any) => ({
+    lean: jest
+      .fn()
+      .mockResolvedValue(
+        filter?.domain ? (opts.existingDomain ?? []) : opts.originals
+      ),
+  }))
 }
 
 const asAdmin = () =>
@@ -146,8 +158,8 @@ describe('POST /api/domain-type-templates/[id]/clone-for-domain', () => {
     ;(Domain.findById as jest.Mock).mockReturnValue({
       lean: jest.fn().mockResolvedValue({ _id: DOMAIN_ID }),
     })
-    ;(CustomService.find as jest.Mock).mockReturnValue({
-      lean: jest.fn().mockResolvedValue([
+    mockCustomServiceFind({
+      originals: [
         {
           _id: SVC_A,
           name: 'Електро',
@@ -160,7 +172,8 @@ describe('POST /api/domain-type-templates/[id]/clone-for-domain', () => {
           fieldName: 'waterPrice',
           serviceType: 'waterPrice',
         },
-      ]),
+      ],
+      existingDomain: [],
     })
     ;(CustomService.create as jest.Mock)
       .mockResolvedValueOnce({ _id: NEW_A })
@@ -208,10 +221,9 @@ describe('POST /api/domain-type-templates/[id]/clone-for-domain', () => {
       lean: jest.fn().mockResolvedValue({ _id: DOMAIN_ID }),
     })
     // SVC_A exists, SVC_B was deleted from DB
-    ;(CustomService.find as jest.Mock).mockReturnValue({
-      lean: jest
-        .fn()
-        .mockResolvedValue([{ _id: SVC_A, name: 'X', fieldName: 'x' }]),
+    mockCustomServiceFind({
+      originals: [{ _id: SVC_A, name: 'X', fieldName: 'x' }],
+      existingDomain: [],
     })
     ;(CustomService.create as jest.Mock).mockResolvedValueOnce({ _id: NEW_A })
 
@@ -228,6 +240,83 @@ describe('POST /api/domain-type-templates/[id]/clone-for-domain', () => {
     expect(data.clonedCount).toBe(1)
     expect(data.missingCount).toBe(1)
     expect(data.groups).toEqual([{ groupName: 'G', services: [NEW_A] }])
+  })
+
+  it('reuses existing domain services instead of duplicating on re-clone', async () => {
+    asAdmin()
+    ;(DomainTypeTemplate.findById as jest.Mock).mockReturnValue({
+      lean: jest.fn().mockResolvedValue({
+        _id: TPL_ID,
+        groups: [{ groupName: 'G1', serviceIds: [SVC_A, SVC_B] }],
+      }),
+    })
+    ;(Domain.findById as jest.Mock).mockReturnValue({
+      lean: jest.fn().mockResolvedValue({ _id: DOMAIN_ID }),
+    })
+    mockCustomServiceFind({
+      originals: [
+        { _id: SVC_A, name: 'Електро', fieldName: 'electricityPrice' },
+        { _id: SVC_B, name: 'Вода', fieldName: 'waterPrice' },
+      ],
+      existingDomain: [
+        { _id: NEW_A, name: 'Електро', fieldName: 'electricityPrice' },
+        { _id: NEW_B, name: 'Вода', fieldName: 'waterPrice' },
+      ],
+    })
+
+    const req = {
+      method: 'POST',
+      query: { id: TPL_ID },
+      body: { domainId: DOMAIN_ID },
+    } as any
+    const res = makeRes()
+    await handler(req, res)
+
+    expect(res.status).toHaveBeenCalledWith(201)
+    expect(CustomService.create).not.toHaveBeenCalled()
+    const { data } = res.json.mock.calls[0][0]
+    expect(data.clonedCount).toBe(0)
+    expect(data.reusedCount).toBe(2)
+    expect(data.missingCount).toBe(0)
+    expect(data.groups).toEqual([{ groupName: 'G1', services: [NEW_A, NEW_B] }])
+  })
+
+  it('reuses one and creates the other when the domain owns only a partial set', async () => {
+    asAdmin()
+    ;(DomainTypeTemplate.findById as jest.Mock).mockReturnValue({
+      lean: jest.fn().mockResolvedValue({
+        _id: TPL_ID,
+        groups: [{ groupName: 'G1', serviceIds: [SVC_A, SVC_B] }],
+      }),
+    })
+    ;(Domain.findById as jest.Mock).mockReturnValue({
+      lean: jest.fn().mockResolvedValue({ _id: DOMAIN_ID }),
+    })
+    mockCustomServiceFind({
+      originals: [
+        { _id: SVC_A, name: 'Електро', fieldName: 'electricityPrice' },
+        { _id: SVC_B, name: 'Вода', fieldName: 'waterPrice' },
+      ],
+      existingDomain: [
+        { _id: NEW_A, name: 'Електро', fieldName: 'electricityPrice' },
+      ],
+    })
+    ;(CustomService.create as jest.Mock).mockResolvedValueOnce({ _id: NEW_B })
+
+    const req = {
+      method: 'POST',
+      query: { id: TPL_ID },
+      body: { domainId: DOMAIN_ID },
+    } as any
+    const res = makeRes()
+    await handler(req, res)
+
+    expect(res.status).toHaveBeenCalledWith(201)
+    expect(CustomService.create).toHaveBeenCalledTimes(1)
+    const { data } = res.json.mock.calls[0][0]
+    expect(data.clonedCount).toBe(1)
+    expect(data.reusedCount).toBe(1)
+    expect(data.groups).toEqual([{ groupName: 'G1', services: [NEW_A, NEW_B] }])
   })
 
   it('handles empty template (no groups) without crashing', async () => {

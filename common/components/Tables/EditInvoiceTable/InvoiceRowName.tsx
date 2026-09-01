@@ -89,8 +89,8 @@ const InvoiceRowName: React.FC<InvoiceRowNameProps> = ({
       </Space>
       {editable && (
         <UpdateInvoiceButton
-          form={form!}
-          name={name!}
+          form={form}
+          name={name}
           serviceType={serviceType}
           disabled={disabled}
         />

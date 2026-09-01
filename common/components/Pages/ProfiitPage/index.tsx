@@ -43,7 +43,10 @@ const ProfitPage = () => {
   const contentList = useMemo(() => {
     return tabList.reduce(
       (acc, domain) => {
-        acc[domain.key] = <ProfitTable domainId={domain.key} />
+        // Keyed per domain: without it React reuses one ProfitTable instance
+        // across tabs, so the dashboard keeps the previously selected period
+        // and renders empty until its effect catches up.
+        acc[domain.key] = <ProfitTable key={domain.key} domainId={domain.key} />
         return acc
       },
       {} as Record<string, ReactNode>
@@ -85,7 +88,9 @@ const ProfitPage = () => {
         >
           {contentList[activeTabKey]}
         </Card>
-        {isModalOpen && <AddCostModal closeModal={closeModal} />}
+        {isModalOpen && (
+          <AddCostModal closeModal={closeModal} activeDomain={activeTabKey} />
+        )}
       </Space>
     </FullScreenWrapper>
   )

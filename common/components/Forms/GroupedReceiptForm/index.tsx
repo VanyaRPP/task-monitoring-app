@@ -40,7 +40,11 @@ interface Props {
   paymentActions: { preview: boolean; edit: boolean }
 }
 
-const GroupedReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
+const GroupedReceiptForm: FC<Props> = ({
+  currPayment,
+  paymentData,
+  paymentActions,
+}) => {
   const {
     form,
     template,
@@ -358,7 +362,14 @@ const GroupedReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
 
   return (
     <>
-      <div style={{ position: 'absolute', top: -85, right: 35, zIndex: 100 }}>
+      <div
+        style={{
+          position: 'absolute',
+          top: paymentActions?.preview ? -70 : -105,
+          right: 35,
+          zIndex: 100,
+        }}
+      >
         <Tooltip
           title={
             isSent
@@ -393,7 +404,19 @@ const GroupedReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
         </Dropdown>
       </div>
 
-      <TemplateComponent {...templateProps} />
+      <div
+        style={{
+          width: '100%',
+          height: '100%',
+          boxSizing: 'border-box',
+          paddingTop: '2em',
+          paddingRight: '1.5em',
+          paddingLeft: '1.5em',
+          position: 'relative',
+        }}
+      >
+        <TemplateComponent {...templateProps} />
+      </div>
     </>
   )
 }

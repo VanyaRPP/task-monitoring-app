@@ -1,0 +1,271 @@
+:global([data-theme='dark']) {
+  .chatWindow {
+    background: #141414;
+  }
+
+  .messagesContainer,
+  .chatFooter {
+    background: #1a1a1a;
+  }
+
+  .aiBubble {
+    background: #262626;
+  }
+
+  .chatInput {
+    color: white !important;
+
+    &::placeholder {
+      color: rgba(255, 255, 255, 0.45) !important;
+    }
+
+    &:focus,
+    &:hover {
+      background: #303030 !important;
+    }
+
+    :global(.ant-input) {
+      color: white !important;
+    }
+  }
+}
+
+.floatButton {
+  z-index: 1000;
+  transition:
+    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    transform: scale(1.1);
+  }
+
+  :global(.ant-float-btn-primary) {
+    background-color: #752fd6 !important;
+  }
+}
+
+.chatWindow {
+  position: fixed;
+  bottom: var(--ai-chat-window-bottom, 144px);
+  right: 24px;
+  width: 380px;
+  max-height: 500px;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  z-index: 999;
+  overflow: hidden;
+  animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(117, 47, 214, 0.2);
+  transition: bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: #ffffff;
+
+  @media (max-width: 576px) {
+    width: calc(100% - 40px);
+    right: 20px;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.chatHeader {
+  background: #752fd6;
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: white;
+}
+
+.messagesContainer {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 350px;
+  background: #f7f5fa;
+
+  /* Custom Scrollbar */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(117, 47, 214, 0.3);
+    border-radius: 10px;
+  }
+}
+
+.messageRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  max-width: 90%;
+}
+
+.userRow {
+  align-self: flex-end;
+  flex-direction: row;
+}
+
+.aiRow {
+  align-self: flex-start;
+}
+
+.messageBubble {
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.4;
+  position: relative;
+  word-break: break-word;
+}
+
+.userBubble {
+  background: #752fd6;
+  color: white;
+  border-bottom-right-radius: 2px;
+}
+
+.aiBubble {
+  border-bottom-left-radius: 2px;
+  border: 1px solid rgba(117, 47, 214, 0.1);
+  background: #ffffff;
+}
+
+.messageText {
+  white-space: pre-wrap;
+}
+
+.chatLink {
+  color: #a87ffb;
+  text-decoration: underline;
+  font-weight: 600;
+
+  &:hover {
+    color: #c0a0ff;
+  }
+}
+
+.recommendationBlock {
+  background: rgba(117, 47, 214, 0.1);
+  border-left: 3px solid #752fd6;
+  padding: 6px 10px;
+  margin: 6px 0;
+  border-radius: 4px;
+  font-style: italic;
+  font-size: 13px;
+  color: #d8b4fe;
+}
+
+.chatFooter {
+  padding: 12px;
+  border-top: 1px solid rgba(117, 47, 214, 0.2);
+  background: #f7f5fa;
+}
+
+.chatInput {
+  border-radius: 20px !important;
+  border: 1px solid rgba(117, 47, 214, 0.2) !important;
+
+  &:focus,
+  &:hover {
+    border-color: #752fd6 !important;
+  }
+
+  :global(.ant-input) {
+    background: transparent !important;
+  }
+}
+
+.aiAvatar {
+  background: #752fd6;
+}
+
+.userAvatar {
+  background: #303030;
+  border: 1px solid #752fd6;
+}
+
+.errorMessage {
+  text-align: center;
+  padding: 8px;
+}
+
+.welcomeHint {
+  position: fixed;
+  bottom: var(--ai-chat-window-bottom, 144px);
+  right: 24px;
+  z-index: 1001;
+  animation: fadeInHint 0.5s ease-out;
+  cursor: pointer;
+  max-width: 220px;
+  transition: bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  @media (max-width: 576px) {
+    right: 20px;
+  }
+}
+
+.hintContent {
+  background: #752fd6;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.4;
+  box-shadow: 0 4px 16px rgba(117, 47, 214, 0.4);
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.hintClose {
+  color: white !important;
+  padding: 0 !important;
+  height: 16px !important;
+  width: 16px !important;
+  opacity: 0.8;
+
+  &:hover {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.1) !important;
+  }
+}
+
+.hintArrow {
+  position: absolute;
+  bottom: -6px;
+  right: 15px;
+  width: 12px;
+  height: 12px;
+  background: #752fd6;
+  transform: rotate(45deg);
+}
+
+@keyframes fadeInHint {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

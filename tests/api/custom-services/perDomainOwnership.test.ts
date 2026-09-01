@@ -1,4 +1,3 @@
-// @ts-nocheck
 import handler from '@pages/api/custom-services'
 import { getCurrentUser } from '@utils/getCurrentUser'
 

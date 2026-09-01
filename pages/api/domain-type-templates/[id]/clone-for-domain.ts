@@ -61,17 +61,52 @@ async function cloneForDomainHandler(
     originals.map((s) => [String(s._id), s])
   )
 
+  const domainObjectId = new mongoose.Types.ObjectId(rawDomainId)
+  const existingDomainServices = uniqueOriginalIds.length
+    ? await CustomService.find({ domain: domainObjectId }).lean()
+    : []
+
+  const serviceKey = (s: any): string => {
+    const fieldName = String(s?.fieldName ?? '')
+      .trim()
+      .toLowerCase()
+    if (fieldName) return `f:${fieldName}`
+    const name = String(s?.name ?? '')
+      .trim()
+      .toLowerCase()
+    return name ? `n:${name}` : ''
+  }
+
+  const existingByKey = new Map<string, any>()
+  for (const s of existingDomainServices) {
+    const key = serviceKey(s)
+    if (key && !existingByKey.has(key)) existingByKey.set(key, s)
+  }
+
   const oldToNew = new Map<string, mongoose.Types.ObjectId>()
+  let clonedCount = 0
+  let reusedCount = 0
   for (const oldId of uniqueOriginalIds) {
     const orig = originalById.get(oldId)
     if (!orig) continue
+
+    const key = serviceKey(orig)
+    const existing = key ? existingByKey.get(key) : undefined
+    if (existing) {
+      oldToNew.set(oldId, existing._id as mongoose.Types.ObjectId)
+      reusedCount++
+      continue
+    }
+
     const created = await CustomService.create({
       name: orig.name,
       fieldName: orig.fieldName,
       ...(orig.serviceType ? { serviceType: orig.serviceType } : {}),
-      domain: new mongoose.Types.ObjectId(rawDomainId),
+      domain: domainObjectId,
     })
     oldToNew.set(oldId, created._id as mongoose.Types.ObjectId)
+    if (key) existingByKey.set(key, created)
+    clonedCount++
   }
 
   const newGroups = (template.groups ?? []).map((g) => ({
@@ -86,7 +121,8 @@ async function cloneForDomainHandler(
     success: true,
     data: {
       groups: newGroups,
-      clonedCount: oldToNew.size,
+      clonedCount,
+      reusedCount,
       missingCount: uniqueOriginalIds.length - oldToNew.size,
     },
   })

@@ -1,9 +1,10 @@
+import mongoose from 'mongoose'
 import Payment from '@common/modules/models/Payment'
 import Domain from '@modules/models/Domain'
-import ProfitService from '@common/services/profitService/profit.service'
 import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
+import { logPaymentMutation } from '@common/modules/services/paymentAudit'
 
 start()
 
@@ -53,13 +54,12 @@ export default async function handler(
       allowedDomainIds = new Set(domains.map((d: any) => d._id.toString()))
     }
 
-    const allowedIds = payments
-      .filter((p) => {
-        if (!allowedDomainIds) return true
-        const domainId = p.domain ? p.domain.toString() : null
-        return !!domainId && allowedDomainIds.has(domainId)
-      })
-      .map((p) => p._id.toString())
+    const allowedPayments = payments.filter((p) => {
+      if (!allowedDomainIds) return true
+      const domainId = p.domain ? p.domain.toString() : null
+      return !!domainId && allowedDomainIds.has(domainId)
+    })
+    const allowedIds = allowedPayments.map((p) => p._id.toString())
 
     let deletedIds: string[] = []
     if (allowedIds.length > 0) {
@@ -78,19 +78,40 @@ export default async function handler(
         deletedIds = allowedIds.filter((id) => !stillThereIds.has(id))
       }
 
-      if (isGlobalAdmin && deletedIds.length > 0) {
-        const settled = await Promise.allSettled(
-          deletedIds.map((id) => ProfitService.deleteByIdPayment(id))
-        )
-        for (const r of settled) {
-          if (r.status === 'rejected') {
-            // eslint-disable-next-line no-console
-            console.error(
-              '[bulk-delete] ProfitService.deleteByIdPayment failed:',
-              r.reason
+      if (deletedIds.length > 0) {
+        const batchId = new mongoose.Types.ObjectId()
+        const deletedSet = new Set(deletedIds)
+        await Promise.all(
+          allowedPayments
+            .filter((p) => deletedSet.has(p._id.toString()))
+            .map((p) =>
+              logPaymentMutation({
+                actionType: 'BULK_DELETE',
+                source: 'bulk',
+                actor: user,
+                before: p,
+                batchId,
+              })
             )
-          }
-        }
+        )
+      }
+
+      if (deletedIds.length > 0) {
+        const batchId = new mongoose.Types.ObjectId()
+        const deletedSet = new Set(deletedIds)
+        await Promise.all(
+          allowedPayments
+            .filter((p) => deletedSet.has(p._id.toString()))
+            .map((p) =>
+              logPaymentMutation({
+                actionType: 'BULK_DELETE',
+                source: 'bulk',
+                actor: user,
+                before: p,
+                batchId,
+              })
+            )
+        )
       }
     }
 

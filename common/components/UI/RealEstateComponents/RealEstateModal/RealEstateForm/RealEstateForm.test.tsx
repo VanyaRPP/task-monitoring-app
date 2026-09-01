@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import { Form, FormInstance } from 'antd'
 import RealEstateForm from './index'
 
@@ -67,5 +67,82 @@ describe('RealEstateForm — префіл адреси', () => {
     expect(addressesSpy).toHaveBeenCalledWith(
       expect.objectContaining({ street: undefined })
     )
+  })
+})
+
+describe('RealEstateForm — вкладки (Tabs)', () => {
+  it('відображає вкладку "Послуги" та рендерить CustomServicesCard при перемиканні', () => {
+    render(<Wrapper />)
+
+    const servicesTab = screen.getByText('Послуги')
+    expect(servicesTab).toBeInTheDocument()
+
+    fireEvent.click(servicesTab)
+
+    expect(screen.getByTestId('custom-services')).toBeInTheDocument()
+  })
+
+  it('відображає вкладку "Договір" з полем номера договору', () => {
+    render(<Wrapper />)
+
+    const contractTab = screen.getByText('Договір')
+    expect(contractTab).toBeInTheDocument()
+
+    fireEvent.click(contractTab)
+
+    expect(screen.getByLabelText('Номер договору')).toBeInTheDocument()
+  })
+
+  it('записує введений номер договору у форму', () => {
+    const formRef: { current: FormInstance | null } = { current: null }
+    const CaptureWrapper = () => {
+      const [form] = Form.useForm()
+      formRef.current = form
+      return (
+        <RealEstateForm
+          form={form as FormInstance}
+          setIsValueChanged={() => undefined}
+        />
+      )
+    }
+    render(<CaptureWrapper />)
+
+    fireEvent.click(screen.getByText('Договір'))
+    fireEvent.change(screen.getByLabelText('Номер договору'), {
+      target: { value: '15' },
+    })
+
+    expect(formRef.current?.getFieldValue('contractNumber')).toBe('15')
+  })
+
+  it('віддає номер договору через validateFields — саме його читає handleSubmit', async () => {
+    const formRef: { current: FormInstance | null } = { current: null }
+    const CaptureWrapper = () => {
+      const [form] = Form.useForm()
+      formRef.current = form
+      return (
+        <RealEstateForm
+          form={form as FormInstance}
+          setIsValueChanged={() => undefined}
+        />
+      )
+    }
+    render(<CaptureWrapper />)
+
+    fireEvent.click(screen.getByText('Договір'))
+    fireEvent.change(screen.getByLabelText('Номер договору'), {
+      target: { value: '15' },
+    })
+
+    const values = await formRef.current?.validateFields(['contractNumber'])
+    expect(values).toMatchObject({ contractNumber: '15' })
+  })
+
+  it('відображає поле дати договору на вкладці "Договір"', () => {
+    render(<Wrapper />)
+
+    fireEvent.click(screen.getByText('Договір'))
+
+    expect(screen.getByLabelText('Дата договору')).toBeInTheDocument()
   })
 })

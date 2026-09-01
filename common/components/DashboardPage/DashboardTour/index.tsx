@@ -1,8 +1,21 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { Tour, TourProps } from 'antd'
 import { useSession } from 'next-auth/react'
 import { AppRoutes } from '@utils/constants'
 import { isAdminCheck } from '@utils/helpers'
+import { RootState } from '@modules/store/store'
+import {
+  clearForcedOpenKeys,
+  setCollapse,
+  setForcedOpenKeys,
+} from '@modules/store/sidebarSlice'
+import { useDispatch, useSelector } from 'react-redux'
+
+const TOUR_SUBMENU_KEYS = [
+  'payments_submenu',
+  'dashboard_submenu',
+  'user_submenu',
+]
 
 interface DashboardTourProps {
   isVisible?: boolean
@@ -23,9 +36,41 @@ const DashboardTour: React.FC<DashboardTourProps> = ({
   userRoles = [],
 }) => {
   const { data: session } = useSession()
+  const dispatch = useDispatch()
+  const collapsed = useSelector((state: RootState) => state.sidebar.collapsed)
   const [tourVisible, setTourVisible] = useState(false)
   const [currentStep, setCurrentStep] = useState(0)
+  const startTimerRef = useRef<ReturnType<typeof setTimeout>>()
   const storageKey = `dashboardTourSeen_${session?.user?.email}`
+
+  useEffect(() => {
+    if (!tourVisible) return
+    return () => {
+      dispatch(clearForcedOpenKeys())
+    }
+  }, [tourVisible, dispatch])
+
+  const startTour = useCallback(() => {
+    const allSubmenusOpen = TOUR_SUBMENU_KEYS.every((key) =>
+      document
+        .querySelector(`.ant-menu-submenu[data-menu-id*="${key}"]`)
+        ?.classList.contains('ant-menu-submenu-open')
+    )
+    const needsDelay = collapsed || !allSubmenusOpen
+
+    dispatch(setCollapse(false))
+    dispatch(setForcedOpenKeys(TOUR_SUBMENU_KEYS))
+    setCurrentStep(0)
+
+    clearTimeout(startTimerRef.current)
+    if (needsDelay) {
+      startTimerRef.current = setTimeout(() => setTourVisible(true), 100)
+    } else {
+      setTourVisible(true)
+    }
+  }, [collapsed, dispatch])
+
+  useEffect(() => () => clearTimeout(startTimerRef.current), [])
 
   useEffect(() => {
     if (isManualStart) return
@@ -35,20 +80,19 @@ const DashboardTour: React.FC<DashboardTourProps> = ({
 
     if (!hasSeenTour) {
       const timer = setTimeout(() => {
-        setTourVisible(true)
+        startTour()
         localStorage.setItem(storageKey, 'true')
       }, 1200)
 
       return () => clearTimeout(timer)
     }
-  }, [session?.user?.email, isManualStart, storageKey])
+  }, [session?.user?.email, isManualStart, storageKey, startTour])
 
   useEffect(() => {
     if (isManualStart && isVisible) {
-      setTourVisible(true)
-      setCurrentStep(0)
+      startTour()
     }
-  }, [isManualStart, isVisible])
+  }, [isManualStart, isVisible, startTour])
 
   const handleClose = () => {
     setTourVisible(false)

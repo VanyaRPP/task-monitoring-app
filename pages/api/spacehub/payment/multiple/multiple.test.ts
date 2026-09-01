@@ -6,7 +6,7 @@ import { payments, users, domains } from '@utils/testData'
 import handler from '.'
 import Payment from '@common/modules/models/Payment'
 import Domain from '@modules/models/Domain'
-import ProfitService from '@common/services/profitService/profit.service'
+import { logPaymentMutation } from '@common/modules/services/paymentAudit'
 
 jest.mock('next-auth', () => ({ getServerSession: jest.fn() }))
 jest.mock('@pages/api/auth/[...nextauth]', () => ({ authOptions: {} }))
@@ -14,7 +14,9 @@ jest.mock('@pages/api/api.config', () => jest.fn())
 
 jest.mock('@common/modules/models/Payment')
 jest.mock('@modules/models/Domain')
-jest.mock('@common/services/profitService/profit.service')
+jest.mock('@common/modules/services/paymentAudit', () => ({
+  logPaymentMutation: jest.fn(),
+}))
 
 setupTestEnvironment()
 
@@ -83,7 +85,6 @@ describe('Payment API Endpoint - bulk delete', () => {
       debitPayments[1],
     ])
     ;(Payment.deleteMany as jest.Mock).mockResolvedValue({ deletedCount: 2 })
-    ;(ProfitService.deleteByIdPayment as jest.Mock).mockResolvedValue({})
 
     const res = await performRequest('DELETE', { ids })
 
@@ -99,7 +100,16 @@ describe('Payment API Endpoint - bulk delete', () => {
         $in: [debitPayments[0]._id.toString(), debitPayments[1]._id.toString()],
       },
     })
-    expect(ProfitService.deleteByIdPayment).toHaveBeenCalledTimes(2)
+
+    // One BULK_DELETE audit entry per deleted payment, sharing a single batchId.
+    const auditCalls = (logPaymentMutation as jest.Mock).mock.calls
+    expect(auditCalls).toHaveLength(2)
+    expect(auditCalls[0][0]).toMatchObject({
+      actionType: 'BULK_DELETE',
+      source: 'bulk',
+    })
+    expect(auditCalls[0][0].batchId).toBeDefined()
+    expect(auditCalls[0][0].batchId).toEqual(auditCalls[1][0].batchId)
   })
 
   it('domain admin: deletes only payments belonging to one of their domains', async () => {
@@ -130,8 +140,6 @@ describe('Payment API Endpoint - bulk delete', () => {
     expect(Payment.deleteMany).toHaveBeenCalledWith({
       _id: { $in: [ownDomainPayment._id.toString()] },
     })
-    // ProfitService should NOT run for domain admin
-    expect(ProfitService.deleteByIdPayment).not.toHaveBeenCalled()
   })
 
   it('domain admin: handles multi-domain admin (deletes payments across all owned domains)', async () => {
@@ -173,6 +181,7 @@ describe('Payment API Endpoint - bulk delete', () => {
     const json = (res.json as jest.Mock).mock.calls[0][0]
     expect(json.data.deletedIds).toEqual([])
     expect(Payment.deleteMany).not.toHaveBeenCalled()
+    expect(logPaymentMutation).not.toHaveBeenCalled()
   })
 
   it('returns empty deletedIds when all requested ids are not found', async () => {
@@ -246,7 +255,6 @@ describe('Payment API Endpoint - bulk delete', () => {
     expect(res.status).toHaveBeenCalledWith(200)
     const json = (res.json as jest.Mock).mock.calls[0][0]
     expect(json.data.deletedIds).toEqual([])
-    expect(ProfitService.deleteByIdPayment).not.toHaveBeenCalled()
   })
 
   it('re-queries to find actually-deleted ids when deletedCount is partial', async () => {
@@ -262,17 +270,12 @@ describe('Payment API Endpoint - bulk delete', () => {
         select: jest.fn().mockResolvedValue([{ _id: b._id }]),
       })
     ;(Payment.deleteMany as jest.Mock).mockResolvedValue({ deletedCount: 1 })
-    ;(ProfitService.deleteByIdPayment as jest.Mock).mockResolvedValue({})
 
     const res = await performRequest('DELETE', { ids: [a._id, b._id] })
 
     expect(res.status).toHaveBeenCalledWith(200)
     const json = (res.json as jest.Mock).mock.calls[0][0]
     expect(json.data.deletedIds).toEqual([a._id.toString()])
-    expect(ProfitService.deleteByIdPayment).toHaveBeenCalledTimes(1)
-    expect(ProfitService.deleteByIdPayment).toHaveBeenCalledWith(
-      a._id.toString()
-    )
   })
 
   it('skips payments with null domain when caller is domain admin', async () => {
@@ -290,30 +293,5 @@ describe('Payment API Endpoint - bulk delete', () => {
     const json = (res.json as jest.Mock).mock.calls[0][0]
     expect(json.data.deletedIds).toEqual([])
     expect(Payment.deleteMany).not.toHaveBeenCalled()
-  })
-
-  it('still returns success when ProfitService cleanup partially fails (errors are swallowed and logged)', async () => {
-    await mockLoginAs(users.globalAdmin)
-    const a = debitPayments[0]
-    const b = debitPayments[1]
-
-    ;(Payment.find as jest.Mock).mockResolvedValue([a, b])
-    ;(Payment.deleteMany as jest.Mock).mockResolvedValue({ deletedCount: 2 })
-    ;(ProfitService.deleteByIdPayment as jest.Mock)
-      .mockResolvedValueOnce({})
-      .mockRejectedValueOnce(new Error('profit cleanup failed'))
-
-    const consoleErrorSpy = jest
-      .spyOn(console, 'error')
-      .mockImplementation(() => undefined)
-
-    const res = await performRequest('DELETE', { ids: [a._id, b._id] })
-
-    expect(res.status).toHaveBeenCalledWith(200)
-    const json = (res.json as jest.Mock).mock.calls[0][0]
-    expect(json.data.deletedIds).toHaveLength(2)
-    expect(consoleErrorSpy).toHaveBeenCalled()
-
-    consoleErrorSpy.mockRestore()
   })
 })

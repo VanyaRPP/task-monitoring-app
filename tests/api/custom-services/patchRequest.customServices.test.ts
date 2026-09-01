@@ -70,20 +70,21 @@ describe('API Route - PATCH Method', () => {
     expect(res.status).toHaveBeenCalledWith(403)
   })
 
-  it('should return 400 if DomainAdmin omits domainId', async () => {
+  it('should allow DomainAdmin to edit service without passing domainId (fallback to service.domain)', async () => {
     mockUser({ isDomainAdmin: true, email: users.domainAdmin.email })
     const service = await createService({ domain: ownDomainId })
 
     const req = {
       method: 'PATCH',
       query: { id: service._id },
-      body: { name: 'X' },
+      body: { name: 'Renamed Without DomainId' },
     } as any
     const res = mockRes()
 
     await handler(req, res)
-
-    expect(res.status).toHaveBeenCalledWith(400)
+    const updated = await CustomService.findById(service._id)
+    expect(res.status).toHaveBeenCalledWith(200)
+    expect(updated?.name).toBe('Renamed Without DomainId')
   })
 
   it('should allow GlobalAdmin to edit service without domainId', async () => {

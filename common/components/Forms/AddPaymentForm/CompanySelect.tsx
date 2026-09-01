@@ -1,138 +1,223 @@
 import { validateField } from '@assets/features/validators'
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
-import RealEstateModal from '@components/UI/RealEstateComponents/RealEstateModal'
-import { PlusOutlined } from '@ant-design/icons'
-import { Button, Divider, Form, Select } from 'antd'
+import { Button, Form, Input, Select } from 'antd'
 import { FormInstance } from 'antd/es/form/Form'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import {
+  getNewEntityName,
+  isNewEntityValue,
+  makeNewEntityValue,
+} from '@utils/inlineCreate'
+import s from './CompanySelect.module.scss'
+
+const COMPANY_TOOLTIP = 'Кому виставляється рахунок — орендар/платник.'
+const EMAIL_TOOLTIP = 'Пошта, яка відображатиметься в рахунку як отримувач.'
 
 interface Props {
   form: FormInstance
   edit?: boolean
   company?: string | Partial<IRealestate>
+  // When true the user can create a brand-new company inline: a persistent
+  // "Створити нову компанію" button in the dropdown switches the field into a
+  // name + email input mode. The value becomes a `new::` sentinel that
+  // AddPaymentModal materializes into a real company on submit.
+  allowCreate?: boolean
 }
 
-export default function CompanySelect({ form, edit, company }: Props) {
+export default function CompanySelect({
+  form,
+  edit,
+  company,
+  allowCreate,
+}: Props) {
   const domainId = Form.useWatch('domain', form)
-  const streetId = Form.useWatch('street', form)
 
   if (!domainId) {
     return (
-      <Form.Item label="Компанія">
+      <Form.Item label="Компанія" tooltip={COMPANY_TOOLTIP}>
         <Select placeholder="Спершу оберіть надавача послуг" disabled />
       </Form.Item>
     )
   }
 
   return (
-    <RealEstateDataFetcher
+    <CompanyPicker
       domainId={domainId}
-      streetId={streetId}
       form={form}
       edit={edit}
       company={company}
+      allowCreate={allowCreate}
     />
   )
 }
 
-interface RealEstateDataFetcherProps {
+interface CompanyPickerProps {
   domainId: string
-  streetId?: string
   form: FormInstance
   edit?: boolean
   company?: string | Partial<IRealestate>
+  allowCreate?: boolean
 }
 
-function RealEstateDataFetcher({
+function CompanyPicker({
   domainId,
-  streetId,
   form,
   edit,
   company,
-}: RealEstateDataFetcherProps) {
-  const { data, isLoading, refetch } = useGetAllRealEstateQuery({
-    domainId,
-    streetId,
-  })
+  allowCreate,
+}: CompanyPickerProps) {
+  const streetId = Form.useWatch('street', form)
+  const companyValue = Form.useWatch('company', form)
+  const [search, setSearch] = useState('')
+  const focusNameOnCreate = useRef(false)
+
+  const isNewDomain = isNewEntityValue(domainId)
+  const isNewCompany = isNewEntityValue(companyValue)
+
+  const { data, isLoading } = useGetAllRealEstateQuery(
+    { domainId, streetId },
+    { skip: isNewDomain }
+  )
 
   const companies = useMemo(() => data?.data ?? [], [data])
 
-  const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false)
-
   useEffect(() => {
-    if (!edit) {
-      if (companies.length === 1) {
-        form.setFieldValue('company', companies[0]._id)
-      } else if (companies.length > 0 && company) {
-        const companyId = typeof company === 'object' ? company._id : company
-        if (form.getFieldValue('company') !== companyId) {
-          form.setFieldValue('company', companyId)
-        }
+    if (edit) return
+    // Never override a typed "new" company with an auto-pick.
+    if (isNewEntityValue(form.getFieldValue('company'))) return
+    if (companies.length === 1) {
+      form.setFieldValue('company', companies[0]._id)
+    } else if (companies.length > 0 && company) {
+      const companyId = typeof company === 'object' ? company._id : company
+      if (form.getFieldValue('company') !== companyId) {
+        form.setFieldValue('company', companyId)
       }
     }
   }, [companies, company, edit, form])
 
-  const createCompanyLabel =
-    companies.length === 0 ? 'Немає компанії? Створити' : 'Створити компанію'
+  useEffect(() => {
+    // Force create mode when there's nothing to pick: a brand-new provider has
+    // no companies, and a user with no companies of their own can only create.
+    if (edit || !allowCreate || isLoading) return
+    if (!isNewDomain && companies.length > 0) return
+    queueMicrotask(() => {
+      if (!isNewEntityValue(form.getFieldValue('company'))) {
+        form.setFieldValue('company', makeNewEntityValue(''))
+      }
+    })
+  }, [isNewDomain, companies.length, allowCreate, edit, isLoading, form])
+
+  const options = useMemo(
+    () => companies.map((i) => ({ value: i._id, label: i.companyName })),
+    [companies]
+  )
+
+  const handleSearch = (value: string) => {
+    const trimmed = value.trim()
+    const hasMatch =
+      !trimmed ||
+      companies.some((c) =>
+        c.companyName?.toLowerCase().includes(trimmed.toLowerCase())
+      )
+    if (allowCreate && !isLoading && trimmed && !hasMatch) {
+      focusNameOnCreate.current = true
+      form.setFieldValue('company', makeNewEntityValue(value))
+      setSearch('')
+      return
+    }
+    setSearch(value)
+  }
+
+  const commitTypedValue = () => {
+    const typed = search.trim()
+    if (!typed) return
+    const match = companies.find(
+      (c) => c.companyName?.trim().toLowerCase() === typed.toLowerCase()
+    )
+    if (match) {
+      form.setFieldValue('company', match._id)
+      setSearch('')
+    }
+  }
+
+  const exitCreateMode = () => {
+    form.setFieldValue('company', undefined)
+    form.setFieldValue('companyEmail', undefined)
+  }
+
+  if (isNewCompany) {
+    return (
+      <>
+        <div className={s.companyRow}>
+          <Form.Item
+            name="company"
+            label="Компанія"
+            tooltip={COMPANY_TOOLTIP}
+            className={s.companyField}
+            getValueProps={(v) => ({
+              value: isNewEntityValue(v) ? getNewEntityName(v) : '',
+            })}
+            normalize={(input) => makeNewEntityValue(input ?? '')}
+            rules={[
+              {
+                validator: (_, v) =>
+                  getNewEntityName(v ?? '').trim()
+                    ? Promise.resolve()
+                    : Promise.reject(new Error('Вкажіть назву компанії')),
+              },
+            ]}
+          >
+            <Input
+              placeholder="Назва нової компанії"
+              autoFocus={focusNameOnCreate.current}
+            />
+          </Form.Item>
+          <Form.Item
+            name="companyEmail"
+            label="Пошта компанії"
+            tooltip={EMAIL_TOOLTIP}
+            rules={validateField('email')}
+            className={s.emailField}
+          >
+            <Input placeholder="email@example.com" />
+          </Form.Item>
+        </div>
+        {!isNewDomain && companies.length > 0 && (
+          <Button
+            type="link"
+            size="small"
+            style={{ padding: 0, marginTop: -4, marginBottom: 8 }}
+            onClick={exitCreateMode}
+          >
+            ← обрати наявну
+          </Button>
+        )}
+      </>
+    )
+  }
 
   return (
-    <>
-      <Form.Item
-        name="company"
-        label="Компанія"
-        rules={validateField('required')}
-      >
-        <Select
-          filterSort={(optionA, optionB) =>
-            (optionA?.label ?? '')
-              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-ignore
-              ?.toLowerCase()
-              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-ignore
-              .localeCompare((optionB?.label ?? '').toLowerCase())
-          }
-          filterOption={(input, option) =>
-            (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-          }
-          options={companies.map((i) => ({
-            value: i._id,
-            label: i.companyName,
-          }))}
-          optionFilterProp="label"
-          placeholder="Пошук компанії"
-          loading={isLoading}
-          showSearch
-          popupRender={(menu) => (
-            <>
-              {menu}
-              <Divider style={{ margin: '8px 0' }} />
-              <Button
-                type="text"
-                block
-                icon={<PlusOutlined />}
-                style={{ textAlign: 'left' }}
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={() => setIsCompanyModalOpen(true)}
-              >
-                {createCompanyLabel}
-              </Button>
-            </>
-          )}
-        />
-      </Form.Item>
-
-      {isCompanyModalOpen && (
-        <RealEstateModal
-          chosenRealEstate={{ domain: domainId, street: streetId }}
-          editable
-          closeModal={() => {
-            setIsCompanyModalOpen(false)
-            refetch()
-          }}
-        />
-      )}
-    </>
+    <Form.Item
+      name="company"
+      label="Компанія"
+      tooltip={COMPANY_TOOLTIP}
+      rules={validateField('required')}
+    >
+      <Select
+        options={options}
+        optionFilterProp="label"
+        placeholder={
+          allowCreate ? 'Пошук або назва нової компанії' : 'Пошук компанії'
+        }
+        loading={isLoading}
+        showSearch
+        allowClear
+        searchValue={search}
+        onSearch={allowCreate ? handleSearch : setSearch}
+        onChange={() => setSearch('')}
+        onBlur={allowCreate ? commitTypedValue : undefined}
+      />
+    </Form.Item>
   )
 }

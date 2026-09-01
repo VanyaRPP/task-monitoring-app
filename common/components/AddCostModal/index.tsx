@@ -10,12 +10,13 @@ import { Form, Tabs, message } from 'antd'
 import type { TabsProps } from 'antd'
 import { FC, useState, useEffect } from 'react'
 import s from './style.module.scss'
-import dayjs from 'dayjs'
-import Category from '@modules/models/Category'
+import dayjs, { Dayjs } from 'dayjs'
+import { Currency } from '@utils/constants'
 
 interface Props {
   closeModal: VoidFunction
   currentProfit?: Profit
+  activeDomain?: string
   profitActions?: {
     preview?: boolean
     edit?: boolean
@@ -25,9 +26,11 @@ interface Props {
 type FormData = {
   domain: string
   date: Date
+  periodMonth?: Dayjs
   sum: number
   description: string
   type: string
+  currency?: string
   categories: string[]
 }
 
@@ -39,13 +42,17 @@ enum CostType {
 const AddCostModal: FC<Props> = ({
   closeModal,
   currentProfit,
+  activeDomain,
   profitActions,
 }) => {
   const { t } = useTranslation()
   const [form] = Form.useForm()
   const [type, setType] = useState<CostType>(CostType.DEBIT)
-  const [createProfit, { isLoading, isError }] = useCreateProfitMutation()
+  const [createProfit, { isLoading }] = useCreateProfitMutation()
   const [updateProfit] = useUpdateProfitMutation()
+
+  const isPreview = profitActions?.preview
+  const isEdit = profitActions?.edit
 
   const handleSubmit = async () => {
     const formData: FormData = await form.validateFields()
@@ -56,6 +63,12 @@ const AddCostModal: FC<Props> = ({
       description: formData.description || '',
       type: type,
       categories: formData.categories || [],
+      // Default to the month of the payment date, which is right for most
+      // costs; the picker is there for the ones it is not.
+      periodMonth: dayjs(formData.periodMonth ?? formData.date).format(
+        'YYYY-MM'
+      ),
+      currency: formData.currency || Currency.UAH,
     }
 
     let response
@@ -81,9 +94,6 @@ const AddCostModal: FC<Props> = ({
   const onTabChange = (key: string) => {
     setType(key === '1' ? CostType.DEBIT : CostType.CREDIT)
   }
-
-  const isPreview = profitActions?.preview
-  const isEdit = profitActions?.edit
 
   const tabItems: TabsProps['items'] = [
     {
@@ -117,13 +127,23 @@ const AddCostModal: FC<Props> = ({
       form.setFieldsValue({
         domain: currentProfit.domain,
         date: dayjs(currentProfit.date),
+        periodMonth: currentProfit.periodMonth
+          ? dayjs(currentProfit.periodMonth)
+          : dayjs(currentProfit.date),
+        currency: currentProfit.currency || Currency.UAH,
         sum: currentProfit.amount,
         description: currentProfit.description,
         categories: currentProfit.categories || [],
       })
       setType(currentProfit.type as CostType)
+    } else {
+      form.setFieldsValue({
+        domain: activeDomain,
+        date: dayjs(),
+        currency: Currency.UAH,
+      })
     }
-  }, [currentProfit, form])
+  }, [currentProfit, form, activeDomain])
 
   return (
     <Modal

@@ -5,25 +5,35 @@
     "periodMonth": "Місяць",
     "periodQuarter": "Квартал",
     "periodYear": "Рік",
-    "plannedProfit": "Прогнозовані прибутки",
-    "actualProfit": "Фактичні прибутки",
-    "plannedExpense": "Прогнозовані витрати",
-    "actualExpense": "Фактичні витрати",
-    "vsForecast": "від прогнозу",
+    "expected": "Прогнозований прибуток",
+    "actual": "Фактичний прибуток",
+    "expenses": "Витрати",
+    "net": "Чистий прибуток",
+    "invoiced": "виставлено рахунків",
+    "collected": "зібрано від виставленого",
+    "ownCosts": "власні витрати домену",
+    "netHint": "фактичний прибуток − витрати",
+    "uncategorized": "Без категорії",
     "trendTitle": "Порівняльна динаміка",
-    "structureTitle": "Структура фактичних прибутків",
-    "details": "Деталі"
+    "structureTitle": "Структура витрат",
+    "notEnoughData": "Недостатньо даних",
+    "vsPrevious": "до попереднього періоду",
+    "unchanged": "без змін до попереднього",
+    "noPrevious": "попереднього періоду для порівняння немає"
   },
   "table": {
     "tableAriaLabel": "Таблиця з підсумком транзакцій прибутку",
     "parent": {
       "month": "Місяць",
-      "debit": "Дебет",
-      "credit": "Кредит",
-      "profit": "Прибуток",
+      "expected": "Прогнозований прибуток",
+      "actual": "Фактичний прибуток",
+      "outstanding": "Недоплата",
+      "expenses": "Витрати",
+      "net": "Чистий прибуток",
       "totalRecords": "Всього записів",
       "errorLoading": "Не вдалося завантажити прибутки.",
-      "noData": "Дані про прибуток відсутні."
+      "noData": "Дані про прибуток відсутні.",
+      "collectedHint": "Частка виставленого, яка вже надійшла"
     },
     "child": {
       "date": "Дата",
@@ -32,7 +42,9 @@
       "description": "Опис",
       "categories": "Категорії",
       "debit": "Витрати",
-      "credit": "Прибутки"
+      "credit": "Прибутки",
+      "author": "Хто додав",
+      "noExpenses": "За цей місяць витрат не записано"
     },
     "noData": "Дані про прибуток відсутні.",
     "tooltipExpand": "Розгорнути всі рядки",
@@ -40,7 +52,8 @@
     "expandAll": "Розгорнути всі",
     "collapseAll": "Згорнути всі",
     "expanded": "Розгорнуто: {{current}} / {{total}}",
-    "paginationTotal": "{{from}}-{{to}} із {{total}} записів"
+    "paginationTotal": "{{from}}-{{to}} із {{total}} місяців",
+    "summary": "Разом"
   },
   "modal": {
     "addTitleDebit": "Додати витрати",
@@ -53,6 +66,7 @@
     "confirm": "Підтвердити",
     "cancel": "Скасувати",
     "successMessage": "Успішно збережено",
+    "editSuccess": "Запис успішно оновлено",
     "errorMessage": "Не вдалося зберегти зміни",
     "previewTitle": "Перегляд запису",
     "closeText": "Закрити"
@@ -67,7 +81,11 @@
     "descriptionPlaceholder": "Введіть опис",
     "category": "Категорія",
     "createdBy": "Створено :",
-    "automatic": "Автоматично"
+    "automatic": "Автоматично",
+    "periodMonth": "За місяць",
+    "periodMonthHint": "Місяць, якого стосується витрата. Наприклад, комуналка за червень, сплачена в липні. Якщо не вказати — береться місяць дати.",
+    "periodMonthPlaceholder": "Місяць витрати",
+    "currency": "Валюта"
   },
   "filters": {
     "dateRange": "Діапазон дат",
@@ -88,5 +106,24 @@
   "messages": {
     "deleted": "Запис успішно видалено.",
     "errorDelete": "Помилка під час видалення запису."
+  },
+  "drilldown": {
+    "titleExpected": "Виставлені рахунки — {{period}}",
+    "titleActual": "Надходження — {{period}}",
+    "invoiceNumber": "Рахунок",
+    "company": "Компанія",
+    "date": "Дата",
+    "sum": "Сума, грн",
+    "total": "Разом",
+    "empty": "За цей місяць платежів немає",
+    "errorLoading": "Не вдалося завантажити платежі.",
+    "truncated": "Показано {{shown}} із {{total}}. Решту дивіться на сторінці «Платежі».",
+    "openPayments": "Перейти до платежів",
+    "titleOutstanding": "Хто не доплатив — {{period}}",
+    "invoiced": "Нараховано",
+    "paid": "Оплачено",
+    "remaining": "Залишок",
+    "allSettled": "За цей місяць усі розрахувалися",
+    "unknownCompany": "Невідома компанія"
   }
 }

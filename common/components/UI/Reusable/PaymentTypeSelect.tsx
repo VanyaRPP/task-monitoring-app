@@ -9,6 +9,12 @@ const PaymentTypeSelect = () => {
     <Form.Item
       name="operation"
       label="Тип оплати"
+      tooltip={
+        <div>
+          <p>Дебет (Реалізація) — нарахування за послуги переліком.</p>
+          <p>Кредит (Оплата) — разова сума одним рядком.</p>
+        </div>
+      }
       rules={validateField('required')}
     >
       <Segmented
@@ -18,22 +24,22 @@ const PaymentTypeSelect = () => {
           {
             label: (
               <div className={styles.segmentedLabel}>
-                <CreditCardFilled />
-                <span>Кредит (Оплата)</span>
-              </div>
-            ),
-            value: Operations.Credit,
-            className: styles.creditSegment,
-          },
-          {
-            label: (
-              <div className={styles.segmentedLabel}>
                 <BankFilled />
                 <span>Дебет (Реалізація)</span>
               </div>
             ),
             value: Operations.Debit,
             className: styles.debitSegment,
+          },
+          {
+            label: (
+              <div className={styles.segmentedLabel}>
+                <CreditCardFilled />
+                <span>Кредит (Оплата)</span>
+              </div>
+            ),
+            value: Operations.Credit,
+            className: styles.creditSegment,
           },
         ]}
       />

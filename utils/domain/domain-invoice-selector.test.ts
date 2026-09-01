@@ -7,7 +7,9 @@ import {
   catalogRowToSelectOption,
   flattenDomainCatalogServices,
   invoiceLineExcludeKey,
+  isCatalogOptionExcluded,
   resolveCustomServicePrice,
+  typedServiceTypesOnInvoice,
 } from './domain-invoice-selector'
 
 describe('domain-invoice-selector', () => {
@@ -155,6 +157,87 @@ describe('domain-invoice-selector', () => {
       serviceId: b.serviceId,
     })
     expect(keyA).not.toBe(keyB)
+  })
+
+  describe('typedServiceTypesOnInvoice', () => {
+    it('collects utility types from auto-seeded rows that have no serviceId', () => {
+      const set = typedServiceTypesOnInvoice([
+        { type: ServiceType.Maintenance },
+        { type: ServiceType.Electricity },
+      ])
+      expect(set.has(ServiceType.Maintenance)).toBe(true)
+      expect(set.has(ServiceType.Electricity)).toBe(true)
+    })
+
+    it('ignores rows that carry a serviceId (added from the catalog)', () => {
+      const set = typedServiceTypesOnInvoice([
+        { type: ServiceType.Water, serviceId: '68156cdbf520914e5e1ad877' },
+      ])
+      expect(set.has(ServiceType.Water)).toBe(false)
+    })
+
+    it('ignores custom and empty rows', () => {
+      const set = typedServiceTypesOnInvoice([
+        { type: ServiceType.Custom, fieldName: 'internetPrice' } as any,
+        null,
+        undefined,
+      ])
+      expect(set.size).toBe(0)
+    })
+  })
+
+  describe('isCatalogOptionExcluded', () => {
+    const maintenanceOption = catalogRowToSelectOption({
+      _id: '677d414283b6ef93c6b8ea2c',
+      name: 'Утримання',
+      fieldName: 'rentPrice',
+      groupName: 'Комунальні',
+    })
+
+    it('hides a utility option whose ServiceType a typed line already owns', () => {
+      const excluded = isCatalogOptionExcluded(
+        maintenanceOption,
+        ['stype:maintenancePrice'],
+        typedServiceTypesOnInvoice([{ type: ServiceType.Maintenance }])
+      )
+      expect(excluded).toBe(true)
+    })
+
+    it('keeps the option when no line owns that ServiceType', () => {
+      const excluded = isCatalogOptionExcluded(
+        maintenanceOption,
+        [],
+        typedServiceTypesOnInvoice([{ type: ServiceType.Electricity }])
+      )
+      expect(excluded).toBe(false)
+    })
+
+    it('still hides an option matched by its line key', () => {
+      const excluded = isCatalogOptionExcluded(
+        maintenanceOption,
+        [maintenanceOption.value],
+        new Set<string>()
+      )
+      expect(excluded).toBe(true)
+    })
+
+    it('does not hide a second same-type catalog service when the first was added from the catalog', () => {
+      const total = catalogRowToSelectOption({
+        _id: '6816bca1e26e39a785fd7a0d',
+        name: 'Всього Водопостачання',
+        fieldName: 'waterPriceTotal',
+        groupName: 'Комунальні',
+      })
+      const excludeServiceTypes = typedServiceTypesOnInvoice([
+        { type: ServiceType.Water, serviceId: '68156cdbf520914e5e1ad877' },
+      ])
+      const excluded = isCatalogOptionExcluded(
+        total,
+        ['sid:68156cdbf520914e5e1ad877'],
+        excludeServiceTypes
+      )
+      expect(excluded).toBe(false)
+    })
   })
 
   it('adding utility row A does not block adding utility row B with same ServiceType', () => {

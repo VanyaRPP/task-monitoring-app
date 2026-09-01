@@ -1,13 +1,12 @@
 import Payment from '@common/modules/models/Payment'
-import PaymentChangeLog from '@common/modules/models/PaymentChangeLog'
 import Domain from '@modules/models/Domain'
 import start, { Data } from '@pages/api/api.config'
-import ProfitService from '@common/services/profitService/profit.service'
 import { getNextInvoiceNumber } from '@common/services/paymentService/payment.service'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import { Operations } from '@utils/constants'
 import { dateShiftMs } from '@common/assets/features/formatDate'
 import type { NextApiRequest, NextApiResponse } from 'next'
+import { logPaymentMutation } from '@common/modules/services/paymentAudit'
 
 start()
 
@@ -17,7 +16,6 @@ const COPYABLE_PAYMENT_FIELDS = [
   'company',
   'monthService',
   'description',
-  'invoice',
   'provider',
   'reciever',
   'generalSum',
@@ -85,8 +83,14 @@ export default async function handler(
 
       const creditData: Record<string, any> = {
         type: Operations.Credit,
+        // Keep the +1ms shift so the credit stays next to its invoice in the
+        // payments list, which sorts by invoiceCreationDate.
         invoiceCreationDate: dateShiftMs(source.invoiceCreationDate, 1),
+        // When the money actually arrived. Defaults to now; once the confirm
+        // dialog offers a date picker this reads it from the request body.
+        paidAt: new Date(),
         invoiceNumber: await getNextInvoiceNumber(),
+        invoice: [],
       }
       for (const field of COPYABLE_PAYMENT_FIELDS) {
         if (source[field] !== undefined) {
@@ -100,35 +104,14 @@ export default async function handler(
         continue
       }
 
-      await PaymentChangeLog.create({
-        paymentId: source._id,
-        date: new Date(),
+      await logPaymentMutation({
+        actionType: 'MARK_PAID',
+        source: 'quick-pay',
+        actor: user,
         reason: 'mark-paid',
-        actorId: user?._id,
-        actorEmail: user?.email,
-        invoiceData: {
-          invoiceNumber: source.invoiceNumber,
-          invoiceCreationDate: source.invoiceCreationDate,
-          invoice: source.invoice,
-          provider: source.provider,
-          reciever: source.reciever,
-          generalSum: source.generalSum,
-          description: source.description,
-          type: source.type,
-          template: source.template,
-          creditPaymentId: created._id,
-        },
+        before: source,
+        after: created,
       })
-
-      if (isGlobalAdmin) {
-        await ProfitService.updatePayment(created._id.toString(), {
-          type: Operations.Credit,
-          date: created.invoiceCreationDate,
-          amount: created.generalSum,
-          description: created.description,
-          invoiceNumber: String(created.invoiceNumber),
-        })
-      }
 
       createdIds.push(created._id.toString())
     }
