@@ -94,9 +94,7 @@ export const buildCounterpartyNameRegexSource = (
  */
 export const isSelfTransaction = (
   transaction:
-    | Pick<ITransaction, 'AUT_CNTR_CRF' | 'AUT_MY_CRF'>
-    | null
-    | undefined
+    Pick<ITransaction, 'AUT_CNTR_CRF' | 'AUT_MY_CRF'> | null | undefined
 ): boolean => {
   const counterparty = transaction?.AUT_CNTR_CRF?.trim()
   const owner = transaction?.AUT_MY_CRF?.trim()

@@ -55,9 +55,7 @@ const ServicesBlock: React.FC<ServiceBlockProps> = ({ sepDomainID }) => {
 
   const domainFilteredCustomServices = useMemo(() => {
     const explicitDomainIds = filter?.domain as unknown as
-      | string[]
-      | null
-      | undefined
+      string[] | null | undefined
     if (explicitDomainIds?.length) {
       return customServices.filter((cs) =>
         explicitDomainIds.some((id) => String(cs.domain) === String(id))

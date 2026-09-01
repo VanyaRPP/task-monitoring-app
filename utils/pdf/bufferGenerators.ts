@@ -1,4 +1,5 @@
 import archiver from 'archiver'
+import { existsSync, rmSync } from 'fs'
 
 const isServerless =
   !!process.env.VERCEL_ENV || !!process.env.AWS_LAMBDA_FUNCTION_NAME
@@ -20,6 +21,48 @@ const CHROMIUM_PACK_URL =
   process.env.CHROMIUM_PACK_URL ||
   'https://github.com/Sparticuz/chromium/releases/download/v127.0.0/chromium-v127.0.0-pack.tar'
 
+// AWS Lambda's nodejs20.x/nodejs22.x runtimes are Amazon Linux 2023; nodejs18.x
+// and older are Amazon Linux 2. @sparticuz/chromium@127 picks between the two
+// lib bundles by string-matching "20.x" in AWS_EXECUTION_ENV, so on nodejs22.x
+// it takes the AL2 branch: it extracts al2.tar.br (which has no libnspr4.so,
+// because AL2's base image already ships it) and points LD_LIBRARY_PATH at
+// /tmp/al2/lib. Chromium then dies with
+//   "libnspr4.so: cannot open shared object file: No such file or directory".
+// Derive the bundle from the Node version actually running and normalise the
+// variable before the module is imported, so its top-level LD_LIBRARY_PATH /
+// FONTCONFIG_PATH setup and its later extract both take the AL2023 branch.
+const CHROMIUM_LIB_DIR = alignChromiumRuntimeEnv()
+
+function alignChromiumRuntimeEnv(): string {
+  const nodeMajor = Number(process.versions.node.split('.')[0])
+  const usesAl2023 = !Number.isNaN(nodeMajor) && nodeMajor >= 20
+
+  if (isServerless) {
+    process.env.AWS_EXECUTION_ENV = usesAl2023
+      ? 'AWS_Lambda_nodejs20.x'
+      : 'AWS_Lambda_nodejs18.x'
+  }
+
+  return usesAl2023 ? '/tmp/al2023/lib' : '/tmp/al2/lib'
+}
+
+// executablePath() returns /tmp/chromium as soon as that file exists, without
+// extracting anything else. A warm container that already unpacked the binary
+// against the wrong lib bundle would therefore stay broken forever, so drop the
+// binary when its libraries are missing and let the next call re-extract.
+function dropStaleChromiumBinary(): void {
+  try {
+    if (
+      existsSync('/tmp/chromium') &&
+      !existsSync(`${CHROMIUM_LIB_DIR}/libnss3.so`)
+    ) {
+      rmSync('/tmp/chromium', { force: true })
+    }
+  } catch {
+    // Best effort only - if /tmp isn't writable the launch below reports it.
+  }
+}
+
 let executablePathPromise: Promise<string> | undefined
 
 function resolveExecutablePath(
@@ -39,6 +82,8 @@ function resolveExecutablePath(
 
 async function launchBrowser() {
   if (isServerless) {
+    dropStaleChromiumBinary()
+
     const [{ default: puppeteerCore }, { default: chromium }] =
       await Promise.all([
         import('puppeteer-core'),

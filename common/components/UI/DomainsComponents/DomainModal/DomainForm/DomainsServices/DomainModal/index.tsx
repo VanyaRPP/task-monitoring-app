@@ -80,10 +80,15 @@ const DomainModal: FC<Props> = ({
   const [tempTitle, setTempTitle] = useState('')
   const [newServiceName, setNewServiceName] = useState('')
   const [activePanel, setActivePanel] = useState<string | string[]>([])
+  const [editingGroupKey, setEditingGroupKey] = useState<string | null>(null)
+  const [tempGroupName, setTempGroupName] = useState('')
   const { data: user } = useGetCurrentUserQuery()
 
   isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
+  const isDomainAdmin = user?.roles?.includes(Roles.DOMAIN_ADMIN)
   const isAdmin = isAdminCheck(user?.roles)
+  const canManageGroups =
+    isAdmin && (isGlobalAdmin || (isDomainAdmin && !!domainId))
 
   useEffect(() => {
     const initialTargets: Record<string, string[]> = {}
@@ -274,6 +279,53 @@ const DomainModal: FC<Props> = ({
     const newTargetKeys = { ...targetKeys }
     delete newTargetKeys[groupName]
     setTargetKeys(newTargetKeys)
+  }
+
+  const handleStartEditGroup = (groupName: string) => {
+    setEditingGroupKey(groupName)
+    setTempGroupName(groupName)
+  }
+
+  const handleCancelEditGroup = () => {
+    setEditingGroupKey(null)
+    setTempGroupName('')
+  }
+
+  const handleSaveEditGroup = (groupName: string) => {
+    const trimmed = tempGroupName.trim()
+
+    if (!trimmed) {
+      message.warning('Назва групи не може бути порожньою')
+      return
+    }
+
+    if (
+      trimmed !== groupName &&
+      localServiceGroups.some((g) => g.groupName === trimmed)
+    ) {
+      message.warning('Група з такою назвою вже існує')
+      return
+    }
+
+    if (trimmed === groupName) {
+      handleCancelEditGroup()
+      return
+    }
+
+    setLocalServiceGroups((prev) =>
+      prev.map((g) =>
+        g.groupName === groupName ? { ...g, groupName: trimmed } : g
+      )
+    )
+
+    setTargetKeys((prev) => {
+      const updated = { ...prev }
+      updated[trimmed] = updated[groupName] || []
+      delete updated[groupName]
+      return updated
+    })
+
+    handleCancelEditGroup()
   }
 
   const renderTransfer = (groupName: string) => (
@@ -516,17 +568,75 @@ const DomainModal: FC<Props> = ({
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center',
+                        gap: 8,
                       }}
                     >
-                      <span>Група: {g.groupName}</span>
-                      {editable && isGlobalAdmin && (
-                        <Button
-                          type="text"
-                          danger
-                          onClick={() => handleRemoveGroup(g.groupName)}
-                        >
-                          Видалити групу послуг
-                        </Button>
+                      {editingGroupKey === g.groupName ? (
+                        <Input
+                          size="small"
+                          value={tempGroupName}
+                          onChange={(e) => setTempGroupName(e.target.value)}
+                          onPressEnter={() => handleSaveEditGroup(g.groupName)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Escape') handleCancelEditGroup()
+                          }}
+                          autoFocus
+                          style={{ flex: 1, maxWidth: 320 }}
+                        />
+                      ) : (
+                        <span>Група: {g.groupName}</span>
+                      )}
+                      {editable && canManageGroups && (
+                        <Space size="small">
+                          {editingGroupKey === g.groupName ? (
+                            <>
+                              <Button
+                                type="text"
+                                size="small"
+                                icon={
+                                  <CheckOutlined
+                                    style={{
+                                      color: '#642AB5',
+                                      stroke: '#642AB5',
+                                      strokeWidth: 60,
+                                    }}
+                                  />
+                                }
+                                onClick={() => handleSaveEditGroup(g.groupName)}
+                              />
+                              <Button
+                                type="text"
+                                size="small"
+                                icon={
+                                  <CloseOutlined
+                                    style={{
+                                      stroke: 'currentColor',
+                                      strokeWidth: 60,
+                                    }}
+                                  />
+                                }
+                                onClick={handleCancelEditGroup}
+                              />
+                            </>
+                          ) : (
+                            <Button
+                              type="text"
+                              size="small"
+                              icon={<EditOutlined />}
+                              onClick={() => handleStartEditGroup(g.groupName)}
+                            />
+                          )}
+                          <Popconfirm
+                            title="Видалити групу послуг?"
+                            onConfirm={() => handleRemoveGroup(g.groupName)}
+                            okText="Так"
+                            cancelText="Ні"
+                          >
+                            <DeleteOutlined
+                              style={{ color: 'red', cursor: 'pointer' }}
+                            />
+                          </Popconfirm>
+                        </Space>
                       )}
                     </div>
                   }

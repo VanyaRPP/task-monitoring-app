@@ -24,6 +24,7 @@ import {
   IPaymentChangeLog,
   AuditFilters,
   IPaymentAuditFacetsResponse,
+  PaymentStatus,
 } from './payment.api.types'
 
 /**
@@ -68,6 +69,7 @@ export const paymentApi = createApi({
         companyIds?: string[]
         streetIds?: string[]
         serviceIds?: string[]
+        status?: PaymentStatus | PaymentStatus[]
         dateField?: 'invoiceCreationDate' | 'date' | 'paidAt'
       }
     >({
@@ -85,6 +87,7 @@ export const paymentApi = createApi({
         streetIds,
         serviceIds,
         dateField,
+        status,
       }) => {
         return {
           url: `spacehub/payment`,
@@ -102,6 +105,7 @@ export const paymentApi = createApi({
             streetIds,
             serviceIds,
             dateField,
+            status,
           },
         }
       },
@@ -191,6 +195,30 @@ export const paymentApi = createApi({
       invalidatesTags: (response) =>
         response ? ['Payment', 'PaymentAudit'] : [],
       onQueryStarted: invalidatePaymentSideEffects,
+    }),
+    updatePaymentStatus: builder.mutation<
+      IExtendedPayment,
+      { _id: string; status: PaymentStatus }
+    >({
+      query({ _id, status }) {
+        return {
+          url: `spacehub/payment/${_id}`,
+          method: 'PATCH',
+          body: { status },
+        }
+      },
+      invalidatesTags: (response) => (response ? ['Payment'] : []),
+      onQueryStarted: invalidatePaymentSideEffects,
+    }),
+    sendPaymentEmail: builder.mutation<
+      { success: boolean },
+      { id: string; html?: string }
+    >({
+      query: ({ id, html }) => ({
+        url: `spacehub/payment/${id}/send-email`,
+        method: 'POST',
+        body: { html },
+      }),
     }),
     markPaymentsPaid: builder.mutation<
       {
@@ -329,4 +357,6 @@ export const {
   useGetPaymentAuditQuery,
   useGetPaymentAuditFacetsQuery,
   useRestorePaymentMutation,
+  useUpdatePaymentStatusMutation,
+  useSendPaymentEmailMutation,
 } = paymentApi

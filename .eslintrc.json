@@ -16,5 +16,14 @@
     "@typescript-eslint/explicit-module-boundary-types": "off",
     "no-console": ["error", { "allow": ["warn", "error", "trace"] }],
     "@typescript-eslint/no-empty-interface": "off"
-  }
+  },
+  "overrides": [
+    {
+      "files": ["**/*.test.ts", "**/*.test.tsx", "**/tests/**", "scripts/**"],
+      "rules": {
+        "@typescript-eslint/ban-ts-comment": "off",
+        "@typescript-eslint/no-empty-function": "off"
+      }
+    }
+  ]
 }

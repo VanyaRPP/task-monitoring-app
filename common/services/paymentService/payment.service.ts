@@ -13,6 +13,7 @@ import {
   sendInvoiceEmail,
   type InvoiceEmailPayment,
 } from '@utils/email/sendInvoiceEmail'
+import { PaymentStatus } from '@common/api/paymentApi/payment.api.types'
 import { FilterQuery } from 'mongoose'
 import { isDev } from '@utils/env'
 
@@ -51,6 +52,7 @@ export interface PaymentQueryParams {
   companyIds?: string | string[]
   domainIds?: string | string[]
   serviceIds?: string | string[]
+  status?: PaymentStatus | string | string[]
   limit?: string
   skip?: string
   type?: 'debit' | 'credit'
@@ -162,6 +164,46 @@ export async function getPayments(
 
   if (type) {
     options.type = type
+  }
+  if (reqQuery.status) {
+    const statuses = Array.isArray(reqQuery.status)
+      ? reqQuery.status
+      : String(reqQuery.status)
+          .split(',')
+          .map((value) => value.trim())
+          .filter(Boolean)
+
+    const normalizedStatuses = Array.from(
+      new Set(
+        statuses.filter(
+          (value): value is PaymentStatus =>
+            value === PaymentStatus.Draft || value === PaymentStatus.Sent
+        )
+      )
+    )
+
+    if (
+      normalizedStatuses.length === 1 &&
+      normalizedStatuses[0] === PaymentStatus.Draft
+    ) {
+      options.$or = [
+        { status: { $in: [PaymentStatus.Draft, null] } },
+        { status: { $exists: false } },
+      ]
+    } else if (normalizedStatuses.length > 0) {
+      const statusFilters: Record<string, any>[] = []
+
+      if (normalizedStatuses.includes(PaymentStatus.Sent))
+        statusFilters.push({ status: PaymentStatus.Sent })
+
+      if (normalizedStatuses.includes(PaymentStatus.Draft))
+        statusFilters.push(
+          { status: { $in: [PaymentStatus.Draft, null] } },
+          { status: { $exists: false } }
+        )
+
+      options.$or = statusFilters
+    }
   }
   // TODO: add security
   if (servicesIds) {

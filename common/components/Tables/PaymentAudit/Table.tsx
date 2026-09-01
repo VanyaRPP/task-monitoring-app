@@ -83,8 +83,7 @@ const PaymentAuditTable: React.FC = () => {
     pagination: TablePaginationConfig,
     nextFilters: TableFilters,
     _sorter:
-      | SorterResult<IPaymentChangeLog>
-      | SorterResult<IPaymentChangeLog>[],
+      SorterResult<IPaymentChangeLog> | SorterResult<IPaymentChangeLog>[],
     extra: { action: 'paginate' | 'sort' | 'filter' }
   ) => {
     if (extra.action === 'filter') {

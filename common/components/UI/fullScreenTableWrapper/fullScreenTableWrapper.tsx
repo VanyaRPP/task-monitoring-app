@@ -3,8 +3,8 @@ import { useDispatch } from 'react-redux'
 import { useRouter } from 'next/router'
 import { useFullScreenFloatButton } from '@modules/hooks/useFloatButton'
 import { addButton, removeButton } from '@modules/store/floatButtonSlice'
-import { FullscreenExitOutlined, FullscreenOutlined } from '@ant-design/icons'
-import { Button } from 'antd'
+import { FullscreenExitOutlined } from '@ant-design/icons'
+import { Button, Tooltip } from 'antd'
 import styles from './styled.module.scss'
 
 interface FullScreenWrapperProps {
@@ -58,14 +58,14 @@ const FullScreenWrapper: React.FC<FullScreenWrapperProps> = ({
   return (
     <>
       {allowFullscreen && isFullScreen && (
-        <Button
-          className={styles.toggleButton}
-          onClick={toggleFullScreen}
-          type="default"
-          icon={
-            isFullScreen ? <FullscreenExitOutlined /> : <FullscreenOutlined />
-          }
-        />
+        <Tooltip title="Вийти з Повноекранного" placement="left">
+          <Button
+            className={styles.toggleButton}
+            onClick={toggleFullScreen}
+            type="default"
+            icon={<FullscreenExitOutlined />}
+          />
+        </Tooltip>
       )}
 
       <div
