@@ -9,12 +9,12 @@ import EncryptionService from '@utils/encryptionService'
 import { hidePercentCharacters } from '@utils/hidePercentCharacters/hidePercentCharacters'
 import { DOMAIN_GENERAL_PROJECTION } from '@utils/domain/domain-view-access'
 
-start()
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
+  await start()
+
   const { isDomainAdmin, isGlobalAdmin, isUser, user } = await getCurrentUser(
     req,
     res

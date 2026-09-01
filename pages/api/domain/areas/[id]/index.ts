@@ -5,12 +5,12 @@ import start, { ExtendedData } from '@pages/api/api.config'
 import type { NextApiHandler, NextApiRequest, NextApiResponse } from 'next'
 import { withValidation } from './validator'
 
-start()
-
 async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ExtendedData>
 ) {
+  await start()
+
   switch (req.method) {
     case 'GET':
       try {

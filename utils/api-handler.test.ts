@@ -1,6 +1,11 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { withErrorHandler } from '@utils/api-handler'
 
+jest.mock('@pages/api/api.config', () => ({
+  __esModule: true,
+  default: jest.fn(),
+}))
+
 type MockRes = {
   status: jest.Mock
   json: jest.Mock

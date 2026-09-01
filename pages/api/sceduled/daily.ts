@@ -6,12 +6,12 @@ import dayjs from 'dayjs'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import start from '../api.config'
 
-start()
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  await start()
+
   try {
     await Task.find({}).then((tasks) => {
       tasks.map(async (task: ITask) => {

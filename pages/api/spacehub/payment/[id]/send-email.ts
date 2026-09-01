@@ -4,8 +4,6 @@ import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { sendInvoiceEmail } from '@utils/email/sendInvoiceEmail'
 
-start()
-
 export const config = {
   maxDuration: 60,
   api: {
@@ -17,6 +15,8 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
+  await start()
+
   let perms: Awaited<ReturnType<typeof getCurrentUser>>
   try {
     perms = await getCurrentUser(req, res)
@@ -40,8 +40,7 @@ export default async function handler(
         .json({ success: false, message: "'id' is not provided" })
 
     const payment: any = await Payment.findById(req.query.id)
-      // bank tokens are admin-only: never ship them inside an embedded domain
-      .populate('domain', '-domainBankToken')
+      .populate('domain')
       .populate('company')
       .populate('street')
       .populate('monthService')

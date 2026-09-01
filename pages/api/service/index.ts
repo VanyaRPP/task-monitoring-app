@@ -16,12 +16,12 @@ import {
 } from '@utils/helpers'
 import Street from '@modules/models/Street'
 
-start()
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
+  await start()
+
   const { isGlobalAdmin, isDomainAdmin, isAdmin, isUser, user } =
     await getCurrentUser(req, res)
 

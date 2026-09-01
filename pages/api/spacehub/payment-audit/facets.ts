@@ -5,12 +5,12 @@ import PaymentChangeLog from '@common/modules/models/PaymentChangeLog'
 import Domain from '@modules/models/Domain'
 import RealEstate from '@common/modules/models/RealEstate'
 
-start()
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  await start()
+
   if (req.method !== 'GET') {
     return res
       .status(405)

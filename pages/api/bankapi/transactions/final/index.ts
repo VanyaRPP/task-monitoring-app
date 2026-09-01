@@ -4,12 +4,12 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import start, { Data } from '@pages/api/api.config'
 import { getFinalTransactions } from '../utils/getTransactions/index'
 
-start()
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
+  await start()
+
   const { token: tokenQuery } = req.query
   const { token: tokenHeader } = req.headers
 
