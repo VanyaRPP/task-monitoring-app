@@ -16,12 +16,18 @@ jest.mock('@common/api/domainApi/domain.api', () => ({
   useUpdateArchivedDomainMutation: jest.fn(),
 }))
 
+jest.mock('@common/api/userApi/user.api', () => ({
+  useGetCurrentUserQuery: jest.fn(),
+}))
+
 import {
   useGetDomainsQuery,
   useDeleteDomainMutation,
   useEditDomainMutation,
   useUpdateArchivedDomainMutation,
 } from '@common/api/domainApi/domain.api'
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+import { Roles } from '@utils/constants'
 
 const mockDomains = [
   {
@@ -51,8 +57,14 @@ const renderComponent = (props = {}) =>
     />
   )
 
+const mockCurrentUser = (roles: string[]) =>
+  (useGetCurrentUserQuery as jest.Mock).mockReturnValue({
+    data: { roles },
+  })
+
 beforeEach(() => {
   jest.clearAllMocks()
+  mockCurrentUser([Roles.DOMAIN_ADMIN])
   ;(useDeleteDomainMutation as jest.Mock).mockReturnValue([
     jest.fn(),
     { isLoading: false },
@@ -131,4 +143,40 @@ it('hides "Надавачі послуг" column when only one company in filter
   renderComponent()
 
   expect(screen.queryByText('Надавачі послуг')).not.toBeInTheDocument()
+})
+
+describe('row actions by access level', () => {
+  beforeEach(() => {
+    ;(useGetDomainsQuery as jest.Mock).mockReturnValue({
+      data: mockDomains,
+      isLoading: false,
+      isError: false,
+    })
+  })
+
+  it('offers preview plus the admin actions to a DomainAdmin', () => {
+    mockCurrentUser([Roles.DOMAIN_ADMIN])
+    const { container } = renderComponent()
+
+    expect(container.querySelector('.anticon-eye')).toBeInTheDocument()
+    expect(container.querySelector('.anticon-edit')).toBeInTheDocument()
+    expect(container.querySelector('.anticon-more')).toBeInTheDocument()
+  })
+
+  it('leaves a view-only User with preview only', () => {
+    mockCurrentUser([Roles.USER])
+    const { container } = renderComponent()
+
+    expect(container.querySelector('.anticon-eye')).toBeInTheDocument()
+    expect(container.querySelector('.anticon-edit')).not.toBeInTheDocument()
+    expect(container.querySelector('.anticon-more')).not.toBeInTheDocument()
+  })
+
+  it('treats an account with no roles as view-only', () => {
+    mockCurrentUser([])
+    const { container } = renderComponent()
+
+    expect(container.querySelector('.anticon-eye')).toBeInTheDocument()
+    expect(container.querySelector('.anticon-edit')).not.toBeInTheDocument()
+  })
 })
