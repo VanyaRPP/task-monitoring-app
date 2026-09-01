@@ -128,7 +128,8 @@ export default async function handler(
           .sort({ date: -1 })
           .limit(+limit)
           .skip(+skip)
-          .populate('domain')
+          // bank tokens are admin-only: never ship them inside an embedded domain
+          .populate('domain', '-domainBankToken')
           .populate('street')
 
         const distinctStreets = await Service.distinct('street', options)

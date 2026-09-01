@@ -254,7 +254,8 @@ export async function getPayments(
     .limit(+limit)
     .populate('company')
     .populate('street')
-    .populate('domain')
+    // bank tokens are admin-only: never ship them inside an embedded domain
+    .populate('domain', '-domainBankToken')
     .populate('monthService')
 
   const total = await Payment.countDocuments(options)
