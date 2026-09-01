@@ -48,7 +48,6 @@ const RealEstateForm: FC<Props> = ({
 }) => {
   const watchedDomainId = Form.useWatch('domain', form)
   const domainId = watchedDomainId || currentRealEstate?.domain?._id
-  const streetId = currentRealEstate?.street?._id
   const { data: domain = {} as IDomain } = useGetDomainByPkQuery(
     { domainId: domainId || currentRealEstate?.domain?._id },
     { skip: !domainId && !currentRealEstate?.domain?._id }
@@ -78,26 +77,6 @@ const RealEstateForm: FC<Props> = ({
       form.setFieldValue('services', servicesWithEnabled)
     }
   }, [services, currentRealEstate, form])
-
-  useEffect(() => {
-    if (!domainId) return
-
-    if (currentRealEstate?.street) {
-      let streetVal =
-        typeof currentRealEstate.street === 'object' &&
-        currentRealEstate.street !== null
-          ? currentRealEstate.street._id
-          : currentRealEstate.street
-
-      if (streetVal && !/^[0-9a-fA-F]{24}$/.test(String(streetVal))) {
-        streetVal = undefined
-      }
-
-      setTimeout(() => {
-        form.setFieldValue('street', streetVal)
-      }, 0)
-    }
-  }, [domainId, currentRealEstate, form])
 
   const isServiceExistById = (serviceId: string) => {
     if (!domain?.customServices?.length) return false

@@ -59,30 +59,74 @@ const AddressesSelect: React.FC<AddressesSelectProps> = ({
   }, [streets])
 
   useEffect(() => {
-    if (domainId && options.length > 0) {
-      if (options.length === 1) {
-        form.setFieldsValue({ street: options[0].value })
-        onStreetHasServiceChange?.(options[0].hasService)
-      } else {
-        const firstStreetWithService = options.find(
-          (option) => option.hasService
-        )
+    // Form.useWatch reports `undefined` for a field's very first render
+    // (it only catches up to the real store value a tick later, via its
+    // own effect). Reading the store directly here — instead of trusting
+    // the `domainId`/`streetId` watch snapshots — avoids treating that
+    // transient "not caught up yet" state as "no domain/street selected"
+    // and wiping out a value the modal already populated for editing.
+    const liveDomainId = form.getFieldValue('domain')
 
-        if (firstStreetWithService) {
-          street
-            ? form.setFieldsValue({ street: street })
-            : form.setFieldsValue({ street: firstStreetWithService.value })
-          onStreetHasServiceChange?.(firstStreetWithService.hasService)
-        } else {
-          form.setFieldsValue({ street: undefined })
-          onStreetHasServiceChange?.(false)
-        }
-      }
+    if (!liveDomainId) {
+      form.setFieldsValue({ street: undefined })
+      onStreetHasServiceChange?.(false)
+      return
+    }
+
+    // The street list for this domain hasn't loaded yet. Don't touch the
+    // field while we don't know the valid options — clearing here would
+    // wipe out an edit-mode value before we ever get a chance to confirm
+    // it's still valid (see the edit-mode check below), letting the
+    // "auto-pick a street" branch silently replace it with the wrong
+    // address once the list finally arrives.
+    if (isStreetsLoading) return
+
+    if (options.length === 0) {
+      form.setFieldsValue({ street: undefined })
+      onStreetHasServiceChange?.(false)
+      return
+    }
+
+    // In edit mode the entity already carries its own street. If that value
+    // is still a valid option for this domain, keep it instead of forcing an
+    // auto-pick below — otherwise every edit would silently overwrite the
+    // company's real address with "the first street that has a service".
+    const liveStreetId = form.getFieldValue('street')
+    const currentStreet = options.find(
+      (option) => option.value === liveStreetId
+    )
+    if (edit && currentStreet) {
+      onStreetHasServiceChange?.(currentStreet.hasService)
+      return
+    }
+
+    if (options.length === 1) {
+      form.setFieldsValue({ street: options[0].value })
+      onStreetHasServiceChange?.(options[0].hasService)
+      return
+    }
+
+    const firstStreetWithService = options.find((option) => option.hasService)
+
+    if (firstStreetWithService) {
+      street
+        ? form.setFieldsValue({ street: street })
+        : form.setFieldsValue({ street: firstStreetWithService.value })
+      onStreetHasServiceChange?.(firstStreetWithService.hasService)
     } else {
       form.setFieldsValue({ street: undefined })
       onStreetHasServiceChange?.(false)
     }
-  }, [domainId, options, form, street, onStreetHasServiceChange])
+  }, [
+    domainId,
+    options,
+    form,
+    street,
+    onStreetHasServiceChange,
+    edit,
+    streetId,
+    isStreetsLoading,
+  ])
 
   const selectedStreet = options.find((option) => option.value === streetId)
   const showNoServiceTooltip = !!selectedStreet && !selectedStreet.hasService
