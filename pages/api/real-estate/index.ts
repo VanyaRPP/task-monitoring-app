@@ -8,12 +8,12 @@ import { isValidEmail } from '@common/assets/features/validators'
 import { FilterQuery } from 'mongoose'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
-start()
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ExtendedData>
 ) {
+  await start()
+
   const { isGlobalAdmin, isDomainAdmin, isAdmin, isUser, user } =
     await getCurrentUser(req, res)
 

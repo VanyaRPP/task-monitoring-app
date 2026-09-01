@@ -25,24 +25,27 @@ export type ExtendedData = Data & {
 
 let bootstrap: Promise<void> | null = null
 
-// 71 API routes call this at module scope as a bare `start()` — no `await`, no
-// `catch`. A rejection there is an unhandled rejection, which under Node's
-// default policy tears down the whole Lambda container mid-request: that is why
-// a database problem surfaced as intermittent 500s across the entire app,
-// unrelated to any one page (see the `unhandledRejection` lines in CloudWatch).
-//
-// Swallow it here so a failed dial can no longer kill the process. The failure
-// still surfaces per request, as a clean 500 from the route's own try/catch,
-// and clearing `bootstrap` lets a later call retry instead of latching onto the
-// first failure.
+/**
+ * Ensures the mongoose connection before a request touches a model.
+ *
+ * Always `await` this from inside the handler, never call it bare at module
+ * scope: module scope runs once per Lambda container, so a container whose one
+ * dial failed would keep serving 500s for the rest of its life, and the
+ * unawaited rejection surfaces as a process-level unhandledRejection instead of
+ * a response. Next 15 installs a handler that keeps the process alive through
+ * that, which is what turned a self-healing crash into a sustained outage.
+ *
+ * `bootstrap` memoises the in-flight dial so concurrent requests share one
+ * connect, and is cleared on failure so the next request retries rather than
+ * latching onto the first error.
+ */
 const start = async (): Promise<void> => {
   if (!bootstrap) {
     bootstrap = dbConnect()
       .then(() => undefined)
       .catch((error) => {
         bootstrap = null
-        // eslint-disable-next-line no-console
-        console.error('[db] initial connection failed', error)
+        throw error
       })
   }
 

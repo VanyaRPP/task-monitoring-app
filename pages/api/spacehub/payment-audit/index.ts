@@ -7,8 +7,6 @@ import Payment from '@common/modules/models/Payment'
 import Domain from '@modules/models/Domain'
 import RealEstate from '@common/modules/models/RealEstate'
 
-start()
-
 const DEFAULT_PAGE = 1
 const DEFAULT_LIMIT = 20
 const MAX_LIMIT = 100
@@ -32,6 +30,8 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  await start()
+
   if (req.method !== 'GET') {
     return res
       .status(405)

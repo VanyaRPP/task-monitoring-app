@@ -9,12 +9,12 @@ import RealEstate from '@modules/models/RealEstate'
 import { IStreet } from '@modules/models/Street'
 import mongoose from 'mongoose'
 
-start()
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  await start()
+
   const { isGlobalAdmin, user } = await getCurrentUser(req, res)
 
   if (req.method === 'GET') {

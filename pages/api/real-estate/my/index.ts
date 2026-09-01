@@ -6,12 +6,12 @@ import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { REACT_LOADABLE_MANIFEST } from 'next/dist/shared/lib/constants'
 
-start()
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
+  await start()
+
   const { isGlobalAdmin, user } = await getCurrentUser(req, res)
 
   if (!isGlobalAdmin) {

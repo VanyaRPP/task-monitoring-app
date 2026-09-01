@@ -4,8 +4,6 @@ import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { sendInvoiceEmail } from '@utils/email/sendInvoiceEmail'
 
-start()
-
 export const config = {
   maxDuration: 60,
   api: {
@@ -17,6 +15,8 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
+  await start()
+
   let perms: Awaited<ReturnType<typeof getCurrentUser>>
   try {
     perms = await getCurrentUser(req, res)

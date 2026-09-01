@@ -6,12 +6,12 @@ import { getCurrentUser } from '@utils/getCurrentUser'
 import { transliterateAndCamelCase } from '@utils/transliterateAndCamelCase'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
-start()
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
+  await start()
+
   const { isGlobalAdmin, isDomainAdmin, isUser } = await getCurrentUser(
     req,
     res

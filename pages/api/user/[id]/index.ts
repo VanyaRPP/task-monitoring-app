@@ -7,12 +7,12 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import { Roles } from '@utils/constants'
 import { isDev } from '@utils/env'
 
-start()
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  await start()
+
   const {
     user: currentUser,
     isGlobalAdmin,

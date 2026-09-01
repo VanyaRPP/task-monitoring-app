@@ -6,8 +6,6 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import { applyTemplateScope } from '@common/services/paymentService/templateScope.service'
 import { logPaymentMutation } from '@common/modules/services/paymentAudit'
 
-start()
-
 const PROTECTED_PATCH_FIELDS = ['_id', 'domain', 'company', '_templateScope']
 
 const sanitizePatchBody = (body: Record<string, any>) => {
@@ -22,6 +20,8 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
+  await start()
+
   let perms: Awaited<ReturnType<typeof getCurrentUser>>
   try {
     perms = await getCurrentUser(req, res)

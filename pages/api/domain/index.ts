@@ -8,12 +8,12 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import EncryptionService from '@utils/encryptionService'
 import { hidePercentCharacters } from '@utils/hidePercentCharacters/hidePercentCharacters'
 
-start()
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
+  await start()
+
   const { isDomainAdmin, isGlobalAdmin, isUser, user } = await getCurrentUser(
     req,
     res
