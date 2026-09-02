@@ -9,12 +9,12 @@ import _groupBy from 'lodash/groupBy'
 import dayjs from 'dayjs'
 import Credit from '@modules/models/Credit'
 
-start()
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
+  await start()
+
   const { isDomainAdmin, isGlobalAdmin, isAdmin, user } = await getCurrentUser(
     req,
     res

@@ -223,7 +223,15 @@ export const InvoiceSelector: React.FC<{
   excludeKeys?: string[]
   excludeServiceTypes?: Set<string>
   onSelect?: (payload: IInvoiceLineAddPayload) => void
-}> = ({ service, company, prevPayment, domainId, excludeKeys, excludeServiceTypes, onSelect }) => {
+}> = ({
+  service,
+  company,
+  prevPayment,
+  domainId,
+  excludeKeys,
+  excludeServiceTypes,
+  onSelect,
+}) => {
   const rawDomainId = service?.domain?._id
     ? String(service.domain._id)
     : domainId
@@ -251,8 +259,7 @@ export const InvoiceSelector: React.FC<{
     const catalogOptions = rows
       .map((row) => catalogRowToSelectOption(row, priceContext))
       .filter(
-        (opt) =>
-          !isCatalogOptionExcluded(opt, excludeKeys, excludeServiceTypes)
+        (opt) => !isCatalogOptionExcluded(opt, excludeKeys, excludeServiceTypes)
       )
     const customOption = {
       value: ServiceType.Custom,
@@ -278,7 +285,11 @@ export const InvoiceSelector: React.FC<{
         return
       }
       const opt = options.find((o) => o.value === value)
-      if (!opt || isCatalogOptionExcluded(opt, excludeKeys, excludeServiceTypes)) return
+      if (
+        !opt ||
+        isCatalogOptionExcluded(opt, excludeKeys, excludeServiceTypes)
+      )
+        return
       onSelect?.(opt.payload)
     },
     [excludeKeys, excludeServiceTypes, onSelect, options]

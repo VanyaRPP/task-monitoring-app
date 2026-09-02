@@ -5,12 +5,12 @@ import start, { Data } from '@pages/api/api.config'
 import RealEstate from '@modules/models/RealEstate'
 import { getCurrentUser } from '@utils/getCurrentUser'
 
-start()
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
+  await start()
+
   const { isDomainAdmin, isGlobalAdmin, isAdmin } = await getCurrentUser(
     req,
     res

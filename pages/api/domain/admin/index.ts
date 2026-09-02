@@ -3,12 +3,12 @@ import { getCurrentUser } from '@utils/getCurrentUser'
 import start, { Data } from '@pages/api/api.config'
 import Domain from '@modules/models/Domain'
 
-start()
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
+  await start()
+
   if (req.method !== 'GET') {
     return res
       .status(405)

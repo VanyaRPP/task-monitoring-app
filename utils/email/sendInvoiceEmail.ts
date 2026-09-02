@@ -20,6 +20,10 @@ export interface InvoiceEmailPayment {
   company?: unknown
 }
 
+export interface SendInvoiceEmailOptions {
+  html?: string
+}
+
 function isEmailDebugEnabled() {
   return process.env.EMAIL_DEBUG === 'true' || isDev
 }
@@ -68,9 +72,18 @@ function getInvoiceRecipients(payment: InvoiceEmailPayment) {
   )
 }
 
+function getAttachmentFileName(payment: InvoiceEmailPayment) {
+  const companyName = payment?.reciever?.companyName || 'invoice'
+  const safeCompanyName = companyName.replace(/[^a-zA-Z0-9_-]+/g, '_')
+
+  return `${safeCompanyName}-inv-${payment.invoiceNumber}.pdf`
+}
+
 export async function sendInvoiceEmail(
-  payment: InvoiceEmailPayment
+  payment: InvoiceEmailPayment,
+  options: SendInvoiceEmailOptions = {}
 ): Promise<boolean> {
+  const { html } = options
   const recipients = getInvoiceRecipients(payment)
   const invoiceId = `INV-${payment.invoiceNumber}`
   const companyName = payment?.reciever?.companyName || 'domain administrator'
@@ -80,6 +93,7 @@ export async function sendInvoiceEmail(
     invoiceId,
     paymentType: payment.type || 'unknown',
     companyName,
+    hasHtml: Boolean(html),
     recipients: maskEmails(recipients),
   })
 
@@ -96,6 +110,27 @@ export async function sendInvoiceEmail(
       missingEnvVars: getMissingEmailEnvVars(),
     })
     return false
+  }
+
+  let attachments: nodemailer.SendMailOptions['attachments']
+  if (html) {
+    logEmailDebug('pdf_generation_started', { invoiceId })
+
+    const { generatePdfFromHtml } = await import('@utils/pdf/bufferGenerators')
+    const pdfBuffer = await generatePdfFromHtml(html)
+
+    logEmailDebug('pdf_generation_completed', {
+      invoiceId,
+      pdfSizeBytes: pdfBuffer.length,
+    })
+
+    attachments = [
+      {
+        filename: getAttachmentFileName(payment),
+        content: pdfBuffer,
+        contentType: 'application/pdf',
+      },
+    ]
   }
 
   const port = Number(process.env.EMAIL_SERVER_PORT)
@@ -122,22 +157,23 @@ export async function sendInvoiceEmail(
   })
 
   try {
-    // Server-side PDF generation removed when invoice templates were
-    // unified on the client-side renderer. Email is sent without an
-    // attached PDF until a browser-backed renderer is wired into the
-    // server pipeline.
-    logEmailDebug('sendMail_started_no_pdf', {
-      invoiceId,
-      sender: maskEmail(sender),
-      recipients: maskEmails(recipients),
-    })
+    logEmailDebug(
+      attachments ? 'sendMail_started' : 'sendMail_started_no_pdf',
+      {
+        invoiceId,
+        sender: maskEmail(sender),
+        recipients: maskEmails(recipients),
+      }
+    )
 
     const result = await transporter.sendMail({
       from: sender,
-      to: sender,
-      bcc: recipients.join(', '),
+      to: recipients.join(', '),
       subject: `Invoice ${invoiceId} for ${companyName}`,
-      text: `Invoice ${invoiceId} notification (PDF attachment temporarily unavailable).`,
+      text: attachments
+        ? `Invoice ${invoiceId} is attached to this email.`
+        : `Invoice ${invoiceId} notification.`,
+      ...(attachments ? { attachments } : {}),
     })
 
     logEmailDebug('sendMail_completed', {

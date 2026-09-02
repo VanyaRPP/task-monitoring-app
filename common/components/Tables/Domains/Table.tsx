@@ -28,7 +28,8 @@ import {
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import StreetsBlock from '@components/DashboardPage/blocks/streets'
-import { AppRoutes, Roles } from '@utils/constants'
+import { AppRoutes } from '@utils/constants'
+import { isDomainViewer } from '@utils/domain/domain-view-access'
 
 export interface Props {
   domainId?: string
@@ -50,7 +51,10 @@ const DomainsTable: React.FC<Props> = ({
   const isOnPage = router.pathname === AppRoutes.DOMAIN
 
   const { data: userResponse } = useGetCurrentUserQuery()
-  const isUser = userResponse?.roles?.includes(Roles.USER)
+  // Anyone without domain-admin rights gets preview only — the same gate the
+  // domain form and the API apply, so an account with no roles at all can no
+  // longer reach the edit/archive/delete actions.
+  const isViewer = isDomainViewer(userResponse?.roles)
 
   const { data, isLoading, isError } = useGetDomainsQuery({
     domainId,
@@ -106,7 +110,7 @@ const DomainsTable: React.FC<Props> = ({
         setDomainActions,
         handleArchive,
         archiveLoading,
-        isUser: !!isUser,
+        isViewer,
       })}
       expandable={{
         expandedRowRender: ({ _id: domainId }) => (
@@ -126,7 +130,7 @@ const getDefaultColumns = ({
   setDomainActions,
   handleArchive,
   archiveLoading,
-  isUser,
+  isViewer,
 }: {
   handleDelete: (id: string) => void
   deleteLoading: boolean
@@ -134,7 +138,7 @@ const getDefaultColumns = ({
   setDomainActions?: React.Dispatch<React.SetStateAction<{ edit: boolean }>>
   handleArchive: (id: string, archived: boolean) => void
   archiveLoading: boolean
-  isUser: boolean
+  isViewer: boolean
 }): ColumnType<any>[] => [
   {
     fixed: 'left',
@@ -188,7 +192,7 @@ const getDefaultColumns = ({
         >
           <EyeOutlined />
         </Button>
-        {!isUser && (
+        {!isViewer && (
           <>
             <Button
               style={{ padding: 0 }}

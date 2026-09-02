@@ -5,32 +5,47 @@ import { useGetByDomainQuery } from '@common/api/profitsApi/profits.api'
 import { useDeleteProfitMutation } from '@common/api/profitsApi/profits.api'
 import { useAppDispatch, useAppSelector } from '@modules/store/hooks'
 import { FC, useEffect, useMemo, useState, useCallback } from 'react'
-import { parentColumns, getChildColumns } from './tableConfig'
-import { Profit } from '@common/api/profitsApi/profits.type'
+import {
+  getParentColumns,
+  getChildColumns,
+  MoneyCell,
+  sumRowsByCurrency,
+  type DrillTarget,
+} from './tableConfig'
+import {
+  Profit,
+  ProfitMonthRow,
+  CurrencyTotals,
+} from '@common/api/profitsApi/profits.type'
 import AddCostModal from '@components/AddCostModal'
 import ProfitDashboard from '../ProfitDashboard'
-import { Table, Alert, Button, Space, Tooltip, message, Card } from 'antd'
+import {
+  Table,
+  Alert,
+  Button,
+  Space,
+  Tooltip,
+  message,
+  Card,
+  Empty,
+  Typography,
+  theme,
+} from 'antd'
 import { useTranslation } from 'react-i18next'
 import { useRouter } from 'next/router'
-import { AppRoutes } from '@utils/constants'
-
-interface ProfitMonthSummary {
-  key: string
-  month: string
-  debit: number
-  credit: number
-  profit: number
-  count: number
-  transactions: Profit[]
-}
+import { AppRoutes, Operations } from '@utils/constants'
+import PaymentsDrilldown from '../PaymentsDrilldown'
 
 interface ProfitTableProps {
   domainId?: string
 }
 
+const { Text } = Typography
+
 const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
   const router = useRouter()
   const isOnPage = router.pathname === AppRoutes.PROFIT
+  const { token } = theme.useToken()
   const { t } = useTranslation()
   const [selectedProfit, setSelectedProfit] = useState<Profit | null>(null)
   const dispatch = useAppDispatch()
@@ -47,55 +62,44 @@ const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
     { skip: !domainId }
   )
 
-  const dataSource: ProfitMonthSummary[] = useMemo(() => {
+  // The server already returns each month fully aggregated - expected income
+  // from invoices, actual income from payments, expenses from manual records.
+  const dataSource: ProfitMonthRow[] = useMemo(() => {
     if (!profitsGrouped?.data) return []
-
-    return Object.entries(profitsGrouped.data).map(([month, transactions]) => {
-      const debit = transactions
-        .filter((t) => t.type === 'debit')
-        .reduce((acc, t) => acc + t.amount, 0)
-
-      const credit = transactions
-        .filter((t) => t.type === 'credit')
-        .reduce((acc, t) => acc + t.amount, 0)
-
-      return {
-        key: month,
-        month,
-        debit,
-        credit,
-        profit: credit - debit,
-        count: transactions.length,
-        transactions,
-      }
-    })
+    return Object.values(profitsGrouped.data).map((row) => ({
+      ...row,
+      key: row.month,
+    }))
   }, [profitsGrouped])
 
   const [expandedRowKeys, setExpandedRowKeys] = useState<string[]>([])
 
+  // Collapsed by default: the month row already carries all four figures, so
+  // the overview is readable without expanding anything. Expanding every month
+  // on load turned the page into one long flat list with month headers in it.
   useEffect(() => {
-    if (
-      router.pathname === AppRoutes.PROFIT ||
-      router.pathname === AppRoutes.SEP_DOMAIN
-    ) {
-      if (dataSource.length > 0) {
-        setExpandedRowKeys(dataSource.map((item) => item.key))
-      } else {
-        setExpandedRowKeys([])
-      }
-    }
-  }, [dataSource, router.pathname])
+    setExpandedRowKeys([])
+  }, [dataSource])
+
+  // Every month expands, including ones with no expenses recorded yet - the
+  // empty state inside says so. Hiding the toggle instead made it vanish from
+  // most rows, which reads as a broken table rather than as "nothing here".
+  const expandableKeys = useMemo(
+    () => dataSource.map((r) => r.key),
+    [dataSource]
+  )
 
   const expandAll = useCallback(() => {
-    setExpandedRowKeys(dataSource.map((item) => item.key))
-  }, [dataSource])
+    setExpandedRowKeys(expandableKeys)
+  }, [expandableKeys])
 
   const collapseAll = useCallback(() => {
     setExpandedRowKeys([])
   }, [])
 
   const isAllExpanded =
-    expandedRowKeys.length === dataSource.length && dataSource.length > 0
+    expandableKeys.length > 0 &&
+    expandedRowKeys.length === expandableKeys.length
 
   const handlePageChange = useCallback(
     (page: number, newPageSize?: number) => {
@@ -110,6 +114,13 @@ const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
     [dispatch]
   )
   const [isEditing, setIsEditing] = useState(false)
+
+  // Which figure the user clicked through from; null keeps the modal closed.
+  const [drilldown, setDrilldown] = useState<{
+    month: string
+    target: DrillTarget
+    currency: string
+  } | null>(null)
 
   const [deleteProfit, { isLoading: isDeleting }] = useDeleteProfitMutation()
 
@@ -143,7 +154,7 @@ const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
           >
             <Button
               onClick={isAllExpanded ? collapseAll : expandAll}
-              disabled={isLoading || dataSource.length === 0}
+              disabled={isLoading || expandableKeys.length === 0}
               aria-pressed={isAllExpanded}
               aria-label={t(
                 isAllExpanded
@@ -161,7 +172,7 @@ const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
           <span>
             {t('profitPage:table.expanded', {
               current: expandedRowKeys.length,
-              total: dataSource.length,
+              total: expandableKeys.length,
             })}
           </span>
         </Space>
@@ -169,7 +180,9 @@ const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
         <Table
           bordered={true}
           loading={isLoading}
-          columns={parentColumns}
+          columns={getParentColumns(token, (month, target, currency) =>
+            setDrilldown({ month, target, currency })
+          )}
           dataSource={dataSource}
           pagination={
             (router.pathname === AppRoutes.PROFIT ||
@@ -177,7 +190,8 @@ const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
               position: ['bottomCenter'],
               hideOnSinglePage: false,
               showSizeChanger: true,
-              pageSizeOptions: ['30', '50', '80', '100'],
+              // pages count MONTHS now, not individual records
+              pageSizeOptions: ['6', '12', '24'],
               pageSize,
               current: currentPage,
               total: profitsGrouped.meta.total,
@@ -193,7 +207,9 @@ const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
           expandable={{
             expandedRowRender: (record) => (
               <Table
-                bordered={true}
+                // No border here: a bordered grid inside a bordered grid reads
+                // as two stacked tables rather than one nested detail view.
+                size="small"
                 columns={getChildColumns(
                   (record) => {
                     setSelectedProfit(record)
@@ -212,17 +228,66 @@ const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
                 }))}
                 pagination={false}
                 rowKey={(record) => record._id}
+                locale={{
+                  emptyText: (
+                    <Empty
+                      image={Empty.PRESENTED_IMAGE_SIMPLE}
+                      description={t('profitPage:table.child.noExpenses')}
+                    />
+                  ),
+                }}
               />
             ),
-            rowExpandable: (record) => record.transactions.length > 0,
             expandedRowKeys,
             onExpandedRowsChange: (expandedKeys) =>
               setExpandedRowKeys([...expandedKeys] as string[]),
           }}
           rowKey={(record) => record.key}
           aria-label={t('profitPage:table.tableAriaLabel')}
+          summary={(rows: readonly ProfitMonthRow[]) => {
+            const totals = sumRowsByCurrency(rows)
+            return (
+              <Table.Summary fixed>
+                <Table.Summary.Row>
+                  <Table.Summary.Cell index={0}>
+                    <Text strong>{t('profitPage:table.summary')}</Text>
+                  </Table.Summary.Cell>
+                  {(
+                    [
+                      (c) => c.expected,
+                      (c) => c.actual,
+                      (c) => c.outstanding,
+                      (c) => c.expenses,
+                    ] as ((c: CurrencyTotals) => number)[]
+                  ).map((pick, i) => (
+                    <Table.Summary.Cell key={i} index={i + 1} align="right">
+                      <MoneyCell row={totals} pick={pick} />
+                    </Table.Summary.Cell>
+                  ))}
+                  <Table.Summary.Cell index={5} align="right">
+                    <MoneyCell
+                      row={totals}
+                      pick={(c) => c.net}
+                      signed
+                      token={token}
+                    />
+                  </Table.Summary.Cell>
+                </Table.Summary.Row>
+              </Table.Summary>
+            )
+          }}
         />
       </Card>
+
+      {drilldown && (
+        <PaymentsDrilldown
+          domainId={domainId}
+          month={drilldown.month}
+          target={drilldown.target}
+          currency={drilldown.currency}
+          onClose={() => setDrilldown(null)}
+        />
+      )}
 
       {selectedProfit && (
         <AddCostModal

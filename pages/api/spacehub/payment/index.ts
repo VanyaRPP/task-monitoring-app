@@ -9,12 +9,12 @@ import {
 import { applyTemplateScope } from '@common/services/paymentService/templateScope.service'
 import { logPaymentMutation } from '@common/modules/services/paymentAudit'
 
-start()
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  await start()
+
   const { isUser, isDomainAdmin, isGlobalAdmin, isAdmin, user } =
     await getCurrentUser(req, res)
 

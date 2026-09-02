@@ -11,6 +11,7 @@ import { useReactToPrint } from 'react-to-print'
 import { useReceiptTemplateProps } from './useReceiptTemplateProps'
 import { useInvoiceTemplateDescriptions } from './useInvoiceTemplateDescriptions'
 import { applyDescriptionOverrides } from './applyDescriptionOverrides'
+import { captureInvoiceHtml } from './captureInvoiceHtml'
 import { builtinTemplateItems } from './builtinTemplates'
 import {
   PrinterOutlined,
@@ -19,11 +20,19 @@ import {
   CheckOutlined,
   TableOutlined,
   MoreOutlined,
+  MailOutlined,
 } from '@ant-design/icons'
-import { Dropdown, Form, message, MenuProps, Button } from 'antd'
+import { Dropdown, Form, message, MenuProps, Button, Tooltip } from 'antd'
 import s from './style.module.scss'
+import { useTranslation } from 'react-i18next'
 import { templateMap } from './templateMap'
 import InvoiceLanguageSelector from './InvoiceLanguageSelector'
+import {
+  useSendPaymentEmailMutation,
+  useUpdatePaymentStatusMutation,
+} from '@common/api/paymentApi/payment.api'
+import { PaymentStatus } from '@common/api/paymentApi/payment.api.types'
+import { t } from 'i18next'
 
 interface Props {
   currPayment?: IExtendedPayment | null
@@ -48,6 +57,8 @@ const GroupedReceiptForm: FC<Props> = ({
     setInvoiceLang,
   } = usePaymentContext()
   const [editPayment] = useEditPaymentMutation()
+  const [sendPaymentEmail] = useSendPaymentEmailMutation()
+  const [updatePaymentStatus] = useUpdatePaymentStatusMutation()
   const invoiceCurrency = useInvoiceCurrency()
   const liveInvoice = Form.useWatch('invoice', form)
   const rawData = currPayment ?? paymentData ?? null
@@ -153,6 +164,34 @@ const GroupedReceiptForm: FC<Props> = ({
     const result = await editPayment({ _id: data._id, invoiceLang: lang })
     if ('error' in result) {
       message.error('Помилка збереження мови')
+    }
+  }
+
+  const paymentStatus =
+    data?.status === PaymentStatus.Sent
+      ? PaymentStatus.Sent
+      : PaymentStatus.Draft
+  const isSent = paymentStatus === PaymentStatus.Sent
+
+  const handleSendEmail = async () => {
+    if (!data?._id || isSent) return
+
+    try {
+      const html = captureInvoiceHtml(componentRef.current)
+      const response = await sendPaymentEmail({ id: data._id, html }).unwrap()
+      if (!response?.success) {
+        message.error(t('payments.messages.sendFailed'))
+        return
+      }
+
+      await updatePaymentStatus({
+        _id: data._id,
+        status: PaymentStatus.Sent,
+      }).unwrap()
+
+      message.success(t('payments.messages.sendSuccess'))
+    } catch {
+      message.error(t('payments.messages.sendFailed'))
     }
   }
 
@@ -331,6 +370,25 @@ const GroupedReceiptForm: FC<Props> = ({
           zIndex: 100,
         }}
       >
+        <Tooltip
+          title={
+            isSent
+              ? t('payments.tooltips.alreadySent')
+              : t('payments.tooltips.sendEmail')
+          }
+        >
+          <MailOutlined
+            className={s.mail}
+            onClick={handleSendEmail}
+            style={{
+              color: isSent
+                ? 'var(--ant-color-text-disabled)'
+                : 'var(--ant-color-success)',
+              cursor: isSent ? 'not-allowed' : 'pointer',
+            }}
+            aria-disabled={isSent}
+          />
+        </Tooltip>
         <Dropdown
           menu={{
             items: mainMenuItems,

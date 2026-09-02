@@ -5,12 +5,12 @@ import { isValidEmail } from '@common/assets/features/validators'
 import bcrypt from 'bcryptjs'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
-start()
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
+  await start()
+
   if (req.method !== 'POST') {
     return res
       .status(405)

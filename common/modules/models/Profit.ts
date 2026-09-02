@@ -1,4 +1,5 @@
 import mongoose, { Schema, Types, Document, Model } from 'mongoose'
+import { Currency } from '@utils/constants'
 
 export interface ProfitDocument extends Document {
   domain: Types.ObjectId
@@ -9,7 +10,16 @@ export interface ProfitDocument extends Document {
   categories?: string[]
   description?: string
   invoiceNumber?: string
+  /** When the money actually moved. */
   date: Date
+  /**
+   * `YYYY-MM` - which month this expense BELONGS to, which is often not the
+   * month it was paid in (June utilities settled in July). Absent on older
+   * records; readers fall back to the month of `date`.
+   */
+  periodMonth?: string
+  /** ISO code; defaults to UAH for records created before multi-currency. */
+  currency?: string
   createdAt?: Date
   updatedAt?: Date
 }
@@ -95,6 +105,12 @@ const ProfitSchema = new Schema<ProfitDocument>(
     description: { type: String },
     invoiceNumber: { type: String },
     date: { type: Date, required: true },
+    periodMonth: {
+      type: String,
+      required: false,
+      match: /^\d{4}-\d{2}$/,
+    },
+    currency: { type: String, required: false, default: Currency.UAH },
   },
   {
     timestamps: true,

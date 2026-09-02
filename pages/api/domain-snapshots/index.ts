@@ -4,13 +4,11 @@ import DomainCustomServicesSnapshot, {
   DOMAIN_SNAPSHOT_REASONS,
   DomainSnapshotReason,
 } from '@modules/models/domain-custom-services-snapshot'
-import start, { Data } from '@pages/api/api.config'
+import { Data } from '@pages/api/api.config'
 import { withErrorHandler } from '@utils/api-handler'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import mongoose from 'mongoose'
 import type { NextApiRequest, NextApiResponse } from 'next'
-
-start()
 
 const DEFAULT_LIMIT = 20
 const MAX_LIMIT = 100

@@ -3,12 +3,12 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import start, { Data } from '@pages/api/api.config'
 
-start()
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
+  await start()
+
   switch (req.method) {
     case 'GET':
       return res

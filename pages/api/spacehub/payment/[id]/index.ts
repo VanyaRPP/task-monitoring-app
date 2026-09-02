@@ -3,11 +3,8 @@ import Domain from '@modules/models/Domain'
 import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import ProfitService from '@common/services/profitService/profit.service'
 import { applyTemplateScope } from '@common/services/paymentService/templateScope.service'
 import { logPaymentMutation } from '@common/modules/services/paymentAudit'
-
-start()
 
 const PROTECTED_PATCH_FIELDS = ['_id', 'domain', 'company', '_templateScope']
 
@@ -23,6 +20,8 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
+  await start()
+
   let perms: Awaited<ReturnType<typeof getCurrentUser>>
   try {
     perms = await getCurrentUser(req, res)
@@ -43,7 +42,8 @@ export default async function handler(
         }
 
         const payment: any = await Payment.findById(req.query.id)
-          .populate('domain')
+          // bank tokens are admin-only: never ship them inside an embedded domain
+          .populate('domain', '-domainBankToken')
           .populate('company')
           .populate('street')
           .populate('monthService')
@@ -107,9 +107,12 @@ export default async function handler(
             .json({ success: false, message: 'failed to delete' })
         }
 
-        if (isGlobalAdmin) {
-          await ProfitService.deleteByIdPayment(req.query.id as string)
-        }
+        await logPaymentMutation({
+          actionType: 'DELETE',
+          source: 'single',
+          actor: user,
+          before: payment,
+        })
 
         await logPaymentMutation({
           actionType: 'DELETE',
@@ -205,21 +208,6 @@ export default async function handler(
           before: current,
           after: response,
         })
-
-        if (isGlobalAdmin) {
-          const description =
-            response.type === 'debit'
-              ? `Інвойс №${response.invoiceNumber}`
-              : response.description
-
-          await ProfitService.updatePayment(req.query.id as string, {
-            type: response.type as 'debit' | 'credit',
-            date: response.invoiceCreationDate,
-            amount: response.generalSum,
-            description,
-            invoiceNumber: String(response.invoiceNumber),
-          })
-        }
 
         return res.status(200).json({ success: true, data: response })
       } catch (error: any) {

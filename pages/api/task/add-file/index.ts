@@ -6,8 +6,6 @@ import fs from 'fs'
 import start, { Data } from '@pages/api/api.config'
 import { v4 as uuidv4 } from 'uuid'
 
-start()
-
 export const config = {
   api: {
     bodyParser: false,
@@ -18,6 +16,8 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
+  await start()
+
   switch (req.method) {
     case 'POST':
       try {

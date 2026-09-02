@@ -6,12 +6,12 @@ import { getFormattedDate } from '@assets/features/formatDate'
 import Service from '@modules/models/Service'
 import Payment from '@modules/models/Payment'
 
-start()
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  await start()
+
   if (req.method === 'GET') {
     try {
       const { domainId, streetId, serviceId, type } = req.query

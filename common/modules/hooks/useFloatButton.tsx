@@ -34,7 +34,7 @@ export const useFullScreenFloatButton = (
       key: `fullscreen-${uniqueKey}`,
       icon: isFullScreen ? <FullscreenExitOutlined /> : <FullscreenOutlined />,
       onClick: toggleFullScreen,
-      tooltip: isFullScreen ? 'Exit Fullscreen' : 'Enter Fullscreen',
+      tooltip: isFullScreen ? 'Вийти' : 'Повноекранний режим',
     }),
     [isFullScreen, uniqueKey]
   )

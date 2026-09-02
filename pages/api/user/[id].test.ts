@@ -3,6 +3,11 @@ import User from '@modules/models/User'
 import Domain from '@modules/models/Domain'
 import RealEstate from '@modules/models/RealEstate'
 
+jest.mock('@pages/api/api.config', () => ({
+  __esModule: true,
+  default: jest.fn(),
+}))
+
 jest.mock('@utils/getCurrentUser', () => ({
   getCurrentUser: jest.fn(() => ({
     user: {

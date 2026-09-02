@@ -7,13 +7,14 @@ import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import EncryptionService from '@utils/encryptionService'
 import { hidePercentCharacters } from '@utils/hidePercentCharacters/hidePercentCharacters'
-
-start()
+import { DOMAIN_GENERAL_PROJECTION } from '@utils/domain/domain-view-access'
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
+  await start()
+
   const { isDomainAdmin, isGlobalAdmin, isUser, user } = await getCurrentUser(
     req,
     res
@@ -68,7 +69,14 @@ export default async function handler(
           } else if (isArchived === false) {
             userDomainFilter.archived = { $ne: true }
           }
+          // View-only access: a plain User may preview the provider their
+          // companies belong to, so they get exactly what the «Загальне» tab
+          // renders and nothing else. Admin-only material (bank tokens,
+          // service/template configuration, archive flags) is projected away
+          // here, on the server, so it is unreachable even by calling the API
+          // directly.
           const domains = await Domain.find(userDomainFilter)
+            .select(DOMAIN_GENERAL_PROJECTION)
             .limit(+limit)
             .populate('streets')
           return res.status(200).json({ success: true, data: domains })

@@ -3,6 +3,7 @@ import ProfitService, {
 } from '@common/services/profitService/profit.service'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getCurrentUser } from '@utils/getCurrentUser'
+import { normalizeCurrency } from '@utils/helpers'
 
 /**
  * @swagger
@@ -124,6 +125,8 @@ export default async function handler(
           categories,
           invoiceNumber,
           payment,
+          periodMonth,
+          currency,
         } = req.body
 
         if (!domain || !amount || !type || !date) {
@@ -150,6 +153,11 @@ export default async function handler(
           categories: Array.isArray(categories) ? categories : [],
           invoiceNumber: invoiceNumber?.trim(),
           payment,
+          // Optional: the ledger falls back to the month of `date` without it.
+          periodMonth: /^\d{4}-\d{2}$/.test(periodMonth ?? '')
+            ? periodMonth
+            : undefined,
+          currency: normalizeCurrency(currency),
         }
 
         try {

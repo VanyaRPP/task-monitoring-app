@@ -14,10 +14,7 @@ import mongoose from 'mongoose'
 const DEFAULT_GROUP_NAME = 'Загальні'
 
 export type ServiceErrorCode =
-  | 'forbidden'
-  | 'not_found'
-  | 'conflict'
-  | 'invalid'
+  'forbidden' | 'not_found' | 'conflict' | 'invalid'
 
 export interface ServiceErr {
   ok: false
@@ -584,8 +581,7 @@ export interface DomainServiceGroup {
  */
 export function assembleDomainServiceCatalog(
   domainCustomServices:
-    | Array<{ groupName?: string | null; services?: unknown[] }>
-    | undefined,
+    Array<{ groupName?: string | null; services?: unknown[] }> | undefined,
   domainScopedServices: LeanCustomService[],
   referencedServices: LeanCustomService[]
 ): DomainServiceGroup[] {
@@ -639,8 +635,7 @@ export function assembleDomainServiceCatalog(
 /** Flattened, de-duplicated service ids referenced across a domain's groups. */
 export function collectReferencedServiceIds(
   domainCustomServices:
-    | Array<{ groupName?: string | null; services?: unknown[] }>
-    | undefined
+    Array<{ groupName?: string | null; services?: unknown[] }> | undefined
 ): string[] {
   return Array.from(
     new Set(

@@ -9,6 +9,11 @@ import { IRealestate } from '../realestateApi/realestate.api.types'
 export type TemplateScope = 'company' | 'domain' | 'payment'
 export type TemplateScopeTarget = Exclude<TemplateScope, 'payment'>
 
+export enum PaymentStatus {
+  Draft = 'draft',
+  Sent = 'sent',
+}
+
 export interface IPaymentField {
   type: ServiceType | string
   name?: string
@@ -40,6 +45,7 @@ export interface IReciever {
 export interface IPayment {
   invoiceNumber: number
   type: string
+  status?: PaymentStatus
   invoiceCreationDate: Date
   domain: Partial<IDomain> | any
   // optional: street-less companies omit it (sending '' fails the ObjectId cast)
@@ -203,6 +209,7 @@ export interface IPaymentInvoiceSnapshot {
   generalSum: number
   description?: string
   type: string
+  status?: PaymentStatus
   currency?: string
 }
 
@@ -216,10 +223,7 @@ export type PaymentActionType =
   | 'RESTORE'
 
 export type PaymentMutationSource =
-  | 'single'
-  | 'bulk'
-  | 'quick-pay'
-  | 'admin-restore'
+  'single' | 'bulk' | 'quick-pay' | 'admin-restore'
 
 export type IPaymentSnapshot = Omit<IPayment, '_id'> & { _id: string }
 

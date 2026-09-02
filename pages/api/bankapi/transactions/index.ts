@@ -17,8 +17,6 @@ import {
   technicalTransactionIdMatchCandidates,
 } from '@components/Pages/BankTransactions/components/TransactionsTable/components/bankHelper'
 
-start()
-
 export function normalizeBankAccount(acc: string | undefined | null) {
   if (acc == null || typeof acc !== 'string') return ''
   return acc.trim()
@@ -140,6 +138,8 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
+  await start()
+
   const { isGlobalAdmin, isDomainAdmin, user } = await getCurrentUser(req, res)
 
   if (!user) {

@@ -4,6 +4,7 @@ import Domain from '@modules/models/Domain'
 import RealEstate from '@modules/models/RealEstate'
 import Street from '@modules/models/Street'
 
+import { DOMAIN_GENERAL_FIELDS } from '@utils/domain/domain-view-access'
 import { mockLoginAs } from '@utils/mockLoginAs'
 import { setupTestEnvironment } from '@utils/setupTestEnvironment'
 import { domains, realEstates, users, streets } from '@utils/testData'
@@ -26,6 +27,13 @@ describe('Domains API - GET', () => {
   })
 
   const clean = (obj: any) => JSON.parse(JSON.stringify(obj))
+
+  // Providers of the companies `users.user` administers — a plain User sees
+  // exactly these, whatever `domainId` they ask for.
+  const viewerDomainIds = realEstates
+    .filter((re) => re.adminEmails.includes(users.user.email))
+    .map((re) => re.domain.toString())
+  const uniqueViewerDomainIds = [...new Set(viewerDomainIds)].sort()
 
   const getExpectedDomains = (filterFn = (d: any) => true) => {
     return domains.filter(filterFn).map((domain) => ({
@@ -183,8 +191,107 @@ describe('Domains API - GET', () => {
     await handler(mockReq, mockRes)
 
     expect(mockRes.status).toHaveBeenCalledWith(200)
-    const received = mockRes.json.mock.lastCall[0].data
-    expect(received).toEqual([])
+    const received = clean(mockRes.json.mock.lastCall[0].data)
+    expect(received.map((d: any) => d._id).sort()).toEqual(
+      uniqueViewerDomainIds
+    )
+  })
+
+  it('load domain as User - «Загальне» fields only', async () => {
+    // Seed the domain the User can reach with everything an admin tab owns,
+    // so the projection is doing real work rather than passing by default.
+    await Domain.updateOne(
+      { _id: domains[0]._id },
+      {
+        $set: {
+          domainBankToken: [
+            {
+              token: 'encrypted-privatbank-secret',
+              shortToken: '****1234',
+              tokenName: 'main',
+              confidant: [],
+            },
+          ],
+          customServices: [{ groupName: 'group', services: [] }],
+          domainServices: [{ name: 'service', price: 1, enabled: true }],
+          defaultTemplate: 'classic',
+          iban: 'UA903052992990004149123456789',
+          rnokpp: '1234567890',
+          mfo: '305299',
+        },
+      }
+    )
+
+    await mockLoginAs(users.user)
+
+    const mockReq = { method: 'GET', query: {} } as any
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockReq, mockRes)
+
+    expect(mockRes.status).toHaveBeenCalledWith(200)
+    const received = clean(mockRes.json.mock.lastCall[0].data)
+    const seeded = received.find(
+      (d: any) => d._id === domains[0]._id.toString()
+    )
+
+    expect(seeded).toBeDefined()
+    expect(Object.keys(seeded).sort()).toEqual(
+      [...DOMAIN_GENERAL_FIELDS].sort()
+    )
+    for (const domain of received) {
+      expect(domain.domainBankToken).toBeUndefined()
+      expect(domain.customServices).toBeUndefined()
+      expect(domain.domainServices).toBeUndefined()
+      expect(domain.defaultTemplate).toBeUndefined()
+      expect(domain.archived).toBeUndefined()
+    }
+  })
+
+  it('keeps the full document for a DomainAdmin', async () => {
+    await Domain.updateOne(
+      { _id: domains[0]._id },
+      {
+        $set: {
+          domainBankToken: [
+            {
+              token: 'encrypted-privatbank-secret',
+              shortToken: '****1234',
+              tokenName: 'main',
+              confidant: [],
+            },
+          ],
+        },
+      }
+    )
+
+    await mockLoginAs(users.domainAdmin)
+
+    const mockReq = { method: 'GET', query: {} } as any
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockReq, mockRes)
+
+    expect(mockRes.status).toHaveBeenCalledWith(200)
+    const received = clean(mockRes.json.mock.lastCall[0].data)
+    const seeded = received.find(
+      (d: any) => d._id === domains[0]._id.toString()
+    )
+
+    expect(seeded.domainBankToken).toEqual([
+      {
+        token: 'encrypted-privatbank-secret',
+        shortToken: '****1234',
+        tokenName: 'main',
+        confidant: [],
+      },
+    ])
   })
 
   it('load domain as DomainAdmin by domainId - restricted access', async () => {
@@ -220,6 +327,11 @@ describe('Domains API - GET', () => {
     await handler(mockReq, mockRes)
 
     expect(mockRes.status).toHaveBeenCalledWith(200)
-    expect(mockRes.json.mock.lastCall[0].data).toHaveLength(0)
+    // domains[2] belongs to another admin's company — asking for it by id must
+    // not widen what the User can read.
+    const received = clean(mockRes.json.mock.lastCall[0].data)
+    expect(received.map((d: any) => d._id)).not.toContain(
+      domains[2]._id.toString()
+    )
   })
 })

@@ -37,7 +37,11 @@ const RealEstateModal: FC<Props> = ({
 }) => {
   const [form] = Form.useForm()
   const [isValueChanged, setIsValueChanged] = useState(false)
-  const initializedRef = useRef(false)
+  // Tracks which entity the form was last populated for, so the form
+  // re-syncs whenever the edited/added entity actually changes instead of
+  // only once per mount (a stale one-shot guard was the source of a bug
+  // where switching entities without unmounting kept showing old values).
+  const initializedForRef = useRef<string | null | undefined>(undefined)
   const [addRealEstate, { isLoading: isAdding }] = useAddRealEstateMutation()
   const [editRealEstate, { isLoading: isEditing }] = useEditRealEstateMutation()
   const domainId = Form.useWatch('domain', form)
@@ -73,15 +77,16 @@ const RealEstateModal: FC<Props> = ({
   }, [currentRealEstate, domainCustomServices])
 
   useEffect(() => {
-    if (initializedRef.current) return
     if (!currentDomainId) return
     if (customDomainServices === undefined) return
 
+    const targetId = currentRealEstate?._id ?? null
+    if (initializedForRef.current === targetId) return
+
     form.setFieldsValue({
-      domain:
-        chosenRealEstate?.domain ||
-        getEntityId(currentRealEstate?.domain) ||
-        currentDomainId,
+      domain: currentRealEstate
+        ? getEntityId(currentRealEstate?.domain)
+        : chosenRealEstate?.domain || currentDomainId,
       street: getEntityId(currentRealEstate?.street),
       companyName: currentRealEstate?.companyName || '',
       description: currentRealEstate?.description || '',
@@ -108,7 +113,7 @@ const RealEstateModal: FC<Props> = ({
       allServices: currentRealEstate?.allServices ?? false,
     })
 
-    initializedRef.current = true
+    initializedForRef.current = targetId
   }, [
     currentDomainId,
     chosenRealEstate?.domain,
@@ -177,6 +182,7 @@ const RealEstateModal: FC<Props> = ({
 
     if ('data' in response) {
       form.resetFields()
+      initializedForRef.current = undefined
       closeModal()
       const action = currentRealEstate ? 'Збережено' : 'Додано'
       message.success(action)
@@ -201,13 +207,22 @@ const RealEstateModal: FC<Props> = ({
     }
   }
 
+  const handleCancel = () => {
+    // Defensive reset so the form never carries stale values into a future
+    // open, even if this modal is ever mounted without being fully
+    // unmounted/remounted by its parent between opens.
+    form.resetFields()
+    initializedForRef.current = undefined
+    closeModal()
+  }
+
   return (
     <Modal
       style={{ top: 20 }}
       title={'Компанії'}
       onOk={handleSubmit}
       changed={() => isValueChanged}
-      onCancel={closeModal}
+      onCancel={handleCancel}
       okText={currentRealEstate ? 'Зберегти' : 'Додати'}
       cancelText={'Відміна'}
       okButtonProps={{ style: { ...(!editable && { display: 'none' }) } }}

@@ -16,12 +16,12 @@ import {
 } from '@utils/helpers'
 import Street from '@modules/models/Street'
 
-start()
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
+  await start()
+
   const { isGlobalAdmin, isDomainAdmin, isAdmin, isUser, user } =
     await getCurrentUser(req, res)
 
@@ -128,7 +128,8 @@ export default async function handler(
           .sort({ date: -1 })
           .limit(+limit)
           .skip(+skip)
-          .populate('domain')
+          // bank tokens are admin-only: never ship them inside an embedded domain
+          .populate('domain', '-domainBankToken')
           .populate('street')
 
         const distinctStreets = await Service.distinct('street', options)

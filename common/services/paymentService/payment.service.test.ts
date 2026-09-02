@@ -22,13 +22,6 @@ jest.mock('@modules/models/Payment', () => ({
   },
 }))
 
-jest.mock('@common/services/profitService/profit.service', () => ({
-  __esModule: true,
-  default: {
-    create: jest.fn(),
-  },
-}))
-
 jest.mock('@utils/email/sendInvoiceEmail', () => ({
   sendInvoiceEmail: jest.fn(),
 }))
@@ -46,9 +39,11 @@ jest.mock('@modules/models/RealEstate', () => ({
   default: {},
 }))
 
+import Service from '@modules/models/Service'
+
 jest.mock('@modules/models/Service', () => ({
   __esModule: true,
-  default: {},
+  default: { find: jest.fn() },
 }))
 
 jest.mock('@pages/api/spacehub/payment/pipelines', () => ({
@@ -73,7 +68,6 @@ jest.mock('@utils/pipelines', () => ({
 
 import Domain from '@modules/models/Domain'
 import Payment from '@modules/models/Payment'
-import ProfitService from '@common/services/profitService/profit.service'
 import { sendInvoiceEmail } from '@utils/email/sendInvoiceEmail'
 import {
   createPayment,
@@ -85,7 +79,6 @@ import { SortOrder, Operations } from '@utils/constants'
 
 const domainFindByIdMock = Domain.findById as jest.Mock
 const paymentCreateMock = Payment.create as jest.Mock
-const createProfitMock = ProfitService.create as jest.Mock
 const sendInvoiceEmailMock = sendInvoiceEmail as jest.Mock
 
 const globalAdminContext = {
@@ -114,10 +107,95 @@ describe('getPayments — sorting', () => {
   })
 })
 
+describe('getPayments — period filtering by dateField', () => {
+  beforeEach(() => jest.clearAllMocks())
+
+  const filterOf = () => (findMock as jest.Mock).mock.calls[0][0]
+
+  it('filters on invoiceCreationDate by default', async () => {
+    await getPayments({ year: 2026, month: 6 }, globalAdminContext)
+
+    expect(filterOf().$expr).toEqual({
+      $and: [
+        { $eq: [{ $year: '$invoiceCreationDate' }, 2026] },
+        { $in: [{ $month: '$invoiceCreationDate' }, [6]] },
+      ],
+    })
+  })
+
+  it('falls back to the invoice date when filtering on paidAt', async () => {
+    // Credits created before paidAt existed have no such field. The profit
+    // ledger aggregates them with the same $ifNull fallback, so a drill-down
+    // filtered here must resolve to the same set of payments.
+    await getPayments(
+      { year: 2026, month: 6, dateField: 'paidAt' },
+      globalAdminContext
+    )
+
+    const paidAtField = { $ifNull: ['$paidAt', '$invoiceCreationDate'] }
+    expect(filterOf().$expr).toEqual({
+      $and: [
+        { $eq: [{ $year: paidAtField }, 2026] },
+        { $in: [{ $month: paidAtField }, [6]] },
+      ],
+    })
+  })
+
+  it.each([
+    ['a number', 6],
+    ['a string', '6'],
+    ['an array', [6]],
+  ])('accepts month as %s', async (_label, month) => {
+    await getPayments({ year: 2026, month } as any, globalAdminContext)
+
+    expect(filterOf().$expr.$and).toContainEqual({
+      $in: [{ $month: '$invoiceCreationDate' }, [6]],
+    })
+  })
+
+  it('keeps payments without a month service inside a service-month filter', async () => {
+    // They have no service to match, so without the fallback branch they would
+    // drop out of the period entirely - and a drill-down would then list fewer
+    // payments than the figure it was opened from.
+    ;(Service.find as jest.Mock).mockReturnValue({
+      select: jest.fn().mockResolvedValue([{ _id: 'service-1' }]),
+    })
+
+    await getPayments(
+      { year: 2026, month: 6, dateField: 'date' },
+      globalAdminContext
+    )
+
+    const filter = filterOf()
+    expect(filter.$or).toEqual([
+      { monthService: { $in: ['service-1'] } },
+      {
+        $and: [
+          {
+            $or: [{ monthService: { $exists: false } }, { monthService: null }],
+          },
+          {
+            $expr: {
+              $and: [
+                { $eq: [{ $year: '$invoiceCreationDate' }, 2026] },
+                { $in: [{ $month: '$invoiceCreationDate' }, [6]] },
+              ],
+            },
+          },
+        ],
+      },
+    ])
+  })
+
+  it('applies no period expression when no period is given', async () => {
+    await getPayments({ dateField: 'paidAt' }, globalAdminContext)
+    expect(filterOf().$expr).toBeUndefined()
+  })
+})
+
 describe('createPayment', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    createProfitMock.mockResolvedValue({})
     sendInvoiceEmailMock.mockResolvedValue(true)
     domainFindByIdMock.mockReturnValue({
       select: jest.fn().mockResolvedValue(null),
@@ -155,15 +233,6 @@ describe('createPayment', () => {
     const result = await createPayment({ invoiceNumber: 77 }, true)
 
     expect(result).toBe(paymentObject)
-    expect(createProfitMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        domain: 'domain-id',
-        payment: 'payment-id',
-        amount: 1250,
-        type: 'debit',
-        invoiceNumber: '77',
-      })
-    )
     expect(sendInvoiceEmailMock).toHaveBeenCalledWith(
       expect.objectContaining({
         invoiceNumber: 77,
@@ -237,7 +306,6 @@ describe('createPayment', () => {
     await expect(createPayment({ invoiceNumber: 79 }, true)).resolves.toBe(
       paymentObject
     )
-    expect(createProfitMock).toHaveBeenCalled()
     expect(sendInvoiceEmailMock).toHaveBeenCalled()
 
     consoleErrorSpy.mockRestore()
@@ -352,7 +420,6 @@ describe('duplicatePayments', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    createProfitMock.mockResolvedValue({})
     sendInvoiceEmailMock.mockResolvedValue(true)
     paymentCreateMock.mockImplementation((data: any) =>
       Promise.resolve({
@@ -394,7 +461,6 @@ describe('duplicatePayments', () => {
 
     // base invoice number resolved once, not once per payment
     expect(aggregateMock).toHaveBeenCalledTimes(1)
-    expect(createProfitMock).toHaveBeenCalledTimes(2)
     expect(sendInvoiceEmailMock).not.toHaveBeenCalled()
   })
 
@@ -414,10 +480,9 @@ describe('duplicatePayments', () => {
       makeSource('src-1', 'domain-1'),
       makeSource('src-2', 'domain-1'),
     ])
-    // First duplicate: profit creation fails -> createPayment throws -> skipped.
-    createProfitMock
-      .mockRejectedValueOnce(new Error('profit down'))
-      .mockResolvedValue({})
+    // First duplicate: the payment write itself fails -> createPayment throws
+    // -> that source is skipped while the rest still go through.
+    paymentCreateMock.mockRejectedValueOnce(new Error('write failed'))
     const consoleErrorSpy = jest
       .spyOn(console, 'error')
       .mockImplementation(() => undefined)

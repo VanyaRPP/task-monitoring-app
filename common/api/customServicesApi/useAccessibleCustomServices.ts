@@ -9,8 +9,7 @@ import type { ICustomService } from './customServices.api.types'
  * - `domain` → a single domain the caller administers (e.g. a domain modal).
  */
 export type CustomServiceScope =
-  | { kind: 'accessible' }
-  | { kind: 'domain'; domainId: string | undefined }
+  { kind: 'accessible' } | { kind: 'domain'; domainId: string | undefined }
 
 /**
  * Single entry point for reading the custom-service catalog. The server is the

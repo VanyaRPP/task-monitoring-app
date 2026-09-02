@@ -72,7 +72,9 @@ export function invoiceLineExcludeKey(
 
 export function typedServiceTypesOnInvoice(
   invoices:
-    | ReadonlyArray<Pick<IPaymentField, 'type' | 'serviceId'> | null | undefined>
+    | ReadonlyArray<
+        Pick<IPaymentField, 'type' | 'serviceId'> | null | undefined
+      >
     | undefined
 ): Set<string> {
   const types = new Set<string>()

@@ -86,6 +86,8 @@ const AddTaskModal: React.FC<PropsType> = ({
       })
 
       form.resetFields()
+      setAddress(null)
+      setError(false)
       setIsModalVisible(false)
       setFormDisabled(false)
     }
@@ -94,6 +96,8 @@ const AddTaskModal: React.FC<PropsType> = ({
   const onCancel = () => {
     setIsModalVisible(false)
     form.resetFields()
+    setAddress(null)
+    setError(false)
   }
 
   const mapOptions = useMemo(() => {
