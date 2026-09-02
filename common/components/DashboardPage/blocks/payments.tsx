@@ -64,11 +64,9 @@ import {
   setSelectedPayments,
 } from '@modules/store/paymentsSlice'
 import { RootState } from '@modules/store/store'
-import {
-  resolvePaymentDateFilterQuery,
-  getTypeOperation,
-} from '@utils/helpers'
+import { resolvePaymentDateFilterQuery, getTypeOperation } from '@utils/helpers'
 import { PaymentDeleteItem } from '@components/Tables/Payment/Header'
+import { usePaymentsFilterUrlSync } from './usePaymentsFilterUrlSync'
 
 export interface PaymentsBlockProps {
   sepDomainID?: string
@@ -105,6 +103,10 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
   const handleView = (p: IExtendedPayment) => dispatch(setOpenView(p))
   const handleEdit = (p: IExtendedPayment) => dispatch(setOpenEdit(p))
   const handleClose = () => dispatch(setCloseModal())
+
+  const { isUrlApplied } = usePaymentsFilterUrlSync({
+    enabled: !sepDomainID && router.pathname === AppRoutes.PAYMENT,
+  })
 
   const currentPage = rawCurrentPage || 1
   const pageSize =
@@ -168,7 +170,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
       type: filters?.type || undefined,
       status: filters?.status || undefined,
     },
-    { skip: currUserLoading || !currUser }
+    { skip: currUserLoading || !currUser || !isUrlApplied }
   )
 
   useEffect(() => {

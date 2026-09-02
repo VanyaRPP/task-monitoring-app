@@ -16,7 +16,12 @@ import {
   numericCell,
   type DrillTarget,
 } from '../ProfitTable/tableConfig'
-import { normalizeCurrency, getCurrencySymbol } from '@utils/helpers'
+import {
+  normalizeCurrency,
+  getCurrencySymbol,
+  formatMonthServiceParam,
+  MONTH_SERVICE_QUERY_PARAM,
+} from '@utils/helpers'
 
 const { Text } = Typography
 
@@ -222,6 +227,19 @@ const PaymentsDrilldown: FC<PaymentsDrilldownProps> = ({
     [t, type, currency]
   )
 
+  const paymentsHref = useMemo(() => {
+    const monthService = period
+      ? formatMonthServiceParam([`${period.year}-month-${period.month}`])
+      : undefined
+
+    return monthService
+      ? {
+          pathname: AppRoutes.PAYMENT,
+          query: { [MONTH_SERVICE_QUERY_PARAM]: monthService },
+        }
+      : AppRoutes.PAYMENT
+  }, [period])
+
   const shown = allPayments.length
   const isTruncated = total > shown
 
@@ -320,7 +338,7 @@ const PaymentsDrilldown: FC<PaymentsDrilldownProps> = ({
               )}
             />
           )}
-          <Link href={AppRoutes.PAYMENT}>
+          <Link href={paymentsHref}>
             {t('profitPage:drilldown.openPayments')} <ExportOutlined />
           </Link>
         </Space>

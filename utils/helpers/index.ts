@@ -786,8 +786,13 @@ export function formatDateFilterForQuery(raw?: string[]) {
 export function resolvePaymentDateFilterQuery(filters?: {
   invoiceCreationDate?: string[]
   monthService?: string[]
-}): { dateField: 'invoiceCreationDate' | 'date'; year?: number; month?: number | number[] } {
-  const dateField: 'invoiceCreationDate' | 'date' = filters?.monthService?.length
+}): {
+  dateField: 'invoiceCreationDate' | 'date'
+  year?: number
+  month?: number | number[]
+} {
+  const dateField: 'invoiceCreationDate' | 'date' = filters?.monthService
+    ?.length
     ? 'date'
     : 'invoiceCreationDate'
 
@@ -798,6 +803,54 @@ export function resolvePaymentDateFilterQuery(filters?: {
   return { dateField, ...query }
 }
 
+export const MONTH_SERVICE_QUERY_PARAM = 'monthService'
+
+const MONTH_SERVICE_FILTER_PATTERN = /^(\d{4})-month-(\d{1,2})$/
+const MONTH_SERVICE_PARAM_PATTERN = /^(\d{4})-(\d{1,2})$/
+const YEAR_PATTERN = /^\d{4}$/
+
+export function parseMonthServiceParam(
+  raw?: string | string[] | null
+): string[] {
+  const tokens = (Array.isArray(raw) ? raw : [raw])
+    .flatMap((value) => (value ? String(value).split(',') : []))
+    .map((token) => token.trim())
+    .filter(Boolean)
+
+  const values = tokens.reduce<string[]>((acc, token) => {
+    if (YEAR_PATTERN.test(token)) {
+      acc.push(token)
+      return acc
+    }
+
+    const matched = token.match(MONTH_SERVICE_PARAM_PATTERN)
+    const month = matched ? Number(matched[2]) : NaN
+    if (month >= 1 && month <= 12) {
+      acc.push(`${matched[1]}-month-${month}`)
+    }
+    return acc
+  }, [])
+
+  return Array.from(new Set(values))
+}
+
+export function formatMonthServiceParam(values?: string[]): string | undefined {
+  const tokens = (values ?? []).reduce<string[]>((acc, value) => {
+    if (YEAR_PATTERN.test(value)) {
+      acc.push(value)
+      return acc
+    }
+
+    const matched = value.match(MONTH_SERVICE_FILTER_PATTERN)
+    if (matched) {
+      acc.push(`${matched[1]}-${matched[2].padStart(2, '0')}`)
+    }
+    return acc
+  }, [])
+
+  return tokens.length ? Array.from(new Set(tokens)).join(',') : undefined
+}
+
 export function getTypeOperation(value?: string) {
   if (value === Operations.Debit) {
     return { type: Operations.Debit }
@@ -806,8 +859,6 @@ export function getTypeOperation(value?: string) {
   }
   return {}
 }
-
-// usePermissions
 
 export function usePermissions(user?: IUser): IPermissions | null {
   const [permissions, setPermissions] = useState<IPermissions | null>(null)
