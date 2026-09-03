@@ -776,6 +776,28 @@ export function formatDateFilterForQuery(raw?: string[]) {
   }
   return query
 }
+/**
+ * Визначає, за яким полем дати фільтрувати платежі на бекенді: за датою
+ * створення (`invoiceCreationDate`) чи за місяцем надання послуг
+ * (`monthService`, бекенд очікує `dateField: 'date'`). Бекенд підтримує
+ * фільтрацію лише за одним полем дати одночасно, тому фільтр за місяцем
+ * надання послуг має пріоритет, коли він активний.
+ */
+export function resolvePaymentDateFilterQuery(filters?: {
+  invoiceCreationDate?: string[]
+  monthService?: string[]
+}): { dateField: 'invoiceCreationDate' | 'date'; year?: number; month?: number | number[] } {
+  const dateField: 'invoiceCreationDate' | 'date' = filters?.monthService?.length
+    ? 'date'
+    : 'invoiceCreationDate'
+
+  const query = formatDateFilterForQuery(
+    dateField === 'date' ? filters?.monthService : filters?.invoiceCreationDate
+  )
+
+  return { dateField, ...query }
+}
+
 export function getTypeOperation(value?: string) {
   if (value === Operations.Debit) {
     return { type: Operations.Debit }
