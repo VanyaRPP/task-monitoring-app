@@ -191,6 +191,49 @@ describe('sendInvoiceEmail', () => {
     expect(sendMailMock).not.toHaveBeenCalled()
   })
 
+  it('omits replyTo and the configuration set header when unset', async () => {
+    await sendInvoiceEmail(buildPayment())
+
+    const sent = sendMailMock.mock.calls[0][0]
+    expect(sent).not.toHaveProperty('replyTo')
+    expect(sent).not.toHaveProperty('headers')
+  })
+
+  it('sets replyTo and the SES configuration set header when configured', async () => {
+    process.env.EMAIL_REPLY_TO = ' support@example.com '
+    process.env.EMAIL_CONFIGURATION_SET = ' invoices '
+
+    await sendInvoiceEmail(buildPayment())
+
+    expect(sendMailMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        replyTo: 'support@example.com',
+        headers: { 'X-SES-CONFIGURATION-SET': 'invoices' },
+      })
+    )
+  })
+
+  it('warns about rejected recipients even though sendMail resolved', async () => {
+    sendMailMock.mockResolvedValue({
+      messageId: 'mid-2',
+      accepted: ['client@real.com'],
+      rejected: ['blocked@real.com'],
+      response: '250 OK',
+    })
+
+    const result = await sendInvoiceEmail(buildPayment())
+
+    expect(result).toBe(true)
+    expect(console.warn).toHaveBeenCalledWith(
+      '[invoice-email] recipients_rejected',
+      expect.objectContaining({
+        rejected: ['bl***@real.com'],
+        accepted: 1,
+        messageId: 'mid-2',
+      })
+    )
+  })
+
   it('propagates the error when sendMail fails', async () => {
     sendMailMock.mockRejectedValue(new Error('smtp down'))
 

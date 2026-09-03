@@ -54,6 +54,25 @@ function logEmailDebug(stage: string, details: Record<string, unknown>) {
   console.info(`[invoice-email] ${stage}`, details)
 }
 
+// SES rejects a From address that is not a verified identity, and e-orenda.com
+// publishes no MX, so nothing can receive a reply sent to it. Point Reply-To at
+// a mailbox that is actually read; without it a recipient pressing "reply"
+// silently gets a bounce.
+function getReplyTo() {
+  return process.env.EMAIL_REPLY_TO?.trim() || undefined
+}
+
+// Opting a message into an SES configuration set is what turns on per-message
+// event publishing (Send/Delivery/Bounce/Complaint/Reject). Over SMTP that is
+// done with this header — without it SES records only aggregate counters and a
+// lost message cannot be traced.
+function getConfigurationSetHeaders() {
+  const configurationSet = process.env.EMAIL_CONFIGURATION_SET?.trim()
+  return configurationSet
+    ? { 'X-SES-CONFIGURATION-SET': configurationSet }
+    : undefined
+}
+
 function hasEmailTransportConfig() {
   return REQUIRED_EMAIL_ENV_VARS.every((key) => Boolean(process.env[key]))
 }
@@ -166,15 +185,34 @@ export async function sendInvoiceEmail(
       }
     )
 
+    const replyTo = getReplyTo()
+    const headers = getConfigurationSetHeaders()
+
     const result = await transporter.sendMail({
       from: sender,
       to: recipients.join(', '),
+      ...(replyTo ? { replyTo } : {}),
+      ...(headers ? { headers } : {}),
       subject: `Invoice ${invoiceId} for ${companyName}`,
       text: attachments
         ? `Invoice ${invoiceId} is attached to this email.`
         : `Invoice ${invoiceId} notification.`,
       ...(attachments ? { attachments } : {}),
     })
+
+    // Nodemailer resolves as long as one recipient was accepted, so a partial
+    // rejection would otherwise be reported to the caller as a clean success.
+    // Logged unconditionally, not behind EMAIL_DEBUG: this is the one signal
+    // that an address never received its invoice.
+    const rejected = Array.isArray(result.rejected) ? result.rejected : []
+    if (rejected.length) {
+      console.warn('[invoice-email] recipients_rejected', {
+        invoiceId,
+        rejected: maskEmails(rejected as string[]),
+        accepted: Array.isArray(result.accepted) ? result.accepted.length : 0,
+        messageId: result.messageId,
+      })
+    }
 
     logEmailDebug('sendMail_completed', {
       invoiceId,
