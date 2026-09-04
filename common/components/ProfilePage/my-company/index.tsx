@@ -1,11 +1,11 @@
 import React from 'react'
 import { Card, Radio } from 'antd'
 import s from '../style.module.scss'
-import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
+import { useGetMyCompaniesQuery } from '@common/api/realestateApi/realestate.api'
 
 const MyCompany = () => {
-  const { data: realEstates, isLoading } = useGetAllRealEstateQuery({})
-  const data = realEstates?.data || []
+  const { data: myCompanies, isLoading } = useGetMyCompaniesQuery()
+  const data = myCompanies?.data || []
 
   return (
     <Card loading={isLoading} size="small" title="Мої компанії">
