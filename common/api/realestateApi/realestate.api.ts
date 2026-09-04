@@ -4,6 +4,7 @@ import {
   IDeleteRealestateResponse,
   IExtendedArchive,
   IExtendedRealestate,
+  IGetMyCompaniesResponse,
   IGetRealestateResponse,
   IRealestate,
 } from './realestate.api.types'
@@ -45,6 +46,17 @@ export const realestateApi = createApi({
               { type: 'RealEstate', id: item._id },
               { type: 'ArchivedApi', id: item._id },
             ])
+          : [],
+    }),
+
+    getMyCompanies: builder.query<IGetMyCompaniesResponse, void>({
+      query: () => ({ url: `real-estate/my` }),
+      providesTags: (response) =>
+        response
+          ? response.data.map((item) => ({
+              type: 'RealEstate' as const,
+              id: item._id,
+            }))
           : [],
     }),
 
@@ -105,6 +117,7 @@ export const {
   useDeleteRealEstateMutation,
   useAddRealEstateMutation,
   useGetAllRealEstateQuery,
+  useGetMyCompaniesQuery,
   useEditRealEstateMutation,
   useUpdateArchivedItemMutation,
 } = realestateApi
