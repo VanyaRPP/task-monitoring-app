@@ -58,6 +58,7 @@ import AddPaymentForm from '../Forms/AddPaymentForm'
 import InvoiceTemplateTab from './InvoiceTemplateTab'
 import GroupedReceiptForm from '../Forms/GroupedReceiptForm'
 import { getPreviewQtyStorageKey } from '../Forms/GroupedReceiptForm/previewQtyStorage'
+import { resolveInvoiceLang } from '../Forms/GroupedReceiptForm/resolveInvoiceLang'
 import PaymentReceiptForm from '../Forms/PaymentReceiptForm'
 import ReceiptForm from '../Forms/ReceiptForm'
 import serviceFilter from './serviceFilter'
@@ -172,10 +173,7 @@ const AddPaymentModal: FC<Props> = ({
   const [showQuantityInPreview, setShowQuantityInPreviewState] = useState(false)
   const [activeTabKey, setActiveTabKey] = useState(preview ? '2' : '1')
   const [invoiceLang, setInvoiceLang] = useState<'en' | 'uk'>(
-    paymentData?.invoiceLang ??
-      (paymentData?.currency && paymentData.currency !== Currency.UAH
-        ? 'en'
-        : 'uk')
+    resolveInvoiceLang(paymentData)
   )
 
   const setShowQuantityInPreview = useCallback(
