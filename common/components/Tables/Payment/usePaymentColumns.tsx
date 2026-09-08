@@ -22,6 +22,8 @@ import {
   toFirstUpperCase,
 } from '@utils/helpers'
 import TableFilterLink from '@components/UI/Reusable/TableFilterLink'
+import { TruncatedText } from '@components/UI/TruncatedText'
+import { widenFilterDropdown } from '../tableFilterHelpers'
 import DateFilterDropdown from './DateFilter/DateFilterDropdown'
 import PaymentDropdown from '@components/PaymentDropDown'
 import s from './style.module.scss'
@@ -67,29 +69,6 @@ interface Params {
     status: PaymentStatus
   }) => Promise<unknown>
   deleteLoading: boolean
-}
-
-function widenFilterDropdown(w = 240) {
-  return (open: boolean) => {
-    if (!open) return
-    requestAnimationFrame(() => {
-      document
-        .querySelectorAll<HTMLElement>('.ant-table-filter-dropdown')
-        .forEach((el) => {
-          el.style.width = `${w}px`
-          el.style.maxWidth = '90vw'
-          el.querySelectorAll<HTMLElement>('.ant-checkbox + span').forEach(
-            (span) => {
-              span.style.whiteSpace = 'normal'
-              span.style.wordBreak = 'break-word'
-              span.style.lineHeight = '1.2'
-              span.style.display = 'inline-block'
-              span.style.maxWidth = '100%'
-            }
-          )
-        })
-    })
-  }
 }
 
 const CustomName = 'custom-name:'
@@ -225,9 +204,10 @@ export function usePaymentColumns({
         filters: sepDomainID ? undefined : domainsFilter,
         filteredValue: filters?.domain || null,
         filterSearch: true,
+        onFilterDropdownOpenChange: widenFilterDropdown(240),
         render: (domain: { _id: string; name: string }) =>
           sepDomainID ? (
-            domain.name
+            <TruncatedText text={domain?.name} />
           ) : (
             <TableFilterLink
               label={domain?.name}
@@ -275,6 +255,7 @@ export function usePaymentColumns({
               filterId={companyId}
               filters={filters}
               setFilters={setFilters}
+              maxWidth={sepDomainID ? 100 : 140}
             />
           )
 

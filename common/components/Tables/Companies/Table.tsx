@@ -51,6 +51,8 @@ import { useEffect, useState, useMemo } from 'react'
 import { useGetDebtorsQuery } from '@common/api/debtorsApi/debtors.api'
 import CollapsedTags from '@components/UI/CollapsedTags'
 import TableFilterLink from '@components/UI/Reusable/TableFilterLink'
+import { TruncatedText } from '@components/UI/TruncatedText'
+import { widenFilterDropdown } from '../tableFilterHelpers'
 import {
   extractDomainsFromRealEstates,
   getVisibleServices,
@@ -682,6 +684,7 @@ const getDefaultColumns = ({
     dataIndex: 'companyName',
     width: 200,
     filterSearch: true,
+    onFilterDropdownOpenChange: widenFilterDropdown(240),
     render: (i: string) => {
       const companyId = realEstatesFilter?.find((f) => f.text === i)?.value
       const canFilter =
@@ -717,9 +720,10 @@ const getDefaultColumns = ({
               filters={filters}
               setFilters={setFilters}
               tooltipTitle=""
+              maxWidth={180}
             />
           ) : (
-            i
+            <TruncatedText text={i} maxWidth={180} />
           )
 
           return (
@@ -749,7 +753,7 @@ const getDefaultColumns = ({
           setFilters={setFilters}
         />
       ) : (
-        i
+        <TruncatedText text={i} />
       )
     },
   }
@@ -767,16 +771,18 @@ const getDefaultColumns = ({
           setFilters={setFilters}
         />
       ) : (
-        i?.name
+        <TruncatedText text={i?.name} />
       ),
     hidden: domainsFilter?.length <= 1,
     filterSearch: true,
+    onFilterDropdownOpenChange: widenFilterDropdown(240),
   }
   const streetColumn: any = {
     title: 'Адреса',
     dataIndex: 'street',
     width: 200,
     filterSearch: true,
+    onFilterDropdownOpenChange: widenFilterDropdown(240),
     render: (i) => (
       <>
         {i?.address} (м. {i?.city})

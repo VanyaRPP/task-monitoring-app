@@ -3,6 +3,7 @@
 import { useGetAllPaymentsQuery } from '@common/api/paymentApi/payment.api'
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import Modal from '@components/UI/ModalWindow'
+import { TruncatedText } from '@components/UI/TruncatedText'
 import { AppRoutes, Operations } from '@utils/constants'
 import { Alert, Empty, Space, Table, Typography } from 'antd'
 import { ExportOutlined } from '@ant-design/icons'
@@ -132,6 +133,7 @@ const PaymentsDrilldown: FC<PaymentsDrilldownProps> = ({
         dataIndex: 'companyName',
         key: 'companyName',
         ellipsis: true,
+        render: (companyName: string) => <TruncatedText text={companyName} />,
       },
       {
         title: t('profitPage:drilldown.invoiced'),
@@ -189,7 +191,11 @@ const PaymentsDrilldown: FC<PaymentsDrilldownProps> = ({
         render: (_, record) => {
           const name =
             (record.company as any)?.companyName || record.reciever?.companyName
-          return name || <Text type="secondary">—</Text>
+          return name ? (
+            <TruncatedText text={name} />
+          ) : (
+            <Text type="secondary">—</Text>
+          )
         },
       },
       {
