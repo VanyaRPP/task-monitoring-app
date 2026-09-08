@@ -31,6 +31,20 @@ jest.mock('@common/api/debtorsApi/debtors.api', () => ({
   useGetDebtorsQuery: () => ({ data: undefined, error: undefined }),
 }))
 
+jest.mock('@common/api/domainApi/domain.api', () => ({
+  useGetDomainTypeTemplatesQuery: () => ({
+    data: [
+      {
+        _id: 'tpl-1',
+        name: 'Комунальні послуги',
+        category: 'utility',
+        isBuiltIn: true,
+        groups: [],
+      },
+    ],
+  }),
+}))
+
 jest.mock('next/router', () => ({
   useRouter: () => ({ pathname: '/real-estate' }),
 }))
@@ -53,7 +67,7 @@ const mockRealEstates = [
     customServices: [],
     adminEmails: ['admin1@example.com'],
     description: 'Будівля А',
-    domain: { _id: 'domain-1', name: 'Домен 1' },
+    domain: { _id: 'domain-1', name: 'Домен 1', domainTypeTemplateId: 'tpl-1' },
     street: { _id: 'street-1', address: 'вул. Тестова, 1', city: 'Київ' },
   },
   {
@@ -69,7 +83,7 @@ const mockRealEstates = [
     customServices: [{ _id: 'cs-1', price: 800, fieldName: 'customField' }],
     adminEmails: ['admin2@example.com'],
     description: 'Будівля Б',
-    domain: { _id: 'domain-1', name: 'Домен 1' },
+    domain: { _id: 'domain-1', name: 'Домен 1', domainTypeTemplateId: 'tpl-1' },
     street: { _id: 'street-1', address: 'вул. Тестова, 1', city: 'Київ' },
   },
 ]

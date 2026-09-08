@@ -80,6 +80,11 @@ describe('PrivatBankApiAdapter', () => {
     )
   })
 
+  it('getBalancesForDateInterval defaults limit to 20 when omitted', async () => {
+    await adapter.getBalancesForDateInterval('UA00', '2024-01-01')
+    expect(paramsOf()).toBe('startDate=2024-01-01&limit=20&acc=UA00')
+  })
+
   it('getInterimTransactions hits the interim transactions endpoint', async () => {
     await adapter.getInterimTransactions(10, 'UA00', 'f1')
 
@@ -89,6 +94,11 @@ describe('PrivatBankApiAdapter', () => {
       expect.any(URLSearchParams)
     )
     expect(paramsOf()).toBe('limit=10&acc=UA00&followId=f1')
+  })
+
+  it('getInterimTransactions defaults limit to 100 when omitted', async () => {
+    await adapter.getInterimTransactions()
+    expect(paramsOf()).toBe('limit=100')
   })
 
   it('getInterimBalances hits the interim balance endpoint', async () => {
@@ -102,6 +112,11 @@ describe('PrivatBankApiAdapter', () => {
     expect(paramsOf()).toBe('limit=7&acc=UA00&followId=f1')
   })
 
+  it('getInterimBalances defaults limit to 100 when omitted', async () => {
+    await adapter.getInterimBalances('UA00')
+    expect(paramsOf()).toBe('limit=100&acc=UA00')
+  })
+
   it('getFinalTransactions hits the final transactions endpoint', async () => {
     await adapter.getFinalTransactions(15, 'f1', 'UA00')
 
@@ -113,6 +128,11 @@ describe('PrivatBankApiAdapter', () => {
     expect(paramsOf()).toBe('limit=15&acc=UA00&followId=f1')
   })
 
+  it('getFinalTransactions defaults limit to 20 when omitted', async () => {
+    await adapter.getFinalTransactions()
+    expect(paramsOf()).toBe('limit=20')
+  })
+
   it('getFinalBalances hits the final balance endpoint', async () => {
     await adapter.getFinalBalances(25, 'f1', 'UA00')
 
@@ -122,5 +142,10 @@ describe('PrivatBankApiAdapter', () => {
       expect.any(URLSearchParams)
     )
     expect(paramsOf()).toBe('limit=25&acc=UA00&followId=f1')
+  })
+
+  it('getFinalBalances defaults limit to 100 when omitted', async () => {
+    await adapter.getFinalBalances()
+    expect(paramsOf()).toBe('limit=100')
   })
 })

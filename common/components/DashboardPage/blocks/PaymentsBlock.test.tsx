@@ -41,6 +41,8 @@ jest.mock('@common/api/paymentApi/payment.api', () => ({
   useDuplicatePaymentsMutation: jest.fn(() => [jest.fn()]),
   useAddPaymentMutation: jest.fn(() => [jest.fn()]),
   useGetPaymentNumberQuery: jest.fn(() => ({ data: 1, refetch: jest.fn() })),
+  useSendPaymentEmailMutation: jest.fn(() => [jest.fn()]),
+  useUpdatePaymentStatusMutation: jest.fn(() => [jest.fn()]),
 }))
 
 jest.mock('@common/api/debtorsApi/debtors.api', () => ({

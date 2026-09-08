@@ -119,19 +119,6 @@ async function assertDomainAccess(
   return ok(domainObjectId)
 }
 
-async function findDuplicateInDomain(
-  name: string,
-  domainId: mongoose.Types.ObjectId,
-  excludeId?: string | mongoose.Types.ObjectId
-) {
-  const filter: Record<string, unknown> = {
-    name: { $regex: `^${escapeRegexForMongo(name)}$`, $options: 'i' },
-    domain: domainId,
-  }
-  if (excludeId) filter._id = { $ne: excludeId }
-  return CustomService.findOne(filter)
-}
-
 async function attachServiceToDomainGroup(
   domainId: mongoose.Types.ObjectId,
   serviceId: mongoose.Types.ObjectId

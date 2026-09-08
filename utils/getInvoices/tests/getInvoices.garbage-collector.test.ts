@@ -574,6 +574,32 @@ describe('getInvoices - GARBAGE COLLECTOR', () => {
         sum: 12,
       })
     })
+    it('should zero out the line when re-editing a payment after the company opted out mid-cycle', () => {
+      const company: Partial<IRealestate> = {
+        garbageCollector: false,
+      }
+      const payment: Partial<IPayment> = {
+        invoice: [
+          {
+            type: ServiceType.GarbageCollector,
+            price: 15,
+            sum: 12,
+          },
+        ],
+      }
+
+      const invoices = getInvoices({
+        company,
+        payment,
+      })
+
+      expect(invoices).toContainEqual({
+        type: ServiceType.GarbageCollector,
+        price: 0,
+        sum: 0,
+      })
+    })
+
     it('should load when service = { garbageCollectorPrice: 10 }, company = { rentPart: 10, garbageCollector: true }, payment = { invoice: [GarbageCollector] }', () => {
       const service: Partial<IService> = {
         garbageCollectorPrice: 10,

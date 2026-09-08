@@ -6,9 +6,11 @@ import {
   getVisibleServices,
   isDomainAdmin,
   isGlobalAdmin,
+  shouldShowStandardServices,
   type IDomainForVisibility,
   type ICustomServiceItem,
 } from '.'
+import type { IDomainTypeTemplate } from '@common/api/domainApi/domain.api.types'
 
 const svc = (id: string, name = id): ICustomServiceItem => ({ _id: id, name })
 
@@ -156,6 +158,55 @@ describe('servicesVisibility — getVisibleServices', () => {
     const d = domain('d1', [{ groupName: 'A', services: ['s1'] }])
     expect(getVisibleServices(undefined, d, all)).toEqual([svc('s1')])
     expect(getVisibleServices(undefined, null, all)).toEqual([])
+  })
+})
+
+describe('servicesVisibility — shouldShowStandardServices', () => {
+  const tpl = (
+    _id: string,
+    category: IDomainTypeTemplate['category']
+  ): IDomainTypeTemplate => ({
+    _id,
+    name: 'Template',
+    category,
+    isBuiltIn: true,
+    groups: [],
+  })
+
+  it('returns false when there are no domains or no templates', () => {
+    const d = { _id: 'd1', domainTypeTemplateId: 't1' } as any
+    expect(shouldShowStandardServices([], [tpl('t1', 'utility')])).toBe(false)
+    expect(shouldShowStandardServices([d], [])).toBe(false)
+  })
+
+  it('returns true when a domain points at a "utility" template', () => {
+    const d = { _id: 'd1', domainTypeTemplateId: 't1' } as any
+    expect(shouldShowStandardServices([d], [tpl('t1', 'utility')])).toBe(true)
+  })
+
+  it('returns true when a domain points at a "real-estate" template', () => {
+    const d = { _id: 'd1', domainTypeTemplateId: 't1' } as any
+    expect(shouldShowStandardServices([d], [tpl('t1', 'real-estate')])).toBe(
+      true
+    )
+  })
+
+  it('returns false when the matched template is not a standard-service category', () => {
+    const d = { _id: 'd1', domainTypeTemplateId: 't1' } as any
+    expect(shouldShowStandardServices([d], [tpl('t1', 'it')])).toBe(false)
+  })
+
+  it('returns false when the domain has no matching domainTypeTemplateId', () => {
+    const d = { _id: 'd1', domainTypeTemplateId: 'missing' } as any
+    expect(shouldShowStandardServices([d], [tpl('t1', 'utility')])).toBe(false)
+  })
+
+  it('returns true if any domain among several matches (mixed-domain admin)', () => {
+    const noMatch = { _id: 'd1', domainTypeTemplateId: 't-other' } as any
+    const match = { _id: 'd2', domainTypeTemplateId: 't1' } as any
+    expect(
+      shouldShowStandardServices([noMatch, match], [tpl('t1', 'utility')])
+    ).toBe(true)
   })
 })
 

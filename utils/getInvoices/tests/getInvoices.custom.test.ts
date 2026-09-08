@@ -284,6 +284,70 @@ describe('getInvoices - CUSTOM', () => {
       )
     })
 
+    it('should load a company-only custom service alongside an unrelated service custom service', () => {
+      // service.customServices is non-empty here (unlike the "missing" test
+      // above), so the fieldName lookup for the company-only item actually
+      // has to scan it and find no match.
+      const service: Partial<IService> = {
+        customServices: [
+          {
+            _id: '65b8a9f4a35a75f7da9f1012' as any,
+            label: 'Прибирання',
+            fieldName: 'cleaningCustom',
+            price: 100,
+          },
+        ],
+      }
+      const company: Partial<IRealestate> = {
+        customServices: [
+          {
+            _id: '65b8a9f4a35a75f7da9f1013' as any,
+            label: 'Інтернет',
+            fieldName: 'internetPrice',
+            price: 250,
+          },
+        ],
+      }
+      // Non-empty and unrelated, so the by-fieldName lookup against prior
+      // months' custom rows also has to scan without finding a match.
+      const prevPayment: Partial<IPayment> = {
+        invoice: [
+          {
+            type: ServiceType.Custom,
+            name: 'Охорона',
+            fieldName: 'securityCustom',
+            price: 50,
+            sum: 50,
+          },
+        ],
+      }
+
+      const invoices = getInvoices({
+        service,
+        company,
+        prevPayment,
+      })
+
+      expect(invoices).toContainEqual(
+        expect.objectContaining({
+          type: ServiceType.Custom,
+          name: 'Інтернет',
+          fieldName: 'internetPrice',
+          price: 250,
+          sum: 250,
+        })
+      )
+      expect(invoices).toContainEqual(
+        expect.objectContaining({
+          type: ServiceType.Custom,
+          name: 'Прибирання',
+          fieldName: 'cleaningCustom',
+          price: 100,
+          sum: 100,
+        })
+      )
+    })
+
     it('should prefer company custom service price when service custom service exists with zero price', () => {
       const service: Partial<IService> = {
         customServices: [

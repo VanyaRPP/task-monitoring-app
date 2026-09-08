@@ -58,6 +58,10 @@ jest.mock('@common/api/debtorsApi/debtors.api', () => ({
   useGetDebtorsQuery: jest.fn(() => ({ data: { companies: [] } })),
 }))
 
+jest.mock('@common/api/domainApi/domain.api', () => ({
+  useGetDomainTypeTemplatesQuery: jest.fn(() => ({ data: [] })),
+}))
+
 jest.mock('next/router', () => ({
   useRouter: jest.fn(() => ({
     pathname: '/real-estate',
