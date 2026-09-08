@@ -14,6 +14,7 @@ import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { FeatureFlagsTable } from '@common/components/FeatureFlagsTable'
 import { UsersTable } from '@components/Tables/UsersTable'
 import { Tags } from '@components/UI/Tags'
+import { TruncatedText } from '@components/UI/TruncatedText'
 import { AppRoutes, Roles } from '@utils/constants'
 import {
   Avatar,
@@ -76,8 +77,11 @@ export const ProfilePage: React.FC = () => {
           <Card className={styles.Content} size="small">
             <Card.Meta
               title={
-                <Typography.Title level={1} style={{ margin: 0 }}>
-                  {user?.name || 'My profile'}
+                <Typography.Title level={1} style={{ margin: 0, minWidth: 0 }}>
+                  <TruncatedText
+                    text={user?.name || 'My profile'}
+                    style={{ fontSize: 'inherit', fontWeight: 'inherit' }}
+                  />
                 </Typography.Title>
               }
               description={<Tags items={user?.roles} />}
@@ -121,7 +125,7 @@ export const ProfilePage: React.FC = () => {
                   handleTagClick(domain)
                 }}
               >
-                {domain.text}
+                <TruncatedText text={domain.text} maxWidth={160} />
               </Tag>
             )}
           />
@@ -141,7 +145,7 @@ export const ProfilePage: React.FC = () => {
                 color="blue"
                 style={{ margin: 0 }}
               >
-                {domain}
+                <TruncatedText text={domain} maxWidth={160} />
               </Tag>
             )}
           />
