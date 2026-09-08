@@ -76,6 +76,7 @@ import {
   getPayments,
 } from './payment.service'
 import { SortOrder, Operations } from '@utils/constants'
+import { PaymentStatus } from '@common/api/paymentApi/payment.api.types'
 
 const domainFindByIdMock = Domain.findById as jest.Mock
 const paymentCreateMock = Payment.create as jest.Mock
@@ -96,6 +97,7 @@ describe('getPayments — sorting', () => {
     expect(sortMock).toHaveBeenCalledWith({
       invoiceCreationDate: SortOrder.DESC,
       type: SortOrder.ASC,
+      _id: SortOrder.ASC,
     })
   })
 
@@ -190,6 +192,76 @@ describe('getPayments — period filtering by dateField', () => {
   it('applies no period expression when no period is given', async () => {
     await getPayments({ dateField: 'paidAt' }, globalAdminContext)
     expect(filterOf().$expr).toBeUndefined()
+  })
+})
+
+describe('getPayments — status filtering', () => {
+  beforeEach(() => jest.clearAllMocks())
+
+  const filterOf = () => (findMock as jest.Mock).mock.calls[0][0]
+
+  it('applies no $or when status is omitted', async () => {
+    await getPayments({}, globalAdminContext)
+    expect(filterOf().$or).toBeUndefined()
+  })
+
+  it('"draft" alone also matches payments with a missing/null status (pre-status data)', async () => {
+    await getPayments({ status: PaymentStatus.Draft }, globalAdminContext)
+    expect(filterOf().$or).toEqual([
+      { status: { $in: [PaymentStatus.Draft, null] } },
+      { status: { $exists: false } },
+    ])
+  })
+
+  it('"sent" alone matches only an explicit sent status', async () => {
+    await getPayments({ status: PaymentStatus.Sent }, globalAdminContext)
+    expect(filterOf().$or).toEqual([{ status: PaymentStatus.Sent }])
+  })
+
+  it('"draft,sent" matches sent explicitly plus draft/missing/null', async () => {
+    await getPayments(
+      { status: `${PaymentStatus.Draft},${PaymentStatus.Sent}` },
+      globalAdminContext
+    )
+    expect(filterOf().$or).toEqual([
+      { status: PaymentStatus.Sent },
+      { status: { $in: [PaymentStatus.Draft, null] } },
+      { status: { $exists: false } },
+    ])
+  })
+
+  it('accepts status as an array, same result as the comma-separated string', async () => {
+    await getPayments(
+      { status: [PaymentStatus.Draft, PaymentStatus.Sent] },
+      globalAdminContext
+    )
+    expect(filterOf().$or).toEqual([
+      { status: PaymentStatus.Sent },
+      { status: { $in: [PaymentStatus.Draft, null] } },
+      { status: { $exists: false } },
+    ])
+  })
+
+  it('trims whitespace and drops empty segments from a comma-separated status', async () => {
+    await getPayments({ status: ' draft , , sent ' }, globalAdminContext)
+    expect(filterOf().$or).toEqual([
+      { status: PaymentStatus.Sent },
+      { status: { $in: [PaymentStatus.Draft, null] } },
+      { status: { $exists: false } },
+    ])
+  })
+
+  it('dedupes a repeated status back down to the single-status case', async () => {
+    await getPayments({ status: 'draft,draft' }, globalAdminContext)
+    expect(filterOf().$or).toEqual([
+      { status: { $in: [PaymentStatus.Draft, null] } },
+      { status: { $exists: false } },
+    ])
+  })
+
+  it('ignores a status value outside the known enum, applying no $or', async () => {
+    await getPayments({ status: 'archived' as any }, globalAdminContext)
+    expect(filterOf().$or).toBeUndefined()
   })
 })
 

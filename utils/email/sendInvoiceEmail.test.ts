@@ -16,6 +16,10 @@ jest.mock('@utils/pdf/bufferGenerators', () => ({
   generatePdfFromHtml: (...args: unknown[]) => generatePdfFromHtmlMock(...args),
 }))
 
+// isDev is normally true under Jest (NODE_ENV isn't 'production'), which would
+// make debug logging unconditional and hide the "debug disabled" branch.
+jest.mock('@utils/env', () => ({ isDev: false }))
+
 import { sendInvoiceEmail, type InvoiceEmailPayment } from './sendInvoiceEmail'
 
 const ORIGINAL_ENV = process.env
@@ -38,9 +42,13 @@ const buildPayment = (
 })
 
 describe('sendInvoiceEmail', () => {
+  let consoleInfoSpy: jest.SpyInstance
+
   beforeEach(() => {
     jest.clearAllMocks()
-    jest.spyOn(console, 'info').mockImplementation(() => undefined)
+    consoleInfoSpy = jest
+      .spyOn(console, 'info')
+      .mockImplementation(() => undefined)
     jest.spyOn(console, 'warn').mockImplementation(() => undefined)
     jest.spyOn(console, 'error').mockImplementation(() => undefined)
 
@@ -198,6 +206,30 @@ describe('sendInvoiceEmail', () => {
     expect(console.error).toHaveBeenCalledWith(
       '[invoice-email] sendMail_failed',
       expect.objectContaining({ message: 'smtp down' })
+    )
+  })
+
+  it('stays silent when EMAIL_DEBUG is unset and isDev is false', async () => {
+    await sendInvoiceEmail(buildPayment())
+    expect(consoleInfoSpy).not.toHaveBeenCalled()
+  })
+
+  it('logs debug info when EMAIL_DEBUG=true, masking a recipient with no "@"', async () => {
+    process.env.EMAIL_DEBUG = 'true'
+
+    await sendInvoiceEmail(
+      buildPayment({
+        reciever: {
+          companyName: 'Acme',
+          adminEmails: ['not-an-email'],
+          description: '',
+        },
+      })
+    )
+
+    expect(consoleInfoSpy).toHaveBeenCalledWith(
+      '[invoice-email] start',
+      expect.objectContaining({ recipients: ['no***'] })
     )
   })
 })

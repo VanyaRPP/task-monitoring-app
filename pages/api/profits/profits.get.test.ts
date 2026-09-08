@@ -190,8 +190,16 @@ describe('Profits API – GET /api/profits/domain/:domainId (getByDomain)', () =
       await domainHandler(mockReq, mockRes)
       expect(mockRes.status).toHaveBeenCalledWith(200)
 
-      const docs = extractDocs(mockRes.json.mock.lastCall[0].data)
-      expect(docs.every((d) => d.domain.toString() === validDomain)).toBe(true)
+      // getByDomainWithMonthSeparation groups records into per-month ledgers
+      // ({ month, byCurrency, transactions, ... }) rather than a flat list, so
+      // the domain check has to reach into each ledger's `transactions`.
+      const data = mockRes.json.mock.lastCall[0].data
+      const transactions = Object.values(data).flatMap(
+        (ledger: any) => ledger.transactions
+      )
+      expect(
+        transactions.every((t) => t.domain.toString() === validDomain)
+      ).toBe(true)
     })
   })
 })

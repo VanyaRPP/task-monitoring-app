@@ -59,6 +59,53 @@ describe('ProfitService.getBalance', () => {
   })
 })
 
+describe('ProfitService.getByDomain', () => {
+  const mockFindChain = (records: any[]) => {
+    const chain: any = {
+      sort: jest.fn(() => chain),
+      skip: jest.fn(() => chain),
+      limit: jest.fn(() => chain),
+      then: (resolve: any) => resolve(records),
+    }
+    return chain
+  }
+
+  it('returns paginated records with default page/limit', async () => {
+    const chain = mockFindChain([{ _id: 'p1' }, { _id: 'p2' }])
+    find.mockReturnValue(chain)
+    countDocuments.mockResolvedValue(2)
+
+    const result = await ProfitService.getByDomain('d1')
+
+    expect(find).toHaveBeenCalledWith({ domain: 'd1' })
+    expect(chain.sort).toHaveBeenCalledWith({ date: -1 })
+    expect(chain.skip).toHaveBeenCalledWith(0)
+    expect(chain.limit).toHaveBeenCalledWith(10)
+    expect(countDocuments).toHaveBeenCalledWith({ domain: 'd1' })
+    expect(result).toEqual({
+      data: [{ _id: 'p1' }, { _id: 'p2' }],
+      meta: { total: 2, page: 1, limit: 10, totalPages: 1 },
+    })
+  })
+
+  it('computes skip from page/limit and rounds totalPages up', async () => {
+    const chain = mockFindChain([])
+    find.mockReturnValue(chain)
+    countDocuments.mockResolvedValue(23)
+
+    const result = await ProfitService.getByDomain('d1', 3, 5)
+
+    expect(chain.skip).toHaveBeenCalledWith(10) // (3 - 1) * 5
+    expect(chain.limit).toHaveBeenCalledWith(5)
+    expect(result.meta).toEqual({
+      total: 23,
+      page: 3,
+      limit: 5,
+      totalPages: 5, // ceil(23 / 5)
+    })
+  })
+})
+
 describe('ProfitService.bulkCreate', () => {
   it('throws when there is nothing to insert', async () => {
     await expect(ProfitService.bulkCreate([])).rejects.toThrow(
