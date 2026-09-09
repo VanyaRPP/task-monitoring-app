@@ -254,6 +254,7 @@ const PaymentsDrilldown: FC<PaymentsDrilldownProps> = ({
             />
           )}
           {isDebtors ? (
+             <div style={{ width: '100%', overflowX: 'auto', display: 'block' }}>
             <Table
               size="small"
               loading={isFetching}
@@ -261,7 +262,7 @@ const PaymentsDrilldown: FC<PaymentsDrilldownProps> = ({
               dataSource={debtors}
               rowKey={(record) => record.companyId}
               pagination={false}
-              scroll={{ y: 400 }}
+              scroll={{ x: '100%', y: 400 }}
               locale={{
                 emptyText: (
                   <Empty
@@ -285,7 +286,10 @@ const PaymentsDrilldown: FC<PaymentsDrilldownProps> = ({
                 </Table.Summary>
               )}
             />
+            </div>
+
           ) : (
+             <div style={{ width: '100%', overflowX: 'auto', display: 'block' }}>
             <Table
               size="small"
               loading={isFetching}
@@ -293,7 +297,7 @@ const PaymentsDrilldown: FC<PaymentsDrilldownProps> = ({
               dataSource={payments}
               rowKey={(record) => record._id}
               pagination={false}
-              scroll={{ y: 400 }}
+              scroll={{ x: '100%', y: 400 }} 
               locale={{
                 emptyText: (
                   <Empty
@@ -319,6 +323,7 @@ const PaymentsDrilldown: FC<PaymentsDrilldownProps> = ({
                 </Table.Summary>
               )}
             />
+            </div>
           )}
           <Link href={AppRoutes.PAYMENT}>
             {t('profitPage:drilldown.openPayments')} <ExportOutlined />
