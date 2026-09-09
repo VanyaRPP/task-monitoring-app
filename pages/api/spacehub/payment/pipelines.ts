@@ -1,3 +1,48 @@
+import { PAYMENTS_TIMEZONE, SortOrder } from '@utils/constants'
+import type { PipelineStage } from 'mongoose'
+
+export function getPaymentsOrderPipeline(
+  options: Record<string, unknown>,
+  { skip, limit }: { skip?: string | number; limit?: string | number } = {}
+) {
+  const pipeline: PipelineStage[] = [
+    { $match: options },
+    {
+      $addFields: {
+        invoiceCreationDay: {
+          $dateTrunc: {
+            date: '$invoiceCreationDate',
+            unit: 'day',
+            timezone: PAYMENTS_TIMEZONE,
+          },
+        },
+      },
+    },
+    {
+      $sort: {
+        invoiceCreationDay: SortOrder.DESC,
+        type: SortOrder.ASC,
+        invoiceCreationDate: SortOrder.DESC,
+        _id: SortOrder.ASC,
+      },
+    },
+  ]
+
+  const skipValue = Number(skip)
+  if (Number.isFinite(skipValue) && skipValue > 0) {
+    pipeline.push({ $skip: skipValue })
+  }
+
+  const limitValue = Number(limit)
+  if (Number.isFinite(limitValue) && limitValue > 0) {
+    pipeline.push({ $limit: limitValue })
+  }
+
+  pipeline.push({ $project: { _id: 1 } })
+
+  return pipeline
+}
+
 export function getCreditDebitPipeline(options) {
   return [
     { $match: options }, // Apply the matching based on options

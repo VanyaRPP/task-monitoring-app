@@ -83,8 +83,11 @@ export default async function handler(
 
       const creditData: Record<string, any> = {
         type: Operations.Credit,
-        // Keep the +1ms shift so the credit stays next to its invoice in the
-        // payments list, which sorts by invoiceCreationDate.
+        // Same calendar day as the invoice, so the payments list - which
+        // buckets by day and then puts credits above debits - keeps the two
+        // together. The +1ms still matters for the views that sort on the raw
+        // invoiceCreationDate (bank transactions), where it is what keeps the
+        // credit above its invoice.
         invoiceCreationDate: dateShiftMs(source.invoiceCreationDate, 1),
         // When the money actually arrived. Defaults to now; once the confirm
         // dialog offers a date picker this reads it from the request body.

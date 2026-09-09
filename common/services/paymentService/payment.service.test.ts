@@ -3,20 +3,29 @@ const skipMock = jest.fn().mockReturnThis()
 const limitMock = jest.fn().mockReturnThis()
 const populateMock = jest.fn().mockReturnThis()
 const leanMock = jest.fn().mockResolvedValue([])
-const findMock = jest.fn(() => ({
+const findChain: any = {
   sort: sortMock,
   skip: skipMock,
   limit: limitMock,
   populate: populateMock,
   lean: leanMock,
-}))
+  then: (onFulfilled: any, onRejected: any) =>
+    Promise.resolve([]).then(onFulfilled, onRejected),
+}
+let lastFindFilter: any
+const findMock = jest.fn((conditions?: any) => {
+  lastFindFilter = conditions
+  return findChain
+})
+findChain.cast = jest.fn(() => lastFindFilter)
+const aggregateMock = jest.fn().mockResolvedValue([])
 
 jest.mock('@modules/models/Payment', () => ({
   __esModule: true,
   default: {
     create: jest.fn(),
     find: findMock,
-    aggregate: jest.fn().mockResolvedValue([]),
+    aggregate: aggregateMock,
     countDocuments: jest.fn().mockResolvedValue(0),
     distinct: jest.fn().mockResolvedValue([]),
   },
@@ -47,6 +56,7 @@ jest.mock('@modules/models/Service', () => ({
 }))
 
 jest.mock('@pages/api/spacehub/payment/pipelines', () => ({
+  getPaymentsOrderPipeline: jest.fn(() => [{ $match: 'ordered' }]),
   getCreditDebitPipeline: jest.fn(),
   getMaxInvoiceNumber: jest.fn(() => [
     { $group: { _id: null, maxNumber: { $max: '$invoiceNumber' } } },
@@ -75,6 +85,7 @@ import {
   getNextInvoiceNumber,
   getPayments,
 } from './payment.service'
+import { getPaymentsOrderPipeline } from '@pages/api/spacehub/payment/pipelines'
 import { SortOrder, Operations } from '@utils/constants'
 import { PaymentStatus } from '@common/api/paymentApi/payment.api.types'
 
@@ -92,13 +103,51 @@ const globalAdminContext = {
 describe('getPayments — sorting', () => {
   beforeEach(() => jest.clearAllMocks())
 
-  it('passes correct sort params to MongoDB', async () => {
-    await getPayments({}, globalAdminContext)
-    expect(sortMock).toHaveBeenCalledWith({
-      invoiceCreationDate: SortOrder.DESC,
-      type: SortOrder.ASC,
-      _id: SortOrder.ASC,
+  it('orders the page through the aggregation, not find().sort()', async () => {
+    await getPayments({ skip: '20', limit: '10' }, globalAdminContext)
+
+    // find() no longer carries the ordering - a calendar-day bucket cannot be
+    // expressed as a plain sort spec.
+    expect(sortMock).not.toHaveBeenCalled()
+    expect(skipMock).not.toHaveBeenCalled()
+    expect(limitMock).not.toHaveBeenCalled()
+
+    expect(getPaymentsOrderPipeline).toHaveBeenCalledWith(expect.any(Object), {
+      skip: '20',
+      limit: '10',
     })
+    expect(aggregateMock).toHaveBeenCalledWith([{ $match: 'ordered' }])
+  })
+
+  it('hydrates exactly the ids the ordering pipeline returned', async () => {
+    const ids = ['aaa', 'bbb']
+    aggregateMock.mockResolvedValueOnce(ids.map((_id) => ({ _id })))
+
+    await getPayments({}, globalAdminContext)
+
+    expect(findMock).toHaveBeenCalledWith({ _id: { $in: ids } })
+  })
+
+  it('restores the pipeline order that find({ $in }) does not preserve', async () => {
+    const credit = { _id: 'credit-id', type: Operations.Credit }
+    const debit = { _id: 'debit-id', type: Operations.Debit }
+
+    aggregateMock.mockResolvedValueOnce([
+      { _id: credit._id },
+      { _id: debit._id },
+    ])
+    findChain.then = (onFulfilled: any, onRejected: any) =>
+      Promise.resolve([debit, credit]).then(onFulfilled, onRejected)
+
+    const result = await getPayments({}, globalAdminContext)
+
+    expect(result.data.map((payment: any) => payment.type)).toEqual([
+      Operations.Credit,
+      Operations.Debit,
+    ])
+
+    findChain.then = (onFulfilled: any, onRejected: any) =>
+      Promise.resolve([]).then(onFulfilled, onRejected)
   })
 
   it('SortOrder.ASC on type puts credit before debit (alphabetical invariant)', () => {
@@ -112,7 +161,8 @@ describe('getPayments — sorting', () => {
 describe('getPayments — period filtering by dateField', () => {
   beforeEach(() => jest.clearAllMocks())
 
-  const filterOf = () => (findMock as jest.Mock).mock.calls[0][0]
+  const filterOf = () =>
+    (getPaymentsOrderPipeline as jest.Mock).mock.calls[0][0]
 
   it('filters on invoiceCreationDate by default', async () => {
     await getPayments({ year: 2026, month: 6 }, globalAdminContext)
@@ -198,7 +248,8 @@ describe('getPayments — period filtering by dateField', () => {
 describe('getPayments — status filtering', () => {
   beforeEach(() => jest.clearAllMocks())
 
-  const filterOf = () => (findMock as jest.Mock).mock.calls[0][0]
+  const filterOf = () =>
+    (getPaymentsOrderPipeline as jest.Mock).mock.calls[0][0]
 
   it('applies no $or when status is omitted', async () => {
     await getPayments({}, globalAdminContext)

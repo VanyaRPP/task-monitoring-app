@@ -35,6 +35,8 @@ export enum SortOrder {
   DESC = -1,
 }
 
+export const PAYMENTS_TIMEZONE = 'Europe/Kyiv'
+
 export enum ColumnsRoleView {
   GlobalAdmin = 1,
   User = 2,
