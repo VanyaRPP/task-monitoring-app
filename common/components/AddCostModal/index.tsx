@@ -17,6 +17,14 @@ interface Props {
   closeModal: VoidFunction
   currentProfit?: Profit
   activeDomain?: string
+  transactionData?: {
+    amount: number
+    date: Date
+    periodMonth?: Dayjs
+    description: string
+    currency: string
+    category: string
+  }
   profitActions?: {
     preview?: boolean
     edit?: boolean
@@ -43,6 +51,7 @@ const AddCostModal: FC<Props> = ({
   closeModal,
   currentProfit,
   activeDomain,
+  transactionData,
   profitActions,
 }) => {
   const { t } = useTranslation()
@@ -139,11 +148,19 @@ const AddCostModal: FC<Props> = ({
     } else {
       form.setFieldsValue({
         domain: activeDomain,
-        date: dayjs(),
-        currency: Currency.UAH,
+        date: transactionData?.date ? dayjs(transactionData.date) : dayjs(),
+        periodMonth: transactionData?.periodMonth
+          ? dayjs(transactionData.periodMonth)
+          : transactionData?.date
+            ? dayjs(transactionData.date)
+            : dayjs(),
+        sum: transactionData?.amount,
+        description: transactionData?.description,
+        categories: transactionData?.category ? [transactionData.category] : [],
+        currency: transactionData?.currency || Currency.UAH,
       })
     }
-  }, [currentProfit, form, activeDomain])
+  }, [currentProfit, form, activeDomain, transactionData])
 
   return (
     <Modal

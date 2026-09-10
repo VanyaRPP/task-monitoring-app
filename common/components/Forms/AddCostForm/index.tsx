@@ -22,7 +22,11 @@ import { useTranslation } from 'next-i18next'
 import s from './style.module.scss'
 import { formatDateWithGenitiveMonthCapitalized } from '@utils/helpers'
 import { useMemo, useState } from 'react'
-import { CURRENCY_SELECT_OPTIONS } from '@utils/constants'
+import {
+  CURRENCY_SELECT_OPTIONS,
+  DEFAULT_CATEGORIES,
+  OTHER_KEY,
+} from '@utils/constants'
 
 dayjs.locale('uk')
 
@@ -32,19 +36,6 @@ interface Props {
   disabled?: boolean
   currentProfit?: Profit
 }
-
-const DEFAULT_CATEGORIES = [
-  'Оренда',
-  'Електрика',
-  'Вода',
-  'Обслуговування',
-  'Прибирання',
-  'Майстри',
-  'Матеріали',
-  'Кава-чай',
-]
-
-const OTHER_KEY = '__other__'
 
 interface CategoriesFieldProps {
   value?: string[]

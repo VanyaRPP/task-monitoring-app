@@ -277,3 +277,16 @@ export const CURRENCY_SELECT_OPTIONS = [
   { value: Currency.USD, label: `${Currency.USD} ($)` },
   { value: Currency.EUR, label: `${Currency.EUR} (€)` },
 ]
+
+export const DEFAULT_CATEGORIES = [
+  'Оренда',
+  'Електрика',
+  'Вода',
+  'Обслуговування',
+  'Прибирання',
+  'Майстри',
+  'Матеріали',
+  'Кава-чай',
+]
+
+export const OTHER_KEY = '__other__'
