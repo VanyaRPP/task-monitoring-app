@@ -1,10 +1,8 @@
 'use client'
 
 import { UserOutlined } from '@ant-design/icons'
-import {
-  useGetDomainFiltersQuery,
-  useGetRealEstateFiltersQuery,
-} from '@common/api/filterApi/filter.api'
+import { useGetDomainFiltersQuery } from '@common/api/filterApi/filter.api'
+import { useGetMyCompaniesQuery } from '@common/api/realestateApi/realestate.api'
 import { useState } from 'react'
 
 import { PlusOutlined } from '@ant-design/icons'
@@ -40,7 +38,7 @@ export const ProfilePage: React.FC = () => {
   const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
 
   const { data: domains } = useGetDomainFiltersQuery({})
-  const { data: companies } = useGetRealEstateFiltersQuery({})
+  const { data: myCompanies } = useGetMyCompaniesQuery()
 
   const handleTagClick = ({ text, value }) => {
     router.push({
@@ -131,9 +129,7 @@ export const ProfilePage: React.FC = () => {
           <Tags
             wrap
             align="center"
-            items={companies?.realEstatesFilter.map(
-              ({ text }) => text as string
-            )}
+            items={myCompanies?.data?.map(({ companyName }) => companyName)}
             render={(domain, index) => (
               <Tag
                 key={index}
