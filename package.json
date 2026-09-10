@@ -83,7 +83,7 @@
     "next-auth": "^4.24.15",
     "next-i18next": "^15.4.2",
     "nextjs-progressbar": "^0.0.16",
-    "nodemailer": "^9.0.6",
+    "nodemailer": "^9.1.1",
     "puppeteer-core": "^22.15.0",
     "react": "^18.3.1",
     "react-cool-onclickoutside": "^1.7.0",
@@ -94,12 +94,12 @@
     "react-resize-detector": "^12.1.0",
     "react-sticky-box": "^2.0.5",
     "react-to-print": "^2.14.12",
-    "sass": "^1.103.1",
+    "sass": "^1.104.0",
     "sharp": "^0.35.4",
     "swagger-ui-react": "^5.32.14",
     "use-places-autocomplete": "^4.0.0",
     "xlsx-js-style": "^1.2.0",
-    "zod": "^4.4.3"
+    "zod": "^4.5.4"
   },
   "devDependencies": {
     "@testing-library/user-event": "^14.6.6",
