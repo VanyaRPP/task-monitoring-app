@@ -47,6 +47,11 @@ const config: Config = {
       prefix: '<rootDir>/',
     }),
     '\\.(css|scss|sass)$': 'identity-obj-proxy',
+    // @ant-design/icons hardcodes this deep import to the ESM build of
+    // @ant-design/colors, which Jest can't parse. Redirect it to the
+    // CJS build shipped in the same nested package.
+    '^@ant-design/colors/es/generate$':
+      '<rootDir>/node_modules/@ant-design/icons/node_modules/@ant-design/colors/lib/generate.js',
   },
 
   moduleFileExtensions: ['ts', 'tsx', 'js'],
