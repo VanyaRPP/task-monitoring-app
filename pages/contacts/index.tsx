@@ -44,24 +44,14 @@ const items: GlassIconsItem[] = [
     label: 'Facebook',
     href: 'https://www.facebook.com/spacehub.zt/',
   },
-  {
-    icon: <LinkedinOutlined />,
-    color: 'purple',
-    label: 'LinkedIn',
-    href: 'https://linkedin.com',
-  },
+ 
   {
     icon: <InstagramOutlined />,
     color: 'red',
     label: 'Instagram',
     href: 'https://www.instagram.com/spacehub.zt/',
   },
-  {
-    icon: <GithubOutlined />,
-    color: 'indigo',
-    label: 'GitHub',
-    href: 'https://github.com',
-  },
+
   {
     icon: <ContactsOutlined />,
     color: 'purple',

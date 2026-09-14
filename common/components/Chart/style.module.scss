@@ -1,18 +1,112 @@
-.chartContainer {
-  max-width: 99%;
-  position: relative;
-  width: 400px;
-  height: 400px;
-  margin: 20px auto;
-
-  .chart {
-    width: 100%;
-    height: 100%;
-  }
+.analyticsBody {
+  display: flex;
+  align-items: flex-start; /* Вирівнює діаграму та легенду строго по верхньому краю */
+  gap: 32px;               /* Безпечна відстань між кругом та легендою */
+  width: 100%;
+  margin-top: 24px;
+  padding-bottom: 24px;    /* Надійний відступ до нижніх кнопок картки */
 }
 
-.loading {
+/* КОНТЕЙНЕР ДІАГРАМИ: Жорстко обмежуємо габарити для Chart.js */
+.chartContainer {
+  flex: 0 0 140px;         /* Задаємо чітку ширину лівої частини в 140px */
+  width: 140px !important;
+  height: 140px !important; /* Обмежуємо висоту до 140px під розмір легенди */
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.chart {
+  width: 140px !important;  
+  height: 140px !important; 
+}
+
+/* КОНТЕЙНЕР ДЛЯ ЛЕГЕНДИ */
+.legendContainer {
+  flex: 1;                 /* Займає весь інший простір праворуч */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  min-width: 0;
+}
+
+/* СІТКА КОМПАНІЙ: Автоматично розподіляє у 2 або 3 колонки */
+.legendList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px 20px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 140px;       /* Висота у згорнутому стані ідеально збігається з кругом */
+  overflow: hidden;
+  transition: max-height 0.35s ease-in-out;
+
+  /* Адаптивний нижній простір (м'яко росте вниз, якщо натиснути кнопку) */
+  &.isExpanded {
+    max-height: 1000px; 
+  }
+}
+
+/* ЕЛЕМЕНТИ СПИСКУ */
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+/* Кольоровий маркер */
+.colorBadge {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+/* Назва компанії з трикрапкою (...) */
+.companyName {
+  font-size: 14px;
+  color: #e0e0e0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+/* КНОПКА РОЗГОРНУТИ */
+.toggleButton {
+  align-self: flex-start;
+  padding: 0 !important;
+  margin-top: 16px;
+  height: auto !important;
+  font-weight: 500;
+  color: #a855f7 !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  
+  &:hover {
+    color: #c084fc !important;
+  }
+}
+
+/* АДАПТИВНІСТЬ ДЛЯ МОБІЛЬНИХ ПРИСТРОЇВ */
+@media (max-width: 768px) {
+  .analyticsBody {
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+  .chartContainer, .chart {
+    width: 130px !important;
+    height: 130px !important;
+  }
+  .legendContainer {
+    width: 100%;
+  }
+  .legendList {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  }
 }
