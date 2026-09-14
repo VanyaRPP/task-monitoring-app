@@ -93,7 +93,7 @@
     "react-resizable": "^3.0.5",
     "react-resize-detector": "^12.1.0",
     "react-sticky-box": "^2.0.5",
-    "react-to-print": "^2.14.12",
+    "react-to-print": "^3.3.0",
     "sass": "^1.103.1",
     "sharp": "^0.35.4",
     "swagger-ui-react": "^5.32.14",
