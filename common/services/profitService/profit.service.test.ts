@@ -429,3 +429,110 @@ describe('ProfitService.getByDomainWithMonthSeparation', () => {
     expect(result.data['2026-06'].transactions).toHaveLength(3)
   })
 })
+
+describe('ProfitService.getByCompanyWithMonthSeparation', () => {
+  const companyId = '64d68421d9ba2fc8fea79d51'
+
+  const income = (
+    year: number,
+    month: number,
+    expected: number,
+    actual: number,
+    currency = 'UAH'
+  ) => ({
+    _id: { year, month, currency },
+    expected,
+    actual,
+    invoiceCount: 1,
+    paymentCount: 1,
+  })
+
+  const expense = (
+    monthKey: string,
+    expenses: number,
+    manualIncome = 0,
+    transactions: any[] = [],
+    currency = 'UAH'
+  ) => ({
+    _id: { monthKey, currency },
+    expenses,
+    manualIncome,
+    transactions,
+  })
+
+  it('reads expected/actual from Payment scoped by company, not domain', async () => {
+    paymentAggregate.mockResolvedValue([income(2026, 6, 15000, 12000)])
+    aggregate.mockResolvedValue([])
+
+    const result =
+      await ProfitService.getByCompanyWithMonthSeparation(companyId)
+
+    const pipeline = paymentAggregate.mock.calls[0][0]
+    expect(pipeline[0]).toEqual({
+      $match: { company: expect.anything() },
+    })
+    expect(result.data['2026-06'].byCurrency.UAH).toMatchObject({
+      expected: 15000,
+      actual: 12000,
+      outstanding: 3000,
+    })
+  })
+
+  // Domain and company are symmetric scopes now - a company can carry its
+  // own manual Profit records (e.g. a cost the client tracks against
+  // itself), matched by `company` instead of `domain`.
+  it('also reads its own expenses from Profit, matched by company', async () => {
+    paymentAggregate.mockResolvedValue([income(2026, 6, 15000, 12000)])
+    aggregate.mockResolvedValue([expense('2026-06', 4000)])
+
+    const result =
+      await ProfitService.getByCompanyWithMonthSeparation(companyId)
+
+    const pipeline = aggregate.mock.calls[0][0]
+    expect(pipeline[0]).toEqual({ $match: { company: expect.anything() } })
+    expect(result.data['2026-06'].byCurrency.UAH).toMatchObject({
+      expenses: 4000,
+    })
+  })
+
+  // A company has no income side in this billing model - `actual` is money
+  // it paid OUT, not money it earned - so `actual - expenses` would label an
+  // outflow as "profit". This is the regression guard for that: `net` must
+  // be a negated total outflow instead, always <= 0.
+  it('computes net as a negated total outflow, not actual minus expenses', async () => {
+    paymentAggregate.mockResolvedValue([income(2026, 6, 15000, 12000)])
+    aggregate.mockResolvedValue([expense('2026-06', 4000)])
+
+    const result =
+      await ProfitService.getByCompanyWithMonthSeparation(companyId)
+
+    // NOT 8000 (12000 - 4000, the domain formula) - that would read as the
+    // company having "profited" from paying its own bills.
+    expect(result.data['2026-06'].byCurrency.UAH.net).toBe(-16000)
+  })
+
+  it('keeps net as actual minus expenses for a domain, unlike a company', async () => {
+    paymentAggregate.mockResolvedValue([income(2026, 6, 15000, 12000)])
+    aggregate.mockResolvedValue([expense('2026-06', 4000)])
+
+    const result = await ProfitService.getByDomainWithMonthSeparation(companyId)
+
+    expect(result.data['2026-06'].byCurrency.UAH.net).toBe(8000)
+  })
+
+  it('paginates over months the same way the domain ledger does', async () => {
+    paymentAggregate.mockResolvedValue([
+      income(2026, 6, 100, 100),
+      income(2026, 5, 200, 200),
+    ])
+
+    const result = await ProfitService.getByCompanyWithMonthSeparation(
+      companyId,
+      1,
+      1
+    )
+
+    expect(Object.keys(result.data)).toEqual(['2026-06'])
+    expect(result.meta).toMatchObject({ total: 2, totalPages: 2, limit: 1 })
+  })
+})

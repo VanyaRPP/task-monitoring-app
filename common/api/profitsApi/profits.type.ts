@@ -2,7 +2,8 @@ import { ObjectId } from 'mongoose'
 
 export interface Profit {
   _id?: string
-  domain: string | ObjectId
+  domain?: string | ObjectId
+  company?: string | ObjectId
   amount: number
   type: 'debit' | 'credit'
   categories?: string[]

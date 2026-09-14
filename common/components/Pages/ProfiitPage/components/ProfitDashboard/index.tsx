@@ -33,6 +33,15 @@ const { useToken } = theme
 
 interface ProfitDashboardProps {
   dataSource: ProfitMonthRow[]
+  /**
+   * Domain and company are symmetric scopes - both get all four cards, the
+   * expense pie, and the full trend chart. The only thing this picks is
+   * which side of the invoice figure the labels describe:
+   *   domain:  an invoice is income  - "we billed them, they owe us".
+   *   company: the SAME invoice is an expense, from the company's own
+   *            self-service view - "we were billed, we owe".
+   */
+  perspective?: 'domain' | 'company'
 }
 
 type PeriodTotals = ReturnType<typeof sumPeriod>
@@ -121,7 +130,11 @@ const PeriodDelta: React.FC<{
   )
 }
 
-const ProfitDashboard: React.FC<ProfitDashboardProps> = ({ dataSource }) => {
+const ProfitDashboard: React.FC<ProfitDashboardProps> = ({
+  dataSource,
+  perspective = 'domain',
+}) => {
+  const isDomain = perspective === 'domain'
   const { t } = useTranslation()
   const [periodType, setPeriodType] = useState('Quarter')
   const [selectedPeriod, setSelectedPeriod] = useState<string | null>(null)
@@ -256,22 +269,33 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({ dataSource }) => {
 
       data.push({
         period: monthName,
-        type: t('profitPage:dashboard.expected'),
+        // "Invoice" means income for a domain, expense for a company - same
+        // number, opposite side of the same transaction.
+        type: t(
+          isDomain
+            ? 'profitPage:dashboard.expected'
+            : 'profitPage:dashboard.expectedCompany'
+        ),
         value: totals?.expected || 0,
       })
       data.push({
         period: monthName,
-        type: t('profitPage:dashboard.actual'),
+        type: t(
+          isDomain
+            ? 'profitPage:dashboard.actual'
+            : 'profitPage:dashboard.actualCompany'
+        ),
         value: totals?.actual || 0,
       })
       data.push({
         period: monthName,
+        // Not invoice-derived, so this label does not flip with perspective.
         type: t('profitPage:dashboard.expenses'),
         value: totals?.expenses || 0,
       })
     })
     return data
-  }, [filteredData, t, currency])
+  }, [filteredData, t, currency, isDomain])
 
   // Expense breakdown, driven by the `categories` field the add-cost form
   // already writes - no guessing the category from the description text.
@@ -314,8 +338,12 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({ dataSource }) => {
     // ignored, which would stack these three unrelated series into one bar.
     transform: [{ type: 'dodgeX' }],
     scale: {
+      // expected (info blue) / actual (success green) / expenses (error red) -
+      // matches the order columnData pushes in, and the red now matches how
+      // "Недоплата"/"Чистий прибуток" already colour a bad figure elsewhere
+      // on this page instead of the less alarming amber it used to be.
       color: {
-        range: [token.colorInfo, token.colorSuccess, token.colorWarning],
+        range: [token.colorInfo, token.colorSuccess, token.colorError],
       },
     },
     theme: isDarkMode ? 'dark' : 'light',
@@ -421,7 +449,13 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({ dataSource }) => {
       <Row gutter={[16, 16]}>
         <Col span={6}>
           <Card size="small">
-            <Text type="secondary">{t('profitPage:dashboard.expected')}</Text>
+            <Text type="secondary">
+              {t(
+                isDomain
+                  ? 'profitPage:dashboard.expected'
+                  : 'profitPage:dashboard.expectedCompany'
+              )}
+            </Text>
             <Statistic
               value={aggregatedData.expected}
               precision={2}
@@ -435,7 +469,13 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({ dataSource }) => {
         </Col>
         <Col span={6}>
           <Card size="small">
-            <Text type="secondary">{t('profitPage:dashboard.actual')}</Text>
+            <Text type="secondary">
+              {t(
+                isDomain
+                  ? 'profitPage:dashboard.actual'
+                  : 'profitPage:dashboard.actualCompany'
+              )}
+            </Text>
             <Statistic
               value={aggregatedData.actual}
               precision={2}
@@ -448,10 +488,20 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({ dataSource }) => {
               }}
             />
             <Space direction="vertical" size={0}>
-              <Tooltip title={t('profitPage:dashboard.collectedHint')}>
+              <Tooltip
+                title={t(
+                  isDomain
+                    ? 'profitPage:dashboard.collectedHint'
+                    : 'profitPage:dashboard.collectedHintCompany'
+                )}
+              >
                 <Text type="secondary" style={{ fontSize: 12 }}>
                   {aggregatedData.collectionRate.toFixed(1)}%{' '}
-                  {t('profitPage:dashboard.collected')}
+                  {t(
+                    isDomain
+                      ? 'profitPage:dashboard.collected'
+                      : 'profitPage:dashboard.collectedCompany'
+                  )}
                 </Text>
               </Tooltip>
               <PeriodDelta
@@ -468,6 +518,7 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({ dataSource }) => {
               value={aggregatedData.expenses}
               precision={2}
               suffix={getCurrencyShortLabel(currency)}
+              valueStyle={{ color: token.colorError }}
             />
             <PeriodDelta
               current={aggregatedData.expenses}
@@ -478,7 +529,13 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({ dataSource }) => {
         </Col>
         <Col span={6}>
           <Card size="small">
-            <Text type="secondary">{t('profitPage:dashboard.net')}</Text>
+            <Text type="secondary">
+              {t(
+                isDomain
+                  ? 'profitPage:dashboard.net'
+                  : 'profitPage:dashboard.netCompany'
+              )}
+            </Text>
             <Statistic
               value={aggregatedData.net}
               precision={2}

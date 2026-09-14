@@ -2,7 +2,15 @@ import mongoose, { Schema, Types, Document, Model } from 'mongoose'
 import { Currency } from '@utils/constants'
 
 export interface ProfitDocument extends Document {
-  domain: Types.ObjectId
+  /**
+   * Exactly one of domain/company is set - which the record belongs to.
+   * Domain and company are symmetric scopes on the Прибутки page (each gets
+   * its own expected/actual/expenses/net); the only thing that differs
+   * between them is how an invoice reads (see ProfitService's docs on
+   * getByDomainWithMonthSeparation/getByCompanyWithMonthSeparation).
+   */
+  domain?: Types.ObjectId
+  company?: Types.ObjectId
   payment?: Types.ObjectId
   createdBy?: Types.ObjectId
   amount: number
@@ -78,7 +86,12 @@ const ProfitSchema = new Schema<ProfitDocument>(
     domain: {
       type: Schema.Types.ObjectId,
       ref: 'Domain',
-      required: true,
+      required: false,
+    },
+    company: {
+      type: Schema.Types.ObjectId,
+      ref: 'RealEstate',
+      required: false,
     },
     payment: {
       type: Schema.Types.ObjectId,

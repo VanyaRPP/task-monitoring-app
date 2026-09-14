@@ -24,12 +24,15 @@ const { Text } = Typography
 const PAGE_LIMIT = 100
 
 export interface PaymentsDrilldownProps {
+  /** Exactly one of domainId/companyId is set, matching the ledger's scope. */
   domainId?: string
+  companyId?: string
   /** `YYYY-MM`; null keeps the modal closed. */
   month: string | null
   /**
    * Debit lists what was invoiced, credit what actually arrived, and
-   * `outstanding` rolls both up per company to answer "who still owes".
+   * `outstanding` rolls both up per company to answer "who still owes" -
+   * only offered from a domain scope; a company scope already IS one company.
    */
   target: DrillTarget
   /** The figure was per-currency, so the list behind it must be too. */
@@ -47,6 +50,7 @@ interface DebtorRow {
 
 const PaymentsDrilldown: FC<PaymentsDrilldownProps> = ({
   domainId,
+  companyId,
   month,
   target,
   currency,
@@ -71,6 +75,7 @@ const PaymentsDrilldown: FC<PaymentsDrilldownProps> = ({
       limit: PAGE_LIMIT,
       type,
       domainIds: domainId ? [domainId] : undefined,
+      companyIds: companyId ? [companyId] : undefined,
       year: period?.year,
       month: period?.month,
       // The ledger files a payment under the month it is FOR, so the list has
@@ -78,7 +83,7 @@ const PaymentsDrilldown: FC<PaymentsDrilldownProps> = ({
       // with the same fallback for rows that have none.
       dateField: 'date',
     },
-    { skip: !domainId || !period }
+    { skip: (!domainId && !companyId) || !period }
   )
 
   // The API has no currency filter, so narrow client-side to the currency
@@ -231,8 +236,12 @@ const PaymentsDrilldown: FC<PaymentsDrilldownProps> = ({
         isDebtors
           ? 'profitPage:drilldown.titleOutstanding'
           : type === Operations.Credit
-            ? 'profitPage:drilldown.titleActual'
-            : 'profitPage:drilldown.titleExpected',
+            ? companyId
+              ? 'profitPage:drilldown.titleActualCompany'
+              : 'profitPage:drilldown.titleActual'
+            : companyId
+              ? 'profitPage:drilldown.titleExpectedCompany'
+              : 'profitPage:drilldown.titleExpected',
         { period: month ? dayjs(month).format('MMMM YYYY') : '' }
       )}
       onOk={onClose}
