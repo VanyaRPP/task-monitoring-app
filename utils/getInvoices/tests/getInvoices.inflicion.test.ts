@@ -215,7 +215,7 @@ describe('getInvoices - INFLICION', () => {
       )
     })
 
-    it('should NOT load when company = { inflicion: true }', () => {
+    it('should load without month service when company = { inflicion: true }', () => {
       const company: Partial<IRealestate> = {
         inflicion: true,
       }
@@ -224,7 +224,7 @@ describe('getInvoices - INFLICION', () => {
         company,
       })
 
-      expect(invoices).not.toContainEqual(
+      expect(invoices).toContainEqual(
         expect.objectContaining({ type: ServiceType.Inflicion })
       )
     })
@@ -341,7 +341,7 @@ describe('getInvoices - INFLICION', () => {
       )
     })
 
-    it('should NOT load when service = null, company = { totalArea: 10, inflicion: true }', () => {
+    it('should load without month service when service = null, company = { totalArea: 10, inflicion: true }', () => {
       const service: Partial<IService> = null
       const company: Partial<IRealestate> = {
         totalArea: 10,
@@ -353,7 +353,7 @@ describe('getInvoices - INFLICION', () => {
         company,
       })
 
-      expect(invoices).not.toContainEqual(
+      expect(invoices).toContainEqual(
         expect.objectContaining({ type: ServiceType.Inflicion })
       )
     })

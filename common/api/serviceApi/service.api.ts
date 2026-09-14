@@ -89,7 +89,7 @@ export const serviceApi = createApi({
       IService,
       Omit<IService, 'domain' | 'street'> & {
         domain: string
-        street: string
+        street?: string
       }
     >({
       query(data) {

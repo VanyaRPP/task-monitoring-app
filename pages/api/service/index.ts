@@ -200,7 +200,12 @@ export default async function handler(
           }
 
           // TODO: body validation
-          const service = await Service.create(req.body)
+          const body = { ...req.body }
+          if (!body.street) {
+            delete body.street
+          }
+
+          const service = await Service.create(body)
           return res.status(200).json({ success: true, data: service })
         } else {
           return res
@@ -208,7 +213,9 @@ export default async function handler(
             .json({ success: false, message: 'not allowed' })
         }
       } catch (error) {
-        return res.status(400).json({ success: false, message: error })
+        return res
+          .status(400)
+          .json({ success: false, message: error?.message ?? error })
       }
   }
 }
