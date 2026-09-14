@@ -26,9 +26,9 @@ export function usePreviousMonthService({ domainId, streetId, date }) {
       month: lastMonth.month(),
       year: lastMonth.year(),
       domainId,
-      streetId,
+      streetId: streetId || undefined,
     },
-    { skip: !domainId || !streetId || !date }
+    { skip: !domainId || !date }
   )
   return { previousMonth: data?.data?.[0] }
 }

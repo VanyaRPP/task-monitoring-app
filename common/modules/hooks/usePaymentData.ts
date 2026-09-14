@@ -172,7 +172,7 @@ export function usePaymentFormData(
     useGetAllServicesQuery(
       {
         domainId,
-        streetId,
+        streetId: streetId || undefined,
         year: placeholderYear,
         month: placeholderMonth,
         limit: 1,
@@ -181,7 +181,6 @@ export function usePaymentFormData(
         skip:
           !isMonthPlaceholder ||
           !domainId ||
-          !streetId ||
           placeholderYear === undefined ||
           placeholderMonth === undefined,
       }
@@ -206,18 +205,14 @@ export function usePaymentFormData(
   const { data: { data: { 0: prevService } } = { data: [null] } } =
     useGetAllServicesQuery(
       {
-        streetId: service?.street?._id ?? streetId,
+        streetId: service?.street?._id ?? (streetId || undefined),
         domainId: service?.domain?._id ?? domainId,
         month: prevMonthMongo,
         year: prevYearMongo,
         limit: 1,
       },
       {
-        skip:
-          !hasAnchor ||
-          !streetId ||
-          !domainId ||
-          (!service && !isMonthPlaceholder),
+        skip: !hasAnchor || !domainId || (!service && !isMonthPlaceholder),
       }
     )
 
@@ -225,14 +220,14 @@ export function usePaymentFormData(
     useGetAllPaymentsQuery(
       {
         companyIds: [companyId],
-        streetIds: [streetId],
+        streetIds: streetId ? [streetId] : undefined,
         domainIds: [domainId],
         serviceIds: [prevService?._id],
         type: Operations.Debit,
         limit: 1,
       },
       {
-        skip: !prevService || !companyId || !streetId || !domainId,
+        skip: !prevService || !companyId || !domainId,
       }
     )
   return {
@@ -240,12 +235,10 @@ export function usePaymentFormData(
     service,
     payment: paymentData,
     prevService:
-      hasAnchor && streetId && domainId && (service || isMonthPlaceholder)
+      hasAnchor && domainId && (service || isMonthPlaceholder)
         ? prevService
         : null,
     prevPayment:
-      !!prevService && !!companyId && !!streetId && !!domainId
-        ? prevPayment
-        : null,
+      !!prevService && !!companyId && !!domainId ? prevPayment : null,
   }
 }

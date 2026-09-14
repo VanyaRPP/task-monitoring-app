@@ -30,6 +30,16 @@ export interface IGetInvoiceByTypeProps {
 
 const SCOPED_KEY_PREFIX = 'sid:'
 
+export const EMPTY_MONTH_SERVICE: Partial<IService> = Object.freeze({
+  rentPrice: 0,
+  electricityPrice: 0,
+  waterPrice: 0,
+  waterPriceTotal: 0,
+  garbageCollectorPrice: 0,
+  inflicionPrice: 0,
+  customServices: [],
+})
+
 /**
  * Ключ рядка в колекції поточного платежу.
  *
@@ -68,7 +78,7 @@ const invoiceCollectionKey = (invoice: IPaymentField): string => {
  */
 export const getInvoices = ({
   company,
-  service,
+  service: rawService,
   payment,
   prevService,
   prevPayment,
@@ -80,12 +90,15 @@ export const getInvoices = ({
     (inv) => inv?.type === ServiceType.Custom && !!inv?.fieldName
   )
   if (
-    (isEmpty(company) || isEmpty(service)) &&
+    isEmpty(company) &&
     (isEmpty(payment) || isEmpty(payment?.invoice)) &&
     !hasPrevCustomItems
   ) {
     return []
   }
+
+  const service =
+    isEmpty(rawService) && !isEmpty(company) ? EMPTY_MONTH_SERVICE : rawService
 
   const currInvoicesCollection =
     payment?.invoice?.reduce((acc, invoice) => {
@@ -278,7 +291,8 @@ export const getInflicionInvoice = ({
     const prevPlacing = prevInvoicesCollection[ServiceType.Placing]
     const price =
       (prevPlacing?.sum ||
-        company.totalArea * (company.pricePerMeter || service.rentPrice || 0)) *
+        company.totalArea *
+          (company.pricePerMeter || service?.rentPrice || 0)) *
       (Math.max(prevService?.inflicionPrice - 100, 0) / 100)
 
     return {
