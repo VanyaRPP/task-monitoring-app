@@ -87,6 +87,28 @@ export const MoneyCell: React.FC<{
  */
 export type DrillTarget = Operations | 'outstanding'
 
+export type ProfitPerspective = 'domain' | 'company'
+
+export interface ParentColumnsOptions {
+  /**
+   * Domain and company are symmetric scopes - both get expected/actual/
+   * expenses/net, both can carry manual records. The only thing that
+   * differs is how an invoice reads:
+   *   domain:  an invoice is income  - "we billed them, they owe us".
+   *   company: the SAME invoice is an expense, from the company's own
+   *            self-service view - "we were billed, we owe".
+   * The underlying numbers (Payment debit/credit) never change, only which
+   * side is reading them - see ProfitService.getLedgerFor.
+   */
+  perspective?: ProfitPerspective
+  /**
+   * The debtor breakdown behind "Недоплата" answers "which company owes" -
+   * meaningless once the scope IS a single company. The figure still shows,
+   * it just is not clickable.
+   */
+  allowDebtorDrill?: boolean
+}
+
 /**
  * Roll several months up per currency. Used for the page summary row, where
  * folding currencies into one figure would be meaningless.
@@ -126,121 +148,147 @@ export const sumRowsByCurrency = (rows: readonly ProfitMonthRow[]) => {
 
 export const getParentColumns = (
   token: GlobalToken,
-  onDrill?: (month: string, target: DrillTarget, currency: string) => void
-): ColumnsType<ProfitMonthRow> => [
-  {
-    title: t('table.parent.month', { ns: 'profitPage' }),
-    dataIndex: 'month',
-    key: 'month',
-    width: 160,
-    render: (month: string) => {
-      const d = dayjs(month)
-      if (!d.isValid()) return month
-      const label = d.format('MMMM YYYY')
-      return (
-        <Text strong>{label.charAt(0).toUpperCase() + label.slice(1)}</Text>
-      )
+  onDrill?: (month: string, target: DrillTarget, currency: string) => void,
+  { perspective = 'domain', allowDebtorDrill = true }: ParentColumnsOptions = {}
+): ColumnsType<ProfitMonthRow> => {
+  const isDomain = perspective === 'domain'
+  return [
+    {
+      title: t('table.parent.month', { ns: 'profitPage' }),
+      dataIndex: 'month',
+      key: 'month',
+      width: 160,
+      render: (month: string) => {
+        const d = dayjs(month)
+        if (!d.isValid()) return month
+        const label = d.format('MMMM YYYY')
+        return (
+          <Text strong>{label.charAt(0).toUpperCase() + label.slice(1)}</Text>
+        )
+      },
     },
-  },
-  {
-    // Invoiced to clients. Not money in hand yet.
-    title: t('table.parent.expected', { ns: 'profitPage' }),
-    key: 'expected',
-    width: 180,
-    align: 'right',
-    render: (_, record) => (
-      <MoneyCell
-        row={record}
-        pick={(c) => c.expected}
-        onClick={
-          onDrill
-            ? (currency) => onDrill(record.month, Operations.Debit, currency)
-            : undefined
-        }
-      />
-    ),
-  },
-  {
-    // What actually arrived, with how much of the invoiced total that covers.
-    title: t('table.parent.actual', { ns: 'profitPage' }),
-    key: 'actual',
-    width: 200,
-    align: 'right',
-    render: (_, record) => (
-      <Space direction="vertical" size={0} style={{ alignItems: 'flex-end' }}>
+    {
+      // Invoiced. For a domain that is income not yet in hand; for a
+      // company's own view it is what they were billed, not yet paid.
+      title: t(
+        isDomain ? 'table.parent.expected' : 'table.parent.expectedCompany',
+        { ns: 'profitPage' }
+      ),
+      key: 'expected',
+      width: 180,
+      align: 'right',
+      render: (_, record) => (
         <MoneyCell
           row={record}
-          pick={(c) => c.actual}
+          pick={(c) => c.expected}
           onClick={
             onDrill
-              ? (currency) => onDrill(record.month, Operations.Credit, currency)
+              ? (currency) => onDrill(record.month, Operations.Debit, currency)
               : undefined
           }
         />
-        {record.currencies.length === 1 &&
-          record.byCurrency[record.currencies[0]].expected > 0 && (
-            <Tooltip
-              title={t('table.parent.collectedHint', { ns: 'profitPage' })}
-            >
-              <Text type="secondary" style={{ fontSize: 12 }}>
-                {Math.round(
-                  (record.byCurrency[record.currencies[0]].actual /
-                    record.byCurrency[record.currencies[0]].expected) *
-                    100
-                )}
-                %
-              </Text>
-            </Tooltip>
-          )}
-      </Space>
-    ),
-  },
-  {
-    // Invoiced but not collected. Clicking through answers "who owes", which
-    // is the one figure on this page you can actually act on.
-    title: t('table.parent.outstanding', { ns: 'profitPage' }),
-    key: 'outstanding',
-    width: 180,
-    align: 'right',
-    render: (_, record) => {
-      // Rounding noise across many invoices leaves a few kopiykas either way;
-      // below a unit there is nothing to chase.
-      const owed = record.currencies.filter(
-        (c) => Math.abs(record.byCurrency[c].outstanding) >= 1
-      )
-      if (!owed.length) return <Text type="secondary">—</Text>
-      return (
-        <MoneyCell
-          row={{ ...record, currencies: owed }}
-          pick={(c) => c.outstanding}
-          onClick={
-            onDrill
-              ? (currency) => onDrill(record.month, 'outstanding', currency)
-              : undefined
-          }
-        />
-      )
+      ),
     },
-  },
-  {
-    // What the domain itself spent - never client-related.
-    title: t('table.parent.expenses', { ns: 'profitPage' }),
-    key: 'expenses',
-    width: 170,
-    align: 'right',
-    render: (_, record) => <MoneyCell row={record} pick={(c) => c.expenses} />,
-  },
-  {
-    // The only figure with a good/bad direction, so the only one we colour.
-    title: t('table.parent.net', { ns: 'profitPage' }),
-    key: 'net',
-    width: 180,
-    align: 'right',
-    render: (_, record) => (
-      <MoneyCell row={record} pick={(c) => c.net} signed token={token} />
-    ),
-  },
-]
+    {
+      // What actually moved: income received for a domain, expense paid
+      // out for a company - with how much of the invoiced total that covers.
+      title: t(
+        isDomain ? 'table.parent.actual' : 'table.parent.actualCompany',
+        { ns: 'profitPage' }
+      ),
+      key: 'actual',
+      width: 200,
+      align: 'right',
+      render: (_, record) => (
+        <Space direction="vertical" size={0} style={{ alignItems: 'flex-end' }}>
+          <MoneyCell
+            row={record}
+            pick={(c) => c.actual}
+            onClick={
+              onDrill
+                ? (currency) =>
+                    onDrill(record.month, Operations.Credit, currency)
+                : undefined
+            }
+          />
+          {record.currencies.length === 1 &&
+            record.byCurrency[record.currencies[0]].expected > 0 && (
+              <Tooltip
+                title={t(
+                  isDomain
+                    ? 'table.parent.collectedHint'
+                    : 'table.parent.collectedHintCompany',
+                  { ns: 'profitPage' }
+                )}
+              >
+                <Text type="secondary" style={{ fontSize: 12 }}>
+                  {Math.round(
+                    (record.byCurrency[record.currencies[0]].actual /
+                      record.byCurrency[record.currencies[0]].expected) *
+                      100
+                  )}
+                  %
+                </Text>
+              </Tooltip>
+            )}
+        </Space>
+      ),
+    },
+    {
+      // Invoiced but not collected. Clicking through answers "who owes", which
+      // is the one figure on this page you can actually act on.
+      title: t('table.parent.outstanding', { ns: 'profitPage' }),
+      key: 'outstanding',
+      width: 180,
+      align: 'right',
+      render: (_, record) => {
+        // Rounding noise across many invoices leaves a few kopiykas either way;
+        // below a unit there is nothing to chase.
+        const owed = record.currencies.filter(
+          (c) => Math.abs(record.byCurrency[c].outstanding) >= 1
+        )
+        if (!owed.length) return <Text type="secondary">—</Text>
+        return (
+          <MoneyCell
+            row={{ ...record, currencies: owed }}
+            pick={(c) => c.outstanding}
+            onClick={
+              onDrill && allowDebtorDrill
+                ? (currency) => onDrill(record.month, 'outstanding', currency)
+                : undefined
+            }
+          />
+        )
+      },
+    },
+    {
+      // Manual record, not derived from the invoice - so unlike
+      // expected/actual, this label does not flip with perspective.
+      title: t('table.parent.expenses', { ns: 'profitPage' }),
+      key: 'expenses',
+      width: 170,
+      align: 'right',
+      render: (_, record) => (
+        <MoneyCell row={record} pick={(c) => c.expenses} />
+      ),
+    },
+    {
+      // The only figure with a good/bad direction, so the only one we colour.
+      // For a company this is not "profit" - a client has no income side in
+      // this model - so it is a negated total outflow instead (see
+      // ProfitService.getLedgerFor), always <= 0, labelled accordingly.
+      title: t(isDomain ? 'table.parent.net' : 'table.parent.netCompany', {
+        ns: 'profitPage',
+      }),
+      key: 'net',
+      width: 180,
+      align: 'right',
+      render: (_, record) => (
+        <MoneyCell row={record} pick={(c) => c.net} signed token={token} />
+      ),
+    },
+  ]
+}
 
 export const getChildColumns = (
   onPreview: (record: Profit) => void,
