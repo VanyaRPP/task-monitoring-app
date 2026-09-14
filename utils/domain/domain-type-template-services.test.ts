@@ -29,4 +29,11 @@ describe('domainTypeTemplateToCustomServices', () => {
       { groupName: 'A', services: ['1', '2'] },
     ])
   })
+
+  it('defaults a group with no serviceIds to an empty services array', () => {
+    const tpl = { groups: [{ groupName: 'A' }] } as any
+    expect(domainTypeTemplateToCustomServices(tpl)).toEqual([
+      { groupName: 'A', services: [] },
+    ])
+  })
 })

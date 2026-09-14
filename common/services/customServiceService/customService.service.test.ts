@@ -1,4 +1,5 @@
 import mongoose from 'mongoose'
+import { ServiceType, defaultServices } from '@utils/constants'
 import {
   assembleDomainServiceCatalog,
   collectReferencedServiceIds,
@@ -107,6 +108,27 @@ describe('access gating', () => {
     })
   })
 
+  it('rejects non-admin callers from creating a service (legacy 400 contract)', async () => {
+    const result = await createCustomService(
+      { name: 'Foo', domainId: String(ownDomainId) },
+      ctxUser
+    )
+    expect(result.ok).toBe(false)
+    if (isServiceErr(result)) expect(result.code).toBe('invalid')
+    expect(asMock(CustomService.create)).not.toHaveBeenCalled()
+  })
+
+  it('rejects non-admin callers from updating a service', async () => {
+    const result = await updateCustomService(
+      String(serviceId),
+      { name: 'Foo' },
+      ctxUser
+    )
+    expect(result.ok).toBe(false)
+    if (isServiceErr(result)) expect(result.code).toBe('forbidden')
+    expect(asMock(CustomService.findById)).not.toHaveBeenCalled()
+  })
+
   it('rejects DomainAdmin without domainId', async () => {
     asMock(CustomService.findById).mockResolvedValueOnce({
       _id: serviceId,
@@ -145,6 +167,127 @@ describe('createCustomService', () => {
     )
     expect(result.ok).toBe(false)
     if (isServiceErr(result)) expect(result.code).toBe('invalid')
+  })
+
+  it('rejects an unknown serviceType', async () => {
+    const result = await createCustomService(
+      { name: 'Foo', domainId: String(ownDomainId), serviceType: 'bogus' },
+      ctxGlobal
+    )
+    expect(result.ok).toBe(false)
+    if (isServiceErr(result)) expect(result.code).toBe('invalid')
+    expect(asMock(CustomService.create)).not.toHaveBeenCalled()
+  })
+
+  it('rejects an invalid domainId', async () => {
+    const result = await createCustomService(
+      { name: 'Foo', domainId: 'not-an-objectid' },
+      ctxGlobal
+    )
+    expect(result.ok).toBe(false)
+    if (isServiceErr(result)) expect(result.code).toBe('invalid')
+    expect(asMock(CustomService.create)).not.toHaveBeenCalled()
+  })
+
+  it('creates a global/legacy service (no domainId) using the $or uniqueness namespace', async () => {
+    asMock(CustomService.findOne).mockResolvedValueOnce(null)
+    asMock(CustomService.create).mockResolvedValueOnce({
+      _id: serviceId,
+      name: 'Foo',
+      fieldName: 'foo',
+      toObject: () => ({ _id: serviceId, name: 'Foo', fieldName: 'foo' }),
+    })
+
+    const result = await createCustomService({ name: 'Foo' }, ctxGlobal)
+
+    expect(result.ok).toBe(true)
+    const uniqFilter = asMock(CustomService.findOne).mock.calls[0][0]
+    expect(uniqFilter.$or).toEqual([
+      { domain: null },
+      { domain: { $exists: false } },
+    ])
+    expect(asMock(CustomService.create)).toHaveBeenCalledWith(
+      expect.not.objectContaining({ domain: expect.anything() })
+    )
+    // No domain to attach into, so neither cascade helper runs.
+    expect(asMock(Domain.updateOne)).not.toHaveBeenCalled()
+    expect(asMock(RealEstate.updateMany)).not.toHaveBeenCalled()
+  })
+
+  it('persists a valid serviceType on the created service', async () => {
+    asMock(CustomService.findOne).mockResolvedValueOnce(null)
+    asMock(CustomService.create).mockResolvedValueOnce({
+      _id: serviceId,
+      name: 'Foo',
+      fieldName: 'foo',
+      domain: ownDomainId,
+      toObject: () => ({ _id: serviceId, name: 'Foo', fieldName: 'foo' }),
+    })
+
+    await createCustomService(
+      {
+        name: 'Foo',
+        domainId: String(ownDomainId),
+        serviceType: ServiceType.Electricity,
+      },
+      ctxGlobal
+    )
+
+    expect(asMock(CustomService.create)).toHaveBeenCalledWith(
+      expect.objectContaining({ serviceType: ServiceType.Electricity })
+    )
+  })
+
+  it('still creates the service when attaching to the default group fails', async () => {
+    asMock(CustomService.findOne).mockResolvedValueOnce(null)
+    asMock(CustomService.create).mockResolvedValueOnce({
+      _id: serviceId,
+      name: 'Foo',
+      fieldName: 'foo',
+      domain: ownDomainId,
+      toObject: () => ({ _id: serviceId, name: 'Foo', fieldName: 'foo' }),
+    })
+    asMock(Domain.updateOne).mockRejectedValueOnce(new Error('write failed'))
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
+
+    const result = await createCustomService(
+      { name: 'Foo', domainId: String(ownDomainId) },
+      ctxGlobal
+    )
+
+    expect(result.ok).toBe(true)
+    expect(warnSpy).toHaveBeenCalledWith(
+      'attachServiceToDomainGroup failed',
+      expect.any(Error)
+    )
+    warnSpy.mockRestore()
+  })
+
+  it('still creates the service when cascading to companies fails', async () => {
+    asMock(CustomService.findOne).mockResolvedValueOnce(null)
+    asMock(CustomService.create).mockResolvedValueOnce({
+      _id: serviceId,
+      name: 'Foo',
+      fieldName: 'foo',
+      domain: ownDomainId,
+      toObject: () => ({ _id: serviceId, name: 'Foo', fieldName: 'foo' }),
+    })
+    asMock(RealEstate.updateMany).mockRejectedValueOnce(
+      new Error('write failed')
+    )
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
+
+    const result = await createCustomService(
+      { name: 'Foo', domainId: String(ownDomainId) },
+      ctxGlobal
+    )
+
+    expect(result.ok).toBe(true)
+    expect(warnSpy).toHaveBeenCalledWith(
+      'attachServiceToDomainCompanies failed',
+      expect.any(Error)
+    )
+    warnSpy.mockRestore()
   })
 
   it('rejects when duplicate exists in same domain', async () => {
@@ -318,6 +461,121 @@ describe('createCustomService', () => {
 })
 
 describe('updateCustomService', () => {
+  it('rejects an invalid id', async () => {
+    const result = await updateCustomService(
+      'not-an-objectid',
+      { name: 'X' },
+      ctxGlobal
+    )
+    expect(result.ok).toBe(false)
+    if (isServiceErr(result)) expect(result.code).toBe('invalid')
+    expect(asMock(CustomService.findById)).not.toHaveBeenCalled()
+  })
+
+  it('rejects an empty name', async () => {
+    const result = await updateCustomService(
+      String(serviceId),
+      { name: '   ' },
+      ctxGlobal
+    )
+    expect(result.ok).toBe(false)
+    if (isServiceErr(result)) expect(result.code).toBe('invalid')
+    expect(asMock(CustomService.findById)).not.toHaveBeenCalled()
+  })
+
+  it('rejects an unknown serviceType', async () => {
+    const result = await updateCustomService(
+      String(serviceId),
+      { name: 'X', serviceType: 'bogus' },
+      ctxGlobal
+    )
+    expect(result.ok).toBe(false)
+    if (isServiceErr(result)) expect(result.code).toBe('invalid')
+    expect(asMock(CustomService.findById)).not.toHaveBeenCalled()
+  })
+
+  it('sets a valid serviceType on the update payload', async () => {
+    asMock(CustomService.findById).mockResolvedValueOnce({
+      _id: serviceId,
+      domain: ownDomainId,
+    })
+    asMock(CustomService.findOne).mockResolvedValueOnce(null)
+    asMock(CustomService.findByIdAndUpdate).mockResolvedValueOnce({
+      toObject: () => ({ _id: serviceId, name: 'X' }),
+    })
+
+    await updateCustomService(
+      String(serviceId),
+      { name: 'X', serviceType: ServiceType.Water },
+      ctxGlobal
+    )
+
+    expect(asMock(CustomService.findByIdAndUpdate)).toHaveBeenCalledWith(
+      String(serviceId),
+      expect.objectContaining({ serviceType: ServiceType.Water }),
+      expect.any(Object)
+    )
+  })
+
+  it('unsets serviceType when it is explicitly cleared', async () => {
+    asMock(CustomService.findById).mockResolvedValueOnce({
+      _id: serviceId,
+      domain: ownDomainId,
+    })
+    asMock(CustomService.findOne).mockResolvedValueOnce(null)
+    asMock(CustomService.findByIdAndUpdate).mockResolvedValueOnce({
+      toObject: () => ({ _id: serviceId, name: 'X' }),
+    })
+
+    await updateCustomService(
+      String(serviceId),
+      { name: 'X', serviceType: '' },
+      ctxGlobal
+    )
+
+    expect(asMock(CustomService.findByIdAndUpdate)).toHaveBeenCalledWith(
+      String(serviceId),
+      expect.objectContaining({ $unset: { serviceType: '' } }),
+      expect.any(Object)
+    )
+  })
+
+  it('GlobalAdmin: rejects a rename that collides with another service', async () => {
+    asMock(CustomService.findById).mockResolvedValueOnce({
+      _id: serviceId,
+      domain: ownDomainId,
+    })
+    asMock(CustomService.findOne).mockResolvedValueOnce({ _id: 'dup' })
+
+    const result = await updateCustomService(
+      String(serviceId),
+      { name: 'Taken' },
+      ctxGlobal
+    )
+
+    expect(result.ok).toBe(false)
+    if (isServiceErr(result)) expect(result.code).toBe('conflict')
+    expect(asMock(CustomService.findByIdAndUpdate)).not.toHaveBeenCalled()
+  })
+
+  it('DomainAdmin: rejects a rename that collides with another service', async () => {
+    asMock(CustomService.findById).mockResolvedValueOnce({
+      _id: serviceId,
+      domain: ownDomainId,
+    })
+    asMock(CustomService.findOne).mockResolvedValueOnce({ _id: 'dup' })
+
+    const result = await updateCustomService(
+      String(serviceId),
+      { name: 'Taken', domainId: String(ownDomainId) },
+      ctxDomain
+    )
+
+    expect(result.ok).toBe(false)
+    if (isServiceErr(result)) expect(result.code).toBe('conflict')
+    expect(asMock(CustomService.findByIdAndUpdate)).not.toHaveBeenCalled()
+  })
+
   it('returns not_found when service missing', async () => {
     asMock(CustomService.findById).mockResolvedValueOnce(null)
     const result = await updateCustomService(
@@ -438,6 +696,78 @@ describe('updateCustomService', () => {
 })
 
 describe('deleteCustomService', () => {
+  it('rejects an invalid id', async () => {
+    const result = await deleteCustomService(
+      'not-an-objectid',
+      { domainId: String(ownDomainId) },
+      ctxGlobal
+    )
+    expect(result.ok).toBe(false)
+    if (isServiceErr(result)) expect(result.code).toBe('invalid')
+    expect(asMock(CustomService.findById)).not.toHaveBeenCalled()
+  })
+
+  it('refuses to delete a system/default service', async () => {
+    const result = await deleteCustomService(
+      defaultServices[0],
+      { domainId: String(ownDomainId) },
+      ctxGlobal
+    )
+    expect(result.ok).toBe(false)
+    if (isServiceErr(result)) expect(result.code).toBe('forbidden')
+    expect(asMock(CustomService.findById)).not.toHaveBeenCalled()
+  })
+
+  it('still deletes when detaching from domain groups fails', async () => {
+    asMock(CustomService.findById).mockResolvedValueOnce({
+      _id: serviceId,
+      domain: ownDomainId,
+    })
+    asMock(CustomService.findByIdAndDelete).mockResolvedValueOnce({})
+    asMock(Domain.updateOne).mockRejectedValueOnce(new Error('write failed'))
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
+
+    const result = await deleteCustomService(
+      String(serviceId),
+      { domainId: String(ownDomainId) },
+      ctxGlobal
+    )
+
+    expect(result.ok).toBe(true)
+    expect(asMock(CustomService.findByIdAndDelete)).toHaveBeenCalled()
+    expect(warnSpy).toHaveBeenCalledWith(
+      'detachServiceFromDomainGroups failed',
+      expect.any(Error)
+    )
+    warnSpy.mockRestore()
+  })
+
+  it('still deletes when detaching from domain companies fails', async () => {
+    asMock(CustomService.findById).mockResolvedValueOnce({
+      _id: serviceId,
+      domain: ownDomainId,
+    })
+    asMock(CustomService.findByIdAndDelete).mockResolvedValueOnce({})
+    asMock(RealEstate.updateMany).mockRejectedValueOnce(
+      new Error('write failed')
+    )
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
+
+    const result = await deleteCustomService(
+      String(serviceId),
+      { domainId: String(ownDomainId) },
+      ctxGlobal
+    )
+
+    expect(result.ok).toBe(true)
+    expect(asMock(CustomService.findByIdAndDelete)).toHaveBeenCalled()
+    expect(warnSpy).toHaveBeenCalledWith(
+      'detachServiceFromDomainCompanies failed',
+      expect.any(Error)
+    )
+    warnSpy.mockRestore()
+  })
+
   it('returns not_found when service missing', async () => {
     asMock(CustomService.findById).mockResolvedValueOnce(null)
     const result = await deleteCustomService(
@@ -642,6 +972,18 @@ describe('listCustomServicesForDomain', () => {
     )
     const filter = asMock(CustomService.find).mock.calls[0][0]
     expect(filter._id).toEqual({ $in: [validId] })
+  })
+
+  it('accepts ids as an actual array (not just a comma-separated string)', async () => {
+    findMock()
+    const idA = new mongoose.Types.ObjectId().toString()
+    const idB = new mongoose.Types.ObjectId().toString()
+    await listCustomServicesForDomain(
+      { domainId: String(ownDomainId), ids: [idA, idB] },
+      ctxGlobal
+    )
+    const filter = asMock(CustomService.find).mock.calls[0][0]
+    expect(filter._id).toEqual({ $in: [idA, idB] })
   })
 
   it('returns empty array if all explicit ids are invalid', async () => {

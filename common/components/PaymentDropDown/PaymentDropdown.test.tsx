@@ -5,13 +5,18 @@ import {
 } from '@common/api/paymentApi/payment.api.types'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import PaymentDropdown from '@components/PaymentDropDown'
-import { Modal } from 'antd'
+
+const modalConfirmMock = jest.fn()
 
 jest.mock('antd', () => ({
   ...jest.requireActual('antd'),
-  Modal: {
-    ...jest.requireActual('antd').Modal,
-    confirm: jest.fn(),
+  App: {
+    ...jest.requireActual('antd').App,
+    useApp: () => ({
+      modal: { confirm: modalConfirmMock },
+      message: jest.requireActual('antd').message,
+      notification: jest.requireActual('antd').notification,
+    }),
   },
 }))
 
@@ -45,8 +50,6 @@ jest.mock(
     return { __esModule: true, default: MockHeadlessReceiptRenderer }
   }
 )
-
-const modalConfirmMock = Modal.confirm as jest.Mock
 
 const basePayment = {
   _id: '1',

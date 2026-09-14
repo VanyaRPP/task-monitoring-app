@@ -95,24 +95,6 @@ export default async function handler(
             )
         )
       }
-
-      if (deletedIds.length > 0) {
-        const batchId = new mongoose.Types.ObjectId()
-        const deletedSet = new Set(deletedIds)
-        await Promise.all(
-          allowedPayments
-            .filter((p) => deletedSet.has(p._id.toString()))
-            .map((p) =>
-              logPaymentMutation({
-                actionType: 'BULK_DELETE',
-                source: 'bulk',
-                actor: user,
-                before: p,
-                batchId,
-              })
-            )
-        )
-      }
     }
 
     return res.status(200).json({
