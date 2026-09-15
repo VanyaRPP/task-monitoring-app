@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { validateField } from '@assets/features/validators'
 import EmailSelect from '@components/UI/Reusable/EmailSelect'
-import { Form, Input } from 'antd'
+import { Form, Input, Checkbox } from 'antd' // Імпортуємо Checkbox
 import { FC, useEffect, useRef } from 'react'
 import DomainStreets from '../DomainStreets'
+import AddStreetForm from '../../../../../Forms/AddStreetForm' // Імпортуємо форму адреси
 import s from '../style.module.scss'
 import type { TabProps } from './types'
 
@@ -66,8 +68,11 @@ const useAutoSyncDescription = (form: TabProps['form'], editable: boolean) => {
   }, [iban, rnokpp, mfo, form, editable])
 }
 
-const GeneralTab: FC<TabProps> = ({ form, editable }) => {
+const GeneralTab: FC<TabProps> = ({ form, editable, setIsValueChanged }) => {
   useAutoSyncDescription(form, editable)
+
+  // Відстежуємо стан чекбокса "Створити нову адресу" в реальному часі
+  const isCreatingNewAddress = Form.useWatch('isCreatingNewAddress', form)
 
   return (
     <>
@@ -79,8 +84,43 @@ const GeneralTab: FC<TabProps> = ({ form, editable }) => {
           disabled={!editable}
         />
       </Form.Item>
+      
       <EmailSelect form={form} disabled={!editable} />
-      <DomainStreets disabled={!editable} />
+      
+      {/* 1. БЛОК АДРЕСИ: Показуємо вибір наявних адрес, лише якщо НЕ створюємо нову */}
+      {!isCreatingNewAddress && <DomainStreets disabled={!editable} />}
+
+      {/* 2. ЧЕКБОКС: Перемикач для створення нової адреси в модалці домену */}
+      {editable && (
+        <Form.Item name="isCreatingNewAddress" valuePropName="checked" style={{ marginBottom: 16 }}>
+          <Checkbox onChange={(e) => {
+            if (e.target.checked) {
+              form.setFieldValue('streets', []) // очищуємо вибір наявних адрес при створенні нової
+            }
+          }}>
+            + Створити нову адресу безпосередньо в модалці домену
+          </Checkbox>
+        </Form.Item>
+      )}
+
+      {/* 3. ФОРМА: Перевикористовуємо оригінальний UI та валідацію створення адреси */}
+      {isCreatingNewAddress && editable && (
+        <div style={{ 
+          padding: '16px', 
+          border: '1px dashed #722ed1', 
+          borderRadius: '6px', 
+          backgroundColor: 'rgba(114, 46, 209, 0.05)',
+          marginBottom: '20px' 
+        }}>
+          <h4 style={{ color: '#722ed1', marginBottom: '12px', fontWeight: 600 }}>Нова адреса надавача</h4>
+          <AddStreetForm
+            form={form}
+            editable={true}
+            setIsValueChanged={setIsValueChanged}
+          />
+        </div>
+      )}
+
       <Form.Item name="iban" label="IBAN">
         <Input
           placeholder="Вкажіть IBAN"

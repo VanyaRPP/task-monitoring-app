@@ -370,25 +370,6 @@ const GroupedReceiptForm: FC<Props> = ({
           zIndex: 100,
         }}
       >
-        <Tooltip
-          title={
-            isSent
-              ? t('payments.tooltips.alreadySent')
-              : t('payments.tooltips.sendEmail')
-          }
-        >
-          <MailOutlined
-            className={s.mail}
-            onClick={handleSendEmail}
-            style={{
-              color: isSent
-                ? 'var(--ant-color-text-disabled)'
-                : 'var(--ant-color-success)',
-              cursor: isSent ? 'not-allowed' : 'pointer',
-            }}
-            aria-disabled={isSent}
-          />
-        </Tooltip>
         <Dropdown
           menu={{
             items: mainMenuItems,
