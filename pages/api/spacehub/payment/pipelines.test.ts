@@ -19,17 +19,28 @@ describe('getPaymentsOrderPipeline', () => {
     })
   })
 
-  it('sorts by day, then type, so credits sit above debits on the same date', () => {
+  it('tracks the newest entry of each company within a day', () => {
+    expect(stageOf(getPaymentsOrderPipeline({}), '$setWindowFields')).toEqual({
+      partitionBy: { day: '$invoiceCreationDay', company: '$company' },
+      output: { companyDayLatest: { $max: '$invoiceCreationDate' } },
+    })
+  })
+
+  it('sorts by day, then company group, then type, so a credit sits right above its debit', () => {
     const sort = stageOf(getPaymentsOrderPipeline({}), '$sort')
 
     expect(Object.keys(sort)).toEqual([
       'invoiceCreationDay',
+      'companyDayLatest',
+      'company',
       'type',
       'invoiceCreationDate',
       '_id',
     ])
     expect(sort).toEqual({
       invoiceCreationDay: SortOrder.DESC,
+      companyDayLatest: SortOrder.DESC,
+      company: SortOrder.ASC,
       type: SortOrder.ASC,
       invoiceCreationDate: SortOrder.DESC,
       _id: SortOrder.ASC,

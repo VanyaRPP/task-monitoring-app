@@ -349,6 +349,98 @@ describe('getPayments — credit above debit within one displayed day', () => {
     ])
   })
 
+  it("keeps a credit next to its debit when another company's debit lands between them", async () => {
+    const scope = await seedScopedPayments()
+    const otherCompany = await RealEstate.create({
+      domain: scope.domain,
+      street: scope.street,
+      companyName: 'Other company',
+      description: 'c',
+      adminEmails: ['other@test.com'],
+    })
+
+    await seedPayment({
+      ...scope,
+      invoiceNumber: 1,
+      type: 'debit',
+      date: new Date('2026-08-26T07:00:00Z'),
+    })
+    await seedPayment({
+      ...scope,
+      company: otherCompany._id,
+      invoiceNumber: 2,
+      type: 'debit',
+      date: new Date('2026-08-26T09:00:00Z'),
+    })
+    await seedPayment({
+      ...scope,
+      invoiceNumber: 3,
+      type: 'credit',
+      date: new Date('2026-08-26T11:00:00Z'),
+    })
+    await seedPayment({
+      ...scope,
+      invoiceNumber: 4,
+      type: 'debit',
+      date: new Date('2026-08-25T07:00:00Z'),
+    })
+    await seedPayment({
+      ...scope,
+      company: otherCompany._id,
+      invoiceNumber: 5,
+      type: 'debit',
+      date: new Date('2026-08-25T09:00:00Z'),
+    })
+    await seedPayment({
+      ...scope,
+      invoiceNumber: 6,
+      type: 'credit',
+      date: new Date('2026-08-25T11:00:00Z'),
+    })
+
+    expect(await listOrder()).toEqual([
+      { invoiceNumber: 3, type: 'credit' },
+      { invoiceNumber: 1, type: 'debit' },
+      { invoiceNumber: 2, type: 'debit' },
+      { invoiceNumber: 6, type: 'credit' },
+      { invoiceNumber: 4, type: 'debit' },
+      { invoiceNumber: 5, type: 'debit' },
+    ])
+  })
+
+  it('orders company groups within a day by their newest entry', async () => {
+    const scope = await seedScopedPayments()
+    const otherCompany = await RealEstate.create({
+      domain: scope.domain,
+      street: scope.street,
+      companyName: 'Other company',
+      description: 'c',
+      adminEmails: ['other@test.com'],
+    })
+
+    await seedPayment({
+      ...scope,
+      invoiceNumber: 1,
+      type: 'credit',
+      date: new Date('2026-08-26T06:00:00Z'),
+    })
+    await seedPayment({
+      ...scope,
+      invoiceNumber: 2,
+      type: 'debit',
+      date: new Date('2026-08-26T06:00:00Z'),
+    })
+    await seedPayment({
+      ...scope,
+      company: otherCompany._id,
+      invoiceNumber: 3,
+      type: 'debit',
+      date: new Date('2026-08-26T12:00:00Z'),
+    })
+
+    expect((await listOrder()).map((p) => p.invoiceNumber)).toEqual([3, 1, 2])
+  })
+
   it('orders newest first within a day once the type is equal', async () => {
     const scope = await seedScopedPayments()
 

@@ -19,8 +19,18 @@ export function getPaymentsOrderPipeline(
       },
     },
     {
+      $setWindowFields: {
+        partitionBy: { day: '$invoiceCreationDay', company: '$company' },
+        output: {
+          companyDayLatest: { $max: '$invoiceCreationDate' },
+        },
+      },
+    },
+    {
       $sort: {
         invoiceCreationDay: SortOrder.DESC,
+        companyDayLatest: SortOrder.DESC,
+        company: SortOrder.ASC,
         type: SortOrder.ASC,
         invoiceCreationDate: SortOrder.DESC,
         _id: SortOrder.ASC,
