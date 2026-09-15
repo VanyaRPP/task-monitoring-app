@@ -78,7 +78,7 @@
     "lottie-react": "^2.4.1",
     "mockingoose": "^2.16.2",
     "mongodb": "^4.16.0",
-    "mongoose": "^7.8.11",
+    "mongoose": "^9.10.0",
     "next": "^15.5.22",
     "next-auth": "^4.24.15",
     "next-i18next": "^15.4.2",
