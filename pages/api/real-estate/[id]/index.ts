@@ -17,7 +17,7 @@ export default async function handler(
     case 'DELETE':
       try {
         if (isGlobalAdmin) {
-          const realEstate = await RealEstate.findByIdAndRemove(req.query.id)
+          const realEstate = await RealEstate.findByIdAndDelete(req.query.id)
           if (realEstate) {
             return res.status(200).json({
               success: true,
@@ -55,7 +55,7 @@ export default async function handler(
             })
           }
 
-          await RealEstate.findByIdAndRemove(req.query.id)
+          await RealEstate.findByIdAndDelete(req.query.id)
           return res.status(200).json({
             success: true,
             data: 'realestate ' + req.query.id + ' was deleted',

@@ -109,7 +109,7 @@ export default async function handler(
           }
         }
 
-        await Domain.findByIdAndRemove(req.query.id).then((domain) => {
+        await Domain.findByIdAndDelete(req.query.id).then((domain) => {
           if (domain) {
             return res.status(200).json({
               success: true,

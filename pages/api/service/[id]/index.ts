@@ -24,7 +24,7 @@ export default async function handler(
             .status(400)
             .json({ success: false, message: 'not allowed' })
         }
-        await Service.findByIdAndRemove(req.query.id).then((service) => {
+        await Service.findByIdAndDelete(req.query.id).then((service) => {
           if (service) {
             return res.status(200).json({
               success: true,

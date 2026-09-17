@@ -100,7 +100,7 @@ export default async function handler(
           }
         }
 
-        const deleted = await Payment.findByIdAndRemove(req.query.id)
+        const deleted = await Payment.findByIdAndDelete(req.query.id)
         if (!deleted) {
           return res
             .status(500)

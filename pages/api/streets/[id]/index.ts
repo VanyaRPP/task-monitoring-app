@@ -41,7 +41,7 @@ export default async function handler(
           }
         }
 
-        await Street.findByIdAndRemove(req.query.id).then((street) => {
+        await Street.findByIdAndDelete(req.query.id).then((street) => {
           if (street) {
             return res.status(200).json({
               success: true,
