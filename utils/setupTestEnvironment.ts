@@ -1,3 +1,5 @@
+import os from 'os'
+
 import { MongoMemoryServer } from 'mongodb-memory-server'
 import mongoose from 'mongoose'
 
@@ -18,6 +20,7 @@ import {
   users,
   profits,
 } from '@utils/testData'
+export const testConnectOptions = { runtimeAdapters: { os } }
 
 export const setupTestEnvironment = () => {
   // Each suite spins up its own mongod. When Jest runs many suites in parallel
@@ -32,10 +35,7 @@ export const setupTestEnvironment = () => {
     await server.start()
 
     mongoose.set('strictQuery', false)
-    await mongoose.connect(server.getUri(), {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    } as any)
+    await mongoose.connect(server.getUri(), testConnectOptions)
   }, 120000) // mongod binary may need to download/boot on a cold run (> launchTimeout)
 
   beforeEach(async () => {

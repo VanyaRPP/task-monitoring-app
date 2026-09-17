@@ -8,6 +8,10 @@ const config: Config = {
   testPathIgnorePatterns: ['/node_modules/', '/.next/'],
   testEnvironment: 'jsdom',
 
+  testEnvironmentOptions: {
+    customExportConditions: ['node', 'node-addons'],
+  },
+
   testTimeout: 15000,
 
   collectCoverageFrom: [

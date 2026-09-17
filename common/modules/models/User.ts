@@ -140,34 +140,28 @@ const UserSchema = new mongoose.Schema<IUser>({
   address: { type: Object },
   password: { type: String },
 })
-UserSchema.pre('validate', function (next) {
+UserSchema.pre('validate', function () {
   this.roles = normalizeRoles(this.roles)
-  next()
 })
 
-UserSchema.pre(
-  ['findOneAndUpdate', 'updateOne', 'updateMany'],
-  function (next) {
-    const update: any = this.getUpdate() || {}
+UserSchema.pre(['findOneAndUpdate', 'updateOne', 'updateMany'], function () {
+  const update: any = this.getUpdate() || {}
 
-    const incoming = update?.roles ?? update?.$set?.roles ?? update?.$set?.role
+  const incoming = update?.roles ?? update?.$set?.roles ?? update?.$set?.role
 
-    if (incoming !== undefined) {
-      const normalized = normalizeRoles(incoming)
+  if (incoming !== undefined) {
+    const normalized = normalizeRoles(incoming)
 
-      if (update.roles !== undefined) update.roles = normalized
-      if (update.$set?.roles !== undefined) update.$set.roles = normalized
-      if (update.$set?.role !== undefined) {
-        update.$set.roles = normalized
-        delete update.$set.role
-      }
-
-      this.setUpdate(update)
+    if (update.roles !== undefined) update.roles = normalized
+    if (update.$set?.roles !== undefined) update.$set.roles = normalized
+    if (update.$set?.role !== undefined) {
+      update.$set.roles = normalized
+      delete update.$set.role
     }
 
-    next()
+    this.setUpdate(update)
   }
-)
+})
 
 const User =
   (mongoose?.models?.User as mongoose.Model<IUser>) ||

@@ -10,6 +10,7 @@ import RealEstate from '@modules/models/RealEstate'
 import Domain from '@modules/models/Domain'
 import Street from '@modules/models/Street'
 import { getPayments } from './payment.service'
+import { testConnectOptions } from '@utils/setupTestEnvironment'
 
 jest.mock('@common/services/profitService/profit.service', () => ({
   __esModule: true,
@@ -26,7 +27,7 @@ let mongo: MongoMemoryServer
 
 beforeAll(async () => {
   mongo = await MongoMemoryServer.create()
-  await mongoose.connect(mongo.getUri())
+  await mongoose.connect(mongo.getUri(), testConnectOptions)
 }, 120000)
 
 afterAll(async () => {
