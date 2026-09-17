@@ -1,5 +1,5 @@
 import Domain from '@modules/models/Domain'
-import Payment from '@modules/models/Payment'
+import Payment, { IPaymentModel } from '@modules/models/Payment'
 import RealEstate from '@modules/models/RealEstate'
 import Service from '@modules/models/Service'
 import {
@@ -14,7 +14,7 @@ import {
   type InvoiceEmailPayment,
 } from '@utils/email/sendInvoiceEmail'
 import { PaymentStatus } from '@common/api/paymentApi/payment.api.types'
-import { FilterQuery } from 'mongoose'
+import { QueryFilter } from 'mongoose'
 import { isDev } from '@utils/env'
 
 function isEmailDebugEnabled() {
@@ -100,14 +100,14 @@ export async function getPayments(
       ? serviceIds.split(',').map((id) => decodeURIComponent(id))
       : serviceIds.map((id) => decodeURIComponent(id))
     : null
-  const options: FilterQuery<typeof Payment> = {}
+  const options: QueryFilter<IPaymentModel> = {}
 
   if (isGlobalAdmin) {
     if (companiesIds) {
       options.company = { $in: companiesIds }
     }
     if (streetsIds) {
-      options.street = { $in: streetIds }
+      options.street = { $in: streetsIds }
     }
     if (domainsIds) {
       options.domain = { $in: domainsIds }
@@ -132,7 +132,7 @@ export async function getPayments(
     }
 
     if (streetsIds) {
-      options.street = { $in: streetIds }
+      options.street = { $in: streetsIds }
     }
 
     const domains = await Domain.find({
@@ -147,7 +147,7 @@ export async function getPayments(
     const companies = await RealEstate.find({
       ...(companiesIds ? { _id: { $in: companiesIds } } : {}),
       adminEmails: user.email,
-      ...(domainIds ? { domain: { $in: domainIds } } : {}),
+      ...(domainsIds ? { domain: { $in: domainsIds } } : {}),
     })
 
     options.company = {
@@ -158,7 +158,7 @@ export async function getPayments(
     }
 
     if (streetsIds) {
-      options.street = { $in: streetIds }
+      options.street = { $in: streetsIds }
     }
   }
 

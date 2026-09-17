@@ -1,7 +1,7 @@
-import mongoose, { ObjectId, Schema } from 'mongoose'
+import mongoose, { Schema, Types } from 'mongoose'
 
 export interface ICreditModel {
-  domain: ObjectId
+  domain: Types.ObjectId
   date: Date
   sum: number
   description: string

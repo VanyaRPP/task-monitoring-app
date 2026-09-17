@@ -1,10 +1,10 @@
-import mongoose, { ObjectId, Schema } from 'mongoose'
+import mongoose, { Schema, Types } from 'mongoose'
 import { Currency } from '@utils/constants'
 import { IDomainService } from './Domain'
 
 export interface IRealEstateModel {
-  domain: ObjectId
-  street: ObjectId
+  domain: Types.ObjectId
+  street: Types.ObjectId
   companyName: string
   description: string
   adminEmails: string[]
@@ -29,7 +29,7 @@ export interface IRealEstateModel {
   allServices?: boolean
 }
 interface ICustomService {
-  _id: ObjectId
+  _id: Types.ObjectId
   fieldName: string
   label: string
   price: number

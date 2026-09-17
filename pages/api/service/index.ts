@@ -3,10 +3,10 @@
 import { getFormattedDate } from '@common/assets/features/formatDate'
 import Domain from '@modules/models/Domain'
 import RealEstate from '@modules/models/RealEstate'
-import Service from '@modules/models/Service'
+import Service, { IServiceModel } from '@modules/models/Service'
 import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
-import { FilterQuery } from 'mongoose'
+import { QueryFilter } from 'mongoose'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import {
   getDistinctCompanyAndDomain,
@@ -53,8 +53,8 @@ export default async function handler(
             : serviceId.map((id) => decodeURIComponent(id))
           : null
 
-        const options: FilterQuery<typeof Service> = {}
-        const filters: FilterQuery<typeof Service> = {}
+        const options: QueryFilter<IServiceModel> = {}
+        const filters: QueryFilter<IServiceModel> = {}
 
         if (domainsIds) {
           filters.domain = { $in: domainsIds }

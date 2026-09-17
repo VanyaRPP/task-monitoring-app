@@ -1,5 +1,5 @@
-import Domain from '@modules/models/Domain'
-import RealEstate from '@modules/models/RealEstate'
+import Domain, { IDomain } from '@modules/models/Domain'
+import RealEstate, { IRealEstateModel } from '@modules/models/RealEstate'
 import Service from '@modules/models/Service'
 import { getInvoices } from '@utils/getInvoices'
 import { getPaymentProviderAndReciever } from '@utils/helpers'
@@ -8,7 +8,7 @@ import {
   getPayments,
   type UserContext,
 } from '@common/services/paymentService/payment.service'
-import type { FilterQuery } from 'mongoose'
+import type { QueryFilter } from 'mongoose'
 
 /**
  * Building blocks for the AI-assisted invoice flow.
@@ -29,7 +29,7 @@ import type { FilterQuery } from 'mongoose'
  */
 async function domainOwnershipFilter(
   ctx: UserContext
-): Promise<FilterQuery<typeof Domain>> {
+): Promise<QueryFilter<IDomain>> {
   if (ctx.isGlobalAdmin) return {}
   return { adminEmails: ctx.user.email }
 }
@@ -69,7 +69,7 @@ export async function findCompaniesByName(
   ctx: UserContext,
   domainId?: string
 ): Promise<CompanyMatch[]> {
-  const options: FilterQuery<typeof RealEstate> = {}
+  const options: QueryFilter<IRealEstateModel> = {}
 
   // Same ownership scoping as pages/api/real-estate/index.ts.
   if (ctx.isGlobalAdmin) {

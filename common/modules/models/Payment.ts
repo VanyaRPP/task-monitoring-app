@@ -5,7 +5,7 @@ import {
   IReciever,
   PaymentStatus,
 } from '@common/api/paymentApi/payment.api.types'
-import mongoose, { ObjectId, Schema } from 'mongoose'
+import mongoose, { Schema, Types } from 'mongoose'
 import { Currency } from '@utils/constants'
 
 export interface IPaymentModel {
@@ -19,10 +19,10 @@ export interface IPaymentModel {
    * fall back to `invoiceCreationDate`.
    */
   paidAt?: Date
-  domain: ObjectId
-  street: ObjectId
-  company: ObjectId
-  monthService: ObjectId | string
+  domain: Types.ObjectId
+  street: Types.ObjectId
+  company: Types.ObjectId
+  monthService: Types.ObjectId | string
   invoice: IPaymentField[]
   description?: string
   provider: IProvider

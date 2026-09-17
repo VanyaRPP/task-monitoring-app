@@ -6,7 +6,7 @@ import { FormInstance } from 'antd'
 import Big from 'big.js'
 import dayjs from 'dayjs'
 import 'dayjs/locale/uk'
-import mongoose, { ObjectId } from 'mongoose'
+import mongoose, { Types } from 'mongoose'
 import {
   CURRENCY_MAP,
   Currency,
@@ -64,7 +64,7 @@ export const getPaymentOptions = async ({
   searchEmail,
   userEmail,
 }: PaymentOptions) => {
-  const options: { payer?: string | ObjectId } = {}
+  const options: { payer?: string | Types.ObjectId } = {}
   // searching for original user
   const user = await User.findOne({ email: userEmail })
 
@@ -434,7 +434,7 @@ export async function getDistinctStreets({
   user: IUser
   model: mongoose.Model<any>
   filters: { filteredCompanys?: any; filteredDomains?: any }
-}): Promise<{ _id: mongoose.ObjectId; streetData: any }[] | undefined> {
+}): Promise<{ _id: Types.ObjectId; streetData: any }[] | undefined> {
   // TODO: group of user roles helpers maybe? Such as isGlobalAdmin(user: IUser): boolean
   const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
   const streetsPipeline = getStreetsPipeline(

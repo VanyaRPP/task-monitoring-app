@@ -1,10 +1,10 @@
-import mongoose, { ObjectId, Schema } from 'mongoose'
+import mongoose, { Schema, Types } from 'mongoose'
 import { ServiceType } from '@utils/constants'
 
 export interface ICustomServiceModel {
   name: string
   fieldName: string
-  domain: ObjectId
+  domain: Types.ObjectId
   serviceType?: ServiceType | string
   _id?: string
   _v: number

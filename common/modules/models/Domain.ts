@@ -1,10 +1,10 @@
-import mongoose, { ObjectId, Schema, Types } from 'mongoose'
+import mongoose, { Schema, Types } from 'mongoose'
 
 export interface IDomain {
   _id: string
   name: string
   adminEmails: [string]
-  streets: [ObjectId]
+  streets: [Types.ObjectId]
   description: string
   mfo: string
   iban: string

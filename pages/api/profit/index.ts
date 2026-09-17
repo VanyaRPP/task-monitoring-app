@@ -3,11 +3,12 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import start, { Data } from '@pages/api/api.config'
 import Domain from '@modules/models/Domain'
-import Payment from '@modules/models/Payment'
+import Payment, { IPaymentModel } from '@modules/models/Payment'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import _groupBy from 'lodash/groupBy'
 import dayjs from 'dayjs'
-import Credit from '@modules/models/Credit'
+import Credit, { ICreditModel } from '@modules/models/Credit'
+import type { QueryFilter } from 'mongoose'
 
 export default async function handler(
   req: NextApiRequest,
@@ -40,7 +41,7 @@ export default async function handler(
           .startOf('month')
           .toDate()
 
-        const paymentsOptions: FilterQuery<typeof Payment> = {
+        const paymentsOptions: QueryFilter<IPaymentModel> = {
           ...(isDomainAdmin && { domain: { $in: domainsIds } }),
           invoiceCreationDate: {
             $gte: fourMonthsAgo,
@@ -49,7 +50,7 @@ export default async function handler(
           type: 'credit',
         }
 
-        const creditOptions: FilterQuery<typeof Credit> = {
+        const creditOptions: QueryFilter<ICreditModel> = {
           ...(isDomainAdmin && { domain: { $in: domainsIds } }),
           date: {
             $gte: fourMonthsAgo,

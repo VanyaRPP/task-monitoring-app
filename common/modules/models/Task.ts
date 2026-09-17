@@ -1,10 +1,10 @@
 import { TaskStatuses } from '@utils/constants'
-import mongoose, { ObjectId, Schema } from 'mongoose'
+import mongoose, { Schema, Types } from 'mongoose'
 
 export interface ITask {
   _id?: string
   name: string
-  creator?: ObjectId | string
+  creator?: Types.ObjectId | string
   description?: string
   domain: string
   address: IAddress
@@ -15,12 +15,12 @@ export interface ITask {
   taskexecutors: [ITaskExecutors]
   comment?: [IComment]
   status: TaskStatuses | string
-  executant?: ObjectId | string
+  executant?: Types.ObjectId | string
 }
 
 export interface ICreateTask {
   name: string
-  creator: ObjectId | string
+  creator: Types.ObjectId | string
   description?: string
   address: IAddress
   category: string
@@ -46,17 +46,17 @@ export interface IComment {
 }
 
 export interface ITaskExecutors {
-  workerid: ObjectId | string //profile photo and rating will be obtained from this id
-  taskId: ObjectId | string
+  workerid: Types.ObjectId | string //profile photo and rating will be obtained from this id
+  taskId: Types.ObjectId | string
   price: number | string
   description: string
   workerdeadline?: Date
 }
 
 export interface ITaskModel {
-  _id?: ObjectId
+  _id?: Types.ObjectId
   name: string
-  creator: ObjectId | string
+  creator: Types.ObjectId | string
   domain: string
   description?: string
   address: IAddress
@@ -67,7 +67,7 @@ export interface ITaskModel {
   taskexecutors: [ITaskExecutors]
   comment?: [IComment]
   status: TaskStatuses
-  executant: ObjectId
+  executant: Types.ObjectId
 }
 
 const TaskSchema = new Schema<ITaskModel>({
@@ -86,7 +86,7 @@ const TaskSchema = new Schema<ITaskModel>({
   executant: { type: Schema.Types.ObjectId },
 })
 
-const Task: mongoose.Model<ITask> =
-  mongoose.models?.Task || mongoose.model<ITask>('Task', TaskSchema)
+const Task: mongoose.Model<ITaskModel> =
+  mongoose.models?.Task || mongoose.model<ITaskModel>('Task', TaskSchema)
 
 export default Task

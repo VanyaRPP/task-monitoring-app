@@ -1,4 +1,4 @@
-import mongoose, { ObjectId, Schema } from 'mongoose'
+import mongoose, { Schema, Types } from 'mongoose'
 
 export type LocalizedText = { en?: string; uk?: string }
 
@@ -28,9 +28,9 @@ export interface IInvoiceTemplate {
   providerDescription: string
   receiverDescription: string
   overrides?: IInvoiceTemplateOverrides
-  domainId?: ObjectId | string
+  domainId?: Types.ObjectId | string
   isBuiltIn: boolean
-  createdBy?: ObjectId | string
+  createdBy?: Types.ObjectId | string
 }
 
 const LocalizedTextSchema = new Schema<LocalizedText>(

@@ -1,11 +1,11 @@
-import mongoose, { Schema, ObjectId } from 'mongoose'
+import mongoose, { Schema, Types } from 'mongoose'
 import { ITask } from './Task'
 
 export interface ICategory {
   _id?: string
   name: string
   description?: string
-  taskincategory?: [ITask | ObjectId]
+  taskincategory?: [ITask | Types.ObjectId]
 }
 
 const CategorySchema = new Schema<ICategory>({

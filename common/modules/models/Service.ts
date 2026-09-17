@@ -1,8 +1,8 @@
-import mongoose, { ObjectId, Schema } from 'mongoose'
+import mongoose, { Schema, Types } from 'mongoose'
 
 export interface IServiceModel {
-  domain: ObjectId
-  street: ObjectId
+  domain: Types.ObjectId
+  street: Types.ObjectId
   rentPrice: number
   date: Date
   electricityPrice: number
@@ -12,7 +12,7 @@ export interface IServiceModel {
   inflicionPrice: number
   description: string
   customServices: {
-    _id: ObjectId
+    _id: Types.ObjectId
     label: string
     fieldName: string
     price: number

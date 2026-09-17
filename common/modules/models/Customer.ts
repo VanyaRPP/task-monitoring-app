@@ -1,8 +1,8 @@
 import { IUser } from './User'
-import mongoose, { ObjectId, Schema } from 'mongoose'
+import mongoose, { Schema, Types } from 'mongoose'
 
 export interface ICustomerModel {
-  customer: ObjectId | IUser
+  customer: Types.ObjectId | IUser
   locations?: string
   information?: string
   description?: string
