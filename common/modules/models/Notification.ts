@@ -17,7 +17,8 @@ const NotificationSchema = new Schema<INotification>({
   timestamp: { type: Date, default: new Date() },
 })
 
-const Notification =
-  mongoose.models.Notification ||
-  mongoose.model('Notification', NotificationSchema)
+const Notification: mongoose.Model<INotification> =
+  mongoose.models?.Notification ||
+  mongoose.model<INotification>('Notification', NotificationSchema)
+
 export default Notification

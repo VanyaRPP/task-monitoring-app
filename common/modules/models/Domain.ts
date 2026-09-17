@@ -65,8 +65,7 @@ const DomainSchema = new Schema<IDomain>({
   },
 })
 
-const Domain =
-  (mongoose.models?.Domain as mongoose.Model<IDomain>) ||
-  mongoose.model('Domain', DomainSchema)
+const Domain: mongoose.Model<IDomain> =
+  mongoose.models?.Domain || mongoose.model<IDomain>('Domain', DomainSchema)
 
 export default Domain

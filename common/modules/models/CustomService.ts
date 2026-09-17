@@ -22,8 +22,8 @@ export const CustomServiceSchema = new Schema<ICustomServiceModel>({
   },
 })
 
-const CustomService =
-  mongoose.models.CustomService ||
-  mongoose.model('CustomService', CustomServiceSchema)
+const CustomService: mongoose.Model<ICustomServiceModel> =
+  mongoose.models?.CustomService ||
+  mongoose.model<ICustomServiceModel>('CustomService', CustomServiceSchema)
 
 export default CustomService

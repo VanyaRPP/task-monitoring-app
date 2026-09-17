@@ -52,8 +52,8 @@ export const ServiceSchema = new Schema<IServiceModel>({
   isVAT: { type: Boolean, required: false, default: true },
 })
 
-const Service =
-  (mongoose.models.Service as mongoose.Model<IServiceModel>) ||
-  mongoose.model('Service', ServiceSchema)
+const Service: mongoose.Model<IServiceModel> =
+  mongoose.models?.Service ||
+  mongoose.model<IServiceModel>('Service', ServiceSchema)
 
 export default Service

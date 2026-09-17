@@ -163,8 +163,7 @@ UserSchema.pre(['findOneAndUpdate', 'updateOne', 'updateMany'], function () {
   }
 })
 
-const User =
-  (mongoose?.models?.User as mongoose.Model<IUser>) ||
-  mongoose?.model('User', UserSchema)
+const User: mongoose.Model<IUser> =
+  mongoose.models?.User || mongoose.model<IUser>('User', UserSchema)
 
 export default User

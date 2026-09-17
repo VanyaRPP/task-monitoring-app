@@ -15,7 +15,8 @@ export const CustomerSchema = new Schema<ICustomerModel>({
   description: { type: String, required: true },
 })
 
-const Customer =
-  mongoose.models.Customer || mongoose.model('Customer', CustomerSchema)
+const Customer: mongoose.Model<ICustomerModel> =
+  mongoose.models?.Customer ||
+  mongoose.model<ICustomerModel>('Customer', CustomerSchema)
 
 export default Customer

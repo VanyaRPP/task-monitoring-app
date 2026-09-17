@@ -78,8 +78,8 @@ const InvoiceTemplateSchema = new Schema<IInvoiceTemplate>(
   { timestamps: true }
 )
 
-const InvoiceTemplate =
-  (mongoose.models?.InvoiceTemplate as mongoose.Model<IInvoiceTemplate>) ||
-  mongoose.model('InvoiceTemplate', InvoiceTemplateSchema)
+const InvoiceTemplate: mongoose.Model<IInvoiceTemplate> =
+  mongoose.models?.InvoiceTemplate ||
+  mongoose.model<IInvoiceTemplate>('InvoiceTemplate', InvoiceTemplateSchema)
 
 export default InvoiceTemplate

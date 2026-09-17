@@ -68,8 +68,8 @@ export const PaymentSchema = new Schema<IPaymentModel>({
   },
 })
 
-const Payment =
-  (mongoose.models?.Payment as mongoose.Model<IPaymentModel>) ||
-  mongoose.model('Payment', PaymentSchema)
+const Payment: mongoose.Model<IPaymentModel> =
+  mongoose.models?.Payment ||
+  mongoose.model<IPaymentModel>('Payment', PaymentSchema)
 
 export default Payment

@@ -127,9 +127,11 @@ const PaymentChangeLogSchema = new Schema<IPaymentChangeLogModel>(
   { timestamps: true }
 )
 
-const PaymentChangeLog =
-  (mongoose.models
-    .PaymentChangeLog as mongoose.Model<IPaymentChangeLogModel>) ||
-  mongoose.model('PaymentChangeLog', PaymentChangeLogSchema)
+const PaymentChangeLog: mongoose.Model<IPaymentChangeLogModel> =
+  mongoose.models?.PaymentChangeLog ||
+  mongoose.model<IPaymentChangeLogModel>(
+    'PaymentChangeLog',
+    PaymentChangeLogSchema
+  )
 
 export default PaymentChangeLog

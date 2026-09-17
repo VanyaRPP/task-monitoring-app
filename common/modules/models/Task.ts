@@ -86,5 +86,7 @@ const TaskSchema = new Schema<ITaskModel>({
   executant: { type: Schema.Types.ObjectId },
 })
 
-const Task = mongoose.models.Task || mongoose.model('Task', TaskSchema)
+const Task: mongoose.Model<ITask> =
+  mongoose.models?.Task || mongoose.model<ITask>('Task', TaskSchema)
+
 export default Task

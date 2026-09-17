@@ -14,6 +14,8 @@ const CategorySchema = new Schema<ICategory>({
   description: { type: String, default: 'no description' },
 })
 
-const Category =
-  mongoose.models.Category || mongoose.model('Category', CategorySchema)
+const Category: mongoose.Model<ICategory> =
+  mongoose.models?.Category ||
+  mongoose.model<ICategory>('Category', CategorySchema)
+
 export default Category
