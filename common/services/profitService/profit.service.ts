@@ -466,7 +466,7 @@ class ProfitService {
       currency: string
     }>
   ) {
-    return ProfitModel.findByIdAndUpdate(id, data, { new: true })
+    return ProfitModel.findByIdAndUpdate(id, data, { returnDocument: 'after' })
   }
 
   static async delete(id: string) {

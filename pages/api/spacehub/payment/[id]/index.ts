@@ -168,7 +168,7 @@ export default async function handler(
           const response = await Payment.findOneAndUpdate(
             { _id: req.query.id },
             { $set: { template: templateKey } },
-            { new: true }
+            { returnDocument: 'after' }
           )
 
           return res.status(200).json({ success: true, data: response })
@@ -197,7 +197,7 @@ export default async function handler(
         const response: any = await Payment.findOneAndUpdate(
           { _id: req.query.id },
           update,
-          { new: true }
+          { returnDocument: 'after' }
         )
 
         await logPaymentMutation({

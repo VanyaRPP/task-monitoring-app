@@ -76,7 +76,7 @@ export default async function handler(
         }
 
         const street = await Street.findByIdAndUpdate(req.query.id, req.body, {
-          new: true,
+          returnDocument: 'after',
         })
         return res.status(200).json({ success: true, data: street })
       } catch (error) {

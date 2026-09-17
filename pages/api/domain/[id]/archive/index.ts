@@ -44,7 +44,7 @@ export default async function handler(
     const response = await Domain.findOneAndUpdate(
       { _id: req.query.id },
       { archived: !!req.body.archived },
-      { new: true }
+      { returnDocument: 'after' }
     )
     return res.status(200).json({ success: true, data: response })
   } catch (error) {

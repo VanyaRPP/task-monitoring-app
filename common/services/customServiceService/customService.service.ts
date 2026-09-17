@@ -353,7 +353,7 @@ export async function updateCustomService(
       return err('conflict', 'Послуга з такою назвою вже існує')
     }
     const updated = await CustomService.findByIdAndUpdate(idStr, update, {
-      new: true,
+      returnDocument: 'after',
     })
     return ok(updated.toObject())
   }
@@ -384,7 +384,7 @@ export async function updateCustomService(
     return err('conflict', 'Послуга з такою назвою вже існує')
   }
   const updated = await CustomService.findByIdAndUpdate(idStr, update, {
-    new: true,
+    returnDocument: 'after',
   })
   return ok(updated.toObject())
 }

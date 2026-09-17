@@ -74,7 +74,7 @@ describe('FeatureFlagService', () => {
       expect(FeatureFlag.findByIdAndUpdate).toHaveBeenCalledWith(
         id,
         updateData,
-        { new: true }
+        { returnDocument: 'after' }
       )
       expect(result).toEqual(updatedFlag)
     })
