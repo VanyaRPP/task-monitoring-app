@@ -424,7 +424,7 @@ export async function duplicatePayments(
       continue
     }
 
-    const body = source.toObject() as Record<string, unknown>
+    const body: Record<string, unknown> = { ...source.toObject() }
     for (const field of NON_COPYABLE_PAYMENT_FIELDS) {
       delete body[field]
     }

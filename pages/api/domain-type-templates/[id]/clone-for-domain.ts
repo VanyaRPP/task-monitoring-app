@@ -102,7 +102,7 @@ async function cloneForDomainHandler(
       ...(orig.serviceType ? { serviceType: orig.serviceType } : {}),
       domain: domainObjectId,
     })
-    oldToNew.set(oldId, created._id as mongoose.Types.ObjectId)
+    oldToNew.set(oldId, created._id as unknown as mongoose.Types.ObjectId)
     if (key) existingByKey.set(key, created)
     clonedCount++
   }

@@ -4,6 +4,7 @@ import start, { Data } from '@pages/api/api.config'
 import {
   assembleDomainServiceCatalog,
   collectReferencedServiceIds,
+  type LeanCustomService,
 } from '@common/services/customServiceService/customService.service'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
@@ -58,8 +59,8 @@ export default async function handler(
 
         const responseData = assembleDomainServiceCatalog(
           domain.customServices,
-          allDomainServices,
-          referencedServices
+          allDomainServices as unknown as LeanCustomService[],
+          referencedServices as unknown as LeanCustomService[]
         )
 
         return res.status(200).json({

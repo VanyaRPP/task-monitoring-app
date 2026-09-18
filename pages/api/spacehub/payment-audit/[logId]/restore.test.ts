@@ -7,6 +7,7 @@ import { domains, users } from '@utils/testData'
 import handler from './restore'
 import Payment from '@common/modules/models/Payment'
 import PaymentChangeLog from '@common/modules/models/PaymentChangeLog'
+import type { PaymentActionType } from '@common/api/paymentApi/payment.api.types'
 
 jest.mock('next-auth', () => ({ getServerSession: jest.fn() }))
 jest.mock('@pages/api/auth/[...nextauth]', () => ({ authOptions: {} }))
@@ -46,7 +47,7 @@ const createDeleteLog = async ({
 }: {
   paymentId: string
   domainId: string
-  actionType?: string
+  actionType?: PaymentActionType
 }) => {
   const log = await PaymentChangeLog.create({
     paymentId,

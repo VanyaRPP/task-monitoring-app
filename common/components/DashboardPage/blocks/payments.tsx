@@ -536,7 +536,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
         })
       )
     },
-    currentPayment,
+    currentPayment: currentPayment as Partial<IExtendedPayment>,
     paymentActions: { edit, preview },
     streets: filterProps.streetsFilter,
     payments: payments,

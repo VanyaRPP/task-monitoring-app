@@ -1,5 +1,5 @@
 import { expect } from '@jest/globals'
-import { isDomainAdmin } from '..'
+import { isDomainAdmin } from '../server'
 import RealEstate from '@modules/models/RealEstate'
 import { IUser } from '@modules/models/User'
 

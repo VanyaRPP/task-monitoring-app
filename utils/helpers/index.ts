@@ -1,12 +1,10 @@
 import { IProvider, IReciever } from '@common/api/paymentApi/payment.api.types'
-import User, { IUser } from '@modules/models/User'
-import RealEstate from '@modules/models/RealEstate'
-import Domain from '@modules/models/Domain'
+import type { IUser } from '@modules/models/User'
 import { FormInstance } from 'antd'
 import Big from 'big.js'
 import dayjs from 'dayjs'
 import 'dayjs/locale/uk'
-import mongoose, { Types } from 'mongoose'
+import type { Model, Types } from 'mongoose'
 import {
   CURRENCY_MAP,
   Currency,
@@ -20,7 +18,7 @@ import {
   getStreetsPipeline,
 } from '../pipelines'
 import { PaymentOptions } from '../types'
-import { IPermissions } from '@modules/models/User'
+import type { IPermissions } from '@modules/models/User'
 import { useGetUserByEmailQuery } from '@common/api/userApi/user.api'
 import { AppRoutes, Operations } from '@utils/constants'
 import { useState, useEffect } from 'react'
@@ -58,36 +56,6 @@ export const getFormattedAddress = (address: string) => {
       return addressChunks[0]
     } else return addressChunks.join(', ')
   }
-}
-
-export const getPaymentOptions = async ({
-  searchEmail,
-  userEmail,
-}: PaymentOptions) => {
-  const options: { payer?: string | Types.ObjectId } = {}
-  // searching for original user
-  const user = await User.findOne({ email: userEmail })
-
-  const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
-
-  if (isGlobalAdmin) {
-    if (searchEmail) {
-      // 1. admin looking for someone items
-      const searchUser = await User.findOne({ email: searchEmail })
-      // TODO: what if user not exists? if (!searchUser) {}
-
-      options.payer = searchUser._id
-      return options
-    }
-
-    // 2. admin looking for all items
-    return options
-  }
-
-  // 3. user can see only his items
-  options.payer = user._id
-
-  return options
 }
 
 export const getName = (name, obj) => {
@@ -432,7 +400,7 @@ export async function getDistinctStreets({
   filters: { filteredCompanys = null, filteredDomains = null },
 }: {
   user: IUser
-  model: mongoose.Model<any>
+  model: Model<any>
   filters: { filteredCompanys?: any; filteredDomains?: any }
 }): Promise<{ _id: Types.ObjectId; streetData: any }[] | undefined> {
   // TODO: group of user roles helpers maybe? Such as isGlobalAdmin(user: IUser): boolean
@@ -709,34 +677,6 @@ export const inputNumberParser = (value: string | undefined) => {
   return isNaN(result) ? null : result
 }
 
-// DOMAIN ADMIN HELPER
-export async function isDomainAdmin(user?: IUser): Promise<boolean> {
-  if (!user || !user.email) {
-    return false
-  }
-
-  try {
-    const domain = await RealEstate.findOne({ adminEmails: user.email })
-    return !!domain
-  } catch (error) {
-    console.error(error)
-    return false
-  }
-}
-
-export async function getDomainAdminDomains(
-  userEmail: string
-): Promise<string[]> {
-  try {
-    const domains = await Domain.find({
-      adminEmails: userEmail,
-    })
-    return domains.map((domain) => domain._id.toString())
-  } catch (error) {
-    console.error(error)
-    return []
-  }
-}
 // GLOBAL ADMIN HELPER
 
 export function isGlobalAdmin(user?: IUser): boolean {
