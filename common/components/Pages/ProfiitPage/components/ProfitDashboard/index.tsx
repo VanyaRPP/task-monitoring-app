@@ -70,21 +70,30 @@ const periodKeyOf = (d: Dayjs, periodType: string) => {
 const sumPeriod = (rows: ProfitMonthRow[], currency: string) => {
   let expected = 0
   let actual = 0
+  let income = 0
   let expenses = 0
+  // Summed, never recomputed: `net` points opposite ways for a domain and a
+  // company (see ProfitService.getLedgerFor), and re-deriving it here as
+  // `actual - expenses` made the card contradict the table column right
+  // beside it - a company's outflow showed up as a green profit.
+  let net = 0
 
   rows.forEach((item) => {
     const totals = item.byCurrency?.[currency]
     if (!totals) return
     expected += totals.expected || 0
     actual += totals.actual || 0
+    income += totals.income || 0
     expenses += totals.expenses || 0
+    net += totals.net || 0
   })
 
   return {
     expected,
     actual,
+    income,
     expenses,
-    net: actual - expenses,
+    net,
     // How much of what we invoiced actually came in.
     collectionRate: expected ? (actual / expected) * 100 : 0,
     outstanding: expected - actual,
@@ -211,6 +220,7 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({
           (volume[c] ?? 0) +
           Math.abs(t.expected) +
           Math.abs(t.actual) +
+          Math.abs(t.income) +
           Math.abs(t.expenses)
       })
     })
@@ -256,6 +266,68 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({
     return rows.length ? sumPeriod(rows, currency) : null
   }, [dataSource, filteredData, periodType, currency])
 
+  // A fifth card only once there is something to put in it - an always-on
+  // "Прибуток 0,00" card would be noise on the many domains that never record
+  // a manual credit.
+  const hasIncome = !!aggregatedData.income || !!previousData?.income
+
+  /**
+   * One descriptor per bar series, in the order they are plotted. The colour
+   * lives here rather than in a loose `range` array so a series can never
+   * drift onto the wrong colour: nothing expense-flavoured is allowed to be
+   * green, and green is reserved for money coming in.
+   */
+  const series = useMemo(() => {
+    const list = [
+      {
+        // "Invoice" means income for a domain, expense for a company - same
+        // number, opposite side of the same transaction. Neutral blue works
+        // for both, because either way it is a figure that is only forecast.
+        label: t(
+          isDomain
+            ? 'profitPage:dashboard.expected'
+            : 'profitPage:dashboard.expectedCompany'
+        ),
+        pick: (c: any) => c?.expected || 0,
+        color: token.colorInfo,
+      },
+      {
+        label: t(
+          isDomain
+            ? 'profitPage:dashboard.actual'
+            : 'profitPage:dashboard.actualCompany'
+        ),
+        pick: (c: any) => c?.actual || 0,
+        // Collected income for a domain; an invoice the company PAID for a
+        // company - an outflow, and an outflow is never green.
+        color: isDomain ? token.colorSuccess : token.colorWarning,
+      },
+      {
+        // Not invoice-derived, so this label does not flip with perspective.
+        label: t('profitPage:dashboard.expenses'),
+        pick: (c: any) => c?.expenses || 0,
+        color: token.colorError,
+      },
+    ]
+
+    // Hand-entered credits. Only worth a fourth bar once something is in it,
+    // but on a company it is the only inflow there is, so it is what puts a
+    // profit on a page called "Прибутки" at all.
+    if (filteredData.some((item) => item.byCurrency?.[currency]?.income)) {
+      list.push({
+        label: t(
+          isDomain
+            ? 'profitPage:dashboard.income'
+            : 'profitPage:dashboard.incomeCompany'
+        ),
+        pick: (c: any) => c?.income || 0,
+        color: isDomain ? token.colorSuccessActive : token.colorSuccess,
+      })
+    }
+
+    return list
+  }, [t, isDomain, token, filteredData, currency])
+
   const columnData = useMemo(() => {
     const data: any[] = []
     const chartData = [...filteredData].sort(
@@ -267,35 +339,12 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({
       const monthName = d.isValid() ? d.format('MMM') : item.month
       const totals = item.byCurrency?.[currency]
 
-      data.push({
-        period: monthName,
-        // "Invoice" means income for a domain, expense for a company - same
-        // number, opposite side of the same transaction.
-        type: t(
-          isDomain
-            ? 'profitPage:dashboard.expected'
-            : 'profitPage:dashboard.expectedCompany'
-        ),
-        value: totals?.expected || 0,
-      })
-      data.push({
-        period: monthName,
-        type: t(
-          isDomain
-            ? 'profitPage:dashboard.actual'
-            : 'profitPage:dashboard.actualCompany'
-        ),
-        value: totals?.actual || 0,
-      })
-      data.push({
-        period: monthName,
-        // Not invoice-derived, so this label does not flip with perspective.
-        type: t('profitPage:dashboard.expenses'),
-        value: totals?.expenses || 0,
+      series.forEach((s) => {
+        data.push({ period: monthName, type: s.label, value: s.pick(totals) })
       })
     })
     return data
-  }, [filteredData, t, currency, isDomain])
+  }, [filteredData, currency, series])
 
   // Expense breakdown, driven by the `categories` field the add-cost form
   // already writes - no guessing the category from the description text.
@@ -338,12 +387,11 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({
     // ignored, which would stack these three unrelated series into one bar.
     transform: [{ type: 'dodgeX' }],
     scale: {
-      // expected (info blue) / actual (success green) / expenses (error red) -
-      // matches the order columnData pushes in, and the red now matches how
-      // "Недоплата"/"Чистий прибуток" already colour a bad figure elsewhere
-      // on this page instead of the less alarming amber it used to be.
+      // `range` maps onto the colour domain in the order the series appear in
+      // `columnData`, so it is derived from the same descriptors rather than
+      // hand-listed - that is what used to put green on a company's expenses.
       color: {
-        range: [token.colorInfo, token.colorSuccess, token.colorError],
+        range: series.map((s) => s.color),
       },
     },
     theme: isDarkMode ? 'dark' : 'light',
@@ -447,7 +495,7 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({
       </Space>
 
       <Row gutter={[16, 16]}>
-        <Col span={6}>
+        <Col flex="1 1 200px">
           <Card size="small">
             <Text type="secondary">
               {t(
@@ -467,7 +515,7 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({
             />
           </Card>
         </Col>
-        <Col span={6}>
+        <Col flex="1 1 200px">
           <Card size="small">
             <Text type="secondary">
               {t(
@@ -480,12 +528,19 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({
               value={aggregatedData.actual}
               precision={2}
               suffix={getCurrencyShortLabel(currency)}
-              valueStyle={{
-                color:
-                  aggregatedData.outstanding <= 0
-                    ? token.colorSuccess
-                    : token.colorError,
-              }}
+              // Domain: fully collected is good news. Company: the same
+              // number is money it paid out, which has no good/bad direction
+              // of its own - and must never come out green.
+              valueStyle={
+                isDomain
+                  ? {
+                      color:
+                        aggregatedData.outstanding <= 0
+                          ? token.colorSuccess
+                          : token.colorError,
+                    }
+                  : undefined
+              }
             />
             <Space direction="vertical" size={0}>
               <Tooltip
@@ -511,7 +566,7 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({
             </Space>
           </Card>
         </Col>
-        <Col span={6}>
+        <Col flex="1 1 200px">
           <Card size="small">
             <Text type="secondary">{t('profitPage:dashboard.expenses')}</Text>
             <Statistic
@@ -527,15 +582,48 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({
             />
           </Card>
         </Col>
-        <Col span={6}>
+        {hasIncome && (
+          <Col flex="1 1 200px">
+            <Card size="small">
+              <Tooltip title={t('profitPage:dashboard.incomeHint')}>
+                <Text type="secondary">
+                  {t(
+                    isDomain
+                      ? 'profitPage:dashboard.income'
+                      : 'profitPage:dashboard.incomeCompany'
+                  )}
+                </Text>
+              </Tooltip>
+              <Statistic
+                value={aggregatedData.income}
+                precision={2}
+                suffix={getCurrencyShortLabel(currency)}
+                valueStyle={{ color: token.colorSuccess }}
+              />
+              <PeriodDelta
+                current={aggregatedData.income}
+                previous={previousData?.income}
+              />
+            </Card>
+          </Col>
+        )}
+        <Col flex="1 1 200px">
           <Card size="small">
-            <Text type="secondary">
-              {t(
+            <Tooltip
+              title={t(
                 isDomain
-                  ? 'profitPage:dashboard.net'
-                  : 'profitPage:dashboard.netCompany'
+                  ? 'profitPage:dashboard.netHint'
+                  : 'profitPage:dashboard.netHintCompany'
               )}
-            </Text>
+            >
+              <Text type="secondary">
+                {t(
+                  isDomain
+                    ? 'profitPage:dashboard.net'
+                    : 'profitPage:dashboard.netCompany'
+                )}
+              </Text>
+            </Tooltip>
             <Statistic
               value={aggregatedData.net}
               precision={2}

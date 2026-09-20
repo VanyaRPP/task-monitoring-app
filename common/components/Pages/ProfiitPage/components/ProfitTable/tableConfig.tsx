@@ -123,12 +123,14 @@ export const sumRowsByCurrency = (rows: readonly ProfitMonthRow[]) => {
       const dst = (byCurrency[currency] ??= {
         expected: 0,
         actual: 0,
+        income: 0,
         expenses: 0,
         outstanding: 0,
         net: 0,
       })
       dst.expected += src.expected
       dst.actual += src.actual
+      dst.income += src.income
       dst.expenses += src.expenses
       dst.outstanding += src.outstanding
       dst.net += src.net
@@ -273,10 +275,30 @@ export const getParentColumns = (
       ),
     },
     {
+      // Hand-entered credits. For a company this is the ONLY inflow the
+      // billing model gives it, so it is the column that stops every figure
+      // on the page from being an outflow; it used to be folded into
+      // `actual`, i.e. filed under an expense heading.
+      title: (
+        <Tooltip title={t('table.parent.incomeHint', { ns: 'profitPage' })}>
+          <span>
+            {t(
+              isDomain ? 'table.parent.income' : 'table.parent.incomeCompany',
+              { ns: 'profitPage' }
+            )}
+          </span>
+        </Tooltip>
+      ),
+      key: 'income',
+      width: 170,
+      align: 'right',
+      render: (_, record) => <MoneyCell row={record} pick={(c) => c.income} />,
+    },
+    {
       // The only figure with a good/bad direction, so the only one we colour.
-      // For a company this is not "profit" - a client has no income side in
-      // this model - so it is a negated total outflow instead (see
-      // ProfitService.getLedgerFor), always <= 0, labelled accordingly.
+      // A company's invoices are outflows, so its net is
+      // income - actual - expenses (see ProfitService.getLedgerFor): it can
+      // go positive, but only on the back of real recorded income.
       title: t(isDomain ? 'table.parent.net' : 'table.parent.netCompany', {
         ns: 'profitPage',
       }),
