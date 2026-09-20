@@ -2,6 +2,7 @@ import { UserOutlined } from '@ant-design/icons'
 import { Avatar, Image } from 'antd'
 import { ObjectId } from 'mongoose'
 import React, { FC } from 'react'
+import { TruncatedText } from '@components/UI/TruncatedText'
 import { useGetUserByIdQuery } from '../../api/userApi/user.api'
 import s from './style.module.scss'
 
@@ -16,7 +17,7 @@ const MicroInfoProfile: FC<Props> = ({ id }) => {
         icon={<UserOutlined />}
         src={<Image src={user?.image} preview={false} alt="Користувач" />}
       />
-      <p>{user?.name || user?.email}</p>
+      <TruncatedText as="p" text={user?.name || user?.email} />
     </div>
   )
 }
