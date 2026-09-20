@@ -3,6 +3,7 @@
 import { useGetAllPaymentsQuery } from '@common/api/paymentApi/payment.api'
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import Modal from '@components/UI/ModalWindow'
+import { TruncatedText } from '@components/UI/TruncatedText'
 import { AppRoutes, Operations } from '@utils/constants'
 import { Alert, Empty, Space, Table, Typography } from 'antd'
 import { ExportOutlined } from '@ant-design/icons'
@@ -142,6 +143,7 @@ const PaymentsDrilldown: FC<PaymentsDrilldownProps> = ({
         dataIndex: 'companyName',
         key: 'companyName',
         ellipsis: true,
+        render: (companyName: string) => <TruncatedText text={companyName} />,
       },
       {
         title: t('profitPage:drilldown.invoiced'),
@@ -199,7 +201,11 @@ const PaymentsDrilldown: FC<PaymentsDrilldownProps> = ({
         render: (_, record) => {
           const name =
             (record.company as any)?.companyName || record.reciever?.companyName
-          return name || <Text type="secondary">—</Text>
+          return name ? (
+            <TruncatedText text={name} />
+          ) : (
+            <Text type="secondary">—</Text>
+          )
         },
       },
       {
@@ -280,73 +286,90 @@ const PaymentsDrilldown: FC<PaymentsDrilldownProps> = ({
               message={t('profitPage:drilldown.truncated', { shown, total })}
             />
           )}
-          {isDebtors ? (
-            <Table
-              size="small"
-              loading={isFetching}
-              columns={debtorColumns}
-              dataSource={debtors}
-              rowKey={(record) => record.companyId}
-              pagination={false}
-              scroll={{ y: 400 }}
-              locale={{
-                emptyText: (
-                  <Empty
-                    image={Empty.PRESENTED_IMAGE_SIMPLE}
-                    description={t('profitPage:drilldown.allSettled')}
-                  />
-                ),
-              }}
-              summary={(rows: readonly DebtorRow[]) => (
-                <Table.Summary fixed>
-                  <Table.Summary.Row>
-                    <Table.Summary.Cell index={0} colSpan={3}>
-                      <Text strong>{t('profitPage:drilldown.total')}</Text>
-                    </Table.Summary.Cell>
-                    <Table.Summary.Cell index={3} align="right">
-                      <Text strong style={numericCell}>
-                        {money(rows.reduce((acc, r) => acc + r.remaining, 0))}
-                      </Text>
-                    </Table.Summary.Cell>
-                  </Table.Summary.Row>
-                </Table.Summary>
-              )}
-            />
-          ) : (
-            <Table
-              size="small"
-              loading={isFetching}
-              columns={columns}
-              dataSource={payments}
-              rowKey={(record) => record._id}
-              pagination={false}
-              scroll={{ y: 400 }}
-              locale={{
-                emptyText: (
-                  <Empty
-                    image={Empty.PRESENTED_IMAGE_SIMPLE}
-                    description={t('profitPage:drilldown.empty')}
-                  />
-                ),
-              }}
-              summary={(rows: readonly IExtendedPayment[]) => (
-                <Table.Summary fixed>
-                  <Table.Summary.Row>
-                    <Table.Summary.Cell index={0} colSpan={3}>
-                      <Text strong>{t('profitPage:drilldown.total')}</Text>
-                    </Table.Summary.Cell>
-                    <Table.Summary.Cell index={3} align="right">
-                      <Text strong style={numericCell}>
-                        {money(
-                          rows.reduce((acc, r) => acc + (r.generalSum || 0), 0)
-                        )}
-                      </Text>
-                    </Table.Summary.Cell>
-                  </Table.Summary.Row>
-                </Table.Summary>
-              )}
-            />
-          )}
+          {/*
+            No `scroll.y` here on purpose: giving a Table that prop makes antd
+            split it into two synced tables (header + body) and pad their
+            total width with an extra reserved column for wherever a
+            scrollbar might go. With macOS's classic, always-visible
+            scrollbars (a common Safari setting) that reserved column was
+            real and wide, showing up as an oversized horizontal scrollbar,
+            or - hidden - as content crammed against the modal's edge. A
+            plain max-height + overflow div sidesteps all of that; the only
+            cost is the header no longer stays pinned while scrolling, which
+            a two/three-row month list rarely needs anyway.
+          */}
+          <div style={{ maxHeight: 400, overflowY: 'auto' }}>
+            {isDebtors ? (
+              <Table
+                tableLayout="fixed"
+                size="small"
+                loading={isFetching}
+                columns={debtorColumns}
+                dataSource={debtors}
+                rowKey={(record) => record.companyId}
+                pagination={false}
+                locale={{
+                  emptyText: (
+                    <Empty
+                      image={Empty.PRESENTED_IMAGE_SIMPLE}
+                      description={t('profitPage:drilldown.allSettled')}
+                    />
+                  ),
+                }}
+                summary={(rows: readonly DebtorRow[]) => (
+                  <Table.Summary>
+                    <Table.Summary.Row>
+                      <Table.Summary.Cell index={0} colSpan={3}>
+                        <Text strong>{t('profitPage:drilldown.total')}</Text>
+                      </Table.Summary.Cell>
+                      <Table.Summary.Cell index={3} align="right">
+                        <Text strong style={numericCell}>
+                          {money(rows.reduce((acc, r) => acc + r.remaining, 0))}
+                        </Text>
+                      </Table.Summary.Cell>
+                    </Table.Summary.Row>
+                  </Table.Summary>
+                )}
+              />
+            ) : (
+              <Table
+                tableLayout="fixed"
+                size="small"
+                loading={isFetching}
+                columns={columns}
+                dataSource={payments}
+                rowKey={(record) => record._id}
+                pagination={false}
+                locale={{
+                  emptyText: (
+                    <Empty
+                      image={Empty.PRESENTED_IMAGE_SIMPLE}
+                      description={t('profitPage:drilldown.empty')}
+                    />
+                  ),
+                }}
+                summary={(rows: readonly IExtendedPayment[]) => (
+                  <Table.Summary>
+                    <Table.Summary.Row>
+                      <Table.Summary.Cell index={0} colSpan={3}>
+                        <Text strong>{t('profitPage:drilldown.total')}</Text>
+                      </Table.Summary.Cell>
+                      <Table.Summary.Cell index={3} align="right">
+                        <Text strong style={numericCell}>
+                          {money(
+                            rows.reduce(
+                              (acc, r) => acc + (r.generalSum || 0),
+                              0
+                            )
+                          )}
+                        </Text>
+                      </Table.Summary.Cell>
+                    </Table.Summary.Row>
+                  </Table.Summary>
+                )}
+              />
+            )}
+          </div>
           <Link href={paymentsHref}>
             {t('profitPage:drilldown.openPayments')} <ExportOutlined />
           </Link>

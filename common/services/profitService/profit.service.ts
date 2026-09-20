@@ -20,15 +20,17 @@ export interface CreateProfitInput {
 }
 
 export interface CurrencyTotals {
-  /** Invoiced to clients this month. */
+  /** Invoiced this month. */
   expected: number
-  /** Money that actually arrived this month. */
+  /** Invoiced money that actually moved this month. */
   actual: number
-  /** What the domain spent this month. */
+  /** Hand-entered `credit` records - income that no invoice produced. */
+  income: number
+  /** Hand-entered `debit` records. */
   expenses: number
-  /** expected - actual: invoiced but not yet collected. */
+  /** expected - actual: invoiced but not yet settled. */
   outstanding: number
-  /** actual - expenses */
+  /** What is left once everything above is applied; sign carries meaning. */
   net: number
 }
 
@@ -320,6 +322,7 @@ class ProfitService {
         entry.byCurrency[currency] = {
           expected: 0,
           actual: 0,
+          income: 0,
           expenses: 0,
           outstanding: 0,
           net: 0,
@@ -344,7 +347,11 @@ class ProfitService {
       const entry = months.get(key) ?? blank(key)
       const totals = bucket(entry, g._id.currency)
       totals.expenses += g.expenses
-      totals.actual += g.manualIncome
+      // Kept out of `actual`: a hand-entered credit is not a client settling
+      // an invoice. Folding it in inflated the collection rate, shrank
+      // `outstanding`, and - on a company, where `actual` reads as money paid
+      // out - filed income under an expense label.
+      totals.income += g.manualIncome
       // One month can produce several expense groups (one per currency), so
       // append rather than overwrite.
       entry.transactions = [...entry.transactions, ...g.transactions]
@@ -354,14 +361,17 @@ class ProfitService {
     for (const entry of months.values()) {
       for (const totals of Object.values(entry.byCurrency)) {
         totals.outstanding = totals.expected - totals.actual
-        totals.net = totals.actual - totals.expenses
+        totals.net = totals.actual + totals.income - totals.expenses
       }
       // Busiest currency first - that is the one worth reading at a glance.
       entry.currencies = Object.keys(entry.byCurrency).sort((a, b) => {
         const volume = (c: string) => {
           const t = entry.byCurrency[c]
           return (
-            Math.abs(t.expected) + Math.abs(t.actual) + Math.abs(t.expenses)
+            Math.abs(t.expected) +
+            Math.abs(t.actual) +
+            Math.abs(t.income) +
+            Math.abs(t.expenses)
           )
         }
         return volume(b) - volume(a)
@@ -474,14 +484,14 @@ class ProfitService {
    * two cannot drift apart); expenses come from manual Profit records
    * scoped the same way.
    *
-   * `net` is the one figure that is NOT just a label swap. For a domain,
-   * `actual` is money collected - real income - so `actual - expenses` is a
-   * real net profit. For a company, `actual` is money it PAID OUT (there is
-   * no income side to a client in this billing model), so the same formula
-   * would label an outflow as "profit". Recomputed as a negated total
-   * outflow instead (`-(actual + expenses)`), which is always <= 0 - the
-   * existing red/green MoneyCell colouring then reads it correctly without
-   * any UI-side special-casing.
+   * `net` is the one figure that is NOT just a label swap, because `actual`
+   * points opposite ways:
+   *   domain:  actual is money collected  -> net = actual + income - expenses
+   *   company: actual is money paid out   -> net = income - actual - expenses
+   * `income` (hand-entered credits) is the one inflow a company has in this
+   * billing model, so it is the term that can pull a company's net positive;
+   * without it every company figure was an outflow and the page had no
+   * profit on it at all.
    */
   private static async getLedgerFor(
     scopeField: 'domain' | 'company',
@@ -506,7 +516,7 @@ class ProfitService {
     if (scopeField === 'company') {
       for (const row of Object.values(ledger.data)) {
         for (const totals of Object.values(row.byCurrency)) {
-          totals.net = -(totals.actual + totals.expenses)
+          totals.net = totals.income - totals.actual - totals.expenses
         }
       }
     }

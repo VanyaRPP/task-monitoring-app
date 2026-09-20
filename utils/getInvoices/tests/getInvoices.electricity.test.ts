@@ -103,7 +103,7 @@ describe('getInvoices - ELECTRICITY', () => {
       )
     })
 
-    it('should NOT load when company = { discount: 0 }', () => {
+    it('should load without month service when company = { discount: 0 }', () => {
       const company: Partial<IRealestate> = {
         discount: 0,
       }
@@ -112,12 +112,12 @@ describe('getInvoices - ELECTRICITY', () => {
         company,
       })
 
-      expect(invoices).not.toContainEqual(
+      expect(invoices).toContainEqual(
         expect.objectContaining({ type: ServiceType.Electricity })
       )
     })
 
-    it('should NOT load when company = { discount: 10 }', () => {
+    it('should load without month service when company = { discount: 10 }', () => {
       const company: Partial<IRealestate> = {
         discount: 10,
       }
@@ -126,12 +126,12 @@ describe('getInvoices - ELECTRICITY', () => {
         company,
       })
 
-      expect(invoices).not.toContainEqual(
+      expect(invoices).toContainEqual(
         expect.objectContaining({ type: ServiceType.Electricity })
       )
     })
 
-    it('should NOT load when company = { discount: NaN }', () => {
+    it('should load without month service when company = { discount: NaN }', () => {
       const company: Partial<IRealestate> = {
         discount: NaN,
       }
@@ -140,12 +140,12 @@ describe('getInvoices - ELECTRICITY', () => {
         company,
       })
 
-      expect(invoices).not.toContainEqual(
+      expect(invoices).toContainEqual(
         expect.objectContaining({ type: ServiceType.Electricity })
       )
     })
 
-    it('should NOT load when company = { discount: null }', () => {
+    it('should load without month service when company = { discount: null }', () => {
       const company: Partial<IRealestate> = {
         discount: null,
       }
@@ -154,12 +154,12 @@ describe('getInvoices - ELECTRICITY', () => {
         company,
       })
 
-      expect(invoices).not.toContainEqual(
+      expect(invoices).toContainEqual(
         expect.objectContaining({ type: ServiceType.Electricity })
       )
     })
 
-    it('should NOT load when company = { discount: undefined }', () => {
+    it('should load without month service when company = { discount: undefined }', () => {
       const company: Partial<IRealestate> = {
         discount: undefined,
       }
@@ -168,7 +168,7 @@ describe('getInvoices - ELECTRICITY', () => {
         company,
       })
 
-      expect(invoices).not.toContainEqual(
+      expect(invoices).toContainEqual(
         expect.objectContaining({ type: ServiceType.Electricity })
       )
     })

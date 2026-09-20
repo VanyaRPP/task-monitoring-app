@@ -28,6 +28,7 @@ import {
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import StreetsBlock from '@components/DashboardPage/blocks/streets'
+import { TruncatedText } from '@components/UI/TruncatedText'
 import { AppRoutes } from '@utils/constants'
 import { isDomainViewer } from '@utils/domain/domain-view-access'
 
@@ -145,6 +146,7 @@ const getDefaultColumns = ({
     title: 'Назва',
     dataIndex: 'name',
     width: '25%',
+    render: (name: string) => <TruncatedText text={name} />,
   },
   {
     title: 'Адміністратори',

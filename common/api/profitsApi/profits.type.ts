@@ -33,15 +33,20 @@ export interface Meta {
 }
 
 export interface CurrencyTotals {
-  /** Invoiced to clients this month. */
+  /** Invoiced this month. */
   expected: number
-  /** Money that actually arrived this month. */
+  /** Invoiced money that actually moved this month. */
   actual: number
-  /** What the domain spent this month. */
+  /** Hand-entered `credit` records - income that no invoice produced. */
+  income: number
+  /** Hand-entered `debit` records. */
   expenses: number
-  /** expected - actual: invoiced but not yet collected. */
+  /** expected - actual: invoiced but not yet settled. */
   outstanding: number
-  /** actual - expenses */
+  /**
+   * domain:  actual + income - expenses
+   * company: income - actual - expenses  (its invoices are outflows)
+   */
   net: number
 }
 

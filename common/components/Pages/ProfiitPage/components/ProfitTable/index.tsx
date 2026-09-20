@@ -198,6 +198,9 @@ const ProfitTable: FC<ProfitTableProps> = ({ scope }) => {
         <Table
           bordered={true}
           loading={isLoading}
+          // Seven money columns no longer fit a narrow viewport; without this
+          // antd squeezes them until the figures wrap mid-number.
+          scroll={{ x: 'max-content' }}
           columns={getParentColumns(
             token,
             (month, target, currency) =>
@@ -278,6 +281,7 @@ const ProfitTable: FC<ProfitTableProps> = ({ scope }) => {
               (c) => c.actual,
               (c) => c.outstanding,
               (c) => c.expenses,
+              (c) => c.income,
             ]
             return (
               <Table.Summary fixed>
@@ -290,7 +294,7 @@ const ProfitTable: FC<ProfitTableProps> = ({ scope }) => {
                       <MoneyCell row={totals} pick={pick} />
                     </Table.Summary.Cell>
                   ))}
-                  <Table.Summary.Cell index={5} align="right">
+                  <Table.Summary.Cell index={6} align="right">
                     <MoneyCell
                       row={totals}
                       pick={(c) => c.net}
