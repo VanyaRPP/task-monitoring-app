@@ -1,6 +1,7 @@
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons'
 import { validateField } from '@assets/features/validators'
 import DomainsSelect from '@components/UI/Reusable/DomainsSelect'
+import type { ActiveScope } from '@components/AddCostModal'
 import { Profit } from '@common/api/profitsApi/profits.type'
 import { inputNumberParser } from '@utils/helpers'
 import {
@@ -31,6 +32,8 @@ interface Props {
   type: string
   disabled?: boolean
   currentProfit?: Profit
+  /** Set when opened from a scoped ledger - see ActiveScope's own doc. */
+  activeScope?: ActiveScope
 }
 
 const DEFAULT_CATEGORIES = [
@@ -196,6 +199,7 @@ const AddCostForm: React.FC<Props> = ({
   type,
   disabled,
   currentProfit,
+  activeScope,
 }) => {
   const { t } = useTranslation()
 
@@ -236,11 +240,26 @@ const AddCostForm: React.FC<Props> = ({
           </div>
         )}
 
-        <DomainsSelect
-          form={form}
-          disabled={isPreview}
-          currentProfit={currentProfit}
-        />
+        {activeScope ? (
+          // The target is implied by the ledger this modal was opened from -
+          // shown, not picked. Domain and company render identically here;
+          // only the label differs (see ActiveScope).
+          <Form.Item
+            label={
+              activeScope.type === 'domain'
+                ? t('profitPage:form.domainScope')
+                : t('profitPage:form.companyScope')
+            }
+          >
+            <Input value={activeScope.label} disabled />
+          </Form.Item>
+        ) : (
+          <DomainsSelect
+            form={form}
+            disabled={isPreview}
+            currentProfit={currentProfit}
+          />
+        )}
 
         <Form.Item
           name="date"

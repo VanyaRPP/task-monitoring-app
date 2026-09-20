@@ -58,6 +58,7 @@ import {
   getVisibleServices,
   shouldShowStandardServices,
 } from '@utils/servicesVisibility'
+import { getTableScrollX } from '@utils/getTableScrollX'
 
 type DebtPerMonth = {
   monthService: string
@@ -195,11 +196,6 @@ const CompaniesTable: React.FC<Props> = ({
   const isUser = userResponse?.roles?.includes(Roles.USER)
   const isAdmin = isAdminCheck(userResponse?.roles)
 
-  const tableWidth =
-    1800 +
-    (isGlobalAdmin ? 50 : 0) +
-    (!domainId && !streetId && !isLoading ? 400 : 0)
-
   const isSingleCompanyByData = useMemo(() => {
     return realEstateData?.realEstatesFilter?.length === 1
   }, [realEstateData?.realEstatesFilter?.length])
@@ -297,6 +293,31 @@ const CompaniesTable: React.FC<Props> = ({
 
   if (isError) return <Alert message="Помилка" type="error" showIcon closable />
 
+  const columns = getDefaultColumns({
+    archiveLoading,
+    handleArchive,
+    domainId,
+    streetId,
+    isLoading,
+    handleDelete,
+    setCurrentRealEstate,
+    deleteLoading,
+    isGlobalAdmin,
+    isAdmin,
+    domainsFilter: domain?.domainsFilter,
+    streetsFilter: street?.streetsFilter,
+    realEstatesFilter: realEstate?.realEstatesFilter,
+    filters,
+    pathname,
+    setRealEstateActions,
+    debtorCompanies,
+    isUser,
+    isSingleCompanyByData,
+    customServices: filteredCustomServices,
+    setFilters,
+    showStandardServices,
+  })
+
   return (
     <Table
       rowKey="_id"
@@ -336,32 +357,9 @@ const CompaniesTable: React.FC<Props> = ({
         }
       }
       loading={isLoading}
-      columns={getDefaultColumns({
-        archiveLoading,
-        handleArchive,
-        domainId,
-        streetId,
-        isLoading,
-        handleDelete,
-        setCurrentRealEstate,
-        deleteLoading,
-        isGlobalAdmin,
-        isAdmin,
-        domainsFilter: domain?.domainsFilter,
-        streetsFilter: street?.streetsFilter,
-        realEstatesFilter: realEstate?.realEstatesFilter,
-        filters,
-        pathname,
-        setRealEstateActions,
-        debtorCompanies,
-        isUser,
-        isSingleCompanyByData,
-        customServices: filteredCustomServices,
-        setFilters,
-        showStandardServices,
-      })}
+      columns={columns}
       dataSource={filteredData}
-      scroll={{ x: tableWidth }}
+      scroll={{ x: getTableScrollX(columns) }}
       onChange={(__, tableFilters) => {
         const newFilters: any = {
           domain: tableFilters?.domain,

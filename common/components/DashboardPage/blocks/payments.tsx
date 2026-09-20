@@ -62,11 +62,11 @@ import {
   setSelectedColumns,
   setPaymentsDeleteItems,
   setSelectedPayments,
-  setSelectedDateField,
 } from '@modules/store/paymentsSlice'
 import { RootState } from '@modules/store/store'
-import { formatDateFilterForQuery, getTypeOperation } from '@utils/helpers'
+import { resolvePaymentDateFilterQuery, getTypeOperation } from '@utils/helpers'
 import { PaymentDeleteItem } from '@components/Tables/Payment/Header'
+import { usePaymentsFilterUrlSync } from './usePaymentsFilterUrlSync'
 
 export interface PaymentsBlockProps {
   sepDomainID?: string
@@ -96,7 +96,6 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     selectedColumns,
     paymentsDeleteItems,
     selectedPayments,
-    selectedDateField,
     currentPage: rawCurrentPage,
     pageSize: rawPageSize,
   } = useSelector((s: RootState) => s.payments)
@@ -104,6 +103,10 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
   const handleView = (p: IExtendedPayment) => dispatch(setOpenView(p))
   const handleEdit = (p: IExtendedPayment) => dispatch(setOpenEdit(p))
   const handleClose = () => dispatch(setCloseModal())
+
+  const { isUrlApplied } = usePaymentsFilterUrlSync({
+    enabled: !sepDomainID && router.pathname === AppRoutes.PAYMENT,
+  })
 
   const currentPage = rawCurrentPage || 1
   const pageSize =
@@ -159,16 +162,15 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     {
       skip: (currentPage - 1) * pageSize,
       limit: pageSize,
-      ...formatDateFilterForQuery(filters?.invoiceCreationDate),
+      ...resolvePaymentDateFilterQuery(filters),
       ...getTypeOperation(filters?.type?.[0]),
-      dateField: selectedDateField,
       companyIds: filters?.company || undefined,
       domainIds: sepDomainID || filters?.domain || undefined,
       streetIds: filters?.street || undefined,
       type: filters?.type || undefined,
       status: filters?.status || undefined,
     },
-    { skip: currUserLoading || !currUser }
+    { skip: currUserLoading || !currUser || !isUrlApplied }
   )
 
   useEffect(() => {
@@ -459,14 +461,21 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     }
 
     if (extra.action === 'filter') {
-      const raw = (allFilters as any)?.invoiceCreationDate
-      const invoiceVals = Array.isArray(raw)
-        ? (raw.filter((x) => typeof x === 'string') as string[])
+      const rawInvoice = (allFilters as any)?.invoiceCreationDate
+      const invoiceVals = Array.isArray(rawInvoice)
+        ? (rawInvoice.filter((x) => typeof x === 'string') as string[])
         : []
+
+      const rawMonth = (allFilters as any)?.monthService
+      const monthVals = Array.isArray(rawMonth)
+        ? (rawMonth.filter((x) => typeof x === 'string') as string[])
+        : []
+
       dispatch(
         setFilters({
           ...allFilters,
           invoiceCreationDate: invoiceVals,
+          monthService: monthVals,
           street: filters?.street,
         })
       )

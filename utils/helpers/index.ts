@@ -1,12 +1,12 @@
 import { IProvider, IReciever } from '@common/api/paymentApi/payment.api.types'
-import User, { IUser } from '@modules/models/User'
+import { IUser } from '@modules/models/User'
 import RealEstate from '@modules/models/RealEstate'
 import Domain from '@modules/models/Domain'
 import { FormInstance } from 'antd'
 import Big from 'big.js'
 import dayjs from 'dayjs'
 import 'dayjs/locale/uk'
-import mongoose, { ObjectId } from 'mongoose'
+import mongoose from 'mongoose'
 import {
   CURRENCY_MAP,
   Currency,
@@ -19,7 +19,6 @@ import {
   getRealEstatesPipeline,
   getStreetsPipeline,
 } from '../pipelines'
-import { PaymentOptions } from '../types'
 import { IPermissions } from '@modules/models/User'
 import { useGetUserByEmailQuery } from '@common/api/userApi/user.api'
 import { AppRoutes, Operations } from '@utils/constants'
@@ -58,36 +57,6 @@ export const getFormattedAddress = (address: string) => {
       return addressChunks[0]
     } else return addressChunks.join(', ')
   }
-}
-
-export const getPaymentOptions = async ({
-  searchEmail,
-  userEmail,
-}: PaymentOptions) => {
-  const options: { payer?: string | ObjectId } = {}
-  // searching for original user
-  const user = await User.findOne({ email: userEmail })
-
-  const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
-
-  if (isGlobalAdmin) {
-    if (searchEmail) {
-      // 1. admin looking for someone items
-      const searchUser = await User.findOne({ email: searchEmail })
-      // TODO: what if user not exists? if (!searchUser) {}
-
-      options.payer = searchUser._id
-      return options
-    }
-
-    // 2. admin looking for all items
-    return options
-  }
-
-  // 3. user can see only his items
-  options.payer = user._id
-
-  return options
 }
 
 export const getName = (name, obj) => {
@@ -749,22 +718,30 @@ export function isGlobalAdmin(user?: IUser): boolean {
 
 export function formatDateFilterForQuery(raw?: string[]) {
   if (!raw?.length) return {}
-  const numbers = raw
-    .map((v) => {
-      const leading = parseInt(v, 10)
-      if (!isNaN(leading)) {
-        const m = v.match(/-(\d+)\s*$/)
-        if (m) {
-          return [leading, parseInt(m[1], 10)]
-        }
-        return [leading]
+  let year: number | undefined
+  const months: number[] = []
+  // A leading number is the year; a "-N" suffix (checking one month under a
+  // year in the date-filter tree) contributes N to `months` instead of being
+  // flattened alongside the year, so multiple months checked under the same
+  // year don't leak the repeated year value into the month list.
+  for (const v of raw) {
+    const leading = parseInt(v, 10)
+    if (!isNaN(leading)) {
+      const m = v.match(/-(\d+)\s*$/)
+      if (m) {
+        year = leading
+        months.push(parseInt(m[1], 10))
+      } else if (year === undefined) {
+        year = leading
       }
+    } else {
       const n = Number(v)
-      return isNaN(n) ? [] : [n]
-    })
-    .flat()
-    .filter((n) => !isNaN(n)) as number[]
-  const [year, ...months] = numbers
+      if (!isNaN(n)) {
+        if (year === undefined) year = n
+        else months.push(n)
+      }
+    }
+  }
   const query: any = {}
   if (year != null) {
     query.year = year
@@ -776,6 +753,81 @@ export function formatDateFilterForQuery(raw?: string[]) {
   }
   return query
 }
+/**
+ * Визначає, за яким полем дати фільтрувати платежі на бекенді: за датою
+ * створення (`invoiceCreationDate`) чи за місяцем надання послуг
+ * (`monthService`, бекенд очікує `dateField: 'date'`). Бекенд підтримує
+ * фільтрацію лише за одним полем дати одночасно, тому фільтр за місяцем
+ * надання послуг має пріоритет, коли він активний.
+ */
+export function resolvePaymentDateFilterQuery(filters?: {
+  invoiceCreationDate?: string[]
+  monthService?: string[]
+}): {
+  dateField: 'invoiceCreationDate' | 'date'
+  year?: number
+  month?: number | number[]
+} {
+  const dateField: 'invoiceCreationDate' | 'date' = filters?.monthService
+    ?.length
+    ? 'date'
+    : 'invoiceCreationDate'
+
+  const query = formatDateFilterForQuery(
+    dateField === 'date' ? filters?.monthService : filters?.invoiceCreationDate
+  )
+
+  return { dateField, ...query }
+}
+
+export const MONTH_SERVICE_QUERY_PARAM = 'monthService'
+
+const MONTH_SERVICE_FILTER_PATTERN = /^(\d{4})-month-(\d{1,2})$/
+const MONTH_SERVICE_PARAM_PATTERN = /^(\d{4})-(\d{1,2})$/
+const YEAR_PATTERN = /^\d{4}$/
+
+export function parseMonthServiceParam(
+  raw?: string | string[] | null
+): string[] {
+  const tokens = (Array.isArray(raw) ? raw : [raw])
+    .flatMap((value) => (value ? String(value).split(',') : []))
+    .map((token) => token.trim())
+    .filter(Boolean)
+
+  const values = tokens.reduce<string[]>((acc, token) => {
+    if (YEAR_PATTERN.test(token)) {
+      acc.push(token)
+      return acc
+    }
+
+    const matched = token.match(MONTH_SERVICE_PARAM_PATTERN)
+    const month = matched ? Number(matched[2]) : NaN
+    if (month >= 1 && month <= 12) {
+      acc.push(`${matched[1]}-month-${month}`)
+    }
+    return acc
+  }, [])
+
+  return Array.from(new Set(values))
+}
+
+export function formatMonthServiceParam(values?: string[]): string | undefined {
+  const tokens = (values ?? []).reduce<string[]>((acc, value) => {
+    if (YEAR_PATTERN.test(value)) {
+      acc.push(value)
+      return acc
+    }
+
+    const matched = value.match(MONTH_SERVICE_FILTER_PATTERN)
+    if (matched) {
+      acc.push(`${matched[1]}-${matched[2].padStart(2, '0')}`)
+    }
+    return acc
+  }, [])
+
+  return tokens.length ? Array.from(new Set(tokens)).join(',') : undefined
+}
+
 export function getTypeOperation(value?: string) {
   if (value === Operations.Debit) {
     return { type: Operations.Debit }
@@ -784,8 +836,6 @@ export function getTypeOperation(value?: string) {
   }
   return {}
 }
-
-// usePermissions
 
 export function usePermissions(user?: IUser): IPermissions | null {
   const [permissions, setPermissions] = useState<IPermissions | null>(null)

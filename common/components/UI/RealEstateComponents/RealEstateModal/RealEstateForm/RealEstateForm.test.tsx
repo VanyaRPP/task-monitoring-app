@@ -10,6 +10,7 @@ jest.mock('@common/api/domainApi/domain.api', () => ({
     isLoading: false,
     isError: false,
   }),
+  useGetDomainTypeTemplatesQuery: () => ({ data: [] }),
 }))
 
 jest.mock('@common/api/serviceApi/service.api', () => ({

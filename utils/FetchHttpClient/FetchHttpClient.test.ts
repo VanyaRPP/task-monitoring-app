@@ -78,6 +78,43 @@ describe('Given the FetchHttpClient', () => {
         })
       })
     })
+
+    describe('AND no headers are given', () => {
+      beforeEach(async () => {
+        setupMockFetch(responseBody)
+        await httpClient.get(apiCall)
+      })
+
+      test('Then it defaults to an empty headers object', () => {
+        expect(global.fetch).toHaveBeenCalledWith(`${BASE_URL}/${apiCall}`, {
+          method: 'GET',
+          headers: {},
+          body: undefined,
+        })
+      })
+    })
+
+    describe('AND searchParams are given', () => {
+      beforeEach(async () => {
+        setupMockFetch(responseBody)
+        await httpClient.get(
+          apiCall,
+          { headers },
+          new URLSearchParams({ page: '2' })
+        )
+      })
+
+      test('Then the URL includes a "?" query string built from them', () => {
+        expect(global.fetch).toHaveBeenCalledWith(
+          `${BASE_URL}/${apiCall}?page=2`,
+          {
+            method: 'GET',
+            headers,
+            body: undefined,
+          }
+        )
+      })
+    })
   })
 
   describe('When I use post method', () => {

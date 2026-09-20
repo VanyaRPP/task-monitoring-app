@@ -1,17 +1,14 @@
 'use client'
 
 import { LoginOutlined, LogoutOutlined, UserOutlined } from '@ant-design/icons'
-import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
+import { useGetMyCompaniesQuery } from '@common/api/realestateApi/realestate.api'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { RolesSelector } from '@components/UI/RolesSelector'
 import { Tags } from '@components/UI/Tags'
 import { TruncatedText } from '@components/UI/TruncatedText'
 import { AppRoutes, Roles } from '@utils/constants'
 import { isDev } from '@utils/env'
-import {
-  useGetDomainFiltersQuery,
-  useGetRealEstateFiltersQuery,
-} from '@common/api/filterApi/filter.api'
+import { useGetDomainFiltersQuery } from '@common/api/filterApi/filter.api'
 
 import {
   Avatar,
@@ -34,7 +31,7 @@ export const Profile: React.FC = () => {
   const { data: user } = useGetCurrentUserQuery()
 
   const { data: domains } = useGetDomainFiltersQuery({})
-  const { data: companies } = useGetRealEstateFiltersQuery({})
+  const { data: myCompanies } = useGetMyCompaniesQuery()
 
   const isDomainAdmin = useMemo(() => {
     return user?.roles?.includes(Roles.DOMAIN_ADMIN)
@@ -148,8 +145,8 @@ export const Profile: React.FC = () => {
                   }
                   wrap
                   align="center"
-                  items={companies?.realEstatesFilter.map(
-                    ({ text }) => text as string
+                  items={myCompanies?.data?.map(
+                    ({ companyName }) => companyName
                   )}
                 />
               </Space>
