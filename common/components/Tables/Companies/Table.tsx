@@ -606,73 +606,91 @@ const getDefaultColumns = ({
       fixed: 'right',
       title: '',
       width: 98,
-      render: (_, realEstate: IExtendedRealestate) => (
-        <Dropdown
-          menu={{
-            items: [
-              {
-                key: 'archive',
-                label: (
-                  <Popconfirm
-                    id="popconfirm_archive"
-                    title={`Ви впевнені що хочете ${
-                      realEstate.archived ? 'розархівувати' : 'архівувати'
-                    } цей елемент?`}
-                    onConfirm={() =>
-                      handleArchive(realEstate?._id, !realEstate.archived)
-                    }
-                    okText={
-                      realEstate.archived ? 'Розархівувати' : 'Архівувати'
-                    }
-                    cancelText="Ні"
-                    disabled={archiveLoading}
-                  >
-                    <Button
-                      type="text"
-                      icon={<InboxOutlined />}
-                      style={{
-                        color: realEstate.archived ? '#722ed1' : '#ff4d4f',
-                        paddingLeft: '10px',
-                        paddingRight: '10px',
-                      }}
+      render: (_, realEstate: IExtendedRealestate) => {
+        const isDomainArchived = !!realEstate.domain?.archived
+        const preventUnarchive = realEstate.archived && isDomainArchived
+
+        const archiveButton = (
+          <Button
+            type="text"
+            icon={<InboxOutlined />}
+            disabled={preventUnarchive}
+            style={{
+              color: preventUnarchive
+                ? undefined
+                : realEstate.archived
+                  ? '#722ed1'
+                  : '#ff4d4f',
+              paddingLeft: '10px',
+              paddingRight: '10px',
+            }}
+          >
+            {realEstate.archived ? 'Розархівувати' : 'Архівувати'}
+          </Button>
+        )
+
+        return (
+          <Dropdown
+            menu={{
+              items: [
+                {
+                  key: 'archive',
+                  label: preventUnarchive ? (
+                    <Tooltip title="Неможливо розархівувати компанію, оскільки її надавач послуг заархівований">
+                      {archiveButton}
+                    </Tooltip>
+                  ) : (
+                    <Popconfirm
+                      id="popconfirm_archive"
+                      title={`Ви впевнені що хочете ${
+                        realEstate.archived ? 'розархівувати' : 'архівувати'
+                      } цей елемент?`}
+                      onConfirm={() =>
+                        handleArchive(realEstate?._id, !realEstate.archived)
+                      }
+                      okText={
+                        realEstate.archived ? 'Розархівувати' : 'Архівувати'
+                      }
+                      cancelText="Ні"
+                      disabled={archiveLoading}
                     >
-                      {realEstate.archived ? 'Розархівувати' : 'Архівувати'}
-                    </Button>
-                  </Popconfirm>
-                ),
-              },
-              (isGlobalAdmin || isAdmin) && {
-                key: 'delete',
-                label: (
-                  <Popconfirm
-                    id="popconfirm_custom"
-                    title={`Ви впевнені що хочете видалити компанію?`}
-                    onConfirm={() => handleDelete(realEstate?._id)}
-                    okText="Видалити"
-                    cancelText="Ні"
-                    disabled={deleteLoading}
-                  >
-                    <Button
-                      type="text"
-                      icon={<DeleteOutlined />}
-                      style={{
-                        color: '#ff4d4f',
-                        paddingLeft: '10px',
-                        paddingRight: '10px',
-                      }}
+                      {archiveButton}
+                    </Popconfirm>
+                  ),
+                },
+                (isGlobalAdmin || isAdmin) && {
+                  key: 'delete',
+                  label: (
+                    <Popconfirm
+                      id="popconfirm_custom"
+                      title={`Ви впевнені що хочете видалити компанію?`}
+                      onConfirm={() => handleDelete(realEstate?._id)}
+                      okText="Видалити"
+                      cancelText="Ні"
+                      disabled={deleteLoading}
                     >
-                      Видалити
-                    </Button>
-                  </Popconfirm>
-                ),
-              },
-            ],
-          }}
-          placement="bottomRight"
-        >
-          <Button icon={<MoreOutlined />} />
-        </Dropdown>
-      ),
+                      <Button
+                        type="text"
+                        icon={<DeleteOutlined />}
+                        style={{
+                          color: '#ff4d4f',
+                          paddingLeft: '10px',
+                          paddingRight: '10px',
+                        }}
+                      >
+                        Видалити
+                      </Button>
+                    </Popconfirm>
+                  ),
+                },
+              ],
+            }}
+            placement="bottomRight"
+          >
+            <Button icon={<MoreOutlined />} />
+          </Dropdown>
+        )
+      },
     })
   }
 
