@@ -62,6 +62,10 @@ const RealEstateModal: FC<Props> = ({
               _id: s._id,
               label: s.name,
               fieldName: s.fieldName,
+              // Тег типу потрібен формі, щоб зрозуміти, чи є в домені послуга
+              // «за площею» (див. isMeterBasedServiceExist). У БД не потрапляє:
+              // схема RealEstate.customServices його не містить.
+              serviceType: (s as { serviceType?: string }).serviceType,
               price: undefined,
             }))
           : []

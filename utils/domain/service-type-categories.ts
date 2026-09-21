@@ -23,6 +23,24 @@ export const SERVICE_TYPES_BY_CATEGORY: Record<
   other: [],
 }
 
+/**
+ * Типи, що рахуються від площі компанії (м² × тариф), а не від показників
+ * лічильника чи частки.
+ *
+ * Площа є в КОЖНОЇ компанії домену, тому такі послуги комунальні за природою:
+ * у Payment Bulk вони рендеряться для всіх компаній і не ховаються за гейтом
+ * «компанія несе послугу» — рівно як нативні колонки Розміщення/Утримання.
+ * Лічильники (електрика, вода) належать конкретним компаніям і гейт зберігають.
+ */
+export const AREA_BASED_SERVICE_TYPES: ReadonlySet<ServiceType> = new Set([
+  ServiceType.Placing,
+  ServiceType.Maintenance,
+])
+
+export const isAreaBasedServiceType = (
+  type?: ServiceType | string | null
+): boolean => !!type && AREA_BASED_SERVICE_TYPES.has(type as ServiceType)
+
 export const UNDEFINED_SERVICE_TYPE_VALUE = ''
 export const UNDEFINED_SERVICE_TYPE_LABEL = 'Невизначений'
 

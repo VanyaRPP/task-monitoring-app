@@ -6,6 +6,7 @@ import {
 } from '@components/Tables/EditInvoiceTable'
 import { ServiceType } from '@utils/constants'
 import { currencyWithUnit, toArray, toRoundFixed } from '@utils/helpers'
+import { resolvePlacingTariff } from '@utils/getInvoices/resolvePlacingTariff'
 import validator from '@utils/validator'
 import { Form, Input, Typography } from 'antd'
 import { useEffect, useMemo } from 'react'
@@ -54,8 +55,7 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
       return prevPlacingInvoice.sum
     }
     const area = company?.totalArea ?? 1
-    const pricePerMeter = company?.pricePerMeter ?? prevService?.rentPrice ?? 0
-    return area * pricePerMeter
+    return area * resolvePlacingTariff({ company, service: prevService })
   }, [prevPlacingInvoice, company, prevService])
 
   const calculatedInitialPrice = useMemo(() => {
@@ -144,8 +144,7 @@ export const Price: React.FC<InvoiceComponentProps> = ({
       return prevPlacingInvoice.sum
     }
     const area = company?.totalArea ?? 1
-    const pricePerMeter = company?.pricePerMeter ?? prevService?.rentPrice ?? 0
-    return area * pricePerMeter
+    return area * resolvePlacingTariff({ company, service: prevService })
   }, [prevPlacingInvoice, company, prevService])
 
   const calculatedInitialPrice = useMemo(() => {
