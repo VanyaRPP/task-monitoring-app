@@ -5,6 +5,7 @@ import CompanyName from './cells/CompanyName'
 import { CustomServiceGate } from './cells/CustomServiceGate'
 import { Popconfirm, TableColumnsType } from 'antd'
 import { ServiceType, UTILITY_SERVICE_ID_TO_TYPE } from '@utils/constants'
+import { isAreaBasedServiceType } from '@utils/domain/service-type-categories'
 
 import {
   ElectricityAmount,
@@ -164,10 +165,36 @@ const waterColumn: TypedColumnBuilder = ({ title, fieldName, price }) => ({
   ],
 })
 
+/**
+ * Розміщення: «За м²» × площа компанії. Лічильника немає, тому тариф живе в
+ * самій колонці, а не в підписі «Загальне» (на відміну від електрики й води).
+ * Нативний рядок під інфляцією комірки перемикають самі — див. cells/Placing.
+ */
+const placingColumn: TypedColumnBuilder = ({ title, fieldName }) => ({
+  title,
+  children: [
+    {
+      title: 'За м²',
+      width: 160,
+      render: (_, { name }: { name: number }) => (
+        <PlacingPrice name={name} fieldName={fieldName} />
+      ),
+    },
+    {
+      title: 'Загальне',
+      width: 200,
+      render: (_, { name }: { name: number }) => (
+        <PlacingSum name={name} fieldName={fieldName} />
+      ),
+    },
+  ],
+})
+
 const TYPED_COLUMN_BUILDERS: Partial<Record<ServiceType, TypedColumnBuilder>> =
   {
     [ServiceType.Electricity]: electricityColumn,
     [ServiceType.Water]: waterColumn,
+    [ServiceType.Placing]: placingColumn,
   }
 
 /** True when a serviceType has a dedicated formula column (native or custom). */
@@ -208,6 +235,25 @@ export const withCompanyGate = (
   }
 }
 
+/**
+ * Чи ховати колонку послуги за гейтом «компанія несе послугу».
+ *
+ * Лічильники (електрика, вода) та безтипові послуги належать конкретним
+ * компаніям — гейт лишається. Послуги «за площею» (Розміщення, Утримання)
+ * комунальні за природою: площа є в КОЖНОЇ компанії домену, тариф падає на
+ * місячну послугу, тому вони рендеряться для всіх — рівно як нативна колонка
+ * «Розміщення», яка гейту ніколи не мала. Компанію, яку не треба рахувати,
+ * вимикають ціною 0 (sum 0 -> Header.tsx такий рядок не відправляє).
+ */
+export const applyCustomColumnGate = (
+  column: TableColumnsType[number] | null,
+  service: AllowedService,
+  gateOpts: { serviceKey: string; fieldName?: string }
+): TableColumnsType[number] | null =>
+  isAreaBasedServiceType(resolveServiceType(service))
+    ? column
+    : withCompanyGate(column, gateOpts)
+
 export const buildTypedCustomColumn = (
   service: AllowedService,
   opts: { key: string; losses?: number; price?: number }
@@ -238,6 +284,15 @@ export const getDefaultColumns = (
   )
   const has = (type: ServiceType): boolean => allowedTypes.has(type)
 
+  // Площа — довідкова колонка, а не рахункова, тому її вмикає БУДЬ-ЯКА послуга
+  // «за площею», включно з per-domain копією (власний _id + serviceType), у
+  // якої власна колонка-формула. Без цього площу, що множиться на тариф, у
+  // таблиці просто не видно.
+  const hasAreaBasedService = allowedServices.some((svc) => {
+    const type = resolveServiceType(svc)
+    return type === ServiceType.Placing || type === ServiceType.Maintenance
+  })
+
   return [
     {
       fixed: 'left',
@@ -245,7 +300,7 @@ export const getDefaultColumns = (
       width: 250,
       render: (_, { name }: { name: number }) => <CompanyName name={name} />,
     },
-    (has(ServiceType.Placing) || has(ServiceType.Maintenance)) && {
+    hasAreaBasedService && {
       title: 'Площа, м²',
       width: 160,
       render: (_, { name }: { name: number }) => <TotalArea name={name} />,
@@ -269,23 +324,8 @@ export const getDefaultColumns = (
         },
       ],
     },
-    has(ServiceType.Placing) && {
-      title: 'Розміщення',
-      children: [
-        {
-          title: 'За м²',
-          width: 160,
-          render: (_, { name }: { name: number }) => (
-            <PlacingPrice name={name} />
-          ),
-        },
-        {
-          title: 'Загальне',
-          width: 200,
-          render: (_, { name }: { name: number }) => <PlacingSum name={name} />,
-        },
-      ],
-    },
+    has(ServiceType.Placing) &&
+      placingColumn({ title: 'Розміщення', fieldName: ServiceType.Placing }),
     has(ServiceType.Inflicion) && {
       title: <InflicionTitle />,
       width: 200,

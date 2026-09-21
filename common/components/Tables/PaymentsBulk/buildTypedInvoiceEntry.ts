@@ -2,22 +2,23 @@ import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
 import { ServiceType } from '@utils/constants'
 import { toRoundFixed } from '@utils/helpers'
 import { resolveTypedServiceTariff } from './typedServiceTariff'
+import { isAreaBasedServiceType } from '@utils/domain/service-type-categories'
 
 interface TypedEntryArgs {
   /** Послуга з каталогу домену. */
   customService: { _id?: unknown; name?: string; fieldName?: string }
   /** Тип, під яким рядок піде в інвойс (electricityPrice / waterPrice). */
   serviceType: ServiceType
-  company?: { customServices?: unknown } | null
+  company?: { customServices?: unknown; totalArea?: unknown } | null
   service?: { customServices?: unknown; losses?: unknown } | null
-  /** Показник лічильника за попередній період. */
+  /** Показник лічильника за попередній період. Типи «за площею» його ігнорують. */
   prevReading: number
   /** Заготовка рядка з getCustomServiceInvoices (name, fieldName, serviceId). */
   base?: Partial<IPaymentField>
 }
 
 /**
- * Рядок інвойсу для per-domain послуги з лічильником у Payment Bulk.
+ * Рядок інвойсу для per-domain типізованої послуги у Payment Bulk.
  *
  * Тип рядка — той самий, яким цю ж послугу додає інвойс із каталогу
  * (buildInvoiceAddPayloadFromCatalogRow), тому EditInvoiceTable віддає його
@@ -42,7 +43,7 @@ export function buildTypedInvoiceEntry({
       ? +toRoundFixed(service?.losses) || undefined
       : undefined
 
-  return {
+  const common = {
     ...base,
     type: serviceType,
     name: customService?.name,
@@ -54,9 +55,21 @@ export function buildTypedInvoiceEntry({
       { company, service },
       { serviceId, fieldName }
     ),
+    sum: 0,
+  }
+
+  // Типи «за площею»: amount — це м², попередній період на нього не впливає.
+  if (isAreaBasedServiceType(serviceType)) {
+    return {
+      ...common,
+      amount: +toRoundFixed(company?.totalArea) || 0,
+    } as IPaymentField
+  }
+
+  return {
+    ...common,
     ...(losses ? { losses } : {}),
     lastAmount: prevReading,
     amount: prevReading,
-    sum: 0,
   } as IPaymentField
 }

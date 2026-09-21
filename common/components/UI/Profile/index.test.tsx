@@ -7,6 +7,7 @@ import {
   useGetDomainFiltersQuery,
   useGetRealEstateFiltersQuery,
 } from '@common/api/filterApi/filter.api'
+import { useGetMyCompaniesQuery } from '@common/api/realestateApi/realestate.api'
 
 jest.mock('@common/api/userApi/user.api', () => ({
   useGetCurrentUserQuery: jest.fn(),
@@ -14,6 +15,7 @@ jest.mock('@common/api/userApi/user.api', () => ({
 
 jest.mock('@common/api/realestateApi/realestate.api', () => ({
   useGetAllRealEstateQuery: jest.fn(() => ({ data: undefined })),
+  useGetMyCompaniesQuery: jest.fn(() => ({ data: undefined })),
 }))
 
 jest.mock('@common/api/filterApi/filter.api', () => ({
@@ -71,6 +73,7 @@ describe('Profile (mini profile popover)', () => {
     ;(useGetRealEstateFiltersQuery as jest.Mock).mockReturnValue({
       data: { realEstatesFilter: [] },
     })
+    ;(useGetMyCompaniesQuery as jest.Mock).mockReturnValue({ data: undefined })
   })
 
   afterEach(() => {
@@ -118,8 +121,8 @@ describe('Profile (mini profile popover)', () => {
     ;(useGetCurrentUserQuery as jest.Mock).mockReturnValue({
       data: { roles: [] },
     })
-    ;(useGetRealEstateFiltersQuery as jest.Mock).mockReturnValue({
-      data: { realEstatesFilter: [{ text: longCompany }] },
+    ;(useGetMyCompaniesQuery as jest.Mock).mockReturnValue({
+      data: { data: [{ companyName: longCompany }] },
     })
 
     render(<Profile />)
