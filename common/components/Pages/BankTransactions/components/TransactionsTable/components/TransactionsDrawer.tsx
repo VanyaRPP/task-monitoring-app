@@ -1,5 +1,6 @@
 import {
   Badge,
+  Tooltip,
   Button,
   Select,
   Space,
@@ -122,13 +123,35 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
     transaction,
     relatedCompanies
   )
+  const quickSendMenuItems = services.map((service) => {
+    // 1. Шукаємо компанію за її _id, вказуючи тип (c: any)
+    const currentCompany = relatedCompanies?.find(
+      (c: any) => c?._id === service?._id || c?.id === service?._id
+    ) as any
 
-  const quickSendMenuItems: MenuProps['items'] = services.map((service) => ({
-    key: service._id,
-    label: formatDate(service.date, 'MMMM YYYY'),
-    icon: <CalendarOutlined />,
-    onClick: () => handleQuickSend(service),
-  }))
+    // 2. Перевіряємо статус архіву за точним полем `archived`
+    const isArchived = !currentCompany || currentCompany?.archived === true
+
+    // 3. Формуємо звичайний текст дати послуги
+    const dateText = formatDate(service.date, 'MMMM YYYY')
+
+    // 4. Якщо архівна — показуємо слово "Архівована" з підказкою Tooltip
+    const itemLabel = isArchived ? (
+      <Tooltip title={currentCompany?.name || 'Назва компанії в архіві'}>
+        <span style={{ color: '#d4380d', fontWeight: 'bold' }}>Архівована</span>
+      </Tooltip>
+    ) : (
+      dateText
+    )
+
+    return {
+      key: service._id,
+      label: itemLabel as any, 
+      icon: <CalendarOutlined />,
+      onClick: () => handleQuickSend(service),
+    }
+  }) as any
+
 
   return (
     <>
@@ -141,18 +164,52 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
         }}
       >
         <Space.Compact style={{ width: '100%' }}>
-          <Select
-            placeholder="Select a related company"
-            onChange={handleCompanyChange}
-            value={selectedCompany ?? undefined}
-            style={{ width: 'calc(100% - 80px)', maxWidth: 300 }}
-          >
-            {relatedCompanies.map((company) => (
-              <Select.Option key={company._id} value={company._id}>
+         {(() => {
+  // Регулярний вираз для перевірки, чи є значення сирим ідентифікатором (ID)
+  // Зазвичай ID в MongoDB — це 24-значний hex-рядок
+  const isIdSelected = typeof selectedCompany === 'string' && /^[0-9a-fA-F]{24}$/.test(selectedCompany);
+
+  // Шукаємо компанію в списку за її ідентифікатором
+  const foundCompany = relatedCompanies.find(c => c._id === selectedCompany);
+
+  // Якщо замість імені пишеться ID, то при наведенні показуємо її назву, інакше — нічого
+  const tooltipTitle = isIdSelected && foundCompany ? foundCompany.companyName : undefined;
+
+  return (
+    <div 
+      title={tooltipTitle} 
+      style={{ display: 'inline-block', width: 'calc(100% - 80px)', maxWidth: 300 }}
+    >
+      <Select
+        placeholder="Select a related company"
+        onChange={handleCompanyChange}
+        value={selectedCompany ?? undefined}
+        style={{ width: '100%' }}
+        optionLabelProp="label"
+        title={tooltipTitle} // Дублюємо title для надійності в Ant Design
+      >
+        {relatedCompanies.map((company) => {
+          // Якщо поточна опція відповідає вибраному ID, її назва в селекторі буде "Архівована"
+          const isThisCompanyArchived = company._id === selectedCompany && isIdSelected;
+          const labelText = isThisCompanyArchived ? 'Архівована' : company.companyName;
+
+          return (
+            <Select.Option 
+              key={company._id} 
+              value={company._id}
+              label={labelText} // <--- Саме це значення запишеться в селектор замість ID
+            >
+              <span style={{ color: isIdSelected && company._id === selectedCompany ? '#d97706' : 'inherit' }}>
                 {company.companyName}
-              </Select.Option>
-            ))}
-          </Select>
+              </span>
+            </Select.Option>
+          );
+        })}
+      </Select>
+    </div>
+  );
+})()}
+
           {isAccountMatched ? (
             <>
               <Dropdown menu={{ items: dropdownItems }} trigger={['click']}>
