@@ -26,7 +26,7 @@ const ReceiptForm: FC<Props> = ({
   const isEnglish = normalizeCurrency(currency) !== 'UAH'
   const componentRef = useRef()
   const handlePrint = useReactToPrint({
-    content: () => componentRef.current,
+    contentRef: componentRef,
     pageStyle: `
       @page {
         size: auto;

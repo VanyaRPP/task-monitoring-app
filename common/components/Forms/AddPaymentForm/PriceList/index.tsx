@@ -74,7 +74,7 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
 
   const componentRef = useRef<HTMLDivElement>(null)
   const handlePrint = useReactToPrint({
-    content: () => componentRef.current,
+    contentRef: componentRef,
     documentTitle:
       payment?.reciever?.companyName + '-inv-' + payment.invoiceNumber,
   })

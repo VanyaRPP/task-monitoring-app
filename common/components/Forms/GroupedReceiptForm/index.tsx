@@ -117,7 +117,7 @@ const GroupedReceiptForm: FC<Props> = ({
     ''
 
   const handlePrint = useReactToPrint({
-    content: () => componentRef.current,
+    contentRef: componentRef,
     documentTitle:
       `${printCompanyName}-inv-${modernInvoiceNumber}` || 'invoice',
   })
@@ -330,7 +330,7 @@ const GroupedReceiptForm: FC<Props> = ({
       key: 'print',
       icon: <PrinterOutlined />,
       label: isEnglish ? 'Print' : 'Друк',
-      onClick: handlePrint,
+      onClick: () => handlePrint(),
     },
     {
       key: 'template',

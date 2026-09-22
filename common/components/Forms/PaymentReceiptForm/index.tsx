@@ -23,7 +23,7 @@ const PaymentReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
   const { token } = theme.useToken()
 
   const handlePrint = useReactToPrint({
-    content: () => componentRef.current,
+    contentRef: componentRef,
     documentTitle:
       (newData?.company?.companyName || newData?.reciever?.companyName) +
       '-payment-receipt-' +
