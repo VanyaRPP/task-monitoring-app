@@ -13,18 +13,23 @@
  */
 /* eslint-disable no-console */
 import dbConnect from '../utils/dbConnect'
-import DomainTypeTemplate from '../common/modules/models/domain-type-template'
+import DomainTypeTemplate, {
+  DomainTypeTemplateCategory,
+} from '../common/modules/models/domain-type-template'
 import { defaultServices } from '../utils/constants'
 import mongoose from 'mongoose'
 
 export interface IBuiltInTemplate {
   name: string
+  /** Керує тим, які ServiceType пропонуються домену цього шаблону. */
+  category?: DomainTypeTemplateCategory
   groups: { groupName: string; serviceIds: string[] }[]
 }
 
 export const BUILT_IN_TEMPLATES: IBuiltInTemplate[] = [
   {
     name: 'Комунальні',
+    category: 'utility',
     groups: [
       {
         groupName: 'Стандартні послуги',
@@ -60,6 +65,7 @@ export async function seedDomainTypeTemplates(
     }))
     await DomainTypeTemplate.create({
       name: tpl.name,
+      category: tpl.category ?? 'other',
       isBuiltIn: true,
       groups,
     })

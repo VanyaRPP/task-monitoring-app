@@ -19,7 +19,7 @@ export const SERVICE_TYPES_BY_CATEGORY: Record<
   it: [],
   edu: [],
   auto: [],
-  'real-estate': [],
+  'real-estate': [ServiceType.HousingFee],
   other: [],
 }
 

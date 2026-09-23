@@ -11,7 +11,7 @@ import {
   Tooltip,
 } from 'antd'
 import Link from 'next/link'
-import { CSSProperties, useEffect, useMemo, useState } from 'react'
+import { CSSProperties, useEffect, useMemo, useState, useRef } from 'react'
 import { useAddStreetMutation } from '@common/api/streetApi/street.api'
 import { PlusOutlined } from '@ant-design/icons'
 import { isNewEntityValue } from '@utils/inlineCreate'
@@ -58,18 +58,23 @@ const AddressesSelect: React.FC<AddressesSelectProps> = ({
     }))
   }, [streets])
 
+  const appliedPreselectRef = useRef<string | undefined>(undefined)
+
+  const autoPickedForDomainRef = useRef<string | undefined>(undefined)
+
   useEffect(() => {
     // Form.useWatch reports `undefined` for a field's very first render
     // (it only catches up to the real store value a tick later, via its
     // own effect). Reading the store directly here — instead of trusting
-    // the `domainId`/`streetId` watch snapshots — avoids treating that
-    // transient "not caught up yet" state as "no domain/street selected"
-    // and wiping out a value the modal already populated for editing.
+    // the `domainId` watch snapshot — avoids treating that transient
+    // "not caught up yet" state as "no domain/street selected" and wiping
+    // out a value the modal already populated for editing.
     const liveDomainId = form.getFieldValue('domain')
 
     if (!liveDomainId) {
       form.setFieldsValue({ street: undefined })
-      onStreetHasServiceChange?.(false)
+      appliedPreselectRef.current = undefined
+      autoPickedForDomainRef.current = undefined
       return
     }
 
@@ -83,52 +88,51 @@ const AddressesSelect: React.FC<AddressesSelectProps> = ({
 
     if (options.length === 0) {
       form.setFieldsValue({ street: undefined })
-      onStreetHasServiceChange?.(false)
+      appliedPreselectRef.current = undefined
+      autoPickedForDomainRef.current = undefined
       return
     }
 
-    // In edit mode the entity already carries its own street. If that value
-    // is still a valid option for this domain, keep it instead of forcing an
-    // auto-pick below — otherwise every edit would silently overwrite the
-    // company's real address with "the first street that has a service".
     const liveStreetId = form.getFieldValue('street')
     const currentStreet = options.find(
       (option) => option.value === liveStreetId
     )
-    if (edit && currentStreet) {
-      onStreetHasServiceChange?.(currentStreet.hasService)
-      return
+
+    if (edit && currentStreet) return
+
+    if (!street) {
+      appliedPreselectRef.current = undefined
+    } else if (street !== appliedPreselectRef.current) {
+      const preselected = options.find((option) => option.value === street)
+      if (preselected) {
+        appliedPreselectRef.current = street
+        form.setFieldsValue({ street: preselected.value })
+        return
+      }
     }
+
+    if (currentStreet) return
+
+    if (autoPickedForDomainRef.current === liveDomainId) return
+    autoPickedForDomainRef.current = liveDomainId
 
     if (options.length === 1) {
       form.setFieldsValue({ street: options[0].value })
-      onStreetHasServiceChange?.(options[0].hasService)
       return
     }
 
     const firstStreetWithService = options.find((option) => option.hasService)
 
-    if (firstStreetWithService) {
-      street
-        ? form.setFieldsValue({ street: street })
-        : form.setFieldsValue({ street: firstStreetWithService.value })
-      onStreetHasServiceChange?.(firstStreetWithService.hasService)
-    } else {
-      form.setFieldsValue({ street: undefined })
-      onStreetHasServiceChange?.(false)
-    }
-  }, [
-    domainId,
-    options,
-    form,
-    street,
-    onStreetHasServiceChange,
-    edit,
-    streetId,
-    isStreetsLoading,
-  ])
+    form.setFieldsValue({ street: firstStreetWithService?.value })
+  }, [domainId, options, form, street, edit, isStreetsLoading])
 
   const selectedStreet = options.find((option) => option.value === streetId)
+  const selectedStreetHasService = selectedStreet?.hasService ?? false
+
+  useEffect(() => {
+    onStreetHasServiceChange?.(selectedStreetHasService)
+  }, [selectedStreetHasService, onStreetHasServiceChange])
+
   const showNoServiceTooltip = !!selectedStreet && !selectedStreet.hasService
   const showNoAddressesTooltip =
     required && !!domainId && !isStreetsLoading && options.length === 0
@@ -235,9 +239,7 @@ const AddressesSelect: React.FC<AddressesSelectProps> = ({
           showSearch
           searchValue={search}
           onSearch={setSearch}
-          onChange={(value) => {
-            const selected = options.find((option) => option.value === value)
-            onStreetHasServiceChange?.(selected?.hasService || false)
+          onChange={() => {
             setSearch('')
           }}
           popupRender={(menu) => (
