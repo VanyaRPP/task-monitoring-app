@@ -37,8 +37,20 @@ describe('service-type-categories', () => {
     expect(values).not.toContain(ServiceType.Custom)
   })
 
+  it('offers the housing fee for the real-estate category', () => {
+    const values = getServiceTypeOptionsForCategory('real-estate')
+      .map((o) => o.value)
+      .filter((v) => v !== UNDEFINED_SERVICE_TYPE_VALUE)
+    expect(values).toEqual([ServiceType.HousingFee])
+    // The debt-calculation page is gated on this type, and it is deliberately
+    // absent from the communal catalog.
+    expect(SERVICE_TYPES_BY_CATEGORY.utility).not.toContain(
+      ServiceType.HousingFee
+    )
+  })
+
   it('offers only "Невизначений" for categories with no own serviceTypes', () => {
-    for (const category of ['it', 'edu', 'auto', 'real-estate', 'other']) {
+    for (const category of ['it', 'edu', 'auto', 'other']) {
       const opts = getServiceTypeOptionsForCategory(category)
       expect(opts).toEqual([
         {
@@ -62,6 +74,7 @@ describe('service-type-categories', () => {
       expect.arrayContaining(SERVICE_TYPES_BY_CATEGORY.utility)
     )
     expect(values).toContain(ServiceType.Electricity)
+    expect(values).toContain(ServiceType.HousingFee)
     expect(values).not.toContain(ServiceType.Custom)
   })
 

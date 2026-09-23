@@ -23,6 +23,7 @@ export enum AppRoutes {
   BANK = '/bank',
   SEP_DOMAIN = '/sepdomain',
   PROFIT = '/profit',
+  DEBT_CALCULATION = '/debt-calculation',
 }
 
 export enum Operations {
@@ -111,6 +112,7 @@ export enum ServiceName {
   waterPart = 'Водонарахування',
   discount = 'Знижка',
   cleaningPrice = 'Прибирання',
+  housingFeePrice = 'Квартплата',
 }
 
 export enum ServiceType {
@@ -124,6 +126,7 @@ export enum ServiceType {
   WaterPart = 'waterPart',
   Discount = 'discount',
   Cleaning = 'cleaningPrice',
+  HousingFee = 'housingFeePrice',
 }
 
 export const quarters = {
@@ -184,11 +187,31 @@ const UTILITY_SERVICE_ID_ENTRIES: ReadonlyArray<
   ['677d437c83b6ef93c6b8ea50', ServiceType.WaterPart], // Частка загальної площі
 ]
 
+/**
+ * Фіксований `_id` глобальної послуги-каталогу «Квартплата з нарахуванням
+ * боргу» (категорія `real-estate`). Її наявність у домені відкриває сторінку
+ * розрахунку заборгованості — див. `utils/domain/housing-fee-access.ts`.
+ */
+export const HOUSING_FEE_SERVICE_ID = '98a133dadb55292d0cb7b884'
+
+const REAL_ESTATE_SERVICE_ID_ENTRIES: ReadonlyArray<
+  readonly [id: string, serviceType: ServiceType]
+> = [[HOUSING_FEE_SERVICE_ID, ServiceType.HousingFee]]
+
+/**
+ * Стандартні КОМУНАЛЬНІ послуги — саме цей список сідиться у вбудований шаблон
+ * «Комунальні» і вважається захищеним від видалення. Послуги інших категорій
+ * сюди не додавати: вони потраплять у комунальний шаблон.
+ */
 export const defaultServices: readonly string[] =
   UTILITY_SERVICE_ID_ENTRIES.map(([id]) => id)
 
-export const UTILITY_SERVICE_ID_TO_TYPE = Object.freeze(
-  Object.fromEntries(UTILITY_SERVICE_ID_ENTRIES) as Record<string, ServiceType>
+/** Усі вбудовані послуги з фіксованим `_id`, незалежно від категорії. */
+export const BUILT_IN_SERVICE_ID_TO_TYPE = Object.freeze(
+  Object.fromEntries([
+    ...UTILITY_SERVICE_ID_ENTRIES,
+    ...REAL_ESTATE_SERVICE_ID_ENTRIES,
+  ]) as Record<string, ServiceType>
 ) as Readonly<Partial<Record<string, ServiceType>>>
 
 export const cascaderMonths = [
