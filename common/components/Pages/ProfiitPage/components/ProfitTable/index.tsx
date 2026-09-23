@@ -286,9 +286,11 @@ const ProfitTable: FC<ProfitTableProps> = ({ scope }) => {
             return (
               <Table.Summary fixed>
                 <Table.Summary.Row>
-                  <Table.Summary.Cell index={0}>
+                  <Table.Summary.Cell index={0} />
+                  <Table.Summary.Cell index={1}>
                     <Text strong>{t('profitPage:table.summary')}</Text>
                   </Table.Summary.Cell>
+
                   {picks.map((pick, i) => (
                     <Table.Summary.Cell key={i} index={i + 1} align="right">
                       <MoneyCell row={totals} pick={pick} />
