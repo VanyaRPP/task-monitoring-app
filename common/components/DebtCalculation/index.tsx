@@ -170,6 +170,23 @@ const DebtCalculationBlock: React.FC = () => {
   // otherwise every refetch would clobber what the user is typing right now.
   const appliedKey = useRef<string>('')
   const [isApplied, setIsApplied] = useState(false)
+  const targetKey = domainId && companyId ? `${domainId}:${companyId}` : ''
+
+  /**
+   * Switching company blanks the form and re-arms the load below.
+   *
+   * Declared BEFORE that effect on purpose: effects fire in declaration order
+   * within one commit, so blanking has to come first. The other way round it
+   * wiped the snapshot the load had just applied, and since `appliedKey` was
+   * already marked the load never ran again - the company's data was simply
+   * gone. It showed up whenever RTK served the company from cache, i.e. every
+   * time you came back to one you had already opened.
+   */
+  useEffect(() => {
+    appliedKey.current = ''
+    setIsApplied(false)
+    setOverrides({})
+  }, [targetKey])
 
   useEffect(() => {
     if (!domainId || !companyId || isSavedFetching) return
@@ -195,11 +212,6 @@ const DebtCalculationBlock: React.FC = () => {
     if (snapshot?.periodTo) setTo(toDayjs(snapshot.periodTo))
     setIsApplied(true)
   }, [domainId, companyId, saved, isSavedFetching])
-
-  useEffect(() => {
-    setIsApplied(false)
-    setOverrides({})
-  }, [companyId])
 
   const result = useMemo(
     () =>

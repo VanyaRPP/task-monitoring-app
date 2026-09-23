@@ -44,6 +44,22 @@ export const useAutoSave = ({
   // The snapshot the server already holds. Kept in a ref so updating it does
   // not restart the effect and spin up an endless save loop.
   const committed = useRef<string | null>(null)
+  // Edits that the debounce has not flushed yet.
+  const pending = useRef<IDebtCalculationSnapshot | null>(null)
+
+  useEffect(() => {
+    return () => {
+      // Switching company cancels the debounce timer below, so whatever was
+      // typed in the last moment would live only in the browser draft. Send it
+      // now: the snapshot carries its own domain and company, so a late save
+      // still lands on the right record.
+      const unsaved = pending.current
+      if (!unsaved) return
+
+      pending.current = null
+      saveCalculation(unsaved)
+    }
+  }, [domainId, companyId, saveCalculation])
 
   useEffect(() => {
     // A different company means a different record; the next snapshot has nothing to compare against.
@@ -64,6 +80,7 @@ export const useAutoSave = ({
     if (committed.current === snapshotJson) return
 
     writeDraft(draftKey(domainId, companyId), snapshot)
+    pending.current = snapshot
     setSaveState('pending')
 
     const timer = setTimeout(async () => {
@@ -71,6 +88,7 @@ export const useAutoSave = ({
       try {
         await saveCalculation(snapshot).unwrap()
         committed.current = snapshotJson
+        pending.current = null
         setSavedAt(new Date())
         setSaveState('saved')
       } catch {
