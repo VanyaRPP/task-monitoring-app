@@ -1,0 +1,51 @@
+.Header {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.Title {
+  margin: 0;
+}
+
+.Controls {
+  width: 100%;
+}
+
+.Field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.Label {
+  font-size: 12px;
+  font-weight: 400;
+  opacity: 0.7;
+  white-space: nowrap;
+}
+
+.Domain {
+  min-width: 220px;
+}
+
+.Method {
+  min-width: 230px;
+}
+
+.Total {
+  font-weight: 600;
+}
+
+.Muted {
+  opacity: 0.65;
+}
+
+.MonthsWrap {
+  padding: 8px 0;
+}
+
+.Saved {
+  min-width: 240px;
+}

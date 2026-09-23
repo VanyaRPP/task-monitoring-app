@@ -4,7 +4,7 @@ import TotalArea from './cells/TotalArea'
 import CompanyName from './cells/CompanyName'
 import { CustomServiceGate } from './cells/CustomServiceGate'
 import { Popconfirm, TableColumnsType } from 'antd'
-import { ServiceType, UTILITY_SERVICE_ID_TO_TYPE } from '@utils/constants'
+import { ServiceType, BUILT_IN_SERVICE_ID_TO_TYPE } from '@utils/constants'
 import { isAreaBasedServiceType } from '@utils/domain/service-type-categories'
 
 import {
@@ -43,13 +43,13 @@ const SERVICE_TYPE_VALUES = new Set<string>(Object.values(ServiceType))
 // Full type resolution, INCLUDING the per-domain `serviceType` tag. Used to pick
 // a custom service's Bulk formula (see resolveCustomFormula) — NOT to decide the
 // built-in communal columns.
-//  - pinned seed _id     → shared seeded services (UTILITY_SERVICE_ID_TO_TYPE)
+//  - pinned seed _id     → shared seeded services (BUILT_IN_SERVICE_ID_TO_TYPE)
 //  - serviceType         → per-domain typed copies (own _id, set via the form)
 //  - fieldName === value → legacy rows whose fieldName already equals the type
 export const resolveServiceType = (
   service: AllowedService
 ): ServiceType | undefined => {
-  const byId = UTILITY_SERVICE_ID_TO_TYPE[String(service?._id)]
+  const byId = BUILT_IN_SERVICE_ID_TO_TYPE[String(service?._id)]
   if (byId) return byId
   if (service?.serviceType && SERVICE_TYPE_VALUES.has(service.serviceType)) {
     return service.serviceType as ServiceType
@@ -68,7 +68,7 @@ export const resolveServiceType = (
 export const resolveCommunalType = (
   service: AllowedService
 ): ServiceType | undefined => {
-  const byId = UTILITY_SERVICE_ID_TO_TYPE[String(service?._id)]
+  const byId = BUILT_IN_SERVICE_ID_TO_TYPE[String(service?._id)]
   if (byId) return byId
   if (service?.fieldName && SERVICE_TYPE_VALUES.has(service.fieldName)) {
     return service.fieldName as ServiceType

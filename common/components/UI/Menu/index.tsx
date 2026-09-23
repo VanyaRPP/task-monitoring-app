@@ -4,6 +4,7 @@ import {
   UserOutlined,
 } from '@ant-design/icons'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+import { useDebtCalculationAccess } from '@modules/hooks/useDebtCalculationAccess'
 import useKeyCode from '@modules/hooks/useKeyCode'
 import { AppRoutes, Roles } from '@utils/constants'
 import { isAdminCheck } from '@utils/helpers'
@@ -65,6 +66,12 @@ export const Menu: React.FC<MenuProps> = ({ defaultOpenKeys, ...props }) => {
     [roles]
   )
 
+  // Пункт з'являється лише коли хоч один домен має послугу «Квартплата».
+  // Ендпоінт адмінський, тож для решти ролей запит навіть не йде.
+  const { hasAccess: hasDebtCalculation } = useDebtCalculationAccess(
+    !isAdminCheck(roles)
+  )
+
   const items = useMemo<AntdMenuProps['items']>(() => {
     return [
       {
@@ -110,6 +117,16 @@ export const Menu: React.FC<MenuProps> = ({ defaultOpenKeys, ...props }) => {
             // same "nothing to view here" state a User already gets
             // elsewhere on this menu.
             hidden: !isAdminCheck(roles) && !isUser,
+          },
+          {
+            key: AppRoutes.DEBT_CALCULATION,
+            type: 'item',
+            label: (
+              <Link href={AppRoutes.DEBT_CALCULATION}>
+                Розрахунок заборгованості
+              </Link>
+            ),
+            hidden: !hasDebtCalculation,
           },
         ].filter(({ hidden }) => !hidden),
       },
@@ -179,7 +196,14 @@ export const Menu: React.FC<MenuProps> = ({ defaultOpenKeys, ...props }) => {
         ].filter(({ hidden }) => !hidden),
       },
     ] as AntdMenuProps['items']
-  }, [isGlobalAdmin, isDomainAdmin, isUser, user?.roles, session?.user?.name])
+  }, [
+    isGlobalAdmin,
+    isDomainAdmin,
+    isUser,
+    hasDebtCalculation,
+    user?.roles,
+    session?.user?.name,
+  ])
 
   return (
     <AntdMenu
