@@ -7,10 +7,10 @@ import { DebtCalculationContext, IDebtCalculationContext } from './'
 import { interop, useExportExcel } from './useExportExcel'
 
 /**
- * Обидва пакети підміняємо у формі, яку віддає ВЕБПАК для CJS-бандла:
- * `{ __esModule: true, default: <модуль> }`. Саме на ній експорт і падав, бо
- * Jest сам по собі транспілює `import()` у `require()` і такої обгортки не
- * створює — без цього мока регресія не ловиться.
+ * Both packages are mocked in the shape WEBPACK hands back for a CJS bundle:
+ * `{ __esModule: true, default: <module> }`. That shape is exactly what the
+ * export used to break on, because Jest transpiles `import()` to `require()`
+ * and never produces the wrapper - without this mock the regression escapes.
  */
 jest.mock('xlsx-js-style', () => ({
   __esModule: true,
@@ -48,7 +48,7 @@ const Harness: React.FC<{ domainName?: string }> = ({ domainName }) => {
 
 const DOMAIN_NAME = 'ОСББ Крошенська 8'
 
-// Без дефолту в параметрі: передане `undefined` його б не перекрило.
+// No default on the parameter: passing `undefined` would not override it.
 const renderHarness = (
   patch: Partial<IDebtCalculationContext> = {},
   domainName?: string
@@ -57,14 +57,13 @@ const renderHarness = (
     <DebtCalculationContext.Provider
       value={
         {
-          companies: [
-            {
-              _id: 'apt-1',
-              companyName: 'Квартира №18',
-              description: 'о/р 123',
-            },
-          ],
-          results: { 'apt-1': result },
+          company: {
+            _id: 'apt-1',
+            companyName: 'Квартира №18',
+            description: 'о/р 123',
+          },
+          result,
+          overrides: {},
           from: dayjs('2026-01-01'),
           to: dayjs('2026-03-01'),
           annualRatePercent: 3,
@@ -109,26 +108,28 @@ describe('useExportExcel', () => {
 
     const [blob, fileName] = getSaveAs().mock.calls[0]
     expect(blob).toBeInstanceOf(Blob)
-    // Порожній або однобайтовий blob означав би, що книга не зібралась.
+    // An empty or one-byte blob would mean the workbook never assembled.
     expect(blob.size).toBeGreaterThan(1000)
+    // The file name now comes from the company: the domain is no longer needed
+    // in it, since the document covers a single company.
     expect(fileName).toBe(
-      'Розрахунок-заборгованості_ОСББ-Крошенська-8_2026-01_2026-03.xlsx'
+      'Розрахунок-заборгованості_Квартира-№18_2026-01_2026-03.xlsx'
     )
   })
 
-  it('обходиться без назви домену в імені файлу', async () => {
+  it('обходиться без назви домену — вона в ім’я файлу не входить', async () => {
     renderHarness({}, undefined)
 
     await userEvent.click(screen.getByRole('button'))
 
     await waitFor(() => expect(getSaveAs()).toHaveBeenCalled())
     expect(getSaveAs().mock.calls[0][1]).toBe(
-      'Розрахунок-заборгованості_2026-01_2026-03.xlsx'
+      'Розрахунок-заборгованості_Квартира-№18_2026-01_2026-03.xlsx'
     )
   })
 
-  it('не формує файл, коли немає квартир', async () => {
-    renderHarness({ companies: [], results: {} })
+  it('не формує файл, коли квартиру не обрано', async () => {
+    renderHarness({ company: undefined, result: undefined })
 
     await userEvent.click(screen.getByRole('button'))
 
@@ -136,14 +137,8 @@ describe('useExportExcel', () => {
     expect(getSaveAs()).not.toHaveBeenCalled()
   })
 
-  it('пропускає квартири без порахованих місяців', async () => {
-    renderHarness({
-      companies: [
-        { _id: 'apt-1', companyName: 'Порожня' },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ] as any,
-      results: { 'apt-1': { ...result, rows: [] } },
-    })
+  it('не формує файл, коли період порожній', async () => {
+    renderHarness({ result: { ...result, rows: [] } })
 
     await userEvent.click(screen.getByRole('button'))
 

@@ -1,11 +1,7 @@
 import {
-  buildDebtCalculationSheets,
+  buildDebtCalculationDocument,
   debtCalculationFileName,
-  ExcelRow,
-  IDebtExcelApartment,
-  MONTHS_SHEET,
-  PARAMS_SHEET,
-  SUMMARY_SHEET,
+  toXlsxStyle,
 } from '@utils/excel/debt-calculation-excel'
 import { IYearMonth } from '@utils/debt-calculation/months'
 import { message } from 'antd'
@@ -18,60 +14,45 @@ export interface IExportExcel {
   isExporting: boolean
 }
 
-const toYearMonth = (value?: Dayjs): IYearMonth | undefined =>
-  value ? { year: value.year(), month: value.month() + 1 } : undefined
-
 /**
- * Дістає реальний модуль із результату `import()`.
+ * Unwraps the real module out of an `import()` result.
  *
- * `xlsx-js-style` і `file-saver` — мініфіковані CJS/UMD бандли без ESM-збірки.
- * Webpack не вміє витягти з таких іменовані експорти, тож у браузері
- * `await import(...)` віддає `{ default: module.exports }`, і звернення до
- * `XLSX.utils` падає з `undefined`. Jest натомість транспілює `import()` у
- * `require()` і віддає модуль напряму — саме тому тести цього не ловили, поки
- * не почали перевіряти обидві форми явно.
+ * `xlsx-js-style` and `file-saver` are minified CJS/UMD bundles with no ESM
+ * build. Webpack cannot extract named exports from those, so in the browser
+ * `await import(...)` hands back `{ default: module.exports }` and reaching for
+ * `XLSX.utils` blows up on `undefined`. Jest, by contrast, transpiles
+ * `import()` to `require()` and returns the module directly - which is exactly
+ * why tests missed this until they started asserting both shapes.
  */
 export const interop = <T>(imported: T & { default?: T }): T =>
   imported?.default ?? imported
 
-/** Ширина колонки під найдовше значення — інакше все злипається в «####». */
-const autoColumns = (rows: ExcelRow[]): { wch: number }[] => {
-  if (rows.length === 0) return []
-
-  return Object.keys(rows[0]).map((header) => {
-    const longest = rows.reduce(
-      (max, row) => Math.max(max, String(row[header] ?? '').length),
-      header.length
-    )
-
-    return { wch: Math.min(longest + 4, 60) }
-  })
-}
+const toYearMonth = (value?: Dayjs): IYearMonth | undefined =>
+  value ? { year: value.year(), month: value.month() + 1 } : undefined
 
 export const useExportExcel = (domainName?: string): IExportExcel => {
-  const { companies, results, from, to, annualRatePercent, inflationMethod } =
-    useDebtCalculationContext()
+  const {
+    company,
+    result,
+    overrides = {},
+    from,
+    to,
+    annualRatePercent,
+    inflationMethod,
+  } = useDebtCalculationContext()
   const [isExporting, setIsExporting] = useState(false)
 
   const exportExcel = async (): Promise<void> => {
-    const apartments: IDebtExcelApartment[] = companies
-      .filter(({ _id }) => results[_id]?.rows?.length)
-      .map(({ _id, companyName, description }) => ({
-        name: companyName,
-        description,
-        result: results[_id],
-      }))
-
-    if (apartments.length === 0) {
-      message.warning('Немає що експортувати — оберіть домен і період')
+    if (!result?.rows?.length) {
+      message.warning('Немає що експортувати — оберіть компанію й період')
       return
     }
 
     setIsExporting(true)
 
     try {
-      // `xlsx-js-style` важкий і суто браузерний, тож вантажимо його лише в
-      // мить натискання, а не в бандл сторінки.
+      // `xlsx-js-style` is heavy and browser-only, so it loads at the moment
+      // of the click rather than in the page bundle.
       const [xlsxModule, fileSaverModule] = await Promise.all([
         import('xlsx-js-style'),
         import('file-saver'),
@@ -81,40 +62,62 @@ export const useExportExcel = (domainName?: string): IExportExcel => {
 
       const periodFrom = toYearMonth(from)
       const periodTo = toYearMonth(to)
-      const sheets = buildDebtCalculationSheets({
-        apartments,
+      const companyName = company?.companyName ?? 'Компанія'
+
+      const document = buildDebtCalculationDocument({
+        companyName,
+        description: company?.description,
+        domainName,
+        result,
         from: periodFrom,
         to: periodTo,
         annualRatePercent,
         inflationMethod,
-        domainName,
+        area: overrides.area ?? company?.totalArea,
+        tariff: overrides.tariff ?? company?.pricePerMeter,
+        openingDebt: overrides.openingDebt,
+        monthUpdatedAt: Object.fromEntries(
+          Object.entries(overrides.months ?? {})
+            .filter(([, month]) => !!month?.updatedAt)
+            .map(([period, month]) => [period, month.updatedAt])
+        ),
       })
 
-      const workbook = XLSX.utils.book_new()
+      const worksheet = XLSX.utils.aoa_to_sheet(
+        document.rows.map((line) => line.map((cell) => cell?.v ?? null))
+      )
+      worksheet['!cols'] = document.columns
 
-      for (const [name, rows] of [
-        [SUMMARY_SHEET, sheets.summary],
-        [MONTHS_SHEET, sheets.months],
-        [PARAMS_SHEET, sheets.params],
-      ] as [string, ExcelRow[]][]) {
-        const worksheet = XLSX.utils.json_to_sheet(rows)
-        worksheet['!cols'] = autoColumns(rows)
+      type Range = { s: { r: number; c: number }; e: { r: number; c: number } }
+      const merges: Range[] = []
 
-        Object.keys(rows[0] ?? {}).forEach((_, column) => {
-          const cell = worksheet[XLSX.utils.encode_cell({ r: 0, c: column })]
-          if (cell) cell.s = { font: { bold: true } }
+      document.rows.forEach((line, r) => {
+        line.forEach((cell, c) => {
+          if (!cell) return
+
+          const address = XLSX.utils.encode_cell({ r, c })
+          const target = worksheet[address]
+          if (!target) return
+
+          target.s = toXlsxStyle(cell)
+          if (cell.numFmt) target.z = cell.numFmt
+          if (cell.span && cell.span > 1) {
+            merges.push({ s: { r, c }, e: { r, c: c + cell.span - 1 } })
+          }
         })
+      })
 
-        XLSX.utils.book_append_sheet(workbook, worksheet, name)
-      }
+      worksheet['!merges'] = merges
+      const workbook = XLSX.utils.book_new()
+      XLSX.utils.book_append_sheet(workbook, worksheet, document.sheetName)
 
       const buffer = XLSX.write(workbook, { type: 'array', bookType: 'xlsx' })
       saveAs(
         new Blob([buffer], { type: 'application/octet-stream' }),
-        `${debtCalculationFileName(domainName, periodFrom, periodTo)}.xlsx`
+        `${debtCalculationFileName(companyName, periodFrom, periodTo)}.xlsx`
       )
     } catch (error) {
-      // Без цього збій виглядав як «нічого не сталося»: ні мережі, ні логів.
+      // Without this a failure looked like nothing happened: no network, no logs.
       console.error('Не вдалося сформувати Excel', error)
       message.error(
         `Не вдалося сформувати файл: ${

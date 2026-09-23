@@ -10,12 +10,12 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 const SERVICE_TYPE_VALUES = new Set<string>(Object.values(ServiceType))
 
 /**
- * Домени, у каталозі яких є послуга заданого `serviceType`.
+ * Domains whose catalog carries a service of the given `serviceType`.
  *
- * Шукаємо двома шляхами, бо каталог домену наповнюється двояко:
- * - клонуванням шаблону — з'являються копії `CustomService` з `domain`;
- * - старим способом — групи домену посилаються на ГЛОБАЛЬНУ послугу напряму,
- *   тож треба зіставити ще й фіксовані `_id` вбудованих послуг.
+ * Two lookups, because a domain's catalog gets filled in two ways:
+ * - by cloning a template, which yields `CustomService` copies with a `domain`;
+ * - the old way, where the domain's groups reference a GLOBAL service
+ *   directly, so the pinned `_id`s of the built-in services must match too.
  */
 async function domainsByServiceTypeHandler(
   req: NextApiRequest,

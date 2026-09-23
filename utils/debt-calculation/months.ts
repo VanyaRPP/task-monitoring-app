@@ -1,6 +1,6 @@
 export interface IYearMonth {
   year: number
-  /** Номер місяця, 1–12 (НЕ як у `Date#getMonth`). */
+  /** Month number, 1-12 (NOT the zero-based `Date#getMonth`). */
   month: number
 }
 
@@ -8,13 +8,14 @@ export const isLeapYear = (year: number): boolean =>
   (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0
 
 /**
- * Дільник для 3% річних. Акт рахує кожен місяць за календарем СВОГО року,
- * тому високосний 2024-й ділиться на 366, а сусідні роки — на 365.
+ * Divisor for the annual-interest formula. The Act prorates every month by the
+ * calendar of ITS OWN year, so leap 2024 divides by 366 and its neighbours by
+ * 365.
  */
 export const daysInYear = (year: number): number =>
   isLeapYear(year) ? 366 : 365
 
-/** Кількість календарних днів у місяці (`month` — 1–12). */
+/** Calendar days in the month (`month` is 1-12). */
 export const daysInMonth = (year: number, month: number): number =>
   new Date(year, month, 0).getDate()
 
@@ -26,10 +27,10 @@ const isValidMonth = (value?: IYearMonth): boolean =>
   value.month <= 12
 
 /**
- * Перелік місяців від `from` до `to` включно.
+ * Every month from `from` to `to`, both inclusive.
  *
- * Порожній масив, якщо межі не задані, некоректні або `to` раніше за `from` —
- * так форма з недозаповненим періодом не валить розрахунок.
+ * Empty when a bound is missing, malformed, or `to` precedes `from`, so a
+ * half-filled period form degrades instead of breaking the calculation.
  */
 export const buildMonthRange = (
   from?: IYearMonth,
@@ -53,13 +54,13 @@ export const buildMonthRange = (
 }
 
 /**
- * Порядковий номер місяця в абсолютній шкалі — щоб порівнювати й сортувати
- * періоди без возні з парами (рік, місяць).
+ * Absolute month ordinal, so periods can be compared and sorted without
+ * juggling (year, month) pairs.
  */
 export const periodKey = ({ year, month }: IYearMonth): number =>
   year * 12 + month
 
-/** Чи входить `value` у відрізок [`from`, `to`] включно. */
+/** Whether `value` falls inside [`from`, `to`], both inclusive. */
 export const isWithinPeriod = (
   value: IYearMonth,
   from?: IYearMonth,
@@ -73,7 +74,7 @@ export const isWithinPeriod = (
   return true
 }
 
-/** Розбір `YYYY-MM` (query-параметр API). `null` на будь-що інше. */
+/** Parses `YYYY-MM` (an API query param). `null` for anything else. */
 export const parsePeriod = (value?: string): IYearMonth | null => {
   const match = /^(\d{4})-(\d{1,2})$/.exec(String(value ?? '').trim())
   if (!match) return null
@@ -84,6 +85,6 @@ export const parsePeriod = (value?: string): IYearMonth | null => {
   return month >= 1 && month <= 12 ? { year, month } : null
 }
 
-/** Форматування в `YYYY-MM` — зворотне до {@link parsePeriod}. */
+/** Formats as `YYYY-MM` - the inverse of {@link parsePeriod}. */
 export const formatPeriod = ({ year, month }: IYearMonth): string =>
   `${year}-${String(month).padStart(2, '0')}`

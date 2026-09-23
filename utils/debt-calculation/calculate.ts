@@ -8,20 +8,20 @@ import {
 } from './types'
 
 /**
- * Непогашена частина одного нарахування разом із коефіцієнтом індексації того
- * місяця, в якому воно виникло. Потрібен лише методу `monthly`.
+ * The unpaid remainder of a single charge together with the indexation
+ * coefficient of the month it arose in. Only the `monthly` method needs it.
  */
 interface IDebtLot {
   amount: number
   coefficient: number
 }
 
-/** Копійчаний допуск — щоб залишок 1e-12 не тримав лот "живим". */
+/** Sub-kopeck tolerance, so a 1e-12 remainder does not keep a lot alive. */
 const EPSILON = 1e-9
 
 const round2 = (value: number): number => +toRoundFixed(value)
 
-/** Оплата гасить найстаріші нарахування першими (FIFO). */
+/** A payment settles the oldest charges first (FIFO). */
 const applyPayment = (lots: IDebtLot[], paid: number): void => {
   let rest = paid
 
@@ -39,8 +39,8 @@ const applyPayment = (lots: IDebtLot[], paid: number): void => {
 }
 
 /**
- * Інфляційні втрати помісячним методом: кожен непогашений лот індексується
- * власним відрізком періоду, а дефляційний відрізок не йде в мінус.
+ * Inflation losses, monthly method: every unpaid lot is indexed over its own
+ * slice of the period, and a deflationary slice never goes negative.
  */
 const lotsInflation = (lots: IDebtLot[], coefficient: number): number =>
   lots.reduce(
@@ -50,19 +50,21 @@ const lotsInflation = (lots: IDebtLot[], coefficient: number): number =>
   )
 
 /**
- * Розрахунок заборгованості за послуги з управління багатоквартирним будинком,
- * 3% річних та інфляційних втрат.
+ * Debt for multi-apartment building management services, plus annual interest
+ * and inflation losses.
  *
- * Відтворює Акт ОСББ (`Розрахунок.xlsx`) один-в-один при
- * `inflationMethod: 'balance'` — див. golden-тест у `calculate.test.ts`.
+ * With `inflationMethod: 'balance'` this reproduces the HOA Act
+ * (`Розрахунок.xlsx`) to the kopeck - see the golden test in
+ * `calculate.test.ts`.
  *
- * Ключові правила, які легко загубити:
- * - індекс ПЕРШОГО місяця не застосовується: індексація починається з місяця,
- *   наступного за місяцем виникнення боргу (ст. 625 ЦК, лист ВСУ № 62-97р);
- * - інфляційні втрати — це значення останнього місяця, а НЕ сума по місяцях:
- *   коефіцієнт уже накопичувальний;
- * - річні ж навпаки додаються за кожен місяць окремо;
- * - дефляція не дає від'ємних втрат.
+ * Rules that are easy to lose:
+ * - the FIRST month's index is never applied: indexation starts from the month
+ *   following the one the debt arose in (art. 625 Civil Code, Supreme Court
+ *   letter 62-97р);
+ * - inflation losses are the last month's value, NOT a sum across months, as
+ *   the coefficient is already cumulative;
+ * - interest, by contrast, IS summed month by month;
+ * - deflation never produces negative losses.
  */
 export const calculateDebt = ({
   months = [],

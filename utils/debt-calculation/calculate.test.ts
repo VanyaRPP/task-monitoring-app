@@ -2,11 +2,12 @@ import { calculateDebt } from './calculate'
 import { IDebtMonthInput } from './types'
 
 /**
- * Golden-фікстура: рядки 160–203 листа «Акт» із `Розрахунок.xlsx` —
- * квартира 67.08 м², період листопад 2021 — червень 2025.
+ * Golden fixture: rows 160-203 of the «Акт» sheet in `Розрахунок.xlsx` - a
+ * 67.08 m² flat, November 2021 through June 2025.
  *
- * Формат: [рік, місяць, сплачено, тариф грн/м², індекс інфляції %].
- * Тариф росте з 5.25 до 6.25 у липні 2024 — це в даних, не помилка.
+ * Shape: [year, month, paid, tariff UAH/m², inflation index %].
+ * The tariff rises from 5.25 to 6.25 in July 2024 - that is in the data, not a
+ * mistake.
  */
 const AKT_ROWS: [number, number, number, number, number][] = [
   [2021, 11, 0, 5.25, 100.8],
@@ -56,7 +57,7 @@ const AKT_ROWS: [number, number, number, number, number][] = [
 ]
 
 const AKT_AREA = 67.08
-/** Кол. I9 Акта — «Заборгованість на 01.11.2021». */
+/** Column I9 of the Act - the opening debt as of 01.11.2021. */
 const AKT_OPENING_DEBT = 352.17
 
 const aktMonths: IDebtMonthInput[] = AKT_ROWS.map(
@@ -81,7 +82,7 @@ describe('calculateDebt — golden: Розрахунок.xlsx', () => {
   })
 
   it('відтворює підсумки Акта', () => {
-    // C204, D204, J204 — прямі суми з листа.
+    // C204, D204 and J204 - straight sums off the sheet.
     expect(result.totals.charged).toBeCloseTo(16300.44, 6)
     expect(result.totals.paid).toBeCloseTo(9272.17, 6)
     expect(result.totals.days).toBe(1338)
@@ -104,8 +105,9 @@ describe('calculateDebt — golden: Розрахунок.xlsx', () => {
   })
 
   it('відтворює разом (E205)', () => {
-    // 12293.2566 на листі — там M204 вбито числом з 2 знаками замість
-    // посилання на M203; від повної точності це відрізняється на 0.0039.
+    // The sheet says 12293.2566: M204 there is a hardcoded 2-decimal number
+    // instead of a reference to M203, which differs by 0.0039 from full
+    // precision.
     expect(result.total).toBeCloseTo(12293.26049131185, 6)
   })
 
@@ -175,9 +177,9 @@ describe('calculateDebt — метод monthly', () => {
   })
 
   it('оплата гасить найстаріше нарахування першим (FIFO)', () => {
-    // Два нарахування по 100; індекс росте лише після другого місяця, тож
-    // старий лот індексується 1.10, новий — 1.00. Оплата 100 гасить старий,
-    // і на індексацію лишається тільки новий лот, тобто 0.
+    // Two charges of 100. The index only rises after the second month, so the
+    // older lot indexes at 1.10 and the newer at 1.00. A payment of 100
+    // settles the older one, leaving only the newer lot to index, i.e. 0.
     const result = calculateDebt({
       months: [
         { year: 2024, month: 1, charged: 100, inflationIndex: 100 },
@@ -199,9 +201,9 @@ describe('calculateDebt — метод monthly', () => {
       inflationMethod: 'monthly',
     })
 
-    // Перший лот проходить +10%, другий виник уже в місяці з цим індексом.
+    // The first lot rides the +10%; the second arose in the month that index belongs to.
     expect(result.inflation).toBeCloseTo(10, 6)
-    // Метод balance нарахував би 10% на весь залишок 200.
+    // The balance method would charge 10% on the whole 200 outstanding.
     expect(
       calculateDebt({
         months: [

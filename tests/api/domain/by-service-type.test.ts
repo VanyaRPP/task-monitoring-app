@@ -34,7 +34,7 @@ const makeRes = () => {
   return res
 }
 
-/** `CustomService.find` викликається двічі: спершу scoped, потім глобальні. */
+/** `CustomService.find` runs twice: domain-scoped first, then the global ones. */
 const mockCustomServiceFind = (scoped: unknown[], global: unknown[]) =>
   (CustomService.find as jest.Mock).mockImplementation((filter: any) => ({
     lean: jest

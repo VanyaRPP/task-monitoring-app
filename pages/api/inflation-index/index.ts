@@ -55,13 +55,13 @@ async function inflationIndexHandler(
 
   switch (req.method) {
     case 'GET': {
-      // Держстатівський ІСЦ — публічна довідкова таблиця, читати може будь-хто
-      // авторизований. Запис нижче лишається за адміном.
+      // Derzhstat's CPI is a public reference table, so any authenticated user
+      // may read it. Writing, below, stays admin-only.
       const from = parsePeriod(req.query.from as string)
       const to = parsePeriod(req.query.to as string)
 
-      // Звужуємо запит роками, а точні межі місяців добираємо в пам'яті:
-      // довідник — це десятки рядків на рік, і так простіше, ніж $expr.
+      // Narrow the query by year and apply the exact month bounds in memory:
+      // the table runs to dozens of rows a year, and this beats an $expr.
       const filter: { year?: IYearFilter } = {}
       if (from || to) {
         filter.year = {}

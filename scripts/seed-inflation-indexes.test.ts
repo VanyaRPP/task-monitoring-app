@@ -26,7 +26,7 @@ describe('INFLATION_INDEXES', () => {
   it('покриває лис.2021 — сер.2026 без пропусків і дублів', () => {
     expect(INFLATION_INDEXES).toHaveLength(58)
     expect(INFLATION_INDEXES[0]).toEqual([2021, 11, 100.8])
-    // Кінець ряду рухається лише разом із публікаціями Держстату.
+    // The end of the series only moves when Derzhstat publishes.
     expect(INFLATION_INDEXES[57]).toEqual([2026, 8, 100.1])
 
     const keys = INFLATION_INDEXES.map(([year, month]) => year * 12 + month)

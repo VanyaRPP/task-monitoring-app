@@ -5,7 +5,7 @@ import dayjs from 'dayjs'
 import { IMonthOverride } from './build-input'
 import { formatPeriod } from './months'
 
-/** Те, що префілу потрібно від платежу. Структурно сумісне з IExtendedPayment. */
+/** What the prefill needs from a payment. Structurally compatible with IExtendedPayment. */
 export interface IPrefillPayment {
   type?: string
   company?: string | { _id?: string }
@@ -16,7 +16,7 @@ export interface IPrefillPayment {
   invoice?: IPaymentField[]
 }
 
-/** Те, що префілу потрібно від місячної послуги домену. */
+/** What the prefill needs from a domain's monthly service. */
 export interface IPrefillService {
   date?: Date | string
   rentPrice?: number
@@ -29,11 +29,11 @@ export interface IBuildMonthPrefillArgs {
 }
 
 /**
- * Місяць читаємо локальним часом, як і решта додатка.
+ * The month is read in local time, like everywhere else in the app.
  *
- * Дати місячних послуг створюються з `dayjs(...).startOf('month')` у київському
- * часі й лягають у базу як UTC на кілька годин раніше. Читання через
- * `getUTCMonth` зсунуло б такий запис на попередній місяць.
+ * Monthly-service dates are created with `dayjs(...).startOf('month')` in Kyiv
+ * time and land in the DB as a UTC instant a few hours earlier. Reading them
+ * with `getUTCMonth` would shift such a record into the previous month.
  */
 const periodOfDate = (value?: Date | string): string | undefined => {
   if (!value) return undefined
@@ -61,11 +61,12 @@ const isHousingFeeLine = (line?: IPaymentField): boolean => {
 }
 
 /**
- * Сума рядків квартплати в рахунку, або `undefined`, якщо таких рядків немає.
+ * The housing-fee lines of an invoice summed, or `undefined` when there are
+ * none.
  *
- * Свідомо НЕ падаємо на `generalSum`: у рахунку можуть бути й інші послуги, і
- * тихо зарахувати їх у квартплату — це завищити борг. Немає рядка — хай
- * двигун рахує `площа × тариф`.
+ * Deliberately does NOT fall back to `generalSum`: an invoice may carry other
+ * services, and quietly counting them as housing fee would overstate the debt.
+ * With no matching line, let the engine derive `area × tariff` instead.
  */
 export const housingFeeCharged = (
   payment?: IPrefillPayment
@@ -77,11 +78,12 @@ export const housingFeeCharged = (
 }
 
 /**
- * Збирає помісячний префіл із того, що вже є в базі: тариф — з місячних послуг
- * домену, нараховано — з рахунків (debit), сплачено — з оплат (credit).
+ * Builds the per-month prefill from what the DB already holds: the tariff
+ * from the domain's monthly services, charges from debit invoices, payments
+ * from credit records.
  *
- * Це саме ПРЕФІЛ: ручні правки користувача лежать окремо і завжди його б'ють
- * (див. `buildDebtCalculationInput`).
+ * This is strictly a PREFILL: the user's manual edits live separately and
+ * always win over it (see `buildDebtCalculationInput`).
  */
 export const buildMonthPrefill = ({
   companyId,

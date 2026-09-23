@@ -2,14 +2,15 @@ import { IApartmentOverrides, IMonthOverride } from './build-input'
 import { IYearMonth } from './months'
 import { InflationMethod } from './types'
 
-/** Те, що зберігається: тільки ВХІДНІ дані, ніколи не результат. */
+/** What gets persisted: INPUTS only, never the computed result. */
 export interface IDebtCalculationSnapshot {
   domain?: string
+  company?: string
   periodFrom?: IYearMonth
   periodTo?: IYearMonth
   annualRatePercent?: number
   inflationMethod?: InflationMethod
-  /** `{ companyId: { ...правки квартири, months: { 'YYYY-MM': {...} } } }` */
+  /** `{ companyId: { ...company edits, months: { 'YYYY-MM': {...} } } }` */
   overrides?: Record<string, IApartmentOverrides>
 }
 
@@ -29,12 +30,14 @@ const APARTMENT_FIELDS = [
   'courtFee',
 ] as const
 
-/** Межі проти роздутого документа: рахунок іде на квартири й місяці, не тисячі. */
+/** Guards against a bloated document: counts run to companies and months, not thousands. */
 const MAX_APARTMENTS = 1000
 const MAX_MONTHS = 1200
 
 const OBJECT_ID = /^[0-9a-fA-F]{24}$/
 const PERIOD = /^\d{4}-(0[1-9]|1[0-2])$/
+/** Long enough to reject junk; Date validates the rest. */
+const MAX_TIMESTAMP_LENGTH = 32
 
 const finite = (value: unknown): number | undefined => {
   if (value === null || value === undefined || value === '') return undefined
@@ -58,6 +61,17 @@ const pickNumbers = <K extends string>(
   return out
 }
 
+/** Accepts only a parseable ISO date, normalized to canonical form. */
+const sanitizeTimestamp = (value: unknown): string | undefined => {
+  if (typeof value !== 'string' || value.length > MAX_TIMESTAMP_LENGTH) {
+    return undefined
+  }
+
+  const time = Date.parse(value)
+
+  return Number.isFinite(time) ? new Date(time).toISOString() : undefined
+}
+
 const sanitizeMonths = (
   source: unknown
 ): Record<string, IMonthOverride> | undefined => {
@@ -69,8 +83,11 @@ const sanitizeMonths = (
   for (const [period, raw] of Object.entries(source)) {
     if (!PERIOD.test(period) || count >= MAX_MONTHS) continue
 
-    const month = pickNumbers(raw, MONTH_FIELDS)
+    const month: IMonthOverride = pickNumbers(raw, MONTH_FIELDS)
+    const updatedAt = sanitizeTimestamp((raw as IMonthOverride)?.updatedAt)
+    // A timestamp on its own, with no value beside it, is an empty row.
     if (Object.keys(month).length === 0) continue
+    if (updatedAt) month.updatedAt = updatedAt
 
     out[period] = month
     count += 1
@@ -91,12 +108,12 @@ const sanitizeYearMonth = (source: unknown): IYearMonth | undefined => {
 }
 
 /**
- * Приводить правки користувача до того, що безпечно класти в Mongo.
+ * Reduces the user's edits to something safe to put into Mongo.
  *
- * Це межа довіри: об'єкт приходить із браузера цілим і лягає в поле типу
- * Mixed. Пропускаємо лише відомі ключі з числовими значеннями, ключі квартир
- * мають бути ObjectId, ключі місяців — `YYYY-MM`. Порожні гілки викидаємо, щоб
- * документ не обростав сміттям на кожному збереженні.
+ * This is the trust boundary: the object arrives whole from the browser and
+ * lands in a Mixed field. Only known keys with numeric values pass, company
+ * keys must be ObjectIds and month keys `YYYY-MM`. Empty branches are dropped
+ * so the document does not accrete junk on every save.
  */
 export const sanitizeOverrides = (
   source: unknown
@@ -122,14 +139,16 @@ export const sanitizeOverrides = (
   return out
 }
 
-/** Нормалізує повний знімок розрахунку перед записом у базу. */
+/** Normalizes the full calculation snapshot before it is written. */
 export const sanitizeSnapshot = (source: unknown): IDebtCalculationSnapshot => {
   const raw = (source ?? {}) as Record<string, unknown>
   const domain = String(raw.domain ?? '')
+  const company = String(raw.company ?? '')
   const rate = finite(raw.annualRatePercent)
 
   return {
     ...(OBJECT_ID.test(domain) ? { domain } : {}),
+    ...(OBJECT_ID.test(company) ? { company } : {}),
     ...(sanitizeYearMonth(raw.periodFrom)
       ? { periodFrom: sanitizeYearMonth(raw.periodFrom) }
       : {}),

@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import {
-  IDebtCalculationListResponse,
+  IDebtCalculationKey,
   IDebtCalculationResponse,
   ISaveDebtCalculationRequest,
   ISavedDebtCalculation,
@@ -11,43 +11,30 @@ export const debtCalculationApi = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: '/api/' }),
   tagTypes: ['DebtCalculation'],
   endpoints: (builder) => ({
-    getDebtCalculations: builder.query<
-      ISavedDebtCalculation[],
-      { domainId?: string } | undefined
+    getDebtCalculation: builder.query<
+      ISavedDebtCalculation | null,
+      IDebtCalculationKey
     >({
-      query: (args) => ({
+      query: ({ domainId, companyId }) => ({
         url: 'debt-calculation',
-        params: args?.domainId ? { domainId: args.domainId } : {},
+        params: { domainId, companyId },
       }),
-      transformResponse: (response: IDebtCalculationListResponse) =>
-        response.data,
+      transformResponse: (response: IDebtCalculationResponse) => response.data,
       providesTags: ['DebtCalculation'],
     }),
 
     saveDebtCalculation: builder.mutation<
-      ISavedDebtCalculation,
+      ISavedDebtCalculation | null,
       ISaveDebtCalculationRequest
     >({
-      query: ({ _id, ...body }) => ({
-        url: _id ? `debt-calculation/${_id}` : 'debt-calculation',
-        method: _id ? 'PATCH' : 'POST',
-        body,
-      }),
+      query: (body) => ({ url: 'debt-calculation', method: 'POST', body }),
       transformResponse: (response: IDebtCalculationResponse) => response.data,
-      invalidatesTags: ['DebtCalculation'],
-    }),
-
-    deleteDebtCalculation: builder.mutation<string, string>({
-      query: (id) => ({ url: `debt-calculation/${id}`, method: 'DELETE' }),
-      transformResponse: (response: { success: boolean; data: string }) =>
-        response.data,
-      invalidatesTags: ['DebtCalculation'],
+      // Deliberately WITHOUT invalidatesTags: autosave fires on every pause in
+      // typing, and a refetch would pull what was just sent back into the form,
+      // clobbering whatever the user is typing next.
     }),
   }),
 })
 
-export const {
-  useGetDebtCalculationsQuery,
-  useSaveDebtCalculationMutation,
-  useDeleteDebtCalculationMutation,
-} = debtCalculationApi
+export const { useGetDebtCalculationQuery, useSaveDebtCalculationMutation } =
+  debtCalculationApi

@@ -145,9 +145,9 @@ describe('buildDebtCalculationInput', () => {
 
 describe('buildDebtCalculationInput + calculateDebt — наскрізь на даних Акта', () => {
   it('відтворює підсумок Акта через шар UI', () => {
-    // Той самий Акт, але зібраний так, як його збирає сторінка: компанія дає
-    // площу й тариф, довідник — індекси, правки місяців — оплати й зміну
-    // тарифу з липня 2024.
+    // The same Act, assembled the way the page assembles it: the company
+    // supplies area and tariff, the reference table supplies indices, and the
+    // month edits supply payments plus the July 2024 tariff change.
     const indexes = [
       [2021, 11, 100.8],
       [2021, 12, 100.6],

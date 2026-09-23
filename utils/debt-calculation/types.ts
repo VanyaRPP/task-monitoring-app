@@ -1,76 +1,77 @@
 import { IYearMonth } from './months'
 
 /**
- * Спосіб нарахування інфляційних втрат.
+ * How inflation losses are accrued.
  *
- * `balance` — як в Акті ОСББ: сукупний коефіцієнт за весь період множиться на
- *   ВЕСЬ поточний залишок боргу, включно з нарахуваннями останніх місяців.
+ * `balance` - what the paper Act does: the cumulative index for the whole
+ *   period multiplies the ENTIRE outstanding balance, recent charges included.
  *
- * `monthly` — як вимагає ст. 625 ЦК і практика ВС: кожне нарахування
- *   індексується від місяця, НАСТУПНОГО за місяцем його виникнення, а оплати
- *   гасять найстаріший борг (FIFO). Дає помітно меншу суму.
+ * `monthly` - what art. 625 of the Civil Code and Supreme Court practice
+ *   require: every charge is indexed from the month FOLLOWING the one it arose
+ *   in, and payments settle the oldest debt first (FIFO). Yields a noticeably
+ *   smaller figure.
  */
 export type InflationMethod = 'balance' | 'monthly'
 
-/** Ставка річних за ст. 625 ЦК, якщо договором не встановлено іншу. */
+/** Annual rate under art. 625 of the Civil Code, absent a contractual one. */
 export const DEFAULT_ANNUAL_RATE_PERCENT = 3
 
-/** Один місяць періоду — те, що вводиться або підтягується з БД. */
+/** One month of the period - typed in by hand or prefilled from the DB. */
 export interface IDebtMonthInput extends IYearMonth {
-  /** Загальна площа, м². */
+  /** Total area, m². */
   area?: number
-  /** Тариф (членський внесок), грн за 1 м². */
+  /** Tariff (membership fee), UAH per m². */
   tariff?: number
-  /** Нараховано, грн. Якщо не задано — рахується як `area × tariff`. */
+  /** Charged, UAH. Computed as `area × tariff` when omitted. */
   charged?: number
-  /** Сплачено, грн. */
+  /** Paid, UAH. */
   paid?: number
-  /** Місячний індекс інфляції (ІСЦ), %: `100.8` означає +0.8%. */
+  /** Monthly consumer price index, %: `100.8` means +0.8%. */
   inflationIndex?: number
 }
 
 export interface IDebtCalculationInput {
   months: IDebtMonthInput[]
-  /** Борг на початок періоду, грн. */
+  /** Opening debt for the period, UAH. */
   openingDebt?: number
-  /** Річна ставка, %. За замовчуванням {@link DEFAULT_ANNUAL_RATE_PERCENT}. */
+  /** Annual rate, %. Defaults to {@link DEFAULT_ANNUAL_RATE_PERCENT}. */
   annualRatePercent?: number
-  /** За замовчуванням `balance` — як в Акті. */
+  /** Defaults to `balance`, matching the Act. */
   inflationMethod?: InflationMethod
   /**
-   * Чи нараховувати річні на внесок у тому ж місяці, в якому його нараховано.
+   * Whether interest accrues on a charge during the very month it was billed.
    *
-   * `true` (за замовчуванням) повторює Акт. `false` — наближення до статуту зі
-   * строком оплати в наступному місяці: внесок починає "капати" лише з
-   * наступного місяця. Точне число дня оплати з'явиться тут, коли ОСББ його
-   * підтвердить.
+   * `true` (default) reproduces the Act. `false` approximates a by-law whose
+   * due date falls in the following month, so a charge only starts accruing
+   * from the next month. The exact due day will land here once the HOA
+   * confirms it.
    */
   interestOnCurrentCharge?: boolean
-  /** Юридичні послуги, грн — окремий рядок підсумку. */
+  /** Legal fees, UAH - its own line in the summary. */
   legalFees?: number
-  /** Держмито, грн — окремий рядок підсумку. */
+  /** Court fee, UAH - its own line in the summary. */
   courtFee?: number
 }
 
-/** Порахований місяць — рядок помісячної деталізації. */
+/** A calculated month - one row of the monthly breakdown. */
 export interface IDebtMonthRow extends IYearMonth {
   area: number
   tariff: number
-  /** Нараховано, грн (кол. D Акта). */
+  /** Charged, UAH (column D of the Act). */
   charged: number
-  /** Сплачено, грн (кол. C). */
+  /** Paid, UAH (column C). */
   paid: number
-  /** Сума боргу на кінець місяця, грн (кол. I). */
+  /** Debt at month end, UAH (column I). */
   debt: number
-  /** Календарних днів у місяці (кол. J). */
+  /** Calendar days in the month (column J). */
   days: number
-  /** Місячний індекс інфляції, % (кол. K). */
+  /** Monthly inflation index, % (column K). */
   inflationIndex: number
-  /** Сукупний коефіцієнт індексації з початку періоду (кол. L). */
+  /** Cumulative indexation coefficient since the period start (column L). */
   coefficient: number
-  /** Інфляційні втрати станом на цей місяць, грн (кол. M). */
+  /** Inflation losses as of this month, UAH (column M). */
   inflationLoss: number
-  /** 3% річних за цей місяць, грн (кол. H). */
+  /** Annual interest for this month, UAH (column H). */
   interest: number
 }
 
@@ -79,22 +80,22 @@ export interface IDebtCalculationResult {
   totals: {
     charged: number
     paid: number
-    /** Сума річних за всі місяці — саме вона йде в підсумок. */
+    /** Interest summed over every month - this is what the summary shows. */
     interest: number
     days: number
   }
-  /** Тіло боргу: `борг на початок + Σ нараховано − Σ сплачено`. */
+  /** Principal: `opening debt + Σ charged − Σ paid`. */
   body: number
-  /** 3% річних — дублює `totals.interest` для читабельності підсумку. */
+  /** Annual interest - mirrors `totals.interest` so the summary reads well. */
   interest: number
   /**
-   * Інфляційні втрати за обраним методом.
+   * Inflation losses under the chosen method.
    *
-   * Це значення ОСТАННЬОГО місяця, а не сума по місяцях — накопичувальний
-   * коефіцієнт уже враховує весь період.
+   * This is the LAST month's figure, not a sum across months: the coefficient
+   * is cumulative and already covers the whole period.
    */
   inflation: number
-  /** Сукупний коефіцієнт індексації за період. */
+  /** Cumulative indexation coefficient for the period. */
   coefficient: number
   legalFees: number
   courtFee: number

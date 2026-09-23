@@ -2,6 +2,7 @@ import { IDebtCalculationResult } from '@utils/debt-calculation/types'
 import { formatPeriod } from '@utils/debt-calculation/months'
 import { InputNumber, Table, Tooltip, Typography } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
+import dayjs from 'dayjs'
 import { useDebtCalculationContext } from './'
 import { formatCoefficient, formatMoney, formatMonthLabel } from './format'
 import s from './style.module.scss'
@@ -9,26 +10,25 @@ import s from './style.module.scss'
 type MonthRow = IDebtCalculationResult['rows'][number]
 
 interface Props {
-  companyId: string
   result: IDebtCalculationResult
 }
 
-const MonthsTable: React.FC<Props> = ({ companyId, result }) => {
-  const { overrides, prefillByCompany, setMonthOverride, inflationMethod } =
+const MonthsTable: React.FC<Props> = ({ result }) => {
+  const { overrides, prefillMonths, setMonthOverride, inflationMethod } =
     useDebtCalculationContext()
 
-  const monthOverrides = overrides[companyId]?.months ?? {}
-  const prefill = prefillByCompany?.[companyId] ?? {}
+  const monthOverrides = overrides.months ?? {}
+  const prefill = prefillMonths ?? {}
 
   const patch = (row: MonthRow, field: string, value: number | null) =>
-    setMonthOverride(companyId, formatPeriod(row), {
+    setMonthOverride(formatPeriod(row), {
       [field]: value == null ? undefined : Number(value),
     })
 
   /**
-   * Показуємо ручну правку, а якщо її немає — підтягнуте з БД. Обидва як
-   * справжнє значення, не плейсхолдер: сплачені 500 грн сірим текстом
-   * виглядали б як порожнє поле.
+   * Shows the manual edit, falling back to what was prefilled from the DB.
+   * Both render as a real value rather than a placeholder: 500 UAH paid, shown
+   * in grey, would read as an empty field.
    */
   const valueOf = (
     row: MonthRow,
@@ -67,8 +67,8 @@ const MonthsTable: React.FC<Props> = ({ companyId, result }) => {
           size="small"
           min={0}
           value={valueOf(row, 'charged')}
-          // Порожнє поле означає «рахуй площа × тариф» — показуємо результат
-          // підказкою, щоб було видно, що саме перекриваєш.
+          // An empty field means "derive area × tariff", so the derived value
+          // shows as the placeholder - you can see what you are overriding.
           placeholder={formatMoney(row.charged)}
           onChange={(value) => patch(row, 'charged', value as number)}
         />
@@ -157,6 +157,22 @@ const MonthsTable: React.FC<Props> = ({ companyId, result }) => {
       align: 'right',
       render: (_, row) => formatMoney(row.inflationLoss),
     },
+    {
+      title: 'Змінено',
+      width: 110,
+      render: (_, row) => {
+        const at = monthOverrides[formatPeriod(row)]?.updatedAt
+        if (!at) return null
+
+        return (
+          <Tooltip title={dayjs(at).format('DD.MM.YYYY HH:mm')}>
+            <Typography.Text type="secondary" className={s.Muted}>
+              {dayjs(at).format('DD.MM HH:mm')}
+            </Typography.Text>
+          </Tooltip>
+        )
+      },
+    },
   ]
 
   return (
@@ -197,11 +213,12 @@ const MonthsTable: React.FC<Props> = ({ companyId, result }) => {
               <Table.Summary.Cell index={10} align="right">
                 <strong>{formatMoney(result.inflation)}</strong>
               </Table.Summary.Cell>
+              <Table.Summary.Cell index={11} />
             </Table.Summary.Row>
           </Table.Summary>
         )}
       />
-      <Typography.Paragraph type="secondary" className={s.Muted}>
+      <Typography.Paragraph type="secondary" className={s.TableNote}>
         {inflationMethod === 'balance'
           ? 'Інфляційні у підсумку — це значення останнього місяця, а не сума по колонці: коефіцієнт накопичувальний.'
           : 'Помісячний метод: кожне нарахування індексується від свого місяця, оплати гасять найстаріший борг.'}
