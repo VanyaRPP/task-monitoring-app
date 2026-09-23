@@ -2,18 +2,18 @@ import { useGetDomainIdsByServiceTypeQuery } from '@common/api/domainApi/domain.
 import { ServiceType } from '@utils/constants'
 
 export interface IDebtCalculationAccess {
-  /** `_id` доменів, у каталозі яких є послуга «Квартплата». */
+  /** `_id`s of the domains whose catalog carries the housing-fee service. */
   domainIds: string[]
-  /** Хоча б один домен має послугу — є сенс показувати сторінку. */
+  /** At least one domain has it, so the page is worth showing. */
   hasAccess: boolean
   isLoading: boolean
 }
 
 /**
- * Доступ до розрахунку заборгованості.
+ * Access to the debt calculation page.
  *
- * Ендпоінт адмінський: не-адмін отримує 403, `data` лишається порожньою і
- * `hasAccess` буде `false` — тобто гейт закривається сам собою.
+ * The endpoint is admin-only: a non-admin gets a 403, `data` stays empty and
+ * `hasAccess` comes out `false`, so the gate closes on its own.
  */
 export const useDebtCalculationAccess = (
   skip = false

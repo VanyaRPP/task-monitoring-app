@@ -1,20 +1,20 @@
 import mongoose, { Schema } from 'mongoose'
 
 /**
- * Офіційний місячний індекс споживчих цін (ІСЦ) Держстату.
+ * The official monthly consumer price index published by Derzhstat.
  *
- * Це ГЛОБАЛЬНИЙ довідник, а не властивість домену. Не плутати з
- * `Service.inflicionPrice`: той живе на місячній послузі конкретного
- * домену+вулиці й керує рядком «Індекс інфляції» у звичайному рахунку. Тут —
- * державна статистика, однакова для всіх, з якої рахується індексація боргу за
- * ст. 625 ЦК.
+ * This is a GLOBAL reference table, not a property of a domain. Do not confuse
+ * it with `Service.inflicionPrice`, which lives on one domain+street monthly
+ * service and drives the «Індекс інфляції» line of an ordinary invoice. What
+ * is stored here is national statistics, identical for everyone, and it drives
+ * debt indexation under art. 625 of the Civil Code.
  */
 export interface IInflationIndex {
   _id?: string
   year: number
-  /** Номер місяця, 1–12. */
+  /** Month number, 1-12. */
   month: number
-  /** ІСЦ, %: `100.8` означає +0.8% до попереднього місяця. */
+  /** CPI, %: `100.8` means +0.8% against the previous month. */
   value: number
 }
 

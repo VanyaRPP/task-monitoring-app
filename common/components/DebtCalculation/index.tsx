@@ -1,15 +1,10 @@
-import {
-  useDeleteDebtCalculationMutation,
-  useGetDebtCalculationsQuery,
-  useSaveDebtCalculationMutation,
-} from '@common/api/debtCalculationApi/debtCalculation.api'
-import { ISavedDebtCalculation } from '@common/api/debtCalculationApi/debtCalculation.api.types'
+import { useGetDebtCalculationQuery } from '@common/api/debtCalculationApi/debtCalculation.api'
 import { useGetInflationIndexesQuery } from '@common/api/inflationIndexApi/inflationIndex.api'
 import { useGetAllPaymentsQuery } from '@common/api/paymentApi/payment.api'
-import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 import { IExtendedRealestate } from '@common/api/realestateApi/realestate.api.types'
 import TableCard from '@common/components/UI/TableCard'
+import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
 import { useDebtCalculationAccess } from '@modules/hooks/useDebtCalculationAccess'
 import {
   buildDebtCalculationInput,
@@ -18,26 +13,40 @@ import {
   indexesByPeriod,
 } from '@utils/debt-calculation/build-input'
 import { calculateDebt } from '@utils/debt-calculation/calculate'
-import { buildMonthPrefill } from '@utils/debt-calculation/prefill'
+import {
+  draftKey,
+  isDraftNewer,
+  readDraft,
+} from '@utils/debt-calculation/draft-storage'
 import { formatPeriod, IYearMonth } from '@utils/debt-calculation/months'
+import { buildMonthPrefill } from '@utils/debt-calculation/prefill'
+import { IDebtCalculationSnapshot } from '@utils/debt-calculation/serialize'
 import {
   DEFAULT_ANNUAL_RATE_PERCENT,
   IDebtCalculationResult,
   InflationMethod,
 } from '@utils/debt-calculation/types'
-import { Alert, message } from 'antd'
+import { Alert } from 'antd'
 import dayjs, { Dayjs } from 'dayjs'
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
+import DebtCalculationBody from './Body'
 import DebtCalculationHeader from './Header'
-import DebtCalculationTable from './Table'
+import { IAutoSave, useAutoSave } from './useAutoSave'
+
+// Neither payments nor monthly services can be filtered by a date range on the
+// server, so we pull the domain's catalog whole and bucket it by month here.
+const PREFILL_PAYMENTS_LIMIT = 5000
+const PREFILL_SERVICES_LIMIT = 500
 
 const toYearMonth = (value?: Dayjs | null): IYearMonth | undefined =>
   value ? { year: value.year(), month: value.month() + 1 } : undefined
-
-// Ні платежі, ні місячні послуги не фільтруються за діапазоном дат на сервері,
-// тож тягнемо каталог домену цілком і розкладаємо по місяцях на клієнті.
-const PREFILL_PAYMENTS_LIMIT = 5000
-const PREFILL_SERVICES_LIMIT = 500
 
 const toDayjs = (value?: IYearMonth): Dayjs | undefined =>
   value
@@ -47,10 +56,14 @@ const toDayjs = (value?: IYearMonth): Dayjs | undefined =>
         .startOf('month')
     : undefined
 
-export interface IDebtCalculationContext {
+export interface IDebtCalculationContext extends IAutoSave {
+  allowedDomainIds: string[]
   domainId?: string
   setDomainId: (value?: string) => void
-  allowedDomainIds: string[]
+  companies: IExtendedRealestate[]
+  companyId?: string
+  setCompanyId: (value?: string) => void
+  company?: IExtendedRealestate
   from?: Dayjs
   to?: Dayjs
   setFrom: (value?: Dayjs) => void
@@ -59,35 +72,16 @@ export interface IDebtCalculationContext {
   setAnnualRatePercent: (value: number) => void
   inflationMethod: InflationMethod
   setInflationMethod: (value: InflationMethod) => void
-  companies: IExtendedRealestate[]
-  /** Результат розрахунку по кожній квартирі, ключ — `company._id`. */
-  results: Record<string, IDebtCalculationResult>
-  overrides: Record<string, IApartmentOverrides>
-  /** Підтягнуте з БД по місяцях: `{ companyId: { 'YYYY-MM': {...} } }`. */
-  prefillByCompany: Record<string, Record<string, IMonthOverride>>
-  setApartmentOverride: (
-    companyId: string,
-    patch: Partial<IApartmentOverrides>
-  ) => void
-  setMonthOverride: (
-    companyId: string,
-    period: string,
-    patch: IMonthOverride
-  ) => void
-  /** Місяці періоду, для яких у довіднику немає ІСЦ. */
+  /** The selected company's calculation. */
+  result?: IDebtCalculationResult
+  overrides: IApartmentOverrides
+  /** Prefilled from the DB, per month, for the selected company. */
+  prefillMonths: Record<string, IMonthOverride>
+  setApartmentOverride: (patch: Partial<IApartmentOverrides>) => void
+  setMonthOverride: (period: string, patch: IMonthOverride) => void
+  /** Months of the period the CPI table has no entry for. */
   missingIndexPeriods: string[]
   isLoading: boolean
-  savedCalculations: ISavedDebtCalculation[]
-  currentId?: string
-  name: string
-  setName: (value: string) => void
-  /** Є незбережені зміни — від цього залежить і попередження при виході. */
-  isDirty: boolean
-  isSaving: boolean
-  save: () => Promise<void>
-  load: (id: string) => void
-  remove: () => Promise<void>
-  reset: () => void
 }
 
 export const DebtCalculationContext =
@@ -97,17 +91,18 @@ export const useDebtCalculationContext = (): IDebtCalculationContext =>
   useContext(DebtCalculationContext)
 
 /**
- * Розрахунок заборгованості за квартплатою.
+ * Housing-fee debt calculation, one company at a time.
  *
- * Стан тримаємо у React, а не в antd Form: тут немає сабміту, а редагована
- * матриця «квартира × місяць × поле» у Form.List коштувала б дорожче за будь-яку
- * вигоду від валідації.
+ * State lives in React rather than an antd Form: there is no submit here, and
+ * an editable month × field matrix in a Form.List would cost more than any
+ * validation it might buy.
  */
 const DebtCalculationBlock: React.FC = () => {
   const { domainIds: allowedDomainIds, isLoading: isAccessLoading } =
     useDebtCalculationAccess()
 
   const [domainId, setDomainId] = useState<string | undefined>()
+  const [companyId, setCompanyId] = useState<string | undefined>()
   const [from, setFrom] = useState<Dayjs | undefined>(() =>
     dayjs().subtract(1, 'year').startOf('month')
   )
@@ -119,24 +114,15 @@ const DebtCalculationBlock: React.FC = () => {
   )
   const [inflationMethod, setInflationMethod] =
     useState<InflationMethod>('balance')
-  const [overrides, setOverrides] = useState<
-    Record<string, IApartmentOverrides>
-  >({})
-  const [currentId, setCurrentId] = useState<string | undefined>()
-  const [name, setName] = useState('')
-  // Знімок на момент останнього збереження/завантаження — база для isDirty.
-  const [savedJson, setSavedJson] = useState('')
-
-  const { data: savedCalculations = [] } = useGetDebtCalculationsQuery(
-    { domainId },
-    { skip: !domainId }
-  )
-  const [saveCalculation, { isLoading: isSaving }] =
-    useSaveDebtCalculationMutation()
-  const [deleteCalculation] = useDeleteDebtCalculationMutation()
+  const [overrides, setOverrides] = useState<IApartmentOverrides>({})
 
   const { data: { data: companies } = { data: [] }, isLoading: isCompanies } =
     useGetAllRealEstateQuery({ domainId, archived: false }, { skip: !domainId })
+
+  const company = useMemo(
+    () => (companies ?? []).find(({ _id }) => _id === companyId),
+    [companies, companyId]
+  )
 
   const fromYearMonth = useMemo(() => toYearMonth(from), [from])
   const toYearMonthValue = useMemo(() => toYearMonth(to), [to])
@@ -152,15 +138,14 @@ const DebtCalculationBlock: React.FC = () => {
 
   const indexByPeriod = useMemo(() => indexesByPeriod(indexes), [indexes])
 
-  const companyIds = useMemo(
-    () => (companies ?? []).map(({ _id }) => _id),
-    [companies]
-  )
-
   const { data: { data: payments } = { data: [] }, isLoading: isPayments } =
     useGetAllPaymentsQuery(
-      { limit: PREFILL_PAYMENTS_LIMIT, domainIds: [domainId], companyIds },
-      { skip: !domainId || companyIds.length === 0 }
+      {
+        limit: PREFILL_PAYMENTS_LIMIT,
+        domainIds: [domainId],
+        companyIds: [companyId],
+      },
+      { skip: !domainId || !companyId }
     )
 
   const { data: { data: services } = { data: [] }, isLoading: isServices } =
@@ -169,96 +154,95 @@ const DebtCalculationBlock: React.FC = () => {
       { skip: !domainId }
     )
 
-  const prefillByCompany = useMemo(
+  const prefillMonths = useMemo(
     () =>
-      (companies ?? []).reduce<Record<string, Record<string, IMonthOverride>>>(
-        (acc, { _id }) => {
-          acc[_id] = buildMonthPrefill({ companyId: _id, payments, services })
-          return acc
-        },
-        {}
-      ),
-    [companies, payments, services]
+      companyId ? buildMonthPrefill({ companyId, payments, services }) : {},
+    [companyId, payments, services]
   )
 
-  const setApartmentOverride = (
-    companyId: string,
-    patch: Partial<IApartmentOverrides>
-  ) =>
-    setOverrides((prev) => ({
-      ...prev,
-      [companyId]: { ...prev[companyId], ...patch },
-    }))
-
-  const setMonthOverride = (
-    companyId: string,
-    period: string,
-    patch: IMonthOverride
-  ) =>
-    setOverrides((prev) => {
-      const apartment = prev[companyId] ?? {}
-      return {
-        ...prev,
-        [companyId]: {
-          ...apartment,
-          months: {
-            ...apartment.months,
-            [period]: { ...apartment.months?.[period], ...patch },
-          },
-        },
-      }
-    })
-
-  const results = useMemo(() => {
-    return (companies ?? []).reduce<Record<string, IDebtCalculationResult>>(
-      (acc, company) => {
-        acc[company._id] = calculateDebt(
-          buildDebtCalculationInput({
-            company,
-            from: fromYearMonth,
-            to: toYearMonthValue,
-            indexByPeriod,
-            overrides: overrides[company._id],
-            prefillMonths: prefillByCompany[company._id],
-            annualRatePercent,
-            inflationMethod,
-          })
-        )
-        return acc
-      },
-      {}
+  const { data: saved, isFetching: isSavedFetching } =
+    useGetDebtCalculationQuery(
+      { domainId, companyId },
+      { skip: !domainId || !companyId }
     )
-  }, [
-    companies,
-    fromYearMonth,
-    toYearMonthValue,
-    indexByPeriod,
-    overrides,
-    prefillByCompany,
-    annualRatePercent,
-    inflationMethod,
-  ])
 
-  const missingIndexPeriods = useMemo(() => {
-    const first = Object.values(results)[0]
-    return (first?.rows ?? [])
-      .filter(
-        ({ year, month }) => !indexByPeriod[formatPeriod({ year, month })]
-      )
-      .map(({ year, month }) => formatPeriod({ year, month }))
-  }, [results, indexByPeriod])
+  // What comes from the DB or the draft is applied exactly once per company,
+  // otherwise every refetch would clobber what the user is typing right now.
+  const appliedKey = useRef<string>('')
+  const [isApplied, setIsApplied] = useState(false)
 
-  const snapshot = useMemo(
+  useEffect(() => {
+    if (!domainId || !companyId || isSavedFetching) return
+
+    const key = `${domainId}:${companyId}`
+    if (appliedKey.current === key) return
+    appliedKey.current = key
+
+    const draft = readDraft(draftKey(domainId, companyId))
+    const snapshot: IDebtCalculationSnapshot | undefined = isDraftNewer(
+      draft,
+      saved?.updatedAt
+    )
+      ? draft.snapshot
+      : (saved as IDebtCalculationSnapshot | undefined)
+
+    setOverrides(snapshot?.overrides?.[companyId] ?? {})
+    setAnnualRatePercent(
+      snapshot?.annualRatePercent ?? DEFAULT_ANNUAL_RATE_PERCENT
+    )
+    setInflationMethod(snapshot?.inflationMethod ?? 'balance')
+    if (snapshot?.periodFrom) setFrom(toDayjs(snapshot.periodFrom))
+    if (snapshot?.periodTo) setTo(toDayjs(snapshot.periodTo))
+    setIsApplied(true)
+  }, [domainId, companyId, saved, isSavedFetching])
+
+  useEffect(() => {
+    setIsApplied(false)
+    setOverrides({})
+  }, [companyId])
+
+  const result = useMemo(
+    () =>
+      companyId
+        ? calculateDebt(
+            buildDebtCalculationInput({
+              company,
+              from: fromYearMonth,
+              to: toYearMonthValue,
+              indexByPeriod,
+              overrides,
+              prefillMonths,
+              annualRatePercent,
+              inflationMethod,
+            })
+          )
+        : undefined,
+    [
+      companyId,
+      company,
+      fromYearMonth,
+      toYearMonthValue,
+      indexByPeriod,
+      overrides,
+      prefillMonths,
+      annualRatePercent,
+      inflationMethod,
+    ]
+  )
+
+  const snapshot = useMemo<IDebtCalculationSnapshot>(
     () => ({
       domain: domainId,
+      company: companyId,
       periodFrom: fromYearMonth,
       periodTo: toYearMonthValue,
       annualRatePercent,
       inflationMethod,
-      overrides,
+      overrides: companyId ? { [companyId]: overrides } : {},
     }),
     [
       domainId,
+      companyId,
       fromYearMonth,
       toYearMonthValue,
       annualRatePercent,
@@ -267,89 +251,49 @@ const DebtCalculationBlock: React.FC = () => {
     ]
   )
 
-  const snapshotJson = JSON.stringify(snapshot)
-  const isDirty = !!domainId && snapshotJson !== savedJson
+  const autoSave = useAutoSave({
+    domainId,
+    companyId,
+    snapshot,
+    enabled: isApplied,
+  })
 
-  // Введене живе в пам'яті доти, доки його не збережено. Без цього попередження
-  // випадковий Cmd+W після години забивання даних коштував би годину.
-  useEffect(() => {
-    if (!isDirty) return
+  const setApartmentOverride = (patch: Partial<IApartmentOverrides>) =>
+    setOverrides((prev) => ({ ...prev, ...patch }))
 
-    const warn = (event: BeforeUnloadEvent) => event.preventDefault()
-    window.addEventListener('beforeunload', warn)
+  const setMonthOverride = (period: string, patch: IMonthOverride) =>
+    setOverrides((prev) => ({
+      ...prev,
+      months: {
+        ...prev.months,
+        [period]: {
+          ...prev.months?.[period],
+          ...patch,
+          // The edit stamp sits next to the value; the page reads it to show
+          // when this month was last touched by hand.
+          updatedAt: new Date().toISOString(),
+        },
+      },
+    }))
 
-    return () => window.removeEventListener('beforeunload', warn)
-  }, [isDirty])
-
-  const save = async () => {
-    const title = name.trim()
-    if (!title) {
-      message.warning('Вкажіть назву розрахунку')
-      return
-    }
-
-    try {
-      const saved = await saveCalculation({
-        ...snapshot,
-        _id: currentId,
-        name: title,
-      }).unwrap()
-
-      setCurrentId(saved._id)
-      setSavedJson(snapshotJson)
-      message.success('Розрахунок збережено')
-    } catch {
-      message.error('Не вдалося зберегти розрахунок')
-    }
-  }
-
-  const load = (id: string) => {
-    const found = savedCalculations.find((item) => item._id === id)
-    if (!found) return
-
-    setCurrentId(found._id)
-    setName(found.name)
-    setDomainId(String(found.domain))
-    setFrom(toDayjs(found.periodFrom))
-    setTo(toDayjs(found.periodTo))
-    setAnnualRatePercent(found.annualRatePercent ?? DEFAULT_ANNUAL_RATE_PERCENT)
-    setInflationMethod(found.inflationMethod ?? 'balance')
-    setOverrides(found.overrides ?? {})
-    setSavedJson(
-      JSON.stringify({
-        domain: String(found.domain),
-        periodFrom: found.periodFrom,
-        periodTo: found.periodTo,
-        annualRatePercent: found.annualRatePercent,
-        inflationMethod: found.inflationMethod,
-        overrides: found.overrides ?? {},
-      })
-    )
-  }
-
-  const remove = async () => {
-    if (!currentId) return
-
-    try {
-      await deleteCalculation(currentId).unwrap()
-      reset()
-      message.success('Розрахунок видалено')
-    } catch {
-      message.error('Не вдалося видалити розрахунок')
-    }
-  }
-
-  const reset = () => {
-    setCurrentId(undefined)
-    setName('')
-    setOverrides({})
-    setSavedJson('')
-  }
+  const missingIndexPeriods = useMemo(
+    () =>
+      (result?.rows ?? [])
+        .filter(
+          ({ year, month }) => !indexByPeriod[formatPeriod({ year, month })]
+        )
+        .map(({ year, month }) => formatPeriod({ year, month })),
+    [result, indexByPeriod]
+  )
 
   const value: IDebtCalculationContext = {
+    allowedDomainIds,
     domainId,
     setDomainId,
-    allowedDomainIds,
+    companies: companies ?? [],
+    companyId,
+    setCompanyId,
+    company,
     from,
     to,
     setFrom,
@@ -358,25 +302,15 @@ const DebtCalculationBlock: React.FC = () => {
     setAnnualRatePercent,
     inflationMethod,
     setInflationMethod,
-    companies: companies ?? [],
-    results,
+    result,
     overrides,
-    prefillByCompany,
+    prefillMonths,
     setApartmentOverride,
     setMonthOverride,
     missingIndexPeriods,
-    savedCalculations,
-    currentId,
-    name,
-    setName,
-    isDirty,
-    isSaving,
-    save,
-    load,
-    remove,
-    reset,
     isLoading:
       isAccessLoading || isCompanies || isIndexes || isPayments || isServices,
+    ...autoSave,
   }
 
   if (!isAccessLoading && allowedDomainIds.length === 0) {
@@ -393,7 +327,7 @@ const DebtCalculationBlock: React.FC = () => {
   return (
     <DebtCalculationContext.Provider value={value}>
       <TableCard title={<DebtCalculationHeader />}>
-        <DebtCalculationTable />
+        <DebtCalculationBody />
       </TableCard>
     </DebtCalculationContext.Provider>
   )

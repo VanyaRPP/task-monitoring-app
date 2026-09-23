@@ -1,5 +1,5 @@
 /**
- * Seed the global consumer-price-index (ІСЦ) reference table.
+ * Seed the global consumer-price-index (CPI) reference table.
  *
  * Idempotent: an existing month keeps its stored value, so a manual correction
  * is never clobbered by a re-run. Pass `overwrite` to force the seeded value.
@@ -18,19 +18,19 @@ import dbConnect from '../utils/dbConnect'
 import { formatPeriod } from '../utils/debt-calculation/months'
 
 /**
- * Офіційний місячний ІСЦ Держстату: [рік, місяць, індекс %].
+ * Derzhstat's official monthly CPI: [year, month, index %].
  *
- * Період листопад 2021 — серпень 2026, два джерела:
- * - лис.2021 — чер.2025: колонка K листа «Акт» у `Розрахунок.xlsx`, звірена з
- *   розрахунком ОСББ;
- * - лип.2025 — сер.2026: експрес-випуски Держстату, перехресно звірені з
- *   index.minfin.com.ua і buhgalter.com.ua (три джерела збіглися).
+ * November 2021 through August 2026, from two sources:
+ * - Nov 2021 - Jun 2025: column K of the «Акт» sheet in `Розрахунок.xlsx`,
+ *   reconciled against the HOA's own calculation;
+ * - Jul 2025 - Aug 2026: Derzhstat express releases, cross-checked against
+ *   index.minfin.com.ua and buhgalter.com.ua (all three agreed).
  *
- * Серпень 2026 — останній опублікований місяць: Держстат оприлюднює ІСЦ
- * близько 9–10 числа наступного місяця, тож вересень з'явиться у жовтні.
+ * August 2026 is the last published month: Derzhstat releases the CPI around
+ * the 9th-10th of the following month, so September lands in October.
  *
- * За межами цього діапазону даних тут свідомо немає: вигадувати статистику для
- * юридичного розрахунку не можна — доповнюйте через POST /api/inflation-index.
+ * Nothing outside that range is seeded on purpose - inventing statistics for a
+ * legal calculation is not acceptable. Extend it via POST /api/inflation-index.
  */
 export const INFLATION_INDEXES: [number, number, number][] = [
   [2021, 11, 100.8],

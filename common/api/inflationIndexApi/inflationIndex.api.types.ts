@@ -2,7 +2,7 @@ import { IInflationIndex } from '@modules/models/InflationIndex'
 
 export type { IInflationIndex }
 
-/** Межі вибірки у форматі `YYYY-MM`. Обидві опційні. */
+/** Range bounds in `YYYY-MM` form. Both optional. */
 export interface IInflationIndexRange {
   from?: string
   to?: string

@@ -2,8 +2,8 @@ import { BUILT_IN_SERVICE_ID_TO_TYPE, ServiceType } from '@utils/constants'
 import { resolveServiceType } from './resolve-service-type'
 
 /**
- * Мінімальна форма послуги каталогу — структурно сумісна і з
- * `ICustomDomainService['services'][number]`, і з документом `CustomService`.
+ * The minimal shape of a catalog service - structurally compatible with both
+ * `ICustomDomainService['services'][number]` and a `CustomService` document.
  */
 export interface IDomainCatalogServiceLike {
   _id?: string | { toString(): string } | null
@@ -16,13 +16,14 @@ export interface IDomainCatalogGroupLike {
 }
 
 /**
- * Перша послуга заданого типу в каталозі домену, або `undefined`.
+ * The first service of the given type in a domain's catalog, or `undefined`.
  *
- * Тип резолвиться через {@link resolveServiceType}, а НЕ звіркою з фіксованим
- * `_id`: клонування шаблону в домен створює власні копії послуг із новими
- * `_id` (див. `/api/domain-type-templates/[id]/clone-for-domain`), і спільним
- * лишається саме `serviceType`. Fallback на фіксований id потрібен для старих
- * доменів, які посилаються на глобальні послуги напряму.
+ * The type is resolved through {@link resolveServiceType}, NOT by matching a
+ * pinned `_id`: cloning a template into a domain creates the domain's own
+ * copies with fresh `_id`s (see
+ * `/api/domain-type-templates/[id]/clone-for-domain`), and `serviceType` is
+ * what they still share. The pinned-id fallback covers older domains that
+ * reference the global services directly.
  */
 export const findDomainServiceByType = (
   groups: IDomainCatalogGroupLike[] | null | undefined,
@@ -38,18 +39,18 @@ export const findDomainServiceByType = (
 }
 
 /**
- * Чи має домен послугу «Квартплата» — умова доступу до сторінки розрахунку
- * заборгованості.
+ * Whether the domain carries the housing-fee service - the gate for the debt
+ * calculation page.
  */
 export const hasHousingFeeService = (
   groups: IDomainCatalogGroupLike[] | null | undefined
 ): boolean => !!findDomainServiceByType(groups, ServiceType.HousingFee)
 
 /**
- * Фіксовані `_id` вбудованих послуг заданого типу.
+ * Pinned `_id`s of the built-in services of a given type.
  *
- * Потрібні серверу, щоб знайти домени, які посилаються на глобальну послугу
- * напряму, ще до того як у документа з'явиться поле `serviceType`.
+ * The server needs them to find domains that reference a global service
+ * directly, from before the document gained a `serviceType` field.
  */
 export const builtInServiceIdsForType = (type: ServiceType): string[] =>
   Object.entries(BUILT_IN_SERVICE_ID_TO_TYPE)

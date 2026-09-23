@@ -1,7 +1,23 @@
+// `TableCard` gives its body padding: 0 while the card head keeps its own
+// 24px. So every piece of content is inset by hand to the same amount,
+// otherwise the labels hang to the left of the heading.
+$gutter: 24px;
+$hairline: rgba(140, 140, 140, 0.4);
+
 .Header {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
+  width: 100%;
+  padding-bottom: 4px;
+}
+
+.TitleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
   width: 100%;
 }
 
@@ -30,22 +46,131 @@
   min-width: 220px;
 }
 
+.Company {
+  min-width: 260px;
+}
+
 .Method {
   min-width: 230px;
 }
 
-.Total {
-  font-weight: 600;
+.Body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  padding: 20px 0 32px;
+}
+
+/** A content band aligned with the card head. */
+.Section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 0 $gutter;
+}
+
+.Apartment {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .Muted {
   opacity: 0.65;
 }
 
+/**
+ * The table is inset by the same gutter as everything else, keeping its own
+ * scrolling inside. Full-bleed made its borders butt into the card's rounded
+ * corners, which read as unfinished.
+ */
 .MonthsWrap {
-  padding: 8px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 $gutter;
 }
 
-.Saved {
-  min-width: 240px;
+.TableNote {
+  margin: 0 !important;
+  opacity: 0.65;
+  font-size: 12px;
+}
+
+/**
+ * One grid for the whole summary: the amount column has to line up in the
+ * total row and in the breakdown alike, even though the breakdown carries an
+ * extra leading column.
+ */
+.Act {
+  display: grid;
+  grid-template-columns: 56px minmax(180px, 1fr) 140px 40px;
+  align-items: center;
+  gap: 10px 12px;
+  max-width: 620px;
+  padding-top: 4px;
+}
+
+.ActTotalLabel {
+  grid-column: 1 / 3;
+  font-weight: 600;
+}
+
+.ActTotalValue {
+  grid-column: 3;
+  text-align: right;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.ActUnit {
+  grid-column: 4;
+  opacity: 0.7;
+}
+
+.ActDivider {
+  grid-column: 1 / 5;
+  height: 1px;
+  margin: 0;
+  background: $hairline;
+}
+
+.ActPrefix {
+  grid-column: 1;
+  opacity: 0.7;
+}
+
+/** An empty first-column cell that keeps the breakdown rows aligned. */
+.ActSpacer {
+  grid-column: 1;
+}
+
+.ActLabel {
+  grid-column: 2;
+  opacity: 0.85;
+}
+
+.ActValue {
+  grid-column: 3;
+  text-align: right;
+}
+
+.ActInput {
+  width: 100%;
+}
+
+.ActSignLabel {
+  grid-column: 2;
+  justify-self: end;
+  margin-top: 22px;
+  font-weight: 600;
+}
+
+.ActSignLine {
+  grid-column: 3 / 5;
+  align-self: end;
+  height: 1px;
+  margin-top: 22px;
+  background: $hairline;
 }

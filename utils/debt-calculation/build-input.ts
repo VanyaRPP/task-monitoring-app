@@ -7,16 +7,18 @@ import {
   InflationMethod,
 } from './types'
 
-/** Ручна правка одного місяця. Порожнє поле = беремо значення за замовчуванням. */
+/** A manual edit of one month. An empty field falls back to the default. */
 export interface IMonthOverride {
   area?: number
   tariff?: number
   charged?: number
   paid?: number
   inflationIndex?: number
+  /** ISO stamp of the last manual edit of this month, surfaced in the UI. */
+  updatedAt?: string
 }
 
-/** Ручні правки по одній квартирі; ключ у `months` — `YYYY-MM`. */
+/** Manual edits for one company; keys in `months` are `YYYY-MM`. */
 export interface IApartmentOverrides {
   area?: number
   tariff?: number
@@ -26,7 +28,7 @@ export interface IApartmentOverrides {
   months?: Record<string, IMonthOverride>
 }
 
-/** Мінімум, який потрібен від компанії — щоб не тягнути весь IRealestate. */
+/** The bare minimum needed from a company, so we avoid dragging in IRealestate. */
 export interface IApartmentDefaults {
   totalArea?: number
   pricePerMeter?: number
@@ -36,19 +38,19 @@ export interface IBuildDebtInputArgs {
   company?: IApartmentDefaults | null
   from?: IYearMonth
   to?: IYearMonth
-  /** Довідник ІСЦ, згорнутий у `{ 'YYYY-MM': 100.8 }`. */
+  /** The CPI reference table collapsed into `{ 'YYYY-MM': 100.8 }`. */
   indexByPeriod?: Record<string, number>
   overrides?: IApartmentOverrides
   /**
-   * Підтягнуте з БД по місяцях (ключ — `YYYY-MM`). Стоїть НИЖЧЕ за будь-яку
-   * ручну правку: користувач завжди головніший за базу.
+   * Prefilled from the DB per month (keys are `YYYY-MM`). Ranks BELOW any
+   * manual edit: the user always outranks the database.
    */
   prefillMonths?: Record<string, IMonthOverride>
   annualRatePercent?: number
   inflationMethod?: InflationMethod
 }
 
-/** Згортає відповідь довідника в мапу за періодом. */
+/** Collapses the reference-table response into a map keyed by period. */
 export const indexesByPeriod = (
   indexes: Pick<IInflationIndex, 'year' | 'month' | 'value'>[] = []
 ): Record<string, number> =>
@@ -58,13 +60,14 @@ export const indexesByPeriod = (
   }, {})
 
 /**
- * Збирає вхід для {@link calculateDebt} з того, що є на сторінці.
+ * Assembles the input for {@link calculateDebt} out of what the page holds.
  *
- * Пріоритет значень — від найконкретнішого до найзагальнішого:
- * правка місяця → правка квартири → префіл з БД → дані компанії.
+ * Precedence runs from most to least specific:
+ * month edit → company edit → DB prefill → company record.
  *
- * `charged` свідомо не має дефолту: поки його не ввели руками, двигун рахує
- * `площа × тариф` сам, і правка площі чи тарифу одразу видно в сумі.
+ * `charged` deliberately has no default: until it is typed in, the engine
+ * derives `area × tariff` itself, so editing either shows up in the total at
+ * once.
  */
 export const buildDebtCalculationInput = ({
   company,

@@ -1,10 +1,10 @@
 import { cascaderMonths } from '@utils/constants'
 
-/** Гроші в таблиці — завжди дві копійки, щоб колонка не «стрибала». */
+/** Money always carries two decimals so the column does not jitter. */
 export const formatMoney = (value?: number): string =>
   Number.isFinite(value) ? (value as number).toFixed(2) : '—'
 
-/** Сукупний коефіцієнт індексації — чотири знаки, як в Акті. */
+/** The cumulative indexation coefficient - four decimals, as in the Act. */
 export const formatCoefficient = (value?: number): string =>
   Number.isFinite(value) ? (value as number).toFixed(4) : '—'
 
