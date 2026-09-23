@@ -1,25 +1,28 @@
 import { useGetDomainIdsByServiceTypeQuery } from '@common/api/domainApi/domain.api'
-import { useGetInflationIndexesQuery } from '@common/api/inflationIndexApi/inflationIndex.api'
 import {
-  useDeleteDebtCalculationMutation,
-  useGetDebtCalculationsQuery,
+  useGetDebtCalculationQuery,
   useSaveDebtCalculationMutation,
 } from '@common/api/debtCalculationApi/debtCalculation.api'
+import { useGetInflationIndexesQuery } from '@common/api/inflationIndexApi/inflationIndex.api'
 import { useGetAllPaymentsQuery } from '@common/api/paymentApi/payment.api'
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
-import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
 import { IExtendedRealestate } from '@common/api/realestateApi/realestate.api.types'
+import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
 import { buildDebtCalculationInput } from '@utils/debt-calculation/build-input'
 import { calculateDebt } from '@utils/debt-calculation/calculate'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import dayjs from 'dayjs'
 import DebtCalculationBlock, {
   DebtCalculationContext,
   IDebtCalculationContext,
 } from './'
-import MonthsTable from './MonthsTable'
+import { asOfDate } from './ActSummary'
+import DebtActSummary from './ActSummary'
+import DebtCalculationBody from './Body'
 import DebtCalculationHeader from './Header'
-import DebtCalculationTable from './Table'
+import MonthsTable from './MonthsTable'
+import SaveStatus from './SaveStatus'
 
 jest.mock('@common/api/domainApi/domain.api', () => ({
   useGetDomainIdsByServiceTypeQuery: jest.fn(),
@@ -43,14 +46,13 @@ jest.mock('@common/api/serviceApi/service.api', () => ({
 }))
 
 jest.mock('@common/api/debtCalculationApi/debtCalculation.api', () => ({
-  useGetDebtCalculationsQuery: jest.fn(),
+  useGetDebtCalculationQuery: jest.fn(),
   useSaveDebtCalculationMutation: jest.fn(),
-  useDeleteDebtCalculationMutation: jest.fn(),
 }))
 
 const COMPANY: IExtendedRealestate = {
   _id: 'apt-1',
-  companyName: 'Квартира №3, Петренко П. П.',
+  companyName: 'Квартира №18, вул. Крошенська 8',
   description: 'о/р 123456',
   totalArea: 67.08,
   pricePerMeter: 5.25,
@@ -59,10 +61,10 @@ const COMPANY: IExtendedRealestate = {
 const result = calculateDebt(
   buildDebtCalculationInput({
     company: COMPANY,
-    from: { year: 2024, month: 1 },
-    to: { year: 2024, month: 3 },
-    indexByPeriod: { '2024-01': 100.4, '2024-02': 100.3, '2024-03': 100.5 },
-    overrides: { openingDebt: 100 },
+    from: { year: 2026, month: 1 },
+    to: { year: 2026, month: 3 },
+    indexByPeriod: { '2026-01': 100.7, '2026-02': 101, '2026-03': 101.7 },
+    overrides: { openingDebt: 8371.52, legalFees: 3000, courtFee: 1211.2 },
   })
 )
 
@@ -70,32 +72,29 @@ const makeContext = (
   patch: Partial<IDebtCalculationContext> = {}
 ): IDebtCalculationContext =>
   ({
+    allowedDomainIds: ['domain-1'],
     domainId: 'domain-1',
     setDomainId: jest.fn(),
-    allowedDomainIds: ['domain-1'],
-    annualRatePercent: 3,
-    inflationMethod: 'balance',
+    companies: [COMPANY],
+    companyId: 'apt-1',
+    setCompanyId: jest.fn(),
+    company: COMPANY,
+    from: dayjs('2026-01-01'),
+    to: dayjs('2026-03-01'),
     setFrom: jest.fn(),
     setTo: jest.fn(),
+    annualRatePercent: 3,
     setAnnualRatePercent: jest.fn(),
+    inflationMethod: 'balance',
     setInflationMethod: jest.fn(),
-    companies: [COMPANY],
-    results: { 'apt-1': result },
-    overrides: {},
-    prefillByCompany: {},
-    savedCalculations: [],
-    name: '',
-    setName: jest.fn(),
-    isDirty: false,
-    isSaving: false,
-    save: jest.fn(),
-    load: jest.fn(),
-    remove: jest.fn(),
-    reset: jest.fn(),
+    result,
+    overrides: { openingDebt: 8371.52, legalFees: 3000, courtFee: 1211.2 },
+    prefillMonths: {},
     setApartmentOverride: jest.fn(),
     setMonthOverride: jest.fn(),
     missingIndexPeriods: [],
     isLoading: false,
+    saveState: 'idle',
     ...patch,
   }) as IDebtCalculationContext
 
@@ -131,19 +130,18 @@ beforeEach(() => {
     data: { data: [] },
     isLoading: false,
   })
-  ;(useGetDebtCalculationsQuery as jest.Mock).mockReturnValue({ data: [] })
+  ;(useGetDebtCalculationQuery as jest.Mock).mockReturnValue({
+    data: null,
+    isFetching: false,
+  })
   ;(useSaveDebtCalculationMutation as jest.Mock).mockReturnValue([
-    jest.fn(),
-    { isLoading: false },
-  ])
-  ;(useDeleteDebtCalculationMutation as jest.Mock).mockReturnValue([
     jest.fn(),
     { isLoading: false },
   ])
 })
 
 describe('DebtCalculationBlock — гейт доступу', () => {
-  it('показує пояснення, коли жоден домен не має послуги «Квартплата»', () => {
+  it('пояснює, коли жоден домен не має послуги «Квартплата»', () => {
     ;(useGetDomainIdsByServiceTypeQuery as jest.Mock).mockReturnValue({
       data: [],
       isLoading: false,
@@ -154,236 +152,229 @@ describe('DebtCalculationBlock — гейт доступу', () => {
     expect(
       screen.getByText('Розрахунок заборгованості недоступний')
     ).toBeInTheDocument()
-    expect(screen.queryByRole('table')).not.toBeInTheDocument()
   })
 
-  it('показує сторінку, щойно хоч один домен має послугу', () => {
+  it('пускає, щойно хоч один домен має послугу', () => {
     render(<DebtCalculationBlock />)
 
     expect(
-      screen.queryByText('Розрахунок заборгованості недоступний')
-    ).not.toBeInTheDocument()
-    expect(
-      screen.getByText('Оберіть домен, щоб побачити квартири')
+      screen.getByText('Оберіть домен у фільтрі згори')
     ).toBeInTheDocument()
   })
 })
 
-describe('DebtCalculationTable', () => {
-  it('просить обрати домен, поки його не обрано', () => {
-    renderWithContext(<DebtCalculationTable />, { domainId: undefined })
+describe('Body — порожні стани', () => {
+  it('просить обрати домен', () => {
+    renderWithContext(<DebtCalculationBody />, { domainId: undefined })
 
     expect(
-      screen.getByText('Оберіть домен, щоб побачити квартири')
+      screen.getByText('Оберіть домен у фільтрі згори')
     ).toBeInTheDocument()
   })
 
-  it('показує назву й опис квартири', () => {
-    renderWithContext(<DebtCalculationTable />)
-
-    expect(screen.getByText('Квартира №3, Петренко П. П.')).toBeInTheDocument()
-    expect(screen.getByText('о/р 123456')).toBeInTheDocument()
-  })
-
-  it('виводить тіло, річні, інфляційні та разом у рядку квартири', () => {
-    renderWithContext(<DebtCalculationTable />)
-
-    const row = screen
-      .getByText('Квартира №3, Петренко П. П.')
-      .closest('tr') as HTMLElement
-
-    expect(within(row).getByText(result.body.toFixed(2))).toBeInTheDocument()
-    expect(
-      within(row).getByText(result.interest.toFixed(2))
-    ).toBeInTheDocument()
-    expect(
-      within(row).getByText(result.inflation.toFixed(2))
-    ).toBeInTheDocument()
-    expect(within(row).getByText(result.total.toFixed(2))).toBeInTheDocument()
-  })
-
-  it('підсумковий рядок повторює єдину квартиру', () => {
-    renderWithContext(<DebtCalculationTable />)
-
-    const totals = screen
-      .getByText('Разом по 1 квартирах')
-      .closest('tr') as HTMLElement
-
-    expect(
-      within(totals).getByText(result.total.toFixed(2))
-    ).toBeInTheDocument()
-  })
-
-  it('підказує площу й тариф компанії плейсхолдерами, поки їх не правили', () => {
-    renderWithContext(<DebtCalculationTable />)
-
-    expect(screen.getByPlaceholderText('67.08')).toBeInTheDocument()
-    expect(screen.getByPlaceholderText('5.25')).toBeInTheDocument()
-  })
-
-  it('попереджає про місяці без індексу в довіднику', () => {
-    renderWithContext(<DebtCalculationTable />, {
-      missingIndexPeriods: ['2024-02', '2024-03'],
+  it('просить обрати компанію', () => {
+    renderWithContext(<DebtCalculationBody />, {
+      companyId: undefined,
+      result: undefined,
     })
 
     expect(
-      screen.getByText(
-        'У довіднику немає індексу інфляції за деякі місяці періоду'
-      )
+      screen.getByText('Оберіть компанію, щоб побачити розрахунок')
     ).toBeInTheDocument()
-    expect(screen.getByText(/2024-02, 2024-03/)).toBeInTheDocument()
+  })
+})
+
+describe('Body — обрана квартира', () => {
+  it('показує назву й опис квартири', () => {
+    renderWithContext(<DebtCalculationBody />)
+
+    expect(
+      screen.getByText('Квартира №18, вул. Крошенська 8')
+    ).toBeInTheDocument()
+    expect(screen.getByText('о/р 123456')).toBeInTheDocument()
+  })
+
+  it('підказує площу й тариф компанії плейсхолдерами', () => {
+    renderWithContext(<DebtCalculationBody />, { overrides: {} })
+
+    // The company parameter fields, not the same-named monthly table columns.
+    expect(screen.getByLabelText('Площа, м²')).toHaveAttribute(
+      'placeholder',
+      '67.08'
+    )
+    expect(screen.getByLabelText('Тариф, грн/м²')).toHaveAttribute(
+      'placeholder',
+      '5.25'
+    )
+    expect(screen.getByLabelText('Борг на початок періоду')).toBeInTheDocument()
+  })
+
+  it('попереджає про місяці без індексу', () => {
+    renderWithContext(<DebtCalculationBody />, {
+      missingIndexPeriods: ['2026-02', '2026-03'],
+    })
+
+    expect(screen.getByText(/2026-02, 2026-03/)).toBeInTheDocument()
+  })
+})
+
+describe('ActSummary — підсумок у стилі Акта', () => {
+  it('рахує дату «станом на» як перше число наступного місяця', () => {
+    expect(asOfDate(dayjs('2025-06-01'))).toBe('01.07.2025')
+    expect(asOfDate(dayjs('2025-12-01'))).toBe('01.01.2026')
+    expect(asOfDate(undefined)).toBe('—')
+  })
+
+  it('виводить загальну суму заборгованості', () => {
+    renderWithContext(<DebtActSummary result={result} />)
+
+    expect(
+      screen.getByText(/Заборгованість станом на 01\.04\.2026 року/)
+    ).toBeInTheDocument()
+    expect(screen.getByText(result.total.toFixed(2))).toBeInTheDocument()
+  })
+
+  it('розбиває на внесок, річні та інфляційні', () => {
+    renderWithContext(<DebtActSummary result={result} />)
+
+    expect(screen.getByText('внесок')).toBeInTheDocument()
+    expect(screen.getByText('3% річних')).toBeInTheDocument()
+    expect(screen.getByText('Інфляційні витрати')).toBeInTheDocument()
+    expect(screen.getByText(result.body.toFixed(2))).toBeInTheDocument()
+    expect(screen.getByText(result.interest.toFixed(2))).toBeInTheDocument()
+  })
+
+  it('називає фактичну ставку, а не захардкожені 3%', () => {
+    renderWithContext(<DebtActSummary result={result} />, {
+      annualRatePercent: 6,
+    })
+
+    expect(screen.getByText('6% річних')).toBeInTheDocument()
+    expect(screen.queryByText('3% річних')).not.toBeInTheDocument()
+  })
+
+  it('юридичні послуги й держмито редагуються тут', async () => {
+    const setApartmentOverride = jest.fn()
+    renderWithContext(<DebtActSummary result={result} />, {
+      setApartmentOverride,
+      overrides: {},
+    })
+
+    expect(screen.getByText('Юридичні послуги')).toBeInTheDocument()
+    expect(screen.getByText('Держмито')).toBeInTheDocument()
+
+    const [legalFees] = screen.getAllByPlaceholderText('0.00')
+    await userEvent.type(legalFees, '5')
+
+    expect(setApartmentOverride).toHaveBeenCalledWith({ legalFees: 5 })
+  })
+
+  it('має місце для підпису голови правління', () => {
+    renderWithContext(<DebtActSummary result={result} />)
+
+    expect(screen.getByText('Голова правління')).toBeInTheDocument()
   })
 })
 
 describe('MonthsTable', () => {
-  it('рендерить рядок на кожен місяць періоду', () => {
-    renderWithContext(<MonthsTable companyId="apt-1" result={result} />)
+  it('рендерить рядок на кожен місяць', () => {
+    renderWithContext(<MonthsTable result={result} />)
 
-    expect(screen.getByText('Січень 2024')).toBeInTheDocument()
-    expect(screen.getByText('Лютий 2024')).toBeInTheDocument()
-    expect(screen.getByText('Березень 2024')).toBeInTheDocument()
+    expect(screen.getByText('Січень 2026')).toBeInTheDocument()
+    expect(screen.getByText('Березень 2026')).toBeInTheDocument()
   })
 
-  it('перший місяць має коефіцієнт 1 — індекс місяця виникнення не рахується', () => {
-    renderWithContext(<MonthsTable companyId="apt-1" result={result} />)
+  it('показує, коли місяць востаннє правили руками', () => {
+    renderWithContext(<MonthsTable result={result} />, {
+      overrides: {
+        months: {
+          '2026-02': { paid: 500, updatedAt: '2026-09-23T14:32:00.000Z' },
+        },
+      },
+    })
 
-    expect(result.rows[0].coefficient).toBe(1)
-    expect(screen.getAllByText('1.0000').length).toBeGreaterThan(0)
+    expect(
+      screen.getByText(dayjs('2026-09-23T14:32:00.000Z').format('DD.MM HH:mm'))
+    ).toBeInTheDocument()
+  })
+
+  it('місяці без ручної правки не мають мітки', () => {
+    renderWithContext(<MonthsTable result={result} />, { overrides: {} })
+
+    expect(screen.queryByText(/\d\d\.\d\d \d\d:\d\d/)).not.toBeInTheDocument()
   })
 
   it('у підсумку показує суму днів і підсумкові інфляційні', () => {
-    renderWithContext(<MonthsTable companyId="apt-1" result={result} />)
+    renderWithContext(<MonthsTable result={result} />)
 
     const totals = screen.getByText('Всього').closest('tr')
     expect(
       within(totals).getByText(String(result.totals.days))
     ).toBeInTheDocument()
-    expect(
-      within(totals).getByText(result.inflation.toFixed(2))
-    ).toBeInTheDocument()
-  })
-
-  it('пояснює, чому інфляційні — не сума колонки', () => {
-    renderWithContext(<MonthsTable companyId="apt-1" result={result} />)
-
-    expect(
-      screen.getByText(/значення останнього місяця, а не сума по колонці/)
-    ).toBeInTheDocument()
-  })
-
-  it('для помісячного методу показує інше пояснення', () => {
-    renderWithContext(<MonthsTable companyId="apt-1" result={result} />, {
-      inflationMethod: 'monthly',
-    })
-
-    expect(
-      screen.getByText(/кожне нарахування індексується від свого місяця/)
-    ).toBeInTheDocument()
   })
 })
 
-describe('MonthsTable — префіл із бази', () => {
-  const prefillByCompany = {
-    'apt-1': {
-      '2024-01': { paid: 500, charged: 419.25, tariff: 6.25 },
-    },
-  }
-
-  it('показує підтягнуте значенням, а не сірим плейсхолдером', () => {
-    renderWithContext(<MonthsTable companyId="apt-1" result={result} />, {
-      prefillByCompany,
+describe('Header', () => {
+  it('кнопка експорту стоїть окремо і вимкнена без квартири', () => {
+    renderWithContext(<DebtCalculationHeader />, {
+      companyId: undefined,
+      result: undefined,
     })
-
-    expect(screen.getByDisplayValue('500')).toBeInTheDocument()
-    expect(screen.getByDisplayValue('419.25')).toBeInTheDocument()
-    expect(screen.getByDisplayValue('6.25')).toBeInTheDocument()
-  })
-
-  it('ручна правка місяця перекриває підтягнуте', () => {
-    renderWithContext(<MonthsTable companyId="apt-1" result={result} />, {
-      prefillByCompany,
-      overrides: { 'apt-1': { months: { '2024-01': { paid: 123 } } } },
-    })
-
-    expect(screen.getByDisplayValue('123')).toBeInTheDocument()
-    expect(screen.queryByDisplayValue('500')).not.toBeInTheDocument()
-  })
-
-  it('місяці без префілу лишаються порожніми', () => {
-    renderWithContext(<MonthsTable companyId="apt-1" result={result} />, {
-      prefillByCompany,
-    })
-
-    // Префіл є лише на січень — лютий і березень порожні.
-    expect(screen.getAllByDisplayValue('500')).toHaveLength(1)
-  })
-})
-
-describe('DebtCalculationHeader — збереження', () => {
-  it('позначає незбережені зміни', () => {
-    renderWithContext(<DebtCalculationHeader />, { isDirty: true })
-
-    expect(screen.getByText('Незбережені зміни')).toBeInTheDocument()
-  })
-
-  it('без змін позначки немає', () => {
-    renderWithContext(<DebtCalculationHeader />, { isDirty: false })
-
-    expect(screen.queryByText('Незбережені зміни')).not.toBeInTheDocument()
-  })
-
-  it('кнопка зберігає новий розрахунок', async () => {
-    const save = jest.fn()
-    renderWithContext(<DebtCalculationHeader />, { save, name: 'Крошенська 8' })
-
-    const button = screen.getByRole('button', { name: /Зберегти/ })
-    await userEvent.click(button)
-
-    expect(save).toHaveBeenCalled()
-  })
-
-  it('для відкритого розрахунку кнопка каже «Зберегти зміни»', () => {
-    renderWithContext(<DebtCalculationHeader />, { currentId: 'calc-1' })
-
-    expect(
-      screen.getByRole('button', { name: /Зберегти зміни/ })
-    ).toBeInTheDocument()
-  })
-
-  it('кнопки видалення немає, поки розрахунок не збережено', () => {
-    renderWithContext(<DebtCalculationHeader />, { currentId: undefined })
-
-    expect(screen.queryByLabelText('delete')).not.toBeInTheDocument()
-  })
-})
-
-describe('DebtCalculationHeader — експорт', () => {
-  it('показує кнопку експорту', () => {
-    renderWithContext(<DebtCalculationHeader />)
-
-    expect(
-      screen.getByRole('button', { name: /Експорт в Excel/ })
-    ).toBeInTheDocument()
-  })
-
-  it('кнопка вимкнена, поки домен не обрано', () => {
-    renderWithContext(<DebtCalculationHeader />, { domainId: undefined })
 
     expect(
       screen.getByRole('button', { name: /Експорт в Excel/ })
     ).toBeDisabled()
   })
 
-  it('без квартир попереджає замість формування файлу', async () => {
-    renderWithContext(<DebtCalculationHeader />, {
-      companies: [],
-      results: {},
+  it('селект компанії вимкнений, поки не обрано домен', () => {
+    renderWithContext(<DebtCalculationHeader />, { domainId: undefined })
+
+    expect(screen.getByRole('combobox', { name: 'Компанія' })).toBeDisabled()
+  })
+
+  it('з обраним доменом селект компанії доступний', () => {
+    renderWithContext(<DebtCalculationHeader />)
+
+    expect(
+      screen.getByRole('combobox', { name: 'Компанія' })
+    ).not.toBeDisabled()
+  })
+
+  it('кнопок збереження більше немає', () => {
+    renderWithContext(<DebtCalculationHeader />)
+
+    expect(screen.queryByRole('button', { name: /Зберегти/ })).toBeNull()
+    expect(screen.queryByRole('button', { name: /Новий/ })).toBeNull()
+  })
+})
+
+describe('SaveStatus', () => {
+  it('мовчить, поки нічого не сталося', () => {
+    const { container } = renderWithContext(<SaveStatus />, {
+      saveState: 'idle',
     })
 
-    await userEvent.click(
-      screen.getByRole('button', { name: /Експорт в Excel/ })
-    )
+    expect(container).toBeEmptyDOMElement()
+  })
 
-    expect(await screen.findByText(/Немає що експортувати/)).toBeInTheDocument()
+  it.each([
+    ['pending', 'Збереження…'],
+    ['saving', 'Збереження…'],
+    ['error', 'Не збережено'],
+  ])('показує стан %s', (saveState, label) => {
+    renderWithContext(<SaveStatus />, {
+      saveState: saveState as IDebtCalculationContext['saveState'],
+    })
+
+    expect(screen.getByText(label)).toBeInTheDocument()
+  })
+
+  it('після збереження називає час', () => {
+    const savedAt = new Date('2026-09-23T14:32:00')
+    renderWithContext(<SaveStatus />, { saveState: 'saved', savedAt })
+
+    expect(
+      screen.getByText(`Збережено о ${dayjs(savedAt).format('HH:mm')}`)
+    ).toBeInTheDocument()
   })
 })

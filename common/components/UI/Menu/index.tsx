@@ -66,8 +66,8 @@ export const Menu: React.FC<MenuProps> = ({ defaultOpenKeys, ...props }) => {
     [roles]
   )
 
-  // Пункт з'являється лише коли хоч один домен має послугу «Квартплата».
-  // Ендпоінт адмінський, тож для решти ролей запит навіть не йде.
+  // The item appears only when at least one domain carries the housing-fee
+  // service. The endpoint is admin-only, so other roles never even ask.
   const { hasAccess: hasDebtCalculation } = useDebtCalculationAccess(
     !isAdminCheck(roles)
   )

@@ -6,7 +6,29 @@ import { getCurrentUser } from '@utils/getCurrentUser'
 import mongoose from 'mongoose'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
-const MAX_NAME_LENGTH = 200
+const isId = (value: string): boolean => mongoose.Types.ObjectId.isValid(value)
+
+/**
+ * Adopts a record saved before the move to autosave.
+ *
+ * Back then a calculation had no `company` field, and the edits of every
+ * company sat in `overrides` under `companyId` keys. We locate such a record
+ * by that key and backfill `company`, so it keeps opening instead of quietly
+ * going orphaned.
+ */
+async function adoptLegacy(domain: string, company: string) {
+  const legacy = await DebtCalculation.findOne({
+    domain,
+    company: { $exists: false },
+    [`overrides.${company}`]: { $exists: true },
+  }).lean()
+
+  if (!legacy) return null
+
+  await DebtCalculation.updateOne({ _id: legacy._id }, { $set: { company } })
+
+  return { ...legacy, company }
+}
 
 async function debtCalculationHandler(
   req: NextApiRequest,
@@ -19,42 +41,40 @@ async function debtCalculationHandler(
 
   switch (req.method) {
     case 'GET': {
-      const domainId = String(req.query.domainId ?? '')
-      const filter = mongoose.Types.ObjectId.isValid(domainId)
-        ? { domain: domainId }
-        : {}
+      const domain = String(req.query.domainId ?? '')
+      const company = String(req.query.companyId ?? '')
 
-      const list = await DebtCalculation.find(filter)
-        .sort({ updatedAt: -1 })
-        .lean()
+      if (!isId(domain) || !isId(company)) {
+        return res
+          .status(400)
+          .json({ success: false, message: 'Потрібні домен і квартира' })
+      }
 
-      return res.status(200).json({ success: true, data: list })
+      const found =
+        (await DebtCalculation.findOne({ domain, company }).lean()) ??
+        (await adoptLegacy(domain, company))
+
+      return res.status(200).json({ success: true, data: found ?? null })
     }
 
     case 'POST': {
-      const name = String(req.body?.name ?? '')
-        .trim()
-        .slice(0, MAX_NAME_LENGTH)
-      if (!name) {
-        return res
-          .status(400)
-          .json({ success: false, message: 'Потрібна назва розрахунку' })
-      }
-
       const snapshot = sanitizeSnapshot(req.body)
-      if (!snapshot.domain) {
+
+      if (!snapshot.domain || !snapshot.company) {
         return res
           .status(400)
-          .json({ success: false, message: 'Потрібен домен' })
+          .json({ success: false, message: 'Потрібні домен і квартира' })
       }
 
-      const created = await DebtCalculation.create({
-        ...snapshot,
-        name,
-        createdBy: user?._id,
-      })
+      // Autosave sends the whole snapshot, so this is an upsert on the
+      // (domain, company) pair - no names, no separate create/update.
+      const saved = await DebtCalculation.findOneAndUpdate(
+        { domain: snapshot.domain, company: snapshot.company },
+        { $set: snapshot, $setOnInsert: { createdBy: user?._id } },
+        { new: true, upsert: true, setDefaultsOnInsert: true }
+      ).lean()
 
-      return res.status(201).json({ success: true, data: created })
+      return res.status(200).json({ success: true, data: saved })
     }
 
     default:

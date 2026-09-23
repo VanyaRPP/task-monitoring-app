@@ -73,7 +73,7 @@ describe('GET /api/inflation-index', () => {
     expect(InflationIndex.find).toHaveBeenCalledWith({
       year: { $gte: 2021, $lte: 2022 },
     })
-    // Рік 2022 потрапив у запит цілком, але червень відсікається тут.
+    // The whole of 2022 made it into the query, but June is trimmed here.
     expect(res.json.mock.calls[0][0].data).toEqual([ROWS[1], ROWS[2]])
   })
 

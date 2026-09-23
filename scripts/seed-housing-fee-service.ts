@@ -1,5 +1,5 @@
 /**
- * Seed the built-in «Квартплата» bundle: the global catalog service plus the
+ * Seed the built-in housing-fee bundle: the global catalog service plus the
  * `real-estate` DomainTypeTemplate that carries it.
  *
  * Attaching that template to a domain is what unlocks the debt-calculation
@@ -28,8 +28,9 @@ import {
 export const HOUSING_FEE_SERVICE_NAME = 'Квартплата з нарахуванням боргу'
 
 /**
- * Глобальна послуга-каталог: без `domain`, рівно як вбудовані комунальні. У
- * домен вона потрапляє копією через clone-for-domain, і копія несе той самий
+ * A global catalog service: no `domain`, exactly like the built-in utility
+ * ones. It reaches a domain as a copy via clone-for-domain, and that copy
+ * carries the same
  * `serviceType`.
  */
 export const HOUSING_FEE_TEMPLATE: IBuiltInTemplate = {
@@ -49,6 +50,7 @@ export interface ISeedHousingFeeReport {
 }
 
 export async function seedHousingFeeService(
+  options: { repair?: boolean } = {},
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   log: (msg: string) => void = () => {}
 ): Promise<ISeedHousingFeeReport> {
@@ -68,14 +70,26 @@ export async function seedHousingFeeService(
     serviceCreated = true
   }
 
-  const templates = await seedDomainTypeTemplates([HOUSING_FEE_TEMPLATE], log)
+  const templates = await seedDomainTypeTemplates(
+    [HOUSING_FEE_TEMPLATE],
+    options,
+    log
+  )
 
   return { serviceCreated, templates }
 }
 
 async function main(): Promise<void> {
   await dbConnect()
-  await seedHousingFeeService(console.log)
+  const repair = process.argv.includes('--repair')
+  const report = await seedHousingFeeService({ repair }, console.log)
+
+  if (report.templates.mismatched.length > 0) {
+    console.error(
+      '[seed] шаблон НЕ налаштовано — перезапустіть із прапорцем --repair'
+    )
+    process.exitCode = 1
+  }
 }
 
 if (require.main === module) {
