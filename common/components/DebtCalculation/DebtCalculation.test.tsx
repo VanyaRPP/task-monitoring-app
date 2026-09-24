@@ -89,6 +89,7 @@ const makeContext = (
     result,
     overrides: { openingDebt: 8371.52, legalFees: 3000, courtFee: 1211.2 },
     prefillMonths: {},
+    indexByPeriod: { '2026-01': 100.7, '2026-02': 101, '2026-03': 101.7 },
     setApartmentOverride: jest.fn(),
     setMonthOverride: jest.fn(),
     isLoading: false,
@@ -314,5 +315,57 @@ describe('Header', () => {
 
     expect(screen.queryByRole('button', { name: /Зберегти/ })).toBeNull()
     expect(screen.queryByRole('button', { name: /Новий/ })).toBeNull()
+  })
+})
+
+describe('MonthsTable — позначка відсутнього індексу', () => {
+  const statusOf = (month: string): string =>
+    screen
+      .getByRole('spinbutton', { name: `Індекс інфляції за ${month}` })
+      .closest('.ant-input-number').className
+
+  it('не чіпає місяць, індекс якого є в довіднику', () => {
+    renderWithContext(<MonthsTable result={result} />)
+
+    expect(statusOf('Січень 2026')).not.toContain('status-error')
+  })
+
+  it('рівно 100 у довіднику — це справжнє значення, не помилка', () => {
+    // Липень 2024 і липень 2026 у засіяному довіднику саме такі: 100.0.
+    // Рядок теж має нести 100, інакше перевірка не відтворює баг.
+    const flat = { '2026-01': 100, '2026-02': 100, '2026-03': 100 }
+    const flatResult = calculateDebt(
+      buildDebtCalculationInput({
+        company: COMPANY,
+        from: { year: 2026, month: 1 },
+        to: { year: 2026, month: 3 },
+        indexByPeriod: flat,
+        overrides: { openingDebt: 8371.52 },
+      })
+    )
+    expect(flatResult.rows[0].inflationIndex).toBe(100)
+
+    renderWithContext(<MonthsTable result={flatResult} />, {
+      indexByPeriod: flat,
+    })
+
+    expect(statusOf('Січень 2026')).not.toContain('status-error')
+  })
+
+  it('червонить місяць, якого в довіднику немає', () => {
+    renderWithContext(<MonthsTable result={result} />, {
+      indexByPeriod: { '2026-02': 101, '2026-03': 101.7 },
+    })
+
+    expect(statusOf('Січень 2026')).toContain('status-error')
+  })
+
+  it('ручна правка знімає позначку навіть без довідника', () => {
+    renderWithContext(<MonthsTable result={result} />, {
+      indexByPeriod: {},
+      overrides: { months: { '2026-01': { inflationIndex: 101.2 } } },
+    })
+
+    expect(statusOf('Січень 2026')).not.toContain('status-error')
   })
 })

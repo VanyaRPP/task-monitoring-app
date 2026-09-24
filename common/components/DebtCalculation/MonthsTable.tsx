@@ -13,8 +13,13 @@ interface Props {
 }
 
 const MonthsTable: React.FC<Props> = ({ result }) => {
-  const { overrides, prefillMonths, setMonthOverride, inflationMethod } =
-    useDebtCalculationContext()
+  const {
+    overrides,
+    prefillMonths,
+    indexByPeriod,
+    setMonthOverride,
+    inflationMethod,
+  } = useDebtCalculationContext()
 
   const monthOverrides = overrides.months ?? {}
   const prefill = prefillMonths ?? {}
@@ -122,7 +127,12 @@ const MonthsTable: React.FC<Props> = ({ result }) => {
       width: 110,
       render: (_, row) => {
         const override = valueOf(row, 'inflationIndex')
-        const isMissing = !override && row.inflationIndex === 100
+        // Ask the reference table, never the value: an index of exactly 100 is
+        // a real published figure (a month with no price change), and the
+        // engine also falls back to 100 when nothing is known. Comparing to
+        // 100 flagged both as missing.
+        const isMissing =
+          override == null && indexByPeriod[formatPeriod(row)] == null
         const input = (
           <InputNumber
             size="small"
@@ -130,6 +140,10 @@ const MonthsTable: React.FC<Props> = ({ result }) => {
             step={0.1}
             status={isMissing ? 'error' : undefined}
             value={override}
+            aria-label={`Індекс інфляції за ${formatMonthLabel(
+              row.year,
+              row.month
+            )}`}
             placeholder={String(row.inflationIndex)}
             onChange={(value) => patch(row, 'inflationIndex', value as number)}
           />

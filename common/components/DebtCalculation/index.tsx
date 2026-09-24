@@ -77,6 +77,8 @@ export interface IDebtCalculationContext {
   overrides: IApartmentOverrides
   /** Prefilled from the DB, per month, for the selected company. */
   prefillMonths: Record<string, IMonthOverride>
+  /** CPI reference values by period, `{ 'YYYY-MM': 100.8 }`. */
+  indexByPeriod: Record<string, number>
   setApartmentOverride: (patch: Partial<IApartmentOverrides>) => void
   setMonthOverride: (period: string, patch: IMonthOverride) => void
   isLoading: boolean
@@ -302,6 +304,7 @@ const DebtCalculationBlock: React.FC = () => {
     result,
     overrides,
     prefillMonths,
+    indexByPeriod,
     setApartmentOverride,
     setMonthOverride,
     isLoading:
