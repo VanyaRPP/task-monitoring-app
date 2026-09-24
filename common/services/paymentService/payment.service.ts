@@ -5,10 +5,11 @@ import Service from '@modules/models/Service'
 import {
   getCreditDebitPipeline,
   getMaxInvoiceNumber,
+  getPaymentsOrderPipeline,
   getServiceTotalsPipeline,
   getTotalGeneralSumPipeline,
 } from '@pages/api/spacehub/payment/pipelines'
-import { quarters, SortOrder } from '@utils/constants'
+import { quarters } from '@utils/constants'
 import {
   sendInvoiceEmail,
   type InvoiceEmailPayment,
@@ -248,34 +249,40 @@ export async function getPayments(
     }
   }
 
-  const payments = await Payment.find(options)
-    .sort({
-      invoiceCreationDate: SortOrder.DESC,
-      type: SortOrder.ASC,
-      _id: SortOrder.ASC,
-    })
-    .skip(+skip)
-    .limit(+limit)
+  const filter = Payment.find(options).cast(Payment)
+
+  const orderedIds = (
+    await Payment.aggregate(getPaymentsOrderPipeline(filter, { skip, limit }))
+  ).map(({ _id }) => _id)
+
+  const unorderedPayments = await Payment.find({ _id: { $in: orderedIds } })
     .populate('company')
     .populate('street')
     // bank tokens are admin-only: never ship them inside an embedded domain
     .populate('domain', '-domainBankToken')
     .populate('monthService')
 
-  const total = await Payment.countDocuments(options)
+  const paymentById = new Map(
+    unorderedPayments.map((payment) => [payment._id.toString(), payment])
+  )
+  const payments = orderedIds
+    .map((id) => paymentById.get(id.toString()))
+    .filter(Boolean)
+
+  const total = await Payment.countDocuments(filter)
 
   const [distinctDomainIds, distinctCompanyIds] = await Promise.all([
-    Payment.distinct('domain', options),
-    Payment.distinct('company', options),
+    Payment.distinct('domain', filter),
+    Payment.distinct('company', filter),
   ])
 
-  const creditDebitPipeline = getCreditDebitPipeline(options)
+  const creditDebitPipeline = getCreditDebitPipeline(filter)
   const totalPayments = await Payment.aggregate(creditDebitPipeline)
 
-  const genralSumPipeline = getTotalGeneralSumPipeline(options)
+  const genralSumPipeline = getTotalGeneralSumPipeline(filter)
   const totalGeneralSum = await Payment.aggregate(genralSumPipeline)
 
-  const serviceTotalsPipeline = getServiceTotalsPipeline(options)
+  const serviceTotalsPipeline = getServiceTotalsPipeline(filter)
   const serviceTotals = await Payment.aggregate(serviceTotalsPipeline)
 
   const totalPaymentsData = [
