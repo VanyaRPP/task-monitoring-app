@@ -54,7 +54,7 @@
     "@reduxjs/toolkit": "^2.2.6",
     "@sparticuz/chromium": "^127.0.0",
     "@sparticuz/chromium-min": "^127",
-    "@testing-library/dom": "^10.4.0",
+    "@testing-library/dom": "^10.4.2",
     "@testing-library/jest-dom": "^6.5.0",
     "@testing-library/react": "^16.3.3",
     "ai": "^6.0.175",
@@ -94,12 +94,12 @@
     "react-resize-detector": "^12.1.0",
     "react-sticky-box": "^2.0.5",
     "react-to-print": "^2.14.12",
-    "sass": "^1.103.1",
+    "sass": "^1.104.1",
     "sharp": "^0.35.4",
-    "swagger-ui-react": "^5.32.14",
+    "swagger-ui-react": "^5.33.0",
     "use-places-autocomplete": "^4.0.0",
     "xlsx-js-style": "^1.2.0",
-    "zod": "^4.4.3"
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@testing-library/user-event": "^14.6.6",
