@@ -33,10 +33,6 @@ const input = (over = {}) => ({
   area: 67.08,
   tariff: 5.25,
   openingDebt: 8371.52,
-  // No trailing «Z», so the expected string does not depend on the machine's
-  // timezone. The DB stores UTC ISO, and the page and the export both render
-  // it in local time.
-  monthUpdatedAt: { '2026-02': '2026-09-23T14:32:00' },
   generatedAt: new Date('2026-09-23T10:30:00'),
   ...over,
 })
@@ -100,9 +96,8 @@ describe('buildDebtCalculationDocument — таблиця', () => {
       'Індекс інфляції, %',
       'Коефіцієнт',
       'Інфляційні',
-      'Змінено',
     ])
-    expect(columns).toHaveLength(12)
+    expect(columns).toHaveLength(11)
   })
 
   it('шапка таблиці в рамці та із заливкою', () => {
@@ -114,26 +109,10 @@ describe('buildDebtCalculationDocument — таблиця', () => {
   it('рядок на кожен місяць, усі клітинки в рамці', () => {
     const january = findRow(rows, 'Січень 2026')
 
-    expect(january).toHaveLength(12)
+    expect(january).toHaveLength(11)
     expect(january.every((cell) => cell.border)).toBe(true)
     expect(january[6].v).toBeCloseTo(result.rows[0].debt, 2)
     expect(january[7].v).toBe(31)
-  })
-
-  it('колонка «Змінено» бере мітку ручної правки', () => {
-    expect(findRow(rows, 'Лютий 2026')[11].v).toBe('23.09.2026 14:32')
-  })
-
-  it('місяці без правки лишають «Змінено» порожнім', () => {
-    expect(findRow(rows, 'Січень 2026')[11].v).toBe('')
-  })
-
-  it('ігнорує нерозбірну мітку замість того, щоб писати Invalid Date', () => {
-    const broken = buildDebtCalculationDocument(
-      input({ monthUpdatedAt: { '2026-01': 'вчора' } })
-    )
-
-    expect(findRow(broken.rows, 'Січень 2026')[11].v).toBe('')
   })
 
   it('підсумковий рядок таблиці з виділенням', () => {

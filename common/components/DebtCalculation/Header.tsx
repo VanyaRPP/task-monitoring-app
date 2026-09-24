@@ -11,7 +11,6 @@ import {
 } from 'antd'
 import { useMemo } from 'react'
 import { useDebtCalculationContext } from './'
-import SaveStatus from './SaveStatus'
 import { useExportExcel } from './useExportExcel'
 import s from './style.module.scss'
 
@@ -67,12 +66,9 @@ const DebtCalculationHeader: React.FC = () => {
   return (
     <div className={s.Header}>
       <div className={s.TitleRow}>
-        <Space align="center" wrap>
-          <Typography.Title level={5} className={s.Title}>
-            Розрахунок заборгованості
-          </Typography.Title>
-          <SaveStatus />
-        </Space>
+        <Typography.Title level={5} className={s.Title}>
+          Розрахунок заборгованості
+        </Typography.Title>
 
         <Button
           icon={<FileExcelOutlined />}

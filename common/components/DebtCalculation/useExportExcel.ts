@@ -76,11 +76,6 @@ export const useExportExcel = (domainName?: string): IExportExcel => {
         area: overrides.area ?? company?.totalArea,
         tariff: overrides.tariff ?? company?.pricePerMeter,
         openingDebt: overrides.openingDebt,
-        monthUpdatedAt: Object.fromEntries(
-          Object.entries(overrides.months ?? {})
-            .filter(([, month]) => !!month?.updatedAt)
-            .map(([period, month]) => [period, month.updatedAt])
-        ),
       })
 
       const worksheet = XLSX.utils.aoa_to_sheet(

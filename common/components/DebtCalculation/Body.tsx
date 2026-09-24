@@ -1,4 +1,4 @@
-import { Alert, Empty, InputNumber, Space, Typography } from 'antd'
+import { Empty, InputNumber, Space, Typography } from 'antd'
 import { useDebtCalculationContext } from './'
 import DebtActSummary from './ActSummary'
 import MonthsTable from './MonthsTable'
@@ -12,7 +12,6 @@ const DebtCalculationBody: React.FC = () => {
     result,
     overrides,
     setApartmentOverride,
-    missingIndexPeriods,
   } = useDebtCalculationContext()
 
   if (!domainId) {
@@ -77,15 +76,6 @@ const DebtCalculationBody: React.FC = () => {
           )}
           {param('Борг на початок періоду', 'openingDebt', '0.00')}
         </Space>
-
-        {missingIndexPeriods.length > 0 && (
-          <Alert
-            showIcon
-            type="warning"
-            message="У довіднику немає індексу інфляції за деякі місяці періоду"
-            description={`Ці місяці рахуються з індексом 100 (без зміни): ${missingIndexPeriods.join(', ')}. Впишіть значення вручну в таблиці або досійте довідник.`}
-          />
-        )}
       </div>
 
       <MonthsTable result={result} />
