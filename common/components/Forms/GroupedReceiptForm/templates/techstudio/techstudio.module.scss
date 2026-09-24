@@ -725,7 +725,7 @@ $cyan-border-l: rgba(0, 140, 135, 0.25);
   }
 }
 
-@media (max-width: 860px) {
+@media screen and (max-width: 860px) {
   .tsHeader {
     grid-template-columns: 1fr;
     gap: 0.8rem;

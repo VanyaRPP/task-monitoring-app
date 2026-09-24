@@ -1,9 +1,11 @@
 import { FC, useEffect, useRef } from 'react'
 import { useGetInvoiceTemplatesQuery } from '@common/api/invoiceTemplateApi/invoiceTemplate.api'
-import { resolveBuiltinTemplateKey, templateMap } from './templateMap'
+import { normalizeCurrency } from '@utils/helpers'
+import { resolveTemplateCandidate, templateMap } from './templateMap'
 import { useReceiptTemplateProps } from './useReceiptTemplateProps'
 import { applyDescriptionOverrides } from './applyDescriptionOverrides'
 import { readShowQuantityInPreview } from './previewQtyStorage'
+import { resolveInvoiceLang } from './resolveInvoiceLang'
 import { captureInvoiceHtml } from './captureInvoiceHtml'
 
 interface Props {
@@ -34,10 +36,9 @@ const HeadlessReceiptRenderer: FC<Props> = ({
     { domainId },
     { skip: !domainId }
   )
+  const templateId = templateKey || resolveTemplateCandidate(payment)
   const customTemplate =
-    customTemplatesRes?.data?.find(
-      (t) => t._id === (templateKey || payment?.template)
-    ) ?? null
+    customTemplatesRes?.data?.find((t) => t._id === templateId) ?? null
 
   const descriptionOverrides = customTemplate
     ? {
@@ -46,19 +47,29 @@ const HeadlessReceiptRenderer: FC<Props> = ({
       }
     : undefined
 
+  const currency = normalizeCurrency(
+    payment?.currency ||
+      (typeof payment?.company === 'object'
+        ? payment?.company?.currency
+        : undefined) ||
+      contextCompany?.currency
+  )
+
   const receiptProps = useReceiptTemplateProps({
-    data: applyDescriptionOverrides(payment, descriptionOverrides),
+    data: applyDescriptionOverrides(
+      payment ? { ...payment, currency } : payment,
+      descriptionOverrides
+    ),
     contextCompany,
     descriptionOverrides,
     overrides: customTemplate?.overrides,
-    lang: payment?.invoiceLang,
+    lang: resolveInvoiceLang(payment),
     showQuantityInPreview: readShowQuantityInPreview(payment?._id),
   })
 
   const resolvedKey =
     customTemplate?.baseTemplateKey ||
-    templateKey ||
-    resolveBuiltinTemplateKey(payment)
+    (templateId in templateMap ? templateId : 'classic')
   const TemplateComponent = templateMap[resolvedKey] || templateMap.classic
 
   useEffect(() => {

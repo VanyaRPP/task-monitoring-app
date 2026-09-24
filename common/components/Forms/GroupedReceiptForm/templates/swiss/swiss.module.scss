@@ -373,7 +373,7 @@ $card-border-l: rgba(0, 0, 0, 0.1);
   }
 }
 
-@media (max-width: 860px) {
+@media screen and (max-width: 860px) {
   .swissInvoice {
     padding: 1.5rem 1.2rem;
   }

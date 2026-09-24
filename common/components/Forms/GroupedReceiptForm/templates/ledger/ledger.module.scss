@@ -566,7 +566,7 @@ $surface-stripe-l: rgba(0, 0, 0, 0.02);
   }
 }
 
-@media (max-width: 860px) {
+@media screen and (max-width: 860px) {
   .lgInvoice {
     padding: 1.4rem 1rem;
   }

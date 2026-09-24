@@ -15,7 +15,12 @@ export function collectAppCss(): string {
 export const PDF_RESET_CSS = `
   html, body { margin: 0; padding: 0; height: auto; background: #fff; }
   *, *::before, *::after { box-sizing: border-box; }
-  @page { size: A4; margin: 12mm 14mm; }
+  /* puppeteer's page.pdf() always sends Chrome explicit zero margins, so a CSS
+     @page margin is dead in the download. Browser printing does honour it, and
+     a different page box is a different layout width — the templates' own
+     breakpoints then resolve differently and print drifts away from the
+     download. Keep the page box identical to the one puppeteer prints on. */
+  @page { size: A4; margin: 0; }
   /* The captured template root may have height:100% / min-height — those
      would prevent puppeteer from paginating overflow. Reset on the
      immediate body children only, not deeper. */
@@ -27,11 +32,23 @@ export const PDF_RESET_CSS = `
   tfoot { display: table-footer-group; }
 `
 
-export function buildStandaloneHtml(innerHtml: string, css: string): string {
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+}
+
+export function buildStandaloneHtml(
+  innerHtml: string,
+  css: string,
+  title?: string
+): string {
   return `<!DOCTYPE html>
   <html>
     <head>
       <meta charset="UTF-8" />
+      ${title ? `<title>${escapeHtml(title)}</title>` : ''}
       <style>${css}</style>
       <style>${PDF_RESET_CSS}</style>
     </head>
@@ -39,9 +56,12 @@ export function buildStandaloneHtml(innerHtml: string, css: string): string {
   </html>`
 }
 
-export function captureInvoiceHtml(node: HTMLElement | null): string {
+export function captureInvoiceHtml(
+  node: HTMLElement | null,
+  title?: string
+): string {
   if (!node) {
     throw new Error('captureInvoiceHtml: nothing rendered to capture')
   }
-  return buildStandaloneHtml(node.outerHTML, collectAppCss())
+  return buildStandaloneHtml(node.outerHTML, collectAppCss(), title)
 }

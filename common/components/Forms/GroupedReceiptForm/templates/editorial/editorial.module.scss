@@ -480,7 +480,7 @@ $surface-card-l: rgba(0, 0, 0, 0.025);
   }
 }
 
-@media (max-width: 860px) {
+@media screen and (max-width: 860px) {
   .edInvoice {
     padding: 1.6rem 1.2rem;
   }

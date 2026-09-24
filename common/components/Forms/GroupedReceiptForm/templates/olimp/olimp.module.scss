@@ -333,7 +333,7 @@
   }
 }
 
-@media (max-width: 900px) {
+@media screen and (max-width: 900px) {
   .invoiceContainer {
     padding: 1.2rem;
   }

@@ -7,11 +7,11 @@ import { usePaymentContext } from '@components/AddPaymentModal'
 import { useInvoiceCurrency } from '@modules/hooks/useInvoiceCurrency'
 import { TemplateKey } from '@components/AddPaymentModal/resolveTemplate'
 import { FC, useRef } from 'react'
-import { useReactToPrint } from 'react-to-print'
 import { useReceiptTemplateProps } from './useReceiptTemplateProps'
 import { useInvoiceTemplateDescriptions } from './useInvoiceTemplateDescriptions'
 import { applyDescriptionOverrides } from './applyDescriptionOverrides'
 import { captureInvoiceHtml } from './captureInvoiceHtml'
+import { printInvoiceHtml } from './printInvoiceHtml'
 import { builtinTemplateItems } from './builtinTemplates'
 import {
   PrinterOutlined,
@@ -116,11 +116,20 @@ const GroupedReceiptForm: FC<Props> = ({
     data?.reciever?.companyName ??
     ''
 
-  const handlePrint = useReactToPrint({
-    content: () => componentRef.current,
-    documentTitle:
-      `${printCompanyName}-inv-${modernInvoiceNumber}` || 'invoice',
-  })
+  const documentTitle = printCompanyName
+    ? `${printCompanyName}-inv-${modernInvoiceNumber}`
+    : 'invoice'
+
+  const handlePrint = () => {
+    try {
+      printInvoiceHtml(
+        captureInvoiceHtml(componentRef.current, documentTitle),
+        documentTitle
+      )
+    } catch {
+      message.error('Не вдалося підготувати рахунок до друку')
+    }
+  }
 
   if (!rawData) return null
 
