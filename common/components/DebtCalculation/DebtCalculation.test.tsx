@@ -22,7 +22,6 @@ import DebtActSummary from './ActSummary'
 import DebtCalculationBody from './Body'
 import DebtCalculationHeader from './Header'
 import MonthsTable from './MonthsTable'
-import SaveStatus from './SaveStatus'
 
 jest.mock('@common/api/domainApi/domain.api', () => ({
   useGetDomainIdsByServiceTypeQuery: jest.fn(),
@@ -90,11 +89,10 @@ const makeContext = (
     result,
     overrides: { openingDebt: 8371.52, legalFees: 3000, courtFee: 1211.2 },
     prefillMonths: {},
+    indexByPeriod: { '2026-01': 100.7, '2026-02': 101, '2026-03': 101.7 },
     setApartmentOverride: jest.fn(),
     setMonthOverride: jest.fn(),
-    missingIndexPeriods: [],
     isLoading: false,
-    saveState: 'idle',
     ...patch,
   }) as IDebtCalculationContext
 
@@ -208,14 +206,6 @@ describe('Body — обрана квартира', () => {
     )
     expect(screen.getByLabelText('Борг на початок періоду')).toBeInTheDocument()
   })
-
-  it('попереджає про місяці без індексу', () => {
-    renderWithContext(<DebtCalculationBody />, {
-      missingIndexPeriods: ['2026-02', '2026-03'],
-    })
-
-    expect(screen.getByText(/2026-02, 2026-03/)).toBeInTheDocument()
-  })
 })
 
 describe('ActSummary — підсумок у стилі Акта', () => {
@@ -284,26 +274,6 @@ describe('MonthsTable', () => {
     expect(screen.getByText('Березень 2026')).toBeInTheDocument()
   })
 
-  it('показує, коли місяць востаннє правили руками', () => {
-    renderWithContext(<MonthsTable result={result} />, {
-      overrides: {
-        months: {
-          '2026-02': { paid: 500, updatedAt: '2026-09-23T14:32:00.000Z' },
-        },
-      },
-    })
-
-    expect(
-      screen.getByText(dayjs('2026-09-23T14:32:00.000Z').format('DD.MM HH:mm'))
-    ).toBeInTheDocument()
-  })
-
-  it('місяці без ручної правки не мають мітки', () => {
-    renderWithContext(<MonthsTable result={result} />, { overrides: {} })
-
-    expect(screen.queryByText(/\d\d\.\d\d \d\d:\d\d/)).not.toBeInTheDocument()
-  })
-
   it('у підсумку показує суму днів і підсумкові інфляційні', () => {
     renderWithContext(<MonthsTable result={result} />)
 
@@ -348,33 +318,54 @@ describe('Header', () => {
   })
 })
 
-describe('SaveStatus', () => {
-  it('мовчить, поки нічого не сталося', () => {
-    const { container } = renderWithContext(<SaveStatus />, {
-      saveState: 'idle',
-    })
+describe('MonthsTable — позначка відсутнього індексу', () => {
+  const statusOf = (month: string): string =>
+    screen
+      .getByRole('spinbutton', { name: `Індекс інфляції за ${month}` })
+      .closest('.ant-input-number').className
 
-    expect(container).toBeEmptyDOMElement()
+  it('не чіпає місяць, індекс якого є в довіднику', () => {
+    renderWithContext(<MonthsTable result={result} />)
+
+    expect(statusOf('Січень 2026')).not.toContain('status-error')
   })
 
-  it.each([
-    ['pending', 'Збереження…'],
-    ['saving', 'Збереження…'],
-    ['error', 'Не збережено'],
-  ])('показує стан %s', (saveState, label) => {
-    renderWithContext(<SaveStatus />, {
-      saveState: saveState as IDebtCalculationContext['saveState'],
+  it('рівно 100 у довіднику — це справжнє значення, не помилка', () => {
+    // Липень 2024 і липень 2026 у засіяному довіднику саме такі: 100.0.
+    // Рядок теж має нести 100, інакше перевірка не відтворює баг.
+    const flat = { '2026-01': 100, '2026-02': 100, '2026-03': 100 }
+    const flatResult = calculateDebt(
+      buildDebtCalculationInput({
+        company: COMPANY,
+        from: { year: 2026, month: 1 },
+        to: { year: 2026, month: 3 },
+        indexByPeriod: flat,
+        overrides: { openingDebt: 8371.52 },
+      })
+    )
+    expect(flatResult.rows[0].inflationIndex).toBe(100)
+
+    renderWithContext(<MonthsTable result={flatResult} />, {
+      indexByPeriod: flat,
     })
 
-    expect(screen.getByText(label)).toBeInTheDocument()
+    expect(statusOf('Січень 2026')).not.toContain('status-error')
   })
 
-  it('після збереження називає час', () => {
-    const savedAt = new Date('2026-09-23T14:32:00')
-    renderWithContext(<SaveStatus />, { saveState: 'saved', savedAt })
+  it('червонить місяць, якого в довіднику немає', () => {
+    renderWithContext(<MonthsTable result={result} />, {
+      indexByPeriod: { '2026-02': 101, '2026-03': 101.7 },
+    })
 
-    expect(
-      screen.getByText(`Збережено о ${dayjs(savedAt).format('HH:mm')}`)
-    ).toBeInTheDocument()
+    expect(statusOf('Січень 2026')).toContain('status-error')
+  })
+
+  it('ручна правка знімає позначку навіть без довідника', () => {
+    renderWithContext(<MonthsTable result={result} />, {
+      indexByPeriod: {},
+      overrides: { months: { '2026-01': { inflationIndex: 101.2 } } },
+    })
+
+    expect(statusOf('Січень 2026')).not.toContain('status-error')
   })
 })

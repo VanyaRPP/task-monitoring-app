@@ -18,8 +18,6 @@ export interface IDebtExcelInput {
   area?: number
   tariff?: number
   openingDebt?: number
-  /** Manual-edit stamps per month - the «Змінено» column. */
-  monthUpdatedAt?: Record<string, string>
   generatedAt?: Date
 }
 
@@ -72,7 +70,7 @@ export const toXlsxStyle = (cell: IExcelCell): Record<string, unknown> => ({
 })
 
 /** Column widths: the first fits month names, the rest fit numbers. */
-const COLUMN_WIDTHS = [18, 13, 13, 11, 14, 12, 14, 8, 13, 12, 14, 14]
+const COLUMN_WIDTHS = [18, 13, 13, 11, 14, 12, 14, 8, 13, 12, 14]
 const COLUMN_COUNT = COLUMN_WIDTHS.length
 
 const MONEY = '0.00'
@@ -95,7 +93,6 @@ const TABLE_HEAD = [
   'Індекс інфляції, %',
   'Коефіцієнт',
   'Інфляційні',
-  'Змінено',
 ]
 
 const money = (value?: number): number =>
@@ -151,8 +148,7 @@ export const asOfLabel = (to?: IYearMonth): string => {
 
 /**
  * Assembles the whole document the way the page shows it: a parameter header,
- * the monthly table with every column (including «Змінено»), and a summary
- * block styled after the paper Act.
+ * the monthly table, and a summary block styled after the paper Act.
  *
  * Pure: no `xlsx` here. Styling is expressed as flags, and `useExportExcel`
  * turns them into real borders and fills in the browser.
@@ -169,7 +165,6 @@ export const buildDebtCalculationDocument = ({
   area,
   tariff,
   openingDebt,
-  monthUpdatedAt = {},
   generatedAt = new Date(),
 }: IDebtExcelInput): IDebtExcelDocument => {
   const interestLabel = `${annualRatePercent}% річних`
@@ -242,11 +237,6 @@ export const buildDebtCalculationDocument = ({
           border: true,
           numFmt: MONEY,
           align: 'right',
-        },
-        {
-          v: timestampLabel(monthUpdatedAt[formatPeriod(month)]),
-          border: true,
-          align: 'center',
         }
       )
     ),
@@ -309,8 +299,7 @@ export const buildDebtCalculationDocument = ({
         fill: 'total',
         numFmt: MONEY,
         align: 'right',
-      },
-      { v: '', border: true, fill: 'total' }
+      }
     ),
   ]
 
