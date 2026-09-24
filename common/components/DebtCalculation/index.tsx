@@ -38,7 +38,7 @@ import {
 } from 'react'
 import DebtCalculationBody from './Body'
 import DebtCalculationHeader from './Header'
-import { IAutoSave, useAutoSave } from './useAutoSave'
+import { useAutoSave } from './useAutoSave'
 
 // Neither payments nor monthly services can be filtered by a date range on the
 // server, so we pull the domain's catalog whole and bucket it by month here.
@@ -56,7 +56,7 @@ const toDayjs = (value?: IYearMonth): Dayjs | undefined =>
         .startOf('month')
     : undefined
 
-export interface IDebtCalculationContext extends IAutoSave {
+export interface IDebtCalculationContext {
   allowedDomainIds: string[]
   domainId?: string
   setDomainId: (value?: string) => void
@@ -79,8 +79,6 @@ export interface IDebtCalculationContext extends IAutoSave {
   prefillMonths: Record<string, IMonthOverride>
   setApartmentOverride: (patch: Partial<IApartmentOverrides>) => void
   setMonthOverride: (period: string, patch: IMonthOverride) => void
-  /** Months of the period the CPI table has no entry for. */
-  missingIndexPeriods: string[]
   isLoading: boolean
 }
 
@@ -263,12 +261,9 @@ const DebtCalculationBlock: React.FC = () => {
     ]
   )
 
-  const autoSave = useAutoSave({
-    domainId,
-    companyId,
-    snapshot,
-    enabled: isApplied,
-  })
+  // Runs for its side effects only: the draft, the debounced write and the
+  // flush on company change. Its state is no longer surfaced in the UI.
+  useAutoSave({ domainId, companyId, snapshot, enabled: isApplied })
 
   const setApartmentOverride = (patch: Partial<IApartmentOverrides>) =>
     setOverrides((prev) => ({ ...prev, ...patch }))
@@ -287,16 +282,6 @@ const DebtCalculationBlock: React.FC = () => {
         },
       },
     }))
-
-  const missingIndexPeriods = useMemo(
-    () =>
-      (result?.rows ?? [])
-        .filter(
-          ({ year, month }) => !indexByPeriod[formatPeriod({ year, month })]
-        )
-        .map(({ year, month }) => formatPeriod({ year, month })),
-    [result, indexByPeriod]
-  )
 
   const value: IDebtCalculationContext = {
     allowedDomainIds,
@@ -319,10 +304,8 @@ const DebtCalculationBlock: React.FC = () => {
     prefillMonths,
     setApartmentOverride,
     setMonthOverride,
-    missingIndexPeriods,
     isLoading:
       isAccessLoading || isCompanies || isIndexes || isPayments || isServices,
-    ...autoSave,
   }
 
   if (!isAccessLoading && allowedDomainIds.length === 0) {

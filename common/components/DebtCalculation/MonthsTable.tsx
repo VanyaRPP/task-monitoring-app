@@ -2,7 +2,6 @@ import { IDebtCalculationResult } from '@utils/debt-calculation/types'
 import { formatPeriod } from '@utils/debt-calculation/months'
 import { InputNumber, Table, Tooltip, Typography } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
-import dayjs from 'dayjs'
 import { useDebtCalculationContext } from './'
 import { formatCoefficient, formatMoney, formatMonthLabel } from './format'
 import s from './style.module.scss'
@@ -129,7 +128,7 @@ const MonthsTable: React.FC<Props> = ({ result }) => {
             size="small"
             min={0}
             step={0.1}
-            status={isMissing ? 'warning' : undefined}
+            status={isMissing ? 'error' : undefined}
             value={override}
             placeholder={String(row.inflationIndex)}
             onChange={(value) => patch(row, 'inflationIndex', value as number)}
@@ -137,7 +136,7 @@ const MonthsTable: React.FC<Props> = ({ result }) => {
         )
 
         return isMissing ? (
-          <Tooltip title="Індексу за цей місяць немає в довіднику — узято 100 (без зміни)">
+          <Tooltip title="Індексу за цей місяць немає в довіднику — узято 100, тобто без зміни. Впишіть значення вручну або досійте довідник.">
             {input}
           </Tooltip>
         ) : (
@@ -156,22 +155,6 @@ const MonthsTable: React.FC<Props> = ({ result }) => {
       width: 130,
       align: 'right',
       render: (_, row) => formatMoney(row.inflationLoss),
-    },
-    {
-      title: 'Змінено',
-      width: 110,
-      render: (_, row) => {
-        const at = monthOverrides[formatPeriod(row)]?.updatedAt
-        if (!at) return null
-
-        return (
-          <Tooltip title={dayjs(at).format('DD.MM.YYYY HH:mm')}>
-            <Typography.Text type="secondary" className={s.Muted}>
-              {dayjs(at).format('DD.MM HH:mm')}
-            </Typography.Text>
-          </Tooltip>
-        )
-      },
     },
   ]
 
@@ -213,7 +196,6 @@ const MonthsTable: React.FC<Props> = ({ result }) => {
               <Table.Summary.Cell index={10} align="right">
                 <strong>{formatMoney(result.inflation)}</strong>
               </Table.Summary.Cell>
-              <Table.Summary.Cell index={11} />
             </Table.Summary.Row>
           </Table.Summary>
         )}

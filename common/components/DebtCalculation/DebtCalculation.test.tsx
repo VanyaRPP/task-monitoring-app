@@ -22,7 +22,6 @@ import DebtActSummary from './ActSummary'
 import DebtCalculationBody from './Body'
 import DebtCalculationHeader from './Header'
 import MonthsTable from './MonthsTable'
-import SaveStatus from './SaveStatus'
 
 jest.mock('@common/api/domainApi/domain.api', () => ({
   useGetDomainIdsByServiceTypeQuery: jest.fn(),
@@ -92,9 +91,7 @@ const makeContext = (
     prefillMonths: {},
     setApartmentOverride: jest.fn(),
     setMonthOverride: jest.fn(),
-    missingIndexPeriods: [],
     isLoading: false,
-    saveState: 'idle',
     ...patch,
   }) as IDebtCalculationContext
 
@@ -208,14 +205,6 @@ describe('Body — обрана квартира', () => {
     )
     expect(screen.getByLabelText('Борг на початок періоду')).toBeInTheDocument()
   })
-
-  it('попереджає про місяці без індексу', () => {
-    renderWithContext(<DebtCalculationBody />, {
-      missingIndexPeriods: ['2026-02', '2026-03'],
-    })
-
-    expect(screen.getByText(/2026-02, 2026-03/)).toBeInTheDocument()
-  })
 })
 
 describe('ActSummary — підсумок у стилі Акта', () => {
@@ -284,26 +273,6 @@ describe('MonthsTable', () => {
     expect(screen.getByText('Березень 2026')).toBeInTheDocument()
   })
 
-  it('показує, коли місяць востаннє правили руками', () => {
-    renderWithContext(<MonthsTable result={result} />, {
-      overrides: {
-        months: {
-          '2026-02': { paid: 500, updatedAt: '2026-09-23T14:32:00.000Z' },
-        },
-      },
-    })
-
-    expect(
-      screen.getByText(dayjs('2026-09-23T14:32:00.000Z').format('DD.MM HH:mm'))
-    ).toBeInTheDocument()
-  })
-
-  it('місяці без ручної правки не мають мітки', () => {
-    renderWithContext(<MonthsTable result={result} />, { overrides: {} })
-
-    expect(screen.queryByText(/\d\d\.\d\d \d\d:\d\d/)).not.toBeInTheDocument()
-  })
-
   it('у підсумку показує суму днів і підсумкові інфляційні', () => {
     renderWithContext(<MonthsTable result={result} />)
 
@@ -345,36 +314,5 @@ describe('Header', () => {
 
     expect(screen.queryByRole('button', { name: /Зберегти/ })).toBeNull()
     expect(screen.queryByRole('button', { name: /Новий/ })).toBeNull()
-  })
-})
-
-describe('SaveStatus', () => {
-  it('мовчить, поки нічого не сталося', () => {
-    const { container } = renderWithContext(<SaveStatus />, {
-      saveState: 'idle',
-    })
-
-    expect(container).toBeEmptyDOMElement()
-  })
-
-  it.each([
-    ['pending', 'Збереження…'],
-    ['saving', 'Збереження…'],
-    ['error', 'Не збережено'],
-  ])('показує стан %s', (saveState, label) => {
-    renderWithContext(<SaveStatus />, {
-      saveState: saveState as IDebtCalculationContext['saveState'],
-    })
-
-    expect(screen.getByText(label)).toBeInTheDocument()
-  })
-
-  it('після збереження називає час', () => {
-    const savedAt = new Date('2026-09-23T14:32:00')
-    renderWithContext(<SaveStatus />, { saveState: 'saved', savedAt })
-
-    expect(
-      screen.getByText(`Збережено о ${dayjs(savedAt).format('HH:mm')}`)
-    ).toBeInTheDocument()
   })
 })
