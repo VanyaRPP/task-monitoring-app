@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { CloseCircleOutlined } from '@ant-design/icons'
 import TotalArea from './cells/TotalArea'
 import CompanyName from './cells/CompanyName'
+import TotalSum from './cells/TotalSum'
 import { CustomServiceGate } from './cells/CustomServiceGate'
 import { Popconfirm, TableColumnsType } from 'antd'
 import { ServiceType, UTILITY_SERVICE_ID_TO_TYPE } from '@utils/constants'
@@ -271,6 +272,25 @@ export const buildTypedCustomColumn = (
   })
 }
 
+const withKey = (
+  key: string,
+  column: TableColumnsType[number]
+): TableColumnsType[number] => ({ ...column, key })
+
+/** Підписи рухомих колонок — для меню видимості. */
+export const NATIVE_COLUMN_LABELS: Record<string, string> = {
+  area: 'Площа, м²',
+  maintenance: 'Утримання',
+  placing: 'Розміщення',
+  inflicion: 'Інфляція',
+  electricity: 'Електропостачання',
+  water: 'Водопостачання',
+  waterPart: 'Водопостачання без лічильника',
+  garbage: 'Вивіз ТПВ',
+  cleaning: 'Прибирання',
+  discount: 'Знижка',
+}
+
 export const getDefaultColumns = (
   remove: (index: number) => void,
   allowedServices: AllowedService[] = [],
@@ -296,16 +316,24 @@ export const getDefaultColumns = (
   return [
     {
       fixed: 'left',
+      title: 'Сума',
+      width: 120,
+      render: (_, { name }: { name: number }) => <TotalSum name={name} />,
+    },
+    {
+      fixed: 'left',
       title: 'Компанія',
       width: 250,
       render: (_, { name }: { name: number }) => <CompanyName name={name} />,
     },
     hasAreaBasedService && {
+      key: 'area',
       title: 'Площа, м²',
       width: 160,
       render: (_, { name }: { name: number }) => <TotalArea name={name} />,
     },
     has(ServiceType.Maintenance) && {
+      key: 'maintenance',
       title: 'Утримання',
       children: [
         {
@@ -325,21 +353,32 @@ export const getDefaultColumns = (
       ],
     },
     has(ServiceType.Placing) &&
-      placingColumn({ title: 'Розміщення', fieldName: ServiceType.Placing }),
+      withKey(
+        'placing',
+        placingColumn({ title: 'Розміщення', fieldName: ServiceType.Placing })
+      ),
     has(ServiceType.Inflicion) && {
+      key: 'inflicion',
       title: <InflicionTitle />,
       width: 200,
       render: (_, { name }: { name: number }) => <InflicionSum name={name} />,
     },
     has(ServiceType.Electricity) &&
-      electricityColumn({
-        title: 'Електропостачання',
-        fieldName: ServiceType.Electricity,
-        losses,
-      }),
+      withKey(
+        'electricity',
+        electricityColumn({
+          title: 'Електропостачання',
+          fieldName: ServiceType.Electricity,
+          losses,
+        })
+      ),
     has(ServiceType.Water) &&
-      waterColumn({ title: 'Водопостачання', fieldName: ServiceType.Water }),
+      withKey(
+        'water',
+        waterColumn({ title: 'Водопостачання', fieldName: ServiceType.Water })
+      ),
     has(ServiceType.WaterPart) && {
+      key: 'waterPart',
       title: 'Водопостачання без лічильника',
       children: [
         {
@@ -359,6 +398,7 @@ export const getDefaultColumns = (
       ],
     },
     has(ServiceType.GarbageCollector) && {
+      key: 'garbage',
       title: 'Вивіз ТПВ',
       children: [
         {
@@ -378,11 +418,13 @@ export const getDefaultColumns = (
       ],
     },
     has(ServiceType.Cleaning) && {
+      key: 'cleaning',
       title: 'Прибирання',
       width: 200,
       render: (_, { name }: { name: number }) => <Cleaning name={name} />,
     },
     has(ServiceType.Discount) && {
+      key: 'discount',
       title: 'Знижка',
       width: 200,
       render: (_, { name }: { name: number }) => <Discount name={name} />,
