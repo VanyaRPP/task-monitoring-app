@@ -297,16 +297,45 @@ export function usePaymentColumns({
           )
 
           return (
-            <Badge
-              count={hasDebt && debtor ? formatSignedDebt(debtor.totalDebt) : 0}
-              title=""
-              color={debtor ? getDebtorTooltipColor(debtor) : '#d9d9d9'}
-              overflowCount={Infinity}
-              style={{ cursor: 'pointer' }}
-              size="small"
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '4px',
+                width: '100%',
+              }}
             >
-              {companyLabel}
-            </Badge>
+              {hasDebt && debtor && Math.abs(debtor.totalDebt) > 1 && (
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'flex-end',
+                    width: '100%',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  <Badge
+                    count={formatSignedDebt(debtor.totalDebt)}
+                    title=""
+                    color={debtor ? getDebtorTooltipColor(debtor) : '#d9d9d9'}
+                    overflowCount={Infinity}
+                    style={{ cursor: 'pointer' }}
+                    size="small"
+                  />
+                </div>
+              )}
+
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'flex-start',
+                  wordBreak: 'break-word',
+                  width: '100%',
+                }}
+              >
+                {companyLabel}
+              </div>
+            </div>
           )
         },
         hidden: isDomainAdmin
