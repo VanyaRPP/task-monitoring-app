@@ -1,6 +1,6 @@
 # Claude Rules — task-monitoring-app
 
-You are an expert developer assistant for the task-monitoring-app, a Next.js 13 Pages-Router application. This file defines **how you work**. For stack details see [TECH_STACK.md](./TECH_STACK.md); for code standards see [CODE_STYLE.md](./CODE_STYLE.md).
+You are an expert developer assistant for the task-monitoring-app, a Next.js 15 Pages-Router application. This file defines **how you work**. For stack details see [TECH_STACK.md](./TECH_STACK.md); for code standards see [CODE_STYLE.md](./CODE_STYLE.md).
 
 ## 1. Context Awareness — Read Before You Write
 
@@ -91,4 +91,4 @@ import { bot } from '@lib/bot'
 4. Are imports using `@`-aliases?
 5. Is browser-only code SSR-guarded (`useEffect` or `dynamic(..., { ssr: false })`)?
 6. Is there an existing util / component / hook to reuse instead of adding a new one?
-7. Will Husky pre-commit (lint + types) pass?
+7. Will CI (lint:check, types:check, build, tests) pass? Pre-commit only runs lint-staged (eslint --fix + prettier on staged files).

@@ -14,7 +14,7 @@ Typing, linting, formatting, and testing standards. For project layout see [CLAU
 - **No untyped objects** crossing module boundaries (component → component, API → client, service → API).
 - **Forbidden escape hatches:** `as any`, `@ts-ignore`, `@ts-nocheck`. If you reach for one, fix the underlying type instead. `as unknown as X` is only acceptable for third-party type bugs, with a one-line `// Why:` comment.
 - **Path aliases everywhere.** Configured in `tsconfig.json` `paths`.
-- **Type-check before proposing:** mentally run `npm run types:check` (`tsc --noEmit`). Husky pre-commit will run it for real.
+- **Type-check before proposing:** mentally run `npm run types:check` (`tsc --noEmit`). CI runs it on every push/PR.
 
 ## ESLint
 
@@ -24,7 +24,7 @@ Config: `.eslintrc.json` extends `next/core-web-vitals`, `plugin:@typescript-esl
 - `@typescript-eslint/no-explicit-any`: off (allowed, but avoid).
 - `@typescript-eslint/no-unused-vars`: off (still — clean up unused imports/vars).
 - `react/react-in-jsx-scope`: off (Next.js handles it).
-- Run `npm run lint` before suggesting code.
+- Check with `npx eslint <files>` or `yarn lint:check`. Do not run `npm run lint` — it auto-fixes the whole repo.
 
 ## Prettier
 
@@ -87,7 +87,7 @@ Framework: Jest 29 + Testing Library. Config: `jest.config.ts`, setup: `jest.set
 - **Co-locate** unit tests: `foo.ts` + `foo.test.ts` in the same folder.
 - **Integration tests** crossing modules live in `tests/`.
 - **API route tests** live next to the route (see `pages/api/**/*.test.ts` and `pages/api/**/tests/`).
-- **Naming:** `<file>.test.ts(x)` for unit, `<file>.spec.ts` for integration.
+- **Naming:** always `<file>.test.ts(x)` — Jest `testMatch` ignores `*.spec.ts`, so spec files never run.
 - **Query priority:** `getByRole` > `getByLabelText` > `getByText` > `getByTestId` (last resort).
 - **Use `user-event`** over `fireEvent` for realistic interactions: `await userEvent.click(...)`.
 - **Mock at the boundary.** Mock Mongoose with `mockingoose`, HTTP with `msw` — not the unit under test.
@@ -98,4 +98,4 @@ Run: `npm test` (single), `npm run test:watch` (watch mode).
 
 ## Pre-Commit (Husky)
 
-`.husky/` runs on commit. Expect lint + type-check to gate. If a hook fails, **fix the cause** — never `--no-verify`.
+`.husky/pre-commit` runs `lint-staged` (eslint --fix + prettier on staged files only). Lint, type-check, build and tests gate in CI. If a hook fails, **fix the cause** — never `--no-verify`.

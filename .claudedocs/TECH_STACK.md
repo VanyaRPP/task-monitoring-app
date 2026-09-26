@@ -6,7 +6,7 @@ Authoritative list of libraries and versions. **Do not introduce new dependencie
 
 | Area        | Library              | Version  | Notes                                          |
 | ----------- | -------------------- | -------- | ---------------------------------------------- |
-| Framework   | `next`               | ^14.2.35 | **Pages Router only** — no `app/` directory    |
+| Framework   | `next`               | ^15.5.22 | **Pages Router only** — no `app/` directory    |
 | Runtime     | `react`, `react-dom` | ^18.3.1  | React 18                                       |
 | Language    | `typescript`         | ^5.8.3   | `strict: false`, but typing is still mandatory |
 | Node        | engine               | 22.x     | Pinned via `engines` in package.json           |
