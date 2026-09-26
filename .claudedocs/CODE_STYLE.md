@@ -10,7 +10,7 @@ Typing, linting, formatting, and testing standards. For project layout see [CLAU
   - Every hook declares its return type when not trivially inferred.
   - Every API handler is typed `NextApiHandler<TResponse>` or `(req: NextApiRequest, res: NextApiResponse<TResponse>) => …`.
   - Every Mongoose model exports a typed `Document`/schema interface.
-- **Reuse types.** Look in `types/`, `@types/*`, and `utils/types.ts` before defining new ones.
+- **Reuse types.** Look in `utils/types.ts`, model interfaces in `@modules/models`, and `@types/*` before defining new ones.
 - **No untyped objects** crossing module boundaries (component → component, API → client, service → API).
 - **Forbidden escape hatches:** `as any`, `@ts-ignore`, `@ts-nocheck`. If you reach for one, fix the underlying type instead. `as unknown as X` is only acceptable for third-party type bugs, with a one-line `// Why:` comment.
 - **Path aliases everywhere.** Configured in `tsconfig.json` `paths`.
@@ -61,11 +61,12 @@ Pages Router renders both. Be explicit:
 - **Browser-only deps** (`gsap`, `lottie-react`, `xlsx` download, `file-saver`, `puppeteer`, `window`/`document`): wrap in `useEffect`, or import via `next/dynamic` with `{ ssr: false }`.
 - **API routes** (`pages/api/**`):
   1. Validate method: `if (req.method !== 'POST') return res.status(405).end()`.
-  2. Auth: `const session = await getServerSession(req, res, authOptions)`.
-  3. DB: `await connectToDatabase()` from `@utils/dbConnect` before Mongoose calls.
-  4. Return typed JSON: `res.status(200).json<TResponse>(...)`.
+  2. Auth: `const { user, isAdmin, ... } = await getCurrentUser(req, res)` from `@utils/getCurrentUser` (throws without a session). Check access to the specific resource, not just the role.
+  3. DB: `await start()` from `@pages/api/api.config` before Mongoose calls, or wrap the handler in `withErrorHandler` (`@utils/api-handler`), which does it.
+  4. Return JSON in the shared `Data` shape from `api.config`: `{ success, data?, message? }`.
+  5. Keep the route's `@swagger` JSDoc block in sync with its contract.
 - **Never** import `@lib/bot` (Grammy) inside a React component or page.
-- **Never** import `puppeteer` (full) inside `pages/api/**` — use `puppeteer-core` + `@sparticuz/chromium`.
+- **Never** import `puppeteer` (full) inside `pages/api/**` — use `puppeteer-core` + `@sparticuz/chromium-min` (see `utils/pdf/bufferGenerators.ts`).
 
 ## Testing
 
@@ -76,7 +77,7 @@ Framework: Jest 29 + Testing Library. Config: `jest.config.ts`, setup: `jest.set
 | `@testing-library/react`      | Rendering components                             |
 | `@testing-library/jest-dom`   | DOM matchers (`toBeInTheDocument`, etc.)         |
 | `@testing-library/user-event` | User interactions (prefer over `fireEvent`)      |
-| `mockingoose`                 | Mocking Mongoose models                          |
+| `mockingoose`                 | Installed but unused — don't start using it      |
 | `mongodb-memory-server`       | Integration tests against a real in-memory Mongo |
 | `msw`                         | Mocking HTTP requests                            |
 | `identity-obj-proxy`          | CSS module mocks (configured)                    |
@@ -90,7 +91,7 @@ Framework: Jest 29 + Testing Library. Config: `jest.config.ts`, setup: `jest.set
 - **Naming:** always `<file>.test.ts(x)` — Jest `testMatch` ignores `*.spec.ts`, so spec files never run.
 - **Query priority:** `getByRole` > `getByLabelText` > `getByText` > `getByTestId` (last resort).
 - **Use `user-event`** over `fireEvent` for realistic interactions: `await userEvent.click(...)`.
-- **Mock at the boundary.** Mock Mongoose with `mockingoose`, HTTP with `msw` — not the unit under test.
+- **Mock at the boundary.** API/service tests run against real in-memory Mongo via `setupTestEnvironment()` + `@utils/testData`, mocking only `next-auth` (log in with `mockLoginAs`). Mock external HTTP with `msw`. Never mock the unit under test.
 - **No snapshot-only tests.** Assert specific behavior.
 - **Don't test implementation details.** Test what the user/consumer observes.
 

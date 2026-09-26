@@ -36,7 +36,8 @@ Detailed rules (loaded below): project map & where new code goes, code style, te
 
 ## Domain rules
 
-- Money: use `big.js`, never float arithmetic on currency.
+- Money is stored as `number` (2 decimals). Round with `toRoundFixed`, and for new arithmetic prefer `multiplyFloat` / `plusFloat` from `@utils/helpers` (big.js inside) over raw `*`/`+`.
+- Dates: `dayjs` (comes with antd, not declared in package.json). Don't add `moment`.
 - i18n: `next-i18next`, default locale `uk`, also `en`; strings in `public/locales/{uk,en}/*.json` — add keys to both.
 - Roles: GlobalAdmin > DomainAdmin > User. DomainAdmin is derived from `Domain.adminEmails` in `getCurrentUser`, not assigned manually.
 
