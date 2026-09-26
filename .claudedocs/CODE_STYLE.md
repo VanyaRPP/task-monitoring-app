@@ -77,7 +77,6 @@ Framework: Jest 29 + Testing Library. Config: `jest.config.ts`, setup: `jest.set
 | `@testing-library/react`      | Rendering components                             |
 | `@testing-library/jest-dom`   | DOM matchers (`toBeInTheDocument`, etc.)         |
 | `@testing-library/user-event` | User interactions (prefer over `fireEvent`)      |
-| `mockingoose`                 | Installed but unused — don't start using it      |
 | `mongodb-memory-server`       | Integration tests against a real in-memory Mongo |
 | `msw`                         | Mocking HTTP requests                            |
 | `identity-obj-proxy`          | CSS module mocks (configured)                    |

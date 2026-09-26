@@ -44,21 +44,21 @@ task-monitoring-app/
 
 ### Where new things go
 
-| You are adding…                   | Put it in…                                                                                                                                                     |
-| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| A new page (route)                | `pages/<route>/index.tsx` (+ `style.module.scss`)                                                                                                              |
-| A new API route                   | `pages/api/<resource>/index.ts` or `[id]/index.ts`. Use `NextApiHandler`.                                                                                      |
-| A new Mongoose model              | `common/modules/models/<Name>.ts`. Export default `mongoose.models.X \|\| mongoose.model(...)`.                                                                |
-| Domain logic called by API routes | `common/services/<feature>/...` (NOT inside the API handler)                                                                                                   |
-| RTK Query endpoints               | `common/api/<resource>Api/` (mirror existing slices)                                                                                                           |
-| Redux slice                       | `common/modules/store/<feature>Slice.ts` + register in `store.ts`                                                                                              |
-| Reusable component                | `common/components/<Name>/index.tsx`                                                                                                                           |
-| UI primitive (button/modal/input) | `common/components/UI/<Name>/index.tsx`                                                                                                                        |
-| Custom hook                       | `common/modules/hooks/use<Name>.ts`                                                                                                                            |
-| Pure util / helper                | `utils/<name>.ts` (+ `<name>.test.ts` next to it)                                                                                                              |
-| Grammy bot logic                  | `common/lib/bot.ts` (singleton) — handlers in `common/lib/bot/` if it grows. **Never** import the bot inside a React component.                                |
-| Cron / scheduled handler          | `pages/api/sceduled/<frequency>.ts` (legacy spelling). hourly/daily/threeTimesDaily are hit by `.github/workflows/scheduled*.yaml`; `quater.ts` has no trigger |
-| One-off seed / backfill           | `scripts/<name>.ts` (+ `<name>.test.ts`)                                                                                                                       |
+| You are adding…                   | Put it in…                                                                                                                                                                            |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A new page (route)                | `pages/<route>/index.tsx` (+ `style.module.scss`)                                                                                                                                     |
+| A new API route                   | `pages/api/<resource>/index.ts` or `[id]/index.ts`. Use `NextApiHandler`.                                                                                                             |
+| A new Mongoose model              | `common/modules/models/<Name>.ts`. Export default `mongoose.models.X \|\| mongoose.model(...)`.                                                                                       |
+| Domain logic called by API routes | `common/services/<feature>/...` (NOT inside the API handler)                                                                                                                          |
+| RTK Query endpoints               | `common/api/<resource>Api/` (mirror existing slices)                                                                                                                                  |
+| Redux slice                       | `common/modules/store/<feature>Slice.ts` + register in `store.ts`                                                                                                                     |
+| Reusable component                | `common/components/<Name>/index.tsx`                                                                                                                                                  |
+| UI primitive (button/modal/input) | `common/components/UI/<Name>/index.tsx`                                                                                                                                               |
+| Custom hook                       | `common/modules/hooks/use<Name>.ts`                                                                                                                                                   |
+| Pure util / helper                | `utils/<name>.ts` (+ `<name>.test.ts` next to it)                                                                                                                                     |
+| Grammy bot logic                  | `common/lib/bot.ts` (singleton) — handlers in `common/lib/bot/` if it grows. **Never** import the bot inside a React component.                                                       |
+| Cron / scheduled handler          | `pages/api/sceduled/<frequency>.ts` (legacy spelling). hourly/daily/threeTimesDaily are hit by `.github/workflows/scheduled*.yaml`; `quater.ts` is commented out (duplicate of daily) |
+| One-off seed / backfill           | `scripts/<name>.ts` (+ `<name>.test.ts`)                                                                                                                                              |
 
 ### Feature map — where existing features live
 

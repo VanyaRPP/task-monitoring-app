@@ -15,22 +15,20 @@ Authoritative list of libraries and versions (synced with `package.json` on 2026
 
 ## UI
 
-| Library                     | Version     | Usage                                                                                                             |
-| --------------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------- |
-| `antd`                      | ^5.20.0     | Primary UI kit (resolves to 5.29.x)                                                                               |
-| `@ant-design/cssinjs`       | ^1.21.0     | SSR-safe styling for Ant Design                                                                                   |
-| `@ant-design/compatible`    | ^5.1.3      | v4→v5 bridge — only `CommentsCard`; avoid in new code                                                             |
-| `@ant-design/icons`         | ^5.4.0      | Icon set                                                                                                          |
-| `@ant-design/plots`         | ^2.6.8      | Charts — use for new charts (dashboard, profit page)                                                              |
-| `chart.js`                  | ^4.4.0      | Legacy — only `common/components/Chart`; don't extend                                                             |
-| `dayjs`                     | (via antd)  | Dates everywhere (~70 files). **Not declared** in package.json — comes transitively with antd. Don't add `moment` |
-| `sass`                      | ^1.103.1    | SCSS Modules — `*.module.scss` per component                                                                      |
-| `classnames` / `clsx`       | ^2.3 / ^2.1 | Conditional className composition (mandatory). `classnames` is the common one                                     |
-| `nextjs-progressbar`        | ^0.0.16     | Route-change progress                                                                                             |
-| `react-resize-detector`     | ^12.1.0     |                                                                                                                   |
-| `react-cool-onclickoutside` | ^1.7.0      |                                                                                                                   |
-| `react-resizable`           | ^3.0.5      | Installed, **not imported anywhere**                                                                              |
-| `react-sticky-box`          | ^2.0.5      | Installed, **not imported anywhere**                                                                              |
+| Library                     | Version     | Usage                                                                                                                               |
+| --------------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `antd`                      | ^5.20.0     | Primary UI kit (resolves to 5.29.x)                                                                                                 |
+| `@ant-design/cssinjs`       | ^1.21.0     | SSR-safe styling for Ant Design                                                                                                     |
+| `@ant-design/compatible`    | ^5.1.3      | v4→v5 bridge — only `CommentsCard`; avoid in new code                                                                               |
+| `@ant-design/icons`         | ^5.4.0      | Icon set                                                                                                                            |
+| `@ant-design/plots`         | ^2.6.8      | Charts — use for new charts (dashboard, profit page)                                                                                |
+| `chart.js`                  | ^4.4.0      | Legacy — only `common/components/Chart`; don't extend                                                                               |
+| `dayjs`                     | ^1.11.21    | Dates everywhere (~70 files). Keep the range compatible with antd's so there is one copy (check `npm ls dayjs`). Don't add `moment` |
+| `sass`                      | ^1.103.1    | SCSS Modules — `*.module.scss` per component                                                                                        |
+| `classnames` / `clsx`       | ^2.3 / ^2.1 | Conditional className composition (mandatory). `classnames` is the common one                                                       |
+| `nextjs-progressbar`        | ^0.0.16     | Route-change progress                                                                                                               |
+| `react-resize-detector`     | ^12.1.0     |                                                                                                                                     |
+| `react-cool-onclickoutside` | ^1.7.0      |                                                                                                                                     |
 
 ## State & Data
 
@@ -83,14 +81,13 @@ Authoritative list of libraries and versions (synced with `package.json` on 2026
 | ------------- | -------------------------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Telegram bot  | `grammy`                                     | ^1.46.0        | Singleton in `@lib/bot`. Type handlers with `Context`. Never import in React tree.                                                                |
 | PDF           | `puppeteer-core` + `@sparticuz/chromium-min` | ^22.15 / ^127  | Dynamic import in `utils/pdf/bufferGenerators.ts`; Chromium pack downloaded at runtime (`CHROMIUM_PACK_URL`). Majors must match (22 ↔ Chrome 127) |
-| PDF           | `@sparticuz/chromium`                        | ^127.0.0       | Installed, **not imported** — the code uses `-min`                                                                                                |
 | PDF           | `puppeteer`                                  | ^22.15.0       | **devDependency only**. Do NOT import in `pages/api/**`.                                                                                          |
 | Animations    | `gsap`                                       | ^3.13.0        | Register plugins client-side; SSR-guard with `useEffect`                                                                                          |
 | Animations    | `lottie-react`                               | ^2.4.1         | SSR-guard or `dynamic({ ssr: false })`                                                                                                            |
 | Excel         | `xlsx-js-style`                              | ^1.2.0         | Styled exports. Plain `xlsx` is **not** installed — import `xlsx-js-style`                                                                        |
 | File download | `file-saver`                                 | ^2.0.5         | Client-side                                                                                                                                       |
 | Zip           | `archiver`                                   | ^6.0.1         |                                                                                                                                                   |
-| Image         | `sharp`                                      | ^0.35.4        | Installed, **not imported** in app code                                                                                                           |
+| Image         | `sharp`                                      | ^0.35.4        | Not imported — used implicitly by `next/image`; pinned via `resolutions` for CVEs (see `docs/dependency-security.md`). Don't remove               |
 | Money math    | `big.js`                                     | ^6.2.1         | Wrapped by `@utils/helpers` (`multiplyFloat`, `plusFloat`, `toRoundFixed`) — use those helpers                                                    |
 | IBAN          | `iban`                                       | ^0.0.14        |                                                                                                                                                   |
 | Bank          | —                                            | —              | PrivatBank adapter in `utils/bankUtils/PrivatBankApiAdapter.ts`                                                                                   |
@@ -114,7 +111,6 @@ Authoritative list of libraries and versions (synced with `package.json` on 2026
 | `mongodb-memory-server`                       | ^8.16.1         | Real in-memory Mongo for API/service tests (`@utils/setupTestEnvironment`) |
 | `msw`                                         | ^1.3.3 (v1 API) | HTTP mocking — used in one test so far                                     |
 | `whatwg-fetch`                                | ^3.6.20         | fetch polyfill where a test needs real fetch semantics                     |
-| `mockingoose`                                 | ^2.16.2         | Installed, **not used** — prefer mongodb-memory-server                     |
 | `eslint` + `eslint-config-next`               | ^8.57.1 / ^15.5 | + `@typescript-eslint/*` ^5, `eslint-config-prettier`                      |
 | `prettier`                                    | ^3.8.3          |                                                                            |
 | `husky` + `lint-staged`                       | ^9.1.7 / ^16    | Pre-commit: eslint --fix + prettier on staged files                        |
