@@ -20,11 +20,14 @@ import { formatPeriod } from '../utils/debt-calculation/months'
 /**
  * Derzhstat's official monthly CPI: [year, month, index %].
  *
- * November 2021 through August 2026, from two sources:
+ * January 2015 through August 2026, from three reconciled sources:
+ * - Jan 2015 - Oct 2021: index.minfin.com.ua, buhgalter.com.ua and
+ *   services.dtkt.ua, which agreed on every month;
  * - Nov 2021 - Jun 2025: column K of the «Акт» sheet in `Розрахунок.xlsx`,
- *   reconciled against the HOA's own calculation;
+ *   reconciled against the HOA's own calculation and against the same
+ *   aggregators;
  * - Jul 2025 - Aug 2026: Derzhstat express releases, cross-checked against
- *   index.minfin.com.ua and buhgalter.com.ua (all three agreed).
+ *   index.minfin.com.ua and buhgalter.com.ua.
  *
  * August 2026 is the last published month: Derzhstat releases the CPI around
  * the 9th-10th of the following month, so September lands in October.
@@ -33,6 +36,88 @@ import { formatPeriod } from '../utils/debt-calculation/months'
  * legal calculation is not acceptable. Extend it via POST /api/inflation-index.
  */
 export const INFLATION_INDEXES: [number, number, number][] = [
+  [2015, 1, 103.1],
+  [2015, 2, 105.3],
+  [2015, 3, 110.8],
+  [2015, 4, 114],
+  [2015, 5, 102.2],
+  [2015, 6, 100.4],
+  [2015, 7, 99],
+  [2015, 8, 99.2],
+  [2015, 9, 102.3],
+  [2015, 10, 98.7],
+  [2015, 11, 102],
+  [2015, 12, 100.7],
+  [2016, 1, 100.9],
+  [2016, 2, 99.6],
+  [2016, 3, 101],
+  [2016, 4, 103.5],
+  [2016, 5, 100.1],
+  [2016, 6, 99.8],
+  [2016, 7, 99.9],
+  [2016, 8, 99.7],
+  [2016, 9, 101.8],
+  [2016, 10, 102.8],
+  [2016, 11, 101.8],
+  [2016, 12, 100.9],
+  [2017, 1, 101.1],
+  [2017, 2, 101],
+  [2017, 3, 101.8],
+  [2017, 4, 100.9],
+  [2017, 5, 101.3],
+  [2017, 6, 101.6],
+  [2017, 7, 100.2],
+  [2017, 8, 99.9],
+  [2017, 9, 102],
+  [2017, 10, 101.2],
+  [2017, 11, 100.9],
+  [2017, 12, 101],
+  [2018, 1, 101.5],
+  [2018, 2, 100.9],
+  [2018, 3, 101.1],
+  [2018, 4, 100.8],
+  [2018, 5, 100],
+  [2018, 6, 100],
+  [2018, 7, 99.3],
+  [2018, 8, 100],
+  [2018, 9, 101.9],
+  [2018, 10, 101.7],
+  [2018, 11, 101.4],
+  [2018, 12, 100.8],
+  [2019, 1, 101],
+  [2019, 2, 100.5],
+  [2019, 3, 100.9],
+  [2019, 4, 101],
+  [2019, 5, 100.7],
+  [2019, 6, 99.5],
+  [2019, 7, 99.4],
+  [2019, 8, 99.7],
+  [2019, 9, 100.7],
+  [2019, 10, 100.7],
+  [2019, 11, 100.1],
+  [2019, 12, 99.8],
+  [2020, 1, 100.2],
+  [2020, 2, 99.7],
+  [2020, 3, 100.8],
+  [2020, 4, 100.8],
+  [2020, 5, 100.3],
+  [2020, 6, 100.2],
+  [2020, 7, 99.4],
+  [2020, 8, 99.8],
+  [2020, 9, 100.5],
+  [2020, 10, 101],
+  [2020, 11, 101.3],
+  [2020, 12, 100.9],
+  [2021, 1, 101.3],
+  [2021, 2, 101],
+  [2021, 3, 101.7],
+  [2021, 4, 100.7],
+  [2021, 5, 101.3],
+  [2021, 6, 100.2],
+  [2021, 7, 100.1],
+  [2021, 8, 99.8],
+  [2021, 9, 101.2],
+  [2021, 10, 100.9],
   [2021, 11, 100.8],
   [2021, 12, 100.6],
   [2022, 1, 101.3],

@@ -1,5 +1,6 @@
 import { IDebtCalculationResult } from '@utils/debt-calculation/types'
 import { formatPeriod } from '@utils/debt-calculation/months'
+import { CameraOutlined } from '@ant-design/icons'
 import { InputNumber, Table, Tooltip, Typography } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { useDebtCalculationContext } from './'
@@ -36,7 +37,8 @@ const MonthsTable: React.FC<Props> = ({ result }) => {
    */
   const valueOf = (
     row: MonthRow,
-    field: 'paid' | 'charged' | 'area' | 'tariff' | 'inflationIndex'
+    field:
+      'paid' | 'charged' | 'correction' | 'area' | 'tariff' | 'inflationIndex'
   ): number | undefined => {
     const period = formatPeriod(row)
 
@@ -46,9 +48,18 @@ const MonthsTable: React.FC<Props> = ({ result }) => {
   const columns: ColumnsType<MonthRow> = [
     {
       title: 'Місяць',
-      width: 130,
+      width: 140,
       fixed: 'left',
-      render: (_, row) => formatMonthLabel(row.year, row.month),
+      render: (_, row) =>
+        monthOverrides[formatPeriod(row)]?.source === 'photo' ? (
+          <Tooltip title="Заповнено з фото — перевірте. Будь-яка правка місяця знімає позначку.">
+            <span className={s.FromPhoto}>
+              <CameraOutlined /> {formatMonthLabel(row.year, row.month)}
+            </span>
+          </Tooltip>
+        ) : (
+          formatMonthLabel(row.year, row.month)
+        ),
     },
     {
       title: 'Сплачено',
@@ -75,6 +86,22 @@ const MonthsTable: React.FC<Props> = ({ result }) => {
           // shows as the placeholder - you can see what you are overriding.
           placeholder={formatMoney(row.charged)}
           onChange={(value) => patch(row, 'charged', value as number)}
+        />
+      ),
+    },
+    {
+      title: (
+        <Tooltip title="Перерахунок за місяць як зміна боргу: мінус зменшує борг, плюс збільшує. У роздруківках білінгу — колонка «Коректура».">
+          Коректура
+        </Tooltip>
+      ),
+      width: 120,
+      render: (_, row) => (
+        <InputNumber
+          size="small"
+          value={valueOf(row, 'correction')}
+          placeholder="0.00"
+          onChange={(value) => patch(row, 'correction', value as number)}
         />
       ),
     },
@@ -194,20 +221,23 @@ const MonthsTable: React.FC<Props> = ({ result }) => {
               <Table.Summary.Cell index={2}>
                 {formatMoney(result.totals.charged)}
               </Table.Summary.Cell>
-              <Table.Summary.Cell index={3} colSpan={2} />
-              <Table.Summary.Cell index={5} align="right">
+              <Table.Summary.Cell index={3}>
+                {formatMoney(result.totals.correction)}
+              </Table.Summary.Cell>
+              <Table.Summary.Cell index={4} colSpan={2} />
+              <Table.Summary.Cell index={6} align="right">
                 <strong>{formatMoney(result.interest)}</strong>
               </Table.Summary.Cell>
-              <Table.Summary.Cell index={6} align="right">
+              <Table.Summary.Cell index={7} align="right">
                 <strong>{formatMoney(result.body)}</strong>
               </Table.Summary.Cell>
-              <Table.Summary.Cell index={7} align="right">
+              <Table.Summary.Cell index={8} align="right">
                 {result.totals.days}
               </Table.Summary.Cell>
-              <Table.Summary.Cell index={8} colSpan={2} align="right">
+              <Table.Summary.Cell index={9} colSpan={2} align="right">
                 {formatCoefficient(result.coefficient)}
               </Table.Summary.Cell>
-              <Table.Summary.Cell index={10} align="right">
+              <Table.Summary.Cell index={11} align="right">
                 <strong>{formatMoney(result.inflation)}</strong>
               </Table.Summary.Cell>
             </Table.Summary.Row>
