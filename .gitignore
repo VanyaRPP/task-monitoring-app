@@ -49,7 +49,9 @@ yarn-error.log*
 # specific files
 /pages/api-doc.tsx
 .cursor
-.claude
+.claude/*
+!.claude/skills/
+!.claude/settings.json
 .claudeignore
 
 # PWA build artifacts

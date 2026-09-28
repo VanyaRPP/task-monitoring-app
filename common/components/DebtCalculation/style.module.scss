@@ -174,3 +174,36 @@ $hairline: rgba(140, 140, 140, 0.4);
   margin-top: 22px;
   background: $hairline;
 }
+
+// A month whose figures came off a photo and have not been touched since.
+.FromPhoto {
+  color: #1677ff;
+  white-space: nowrap;
+}
+
+.PlanLoading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.Plan {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  ul {
+    margin: 0;
+    padding-left: 18px;
+  }
+}
+
+.PlanList {
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.PlanHint {
+  font-size: 12px;
+  margin-bottom: 0 !important;
+}

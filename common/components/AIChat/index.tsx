@@ -1,7 +1,16 @@
 'use client'
 
-import React, { useRef, useEffect, useState, KeyboardEvent } from 'react'
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useRef,
+  useEffect,
+  useState,
+  KeyboardEvent,
+} from 'react'
 import { useChat, type UIMessage } from '@ai-sdk/react'
+import { DefaultChatTransport, type FileUIPart } from 'ai'
 import {
   FloatButton,
   Input,
@@ -12,6 +21,7 @@ import {
   Spin,
 } from 'antd'
 import {
+  CameraOutlined,
   RobotOutlined,
   SendOutlined,
   UserOutlined,
@@ -22,6 +32,17 @@ import { useIsAdmin } from '@modules/hooks/useIsAdmin'
 import { useAppSelector } from '@modules/store/hooks'
 import AddPaymentModal from '@components/AddPaymentModal'
 import { message } from 'antd'
+import {
+  DOCUMENT_BATCH_PART,
+  type IDocumentBatchPart,
+} from '@common/services/aiAssistant/documents/types'
+import BatchCard from './photoImport/BatchCard'
+import { shrinkImage } from './photoImport/imageTools'
+import {
+  IDocumentBatch,
+  IImportCardState,
+  useDocumentImports,
+} from './photoImport/useDocumentImports'
 import styles from './style.module.scss'
 
 const { Text } = Typography
@@ -80,11 +101,86 @@ const getMessageText = (message: UIMessage): string => {
   return ''
 }
 
+const isPhoto = (part: UIMessage['parts'][number]): part is FileUIPart =>
+  part.type === 'file' && part.mediaType?.startsWith('image/')
+
+const BATCH_PART_TYPE = `data-${DOCUMENT_BATCH_PART}`
+
+const getBatchIds = (message: UIMessage): string[] =>
+  (message.parts ?? [])
+    .filter((part) => part.type === BATCH_PART_TYPE)
+    .map((part) => (part as { data: IDocumentBatchPart }).data.batchId)
+
+/**
+ * Photos never go to /api/chat: the widget reads them itself (see
+ * `useDocumentImports`), and the chat model learns what they held from the
+ * batch summary. Each resent image would add hundreds of KB to every request.
+ */
+const withoutPhotos = (messages: UIMessage[]): UIMessage[] =>
+  messages.map((message) => ({
+    ...message,
+    parts: message.parts.map((part) =>
+      isPhoto(part) ? { type: 'text' as const, text: '[Фото документа]' } : part
+    ),
+  }))
+
+interface IDocumentBatchesContext {
+  batches: Record<string, IDocumentBatch>
+  updateCard: (
+    batchId: string,
+    key: string,
+    patch: Partial<IImportCardState>
+  ) => void
+}
+
+const DocumentBatchesContext = createContext<IDocumentBatchesContext>({
+  batches: {},
+  updateCard: () => undefined,
+})
+
+const chatTransport = new DefaultChatTransport<UIMessage>({
+  api: '/api/chat',
+  prepareSendMessagesRequest: ({ id, messages, body, trigger, messageId }) => ({
+    body: {
+      ...body,
+      id,
+      messages: withoutPhotos(messages),
+      trigger,
+      messageId,
+    },
+  }),
+})
+
 const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
+  const { batches, updateCard } = useContext(DocumentBatchesContext)
   const isUser = message.role === 'user'
   const text = getMessageText(message)
+  const photos = (message.parts ?? []).filter(isPhoto)
+  const batchIds = getBatchIds(message)
 
-  if (!text) return null
+  if (!text && photos.length === 0 && batchIds.length === 0) return null
+
+  // The import cards need the full width of the window, not a bubble.
+  if (batchIds.length > 0) {
+    return (
+      <div className={`${styles.messageRow} ${styles.aiRow} ${styles.cardRow}`}>
+        <Avatar
+          size={24}
+          icon={<RobotOutlined />}
+          className={styles.aiAvatar}
+        />
+        <div className={styles.cardColumn}>
+          {batchIds.map((batchId) => (
+            <BatchCard
+              key={batchId}
+              batch={batches[batchId]}
+              onCardChange={(key, patch) => updateCard(batchId, key, patch)}
+            />
+          ))}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div
@@ -100,7 +196,18 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
       <div
         className={`${styles.messageBubble} ${isUser ? styles.userBubble : styles.aiBubble}`}
       >
-        <div className={styles.messageText}>{renderMessageContent(text)}</div>
+        {photos.map((photo, index) => (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            key={index}
+            src={photo.url}
+            alt="Фото документа"
+            className={styles.messagePhoto}
+          />
+        ))}
+        {text && (
+          <div className={styles.messageText}>{renderMessageContent(text)}</div>
+        )}
       </div>
       {isUser && (
         <Avatar
@@ -128,6 +235,9 @@ const AIChat: React.FC = () => {
   const [showHint, setShowHint] = useState<boolean>(false)
   const [inputValue, setInputValue] = useState<string>('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const photoInputRef = useRef<HTMLInputElement>(null)
+  const [isPreparingPhoto, setIsPreparingPhoto] = useState(false)
+  const [isDragging, setIsDragging] = useState(false)
 
   // Invoice draft flow: previewInvoice tool returns a draft that opens the
   // prefilled AddPaymentModal. `handledToolCalls` guards against the stream
@@ -136,7 +246,8 @@ const AIChat: React.FC = () => {
   const [invoiceModalOpen, setInvoiceModalOpen] = useState<boolean>(false)
   const handledToolCallsRef = useRef<Set<string>>(new Set())
 
-  const { messages, sendMessage, status, error } = useChat({
+  const { messages, setMessages, sendMessage, status, error } = useChat({
+    transport: chatTransport,
     messages: [
       {
         id: 'welcome',
@@ -156,6 +267,35 @@ const AIChat: React.FC = () => {
       console.error('AIChat Error:', error)
     }
   }, [error])
+
+  // Once a batch is read, its summary goes into the message that stands for
+  // it - that text is all the chat model will ever know about the photos.
+  const onBatchDone = useCallback(
+    (batchId: string, summary: string) =>
+      setMessages((prev) =>
+        prev.map((message) =>
+          getBatchIds(message).includes(batchId)
+            ? {
+                ...message,
+                parts: message.parts.map((part) =>
+                  part.type === BATCH_PART_TYPE
+                    ? {
+                        ...part,
+                        data: { ...(part as any).data, summary },
+                      }
+                    : part
+                ),
+              }
+            : message
+        )
+      ),
+    [setMessages]
+  )
+  const {
+    batches,
+    start: startBatch,
+    updateCard,
+  } = useDocumentImports(onBatchDone)
 
   // Watch for a completed `previewInvoice` tool call and open the prefilled
   // AddPaymentModal with its draft. Each toolCallId is handled at most once.
@@ -209,6 +349,62 @@ const AIChat: React.FC = () => {
     setInputValue('')
   }
 
+  /**
+   * Photos from the picker, the clipboard or a drop. They need no text: the
+   * widget works out what they are and reads them in the background. The
+   * photos and their card are added to the chat locally - nothing is sent to
+   * the chat model.
+   */
+  const handleFiles = async (files: File[]): Promise<void> => {
+    const images = files.filter((file) => file.type.startsWith('image/'))
+    if (images.length === 0) return
+
+    setIsPreparingPhoto(true)
+    try {
+      const shrunk = await Promise.all(images.map(shrinkImage))
+      const batchId = startBatch(
+        shrunk.map((photo, index) => ({
+          name: images[index].name || `Фото ${index + 1}`,
+          url: photo.url,
+        }))
+      )
+      const stamp = Date.now()
+      setMessages((prev) => [
+        ...prev,
+        { id: `photos-${stamp}`, role: 'user', parts: shrunk },
+        {
+          id: `batch-${stamp}`,
+          role: 'assistant',
+          parts: [{ type: BATCH_PART_TYPE, data: { batchId } } as any],
+        },
+      ])
+    } catch {
+      message.error('Не вдалося відкрити фото. Спробуйте JPG або PNG.')
+    } finally {
+      setIsPreparingPhoto(false)
+    }
+  }
+
+  const handlePicked = (event: React.ChangeEvent<HTMLInputElement>): void => {
+    const files = Array.from(event.target.files ?? [])
+    // Reset so picking the same file again still fires onChange.
+    event.target.value = ''
+    void handleFiles(files)
+  }
+
+  const handlePaste = (event: React.ClipboardEvent): void => {
+    const files = Array.from(event.clipboardData?.files ?? [])
+    if (!files.some((file) => file.type.startsWith('image/'))) return
+    event.preventDefault()
+    void handleFiles(files)
+  }
+
+  const handleDrop = (event: React.DragEvent): void => {
+    event.preventDefault()
+    setIsDragging(false)
+    void handleFiles(Array.from(event.dataTransfer?.files ?? []))
+  }
+
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>): void => {
     if (e.key === 'Enter' && !e.shiftKey && !isLoading) {
       e.preventDefault()
@@ -259,7 +455,33 @@ const AIChat: React.FC = () => {
       )}
 
       {open && (
-        <div data-ai-chat className={styles.chatWindow} style={windowStyle}>
+        <div
+          data-ai-chat
+          className={`${styles.chatWindow} ${isDragging ? styles.chatDragging : ''}`}
+          style={windowStyle}
+          onPaste={handlePaste}
+          onDragOver={(event) => {
+            if (
+              !Array.from(event.dataTransfer?.types ?? []).includes('Files')
+            ) {
+              return
+            }
+            event.preventDefault()
+            setIsDragging(true)
+          }}
+          onDragLeave={(event) => {
+            // Only when leaving the window, not when crossing its children.
+            if (!event.currentTarget.contains(event.relatedTarget as Node)) {
+              setIsDragging(false)
+            }
+          }}
+          onDrop={handleDrop}
+        >
+          {isDragging && (
+            <div className={styles.dropOverlay}>
+              Відпустіть, щоб надіслати фото
+            </div>
+          )}
           <div className={styles.chatHeader}>
             <Space>
               <Avatar
@@ -280,9 +502,11 @@ const AIChat: React.FC = () => {
           </div>
 
           <div className={styles.messagesContainer}>
-            {messages.map((message) => (
-              <ChatMessage key={message.id} message={message} />
-            ))}
+            <DocumentBatchesContext.Provider value={{ batches, updateCard }}>
+              {messages.map((message) => (
+                <ChatMessage key={message.id} message={message} />
+              ))}
+            </DocumentBatchesContext.Provider>
 
             {isLoading &&
               (messages[messages.length - 1]?.role as string) === 'user' && (
@@ -309,6 +533,24 @@ const AIChat: React.FC = () => {
           </div>
 
           <div className={styles.chatFooter}>
+            <input
+              ref={photoInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              hidden
+              data-testid="ai-chat-photo-input"
+              onChange={handlePicked}
+            />
+            <Button
+              type="text"
+              icon={<CameraOutlined />}
+              title="Надіслати фото документів (можна кілька, або вставити Ctrl+V чи перетягнути у вікно)"
+              aria-label="Надіслати фото документів"
+              loading={isPreparingPhoto}
+              onClick={() => photoInputRef.current?.click()}
+              className={styles.photoButton}
+            />
             <Input
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
