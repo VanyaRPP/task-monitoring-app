@@ -195,6 +195,7 @@ const TYPED_COLUMN_BUILDERS: Partial<Record<ServiceType, TypedColumnBuilder>> =
     [ServiceType.Electricity]: electricityColumn,
     [ServiceType.Water]: waterColumn,
     [ServiceType.Placing]: placingColumn,
+    [ServiceType.HousingFee]: placingColumn,
   }
 
 /** True when a serviceType has a dedicated formula column (native or custom). */
@@ -288,10 +289,9 @@ export const getDefaultColumns = (
   // «за площею», включно з per-domain копією (власний _id + serviceType), у
   // якої власна колонка-формула. Без цього площу, що множиться на тариф, у
   // таблиці просто не видно.
-  const hasAreaBasedService = allowedServices.some((svc) => {
-    const type = resolveServiceType(svc)
-    return type === ServiceType.Placing || type === ServiceType.Maintenance
-  })
+  const hasAreaBasedService = allowedServices.some((svc) =>
+    isAreaBasedServiceType(resolveServiceType(svc))
+  )
 
   return [
     {

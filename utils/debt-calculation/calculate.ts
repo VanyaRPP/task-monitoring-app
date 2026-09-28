@@ -103,6 +103,7 @@ export const calculateDebt = ({
     // A correction adjusts what the month billed: it moves the debt with the
     // charge. One that outweighs the charge settles older debt, like a payment.
     const billed = charged + correction
+    const opening = debt
     const debtBeforeCharge = debt - paid
     debt = debtBeforeCharge + billed
 
@@ -119,6 +120,7 @@ export const calculateDebt = ({
     rows.push({
       year: month.year,
       month: month.month,
+      opening,
       area,
       tariff,
       charged,

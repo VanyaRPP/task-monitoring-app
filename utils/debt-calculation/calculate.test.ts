@@ -356,3 +356,25 @@ describe('calculateDebt — коректура', () => {
     expect(result.inflation).toBeGreaterThan(0)
   })
 })
+
+describe('calculateDebt — вхідне сальдо місяця', () => {
+  it('перший місяць відкривається боргом на початок, наступні — вихідним попереднього', () => {
+    const result = calculateDebt({
+      openingDebt: 16192.23,
+      months: [
+        { year: 2019, month: 9, charged: 424.46, paid: 0 },
+        { year: 2019, month: 10, charged: 424.46, paid: 400 },
+      ],
+    })
+
+    expect(
+      result.rows.map(({ opening, debt }) => [
+        opening,
+        Math.round(debt * 100) / 100,
+      ])
+    ).toEqual([
+      [16192.23, 16616.69],
+      [16616.69, 16641.15],
+    ])
+  })
+})
