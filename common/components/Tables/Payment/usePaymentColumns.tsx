@@ -299,19 +299,22 @@ export function usePaymentColumns({
           return (
             <div
               style={{
+                position: 'relative',
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '4px',
                 width: '100%',
+                paddingTop: '20px',
               }}
             >
               {hasDebt && debtor && Math.abs(debtor.totalDebt) > 1 && (
                 <div
                   style={{
-                    display: 'flex',
-                    justifyContent: 'flex-end',
-                    width: '100%',
+                    position: 'absolute',
+                    top: '0px',
+                    right: '-14px', // Зміщено ще трішки правіше, ближче до самого кордону стовпця
                     whiteSpace: 'nowrap',
+                    zIndex: 1,
                   }}
                 >
                   <Badge
