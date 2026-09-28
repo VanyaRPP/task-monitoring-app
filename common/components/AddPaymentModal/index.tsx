@@ -671,6 +671,9 @@ const AddPaymentModal: FC<Props> = ({
       transaction,
       template: effectiveTemplate,
       invoiceLang,
+      originalInvoiceCreationDate: edit
+        ? paymentData?.invoiceCreationDate
+        : undefined,
     })
 
     const finalPayload = templateScope
