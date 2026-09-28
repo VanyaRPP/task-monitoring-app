@@ -42,6 +42,7 @@ const SOURCE_OPTIONS = [
   { text: 'bulk', value: 'bulk' },
   { text: 'quick-pay', value: 'quick-pay' },
   { text: 'admin-restore', value: 'admin-restore' },
+  { text: 'debt-import', value: 'debt-import' },
 ]
 
 const dateRangeDropdown = ({

@@ -1,6 +1,12 @@
 import { Operations, ServiceType } from '@utils/constants'
 import { buildDebtCalculationInput } from './build-input'
-import { buildMonthPrefill, housingFeeCharged } from './prefill'
+import {
+  buildMonthPrefill,
+  CORRECTION_FIELD,
+  housingFeeCharged,
+  OPENING_BALANCE_FIELD,
+  prefillOpeningDebt,
+} from './prefill'
 
 const housingLine = (sum: number) => ({
   type: ServiceType.HousingFee,
@@ -223,5 +229,131 @@ describe('префіл у buildDebtCalculationInput', () => {
     }).months
 
     expect(month.tariff).toBe(9)
+  })
+})
+
+describe('«Вхідне сальдо» з імпорту', () => {
+  const openingInvoice = (sum: number, date: Date) =>
+    debit({
+      monthService: undefined,
+      invoiceCreationDate: date,
+      invoice: [
+        { type: 'custom', fieldName: OPENING_BALANCE_FIELD, price: sum, sum },
+      ],
+      generalSum: sum,
+    })
+
+  // History: 11 262,17 brought in at 8/2018, then two months of charges and a payment.
+  const payments = [
+    openingInvoice(11262.17, new Date(2018, 7, 1, 12)),
+    debit({
+      monthService: undefined,
+      invoiceCreationDate: new Date(2018, 7, 1, 12),
+      invoice: [housingLine(393.14)],
+    }),
+    debit({
+      monthService: undefined,
+      invoiceCreationDate: new Date(2018, 8, 1, 12),
+      invoice: [housingLine(393.14)],
+    }),
+    credit({ paidAt: new Date(2018, 8, 1, 12), generalSum: 400 }),
+  ]
+
+  const prefill = buildMonthPrefill({ companyId: 'apt-1', payments })
+
+  it('не рахується нарахуванням свого місяця', () => {
+    expect(prefill['2018-08']).toEqual({
+      charged: 393.14,
+      openingBalance: 11262.17,
+    })
+  })
+
+  it('на початок історії борг — саме вхідне сальдо', () => {
+    expect(prefillOpeningDebt(prefill, { year: 2018, month: 8 })).toBe(11262.17)
+  })
+
+  it('пізніший період відкривається з боргом, накопиченим з історії', () => {
+    // 11262,17 + 393,14 + 393,14 - 400 = 11648,45
+    expect(prefillOpeningDebt(prefill, { year: 2018, month: 10 })).toBe(
+      11648.45
+    )
+  })
+
+  it('без вхідного сальдо до початку періоду — нічого не вигадує', () => {
+    expect(
+      prefillOpeningDebt(prefill, { year: 2018, month: 7 })
+    ).toBeUndefined()
+    expect(
+      prefillOpeningDebt(buildMonthPrefill({ payments: [debit()] }), {
+        year: 2024,
+        month: 1,
+      })
+    ).toBeUndefined()
+  })
+
+  it('борг на початок: ручний → з історії → 0', () => {
+    const from = { year: 2018, month: 9 }
+    const base = { from, to: from, prefillMonths: prefill }
+
+    expect(
+      buildDebtCalculationInput({ ...base, prefillOpeningDebt: 11655.31 })
+        .openingDebt
+    ).toBe(11655.31)
+    expect(
+      buildDebtCalculationInput({
+        ...base,
+        prefillOpeningDebt: 11655.31,
+        overrides: { openingDebt: 1 },
+      }).openingDebt
+    ).toBe(1)
+    expect(buildDebtCalculationInput(base).openingDebt).toBe(0)
+  })
+
+  it('вхідне сальдо всередині періоду зʼявляється боргом свого місяця', () => {
+    const input = buildDebtCalculationInput({
+      from: { year: 2018, month: 7 },
+      to: { year: 2018, month: 8 },
+      prefillMonths: prefill,
+    })
+
+    expect(input.months.map(({ charged }) => charged)).toEqual([
+      undefined,
+      11655.31,
+    ])
+  })
+})
+
+describe('коректура з платежів', () => {
+  it('рядок «Коректура» йде в свою колонку, нарахування лишається повним', () => {
+    const prefill = buildMonthPrefill({
+      companyId: 'apt-1',
+      payments: [
+        debit({
+          invoice: [
+            housingLine(424.46),
+            {
+              type: ServiceType.HousingFee,
+              fieldName: CORRECTION_FIELD,
+              price: -6.86,
+              sum: -6.86,
+            },
+          ],
+        }),
+      ],
+    })
+
+    expect(prefill['2024-01']).toEqual({ charged: 424.46, correction: -6.86 })
+  })
+
+  it('ручна коректура перемагає префіл', () => {
+    const from = { year: 2024, month: 1 }
+    const input = buildDebtCalculationInput({
+      from,
+      to: from,
+      prefillMonths: { '2024-01': { charged: 424.46, correction: -6.86 } },
+      overrides: { months: { '2024-01': { correction: -10 } } },
+    })
+
+    expect(input.months[0]).toMatchObject({ charged: 424.46, correction: -10 })
   })
 })

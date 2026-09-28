@@ -23,17 +23,34 @@ beforeEach(() => {
 })
 
 describe('INFLATION_INDEXES', () => {
-  it('покриває лис.2021 — сер.2026 без пропусків і дублів', () => {
-    expect(INFLATION_INDEXES).toHaveLength(58)
-    expect(INFLATION_INDEXES[0]).toEqual([2021, 11, 100.8])
+  it('покриває січ.2015 — сер.2026 без пропусків і дублів', () => {
+    expect(INFLATION_INDEXES).toHaveLength(140)
+    expect(INFLATION_INDEXES[0]).toEqual([2015, 1, 103.1])
     // The end of the series only moves when Derzhstat publishes.
-    expect(INFLATION_INDEXES[57]).toEqual([2026, 8, 100.1])
+    expect(INFLATION_INDEXES[139]).toEqual([2026, 8, 100.1])
 
     const keys = INFLATION_INDEXES.map(([year, month]) => year * 12 + month)
     expect(new Set(keys).size).toBe(keys.length)
     keys.forEach((key, i) => {
       if (i > 0) expect(key).toBe(keys[i - 1] + 1)
     })
+  })
+
+  it('несе тарифний стрибок 2015-го, а не зсунутий ряд', () => {
+    // April 2015 is the highest point of the whole series (+14% in a month).
+    // If a source slips a row, this point slides with it.
+    const byPeriod = new Map(
+      INFLATION_INDEXES.map(([year, month, value]) => [
+        `${year}-${month}`,
+        value,
+      ])
+    )
+    expect(byPeriod.get('2015-4')).toBe(114)
+    expect(byPeriod.get('2015-3')).toBe(110.8)
+    expect(byPeriod.get('2016-4')).toBe(103.5)
+    // The seam with the older range: these two came from the xlsx and must match.
+    expect(byPeriod.get('2021-10')).toBe(100.9)
+    expect(byPeriod.get('2021-11')).toBe(100.8)
   })
 
   it('покриває період Акта, на якому стоїть golden-тест двигуна', () => {
@@ -48,7 +65,7 @@ describe('INFLATION_INDEXES', () => {
     INFLATION_INDEXES.forEach(([year, month, value]) => {
       expect(month).toBeGreaterThanOrEqual(1)
       expect(month).toBeLessThanOrEqual(12)
-      expect(year).toBeGreaterThanOrEqual(2021)
+      expect(year).toBeGreaterThanOrEqual(2015)
       expect(year).toBeLessThanOrEqual(2026)
       expect(value).toBeGreaterThan(90)
       expect(value).toBeLessThan(120)

@@ -70,7 +70,7 @@ export const toXlsxStyle = (cell: IExcelCell): Record<string, unknown> => ({
 })
 
 /** Column widths: the first fits month names, the rest fit numbers. */
-const COLUMN_WIDTHS = [18, 13, 13, 11, 14, 12, 14, 8, 13, 12, 14]
+const COLUMN_WIDTHS = [18, 13, 13, 12, 11, 14, 12, 14, 8, 13, 12, 14]
 const COLUMN_COUNT = COLUMN_WIDTHS.length
 
 const MONEY = '0.00'
@@ -85,6 +85,7 @@ const TABLE_HEAD = [
   'Місяць',
   'Сплачено',
   'Нараховано',
+  'Коректура',
   'Площа, м²',
   'Тариф, грн/м²',
   'Річних',
@@ -204,6 +205,12 @@ export const buildDebtCalculationDocument = ({
           numFmt: MONEY,
           align: 'right',
         },
+        {
+          v: money(month.correction),
+          border: true,
+          numFmt: MONEY,
+          align: 'right',
+        },
         { v: money(month.area), border: true, numFmt: MONEY, align: 'right' },
         { v: money(month.tariff), border: true, numFmt: MONEY, align: 'right' },
         {
@@ -252,6 +259,14 @@ export const buildDebtCalculationDocument = ({
       },
       {
         v: money(result.totals.charged),
+        bold: true,
+        border: true,
+        fill: 'total',
+        numFmt: MONEY,
+        align: 'right',
+      },
+      {
+        v: money(result.totals.correction),
         bold: true,
         border: true,
         fill: 'total',

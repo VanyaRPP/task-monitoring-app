@@ -1,5 +1,9 @@
 import { calculateDebt } from './calculate'
-import { buildDebtCalculationInput, indexesByPeriod } from './build-input'
+import {
+  buildDebtCalculationInput,
+  indexesByPeriod,
+  withoutTypedFigures,
+} from './build-input'
 
 const FROM = { year: 2024, month: 1 }
 const TO = { year: 2024, month: 3 }
@@ -234,5 +238,47 @@ describe('buildDebtCalculationInput + calculateDebt — наскрізь на д
     expect(result.body).toBeCloseTo(7380.44, 6)
     expect(result.interest).toBeCloseTo(516.9665973905232, 6)
     expect(result.inflation).toBeCloseTo(4395.853893921326, 6)
+  })
+})
+
+describe('withoutTypedFigures', () => {
+  const overrides = {
+    openingDebt: 16616.69,
+    area: 67.08,
+    months: {
+      '2019-11': {
+        charged: 424.46,
+        correction: -6.86,
+        paid: 0,
+        source: 'photo',
+        updatedAt: '2026-09-27T10:00:00.000Z',
+      },
+      '2019-12': { charged: 424.46, paid: 400, tariff: 9 },
+      // Nothing billed on paper: no invoice will exist for it.
+      '2025-03': { charged: 0, paid: 700, source: 'photo' },
+      '2026-01': { paid: 1 },
+    },
+  }
+
+  it('знімає цифри, що стали платежами; площа, тариф і інші місяці — лишаються', () => {
+    const next = withoutTypedFigures(
+      overrides,
+      ['2019-11', '2019-12', '2025-03'],
+      true
+    )
+
+    expect(next).toEqual({
+      area: 67.08,
+      months: {
+        '2019-12': { tariff: 9 },
+        // The zero stays - otherwise the month becomes area × tariff.
+        '2025-03': { charged: 0 },
+        '2026-01': { paid: 1 },
+      },
+    })
+  })
+
+  it('вхідний борг лишає, якщо його не створювали', () => {
+    expect(withoutTypedFigures(overrides, [], false).openingDebt).toBe(16616.69)
   })
 })

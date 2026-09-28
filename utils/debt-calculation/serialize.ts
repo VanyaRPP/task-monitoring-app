@@ -18,6 +18,7 @@ const MONTH_FIELDS = [
   'area',
   'tariff',
   'charged',
+  'correction',
   'paid',
   'inflationIndex',
 ] as const
@@ -88,6 +89,8 @@ const sanitizeMonths = (
     // A timestamp on its own, with no value beside it, is an empty row.
     if (Object.keys(month).length === 0) continue
     if (updatedAt) month.updatedAt = updatedAt
+    // The only source there is; anything else is dropped, never stored.
+    if ((raw as IMonthOverride)?.source === 'photo') month.source = 'photo'
 
     out[period] = month
     count += 1

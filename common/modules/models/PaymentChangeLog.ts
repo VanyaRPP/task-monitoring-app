@@ -85,7 +85,7 @@ const PaymentChangeLogSchema = new Schema<IPaymentChangeLogModel>(
 
     source: {
       type: String,
-      enum: ['single', 'bulk', 'quick-pay', 'admin-restore'],
+      enum: ['single', 'bulk', 'quick-pay', 'admin-restore', 'debt-import'],
       required: true,
     },
 
