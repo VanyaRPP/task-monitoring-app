@@ -62,6 +62,16 @@ const MonthsTable: React.FC<Props> = ({ result }) => {
         ),
     },
     {
+      title: (
+        <Tooltip title="Борг на початок місяця — вихідне сальдо попереднього.">
+          Вхідне сальдо
+        </Tooltip>
+      ),
+      width: 120,
+      align: 'right',
+      render: (_, row) => formatMoney(row.opening),
+    },
+    {
       title: 'Сплачено',
       width: 120,
       render: (_, row) => (
@@ -138,7 +148,9 @@ const MonthsTable: React.FC<Props> = ({ result }) => {
       render: (_, row) => formatMoney(row.interest),
     },
     {
-      title: 'Сума боргу',
+      title: (
+        <Tooltip title="Сума боргу на кінець місяця.">Вихідне сальдо</Tooltip>
+      ),
       width: 120,
       align: 'right',
       render: (_, row) => <strong>{formatMoney(row.debt)}</strong>,
@@ -215,29 +227,31 @@ const MonthsTable: React.FC<Props> = ({ result }) => {
               <Table.Summary.Cell index={0}>
                 <strong>Всього</strong>
               </Table.Summary.Cell>
-              <Table.Summary.Cell index={1}>
+              {/* Openings are not summed - each is the month before's closing. */}
+              <Table.Summary.Cell index={1} />
+              <Table.Summary.Cell index={2}>
                 {formatMoney(result.totals.paid)}
               </Table.Summary.Cell>
-              <Table.Summary.Cell index={2}>
+              <Table.Summary.Cell index={3}>
                 {formatMoney(result.totals.charged)}
               </Table.Summary.Cell>
-              <Table.Summary.Cell index={3}>
+              <Table.Summary.Cell index={4}>
                 {formatMoney(result.totals.correction)}
               </Table.Summary.Cell>
-              <Table.Summary.Cell index={4} colSpan={2} />
-              <Table.Summary.Cell index={6} align="right">
+              <Table.Summary.Cell index={5} colSpan={2} />
+              <Table.Summary.Cell index={7} align="right">
                 <strong>{formatMoney(result.interest)}</strong>
               </Table.Summary.Cell>
-              <Table.Summary.Cell index={7} align="right">
+              <Table.Summary.Cell index={8} align="right">
                 <strong>{formatMoney(result.body)}</strong>
               </Table.Summary.Cell>
-              <Table.Summary.Cell index={8} align="right">
+              <Table.Summary.Cell index={9} align="right">
                 {result.totals.days}
               </Table.Summary.Cell>
-              <Table.Summary.Cell index={9} colSpan={2} align="right">
+              <Table.Summary.Cell index={10} colSpan={2} align="right">
                 {formatCoefficient(result.coefficient)}
               </Table.Summary.Cell>
-              <Table.Summary.Cell index={11} align="right">
+              <Table.Summary.Cell index={12} align="right">
                 <strong>{formatMoney(result.inflation)}</strong>
               </Table.Summary.Cell>
             </Table.Summary.Row>

@@ -60,6 +60,8 @@ export interface IDebtCalculationInput {
 
 /** A calculated month - one row of the monthly breakdown. */
 export interface IDebtMonthRow extends IYearMonth {
+  /** Debt at the start of the month, UAH - the previous month's closing. */
+  opening: number
   area: number
   tariff: number
   /** Charged, UAH (column D of the Act). */
