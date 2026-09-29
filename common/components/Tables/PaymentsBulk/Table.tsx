@@ -5,6 +5,7 @@ import {
   applyCustomColumnGate,
   buildTypedCustomColumn,
   getDefaultColumns,
+  NATIVE_COLUMN_LABELS,
   hasTypedColumn,
   resolveServiceType,
 } from '@common/components/Tables/PaymentsBulk/column.config'
@@ -14,13 +15,54 @@ import { resolveTypedServiceTariff } from '@common/components/Tables/PaymentsBul
 import serviceFilter from '@components/AddPaymentModal/serviceFilter'
 import { AppRoutes, Operations } from '@utils/constants'
 import { getInvoices } from '@utils/getInvoices'
-import { Alert, Empty, Form, InputNumber, Table } from 'antd'
+import {
+  Alert,
+  Button,
+  message,
+  Dropdown,
+  Empty,
+  Form,
+  InputNumber,
+  Table,
+  Tooltip,
+} from 'antd'
+import {
+  CloseOutlined,
+  EyeOutlined,
+  SaveOutlined,
+  UndoOutlined,
+} from '@ant-design/icons'
+import { useDispatch } from 'react-redux'
+import { addButton, removeButton } from '@modules/store/floatButtonSlice'
+import { useDragDropPanelFloatButton } from '@modules/hooks/useFloatButton'
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+import useTheme from '@modules/hooks/useTheme'
+import dashboardStyles from '../../DashboardPage/style.module.scss'
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  SortableContext,
+  horizontalListSortingStrategy,
+} from '@dnd-kit/sortable'
+import WidgetVisibilityMenu from '@common/components/UI/WidgetVisibilityMenu'
+import { applyColumnLayout, mergeOrder, moveColumn } from './columnLayout'
+import DraggableHeaderCell from './DraggableHeaderCell'
+import HiddenColumnCells from './HiddenColumnCells'
 import { useRouter } from 'next/router'
-import { useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { defaultServices } from '@utils/constants'
 import { findPrevPaymentMatch } from './hooks/usePrevPayment/usePrevPayment'
 import { Amount } from './cells/Amount'
 import styles from './stylestable.module.scss'
+
+const withColumnKey = (column: any, key: string) =>
+  column ? { ...column, key } : column
 
 const InvoicesTable: React.FC = () => {
   const router = useRouter()
@@ -78,7 +120,10 @@ const InvoicesTable: React.FC = () => {
             ),
           })
           if (typedColumn)
-            return applyCustomColumnGate(typedColumn, s, gateOpts)
+            return withColumnKey(
+              applyCustomColumnGate(typedColumn, s, gateOpts),
+              key
+            )
 
           const genericColumn = {
             title: s.name,
@@ -108,10 +153,106 @@ const InvoicesTable: React.FC = () => {
               },
             ],
           }
-          return applyCustomColumnGate(genericColumn, s, gateOpts)
+          return withColumnKey(
+            applyCustomColumnGate(genericColumn, s, gateOpts),
+            key
+          )
         }),
     [allowedServices, service]
   )
+
+  const columns = useMemo(
+    () =>
+      getDefaultColumns(
+        () => undefined,
+        allowedServices,
+        service?.losses,
+        customServicesColumns
+      ),
+    [allowedServices, service?.losses, customServicesColumns]
+  )
+
+  // Рухомі колонки = ті, що мають key (Сума / Компанія / видалення фіксовані).
+  const movableKeys = useMemo(
+    () =>
+      columns
+        .filter((c) => c.key != null && !c.fixed)
+        .map((c) => String(c.key)),
+    [columns]
+  )
+  const labels = useMemo(() => {
+    const map: Record<string, string> = { ...NATIVE_COLUMN_LABELS }
+    allowedServices.forEach((s) => {
+      map[String(s._id)] = s.name
+    })
+    return map
+  }, [allowedServices])
+
+  const [order, setOrder] = useState<string[]>([])
+  const [hidden, setHidden] = useState<string[]>([])
+  const currentOrder = useMemo(
+    () => mergeOrder(order, movableKeys),
+    [order, movableKeys]
+  )
+
+  const [isPanelVisible, togglePanelVisible, panelFloatButton] =
+    useDragDropPanelFloatButton('payments-bulk')
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+  )
+  const handleDragEnd = useCallback(
+    ({ active, over }: DragEndEvent) => {
+      if (!isPanelVisible || !over || active.id === over.id) return
+      setOrder(moveColumn(currentOrder, String(active.id), String(over.id)))
+    },
+    [currentOrder, isPanelVisible]
+  )
+  const dispatch = useDispatch()
+  const [theme] = useTheme()
+  const isDark = theme === 'dark'
+  const { data: user } = useGetCurrentUserQuery()
+  const storageKey = `payments-bulk-columns-${user?._id ?? ''}`
+
+  useEffect(() => {
+    dispatch(addButton(panelFloatButton))
+    return () => {
+      dispatch(removeButton(panelFloatButton.key))
+    }
+  }, [dispatch, panelFloatButton])
+
+  // Збережений порядок/видимість — як layout дашборду у localStorage.
+  useEffect(() => {
+    if (!user?._id) return
+    try {
+      const saved = JSON.parse(localStorage.getItem(storageKey) ?? 'null')
+      if (saved) {
+        setOrder(saved.order ?? [])
+        setHidden(saved.hidden ?? [])
+      }
+    } catch {}
+  }, [user?._id, storageKey])
+
+  const resetLayout = useCallback(() => {
+    setOrder([])
+    setHidden([])
+    try {
+      localStorage.removeItem(storageKey)
+    } catch {}
+    message.success('Відновлено!')
+    togglePanelVisible()
+  }, [storageKey, togglePanelVisible])
+
+  const saveLayout = useCallback(() => {
+    try {
+      localStorage.setItem(
+        storageKey,
+        JSON.stringify({ order: currentOrder, hidden })
+      )
+    } catch {}
+    message.success('Збережено!')
+    togglePanelVisible()
+  }, [storageKey, currentOrder, hidden, togglePanelVisible])
 
   const paymentsValue = useMemo(() => {
     if (!companies || companies.length === 0 || !service) return []
@@ -210,32 +351,125 @@ const InvoicesTable: React.FC = () => {
 
   return (
     <Form.List name="payments">
-      {(fields, { remove }) => (
-        <Table
-          className={styles.customTable}
-          bordered
-          rowKey="name"
-          size="small"
-          pagination={false}
-          loading={isLoading}
-          tableLayout="fixed"
-          columns={[
-            ...getDefaultColumns(
-              remove,
-              allowedServices,
-              service?.losses,
-              customServicesColumns
-            ),
-          ]}
-          dataSource={fields}
-          scroll={{ x: 1200 }}
-          locale={{
-            emptyText: (
-              <Empty description="За даною адресою послуг не знайдено!" />
-            ),
-          }}
-        />
-      )}
+      {(fields, { remove }) => {
+        const allColumns = getDefaultColumns(
+          remove,
+          allowedServices,
+          service?.losses,
+          customServicesColumns
+        )
+        const hiddenColumns = allColumns.filter(
+          (c) => c.key != null && !c.fixed && hidden.includes(String(c.key))
+        )
+        const tableColumns = applyColumnLayout(
+          allColumns,
+          currentOrder,
+          hidden
+        ).map((c) =>
+          isPanelVisible && c.key != null && !c.fixed
+            ? {
+                ...c,
+                onHeaderCell: () =>
+                  ({ 'data-column-id': String(c.key) }) as any,
+              }
+            : c
+        )
+        const visibleKeys = currentOrder.filter((k) => !hidden.includes(k))
+
+        return (
+          <>
+            {isPanelVisible && (
+              <div
+                className={`${dashboardStyles.toolbar} ${
+                  isDark ? dashboardStyles.dark : dashboardStyles.light
+                }`}
+                style={{ marginBottom: 8 }}
+              >
+                <div className={dashboardStyles.buttonsBlock} />
+                <div className={dashboardStyles.actions}>
+                  <div
+                    className={dashboardStyles.divider}
+                    style={{ backgroundColor: isDark ? '#555' : '#ccc' }}
+                  />
+                  <Dropdown
+                    trigger={['click']}
+                    popupRender={() => (
+                      <div style={{ padding: 8 }}>
+                        <WidgetVisibilityMenu
+                          hidden={hidden}
+                          onChange={setHidden}
+                          available={currentOrder}
+                          labels={labels}
+                        />
+                      </div>
+                    )}
+                  >
+                    <Tooltip title="Приховати колонки">
+                      <Button
+                        icon={<EyeOutlined />}
+                        aria-label="Приховати колонки"
+                      />
+                    </Tooltip>
+                  </Dropdown>
+                  <Tooltip title="Відновати">
+                    <Button
+                      icon={<UndoOutlined />}
+                      aria-label="Відновити колонки"
+                      onClick={resetLayout}
+                    />
+                  </Tooltip>
+                  <Tooltip title="Зберегти">
+                    <Button
+                      icon={<SaveOutlined />}
+                      aria-label="Зберегти колонки"
+                      onClick={saveLayout}
+                    />
+                  </Tooltip>
+                  <Tooltip title="Вийти з режиму редагування">
+                    <Button
+                      icon={<CloseOutlined />}
+                      onClick={togglePanelVisible}
+                    />
+                  </Tooltip>
+                </div>
+              </div>
+            )}
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={visibleKeys}
+                strategy={horizontalListSortingStrategy}
+              >
+                <Table
+                  className={styles.customTable}
+                  bordered
+                  rowKey="name"
+                  size="small"
+                  pagination={false}
+                  loading={isLoading}
+                  tableLayout="fixed"
+                  columns={tableColumns}
+                  components={{ header: { cell: DraggableHeaderCell } }}
+                  dataSource={fields}
+                  scroll={{ x: 1200 }}
+                  locale={{
+                    emptyText: (
+                      <Empty description="За даною адресою послуг не знайдено!" />
+                    ),
+                  }}
+                />
+              </SortableContext>
+            </DndContext>
+            <HiddenColumnCells
+              columns={hiddenColumns}
+              names={fields.map((f) => f.name)}
+            />
+          </>
+        )
+      }}
     </Form.List>
   )
 }
