@@ -93,7 +93,7 @@ async function inflationIndexHandler(
         items.map(({ year, month, value }) => ({
           updateOne: {
             filter: { year, month },
-            update: { $set: { value } },
+            update: { $set: { value, source: 'manual' } },
             upsert: true,
           },
         }))
