@@ -53,7 +53,7 @@
     "@react-google-maps/api": "^2.12.0",
     "@reduxjs/toolkit": "^2.2.6",
     "@sparticuz/chromium-min": "^127",
-    "@testing-library/dom": "^10.4.0",
+    "@testing-library/dom": "^10.4.2",
     "@testing-library/jest-dom": "^6.5.0",
     "@testing-library/react": "^16.3.3",
     "ai": "^6.0.175",
@@ -65,7 +65,7 @@
     "classnames": "^2.3.1",
     "clsx": "^2.1.1",
     "crypto-js": "^4.2.0",
-    "dayjs": "^1.11.21",
+    "dayjs": "^1.11.23",
     "dotenv": "^16.4.5",
     "file-saver": "^2.0.5",
     "formidable": "^2.0.1",
@@ -91,12 +91,12 @@
     "react-redux": "^9.1.2",
     "react-resize-detector": "^12.1.0",
     "react-to-print": "^2.14.12",
-    "sass": "^1.103.1",
+    "sass": "^1.105.0",
     "sharp": "^0.35.4",
-    "swagger-ui-react": "^5.32.14",
+    "swagger-ui-react": "^5.33.0",
     "use-places-autocomplete": "^4.0.0",
     "xlsx-js-style": "^1.2.0",
-    "zod": "^4.4.3"
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@testing-library/user-event": "^14.6.6",
