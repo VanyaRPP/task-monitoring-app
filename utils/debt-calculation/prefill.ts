@@ -3,7 +3,7 @@ import { Operations, ServiceType } from '@utils/constants'
 import { resolveServiceType } from '@utils/domain/resolve-service-type'
 import dayjs from 'dayjs'
 import { IMonthOverride } from './build-input'
-import { formatPeriod } from './months'
+import { formatPeriod, yearMonthOf } from './months'
 
 /** What the prefill needs from a payment. Structurally compatible with IExtendedPayment. */
 export interface IPrefillPayment {
@@ -26,6 +26,7 @@ export interface IBuildMonthPrefillArgs {
   companyId?: string
   payments?: IPrefillPayment[]
   services?: IPrefillService[]
+  timeZone?: string
 }
 
 /**
@@ -35,13 +36,16 @@ export interface IBuildMonthPrefillArgs {
  * time and land in the DB as a UTC instant a few hours earlier. Reading them
  * with `getUTCMonth` would shift such a record into the previous month.
  */
-const periodOfDate = (value?: Date | string): string | undefined => {
+const periodOfDate = (
+  value?: Date | string,
+  timeZone?: string
+): string | undefined => {
   if (!value) return undefined
 
   const date = dayjs(value)
 
   return date.isValid()
-    ? formatPeriod({ year: date.year(), month: date.month() + 1 })
+    ? formatPeriod(yearMonthOf(date.toDate(), timeZone))
     : undefined
 }
 
@@ -89,13 +93,14 @@ export const buildMonthPrefill = ({
   companyId,
   payments = [],
   services = [],
+  timeZone,
 }: IBuildMonthPrefillArgs): Record<string, IMonthOverride> => {
   const prefill: Record<string, IMonthOverride> = {}
   const at = (period: string): IMonthOverride =>
     (prefill[period] = prefill[period] ?? {})
 
   for (const service of services) {
-    const period = periodOfDate(service?.date)
+    const period = periodOfDate(service?.date, timeZone)
     const tariff = Number(service?.rentPrice)
 
     if (period && Number.isFinite(tariff) && tariff > 0) {
@@ -107,7 +112,10 @@ export const buildMonthPrefill = ({
     if (companyId && idOf(payment?.company) !== companyId) continue
 
     if (payment?.type === Operations.Credit) {
-      const period = periodOfDate(payment.paidAt ?? payment.invoiceCreationDate)
+      const period = periodOfDate(
+        payment.paidAt ?? payment.invoiceCreationDate,
+        timeZone
+      )
       if (!period) continue
 
       at(period).paid =
@@ -120,7 +128,10 @@ export const buildMonthPrefill = ({
     const monthService = payment.monthService
     const serviceDate =
       typeof monthService === 'string' ? undefined : monthService?.date
-    const period = periodOfDate(serviceDate ?? payment.invoiceCreationDate)
+    const period = periodOfDate(
+      serviceDate ?? payment.invoiceCreationDate,
+      timeZone
+    )
     if (!period) continue
 
     const charged = housingFeeCharged(payment)

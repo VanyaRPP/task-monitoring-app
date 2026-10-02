@@ -4,11 +4,14 @@
 
 import { readFileSync } from 'fs'
 import { MongoMemoryServer } from 'mongodb-memory-server'
-import mongoose from 'mongoose'
+import mongoose, { Types } from 'mongoose'
 import { join } from 'path'
 
 import type { IInflationIndexInput } from '@common/api/inflationIndexApi/inflationIndex.api.types'
+import CustomService from '@modules/models/CustomService'
 import InflationIndex from '@modules/models/InflationIndex'
+import Service from '@modules/models/Service'
+import * as fillServices from './fill-services'
 import { INFLATION_INDEXES } from '../../scripts/seed-inflation-indexes'
 import {
   formatSyncReport,
@@ -78,6 +81,8 @@ describe('syncInflationIndexes на збережених сторінках', ()
       mismatched: [],
       rejected: [],
       failedSources: [],
+      servicesFilled: 0,
+      fillFailures: [],
     })
     expect(await findMonth(2026, 8)).toMatchObject({
       value: 100.1,
@@ -209,12 +214,104 @@ describe('syncInflationIndexes, коли щось пішло не так', () =>
   })
 })
 
+describe('syncInflationIndexes заповнює місячні послуги', () => {
+  const AUGUST = new Date('2026-07-31T21:00:00.000Z')
+  const SEPTEMBER = new Date('2026-08-31T21:00:00.000Z')
+
+  let domain: Types.ObjectId
+
+  beforeEach(async () => {
+    await seedExcept('2026-8')
+    domain = new Types.ObjectId()
+    await CustomService.collection.insertOne({
+      name: 'Інфляція',
+      fieldName: 'inflicionPrice',
+      serviceType: 'inflicionPrice',
+      domain,
+    })
+  })
+
+  afterEach(async () => {
+    jest.restoreAllMocks()
+    await Promise.all([Service.deleteMany({}), CustomService.deleteMany({})])
+  })
+
+  const insertService = async (date: Date, inflicionPrice: number) =>
+    (
+      await Service.collection.insertOne({
+        domain,
+        date,
+        rentPrice: 25,
+        inflicionPrice,
+      })
+    ).insertedId
+
+  const indexOf = async (id: Types.ObjectId) =>
+    (await Service.findById(id).lean())?.inflicionPrice
+
+  it('заповнює порожнє поле щойно доданого місяця', async () => {
+    const august = await insertService(AUGUST, 0)
+
+    const report = await syncInflationIndexes(SOURCES, fixtureFetch)
+
+    expect(report.servicesFilled).toBe(1)
+    expect(await indexOf(august)).toBe(100.1)
+  })
+
+  it('не чіпає ручне значення', async () => {
+    const august = await insertService(AUGUST, 100.5)
+
+    const report = await syncInflationIndexes(SOURCES, fixtureFetch)
+
+    expect(report.servicesFilled).toBe(0)
+    expect(await indexOf(august)).toBe(100.5)
+  })
+
+  it('місяць, якого немає в довіднику, лишається порожнім', async () => {
+    const september = await insertService(SEPTEMBER, 0)
+
+    await syncInflationIndexes(SOURCES, fixtureFetch)
+
+    expect(await findMonth(2026, 9)).toBeNull()
+    expect(await indexOf(september)).toBe(0)
+  })
+
+  it('без нових місяців послуги не чіпає', async () => {
+    await InflationIndex.create({ year: 2026, month: 8, value: 100.1 })
+    const august = await insertService(AUGUST, 0)
+
+    const report = await syncInflationIndexes(SOURCES, fixtureFetch)
+
+    expect(report.added).toEqual([])
+    expect(await indexOf(august)).toBe(0)
+  })
+
+  it('збій заповнення видно у звіті, а індекс однаково записаний', async () => {
+    jest
+      .spyOn(fillServices, 'fillServicesInflation')
+      .mockRejectedValue(new Error('timeout'))
+
+    const report = await syncInflationIndexes(SOURCES, fixtureFetch)
+
+    expect(report.added).toEqual([{ year: 2026, month: 8, value: 100.1 }])
+    expect(report.fillFailures).toEqual([
+      { year: 2026, month: 8, error: 'timeout' },
+    ])
+    expect(hasProblems(report)).toBe(true)
+    expect(formatSyncReport(report)).toContain(
+      'не вдалося заповнити послуги за 2026-08: timeout'
+    )
+  })
+})
+
 describe('hasProblems і formatSyncReport', () => {
   const empty: ISyncReport = {
     added: [],
     mismatched: [],
     rejected: [],
     failedSources: [],
+    servicesFilled: 0,
+    fillFailures: [],
   }
   const unconfirmed = {
     year: 2026,
@@ -254,6 +351,8 @@ describe('hasProblems і formatSyncReport', () => {
       mismatched: [unconfirmed],
       rejected: [{ year: 2026, month: 7, value: 1003 }],
       failedSources: [{ source: 'buhgalter', error: 'HTTP 503' }],
+      servicesFilled: 0,
+      fillFailures: [],
     })
 
     expect(text.split('\n')).toEqual([

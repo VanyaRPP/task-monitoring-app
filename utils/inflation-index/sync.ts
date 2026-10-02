@@ -1,6 +1,7 @@
 import type { IInflationIndexInput } from '@common/api/inflationIndexApi/inflationIndex.api.types'
 import InflationIndex from '@modules/models/InflationIndex'
 import { formatPeriod, periodKey } from '@utils/debt-calculation/months'
+import { fillServicesInflation } from './fill-services'
 import { insertMissingIndexes } from './insert-missing'
 import { filterByRange, reconcileSources } from './reconcile'
 import {
@@ -27,11 +28,19 @@ export interface IFailedSource {
   error: string
 }
 
+export interface IFillFailure {
+  year: number
+  month: number
+  error: string
+}
+
 export interface ISyncReport {
   added: IInflationIndexInput[]
   mismatched: IIndexMismatch[]
   rejected: IIndexRejected[]
   failedSources: IFailedSource[]
+  servicesFilled: number
+  fillFailures: IFillFailure[]
 }
 
 const FETCH_TIMEOUT_MS = 20_000
@@ -99,19 +108,48 @@ export async function syncInflationIndexes(
   const { valid, rejected } = filterByRange(agreed)
   const added = await insertMissingIndexes(valid)
 
-  return { added, mismatched, rejected, failedSources }
+  let servicesFilled = 0
+  const fillFailures: IFillFailure[] = []
+  for (const item of added) {
+    try {
+      servicesFilled += await fillServicesInflation(item)
+    } catch (error) {
+      fillFailures.push({
+        year: item.year,
+        month: item.month,
+        error: error instanceof Error ? error.message : String(error),
+      })
+    }
+  }
+
+  return {
+    added,
+    mismatched,
+    rejected,
+    failedSources,
+    servicesFilled,
+    fillFailures,
+  }
 }
 
 export const hasProblems = (report: ISyncReport): boolean =>
   report.failedSources.length > 0 ||
   report.rejected.length > 0 ||
+  report.fillFailures.length > 0 ||
   report.mismatched.some(({ reason }) => reason === 'conflict')
 
 const listPeriods = (items: IInflationIndexInput[]) =>
   items.map((item) => `${formatPeriod(item)}=${item.value}`).join(', ')
 
 export function formatSyncReport(report: ISyncReport): string {
-  const { added, mismatched, rejected, failedSources } = report
+  const {
+    added,
+    mismatched,
+    rejected,
+    failedSources,
+    servicesFilled,
+    fillFailures,
+  } = report
   const lines = [
     `[cron:monthly] ІСЦ: додано ${added.length}, розбіжностей ${mismatched.length}, відкинуто ${rejected.length}, джерел з помилкою ${failedSources.length}`,
   ]
@@ -126,6 +164,14 @@ export function formatSyncReport(report: ISyncReport): string {
   }
   failedSources.forEach(({ source, error }) => {
     lines.push(`  джерело ${source} недоступне: ${error}`)
+  })
+  if (servicesFilled) {
+    lines.push(`  послуг з індексом заповнено: ${servicesFilled}`)
+  }
+  fillFailures.forEach(({ error, ...period }) => {
+    lines.push(
+      `  не вдалося заповнити послуги за ${formatPeriod(period)}: ${error}`
+    )
   })
 
   return lines.join('\n')

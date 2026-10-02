@@ -14,6 +14,12 @@ import {
 } from '@utils/debt-calculation/build-input'
 import { calculateDebt } from '@utils/debt-calculation/calculate'
 import {
+  defaultDebtPeriod,
+  PREFILL_PAYMENTS_LIMIT,
+  PREFILL_SERVICES_LIMIT,
+  resolveSnapshotSettings,
+} from '@utils/debt-calculation/company-debt'
+import {
   draftKey,
   isDraftNewer,
   readDraft,
@@ -39,11 +45,6 @@ import {
 import DebtCalculationBody from './Body'
 import DebtCalculationHeader from './Header'
 import { useAutoSave } from './useAutoSave'
-
-// Neither payments nor monthly services can be filtered by a date range on the
-// server, so we pull the domain's catalog whole and bucket it by month here.
-const PREFILL_PAYMENTS_LIMIT = 5000
-const PREFILL_SERVICES_LIMIT = 500
 
 const toYearMonth = (value?: Dayjs | null): IYearMonth | undefined =>
   value ? { year: value.year(), month: value.month() + 1 } : undefined
@@ -104,10 +105,10 @@ const DebtCalculationBlock: React.FC = () => {
   const [domainId, setDomainId] = useState<string | undefined>()
   const [companyId, setCompanyId] = useState<string | undefined>()
   const [from, setFrom] = useState<Dayjs | undefined>(() =>
-    dayjs().subtract(1, 'year').startOf('month')
+    toDayjs(defaultDebtPeriod().from)
   )
   const [to, setTo] = useState<Dayjs | undefined>(() =>
-    dayjs().subtract(1, 'month').startOf('month')
+    toDayjs(defaultDebtPeriod().to)
   )
   const [annualRatePercent, setAnnualRatePercent] = useState(
     DEFAULT_ANNUAL_RATE_PERCENT
@@ -203,13 +204,12 @@ const DebtCalculationBlock: React.FC = () => {
       ? draft.snapshot
       : (saved as IDebtCalculationSnapshot | undefined)
 
-    setOverrides(snapshot?.overrides?.[companyId] ?? {})
-    setAnnualRatePercent(
-      snapshot?.annualRatePercent ?? DEFAULT_ANNUAL_RATE_PERCENT
-    )
-    setInflationMethod(snapshot?.inflationMethod ?? 'balance')
-    if (snapshot?.periodFrom) setFrom(toDayjs(snapshot.periodFrom))
-    if (snapshot?.periodTo) setTo(toDayjs(snapshot.periodTo))
+    const settings = resolveSnapshotSettings(snapshot, companyId)
+    setOverrides(settings.overrides)
+    setAnnualRatePercent(settings.annualRatePercent)
+    setInflationMethod(settings.inflationMethod)
+    if (settings.periodFrom) setFrom(toDayjs(settings.periodFrom))
+    if (settings.periodTo) setTo(toDayjs(settings.periodTo))
     setIsApplied(true)
   }, [domainId, companyId, saved, isSavedFetching])
 

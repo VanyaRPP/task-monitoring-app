@@ -7,10 +7,13 @@ import { ConfigProvider, DatePicker, Form, FormInstance, Input } from 'antd'
 import ukUA from 'antd/lib/locale/uk_UA'
 import dayjs from 'dayjs'
 import 'dayjs/locale/uk'
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, useRef } from 'react'
 import s from './style.module.scss'
 import { inputNumberParser } from '@utils/helpers'
 import { useGetCustomServicesByDomainQuery } from '@common/api/customServicesApi/customServices.api'
+import { useGetInflationIndexesQuery } from '@common/api/inflationIndexApi/inflationIndex.api'
+import { formatPeriod } from '@utils/debt-calculation/months'
+import { applyInflationDefault } from '@utils/inflation-index/service-defaults'
 import CustomServicesCard from '@components/UI/CustomServicesCard'
 import { LossesCollapse } from '@components/Losses/LossesCollapse'
 
@@ -35,6 +38,20 @@ const AddServiceForm: React.FC<Props> = ({
   const domainId = Form.useWatch('domain', form)
   const streetId = Form.useWatch('street', form)
 
+  const selectedMonth = date ? dayjs(date) : null
+  const period = selectedMonth?.isValid()
+    ? formatPeriod({
+        year: selectedMonth.year(),
+        month: selectedMonth.month() + 1,
+      })
+    : undefined
+  const { data: indexes } = useGetInflationIndexesQuery(
+    { from: period, to: period },
+    { skip: !period }
+  )
+  const indexValue =
+    indexes?.find((item) => formatPeriod(item) === period)?.value ?? null
+
   const filteredServicesPrice = (customServices) => {
     return customServices?.map((service) => {
       let price = null
@@ -49,12 +66,13 @@ const AddServiceForm: React.FC<Props> = ({
             0
           break
         case 'inflicionPrice':
-          price =
-            currentService?.inflicionPrice ??
-            currentService?.customServices?.find(
-              (service) => service.fieldName === 'inflicionPrice'
-            )?.price ??
-            0
+          price = currentService
+            ? (currentService.inflicionPrice ??
+              currentService.customServices?.find(
+                (service) => service.fieldName === 'inflicionPrice'
+              )?.price ??
+              0)
+            : indexValue
           break
         case 'rentPrice':
           price =
@@ -137,8 +155,7 @@ const AddServiceForm: React.FC<Props> = ({
           currentService?.electricityPrice ??
           previousMonth?.electricityPrice ??
           0,
-        inflicionPrice:
-          currentService?.inflicionPrice ?? previousMonth?.inflicionPrice ?? 0,
+        inflicionPrice: currentService?.inflicionPrice ?? indexValue,
         rentPrice: currentService?.rentPrice ?? previousMonth?.rentPrice ?? 0,
         waterPrice:
           currentService?.waterPrice ?? previousMonth?.waterPrice ?? 0,
@@ -160,7 +177,19 @@ const AddServiceForm: React.FC<Props> = ({
         isVAT: currentService?.isVAT || true,
       })
     }
-  }, [form, currentService, previousMonth, initialCustomServices])
+  }, [form, currentService, previousMonth, initialCustomServices, indexValue])
+
+  const appliedIndex = useRef<number | null>(null)
+  useEffect(() => {
+    if (currentService) return
+
+    const rows = form.getFieldValue('customServices')
+    if (Array.isArray(rows) && rows.length > 0) {
+      const next = applyInflationDefault(rows, indexValue, appliedIndex.current)
+      if (next !== rows) form.setFieldsValue({ customServices: next })
+    }
+    appliedIndex.current = indexValue
+  }, [currentService, form, indexValue])
 
   useEffect(() => {
     form.setFields([

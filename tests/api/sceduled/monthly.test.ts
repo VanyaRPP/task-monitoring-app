@@ -23,6 +23,8 @@ const REPORT = {
   mismatched: [],
   rejected: [],
   failedSources: [],
+  servicesFilled: 0,
+  fillFailures: [],
 }
 
 let warn: jest.SpyInstance
