@@ -133,6 +133,7 @@ const DebtCalculationBlock: React.FC = () => {
       {
         from: fromYearMonth && formatPeriod(fromYearMonth),
         to: toYearMonthValue && formatPeriod(toYearMonthValue),
+        domainId,
       },
       { skip: !from || !to }
     )

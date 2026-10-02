@@ -46,7 +46,7 @@ const AddServiceForm: React.FC<Props> = ({
       })
     : undefined
   const { data: indexes } = useGetInflationIndexesQuery(
-    { from: period, to: period },
+    { from: period, to: period, domainId: domainId || undefined },
     { skip: !period }
   )
   const indexValue =

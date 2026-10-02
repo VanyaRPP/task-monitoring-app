@@ -7,6 +7,7 @@ import mongoose, { Types } from 'mongoose'
 
 import CustomService from '@modules/models/CustomService'
 import Domain from '@modules/models/Domain'
+import DomainInflationOverride from '@modules/models/DomainInflationOverride'
 import Service from '@modules/models/Service'
 import { fillServicesInflation } from './fill-services'
 
@@ -29,6 +30,7 @@ afterEach(async () => {
     Service.deleteMany({}),
     Domain.deleteMany({}),
     CustomService.deleteMany({}),
+    DomainInflationOverride.deleteMany({}),
   ])
 })
 
@@ -194,5 +196,31 @@ describe('fillServicesInflation', () => {
     await fillServicesInflation(SEPTEMBER_CPI)
 
     expect(await fillServicesInflation({ ...SEPTEMBER_CPI, value: 99 })).toBe(0)
+  })
+
+  it('домен із власним значенням за місяць отримує саме його', async () => {
+    const overridden = await domainWithInflation()
+    const neighbour = await domainWithInflation()
+    await DomainInflationOverride.create({
+      domain: overridden,
+      year: 2026,
+      month: 9,
+      value: 101.7,
+    })
+    const own = await insertService({
+      domain: overridden,
+      date: SEPTEMBER,
+      inflicionPrice: 0,
+    })
+    const other = await insertService({
+      domain: neighbour,
+      date: SEPTEMBER,
+      inflicionPrice: 0,
+    })
+
+    expect(await fillServicesInflation(SEPTEMBER_CPI)).toBe(2)
+
+    expect((await load(own))?.inflicionPrice).toBe(101.7)
+    expect((await load(other))?.inflicionPrice).toBe(100.4)
   })
 })

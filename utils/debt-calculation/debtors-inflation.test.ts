@@ -7,6 +7,7 @@ import mongoose, { Types } from 'mongoose'
 
 import CustomService from '@modules/models/CustomService'
 import DebtCalculation from '@modules/models/DebtCalculation'
+import DomainInflationOverride from '@modules/models/DomainInflationOverride'
 import InflationIndex from '@modules/models/InflationIndex'
 import Payment from '@modules/models/Payment'
 import RealEstate from '@modules/models/RealEstate'
@@ -35,6 +36,7 @@ afterEach(async () => {
     [
       CustomService,
       DebtCalculation,
+      DomainInflationOverride,
       InflationIndex,
       Payment,
       RealEstate,
@@ -78,7 +80,9 @@ const seed = async ({ housingFee = true } = {}): Promise<IFixture> => {
     totalArea: 0,
     pricePerMeter: 0,
   })
-  await InflationIndex.insertMany(INDEXES)
+  if ((await InflationIndex.countDocuments()) === 0) {
+    await InflationIndex.insertMany(INDEXES)
+  }
 
   for (const month of [1, 2, 3]) {
     const { insertedId: monthService } = await Service.collection.insertOne({
@@ -126,6 +130,37 @@ const viaPage = async (
 }
 
 describe('calculateDebtorsInflation', () => {
+  it('бере індекс домену замість довідника лише в його домені', async () => {
+    const overridden = await seed()
+    const neighbour = await seed()
+    for (const { domain, company } of [overridden, neighbour]) {
+      await DebtCalculation.create({
+        domain,
+        company,
+        periodFrom: { year: 2025, month: 1 },
+        periodTo: { year: 2025, month: 3 },
+      })
+    }
+    await DomainInflationOverride.create({
+      domain: overridden.domain,
+      year: 2025,
+      month: 3,
+      value: 103,
+    })
+
+    const result = await calculateDebtorsInflation(
+      [String(overridden.company), String(neighbour.company)],
+      NOW
+    )
+
+    // 1500 × (1.008 × 1.03 − 1) instead of 1500 × (1.008 × 1.015 − 1)
+    expect(result[String(overridden.company)].loss).toBeCloseTo(
+      1500 * (1.008 * 1.03 - 1),
+      6
+    )
+    expect(result[String(neighbour.company)].loss).toBeCloseTo(34.68, 2)
+  })
+
   it('збігається з ручним розрахунком і з двигуном сторінки', async () => {
     const fixture = await seed()
     await DebtCalculation.create({

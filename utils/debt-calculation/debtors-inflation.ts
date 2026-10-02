@@ -1,10 +1,12 @@
 import DebtCalculation from '@modules/models/DebtCalculation'
+import DomainInflationOverride from '@modules/models/DomainInflationOverride'
 import InflationIndex from '@modules/models/InflationIndex'
 import Payment from '@modules/models/Payment'
 import RealEstate from '@modules/models/RealEstate'
 import Service from '@modules/models/Service'
 import { ServiceType } from '@utils/constants'
 import { findDomainIdsByServiceType } from '@utils/domain/domains-by-service-type'
+import { mergeDomainIndexes } from '@utils/inflation-index/domain-overrides'
 import { SERVICE_TIMEZONE } from '@utils/inflation-index/fill-services'
 import { indexesByPeriod } from './build-input'
 import {
@@ -53,7 +55,7 @@ export async function calculateDebtorsInflation(
   const ids = companies.map(({ _id }) => _id)
   const domainIds = [...new Set(companies.map(({ domain }) => String(domain)))]
 
-  const [payments, services, indexes, saved] = await Promise.all([
+  const [payments, services, indexes, saved, overrides] = await Promise.all([
     Payment.find(
       { company: { $in: ids } },
       'domain company type generalSum invoiceCreationDate paidAt monthService invoice'
@@ -65,9 +67,14 @@ export async function calculateDebtorsInflation(
       .lean(),
     InflationIndex.find({}, 'year month value').lean(),
     DebtCalculation.find({ company: { $in: ids } }).lean(),
+    DomainInflationOverride.find(
+      { domain: { $in: domainIds } },
+      'domain year month value'
+    ).lean(),
   ])
 
-  const indexByPeriod = indexesByPeriod(indexes)
+  const reference = indexesByPeriod(indexes)
+  const overridesByDomain = groupBy(overrides, ({ domain }) => String(domain))
   const defaultPeriod = defaultDebtPeriod(now, SERVICE_TIMEZONE)
   const paymentsByCompany = groupBy(payments, ({ company }) => String(company))
   const servicesByDomain = groupBy(services, ({ domain }) => String(domain))
@@ -88,7 +95,10 @@ export async function calculateDebtorsInflation(
         0,
         PREFILL_SERVICES_LIMIT
       ) as unknown as IPrefillService[],
-      indexByPeriod,
+      indexByPeriod: mergeDomainIndexes(
+        reference,
+        overridesByDomain.get(domainId) ?? []
+      ),
       timeZone: SERVICE_TIMEZONE,
       saved: saved.find(
         (record) =>

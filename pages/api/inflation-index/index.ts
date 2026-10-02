@@ -1,4 +1,7 @@
+import DomainInflationOverride from '@modules/models/DomainInflationOverride'
 import InflationIndex, { IInflationIndex } from '@modules/models/InflationIndex'
+import { canViewDomain } from '@utils/domain/domain-access'
+import { applyDomainOverrides } from '@utils/inflation-index/domain-overrides'
 import { Data } from '@pages/api/api.config'
 import { withErrorHandler } from '@utils/api-handler'
 import {
@@ -51,7 +54,8 @@ async function inflationIndexHandler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  const { isAdmin } = await getCurrentUser(req, res)
+  const access = await getCurrentUser(req, res)
+  const { isAdmin } = access
 
   switch (req.method) {
     case 'GET': {
@@ -70,9 +74,28 @@ async function inflationIndexHandler(
       }
 
       const list = await InflationIndex.find(filter).lean()
-      const data = list
+      const reference = list
         .filter((item) => isWithinPeriod(item, from, to))
         .sort((a, b) => periodKey(a) - periodKey(b))
+
+      const domainId = req.query.domainId
+      if (domainId === undefined || domainId === '') {
+        return res.status(200).json({ success: true, data: reference })
+      }
+      if (!(await canViewDomain(access, domainId))) {
+        return res
+          .status(403)
+          .json({ success: false, message: 'Немає доступу' })
+      }
+
+      const overrides = await DomainInflationOverride.find({
+        domain: domainId,
+        ...filter,
+      }).lean()
+      const data = applyDomainOverrides(
+        reference,
+        overrides.filter((item) => isWithinPeriod(item, from, to))
+      )
 
       return res.status(200).json({ success: true, data })
     }
