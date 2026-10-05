@@ -47,11 +47,11 @@ const config: Config = {
       prefix: '<rootDir>/',
     }),
     '\\.(css|scss|sass)$': 'identity-obj-proxy',
-    // @ant-design/icons hardcodes this deep import to the ESM build of
-    // @ant-design/colors, which Jest can't parse. Redirect it to the
-    // CJS build shipped in the same nested package.
-    '^@ant-design/colors/es/generate$':
-      '<rootDir>/node_modules/@ant-design/icons/node_modules/@ant-design/colors/lib/generate.js',
+    // @ant-design/icons ships CJS that hard-requires the ESM build
+    // (`require('@ant-design/colors/es/generate')`). Bundlers cope; Jest's CJS
+    // runtime throws "Cannot use import statement outside a module". Point the
+    // `es/` subpath at the CJS `lib/` twin — same code, same package version.
+    '^@ant-design/colors/es/(.*)$': '@ant-design/colors/lib/$1',
   },
 
   moduleFileExtensions: ['ts', 'tsx', 'js'],

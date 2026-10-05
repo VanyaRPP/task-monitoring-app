@@ -102,7 +102,7 @@ const InvoicesHeader = () => {
         invoiceNumber: newInvoiceNumber + index,
         type: Operations.Debit,
         domain: domainId,
-        street: streetId,
+        ...(streetId ? { street: streetId } : {}),
         company: payment.company?._id,
         monthService: monthServiceId,
         invoiceCreationDate: new Date(),
@@ -150,6 +150,7 @@ const InvoicesHeader = () => {
         <DomainsSelect form={form} />
         <AddressesSelect
           form={form}
+          required={false}
           // dropdownStyle={{ minWidth: 'max-content' }}
         />
         <MonthServiceGeneralInfo />

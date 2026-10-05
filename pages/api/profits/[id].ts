@@ -1,4 +1,6 @@
 import ProfitService from '@common/services/profitService/profit.service'
+import Profit from '@modules/models/Profit'
+import RealEstate from '@modules/models/RealEstate'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getCurrentUser } from '@utils/getCurrentUser'
 
@@ -117,12 +119,23 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const { isGlobalAdmin, isUser } = await getCurrentUser(req, res)
-  if (isUser) return res.status(403).json({ success: false })
-
+  const { isUser, user } = await getCurrentUser(req, res)
   const { id } = req.query
 
   try {
+    // A plain User only ever reaches a record at all as a company's own
+    // admin (the only way to see one - see useProfitScopes), so they may
+    // only touch a record filed under a company they administer. Admins
+    // (GlobalAdmin/DomainAdmin) keep unrestricted access, unchanged.
+    if (isUser) {
+      const existing = await Profit.findById(id).select('company').lean()
+      const companyId = (existing as any)?.company?.toString()
+      const owns =
+        companyId &&
+        (await RealEstate.exists({ _id: companyId, adminEmails: user.email }))
+      if (!owns) return res.status(403).json({ success: false })
+    }
+
     switch (req.method) {
       case 'GET': {
         const record = await ProfitService.getById(id as string)

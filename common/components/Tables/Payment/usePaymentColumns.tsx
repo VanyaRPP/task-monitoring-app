@@ -22,6 +22,8 @@ import {
   toFirstUpperCase,
 } from '@utils/helpers'
 import TableFilterLink from '@components/UI/Reusable/TableFilterLink'
+import { TruncatedText } from '@components/UI/TruncatedText'
+import { widenFilterDropdown } from '../tableFilterHelpers'
 import DateFilterDropdown from './DateFilter/DateFilterDropdown'
 import PaymentDropdown from '@components/PaymentDropDown'
 import s from './style.module.scss'
@@ -69,41 +71,12 @@ interface Params {
   deleteLoading: boolean
 }
 
-function widenFilterDropdown(w = 240) {
-  return (open: boolean) => {
-    if (!open) return
-    requestAnimationFrame(() => {
-      document
-        .querySelectorAll<HTMLElement>('.ant-table-filter-dropdown')
-        .forEach((el) => {
-          el.style.width = `${w}px`
-          el.style.maxWidth = '90vw'
-          el.querySelectorAll<HTMLElement>('.ant-checkbox + span').forEach(
-            (span) => {
-              span.style.whiteSpace = 'normal'
-              span.style.wordBreak = 'break-word'
-              span.style.lineHeight = '1.2'
-              span.style.display = 'inline-block'
-              span.style.maxWidth = '100%'
-            }
-          )
-        })
-    })
-  }
-}
-
 const CustomName = 'custom-name:'
 
 const hasOwnColumn = (
   field: Pick<IExtendedPayment['invoice'][number], 'type' | 'serviceId'>
 ): boolean => field.type === ServiceType.Custom || !!field.serviceId
 
-// Such services are identified by their invoice `name` — the same key the
-// payments filter (ColumnSelect) uses — so the table columns and the filter
-// options are always derived from the same source and stay in sync. Only names
-// with a non-zero sum are surfaced (a 0-sum line renders no column). The
-// payments are already domain-narrowed server-side, so this list is implicitly
-// scoped to the selected domain(s).
 export function getInvoiceCustomServiceNames({
   payments,
 }: {
@@ -169,6 +142,42 @@ export function buildAutoCustomColumns({
   })
 }
 
+export function buildDateFilters(dateFilters?: IPaymentFilterResponse) {
+  if (!dateFilters) return []
+
+  const monthItems = (dateFilters.monthFilter ?? [])
+    .filter((f) => f.value != null)
+    .map((f) => ({
+      num: Number(f.value),
+      label: toFirstUpperCase(dateToMonth(new Date(2000, Number(f.value) - 1))),
+    }))
+
+  const MIN_YEAR = 2025
+  const currentYear = new Date().getFullYear()
+  const backendYears: number[] = (dateFilters.yearFilter ?? [])
+    .filter((y) => y?.value != null)
+    .map((y) => Number(y.value))
+
+  const years = Array.from(
+    new Set([
+      ...backendYears,
+      ...Array.from(
+        { length: currentYear - MIN_YEAR + 1 },
+        (_, i) => currentYear - i
+      ),
+    ])
+  ).sort((a, b) => b - a)
+
+  return years.map((y) => ({
+    text: String(y),
+    value: String(y),
+    children: monthItems.map((m) => ({
+      text: m.label,
+      value: `${y}-month-${m.num}`,
+    })),
+  }))
+}
+
 export function usePaymentColumns({
   sepDomainID,
   filters,
@@ -225,9 +234,10 @@ export function usePaymentColumns({
         filters: sepDomainID ? undefined : domainsFilter,
         filteredValue: filters?.domain || null,
         filterSearch: true,
+        onFilterDropdownOpenChange: widenFilterDropdown(240),
         render: (domain: { _id: string; name: string }) =>
           sepDomainID ? (
-            domain.name
+            <TruncatedText text={domain?.name} />
           ) : (
             <TableFilterLink
               label={domain?.name}
@@ -275,6 +285,7 @@ export function usePaymentColumns({
               filterId={companyId}
               filters={filters}
               setFilters={setFilters}
+              maxWidth={sepDomainID ? 100 : 140}
             />
           )
 
@@ -307,44 +318,7 @@ export function usePaymentColumns({
         dataIndex: 'invoiceCreationDate',
         render: (date: string) => dateToDefaultFormat(date),
         width: sepDomainID ? 70 : 170,
-        filters:
-          !sepDomainID && dateFilters
-            ? (() => {
-                const monthItems = (dateFilters.monthFilter ?? [])
-                  .filter((f) => f.value != null)
-                  .map((f) => ({
-                    num: Number(f.value),
-                    label: toFirstUpperCase(
-                      dateToMonth(new Date(2000, Number(f.value) - 1))
-                    ),
-                  }))
-
-                const MIN_YEAR = 2025
-                const currentYear = new Date().getFullYear()
-                const backendYears: number[] = (dateFilters.yearFilter ?? [])
-                  .filter((y) => y?.value != null)
-                  .map((y) => Number(y.value))
-
-                const years = Array.from(
-                  new Set([
-                    ...backendYears,
-                    ...Array.from(
-                      { length: currentYear - MIN_YEAR + 1 },
-                      (_, i) => currentYear - i
-                    ),
-                  ])
-                ).sort((a, b) => b - a)
-
-                return years.map((y) => ({
-                  text: String(y),
-                  value: String(y),
-                  children: monthItems.map((m) => ({
-                    text: m.label,
-                    value: `${y}-month-${m.num}`,
-                  })),
-                }))
-              })()
-            : [],
+        filters: !sepDomainID ? buildDateFilters(dateFilters) : [],
         filteredValue: filters?.invoiceCreationDate || null,
         filterDropdown: (ddProps) => (
           <DateFilterDropdown
@@ -405,6 +379,14 @@ export function usePaymentColumns({
         dataIndex: 'monthService',
         align: 'center',
         width: sepDomainID ? 75 : 164,
+        filters: !sepDomainID ? buildDateFilters(dateFilters) : [],
+        filteredValue: filters?.monthService || null,
+        filterDropdown: (ddProps) => (
+          <DateFilterDropdown
+            data={(ddProps.filters as any) ?? []}
+            {...ddProps}
+          />
+        ),
         render: (
           monthService: Partial<IExtendedPayment> | string | null,
           payment: IExtendedPayment

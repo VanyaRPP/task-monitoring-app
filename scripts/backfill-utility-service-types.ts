@@ -14,7 +14,7 @@
 /* eslint-disable no-console */
 import dbConnect from '../utils/dbConnect'
 import CustomService from '../common/modules/models/CustomService'
-import { UTILITY_SERVICE_ID_TO_TYPE } from '../utils/constants'
+import { BUILT_IN_SERVICE_ID_TO_TYPE } from '../utils/constants'
 import mongoose from 'mongoose'
 
 export interface IBackfillReport {
@@ -26,7 +26,7 @@ export interface IBackfillReport {
 export async function backfillUtilityServiceTypes(
   mapping: Readonly<
     Partial<Record<string, string>>
-  > = UTILITY_SERVICE_ID_TO_TYPE,
+  > = BUILT_IN_SERVICE_ID_TO_TYPE,
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   log: (msg: string) => void = () => {}
 ): Promise<IBackfillReport> {
@@ -59,7 +59,7 @@ export async function backfillUtilityServiceTypes(
 
 async function main(): Promise<void> {
   await dbConnect()
-  await backfillUtilityServiceTypes(UTILITY_SERVICE_ID_TO_TYPE, console.log)
+  await backfillUtilityServiceTypes(BUILT_IN_SERVICE_ID_TO_TYPE, console.log)
 }
 
 if (require.main === module) {

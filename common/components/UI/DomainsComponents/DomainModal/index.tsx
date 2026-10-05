@@ -77,7 +77,7 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
 
   const handleSubmit = async () => {
     await form.validateFields()
-    const formData = form.getFieldsValue()
+    const formData = form.getFieldsValue(true)
 
     if (
       !currentDomain &&

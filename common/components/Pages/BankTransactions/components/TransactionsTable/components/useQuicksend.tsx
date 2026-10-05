@@ -80,8 +80,8 @@ export const useQuickSend = ({
 
   const { data: servicesData, isLoading: isServicesLoading } =
     useGetAllServicesQuery(
-      { domainId: domain._id, streetId },
-      { skip: !domain._id || !streetId }
+      { domainId: domain._id, streetId: streetId || undefined },
+      { skip: !domain._id }
     )
 
   const services = useMemo(() => {

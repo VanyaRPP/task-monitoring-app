@@ -20,6 +20,26 @@ jest.mock('@common/api/userApi/user.api', () => ({
   useGetCurrentUserQuery: jest.fn(),
 }))
 
+jest.mock('antd', () => {
+  const actual = jest.requireActual('antd')
+  return {
+    ...actual,
+    Tooltip: ({
+      title,
+      children,
+    }: {
+      title: React.ReactNode
+      children: React.ReactNode
+    }) =>
+      React.createElement(
+        React.Fragment,
+        null,
+        React.createElement('span', { 'data-testid': 'tooltip-title' }, title),
+        children
+      ),
+  }
+})
+
 import {
   useGetDomainsQuery,
   useDeleteDomainMutation,
@@ -81,6 +101,63 @@ beforeEach(() => {
 
 afterEach(() => {
   jest.clearAllMocks()
+})
+
+describe('long domain names', () => {
+  const setWidths = (scrollWidth: number, clientWidth: number) => {
+    Object.defineProperty(HTMLElement.prototype, 'scrollWidth', {
+      configurable: true,
+      value: scrollWidth,
+    })
+    Object.defineProperty(HTMLElement.prototype, 'clientWidth', {
+      configurable: true,
+      value: clientWidth,
+    })
+  }
+
+  afterEach(() => {
+    delete (HTMLElement.prototype as any).scrollWidth
+    delete (HTMLElement.prototype as any).clientWidth
+  })
+
+  it('renders a short domain name in full with no tooltip', () => {
+    setWidths(50, 50)
+    ;(useGetDomainsQuery as jest.Mock).mockReturnValue({
+      data: mockDomains,
+      isLoading: false,
+      isError: false,
+    })
+
+    renderComponent()
+
+    expect(screen.getByText('Rozetka')).toBeInTheDocument()
+  })
+
+  it('truncates a long domain name and exposes it via a title attribute on hover', () => {
+    setWidths(300, 50)
+    const longName =
+      'Товариство з обмеженою відповідальністю "Інноваційні рішення для бізнесу"'
+    ;(useGetDomainsQuery as jest.Mock).mockReturnValue({
+      data: [
+        {
+          _id: '3',
+          name: longName,
+          adminEmails: [],
+          description: 'Long name domain',
+        },
+      ],
+      isLoading: false,
+      isError: false,
+    })
+
+    renderComponent()
+
+    // antd renders a fixed column's cells twice (real + hidden measure row).
+    expect(screen.getAllByText(longName).length).toBeGreaterThan(0)
+    expect(screen.getAllByTestId('tooltip-title')[0]).toHaveTextContent(
+      longName
+    )
+  })
 })
 
 it('renders domains table with data', () => {

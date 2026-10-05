@@ -3,7 +3,6 @@ import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
 import {
   buildMonthServicePlaceholder,
   isMonthServicePlaceholder,
-  parseMonthServicePlaceholder,
 } from '@common/components/Forms/AddPaymentForm/month-service-placeholder'
 import { Form, FormInstance, Select } from 'antd'
 import dayjs from 'dayjs'
@@ -49,7 +48,10 @@ const MonthServiceSelect: React.FC<MonthServiceSelectProps> = ({
     )
 
   const options = useMemo(() => {
-    const byMonthKey = new Map<string, { value: string; label: string }>()
+    const byMonthKey = new Map<
+      string,
+      { value: string; label: string; sortValue: number }
+    >()
 
     const allServices = currentValueMissing
       ? [...(services ?? []), ...(currentServiceRes ?? [])]
@@ -60,6 +62,7 @@ const MonthServiceSelect: React.FC<MonthServiceSelectProps> = ({
       byMonthKey.set(key, {
         value: svc._id,
         label: dayjs(svc.date).format('MMMM YYYY'),
+        sortValue: dayjs(svc.date).valueOf(),
       })
     }
 
@@ -70,19 +73,14 @@ const MonthServiceSelect: React.FC<MonthServiceSelectProps> = ({
         byMonthKey.set(key, {
           value: buildMonthServicePlaceholder(m),
           label: m.format('MMMM YYYY'),
+          sortValue: m.valueOf(),
         })
       }
     }
 
-    const sortKey = (opt: { value: string }) => {
-      if (isMonthServicePlaceholder(opt.value)) {
-        return parseMonthServicePlaceholder(opt.value).valueOf()
-      }
-      const svc = services?.find((s) => s._id === opt.value)
-      return svc ? dayjs(svc.date).valueOf() : 0
-    }
-
-    return [...byMonthKey.values()].sort((a, b) => sortKey(b) - sortKey(a))
+    return [...byMonthKey.values()]
+      .sort((a, b) => b.sortValue - a.sortValue)
+      .map(({ value, label }) => ({ value, label }))
   }, [services, currentValueMissing, currentServiceRes])
 
   useEffect(() => {

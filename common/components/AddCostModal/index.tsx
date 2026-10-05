@@ -13,10 +13,22 @@ import s from './style.module.scss'
 import dayjs, { Dayjs } from 'dayjs'
 import { Currency } from '@utils/constants'
 
+/**
+ * The domain or company this modal was opened for, when it was opened from
+ * a scoped context (the Прибутки page). Domain and company are symmetric
+ * scopes there - either can carry its own expenses - so this is exactly one
+ * of the two, never a separate "which company" picker.
+ */
+export interface ActiveScope {
+  type: 'domain' | 'company'
+  id: string
+  label: string
+}
+
 interface Props {
   closeModal: VoidFunction
   currentProfit?: Profit
-  activeDomain?: string
+  activeScope?: ActiveScope
   profitActions?: {
     preview?: boolean
     edit?: boolean
@@ -42,7 +54,7 @@ enum CostType {
 const AddCostModal: FC<Props> = ({
   closeModal,
   currentProfit,
-  activeDomain,
+  activeScope,
   profitActions,
 }) => {
   const { t } = useTranslation()
@@ -57,7 +69,11 @@ const AddCostModal: FC<Props> = ({
   const handleSubmit = async () => {
     const formData: FormData = await form.validateFields()
     const costData = {
-      domain: formData.domain,
+      // With an active scope, the target is implied by which ledger the
+      // modal was opened from - not something to re-derive from the form.
+      ...(activeScope
+        ? { [activeScope.type]: activeScope.id }
+        : { domain: formData.domain }),
       date: dayjs(formData.date).toISOString(),
       amount: formData.sum,
       description: formData.description || '',
@@ -105,6 +121,7 @@ const AddCostModal: FC<Props> = ({
           type="debit"
           disabled={isPreview}
           currentProfit={currentProfit}
+          activeScope={activeScope}
         />
       ),
     },
@@ -117,6 +134,7 @@ const AddCostModal: FC<Props> = ({
           type="credit"
           disabled={isPreview}
           currentProfit={currentProfit}
+          activeScope={activeScope}
         />
       ),
     },
@@ -138,12 +156,14 @@ const AddCostModal: FC<Props> = ({
       setType(currentProfit.type as CostType)
     } else {
       form.setFieldsValue({
-        domain: activeDomain,
+        // No `domain` field to fill when scoped - see handleSubmit, which
+        // reads the target from activeScope directly instead of the form.
+        ...(activeScope ? {} : { domain: undefined }),
         date: dayjs(),
         currency: Currency.UAH,
       })
     }
-  }, [currentProfit, form, activeDomain])
+  }, [currentProfit, form, activeScope])
 
   return (
     <Modal
@@ -182,6 +202,7 @@ const AddCostModal: FC<Props> = ({
           type={type}
           disabled={isPreview}
           currentProfit={currentProfit}
+          activeScope={activeScope}
         />
       ) : (
         <Tabs

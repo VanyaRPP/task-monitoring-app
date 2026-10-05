@@ -64,27 +64,37 @@ export interface CompanyMatch {
   domainName: string
 }
 
+/**
+ * Which companies the user may see - same scoping as
+ * pages/api/real-estate/index.ts. Shared by every company lookup the assistant
+ * does, so none of them can widen access by accident.
+ */
+export async function companyOwnershipFilter(
+  ctx: UserContext
+): Promise<FilterQuery<typeof RealEstate>> {
+  if (ctx.isGlobalAdmin) return {}
+
+  if (ctx.isDomainAdmin) {
+    const domainIds = await Domain.distinct('_id', {
+      adminEmails: ctx.user.email,
+    })
+    return {
+      $or: [
+        { domain: { $in: domainIds.map((id) => id.toString()) } },
+        { adminEmails: ctx.user.email },
+      ],
+    }
+  }
+
+  return { adminEmails: ctx.user.email }
+}
+
 export async function findCompaniesByName(
   name: string,
   ctx: UserContext,
   domainId?: string
 ): Promise<CompanyMatch[]> {
-  const options: FilterQuery<typeof RealEstate> = {}
-
-  // Same ownership scoping as pages/api/real-estate/index.ts.
-  if (ctx.isGlobalAdmin) {
-    // no restriction
-  } else if (ctx.isDomainAdmin) {
-    const domainIds = await Domain.distinct('_id', {
-      adminEmails: ctx.user.email,
-    })
-    options.$or = [
-      { domain: { $in: domainIds.map((id) => id.toString()) } },
-      { adminEmails: ctx.user.email },
-    ]
-  } else {
-    options.adminEmails = ctx.user.email
-  }
+  const options = await companyOwnershipFilter(ctx)
 
   const companies = await RealEstate.find({
     $and: [

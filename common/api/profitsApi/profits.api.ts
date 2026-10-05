@@ -38,6 +38,15 @@ export const profitApi = createApi({
       providesTags: ['Profit'],
     }),
 
+    getByCompany: builder.query<
+      GroupedProfitResponse,
+      { companyId: string; page?: number; limit?: number }
+    >({
+      query: ({ companyId, page = 1, limit = 10 }) =>
+        `/company/${companyId}?page=${page}&limit=${limit}`,
+      providesTags: ['Profit'],
+    }),
+
     getBalance: builder.query<number, string>({
       query: (domainId) => `/balance/${domainId}`,
     }),
@@ -86,6 +95,7 @@ export const {
   useGetProfitsQuery,
   useGetProfitByIdQuery,
   useGetByDomainQuery,
+  useGetByCompanyQuery,
   useGetBalanceQuery,
   useCreateProfitMutation,
   useBulkCreateProfitMutation,

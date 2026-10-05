@@ -190,6 +190,53 @@ describe('useQuickSend', () => {
     expect(mockAddPayment.mock.calls[0][0]).not.toHaveProperty('street')
   })
 
+  it('loads the provider month services when the company has no street', () => {
+    const { getStreetId } = require('./quickSendHelpers')
+    const {
+      useGetAllServicesQuery,
+    } = require('@common/api/serviceApi/service.api')
+    ;(getStreetId as jest.Mock).mockReturnValue(undefined)
+    ;(useGetAllServicesQuery as jest.Mock).mockReturnValue({
+      data: { data: [{ _id: 'service_may', date: '2026-05-01' }] },
+    })
+
+    const { result } = renderHook(() =>
+      useQuickSend({
+        transaction,
+        domain,
+        selectedCompanyId: 'company_1',
+        relatedCompanies,
+      })
+    )
+
+    const [args, opts] = (useGetAllServicesQuery as jest.Mock).mock.calls.at(-1)
+    expect(opts.skip).toBe(false)
+    expect(args).toEqual({ domainId: 'domain_1', streetId: undefined })
+    // the existing month is offered as-is, not as a placeholder to re-create
+    expect(result.current.services.map((s) => s._id)).toContain('service_may')
+  })
+
+  it('still narrows month services by the company street when it has one', () => {
+    const { getStreetId } = require('./quickSendHelpers')
+    const {
+      useGetAllServicesQuery,
+    } = require('@common/api/serviceApi/service.api')
+    ;(getStreetId as jest.Mock).mockReturnValue('street_1')
+
+    renderHook(() =>
+      useQuickSend({
+        transaction,
+        domain,
+        selectedCompanyId: 'company_1',
+        relatedCompanies,
+      })
+    )
+
+    const [args, opts] = (useGetAllServicesQuery as jest.Mock).mock.calls.at(-1)
+    expect(opts.skip).toBe(false)
+    expect(args).toEqual({ domainId: 'domain_1', streetId: 'street_1' })
+  })
+
   it('uses transaction DAT_OD as invoiceCreationDate when available', async () => {
     const customTransaction = { ...transaction, DAT_OD: '03.05.2026' } as any
     const { result } = renderHook(() =>

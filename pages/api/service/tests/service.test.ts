@@ -1,5 +1,6 @@
 import { expect } from '@jest/globals'
 import handler from '..'
+import Service from '@modules/models/Service'
 
 import { parseReceived, removeProps, unpopulate } from '@utils/helpers'
 import { mockLoginAs } from '@utils/mockLoginAs'
@@ -529,5 +530,103 @@ describe('Service API - GET', () => {
 })
 
 describe('Service API - POST', () => {
-  // TODO: POST tests
+  const createService = async (body: Record<string, unknown>) => {
+    const mockReq = { method: 'POST', body } as any
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockReq, mockRes)
+
+    return {
+      status: mockRes.status,
+      body: mockRes.json.mock.lastCall[0],
+    }
+  }
+
+  const monthServiceBody = (domain: string) => ({
+    domain,
+    date: new Date(Date.UTC(2026, 4, 1, 12, 0, 0)),
+    rentPrice: 0,
+    electricityPrice: 0,
+    waterPrice: 0,
+    waterPriceTotal: 0,
+    customServices: [],
+  })
+
+  // domains[2] has no addresses at all
+  const domainWithoutStreets = domains[2]._id
+
+  it('should create a month service without an address as GlobalAdmin', async () => {
+    await mockLoginAs(users.globalAdmin)
+
+    const response = await createService(monthServiceBody(domainWithoutStreets))
+
+    expect(response.status).toHaveBeenCalledWith(200)
+    expect(response.body.success).toBe(true)
+    expect(response.body.data.street).toBeUndefined()
+
+    const saved = await Service.findById(response.body.data._id)
+    expect(saved).not.toBeNull()
+    expect(saved.domain.toString()).toBe(domainWithoutStreets)
+    expect(saved.street).toBeUndefined()
+  })
+
+  it.each([[''], [null]])(
+    'should treat street = %p as "no address" instead of failing',
+    async (street) => {
+      await mockLoginAs(users.globalAdmin)
+
+      const response = await createService({
+        ...monthServiceBody(domainWithoutStreets),
+        street,
+      })
+
+      expect(response.status).toHaveBeenCalledWith(200)
+      expect(response.body.success).toBe(true)
+      expect(response.body.data.street).toBeUndefined()
+    }
+  )
+
+  it('should create a month service without an address as DomainAdmin of the domain', async () => {
+    await mockLoginAs(users.domainAdmin)
+
+    const response = await createService(monthServiceBody(domains[0]._id))
+
+    expect(response.status).toHaveBeenCalledWith(200)
+    expect(response.body.success).toBe(true)
+    expect(response.body.data.street).toBeUndefined()
+  })
+
+  it('should still keep the address when one is provided', async () => {
+    await mockLoginAs(users.globalAdmin)
+
+    const response = await createService({
+      ...monthServiceBody(domains[0]._id),
+      street: streets[0]._id,
+    })
+
+    expect(response.status).toHaveBeenCalledWith(200)
+    expect(response.body.data.street.toString()).toBe(streets[0]._id)
+  })
+
+  it('should still require a domain for DomainAdmin', async () => {
+    await mockLoginAs(users.domainAdmin)
+
+    const { domain: _omit, ...body } = monthServiceBody(domains[0]._id)
+    const response = await createService(body)
+
+    expect(response.status).toHaveBeenCalledWith(400)
+    expect(response.body.success).toBe(false)
+  })
+
+  it('should NOT create a service in a foreign domain as DomainAdmin', async () => {
+    await mockLoginAs(users.domainAdmin)
+
+    const response = await createService(monthServiceBody(domains[1]._id))
+
+    expect(response.status).toHaveBeenCalledWith(403)
+    expect(response.body.success).toBe(false)
+  })
 })

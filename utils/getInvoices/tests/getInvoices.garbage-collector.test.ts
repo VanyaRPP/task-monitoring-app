@@ -177,7 +177,7 @@ describe('getInvoices - GARBAGE COLLECTOR', () => {
       )
     })
 
-    it('should NOT load when company = { garbageCollector: true }', () => {
+    it('should load without month service when company = { garbageCollector: true }', () => {
       const company: Partial<IRealestate> = {
         garbageCollector: true,
       }
@@ -186,7 +186,7 @@ describe('getInvoices - GARBAGE COLLECTOR', () => {
         company,
       })
 
-      expect(invoices).not.toContainEqual(
+      expect(invoices).toContainEqual(
         expect.objectContaining({ type: ServiceType.GarbageCollector })
       )
     })

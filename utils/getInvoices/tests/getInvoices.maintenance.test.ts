@@ -98,7 +98,7 @@ describe('getInvoices - MAINTENANCE', () => {
         expect.objectContaining({ type: ServiceType.Maintenance })
       )
     })
-    it('should NOT load when company = { totalArea: 10 }', () => {
+    it('should load without month service when company = { totalArea: 10 }', () => {
       const company: Partial<IRealestate> = {
         totalArea: 10,
       }
@@ -107,11 +107,11 @@ describe('getInvoices - MAINTENANCE', () => {
         company,
       })
 
-      expect(invoices).not.toContainEqual(
+      expect(invoices).toContainEqual(
         expect.objectContaining({ type: ServiceType.Maintenance })
       )
     })
-    it('should NOT load when company = { totalArea: 0 }', () => {
+    it('should load without month service when company = { totalArea: 0 }', () => {
       const company: Partial<IRealestate> = {
         totalArea: 0,
       }
@@ -120,7 +120,7 @@ describe('getInvoices - MAINTENANCE', () => {
         company,
       })
 
-      expect(invoices).not.toContainEqual(
+      expect(invoices).toContainEqual(
         expect.objectContaining({ type: ServiceType.Maintenance })
       )
     })
@@ -137,7 +137,7 @@ describe('getInvoices - MAINTENANCE', () => {
         expect.objectContaining({ type: ServiceType.Maintenance })
       )
     })
-    it('should NOT load when company = { totalArea: null }', () => {
+    it('should load without month service when company = { totalArea: null }', () => {
       const company: Partial<IRealestate> = {
         totalArea: null,
       }
@@ -146,7 +146,7 @@ describe('getInvoices - MAINTENANCE', () => {
         company,
       })
 
-      expect(invoices).not.toContainEqual(
+      expect(invoices).toContainEqual(
         expect.objectContaining({ type: ServiceType.Maintenance })
       )
     })
@@ -177,8 +177,14 @@ describe('getInvoices - MAINTENANCE', () => {
       // accessed `service.rentPrice` on null → crash.
       expect(() => getInvoices({ company, service })).not.toThrow()
       const invoices = getInvoices({ company, service })
-      expect(invoices).not.toContainEqual(
-        expect.objectContaining({ type: ServiceType.Maintenance })
+      // No month service yet → the default row is still seeded, at zero price.
+      expect(invoices).toContainEqual(
+        expect.objectContaining({
+          type: ServiceType.Maintenance,
+          amount: 109.2,
+          price: 0,
+          sum: 0,
+        })
       )
     })
 

@@ -2,11 +2,11 @@ import { useGetCustomServicesByDomainQuery } from '@common/api/customServicesApi
 import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
 import { buildBulkInvoiceMap } from '@common/components/Tables/PaymentsBulk/buildInvoiceMap'
 import {
+  applyCustomColumnGate,
   buildTypedCustomColumn,
   getDefaultColumns,
   hasTypedColumn,
   resolveServiceType,
-  withCompanyGate,
 } from '@common/components/Tables/PaymentsBulk/column.config'
 import { buildTypedInvoiceEntry } from '@common/components/Tables/PaymentsBulk/buildTypedInvoiceEntry'
 import { resolvePrevReading } from '@common/components/Tables/PaymentsBulk/prevReading'
@@ -62,8 +62,9 @@ const InvoicesTable: React.FC = () => {
 
           // A typed custom service (e.g. serviceType === Electricity) renders
           // with the SAME builder as the native communal column of that type.
-          // Untyped services keep the plain Кількість/Ціна pair. Either way the
-          // cells only show on rows whose company actually uses the service.
+          // Untyped services keep the plain Кількість/Ціна pair. Whether the
+          // cells are hidden on rows whose company lacks the service is decided
+          // by applyCustomColumnGate (area-based types render for everyone).
           const gateOpts = { serviceKey: key, fieldName: s.fieldName }
 
           const typedColumn = buildTypedCustomColumn(s, {
@@ -76,7 +77,8 @@ const InvoicesTable: React.FC = () => {
               { serviceId: key, fieldName: s.fieldName }
             ),
           })
-          if (typedColumn) return withCompanyGate(typedColumn, gateOpts)
+          if (typedColumn)
+            return applyCustomColumnGate(typedColumn, s, gateOpts)
 
           const genericColumn = {
             title: s.name,
@@ -106,7 +108,7 @@ const InvoicesTable: React.FC = () => {
               },
             ],
           }
-          return withCompanyGate(genericColumn, gateOpts)
+          return applyCustomColumnGate(genericColumn, s, gateOpts)
         }),
     [allowedServices, service]
   )

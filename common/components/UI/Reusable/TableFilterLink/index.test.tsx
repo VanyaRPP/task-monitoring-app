@@ -82,6 +82,57 @@ describe('TableFilterLink', () => {
     )
   })
 
+  it('applies an explicit pixel max-width when provided', () => {
+    render(<TableFilterLink {...defaultProps} maxWidth={140} />)
+    expect(screen.getByText('Test Label')).toHaveStyle({ maxWidth: '140px' })
+  })
+
+  it('has no inline max-width by default (relies on the ellipsis class)', () => {
+    render(<TableFilterLink {...defaultProps} />)
+    expect(screen.getByText('Test Label')).not.toHaveAttribute('style')
+  })
+
+  describe('truncation', () => {
+    const setWidths = (scrollWidth: number, clientWidth: number) => {
+      Object.defineProperty(HTMLElement.prototype, 'scrollWidth', {
+        configurable: true,
+        value: scrollWidth,
+      })
+      Object.defineProperty(HTMLElement.prototype, 'clientWidth', {
+        configurable: true,
+        value: clientWidth,
+      })
+    }
+
+    afterEach(() => {
+      delete (HTMLElement.prototype as any).scrollWidth
+      delete (HTMLElement.prototype as any).clientWidth
+    })
+
+    it('shows only the action hint when the label fits', () => {
+      setWidths(100, 100)
+      render(<TableFilterLink {...defaultProps} />)
+      const tooltip = screen.getByTestId('tooltip-title')
+      expect(tooltip).toHaveTextContent('Додати в фільтри')
+      expect(tooltip).not.toHaveTextContent('Test Label')
+    })
+
+    it('includes the full label alongside the hint when truncated', () => {
+      setWidths(300, 100)
+      render(
+        <TableFilterLink
+          {...defaultProps}
+          label="Товариство з обмеженою відповідальністю Інноваційні рішення"
+        />
+      )
+      const tooltip = screen.getByTestId('tooltip-title')
+      expect(tooltip).toHaveTextContent(
+        'Товариство з обмеженою відповідальністю Інноваційні рішення'
+      )
+      expect(tooltip).toHaveTextContent('Додати в фільтри')
+    })
+  })
+
   it('works for company filter key', () => {
     const companySetFilters = jest.fn()
     render(
