@@ -15,12 +15,7 @@ export interface IDomainModel {
 }
 
 export type DomainTypeTemplateCategory =
-  | 'utility'
-  | 'it'
-  | 'edu'
-  | 'auto'
-  | 'real-estate'
-  | 'other'
+  'utility' | 'it' | 'edu' | 'auto' | 'real-estate' | 'other'
 
 export interface IDomainTypeTemplateGroup {
   groupName: string

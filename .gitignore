@@ -2,6 +2,9 @@
 .idea
 
 # dependencies
+# This project uses yarn (see packageManager); an npm lockfile here would
+# drift from yarn.lock and break `yarn install --frozen-lockfile` in CI.
+package-lock.json
 /node_modules
 /.pnp
 .pnp.js

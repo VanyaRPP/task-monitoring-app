@@ -44,9 +44,7 @@ const DomainsServices: FC<Props> = ({
   const [isModalOpen, setIsModalOpen] = useState(false)
   const { data: templates = [] } = useGetDomainTypeTemplatesQuery(undefined)
   const watchedTemplateId = Form.useWatch('domainTypeTemplateId', form) as
-    | string
-    | null
-    | undefined
+    string | null | undefined
   const currentCategory = templates.find(
     (t) => String(t._id) === String(watchedTemplateId)
   )?.category
