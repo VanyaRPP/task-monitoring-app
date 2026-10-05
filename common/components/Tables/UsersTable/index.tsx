@@ -54,7 +54,10 @@ const ROLE_FILTER_OPTIONS: SelectProps['options'] = [
 const getUserRoleValue = (u: any): string =>
   u?.role ?? u?.roles?.[0] ?? Roles.USER
 
-const EditUserButton: React.FC<{ userId?: IUser['_id'] }> = ({ userId }) => {
+const EditUserButton: React.FC<{
+  userId?: IUser['_id']
+  disabled?: boolean
+}> = ({ userId, disabled }) => {
   const [open, setOpen] = useState(false)
 
   return (
@@ -63,6 +66,7 @@ const EditUserButton: React.FC<{ userId?: IUser['_id'] }> = ({ userId }) => {
         type="link"
         icon={<EditOutlined />}
         onClick={() => setOpen(true)}
+        disabled={disabled}
       />
       <EditUserModal
         open={open}
@@ -311,14 +315,24 @@ export const UsersTable: React.FC<Props> = ({
           const isSelf = currentUser?._id?.toString() === userId
           const isTargetGlobalAdmin =
             getUserRoleValue(user) === Roles.GLOBAL_ADMIN
+          const isTargetAdmin =
+            isDomainAdmin &&
+            !isSelf &&
+            (getUserRoleValue(user) === Roles.DOMAIN_ADMIN ||
+              getUserRoleValue(user) === Roles.GLOBAL_ADMIN)
           const notInDomain =
             isDomainAdmin && !domainAdminEmails?.includes(user.email)
           return (
             <div style={{ display: 'flex', gap: 4 }}>
-              <EditUserButton userId={userId} />
+              <EditUserButton
+                userId={userId}
+                disabled={isTargetAdmin || notInDomain}
+              />
               <DeleteUserButton
                 userId={userId}
-                disabled={isSelf || isTargetGlobalAdmin || notInDomain}
+                disabled={
+                  isSelf || isTargetAdmin || isTargetGlobalAdmin || notInDomain
+                }
               />
             </div>
           )
