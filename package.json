@@ -82,7 +82,7 @@
     "next-auth": "^4.24.15",
     "next-i18next": "^15.4.2",
     "nextjs-progressbar": "^0.0.16",
-    "nodemailer": "^9.1.1",
+    "nodemailer": "^10.0.15",
     "puppeteer-core": "^22.15.0",
     "react": "^18.3.1",
     "react-cool-onclickoutside": "^1.7.0",
@@ -133,11 +133,12 @@
     "whatwg-fetch": "^3.6.20"
   },
   "resolutions": {
+    "basic-ftp": "^6.2.2",
     "cookie": "^0.7.2",
     "postcss": "^8.5.25",
     "serialize-javascript": "^7.0.7",
     "sharp": "^0.35.5",
-    "undici": "^6.28.0",
+    "undici": "^6.28.1",
     "uuid": "^11.1.1",
     "**/@next/eslint-plugin-next/glob": "^10.5.0",
     "open-cli/file-type": "^22.0.1"
