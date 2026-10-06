@@ -1,3 +1,5 @@
+import { INVOICE_FONT_FAMILIES } from '@utils/pdf/invoicePageStyle'
+
 export const PRINT_FRAME_ID = 'invoice-print-frame'
 
 export function printInvoiceHtml(html: string, documentTitle?: string): void {
@@ -25,21 +27,49 @@ export function printInvoiceHtml(html: string, documentTitle?: string): void {
     if (!frameWindow || !frameDocument?.body?.firstChild) return
     frame.onload = null
 
-    const previousTitle = document.title
-    if (documentTitle) document.title = documentTitle
+    // The load event doesn't wait for web fonts, and fonts.ready alone can
+    // resolve before layout has even requested them. Ask for every invoice
+    // family against the page text explicitly, then wait for the set.
+    const fonts = frameDocument.fonts
+    const text = frameDocument.body.textContent ?? ''
+    const fontsReady = fonts
+      ? Promise.all(
+          INVOICE_FONT_FAMILIES.map((family) =>
+            fonts.load(`16px "${family}"`, text)
+          )
+        ).then(() => fonts.ready)
+      : Promise.resolve()
 
-    frameWindow.addEventListener('afterprint', () => frame.remove(), {
-      once: true,
-    })
-
-    try {
-      frameWindow.focus()
-      frameWindow.print()
-    } catch {
-      frame.remove()
-    } finally {
-      document.title = previousTitle
+    const reportUnloadedFonts = () => {
+      const failed = Array.from(fonts ?? [])
+        .filter((face) => face.status === 'error')
+        .map((face) => face.family)
+      if (failed.length) {
+        // Without these faces the invoice prints in the browser's default font.
+        console.warn('Invoice print fonts failed to load:', failed)
+      }
     }
+
+    fontsReady
+      .catch(() => undefined)
+      .then(() => {
+        reportUnloadedFonts()
+        const previousTitle = document.title
+        if (documentTitle) document.title = documentTitle
+
+        frameWindow.addEventListener('afterprint', () => frame.remove(), {
+          once: true,
+        })
+
+        try {
+          frameWindow.focus()
+          frameWindow.print()
+        } catch {
+          frame.remove()
+        } finally {
+          document.title = previousTitle
+        }
+      })
   }
 
   frame.srcdoc = html

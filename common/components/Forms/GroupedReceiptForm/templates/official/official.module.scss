@@ -410,11 +410,6 @@ $lightRoot: ":global(:root[data-theme='light'])";
 }
 
 @media print {
-  @page {
-    size: A4;
-    margin: 0;
-  }
-
   .clInvoice {
     max-width: none !important;
     width: 100% !important;

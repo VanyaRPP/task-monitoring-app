@@ -1,3 +1,10 @@
+import {
+  INVOICE_FONT_BASE_CSS,
+  INVOICE_FONT_CSS,
+  INVOICE_PAGE_CSS,
+  pinInvoiceFonts,
+} from '@utils/pdf/invoicePageStyle'
+
 export function collectAppCss(): string {
   const parts: string[] = []
   for (const sheet of Array.from(document.styleSheets)) {
@@ -15,12 +22,9 @@ export function collectAppCss(): string {
 export const PDF_RESET_CSS = `
   html, body { margin: 0; padding: 0; height: auto; background: #fff; }
   *, *::before, *::after { box-sizing: border-box; }
-  /* puppeteer's page.pdf() always sends Chrome explicit zero margins, so a CSS
-     @page margin is dead in the download. Browser printing does honour it, and
-     a different page box is a different layout width — the templates' own
-     breakpoints then resolve differently and print drifts away from the
-     download. Keep the page box identical to the one puppeteer prints on. */
-  @page { size: A4; margin: 0; }
+  /* Same page box as the puppeteer download (INVOICE_PAGE_MARGIN), so print
+     and download wrap identically and nothing touches the paper edge. */
+  ${INVOICE_PAGE_CSS}
   /* The captured template root may have height:100% / min-height — those
      would prevent puppeteer from paginating overflow. Reset on the
      immediate body children only, not deeper. */
@@ -32,27 +36,54 @@ export const PDF_RESET_CSS = `
   tfoot { display: table-footer-group; }
 `
 
+// The collected app css carries whatever @page rules the loaded stylesheets
+// had (templates used to ship their own, some with margin: 0 !important, which
+// Chrome lets beat ours). INVOICE_PAGE_CSS must be the only page box.
+// The app's own @font-face rules go too: pinInvoiceFonts would otherwise
+// rename their family and graft Work Sans/Outfit onto 'Invoice Sans'.
+export function stripPageRules(css: string): string {
+  return css.replace(/@(page|font-face)\b[^{]*\{[^{}]*\}/g, '')
+}
+
+function pinInlineStyleFonts(html: string): string {
+  return html.replace(
+    /style="([^"]*)"/g,
+    (_, style: string) => `style="${pinInvoiceFonts(style)}"`
+  )
+}
+
 function escapeHtml(value: string): string {
   return value
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+}
+
+interface StandaloneHtmlOptions {
+  title?: string
+  // Absolute origin for root-relative urls (fonts, images): puppeteer renders
+  // the html on about:blank, where '/fonts/...' resolves to nothing.
+  baseUrl?: string
 }
 
 export function buildStandaloneHtml(
   innerHtml: string,
   css: string,
-  title?: string
+  { title, baseUrl }: StandaloneHtmlOptions = {}
 ): string {
   return `<!DOCTYPE html>
   <html>
     <head>
       <meta charset="UTF-8" />
+      ${baseUrl ? `<base href="${escapeHtml(baseUrl)}" />` : ''}
       ${title ? `<title>${escapeHtml(title)}</title>` : ''}
-      <style>${css}</style>
+      <style>${INVOICE_FONT_CSS}</style>
+      <style>${INVOICE_FONT_BASE_CSS}</style>
+      <style>${pinInvoiceFonts(stripPageRules(css))}</style>
       <style>${PDF_RESET_CSS}</style>
     </head>
-    <body>${innerHtml}</body>
+    <body>${pinInlineStyleFonts(innerHtml)}</body>
   </html>`
 }
 
@@ -63,5 +94,8 @@ export function captureInvoiceHtml(
   if (!node) {
     throw new Error('captureInvoiceHtml: nothing rendered to capture')
   }
-  return buildStandaloneHtml(node.outerHTML, collectAppCss(), title)
+  return buildStandaloneHtml(node.outerHTML, collectAppCss(), {
+    title,
+    baseUrl: `${window.location.origin}/`,
+  })
 }

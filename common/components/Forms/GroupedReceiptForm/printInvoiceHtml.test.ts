@@ -24,10 +24,12 @@ const stubContentWindow = (
   return print
 }
 
-const flushLoad = (options = {}) => {
+const flushLoad = async (options = {}) => {
   const frame = getFrame()
   const print = stubContentWindow(frame, options)
   frame.onload?.(new Event('load'))
+  // Printing waits for document.fonts.ready.
+  await new Promise((resolve) => setTimeout(resolve, 0))
   return { frame, print }
 }
 
@@ -37,12 +39,12 @@ describe('printInvoiceHtml', () => {
     document.title = 'E-ORENDA'
   })
 
-  it('prints the exact html it was given', () => {
+  it('prints the exact html it was given', async () => {
     printInvoiceHtml(HTML)
 
     expect(getFrame().srcdoc).toBe(HTML)
 
-    const { print } = flushLoad()
+    const { print } = await flushLoad()
     expect(print).toHaveBeenCalledTimes(1)
   })
 
@@ -58,31 +60,31 @@ describe('printInvoiceHtml', () => {
     expect(frame.style.top.startsWith('-')).toBe(true)
   })
 
-  it('ignores the load of the initial empty document', () => {
+  it('ignores the load of the initial empty document', async () => {
     printInvoiceHtml(HTML)
 
-    const { print } = flushLoad({ empty: true })
+    const { print } = await flushLoad({ empty: true })
     expect(print).not.toHaveBeenCalled()
 
     // The real srcdoc load still prints.
-    const second = flushLoad()
+    const second = await flushLoad()
     expect(second.print).toHaveBeenCalledTimes(1)
   })
 
-  it('names the print job after the document title and restores it', () => {
+  it('names the print job after the document title and restores it', async () => {
     printInvoiceHtml(HTML, 'Acme-inv-01012501')
 
     const seen: string[] = []
-    flushLoad({ print: jest.fn(() => seen.push(document.title)) })
+    await flushLoad({ print: jest.fn(() => seen.push(document.title)) })
 
     expect(seen).toEqual(['Acme-inv-01012501'])
     expect(document.title).toBe('E-ORENDA')
   })
 
-  it('restores the title even when printing throws', () => {
+  it('restores the title even when printing throws', async () => {
     printInvoiceHtml(HTML, 'Acme-inv-01012501')
 
-    flushLoad({
+    await flushLoad({
       print: jest.fn(() => {
         throw new Error('print blocked')
       }),

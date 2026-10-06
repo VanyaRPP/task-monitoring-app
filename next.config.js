@@ -20,6 +20,13 @@ const nextConfig = {
   // need to keep these out of the webpack bundle — no asset tracing required.
   // Promoted out of `experimental` in Next 15.
   serverExternalPackages: ['@sparticuz/chromium-min', 'puppeteer-core'],
+  // utils/pdf/bufferGenerators.ts serves the invoice fonts to puppeteer from
+  // public/ on disk; serverless functions don't ship public/ unless traced.
+  outputFileTracingIncludes: {
+    '/api/spacehub/payment/htmlToPdf': ['./public/fonts/invoice/*.woff2'],
+    '/api/spacehub/payment/htmlToPdfZip': ['./public/fonts/invoice/*.woff2'],
+    '/api/spacehub/payment/[id]/send-email': ['./public/fonts/invoice/*.woff2'],
+  },
   transpilePackages: [
     'antd',
     '@ant-design/icons',
@@ -71,6 +78,18 @@ const nextConfig = {
         pathname: '/a/**',
       },
     ],
+  },
+  // Invoice PDFs are rendered by puppeteer from html on about:blank (origin
+  // "null"), and @font-face fetches are CORS requests — without this header
+  // the download silently falls back to Chromium's system fonts.
+  async headers() {
+    return [
+      {
+        source: '/fonts/invoice/:file*',
+        locale: false,
+        headers: [{ key: 'Access-Control-Allow-Origin', value: '*' }],
+      },
+    ]
   },
 }
 

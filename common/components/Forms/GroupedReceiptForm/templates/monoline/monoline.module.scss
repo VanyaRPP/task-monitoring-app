@@ -520,11 +520,6 @@ $surface-hover-l: rgba(0, 0, 0, 0.03);
 }
 
 @media print {
-  @page {
-    size: A4;
-    margin: 14mm 16mm;
-  }
-
   .mlInvoice {
     max-width: none !important;
     width: 100% !important;

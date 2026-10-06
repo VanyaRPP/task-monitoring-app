@@ -652,11 +652,6 @@ $shadow-l:
 }
 
 @media print {
-  @page {
-    size: A4;
-    margin: 12mm 14mm;
-  }
-
   .azInvoice {
     max-width: none !important;
     width: 100% !important;

@@ -12,6 +12,7 @@ import { useInvoiceTemplateDescriptions } from './useInvoiceTemplateDescriptions
 import { applyDescriptionOverrides } from './applyDescriptionOverrides'
 import { captureInvoiceHtml } from './captureInvoiceHtml'
 import { printInvoiceHtml } from './printInvoiceHtml'
+import { inlineInvoiceFonts } from './inlineInvoiceFonts'
 import { builtinTemplateItems } from './builtinTemplates'
 import {
   PrinterOutlined,
@@ -120,15 +121,23 @@ const GroupedReceiptForm: FC<Props> = ({
     ? `${printCompanyName}-inv-${modernInvoiceNumber}`
     : 'invoice'
 
-  const handlePrint = () => {
+  const handlePrint = async () => {
+    let html: string
     try {
-      printInvoiceHtml(
-        captureInvoiceHtml(componentRef.current, documentTitle),
-        documentTitle
-      )
+      html = captureInvoiceHtml(componentRef.current, documentTitle)
     } catch {
       message.error('Не вдалося підготувати рахунок до друку')
+      return
     }
+
+    try {
+      html = await inlineInvoiceFonts(html)
+    } catch (error) {
+      // Still print: the frame retries the font urls itself.
+      console.warn('Invoice fonts could not be inlined for print:', error)
+    }
+
+    printInvoiceHtml(html, documentTitle)
   }
 
   if (!rawData) return null

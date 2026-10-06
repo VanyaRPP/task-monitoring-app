@@ -606,11 +606,6 @@ $surface-stripe-l: rgba(0, 0, 0, 0.02);
 }
 
 @media print {
-  @page {
-    size: A4;
-    margin: 0 !important;
-  }
-
   .lgInvoice {
     max-width: none !important;
     width: 100% !important;
