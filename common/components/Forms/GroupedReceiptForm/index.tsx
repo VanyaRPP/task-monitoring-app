@@ -7,11 +7,12 @@ import { usePaymentContext } from '@components/AddPaymentModal'
 import { useInvoiceCurrency } from '@modules/hooks/useInvoiceCurrency'
 import { TemplateKey } from '@components/AddPaymentModal/resolveTemplate'
 import { FC, useRef } from 'react'
-import { useReactToPrint } from 'react-to-print'
 import { useReceiptTemplateProps } from './useReceiptTemplateProps'
 import { useInvoiceTemplateDescriptions } from './useInvoiceTemplateDescriptions'
 import { applyDescriptionOverrides } from './applyDescriptionOverrides'
 import { captureInvoiceHtml } from './captureInvoiceHtml'
+import { printInvoiceHtml } from './printInvoiceHtml'
+import { inlineInvoiceFonts } from './inlineInvoiceFonts'
 import { builtinTemplateItems } from './builtinTemplates'
 import {
   PrinterOutlined,
@@ -116,11 +117,28 @@ const GroupedReceiptForm: FC<Props> = ({
     data?.reciever?.companyName ??
     ''
 
-  const handlePrint = useReactToPrint({
-    content: () => componentRef.current,
-    documentTitle:
-      `${printCompanyName}-inv-${modernInvoiceNumber}` || 'invoice',
-  })
+  const documentTitle = printCompanyName
+    ? `${printCompanyName}-inv-${modernInvoiceNumber}`
+    : 'invoice'
+
+  const handlePrint = async () => {
+    let html: string
+    try {
+      html = captureInvoiceHtml(componentRef.current, documentTitle)
+    } catch {
+      message.error('Не вдалося підготувати рахунок до друку')
+      return
+    }
+
+    try {
+      html = await inlineInvoiceFonts(html)
+    } catch (error) {
+      // Still print: the frame retries the font urls itself.
+      console.warn('Invoice fonts could not be inlined for print:', error)
+    }
+
+    printInvoiceHtml(html, documentTitle)
+  }
 
   if (!rawData) return null
 
