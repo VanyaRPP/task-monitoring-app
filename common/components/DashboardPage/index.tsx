@@ -13,14 +13,8 @@ import ServicesBlock from '@components/DashboardPage/blocks/services'
 import StreetsBlock from '@components/DashboardPage/blocks/streets'
 import CompaniesAreaChart from '@components/DashboardPage/blocks/сompaniesAreaChart'
 import { Roles } from '@utils/constants'
-import { Col, Row, Space, Button, Flex, message, Tooltip, Dropdown } from 'antd'
-import {
-  CloseOutlined,
-  SaveOutlined,
-  UndoOutlined,
-  EyeOutlined,
-  QuestionCircleOutlined,
-} from '@ant-design/icons'
+import { Col, Row, Space, Button, Flex, message } from 'antd'
+import { QuestionCircleOutlined } from '@ant-design/icons'
 import PaymentsChart from '@components/DashboardPage/blocks/paymentChart'
 import ProfitPage from '@components/Pages/ProfiitPage'
 import { addButton, removeButton } from '@modules/store/floatButtonSlice'
@@ -30,8 +24,7 @@ import {
 } from '@modules/hooks/useFloatButton'
 import { useDispatch } from 'react-redux'
 import s from './style.module.scss'
-import useTheme from '@modules/hooks/useTheme'
-import WidgetVisibilityMenu from '@components/UI/WidgetVisibilityMenu'
+import LayoutEditToolbar from '@components/UI/LayoutEditToolbar'
 import { WidgetWrapper } from '@components/UI/WidgetWrapper'
 import DashboardTour from '@components/DashboardPage/DashboardTour'
 import {
@@ -190,9 +183,6 @@ const Dashboard: React.FC = () => {
   const [isPanelVisible, togglePanelVisible, panelFloatButton] =
     useDragDropPanelFloatButton('dashboard')
 
-  const [theme] = useTheme()
-  const isDark = theme === 'dark'
-
   useEffect(() => {
     if (isPanelVisible && !isEditMode) {
       toggleEditMode()
@@ -261,17 +251,6 @@ const Dashboard: React.FC = () => {
     [orderedWidgets, hiddenWidget]
   )
 
-  const menu = (
-    <div style={{ padding: 8 }}>
-      <WidgetVisibilityMenu
-        hidden={hiddenWidget}
-        onChange={setHiddenWidget}
-        available={orderedWidgets}
-        labels={widgetLabels}
-      />
-    </div>
-  )
-
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 5 },
@@ -335,7 +314,16 @@ const Dashboard: React.FC = () => {
   return (
     <div className={s.wrapper}>
       {isPanelVisible && (
-        <div className={`${s.toolbar} ${isDark ? s.dark : s.light}`}>
+        <LayoutEditToolbar
+          hideTitle="Приховати віджети"
+          hidden={hiddenWidget}
+          onHiddenChange={setHiddenWidget}
+          available={orderedWidgets}
+          labels={widgetLabels}
+          onReset={() => handleLayoutAction('revert')}
+          onSave={() => handleLayoutAction('save')}
+          onClose={togglePanelVisible}
+        >
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}
@@ -345,55 +333,26 @@ const Dashboard: React.FC = () => {
               items={renderedWidgets.map((k) => `toolbar-${k}`)}
               strategy={horizontalListSortingStrategy}
             >
-              <div className={s.buttonsBlock}>
-                {renderedWidgets.map((key) => (
-                  <SortableToolbarButton
-                    key={`toolbar-${key}`}
-                    id={`toolbar-${key}`}
-                    onClick={() => {
-                      const element = document.getElementById(key)
-                      if (element) {
-                        element.scrollIntoView({
-                          behavior: 'smooth',
-                          block: 'center',
-                        })
-                      }
-                    }}
-                  >
-                    {widgetLabels[key]}
-                  </SortableToolbarButton>
-                ))}
-              </div>
+              {renderedWidgets.map((key) => (
+                <SortableToolbarButton
+                  key={`toolbar-${key}`}
+                  id={`toolbar-${key}`}
+                  onClick={() => {
+                    const element = document.getElementById(key)
+                    if (element) {
+                      element.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center',
+                      })
+                    }
+                  }}
+                >
+                  {widgetLabels[key]}
+                </SortableToolbarButton>
+              ))}
             </SortableContext>
           </DndContext>
-          <div className={s.actions}>
-            <div
-              className={s.divider}
-              style={{ backgroundColor: isDark ? '#555' : '#ccc' }}
-            />
-            <Dropdown overlay={menu} trigger={['click']}>
-              <Tooltip title="Приховати віджети">
-                <Button icon={<EyeOutlined />} />
-              </Tooltip>
-            </Dropdown>
-
-            <Tooltip title="Відновати">
-              <Button
-                icon={<UndoOutlined />}
-                onClick={() => handleLayoutAction('revert')}
-              />
-            </Tooltip>
-            <Tooltip title="Зберегти">
-              <Button
-                icon={<SaveOutlined />}
-                onClick={() => handleLayoutAction('save')}
-              />
-            </Tooltip>
-            <Tooltip title="Вийти з режиму редагування">
-              <Button icon={<CloseOutlined />} onClick={togglePanelVisible} />
-            </Tooltip>
-          </div>
-        </div>
+        </LayoutEditToolbar>
       )}
       {isLayoutReady && (
         <DndContext

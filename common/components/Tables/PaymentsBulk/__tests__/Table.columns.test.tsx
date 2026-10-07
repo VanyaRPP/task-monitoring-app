@@ -77,7 +77,7 @@ jest.mock('@dnd-kit/core', () => {
 })
 
 // eslint-disable-next-line import/first
-import InvoicesTable from './Table'
+import InvoicesTable from '../Table'
 
 const service = {
   _id: 'month-1',
@@ -208,7 +208,7 @@ describe('приховування / відновлення колонок', () 
     await waitFor(() => expect(headerTitles()).not.toContain('Розміщення'))
     expect(total()).toBe(before)
 
-    fireEvent.click(screen.getByLabelText('Відновити колонки'))
+    fireEvent.click(screen.getByLabelText('Відновити'))
     await waitFor(() => expect(headerTitles()).toContain('Розміщення'))
     expect(total()).toBe(before)
   })

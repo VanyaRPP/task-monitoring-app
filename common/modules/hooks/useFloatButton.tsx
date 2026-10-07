@@ -9,7 +9,7 @@ import {
 } from '@ant-design/icons'
 import useTheme from '@modules/hooks/useTheme'
 import { FloatButtonItem } from '@utils/types'
-import React, { useMemo, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 
 export const useThemeFloatButton = (): FloatButtonItem => {
   const [theme, setTheme] = useTheme()
@@ -71,7 +71,7 @@ export const useDragDropPanelFloatButton = (
 ): [boolean, () => void, FloatButtonItem] => {
   const [visible, setVisible] = useState(false)
 
-  const toggleVisible = () => setVisible((prev) => !prev)
+  const toggleVisible = useCallback(() => setVisible((prev) => !prev), [])
 
   const button = useMemo<FloatButtonItem>(
     () => ({
@@ -80,7 +80,7 @@ export const useDragDropPanelFloatButton = (
       onClick: toggleVisible,
       tooltip: visible ? 'Вийти з режиму редагування' : 'Режим редагування',
     }),
-    [visible, uniqueKey]
+    [visible, uniqueKey, toggleVisible]
   )
 
   return [visible, toggleVisible, button]

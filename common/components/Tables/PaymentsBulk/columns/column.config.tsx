@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react'
 import { CloseCircleOutlined } from '@ant-design/icons'
-import TotalArea from './cells/TotalArea'
-import CompanyName from './cells/CompanyName'
-import TotalSum from './cells/TotalSum'
-import { CustomServiceGate } from './cells/CustomServiceGate'
+import TotalArea from '../cells/TotalArea'
+import CompanyName from '../cells/CompanyName'
+import TotalSum from '../cells/TotalSum'
+import { CustomServiceGate } from '../cells/CustomServiceGate'
 import { Popconfirm, TableColumnsType } from 'antd'
 import { ServiceType, UTILITY_SERVICE_ID_TO_TYPE } from '@utils/constants'
 import { isAreaBasedServiceType } from '@utils/domain/service-type-categories'
@@ -14,23 +14,23 @@ import {
   ElectricitySumTitle,
   LossElectricityPrice,
   LossElectricitySum,
-} from './cells/Electricity'
-import { MaintenanceSum, MaintenancePrice } from './cells/Maintenance'
-import { PlacingSum, PlacingPrice } from './cells/Placing'
-import { Cleaning } from './cells/Cleaning'
-import { Discount } from './cells/Discount'
+} from '../cells/Electricity'
+import { MaintenanceSum, MaintenancePrice } from '../cells/Maintenance'
+import { PlacingSum, PlacingPrice } from '../cells/Placing'
+import { Cleaning } from '../cells/Cleaning'
+import { Discount } from '../cells/Discount'
 import {
   GarbageCollectorSumTitle,
   GarbageCollectorAmount,
   GarbageCollectorSum,
-} from './cells/GarbageCollector'
-import { InflicionTitle, InflicionSum } from './cells/Inflicion'
-import { WaterSumTitle, WaterAmount, WaterSum } from './cells/Water'
+} from '../cells/GarbageCollector'
+import { InflicionTitle, InflicionSum } from '../cells/Inflicion'
+import { WaterSumTitle, WaterAmount, WaterSum } from '../cells/Water'
 import {
   WaterPartSumTitle,
   WaterPartAmount,
   WaterPartSum,
-} from './cells/WaterPart'
+} from '../cells/WaterPart'
 
 type AllowedService = {
   _id?: unknown
@@ -272,13 +272,11 @@ export const buildTypedCustomColumn = (
   })
 }
 
-const withKey = (
-  key: string,
-  column: TableColumnsType[number]
-): TableColumnsType[number] => ({ ...column, key })
-
-/** Підписи рухомих колонок — для меню видимості. */
-export const NATIVE_COLUMN_LABELS: Record<string, string> = {
+/**
+ * Рухомі (drag & drop / приховування) вбудовані колонки: ключ -> підпис.
+ * Єдине джерело і для `key` колонки, і для її заголовка, і для меню видимості.
+ */
+export const NATIVE_COLUMN_LABELS = {
   area: 'Площа, м²',
   maintenance: 'Утримання',
   placing: 'Розміщення',
@@ -289,7 +287,19 @@ export const NATIVE_COLUMN_LABELS: Record<string, string> = {
   garbage: 'Вивіз ТПВ',
   cleaning: 'Прибирання',
   discount: 'Знижка',
-}
+} as const satisfies Record<string, string>
+
+type NativeColumnKey = keyof typeof NATIVE_COLUMN_LABELS
+
+/** Ставить колонці `key`; заголовок за замовчуванням — підпис із мапи. */
+const nativeColumn = (
+  key: NativeColumnKey,
+  column: TableColumnsType[number]
+): TableColumnsType[number] => ({
+  title: NATIVE_COLUMN_LABELS[key],
+  ...column,
+  key,
+})
 
 export const getDefaultColumns = (
   remove: (index: number) => void,
@@ -326,109 +336,109 @@ export const getDefaultColumns = (
       width: 250,
       render: (_, { name }: { name: number }) => <CompanyName name={name} />,
     },
-    hasAreaBasedService && {
-      key: 'area',
-      title: 'Площа, м²',
-      width: 160,
-      render: (_, { name }: { name: number }) => <TotalArea name={name} />,
-    },
-    has(ServiceType.Maintenance) && {
-      key: 'maintenance',
-      title: 'Утримання',
-      children: [
-        {
-          title: 'За м²',
-          width: 160,
-          render: (_, { name }: { name: number }) => (
-            <MaintenancePrice name={name} />
-          ),
-        },
-        {
-          title: 'Загальне',
-          width: 200,
-          render: (_, { name }: { name: number }) => (
-            <MaintenanceSum name={name} />
-          ),
-        },
-      ],
-    },
+    hasAreaBasedService &&
+      nativeColumn('area', {
+        width: 160,
+        render: (_, { name }: { name: number }) => <TotalArea name={name} />,
+      }),
+    has(ServiceType.Maintenance) &&
+      nativeColumn('maintenance', {
+        children: [
+          {
+            title: 'За м²',
+            width: 160,
+            render: (_, { name }: { name: number }) => (
+              <MaintenancePrice name={name} />
+            ),
+          },
+          {
+            title: 'Загальне',
+            width: 200,
+            render: (_, { name }: { name: number }) => (
+              <MaintenanceSum name={name} />
+            ),
+          },
+        ],
+      }),
     has(ServiceType.Placing) &&
-      withKey(
+      nativeColumn(
         'placing',
-        placingColumn({ title: 'Розміщення', fieldName: ServiceType.Placing })
+        placingColumn({
+          title: NATIVE_COLUMN_LABELS.placing,
+          fieldName: ServiceType.Placing,
+        })
       ),
-    has(ServiceType.Inflicion) && {
-      key: 'inflicion',
-      title: <InflicionTitle />,
-      width: 200,
-      render: (_, { name }: { name: number }) => <InflicionSum name={name} />,
-    },
+    has(ServiceType.Inflicion) &&
+      nativeColumn('inflicion', {
+        title: <InflicionTitle />,
+        width: 200,
+        render: (_, { name }: { name: number }) => <InflicionSum name={name} />,
+      }),
     has(ServiceType.Electricity) &&
-      withKey(
+      nativeColumn(
         'electricity',
         electricityColumn({
-          title: 'Електропостачання',
+          title: NATIVE_COLUMN_LABELS.electricity,
           fieldName: ServiceType.Electricity,
           losses,
         })
       ),
     has(ServiceType.Water) &&
-      withKey(
+      nativeColumn(
         'water',
-        waterColumn({ title: 'Водопостачання', fieldName: ServiceType.Water })
+        waterColumn({
+          title: NATIVE_COLUMN_LABELS.water,
+          fieldName: ServiceType.Water,
+        })
       ),
-    has(ServiceType.WaterPart) && {
-      key: 'waterPart',
-      title: 'Водопостачання без лічильника',
-      children: [
-        {
-          title: 'Частка, %',
-          width: 160,
-          render: (_, { name }: { name: number }) => (
-            <WaterPartAmount name={name} />
-          ),
-        },
-        {
-          title: <WaterPartSumTitle />,
-          width: 200,
-          render: (_, { name }: { name: number }) => (
-            <WaterPartSum name={name} />
-          ),
-        },
-      ],
-    },
-    has(ServiceType.GarbageCollector) && {
-      key: 'garbage',
-      title: 'Вивіз ТПВ',
-      children: [
-        {
-          title: 'Частка, %',
-          width: 160,
-          render: (_, { name }: { name: number }) => (
-            <GarbageCollectorAmount name={name} />
-          ),
-        },
-        {
-          title: <GarbageCollectorSumTitle />,
-          width: 200,
-          render: (_, { name }: { name: number }) => (
-            <GarbageCollectorSum name={name} />
-          ),
-        },
-      ],
-    },
-    has(ServiceType.Cleaning) && {
-      key: 'cleaning',
-      title: 'Прибирання',
-      width: 200,
-      render: (_, { name }: { name: number }) => <Cleaning name={name} />,
-    },
-    has(ServiceType.Discount) && {
-      key: 'discount',
-      title: 'Знижка',
-      width: 200,
-      render: (_, { name }: { name: number }) => <Discount name={name} />,
-    },
+    has(ServiceType.WaterPart) &&
+      nativeColumn('waterPart', {
+        children: [
+          {
+            title: 'Частка, %',
+            width: 160,
+            render: (_, { name }: { name: number }) => (
+              <WaterPartAmount name={name} />
+            ),
+          },
+          {
+            title: <WaterPartSumTitle />,
+            width: 200,
+            render: (_, { name }: { name: number }) => (
+              <WaterPartSum name={name} />
+            ),
+          },
+        ],
+      }),
+    has(ServiceType.GarbageCollector) &&
+      nativeColumn('garbage', {
+        children: [
+          {
+            title: 'Частка, %',
+            width: 160,
+            render: (_, { name }: { name: number }) => (
+              <GarbageCollectorAmount name={name} />
+            ),
+          },
+          {
+            title: <GarbageCollectorSumTitle />,
+            width: 200,
+            render: (_, { name }: { name: number }) => (
+              <GarbageCollectorSum name={name} />
+            ),
+          },
+        ],
+      }),
+    has(ServiceType.Cleaning) &&
+      nativeColumn('cleaning', {
+        width: 200,
+        render: (_, { name }: { name: number }) => <Cleaning name={name} />,
+      }),
+    has(ServiceType.Discount) &&
+      nativeColumn('discount', {
+        width: 200,
+        render: (_, { name }: { name: number }) => <Discount name={name} />,
+      }),
     ...extraColumns,
     {
       fixed: 'right',

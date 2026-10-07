@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { Form } from 'antd'
 import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
-import { companyHasCustomService } from '../companyHasCustomService'
+import { companyHasCustomService } from '../invoice/companyHasCustomService'
 
 interface Props {
   name: number

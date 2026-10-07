@@ -1,7 +1,7 @@
 import React from 'react'
 import { Form, Tooltip, Typography } from 'antd'
 import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
-import { calcCompanyTotal, listCompanyTotalItems } from '../totalSum'
+import { calcCompanyTotal, listCompanyTotalItems } from '../invoice/totalSum'
 
 const TotalSum: React.FC<{ name: number }> = ({ name }) => {
   const { form } = useInvoicesPaymentContext()

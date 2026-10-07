@@ -1,6 +1,6 @@
 import type { TableColumnsType } from 'antd'
 import { calcCompanyTotal } from './totalSum'
-import { applyColumnLayout } from './columnLayout'
+import { applyColumnLayout } from '../columnLayout/columnLayout'
 
 const invoice = () => ({
   maintenancePrice: { fieldName: 'maintenancePrice', sum: 100 },
