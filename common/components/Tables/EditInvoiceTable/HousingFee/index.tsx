@@ -1,7 +1,7 @@
 import { usePaymentContext } from '@components/AddPaymentModal'
 import { useInvoiceCurrency } from '@modules/hooks/useInvoiceCurrency'
 import { InvoiceComponentProps } from '@components/Tables/EditInvoiceTable'
-import { resolveTypedServiceTariff } from '@components/Tables/PaymentsBulk/typedServiceTariff'
+import { resolveTypedServiceTariff } from '@common/components/Tables/PaymentsBulk/invoice/typedServiceTariff'
 import { currencyWithUnit, toArray, toRoundFixed } from '@utils/helpers'
 import validator from '@utils/validator'
 import { Form, Input } from 'antd'
