@@ -22,6 +22,7 @@ import {
 import { IPermissions } from '@modules/models/User'
 import { useGetUserByEmailQuery } from '@common/api/userApi/user.api'
 import { AppRoutes, Operations } from '@utils/constants'
+import { dateRangeToQueryBounds } from '@utils/paymentDateRange'
 import { useState, useEffect } from 'react'
 
 export const toFirstUpperCase = (text: string) => {
@@ -763,10 +764,14 @@ export function formatDateFilterForQuery(raw?: string[]) {
 export function resolvePaymentDateFilterQuery(filters?: {
   invoiceCreationDate?: string[]
   monthService?: string[]
+  dateFrom?: string
+  dateTo?: string
 }): {
   dateField: 'invoiceCreationDate' | 'date'
   year?: number
   month?: number | number[]
+  dateFrom?: string
+  dateTo?: string
 } {
   const dateField: 'invoiceCreationDate' | 'date' = filters?.monthService
     ?.length
@@ -777,7 +782,9 @@ export function resolvePaymentDateFilterQuery(filters?: {
     dateField === 'date' ? filters?.monthService : filters?.invoiceCreationDate
   )
 
-  return { dateField, ...query }
+  // The "За проміжок" range always applies to invoiceCreationDate, on top of
+  // whichever year/month filter is active.
+  return { dateField, ...query, ...dateRangeToQueryBounds(filters) }
 }
 
 export const MONTH_SERVICE_QUERY_PARAM = 'monthService'
