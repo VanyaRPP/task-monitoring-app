@@ -24,6 +24,9 @@ const PLACING = {
   fieldName: 'placingPrice',
 }
 
+// Додаткові (кастомні) послуги домену — вмикаються лише в окремих тестах.
+const mockExtraServices: { current: any[] } = { current: [] }
+
 jest.mock('@common/api/customServicesApi/customServices.api', () => ({
   useGetCustomServicesByDomainQuery: () => ({
     data: {
@@ -40,6 +43,7 @@ jest.mock('@common/api/customServicesApi/customServices.api', () => ({
               name: 'Розміщення',
               fieldName: 'placingPrice',
             },
+            ...mockExtraServices.current,
           ],
         },
       ],
@@ -64,13 +68,19 @@ jest.mock('@modules/hooks/useFloatButton', () => ({
 }))
 
 // Перехоплюємо onDragEnd, щоб імітувати перетягування заголовка.
-const dnd: { onDragEnd?: (e: any) => void } = {}
+// Панель має власний DndContext (id="layout-edit-toolbar"), таблиця — без id.
+const dnd: {
+  onDragEnd?: (e: any) => void
+  onToolbarDragEnd?: (e: any) => void
+} = {}
 jest.mock('@dnd-kit/core', () => {
   const actual = jest.requireActual('@dnd-kit/core')
   return {
     ...actual,
     DndContext: (props: any) => {
-      dnd.onDragEnd = props.onDragEnd
+      if (props.id === 'layout-edit-toolbar')
+        dnd.onToolbarDragEnd = props.onDragEnd
+      else dnd.onDragEnd = props.onDragEnd
       return <actual.DndContext {...props} />
     },
   }
@@ -156,7 +166,10 @@ const toggleColumnVisibility = async (label: string) => {
   fireEvent.click(await screen.findByLabelText(label))
 }
 
-beforeEach(() => localStorage.clear())
+beforeEach(() => {
+  localStorage.clear()
+  mockExtraServices.current = []
+})
 
 describe('загальна сума по компанії', () => {
   it('показує суму всіх виставлених послуг компанії', async () => {
@@ -189,6 +202,77 @@ describe('Drag & Drop колонок', () => {
 
     act(() => {
       dnd.onDragEnd!({ active: { id: 'placing' }, over: { id: 'maintenance' } })
+    })
+
+    await waitFor(() =>
+      expect(idx('Розміщення')).toBeLessThan(idx('Утримання'))
+    )
+  })
+})
+
+describe('Компанія та Сума', () => {
+  it('за замовчуванням Компанія перша, Сума — остання', async () => {
+    renderTable()
+    await waitFor(() => expect(headerTitles()).toContain('Розміщення'))
+    const titles = headerTitles()
+    expect(titles[0]).toBe('Компанія')
+    expect(titles.indexOf('Сума')).toBeGreaterThan(titles.indexOf('Розміщення'))
+
+    // На краях — закріплені при горизонтальному скролі.
+    const th = (title: string) =>
+      Array.from(document.querySelectorAll('thead th')).find(
+        (el) => el.textContent?.trim() === title
+      )
+    expect(th('Компанія')?.className).toContain('ant-table-cell-fix-left')
+    expect(th('Сума')?.className).toContain('ant-table-cell-fix-right')
+    expect(th('Розміщення')?.className).not.toContain('ant-table-cell-fix')
+  })
+
+  it('Сума перетягується, як і решта колонок', async () => {
+    renderTable()
+    await waitFor(() => expect(headerTitles()).toContain('Сума'))
+    act(() => {
+      dnd.onDragEnd?.({ active: { id: 'total' }, over: { id: 'company' } })
+    })
+    await waitFor(() => expect(headerTitles()[0]).toBe('Сума'))
+  })
+
+  it('Компанію не можна приховати, Суму — можна', async () => {
+    renderTable()
+    await waitFor(() => expect(headerTitles()).toContain('Сума'))
+    fireEvent.click(screen.getByLabelText('Приховати колонки'))
+    expect(await screen.findByRole('checkbox', { name: 'Сума' })).toBeTruthy()
+    expect(screen.queryByRole('checkbox', { name: 'Компанія' })).toBeNull()
+  })
+})
+
+describe('панель редагування', () => {
+  const toolbarLabels = () =>
+    Array.from(
+      document.querySelectorAll('div[aria-roledescription="sortable"]')
+    )
+      .map((el) => el.textContent?.trim())
+      .filter(Boolean)
+
+  it('показує кнопки колонок у поточному порядку', async () => {
+    renderTable()
+    await waitFor(() => expect(toolbarLabels()).toContain('Розміщення'))
+    const labels = toolbarLabels()
+    expect(labels[0]).toBe('Компанія')
+    expect(labels[labels.length - 1]).toBe('Сума')
+  })
+
+  it('перетягування кнопки на панелі змінює порядок колонок', async () => {
+    renderTable()
+    await waitFor(() => expect(headerTitles()).toContain('Розміщення'))
+    const idx = (t: string) => headerTitles().indexOf(t)
+    expect(idx('Утримання')).toBeLessThan(idx('Розміщення'))
+
+    act(() => {
+      dnd.onToolbarDragEnd?.({
+        active: { id: 'toolbar-placing' },
+        over: { id: 'toolbar-maintenance' },
+      })
     })
 
     await waitFor(() =>
@@ -255,5 +339,55 @@ describe('приховані колонки та загальна сума', () 
     })
     await waitFor(() => expect(total()).not.toBe(before))
     expect(total()).toBe(invoiceSums())
+  })
+})
+
+describe('видалення компанії', () => {
+  const INTERNET = {
+    _id: '6a0000000000000000000001',
+    name: 'Інтернет',
+    fieldName: 'internet',
+  }
+  const withInternet = (id: string, name: string) => ({
+    ...company(id, name),
+    customServices: [{ _id: INTERNET._id, fieldName: 'internet', price: 100 }],
+  })
+
+  beforeEach(() => {
+    mockExtraServices.current = [INTERNET]
+  })
+
+  const removeRow = async (row: number) => {
+    const icons = document.querySelectorAll('tbody .anticon-close-circle')
+    fireEvent.click(icons[row])
+    fireEvent.click(await screen.findByRole('button', { name: 'Так' }))
+  }
+
+  it('прибирає колонку послуги, якої більше не має жодна компанія', async () => {
+    renderTable([withInternet('c1', 'Alpha'), company('c2', 'Beta')])
+    await waitFor(() => expect(headerTitles()).toContain('Інтернет'))
+
+    await removeRow(0)
+
+    await waitFor(() => expect(headerTitles()).not.toContain('Інтернет'))
+    expect(headerTitles()).toContain('Розміщення')
+  })
+
+  it('лишає колонку, поки послугу має хоч одна компанія', async () => {
+    renderTable([withInternet('c1', 'Alpha'), withInternet('c2', 'Beta')])
+    await waitFor(() => expect(headerTitles()).toContain('Інтернет'))
+
+    await removeRow(0)
+
+    await waitFor(() =>
+      expect(screen.getAllByTestId('company-total')).toHaveLength(1)
+    )
+    expect(headerTitles()).toContain('Інтернет')
+  })
+
+  it('не показує колонку послуги, якої немає в жодної компанії', async () => {
+    renderTable([company('c1', 'Alpha')])
+    await waitFor(() => expect(headerTitles()).toContain('Розміщення'))
+    expect(headerTitles()).not.toContain('Інтернет')
   })
 })

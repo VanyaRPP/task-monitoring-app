@@ -9,15 +9,31 @@ import { applyCustomColumnGate, buildTypedCustomColumn } from './column.config'
 
 export type DomainCustomService = ICustomDomainService['services'][number]
 
-const withColumnKey = (
+export type CompanyGate = { serviceKey: string; fieldName?: string }
+
+type BuiltColumn = {
+  column: TableColumnsType[number] | null
+  /** Є, якщо комірки показуються лише компаніям, що мають послугу. */
+  gate?: CompanyGate
+}
+
+const gateAndKey = (
   column: TableColumnsType[number] | null,
-  key: string
-): TableColumnsType[number] | null => (column ? { ...column, key } : column)
+  s: DomainCustomService,
+  gateOpts: CompanyGate
+): BuiltColumn => {
+  const gated = applyCustomColumnGate(column, s, gateOpts)
+  return {
+    column: gated ? { ...gated, key: gateOpts.serviceKey } : gated,
+    // applyCustomColumnGate повертає ту саму колонку, якщо гейт не потрібен.
+    gate: gated && gated !== column ? gateOpts : undefined,
+  }
+}
 
 const buildCustomServiceColumn = (
   s: DomainCustomService,
   service: IService | null | undefined
-): TableColumnsType[number] | null => {
+): BuiltColumn => {
   // Key each custom column by the service _id, NOT fieldName: two
   // services whose names differ only in parentheses ("електрика(1)")
   // transliterate to the SAME fieldName and would otherwise share inputs.
@@ -40,8 +56,7 @@ const buildCustomServiceColumn = (
       { serviceId: key, fieldName: s.fieldName }
     ),
   })
-  if (typedColumn)
-    return withColumnKey(applyCustomColumnGate(typedColumn, s, gateOpts), key)
+  if (typedColumn) return gateAndKey(typedColumn, s, gateOpts)
 
   const genericColumn = {
     title: s.name,
@@ -64,10 +79,13 @@ const buildCustomServiceColumn = (
       },
     ],
   }
-  return withColumnKey(applyCustomColumnGate(genericColumn, s, gateOpts), key)
+  return gateAndKey(genericColumn, s, gateOpts)
 }
 
-/** Колонки кастомних (не вбудованих) послуг домену + їхні підписи для меню. */
+/**
+ * Колонки кастомних (не вбудованих) послуг домену, їхні підписи для меню та
+ * гейти «компанія має послугу» (ключ колонки -> гейт).
+ */
 export const useCustomServicesColumns = (
   allowedServices: DomainCustomService[],
   service: IService | null | undefined
@@ -80,13 +98,19 @@ export const useCustomServicesColumns = (
     [allowedServices]
   )
 
-  const columns = useMemo(
-    () =>
-      customServices.map((s) =>
-        buildCustomServiceColumn(s, service)
-      ) as TableColumnsType,
-    [customServices, service]
-  )
+  const { columns, gates } = useMemo(() => {
+    const built = customServices.map((s) =>
+      buildCustomServiceColumn(s, service)
+    )
+    const gates: Record<string, CompanyGate> = {}
+    built.forEach(({ column, gate }) => {
+      if (column && gate) gates[String(column.key)] = gate
+    })
+    return {
+      columns: built.map(({ column }) => column) as TableColumnsType,
+      gates,
+    }
+  }, [customServices, service])
 
   const labels = useMemo(
     () =>
@@ -96,5 +120,5 @@ export const useCustomServicesColumns = (
     [customServices]
   )
 
-  return { columns, labels }
+  return { columns, labels, gates }
 }

@@ -83,12 +83,17 @@ export const useColumnLayout = (movableKeys: string[]) => {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
   )
+  const moveKey = useCallback(
+    (activeKey: string, overKey: string) =>
+      setOrder(moveColumn(currentOrder, activeKey, overKey)),
+    [currentOrder]
+  )
   const handleDragEnd = useCallback(
     ({ active, over }: DragEndEvent) => {
       if (!isPanelVisible || !over || active.id === over.id) return
-      setOrder(moveColumn(currentOrder, String(active.id), String(over.id)))
+      moveKey(String(active.id), String(over.id))
     },
-    [currentOrder, isPanelVisible]
+    [moveKey, isPanelVisible]
   )
 
   return {
@@ -101,6 +106,7 @@ export const useColumnLayout = (movableKeys: string[]) => {
     resetLayout,
     saveLayout,
     sensors,
+    moveKey,
     handleDragEnd,
   }
 }

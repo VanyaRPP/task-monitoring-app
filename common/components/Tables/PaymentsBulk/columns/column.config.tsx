@@ -277,6 +277,7 @@ export const buildTypedCustomColumn = (
  * Єдине джерело і для `key` колонки, і для її заголовка, і для меню видимості.
  */
 export const NATIVE_COLUMN_LABELS = {
+  company: 'Компанія',
   area: 'Площа, м²',
   maintenance: 'Утримання',
   placing: 'Розміщення',
@@ -287,9 +288,22 @@ export const NATIVE_COLUMN_LABELS = {
   garbage: 'Вивіз ТПВ',
   cleaning: 'Прибирання',
   discount: 'Знижка',
+  total: 'Сума',
 } as const satisfies Record<string, string>
 
 type NativeColumnKey = keyof typeof NATIVE_COLUMN_LABELS
+
+/**
+ * Колонки, що «прилипають» до краю при горизонтальному скролі, поки стоять
+ * на цьому краю (Компанія — першою, Сума — останньою). Перетягнуті всередину
+ * таблиці — скролються як звичайні.
+ */
+export const EDGE_PINNED_COLUMNS: Partial<
+  Record<NativeColumnKey, 'left' | 'right'>
+> = { company: 'left', total: 'right' }
+
+/** Компанія — ідентифікатор рядка: її можна рухати, але не ховати. */
+export const UNHIDEABLE_COLUMNS: string[] = ['company']
 
 /** Ставить колонці `key`; заголовок за замовчуванням — підпис із мапи. */
 const nativeColumn = (
@@ -324,18 +338,10 @@ export const getDefaultColumns = (
   })
 
   return [
-    {
-      fixed: 'left',
-      title: 'Сума',
-      width: 120,
-      render: (_, { name }: { name: number }) => <TotalSum name={name} />,
-    },
-    {
-      fixed: 'left',
-      title: 'Компанія',
+    nativeColumn('company', {
       width: 250,
       render: (_, { name }: { name: number }) => <CompanyName name={name} />,
-    },
+    }),
     hasAreaBasedService &&
       nativeColumn('area', {
         width: 160,
@@ -440,6 +446,10 @@ export const getDefaultColumns = (
         render: (_, { name }: { name: number }) => <Discount name={name} />,
       }),
     ...extraColumns,
+    nativeColumn('total', {
+      width: 120,
+      render: (_, { name }: { name: number }) => <TotalSum name={name} />,
+    }),
     {
       fixed: 'right',
       align: 'center',

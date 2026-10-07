@@ -39,7 +39,6 @@ import {
 import {
   SortableContext,
   verticalListSortingStrategy,
-  horizontalListSortingStrategy,
   useSortable,
   arrayMove,
 } from '@dnd-kit/sortable'
@@ -122,52 +121,6 @@ const SortableWidget: React.FC<SortableWidgetProps> = ({
       {...(isEditMode ? { ...attributes, ...listeners } : {})}
     >
       {children}
-    </div>
-  )
-}
-
-interface SortableToolbarButtonProps {
-  id: string
-  onClick: () => void
-  children: React.ReactNode
-}
-
-const SortableToolbarButton: React.FC<SortableToolbarButtonProps> = ({
-  id,
-  onClick,
-  children,
-}) => {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id })
-
-  const style: React.CSSProperties = {
-    transform: transform
-      ? CSS.Translate.toString({ ...transform, y: 0 })
-      : undefined,
-    transition: isDragging ? 'none' : transition,
-    opacity: isDragging ? 0.5 : 1,
-    zIndex: isDragging ? 999 : 'auto',
-    cursor: isDragging ? 'grabbing' : 'grab',
-    touchAction: 'none',
-    display: 'flex',
-    willChange: 'transform',
-  }
-
-  return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      <Button
-        type="link"
-        onClick={onClick}
-        style={{ pointerEvents: isDragging ? 'none' : 'auto' }}
-      >
-        {children}
-      </Button>
     </div>
   )
 }
@@ -264,24 +217,28 @@ const Dashboard: React.FC = () => {
     document.body.style.cursor = 'grabbing'
   }, [])
 
-  const getWidgetKey = (id: string | number): WidgetKey =>
-    String(id).replace('toolbar-', '') as WidgetKey
+  const moveWidget = useCallback((activeKey: WidgetKey, overKey: WidgetKey) => {
+    setOrderedWidgets((prev) =>
+      arrayMove(prev, prev.indexOf(activeKey), prev.indexOf(overKey))
+    )
+  }, [])
 
-  const handleDragEnd = useCallback((event: DragEndEvent) => {
-    setIsDraggingActive(false)
-    document.body.style.cursor = ''
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      setIsDraggingActive(false)
+      document.body.style.cursor = ''
 
-    const { active, over } = event
-    if (!over || active.id === over.id) return
+      const { active, over } = event
+      if (!over || active.id === over.id) return
+      moveWidget(active.id as WidgetKey, over.id as WidgetKey)
+    },
+    [moveWidget]
+  )
 
-    const activeKey = getWidgetKey(active.id)
-    const overKey = getWidgetKey(over.id)
-
-    setOrderedWidgets((prev) => {
-      const oldIndex = prev.indexOf(activeKey)
-      const newIndex = prev.indexOf(overKey)
-      return arrayMove(prev, oldIndex, newIndex)
-    })
+  const scrollToWidget = useCallback((key: WidgetKey) => {
+    document
+      .getElementById(key)
+      ?.scrollIntoView({ behavior: 'smooth', block: 'center' })
   }, [])
 
   const handleDragCancel = useCallback(() => {
@@ -323,36 +280,10 @@ const Dashboard: React.FC = () => {
           onReset={() => handleLayoutAction('revert')}
           onSave={() => handleLayoutAction('save')}
           onClose={togglePanelVisible}
-        >
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
-          >
-            <SortableContext
-              items={renderedWidgets.map((k) => `toolbar-${k}`)}
-              strategy={horizontalListSortingStrategy}
-            >
-              {renderedWidgets.map((key) => (
-                <SortableToolbarButton
-                  key={`toolbar-${key}`}
-                  id={`toolbar-${key}`}
-                  onClick={() => {
-                    const element = document.getElementById(key)
-                    if (element) {
-                      element.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'center',
-                      })
-                    }
-                  }}
-                >
-                  {widgetLabels[key]}
-                </SortableToolbarButton>
-              ))}
-            </SortableContext>
-          </DndContext>
-        </LayoutEditToolbar>
+          items={renderedWidgets}
+          onMove={moveWidget}
+          onItemClick={scrollToWidget}
+        />
       )}
       {isLayoutReady && (
         <DndContext

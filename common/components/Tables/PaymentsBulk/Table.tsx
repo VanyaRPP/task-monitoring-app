@@ -12,17 +12,27 @@ import {
   applyColumnLayout,
   getMovableKeys,
   isMovableColumn,
+  pinEdgeColumns,
 } from './columnLayout/columnLayout'
 import DraggableHeaderCell from './columnLayout/DraggableHeaderCell'
 import HiddenColumnCells from './columnLayout/HiddenColumnCells'
 import { useColumnLayout } from './columnLayout/useColumnLayout'
 import {
+  EDGE_PINNED_COLUMNS,
   NATIVE_COLUMN_LABELS,
+  UNHIDEABLE_COLUMNS,
   getDefaultColumns,
 } from './columns/column.config'
 import { useCustomServicesColumns } from './columns/useCustomServicesColumns'
+import { findUnusedCustomServices } from './invoice/companyHasCustomService'
 import { usePaymentsFormValue } from './invoice/usePaymentsFormValue'
 import styles from './stylestable.module.scss'
+
+// Заголовки мають data-column-id лише в режимі редагування — тоді ж і панель.
+const scrollToColumn = (key: string) =>
+  document
+    .querySelector(`th[data-column-id="${key}"]`)
+    ?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
 
 const InvoicesTable: React.FC = () => {
   const { form, service, isLoading, isError } = useInvoicesPaymentContext()
@@ -43,8 +53,11 @@ const InvoicesTable: React.FC = () => {
 
   usePaymentsFormValue(allowedServices)
 
-  const { columns: customServicesColumns, labels: customServicesLabels } =
-    useCustomServicesColumns(allowedServices, service)
+  const {
+    columns: customServicesColumns,
+    labels: customServicesLabels,
+    gates: customServicesGates,
+  } = useCustomServicesColumns(allowedServices, service)
 
   // `remove` з'являється лише всередині Form.List, а колонки потрібні раніше
   // (ключі для layout) — тому кнопка видалення бере його через ref.
@@ -76,10 +89,15 @@ const InvoicesTable: React.FC = () => {
     resetLayout,
     saveLayout,
     sensors,
+    moveKey,
     handleDragEnd,
   } = useColumnLayout(movableKeys)
+  const hideableKeys = useMemo(
+    () => currentOrder.filter((k) => !UNHIDEABLE_COLUMNS.includes(k)),
+    [currentOrder]
+  )
 
-  const tableColumns = useMemo(
+  const laidOutColumns = useMemo(
     () =>
       applyColumnLayout(columns, currentOrder, hidden).map((c) =>
         isPanelVisible && isMovableColumn(c)
@@ -106,6 +124,27 @@ const InvoicesTable: React.FC = () => {
       {(fields, { remove }) => {
         removeRef.current = remove
 
+        // Кастомна послуга, якої не має жодна компанія в таблиці (напр. після
+        // видалення єдиної такої), дала б порожню колонку — прибираємо її.
+        // Form.List перерендерюється на додавання/видалення рядків.
+        const unused = findUnusedCustomServices(
+          customServicesGates,
+          fields.map((f) =>
+            form.getFieldValue([
+              'payments',
+              f.name,
+              'company',
+              'customServices',
+            ])
+          )
+        )
+        const isShown = (key: string) => !unused.includes(key)
+        const shownKeys = visibleKeys.filter(isShown)
+        const tableColumns = pinEdgeColumns(
+          laidOutColumns.filter((c) => c.key == null || isShown(String(c.key))),
+          EDGE_PINNED_COLUMNS
+        )
+
         return (
           <>
             {isPanelVisible && (
@@ -113,8 +152,11 @@ const InvoicesTable: React.FC = () => {
                 hideTitle="Приховати колонки"
                 hidden={hidden}
                 onHiddenChange={setHidden}
-                available={currentOrder}
+                available={hideableKeys.filter(isShown)}
                 labels={labels}
+                items={shownKeys}
+                onMove={moveKey}
+                onItemClick={scrollToColumn}
                 onReset={resetLayout}
                 onSave={saveLayout}
                 onClose={togglePanelVisible}
@@ -127,7 +169,7 @@ const InvoicesTable: React.FC = () => {
               onDragEnd={handleDragEnd}
             >
               <SortableContext
-                items={visibleKeys}
+                items={shownKeys}
                 strategy={horizontalListSortingStrategy}
               >
                 <Table
