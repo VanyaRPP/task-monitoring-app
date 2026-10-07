@@ -56,6 +56,30 @@ describe('resolvePaymentDateFilterQuery()', () => {
     expect(result.month).toContain(2)
   })
 
+  it('додає межі довільного проміжку дат до запиту', () => {
+    const result = resolvePaymentDateFilterQuery({
+      dateFrom: '2026-08-01',
+      dateTo: '2026-09-28',
+    })
+
+    expect(result.dateField).toBe('invoiceCreationDate')
+    expect(new Date(result.dateFrom).getDate()).toBe(1)
+    expect(new Date(result.dateTo).getDate()).toBe(28)
+    expect(new Date(result.dateTo).getMonth()).toBe(8)
+  })
+
+  it('поєднує проміжок дат із фільтром за місяцем послуг', () => {
+    const result = resolvePaymentDateFilterQuery({
+      monthService: ['2026-month-7'],
+      dateFrom: '2026-08-01',
+      dateTo: '2026-09-28',
+    })
+
+    expect(result).toMatchObject({ dateField: 'date', year: 2026, month: 7 })
+    expect(result.dateFrom).toBeDefined()
+    expect(result.dateTo).toBeDefined()
+  })
+
   it('фільтрує лише за роком, коли місяць не обрано', () => {
     const result = resolvePaymentDateFilterQuery({
       monthService: ['2026'],

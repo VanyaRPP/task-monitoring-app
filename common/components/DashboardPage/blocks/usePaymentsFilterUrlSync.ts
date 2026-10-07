@@ -8,6 +8,12 @@ import {
   formatMonthServiceParam,
   parseMonthServiceParam,
 } from '@utils/helpers'
+import {
+  DATE_FROM_QUERY_PARAM,
+  DATE_TO_QUERY_PARAM,
+  applyDateRangeToFilters,
+  parseDateRange,
+} from '@utils/paymentDateRange'
 
 export function usePaymentsFilterUrlSync({ enabled }: { enabled: boolean }) {
   const router = useRouter()
@@ -24,14 +30,19 @@ export function usePaymentsFilterUrlSync({ enabled }: { enabled: boolean }) {
     const monthService = parseMonthServiceParam(
       router.query[MONTH_SERVICE_QUERY_PARAM]
     )
-    if (monthService.length) {
-      dispatch(
-        setFilters({
-          ...filtersRef.current,
-          invoiceCreationDate: [],
-          monthService,
-        })
-      )
+    const dateRange = parseDateRange(
+      router.query[DATE_FROM_QUERY_PARAM],
+      router.query[DATE_TO_QUERY_PARAM]
+    )
+    if (monthService.length || dateRange) {
+      let next = filtersRef.current
+      if (monthService.length) {
+        next = { ...next, invoiceCreationDate: [], monthService }
+      }
+      if (dateRange) {
+        next = applyDateRangeToFilters(next, dateRange)
+      }
+      dispatch(setFilters(next))
     }
     setIsUrlApplied(true)
   }, [enabled, isUrlApplied, router.isReady, router.query, dispatch])
@@ -39,21 +50,44 @@ export function usePaymentsFilterUrlSync({ enabled }: { enabled: boolean }) {
   useEffect(() => {
     if (!enabled || !isUrlApplied) return
 
-    const nextParam = formatMonthServiceParam(filters?.monthService)
-    const rawParam = router.query[MONTH_SERVICE_QUERY_PARAM]
-    const currentParam = Array.isArray(rawParam) ? rawParam.join(',') : rawParam
-    if ((nextParam ?? null) === (currentParam ?? null)) return
+    const dateRange = parseDateRange(filters?.dateFrom, filters?.dateTo)
+    const nextParams: Record<string, string | undefined> = {
+      [MONTH_SERVICE_QUERY_PARAM]: formatMonthServiceParam(
+        filters?.monthService
+      ),
+      [DATE_FROM_QUERY_PARAM]: dateRange?.dateFrom,
+      [DATE_TO_QUERY_PARAM]: dateRange?.dateTo,
+    }
 
     const query = { ...router.query }
-    if (nextParam) {
-      query[MONTH_SERVICE_QUERY_PARAM] = nextParam
-    } else {
-      delete query[MONTH_SERVICE_QUERY_PARAM]
+    let changed = false
+    for (const [key, nextParam] of Object.entries(nextParams)) {
+      const rawParam = query[key]
+      const currentParam = Array.isArray(rawParam)
+        ? rawParam.join(',')
+        : rawParam
+      if ((nextParam ?? null) === (currentParam ?? null)) continue
+
+      changed = true
+      if (nextParam) {
+        query[key] = nextParam
+      } else {
+        delete query[key]
+      }
     }
+    if (!changed) return
+
     router.replace({ pathname: router.pathname, query }, undefined, {
       shallow: true,
     })
-  }, [enabled, isUrlApplied, filters?.monthService, router])
+  }, [
+    enabled,
+    isUrlApplied,
+    filters?.monthService,
+    filters?.dateFrom,
+    filters?.dateTo,
+    router,
+  ])
 
   return { isUrlApplied }
 }

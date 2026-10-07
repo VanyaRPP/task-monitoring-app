@@ -77,6 +77,53 @@ describe('usePaymentsFilterUrlSync()', () => {
       )
     })
 
+    it('відновлює проміжок дат із ?dateFrom=&dateTo=', () => {
+      mockFilters({ domain: ['domain-1'] })
+      mockRouter({ dateFrom: '2026-08-01', dateTo: '2026-09-28' })
+
+      renderHook(() => usePaymentsFilterUrlSync({ enabled: true }))
+
+      expect(dispatch).toHaveBeenCalledWith(
+        setFilters({
+          domain: ['domain-1'],
+          dateFrom: '2026-08-01',
+          dateTo: '2026-09-28',
+        })
+      )
+    })
+
+    it('відновлює проміжок дат разом із місяцем послуг', () => {
+      mockRouter({
+        monthService: '2026-07',
+        dateFrom: '2026-08-01',
+        dateTo: '2026-09-28',
+      })
+
+      renderHook(() => usePaymentsFilterUrlSync({ enabled: true }))
+
+      expect(dispatch).toHaveBeenCalledTimes(1)
+      expect(dispatch).toHaveBeenCalledWith(
+        setFilters({
+          invoiceCreationDate: [],
+          monthService: ['2026-month-7'],
+          dateFrom: '2026-08-01',
+          dateTo: '2026-09-28',
+        })
+      )
+    })
+
+    it.each([
+      [{ dateFrom: '2026-08-01' }],
+      [{ dateFrom: '2026-02-30', dateTo: '2026-03-01' }],
+      [{ dateFrom: '01.08.2026', dateTo: '28.09.2026' }],
+    ])('ігнорує неповний або битий проміжок у URL: %o', (query) => {
+      mockRouter(query)
+
+      renderHook(() => usePaymentsFilterUrlSync({ enabled: true }))
+
+      expect(dispatch).not.toHaveBeenCalled()
+    })
+
     it('лишає сторінку працювати як раніше, коли параметра в URL немає', () => {
       mockRouter({})
 
@@ -103,7 +150,7 @@ describe('usePaymentsFilterUrlSync()', () => {
       expect(result.current.isUrlApplied).toBe(false)
     })
 
-    it('нічого не робить там, де фільтрів за URL немає (дашборд, sepdomain)', () => {
+    it('нічого не робить там, де фільтрів за URL немає (дашборд)', () => {
       const replace = mockRouter({ monthService: '2026-07' })
 
       const { result } = renderHook(() =>
@@ -166,6 +213,67 @@ describe('usePaymentsFilterUrlSync()', () => {
         undefined,
         { shallow: true }
       )
+    })
+
+    it('записує обраний проміжок дат в URL', () => {
+      const replace = mockRouter({ tab: 'all' })
+
+      const { rerender } = renderHook(() =>
+        usePaymentsFilterUrlSync({ enabled: true })
+      )
+      mockFilters({
+        domain: ['domain-1'],
+        dateFrom: '2026-08-01',
+        dateTo: '2026-09-28',
+      })
+      rerender()
+
+      expect(replace).toHaveBeenCalledWith(
+        {
+          pathname: '/payment',
+          query: { tab: 'all', dateFrom: '2026-08-01', dateTo: '2026-09-28' },
+        },
+        undefined,
+        { shallow: true }
+      )
+    })
+
+    it('прибирає проміжок дат з URL після очищення, лишаючи місяць послуг', () => {
+      const replace = mockRouter({
+        monthService: '2026-07',
+        dateFrom: '2026-08-01',
+        dateTo: '2026-09-28',
+      })
+      mockFilters({
+        monthService: ['2026-month-7'],
+        dateFrom: '2026-08-01',
+        dateTo: '2026-09-28',
+      })
+
+      const { rerender } = renderHook(() =>
+        usePaymentsFilterUrlSync({ enabled: true })
+      )
+      mockFilters({ monthService: ['2026-month-7'] })
+      rerender()
+
+      expect(replace).toHaveBeenCalledWith(
+        { pathname: '/payment', query: { monthService: '2026-07' } },
+        undefined,
+        { shallow: true }
+      )
+    })
+
+    it('не переписує URL, коли проміжок у ньому вже актуальний', () => {
+      const query = { dateFrom: '2026-08-01', dateTo: '2026-09-28' }
+      const replace = mockRouter(query)
+      mockFilters(query)
+
+      const { rerender } = renderHook(() =>
+        usePaymentsFilterUrlSync({ enabled: true })
+      )
+      rerender()
+
+      expect(replace).not.toHaveBeenCalled()
     })
 
     it('не переписує URL, коли він уже описує поточний фільтр', () => {
