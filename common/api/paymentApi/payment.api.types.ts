@@ -223,7 +223,7 @@ export type PaymentActionType =
   | 'RESTORE'
 
 export type PaymentMutationSource =
-  'single' | 'bulk' | 'quick-pay' | 'admin-restore'
+  'single' | 'bulk' | 'quick-pay' | 'admin-restore' | 'debt-import'
 
 export type IPaymentSnapshot = Omit<IPayment, '_id'> & { _id: string }
 

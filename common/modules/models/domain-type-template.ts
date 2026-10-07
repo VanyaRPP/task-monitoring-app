@@ -1,12 +1,7 @@
 import mongoose, { Schema, Types } from 'mongoose'
 
 export type DomainTypeTemplateCategory =
-  | 'utility'
-  | 'it'
-  | 'edu'
-  | 'auto'
-  | 'real-estate'
-  | 'other'
+  'utility' | 'it' | 'edu' | 'auto' | 'real-estate' | 'other'
 
 export const DOMAIN_TYPE_TEMPLATE_CATEGORIES: DomainTypeTemplateCategory[] = [
   'utility',

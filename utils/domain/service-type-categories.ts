@@ -19,7 +19,7 @@ export const SERVICE_TYPES_BY_CATEGORY: Record<
   it: [],
   edu: [],
   auto: [],
-  'real-estate': [],
+  'real-estate': [ServiceType.HousingFee],
   other: [],
 }
 
@@ -35,6 +35,7 @@ export const SERVICE_TYPES_BY_CATEGORY: Record<
 export const AREA_BASED_SERVICE_TYPES: ReadonlySet<ServiceType> = new Set([
   ServiceType.Placing,
   ServiceType.Maintenance,
+  ServiceType.HousingFee,
 ])
 
 export const isAreaBasedServiceType = (

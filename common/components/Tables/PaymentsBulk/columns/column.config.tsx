@@ -5,7 +5,7 @@ import CompanyName from '../cells/CompanyName'
 import TotalSum from '../cells/TotalSum'
 import { CustomServiceGate } from '../cells/CustomServiceGate'
 import { Popconfirm, TableColumnsType } from 'antd'
-import { ServiceType, UTILITY_SERVICE_ID_TO_TYPE } from '@utils/constants'
+import { ServiceType, BUILT_IN_SERVICE_ID_TO_TYPE } from '@utils/constants'
 import { isAreaBasedServiceType } from '@utils/domain/service-type-categories'
 
 import {
@@ -44,13 +44,13 @@ const SERVICE_TYPE_VALUES = new Set<string>(Object.values(ServiceType))
 // Full type resolution, INCLUDING the per-domain `serviceType` tag. Used to pick
 // a custom service's Bulk formula (see resolveCustomFormula) — NOT to decide the
 // built-in communal columns.
-//  - pinned seed _id     → shared seeded services (UTILITY_SERVICE_ID_TO_TYPE)
+//  - pinned seed _id     → shared seeded services (BUILT_IN_SERVICE_ID_TO_TYPE)
 //  - serviceType         → per-domain typed copies (own _id, set via the form)
 //  - fieldName === value → legacy rows whose fieldName already equals the type
 export const resolveServiceType = (
   service: AllowedService
 ): ServiceType | undefined => {
-  const byId = UTILITY_SERVICE_ID_TO_TYPE[String(service?._id)]
+  const byId = BUILT_IN_SERVICE_ID_TO_TYPE[String(service?._id)]
   if (byId) return byId
   if (service?.serviceType && SERVICE_TYPE_VALUES.has(service.serviceType)) {
     return service.serviceType as ServiceType
@@ -69,7 +69,7 @@ export const resolveServiceType = (
 export const resolveCommunalType = (
   service: AllowedService
 ): ServiceType | undefined => {
-  const byId = UTILITY_SERVICE_ID_TO_TYPE[String(service?._id)]
+  const byId = BUILT_IN_SERVICE_ID_TO_TYPE[String(service?._id)]
   if (byId) return byId
   if (service?.fieldName && SERVICE_TYPE_VALUES.has(service.fieldName)) {
     return service.fieldName as ServiceType
@@ -196,6 +196,7 @@ const TYPED_COLUMN_BUILDERS: Partial<Record<ServiceType, TypedColumnBuilder>> =
     [ServiceType.Electricity]: electricityColumn,
     [ServiceType.Water]: waterColumn,
     [ServiceType.Placing]: placingColumn,
+    [ServiceType.HousingFee]: placingColumn,
   }
 
 /** True when a serviceType has a dedicated formula column (native or custom). */
@@ -332,10 +333,9 @@ export const getDefaultColumns = (
   // «за площею», включно з per-domain копією (власний _id + serviceType), у
   // якої власна колонка-формула. Без цього площу, що множиться на тариф, у
   // таблиці просто не видно.
-  const hasAreaBasedService = allowedServices.some((svc) => {
-    const type = resolveServiceType(svc)
-    return type === ServiceType.Placing || type === ServiceType.Maintenance
-  })
+  const hasAreaBasedService = allowedServices.some((svc) =>
+    isAreaBasedServiceType(resolveServiceType(svc))
+  )
 
   return [
     nativeColumn('company', {

@@ -1,0 +1,409 @@
+import { useGetDebtCalculationQuery } from '@common/api/debtCalculationApi/debtCalculation.api'
+import { useGetInflationIndexesQuery } from '@common/api/inflationIndexApi/inflationIndex.api'
+import { useGetAllPaymentsQuery } from '@common/api/paymentApi/payment.api'
+import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
+import { IExtendedRealestate } from '@common/api/realestateApi/realestate.api.types'
+import TableCard from '@common/components/UI/TableCard'
+import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
+import { useDebtCalculationAccess } from '@modules/hooks/useDebtCalculationAccess'
+import {
+  buildDebtCalculationInput,
+  IApartmentOverrides,
+  IMonthOverride,
+  indexesByPeriod,
+  withoutTypedFigures,
+} from '@utils/debt-calculation/build-input'
+import { calculateDebt } from '@utils/debt-calculation/calculate'
+import {
+  draftKey,
+  isDraftNewer,
+  readDraft,
+} from '@utils/debt-calculation/draft-storage'
+import { formatPeriod, IYearMonth } from '@utils/debt-calculation/months'
+import {
+  buildMonthPrefill,
+  prefillOpeningDebt,
+} from '@utils/debt-calculation/prefill'
+import { IDebtCalculationSnapshot } from '@utils/debt-calculation/serialize'
+import {
+  DEFAULT_ANNUAL_RATE_PERCENT,
+  IDebtCalculationResult,
+  InflationMethod,
+} from '@utils/debt-calculation/types'
+import { Alert } from 'antd'
+import dayjs, { Dayjs } from 'dayjs'
+import { useRouter } from 'next/compat/router'
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
+import DebtCalculationBody from './Body'
+import DebtCalculationHeader from './Header'
+import { DEBT_IMPORTED_EVENT, IDebtImportedDetail } from './importEvents'
+import { useAutoSave } from './useAutoSave'
+
+// Neither payments nor monthly services can be filtered by a date range on the
+// server, so we pull the domain's catalog whole and bucket it by month here.
+const PREFILL_PAYMENTS_LIMIT = 5000
+const PREFILL_SERVICES_LIMIT = 500
+
+const toYearMonth = (value?: Dayjs | null): IYearMonth | undefined =>
+  value ? { year: value.year(), month: value.month() + 1 } : undefined
+
+const toDayjs = (value?: IYearMonth): Dayjs | undefined =>
+  value
+    ? dayjs()
+        .year(value.year)
+        .month(value.month - 1)
+        .startOf('month')
+    : undefined
+
+export interface IDebtCalculationContext {
+  allowedDomainIds: string[]
+  domainId?: string
+  setDomainId: (value?: string) => void
+  companies: IExtendedRealestate[]
+  companyId?: string
+  setCompanyId: (value?: string) => void
+  company?: IExtendedRealestate
+  from?: Dayjs
+  to?: Dayjs
+  setFrom: (value?: Dayjs) => void
+  setTo: (value?: Dayjs) => void
+  annualRatePercent: number
+  setAnnualRatePercent: (value: number) => void
+  inflationMethod: InflationMethod
+  setInflationMethod: (value: InflationMethod) => void
+  /** The selected company's calculation. */
+  result?: IDebtCalculationResult
+  overrides: IApartmentOverrides
+  /** Prefilled from the DB, per month, for the selected company. */
+  prefillMonths: Record<string, IMonthOverride>
+  /** The debt at the period start derived from the DB history, if it can be. */
+  openingDebtPrefill?: number
+  /** The opening debt in force: the manual one, else the derived one, else 0. */
+  openingDebt: number
+  /** Re-reads the company's payments - after payments were created from here. */
+  refetchPayments: () => void
+  /**
+   * Drops the typed-in figures (charged, correction, paid) of months that are
+   * now payments, and optionally the opening debt, so the table reads them
+   * back from the DB. Area, tariff and index edits stay.
+   */
+  clearTypedFigures: (periods: string[], openingDebt: boolean) => void
+  /** CPI reference values by period, `{ 'YYYY-MM': 100.8 }`. */
+  indexByPeriod: Record<string, number>
+  setApartmentOverride: (patch: Partial<IApartmentOverrides>) => void
+  setMonthOverride: (period: string, patch: IMonthOverride) => void
+  isLoading: boolean
+}
+
+export const DebtCalculationContext =
+  createContext<IDebtCalculationContext>(null)
+
+export const useDebtCalculationContext = (): IDebtCalculationContext =>
+  useContext(DebtCalculationContext)
+
+/**
+ * Housing-fee debt calculation, one company at a time.
+ *
+ * State lives in React rather than an antd Form: there is no submit here, and
+ * an editable month × field matrix in a Form.List would cost more than any
+ * validation it might buy.
+ */
+const DebtCalculationBlock: React.FC = () => {
+  const { domainIds: allowedDomainIds, isLoading: isAccessLoading } =
+    useDebtCalculationAccess()
+
+  const [domainId, setDomainId] = useState<string | undefined>()
+  const [companyId, setCompanyId] = useState<string | undefined>()
+  const [from, setFrom] = useState<Dayjs | undefined>(() =>
+    dayjs().subtract(1, 'year').startOf('month')
+  )
+  const [to, setTo] = useState<Dayjs | undefined>(() =>
+    dayjs().subtract(1, 'month').startOf('month')
+  )
+  const [annualRatePercent, setAnnualRatePercent] = useState(
+    DEFAULT_ANNUAL_RATE_PERCENT
+  )
+  const [inflationMethod, setInflationMethod] =
+    useState<InflationMethod>('balance')
+  const [overrides, setOverrides] = useState<IApartmentOverrides>({})
+
+  // Deep link, e.g. from the assistant's photo import:
+  // /debt-calculation?domainId=…&companyId=…
+  const router = useRouter()
+  const queryDomainId = router?.query.domainId
+  const queryCompanyId = router?.query.companyId
+  useEffect(() => {
+    if (typeof queryDomainId === 'string') setDomainId(queryDomainId)
+    if (typeof queryCompanyId === 'string') setCompanyId(queryCompanyId)
+  }, [queryDomainId, queryCompanyId])
+
+  const { data: { data: companies } = { data: [] }, isLoading: isCompanies } =
+    useGetAllRealEstateQuery({ domainId, archived: false }, { skip: !domainId })
+
+  const company = useMemo(
+    () => (companies ?? []).find(({ _id }) => _id === companyId),
+    [companies, companyId]
+  )
+
+  const fromYearMonth = useMemo(() => toYearMonth(from), [from])
+  const toYearMonthValue = useMemo(() => toYearMonth(to), [to])
+
+  const { data: indexes = [], isLoading: isIndexes } =
+    useGetInflationIndexesQuery(
+      {
+        from: fromYearMonth && formatPeriod(fromYearMonth),
+        to: toYearMonthValue && formatPeriod(toYearMonthValue),
+      },
+      { skip: !from || !to }
+    )
+
+  const indexByPeriod = useMemo(() => indexesByPeriod(indexes), [indexes])
+
+  const {
+    data: { data: payments } = { data: [] },
+    isLoading: isPayments,
+    refetch: refetchPayments,
+  } = useGetAllPaymentsQuery(
+    {
+      limit: PREFILL_PAYMENTS_LIMIT,
+      domainIds: [domainId],
+      companyIds: [companyId],
+    },
+    { skip: !domainId || !companyId }
+  )
+
+  const { data: { data: services } = { data: [] }, isLoading: isServices } =
+    useGetAllServicesQuery(
+      { domainId, limit: PREFILL_SERVICES_LIMIT },
+      { skip: !domainId }
+    )
+
+  const prefillMonths = useMemo(
+    () =>
+      companyId ? buildMonthPrefill({ companyId, payments, services }) : {},
+    [companyId, payments, services]
+  )
+
+  const {
+    data: saved,
+    isFetching: isSavedFetching,
+    refetch: refetchSaved,
+  } = useGetDebtCalculationQuery(
+    { domainId, companyId },
+    { skip: !domainId || !companyId }
+  )
+
+  // What comes from the DB or the draft is applied exactly once per company,
+  // otherwise every refetch would clobber what the user is typing right now.
+  const appliedKey = useRef<string>('')
+  const [isApplied, setIsApplied] = useState(false)
+  // Bumped to re-run the load below after an import.
+  const [reloadTick, setReloadTick] = useState(0)
+  const targetKey = domainId && companyId ? `${domainId}:${companyId}` : ''
+
+  /**
+   * Switching company blanks the form and re-arms the load below.
+   *
+   * Declared BEFORE that effect on purpose: effects fire in declaration order
+   * within one commit, so blanking has to come first. The other way round it
+   * wiped the snapshot the load had just applied, and since `appliedKey` was
+   * already marked the load never ran again - the company's data was simply
+   * gone. It showed up whenever RTK served the company from cache, i.e. every
+   * time you came back to one you had already opened.
+   */
+  useEffect(() => {
+    appliedKey.current = ''
+    setIsApplied(false)
+    setOverrides({})
+  }, [targetKey])
+
+  useEffect(() => {
+    if (!domainId || !companyId || isSavedFetching) return
+
+    const key = `${domainId}:${companyId}`
+    if (appliedKey.current === key) return
+    appliedKey.current = key
+
+    const draft = readDraft(draftKey(domainId, companyId))
+    const snapshot: IDebtCalculationSnapshot | undefined = isDraftNewer(
+      draft,
+      saved?.updatedAt
+    )
+      ? draft.snapshot
+      : (saved as IDebtCalculationSnapshot | undefined)
+
+    setOverrides(snapshot?.overrides?.[companyId] ?? {})
+    setAnnualRatePercent(
+      snapshot?.annualRatePercent ?? DEFAULT_ANNUAL_RATE_PERCENT
+    )
+    setInflationMethod(snapshot?.inflationMethod ?? 'balance')
+    if (snapshot?.periodFrom) setFrom(toDayjs(snapshot.periodFrom))
+    if (snapshot?.periodTo) setTo(toDayjs(snapshot.periodTo))
+    setIsApplied(true)
+  }, [domainId, companyId, saved, isSavedFetching, reloadTick])
+
+  // Months imported from photos into the company on screen: stop autosave at
+  // once - the form still holds the pre-import months and would write them
+  // back - then load the merged record afresh.
+  useEffect(() => {
+    const onImported = (event: Event) => {
+      const detail = (event as CustomEvent<IDebtImportedDetail>).detail
+      if (detail?.domainId !== domainId || detail?.companyId !== companyId) {
+        return
+      }
+
+      setIsApplied(false)
+      refetchSaved().finally(() => {
+        appliedKey.current = ''
+        setReloadTick((tick) => tick + 1)
+      })
+    }
+
+    window.addEventListener(DEBT_IMPORTED_EVENT, onImported)
+    return () => window.removeEventListener(DEBT_IMPORTED_EVENT, onImported)
+  }, [domainId, companyId, refetchSaved])
+
+  const openingDebtPrefill = useMemo(
+    () => prefillOpeningDebt(prefillMonths, fromYearMonth),
+    [prefillMonths, fromYearMonth]
+  )
+
+  const result = useMemo(
+    () =>
+      companyId
+        ? calculateDebt(
+            buildDebtCalculationInput({
+              company,
+              from: fromYearMonth,
+              to: toYearMonthValue,
+              indexByPeriod,
+              overrides,
+              prefillMonths,
+              prefillOpeningDebt: openingDebtPrefill,
+              annualRatePercent,
+              inflationMethod,
+            })
+          )
+        : undefined,
+    [
+      companyId,
+      company,
+      fromYearMonth,
+      toYearMonthValue,
+      indexByPeriod,
+      overrides,
+      prefillMonths,
+      openingDebtPrefill,
+      annualRatePercent,
+      inflationMethod,
+    ]
+  )
+
+  const snapshot = useMemo<IDebtCalculationSnapshot>(
+    () => ({
+      domain: domainId,
+      company: companyId,
+      periodFrom: fromYearMonth,
+      periodTo: toYearMonthValue,
+      annualRatePercent,
+      inflationMethod,
+      overrides: companyId ? { [companyId]: overrides } : {},
+    }),
+    [
+      domainId,
+      companyId,
+      fromYearMonth,
+      toYearMonthValue,
+      annualRatePercent,
+      inflationMethod,
+      overrides,
+    ]
+  )
+
+  // Runs for its side effects only: the draft, the debounced write and the
+  // flush on company change. Its state is no longer surfaced in the UI.
+  useAutoSave({ domainId, companyId, snapshot, enabled: isApplied })
+
+  const setApartmentOverride = (patch: Partial<IApartmentOverrides>) =>
+    setOverrides((prev) => ({ ...prev, ...patch }))
+
+  const clearTypedFigures = (periods: string[], openingDebt: boolean) =>
+    setOverrides((prev) => withoutTypedFigures(prev, periods, openingDebt))
+
+  const setMonthOverride = (period: string, patch: IMonthOverride) =>
+    setOverrides((prev) => ({
+      ...prev,
+      months: {
+        ...prev.months,
+        [period]: {
+          ...prev.months?.[period],
+          ...patch,
+          // Touched by hand: no longer "as read off the photo".
+          source: undefined,
+          // The edit stamp sits next to the value; the page reads it to show
+          // when this month was last touched by hand.
+          updatedAt: new Date().toISOString(),
+        },
+      },
+    }))
+
+  const value: IDebtCalculationContext = {
+    allowedDomainIds,
+    domainId,
+    setDomainId,
+    companies: companies ?? [],
+    companyId,
+    setCompanyId,
+    company,
+    from,
+    to,
+    setFrom,
+    setTo,
+    annualRatePercent,
+    setAnnualRatePercent,
+    inflationMethod,
+    setInflationMethod,
+    result,
+    overrides,
+    prefillMonths,
+    openingDebtPrefill,
+    openingDebt: overrides.openingDebt ?? openingDebtPrefill ?? 0,
+    refetchPayments: () => {
+      if (domainId && companyId) refetchPayments()
+    },
+    clearTypedFigures,
+    indexByPeriod,
+    setApartmentOverride,
+    setMonthOverride,
+    isLoading:
+      isAccessLoading || isCompanies || isIndexes || isPayments || isServices,
+  }
+
+  if (!isAccessLoading && allowedDomainIds.length === 0) {
+    return (
+      <Alert
+        showIcon
+        type="info"
+        message="Розрахунок заборгованості недоступний"
+        description="Жоден домен не має послуги «Квартплата». Додайте домену шаблон «Квартплата» — і сторінка запрацює."
+      />
+    )
+  }
+
+  return (
+    <DebtCalculationContext.Provider value={value}>
+      <TableCard title={<DebtCalculationHeader />}>
+        <DebtCalculationBody />
+      </TableCard>
+    </DebtCalculationContext.Provider>
+  )
+}
+
+export default DebtCalculationBlock
