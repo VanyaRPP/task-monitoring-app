@@ -13,14 +13,8 @@ import ServicesBlock from '@components/DashboardPage/blocks/services'
 import StreetsBlock from '@components/DashboardPage/blocks/streets'
 import CompaniesAreaChart from '@components/DashboardPage/blocks/сompaniesAreaChart'
 import { Roles } from '@utils/constants'
-import { Col, Row, Space, Button, Flex, message, Tooltip, Dropdown } from 'antd'
-import {
-  CloseOutlined,
-  SaveOutlined,
-  UndoOutlined,
-  EyeOutlined,
-  QuestionCircleOutlined,
-} from '@ant-design/icons'
+import { Col, Row, Space, Button, Flex, message } from 'antd'
+import { QuestionCircleOutlined } from '@ant-design/icons'
 import PaymentsChart from '@components/DashboardPage/blocks/paymentChart'
 import ProfitPage from '@components/Pages/ProfiitPage'
 import { addButton, removeButton } from '@modules/store/floatButtonSlice'
@@ -30,8 +24,7 @@ import {
 } from '@modules/hooks/useFloatButton'
 import { useDispatch } from 'react-redux'
 import s from './style.module.scss'
-import useTheme from '@modules/hooks/useTheme'
-import WidgetVisibilityMenu from '@components/UI/WidgetVisibilityMenu'
+import LayoutEditToolbar from '@components/UI/LayoutEditToolbar'
 import { WidgetWrapper } from '@components/UI/WidgetWrapper'
 import DashboardTour from '@components/DashboardPage/DashboardTour'
 import {
@@ -46,7 +39,6 @@ import {
 import {
   SortableContext,
   verticalListSortingStrategy,
-  horizontalListSortingStrategy,
   useSortable,
   arrayMove,
 } from '@dnd-kit/sortable'
@@ -133,52 +125,6 @@ const SortableWidget: React.FC<SortableWidgetProps> = ({
   )
 }
 
-interface SortableToolbarButtonProps {
-  id: string
-  onClick: () => void
-  children: React.ReactNode
-}
-
-const SortableToolbarButton: React.FC<SortableToolbarButtonProps> = ({
-  id,
-  onClick,
-  children,
-}) => {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id })
-
-  const style: React.CSSProperties = {
-    transform: transform
-      ? CSS.Translate.toString({ ...transform, y: 0 })
-      : undefined,
-    transition: isDragging ? 'none' : transition,
-    opacity: isDragging ? 0.5 : 1,
-    zIndex: isDragging ? 999 : 'auto',
-    cursor: isDragging ? 'grabbing' : 'grab',
-    touchAction: 'none',
-    display: 'flex',
-    willChange: 'transform',
-  }
-
-  return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      <Button
-        type="link"
-        onClick={onClick}
-        style={{ pointerEvents: isDragging ? 'none' : 'auto' }}
-      >
-        {children}
-      </Button>
-    </div>
-  )
-}
-
 const Dashboard: React.FC = () => {
   const dispatch = useDispatch()
   const { data: userResponse } = useGetCurrentUserQuery()
@@ -189,9 +135,6 @@ const Dashboard: React.FC = () => {
     useEditModelFloatButton('dashboard')
   const [isPanelVisible, togglePanelVisible, panelFloatButton] =
     useDragDropPanelFloatButton('dashboard')
-
-  const [theme] = useTheme()
-  const isDark = theme === 'dark'
 
   useEffect(() => {
     if (isPanelVisible && !isEditMode) {
@@ -261,17 +204,6 @@ const Dashboard: React.FC = () => {
     [orderedWidgets, hiddenWidget]
   )
 
-  const menu = (
-    <div style={{ padding: 8 }}>
-      <WidgetVisibilityMenu
-        hidden={hiddenWidget}
-        onChange={setHiddenWidget}
-        available={orderedWidgets}
-        labels={widgetLabels}
-      />
-    </div>
-  )
-
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 5 },
@@ -285,24 +217,28 @@ const Dashboard: React.FC = () => {
     document.body.style.cursor = 'grabbing'
   }, [])
 
-  const getWidgetKey = (id: string | number): WidgetKey =>
-    String(id).replace('toolbar-', '') as WidgetKey
+  const moveWidget = useCallback((activeKey: WidgetKey, overKey: WidgetKey) => {
+    setOrderedWidgets((prev) =>
+      arrayMove(prev, prev.indexOf(activeKey), prev.indexOf(overKey))
+    )
+  }, [])
 
-  const handleDragEnd = useCallback((event: DragEndEvent) => {
-    setIsDraggingActive(false)
-    document.body.style.cursor = ''
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      setIsDraggingActive(false)
+      document.body.style.cursor = ''
 
-    const { active, over } = event
-    if (!over || active.id === over.id) return
+      const { active, over } = event
+      if (!over || active.id === over.id) return
+      moveWidget(active.id as WidgetKey, over.id as WidgetKey)
+    },
+    [moveWidget]
+  )
 
-    const activeKey = getWidgetKey(active.id)
-    const overKey = getWidgetKey(over.id)
-
-    setOrderedWidgets((prev) => {
-      const oldIndex = prev.indexOf(activeKey)
-      const newIndex = prev.indexOf(overKey)
-      return arrayMove(prev, oldIndex, newIndex)
-    })
+  const scrollToWidget = useCallback((key: WidgetKey) => {
+    document
+      .getElementById(key)
+      ?.scrollIntoView({ behavior: 'smooth', block: 'center' })
   }, [])
 
   const handleDragCancel = useCallback(() => {
@@ -335,65 +271,19 @@ const Dashboard: React.FC = () => {
   return (
     <div className={s.wrapper}>
       {isPanelVisible && (
-        <div className={`${s.toolbar} ${isDark ? s.dark : s.light}`}>
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
-          >
-            <SortableContext
-              items={renderedWidgets.map((k) => `toolbar-${k}`)}
-              strategy={horizontalListSortingStrategy}
-            >
-              <div className={s.buttonsBlock}>
-                {renderedWidgets.map((key) => (
-                  <SortableToolbarButton
-                    key={`toolbar-${key}`}
-                    id={`toolbar-${key}`}
-                    onClick={() => {
-                      const element = document.getElementById(key)
-                      if (element) {
-                        element.scrollIntoView({
-                          behavior: 'smooth',
-                          block: 'center',
-                        })
-                      }
-                    }}
-                  >
-                    {widgetLabels[key]}
-                  </SortableToolbarButton>
-                ))}
-              </div>
-            </SortableContext>
-          </DndContext>
-          <div className={s.actions}>
-            <div
-              className={s.divider}
-              style={{ backgroundColor: isDark ? '#555' : '#ccc' }}
-            />
-            <Dropdown overlay={menu} trigger={['click']}>
-              <Tooltip title="Приховати віджети">
-                <Button icon={<EyeOutlined />} />
-              </Tooltip>
-            </Dropdown>
-
-            <Tooltip title="Відновати">
-              <Button
-                icon={<UndoOutlined />}
-                onClick={() => handleLayoutAction('revert')}
-              />
-            </Tooltip>
-            <Tooltip title="Зберегти">
-              <Button
-                icon={<SaveOutlined />}
-                onClick={() => handleLayoutAction('save')}
-              />
-            </Tooltip>
-            <Tooltip title="Вийти з режиму редагування">
-              <Button icon={<CloseOutlined />} onClick={togglePanelVisible} />
-            </Tooltip>
-          </div>
-        </div>
+        <LayoutEditToolbar
+          hideTitle="Приховати віджети"
+          hidden={hiddenWidget}
+          onHiddenChange={setHiddenWidget}
+          available={orderedWidgets}
+          labels={widgetLabels}
+          onReset={() => handleLayoutAction('revert')}
+          onSave={() => handleLayoutAction('save')}
+          onClose={togglePanelVisible}
+          items={renderedWidgets}
+          onMove={moveWidget}
+          onItemClick={scrollToWidget}
+        />
       )}
       {isLayoutReady && (
         <DndContext

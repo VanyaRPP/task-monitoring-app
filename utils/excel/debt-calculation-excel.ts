@@ -70,7 +70,7 @@ export const toXlsxStyle = (cell: IExcelCell): Record<string, unknown> => ({
 })
 
 /** Column widths: the first fits month names, the rest fit numbers. */
-const COLUMN_WIDTHS = [18, 13, 13, 11, 14, 12, 14, 8, 13, 12, 14]
+const COLUMN_WIDTHS = [18, 14, 13, 13, 12, 11, 14, 12, 14, 8, 13, 12, 14]
 const COLUMN_COUNT = COLUMN_WIDTHS.length
 
 const MONEY = '0.00'
@@ -83,12 +83,14 @@ const METHOD_LABEL: Record<InflationMethod, string> = {
 
 const TABLE_HEAD = [
   'Місяць',
+  'Вхідне сальдо',
   'Сплачено',
   'Нараховано',
+  'Коректура',
   'Площа, м²',
   'Тариф, грн/м²',
   'Річних',
-  'Сума боргу',
+  'Вихідне сальдо',
   'Днів',
   'Індекс інфляції, %',
   'Коефіцієнт',
@@ -197,9 +199,21 @@ export const buildDebtCalculationDocument = ({
     ...result.rows.map((month) =>
       row(
         { v: monthLabel(month), border: true },
+        {
+          v: money(month.opening),
+          border: true,
+          numFmt: MONEY,
+          align: 'right',
+        },
         { v: money(month.paid), border: true, numFmt: MONEY, align: 'right' },
         {
           v: money(month.charged),
+          border: true,
+          numFmt: MONEY,
+          align: 'right',
+        },
+        {
+          v: money(month.correction),
           border: true,
           numFmt: MONEY,
           align: 'right',
@@ -242,6 +256,7 @@ export const buildDebtCalculationDocument = ({
     ),
     row(
       { v: 'Всього', bold: true, border: true, fill: 'total' },
+      { v: '', border: true, fill: 'total' },
       {
         v: money(result.totals.paid),
         bold: true,
@@ -252,6 +267,14 @@ export const buildDebtCalculationDocument = ({
       },
       {
         v: money(result.totals.charged),
+        bold: true,
+        border: true,
+        fill: 'total',
+        numFmt: MONEY,
+        align: 'right',
+      },
+      {
+        v: money(result.totals.correction),
         bold: true,
         border: true,
         fill: 'total',

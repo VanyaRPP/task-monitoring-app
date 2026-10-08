@@ -8,7 +8,8 @@
     background: #1a1a1a;
   }
 
-  .aiBubble {
+  .aiBubble,
+  .importCard {
     background: #262626;
   }
 
@@ -177,9 +178,156 @@
   padding: 12px;
   border-top: 1px solid rgba(117, 47, 214, 0.2);
   background: #f7f5fa;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.chatDragging {
+  border-color: #752fd6;
+}
+
+.dropOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed #752fd6;
+  border-radius: 16px;
+  background: rgba(117, 47, 214, 0.12);
+  color: #752fd6;
+  font-weight: 600;
+  pointer-events: none;
+}
+
+.importPlan {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+}
+
+.importConflictsHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.importConflict {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+  border-top: 1px solid rgba(117, 47, 214, 0.1);
+}
+
+.importProgress {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.importProgressName {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.importOk {
+  color: #52c41a;
+}
+
+.photoButton {
+  flex-shrink: 0;
+  color: #752fd6 !important;
+}
+
+.messagePhoto {
+  display: block;
+  max-width: 180px;
+  max-height: 180px;
+  border-radius: 8px;
+  margin-bottom: 4px;
+  object-fit: cover;
+}
+
+// The import card spans the window instead of sitting in a narrow bubble.
+.cardRow {
+  max-width: 100%;
+  width: 100%;
+}
+
+.cardColumn {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.importCard {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border-bottom-left-radius: 2px;
+  border: 1px solid rgba(117, 47, 214, 0.2);
+  background: #ffffff;
+  font-size: 13px;
+}
+
+.importMeta {
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.importIssues {
+  font-size: 12px;
+
+  ul {
+    margin: 0;
+    padding-left: 16px;
+  }
+}
+
+.importTableLink {
+  align-self: flex-start;
+  padding: 0 !important;
+  height: auto !important;
+}
+
+.importPicker {
+  width: 100%;
+}
+
+.importHint {
+  font-size: 11px;
+}
+
+.importActions {
+  margin-top: 2px;
+}
+
+.importFlag {
+  color: #faad14;
+  margin-right: 4px;
+}
+
+.importRowFlagged > td {
+  background: rgba(250, 173, 20, 0.12) !important;
 }
 
 .chatInput {
+  flex: 1;
   border-radius: 20px !important;
   border: 1px solid rgba(117, 47, 214, 0.2) !important;
 

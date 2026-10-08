@@ -1,6 +1,6 @@
 import { IPayment } from '@common/api/paymentApi/payment.api.types'
 import { isDev } from '@utils/env'
-import nodemailer from 'nodemailer'
+import nodemailer, { type SendMailOptions } from 'nodemailer'
 
 const REQUIRED_EMAIL_ENV_VARS = [
   'EMAIL_SERVER_HOST',
@@ -112,7 +112,7 @@ export async function sendInvoiceEmail(
     return false
   }
 
-  let attachments: nodemailer.SendMailOptions['attachments']
+  let attachments: SendMailOptions['attachments']
   if (html) {
     logEmailDebug('pdf_generation_started', { invoiceId })
 

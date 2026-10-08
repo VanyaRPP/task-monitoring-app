@@ -86,18 +86,20 @@ describe('buildDebtCalculationDocument — таблиця', () => {
   it('має всі колонки, що рендеряться на сторінці', () => {
     expect(header.map((cell) => cell.v)).toEqual([
       'Місяць',
+      'Вхідне сальдо',
       'Сплачено',
       'Нараховано',
+      'Коректура',
       'Площа, м²',
       'Тариф, грн/м²',
       'Річних',
-      'Сума боргу',
+      'Вихідне сальдо',
       'Днів',
       'Індекс інфляції, %',
       'Коефіцієнт',
       'Інфляційні',
     ])
-    expect(columns).toHaveLength(11)
+    expect(columns).toHaveLength(13)
   })
 
   it('шапка таблиці в рамці та із заливкою', () => {
@@ -109,19 +111,22 @@ describe('buildDebtCalculationDocument — таблиця', () => {
   it('рядок на кожен місяць, усі клітинки в рамці', () => {
     const january = findRow(rows, 'Січень 2026')
 
-    expect(january).toHaveLength(11)
+    expect(january).toHaveLength(13)
     expect(january.every((cell) => cell.border)).toBe(true)
-    expect(january[6].v).toBeCloseTo(result.rows[0].debt, 2)
-    expect(january[7].v).toBe(31)
+    expect(january[1].v).toBeCloseTo(result.rows[0].opening, 2)
+    expect(january[4].v).toBeCloseTo(result.rows[0].correction, 2)
+    expect(january[8].v).toBeCloseTo(result.rows[0].debt, 2)
+    expect(january[9].v).toBe(31)
   })
 
   it('підсумковий рядок таблиці з виділенням', () => {
     const totals = findRow(rows, 'Всього')
 
-    expect(totals[1].v).toBeCloseTo(result.totals.paid, 2)
-    expect(totals[2].v).toBeCloseTo(result.totals.charged, 2)
-    expect(totals[6].v).toBeCloseTo(result.body, 2)
-    expect(totals[7].v).toBe(result.totals.days)
+    expect(totals[2].v).toBeCloseTo(result.totals.paid, 2)
+    expect(totals[3].v).toBeCloseTo(result.totals.charged, 2)
+    expect(totals[4].v).toBeCloseTo(result.totals.correction, 2)
+    expect(totals[8].v).toBeCloseTo(result.body, 2)
+    expect(totals[9].v).toBe(result.totals.days)
     expect(totals.every((cell) => cell.fill === 'total')).toBe(true)
   })
 })

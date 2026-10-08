@@ -38,13 +38,13 @@ jest.mock('@modules/hooks/useInvoiceCurrency', () => ({
 }))
 
 // eslint-disable-next-line import/first
-import { ElectricitySum } from './cells/Electricity'
+import { ElectricitySum } from '../cells/Electricity'
 // eslint-disable-next-line import/first
-import ElectricityInvoiceRow from '../EditInvoiceTable/Electricity'
+import ElectricityInvoiceRow from '../../EditInvoiceTable/Electricity'
 // eslint-disable-next-line import/first
 import { LossesCollapse } from '@components/Losses/LossesCollapse'
 // eslint-disable-next-line import/first
-import { buildTypedInvoiceEntry } from './buildTypedInvoiceEntry'
+import { buildTypedInvoiceEntry } from '../invoice/buildTypedInvoiceEntry'
 
 const CUSTOM_SERVICE = {
   _id: '68a0000000000000000000a1',

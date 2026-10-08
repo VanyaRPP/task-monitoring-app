@@ -24,6 +24,11 @@ export interface IDebtMonthInput extends IYearMonth {
   tariff?: number
   /** Charged, UAH. Computed as `area × tariff` when omitted. */
   charged?: number
+  /**
+   * Correction (recalculation) of the month, UAH, as a change to the debt:
+   * negative lowers it. Billing printouts carry it in its own column.
+   */
+  correction?: number
   /** Paid, UAH. */
   paid?: number
   /** Monthly consumer price index, %: `100.8` means +0.8%. */
@@ -55,10 +60,14 @@ export interface IDebtCalculationInput {
 
 /** A calculated month - one row of the monthly breakdown. */
 export interface IDebtMonthRow extends IYearMonth {
+  /** Debt at the start of the month, UAH - the previous month's closing. */
+  opening: number
   area: number
   tariff: number
   /** Charged, UAH (column D of the Act). */
   charged: number
+  /** Correction, UAH: the month's change to the debt, negative lowers it. */
+  correction: number
   /** Paid, UAH (column C). */
   paid: number
   /** Debt at month end, UAH (column I). */
@@ -79,6 +88,7 @@ export interface IDebtCalculationResult {
   rows: IDebtMonthRow[]
   totals: {
     charged: number
+    correction: number
     paid: number
     /** Interest summed over every month - this is what the summary shows. */
     interest: number

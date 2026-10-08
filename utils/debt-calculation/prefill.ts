@@ -3,7 +3,37 @@ import { Operations, ServiceType } from '@utils/constants'
 import { resolveServiceType } from '@utils/domain/resolve-service-type'
 import dayjs from 'dayjs'
 import { IMonthOverride } from './build-input'
-import { formatPeriod, yearMonthOf } from './months'
+import {
+  formatPeriod,
+  IYearMonth,
+  parsePeriod,
+  periodKey,
+  yearMonthOf,
+} from './months'
+
+/**
+ * `fieldName` of the invoice line that carries a debt brought in from outside
+ * the system - the «Вхідне сальдо» invoice a photo import creates at the start
+ * of the known history. It is a debt, not a charge for that month.
+ */
+export const OPENING_BALANCE_FIELD = 'openingBalance'
+
+export const isOpeningBalanceLine = (line?: IPaymentField): boolean =>
+  line?.fieldName === OPENING_BALANCE_FIELD
+
+/**
+ * `fieldName` of a housing-fee line that corrects the month's charge (a
+ * recalculation, usually negative). It stays a housing-fee line - everything
+ * summing the housing fee sees the net - but the debt page shows it in its
+ * own column.
+ */
+export const CORRECTION_FIELD = 'housingFeeCorrection'
+
+/** A month of the prefill: the calculation's inputs plus a debt brought in. */
+export interface IMonthPrefill extends IMonthOverride {
+  /** Sum of «Вхідне сальдо» lines dated this month. */
+  openingBalance?: number
+}
 
 /** What the prefill needs from a payment. Structurally compatible with IExtendedPayment. */
 export interface IPrefillPayment {
@@ -36,7 +66,7 @@ export interface IBuildMonthPrefillArgs {
  * time and land in the DB as a UTC instant a few hours earlier. Reading them
  * with `getUTCMonth` would shift such a record into the previous month.
  */
-const periodOfDate = (
+export const periodOfDate = (
   value?: Date | string,
   timeZone?: string
 ): string | undefined => {
@@ -52,8 +82,8 @@ const periodOfDate = (
 const idOf = (value?: string | { _id?: string }): string =>
   typeof value === 'string' ? value : String(value?._id ?? '')
 
-const isHousingFeeLine = (line?: IPaymentField): boolean => {
-  if (!line) return false
+export const isHousingFeeLine = (line?: IPaymentField): boolean => {
+  if (!line || isOpeningBalanceLine(line)) return false
   if (line.type === ServiceType.HousingFee) return true
 
   return (
@@ -81,10 +111,17 @@ export const housingFeeCharged = (
   return lines.reduce((acc, { sum }) => acc + (Number(sum) || 0), 0)
 }
 
+/** The correction lines of an invoice summed; 0 when there are none. */
+export const housingFeeCorrection = (payment?: IPrefillPayment): number =>
+  (payment?.invoice ?? [])
+    .filter((line) => line?.fieldName === CORRECTION_FIELD)
+    .reduce((acc, { sum }) => acc + (Number(sum) || 0), 0)
+
 /**
  * Builds the per-month prefill from what the DB already holds: the tariff
  * from the domain's monthly services, charges from debit invoices, payments
- * from credit records.
+ * from credit records, and any «Вхідне сальдо» (see
+ * {@link prefillOpeningDebt}).
  *
  * This is strictly a PREFILL: the user's manual edits live separately and
  * always win over it (see `buildDebtCalculationInput`).
@@ -94,9 +131,9 @@ export const buildMonthPrefill = ({
   payments = [],
   services = [],
   timeZone,
-}: IBuildMonthPrefillArgs): Record<string, IMonthOverride> => {
-  const prefill: Record<string, IMonthOverride> = {}
-  const at = (period: string): IMonthOverride =>
+}: IBuildMonthPrefillArgs): Record<string, IMonthPrefill> => {
+  const prefill: Record<string, IMonthPrefill> = {}
+  const at = (period: string): IMonthPrefill =>
     (prefill[period] = prefill[period] ?? {})
 
   for (const service of services) {
@@ -136,9 +173,62 @@ export const buildMonthPrefill = ({
 
     const charged = housingFeeCharged(payment)
     if (charged != null) {
-      at(period).charged = (at(period).charged ?? 0) + charged
+      const correction = housingFeeCorrection(payment)
+      at(period).charged = (at(period).charged ?? 0) + charged - correction
+      if (correction !== 0) {
+        at(period).correction = (at(period).correction ?? 0) + correction
+      }
+    }
+
+    const brought = (payment.invoice ?? []).filter(isOpeningBalanceLine)
+    if (brought.length > 0) {
+      at(period).openingBalance = brought.reduce(
+        (acc, { sum }) => acc + (Number(sum) || 0),
+        at(period).openingBalance ?? 0
+      )
     }
   }
 
   return prefill
+}
+
+const round2 = (value: number): number => Math.round(value * 100) / 100
+
+/**
+ * The debt at the start of `from`, as the DB tells it - or `undefined` when
+ * the DB cannot tell (no «Вхідне сальдо» at or before `from`), in which case
+ * the opening debt stays manual as before.
+ *
+ * History starts at the earliest «Вхідне сальдо»; from there every month's
+ * charges minus payments up to `from` are carried in. So a period that starts
+ * later than the imported history still opens with the right debt.
+ */
+export const prefillOpeningDebt = (
+  prefill: Record<string, IMonthPrefill>,
+  from?: IYearMonth
+): number | undefined => {
+  if (!from) return undefined
+
+  const start = periodKey(from)
+  const months = Object.entries(prefill)
+    .map(([period, month]) => ({ key: parsePeriod(period), month }))
+    .filter(
+      (entry): entry is { key: IYearMonth; month: IMonthPrefill } =>
+        !!entry.key && periodKey(entry.key) <= start
+    )
+
+  const brought = months.filter(({ month }) => month.openingBalance)
+  if (brought.length === 0) return undefined
+
+  const historyStart = Math.min(...brought.map(({ key }) => periodKey(key)))
+
+  const debt = months
+    .filter(({ key }) => periodKey(key) >= historyStart)
+    .reduce((acc, { key, month }) => {
+      const carried =
+        periodKey(key) < start ? (month.charged ?? 0) - (month.paid ?? 0) : 0
+      return acc + (month.openingBalance ?? 0) + carried
+    }, 0)
+
+  return round2(debt)
 }

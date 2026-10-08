@@ -116,7 +116,7 @@ describe('syncInflationIndexes на збережених сторінках', ()
 
     await syncInflationIndexes(SOURCES, fixtureFetch)
 
-    expect(await findMonth(2021, 10)).toBeNull()
+    expect(await findMonth(2014, 12)).toBeNull()
     expect(await findMonth(2014, 1)).toBeNull()
   })
 
