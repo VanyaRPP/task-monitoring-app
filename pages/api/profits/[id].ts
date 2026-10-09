@@ -3,6 +3,7 @@ import Profit from '@modules/models/Profit'
 import RealEstate from '@modules/models/RealEstate'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getCurrentUser } from '@utils/getCurrentUser'
+import { normalizeProfitItems } from '@utils/profit-items'
 
 /**
  * @swagger
@@ -59,6 +60,12 @@ import { getCurrentUser } from '@utils/getCurrentUser'
  *             properties:
  *               amount:
  *                 type: number
+ *                 description: Ignored when items are sent - it is their sum
+ *               items:
+ *                 type: array
+ *                 description: Replaces the lines; amount and categories follow them
+ *                 items:
+ *                   $ref: '#/components/schemas/ProfitItem'
  *               type:
  *                 type: string
  *                 enum: [credit, debit]
@@ -143,7 +150,22 @@ export default async function handler(
       }
 
       case 'PATCH': {
-        const updated = await ProfitService.update(id as string, req.body)
+        let body = req.body
+        if (body?.items !== undefined) {
+          const lines = normalizeProfitItems(body.items)
+          if (!lines.ok) {
+            return res
+              .status(400)
+              .json({ success: false, message: lines.error })
+          }
+          body = {
+            ...body,
+            items: lines.items,
+            amount: lines.amount,
+            categories: lines.categories,
+          }
+        }
+        const updated = await ProfitService.update(id as string, body)
         return res.status(200).json({ success: true, data: updated })
       }
 

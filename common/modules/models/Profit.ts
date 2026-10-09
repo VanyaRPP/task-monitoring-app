@@ -1,5 +1,6 @@
 import mongoose, { Schema, Types, Document, Model } from 'mongoose'
 import { Currency } from '@utils/constants'
+import type { IProfitItem } from '@utils/profit-items'
 
 export interface ProfitDocument extends Document {
   /**
@@ -16,6 +17,12 @@ export interface ProfitDocument extends Document {
   amount: number
   type: 'debit' | 'credit' // 'debit' = витрата (-), 'credit' = прибуток (+)
   categories?: string[]
+  /**
+   * One receipt split by category, each line with its own amount. When set,
+   * `amount` is their sum and `categories` their distinct categories (both
+   * derived server-side, see normalizeProfitItems). Absent on older records.
+   */
+  items?: IProfitItem[]
   description?: string
   invoiceNumber?: string
   /** When the money actually moved. */
@@ -64,6 +71,11 @@ export interface ProfitDocument extends Document {
  *           items:
  *             type: string
  *           example: ["salary", "bonus"]
+ *         items:
+ *           type: array
+ *           description: Lines of one receipt; amount is their sum
+ *           items:
+ *             $ref: '#/components/schemas/ProfitItem'
  *         description:
  *           type: string
  *           example: "Bonus for project delivery"
@@ -80,7 +92,31 @@ export interface ProfitDocument extends Document {
  *         updatedAt:
  *           type: string
  *           format: date-time
+ *     ProfitItem:
+ *       type: object
+ *       required:
+ *         - amount
+ *       properties:
+ *         category:
+ *           type: string
+ *           example: "Прибирання"
+ *         amount:
+ *           type: number
+ *           description: Positive; the record's type carries the sign
+ *           example: 2600
+ *         description:
+ *           type: string
+ *           example: "13 × 200"
  */
+const ProfitItemSchema = new Schema<IProfitItem>(
+  {
+    category: { type: String },
+    amount: { type: Number, required: true },
+    description: { type: String },
+  },
+  { _id: false }
+)
+
 const ProfitSchema = new Schema<ProfitDocument>(
   {
     domain: {
@@ -114,6 +150,10 @@ const ProfitSchema = new Schema<ProfitDocument>(
     categories: {
       type: [String],
       default: [],
+    },
+    items: {
+      type: [ProfitItemSchema],
+      default: undefined,
     },
     description: { type: String },
     invoiceNumber: { type: String },

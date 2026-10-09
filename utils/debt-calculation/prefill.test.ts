@@ -64,6 +64,19 @@ describe('housingFeeCharged', () => {
 })
 
 describe('buildMonthPrefill', () => {
+  it('з timeZone читає місяць у цьому поясі — сервер працює в UTC', () => {
+    const services = [
+      { date: new Date('2025-02-28T22:00:00.000Z'), rentPrice: 12 },
+    ]
+
+    expect(buildMonthPrefill({ services, timeZone: 'Europe/Kyiv' })).toEqual({
+      '2025-03': { tariff: 12 },
+    })
+    expect(buildMonthPrefill({ services, timeZone: 'UTC' })).toEqual({
+      '2025-02': { tariff: 12 },
+    })
+  })
+
   it('бере тариф із місячної послуги домену', () => {
     const prefill = buildMonthPrefill({
       services: [

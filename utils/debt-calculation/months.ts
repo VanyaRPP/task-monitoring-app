@@ -85,6 +85,22 @@ export const parsePeriod = (value?: string): IYearMonth | null => {
   return month >= 1 && month <= 12 ? { year, month } : null
 }
 
+export const yearMonthOf = (date: Date, timeZone?: string): IYearMonth => {
+  if (!timeZone) {
+    return { year: date.getFullYear(), month: date.getMonth() + 1 }
+  }
+
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    year: 'numeric',
+    month: 'numeric',
+  }).formatToParts(date)
+  const part = (type: string) =>
+    Number(parts.find((item) => item.type === type)?.value)
+
+  return { year: part('year'), month: part('month') }
+}
+
 /** Formats as `YYYY-MM` - the inverse of {@link parsePeriod}. */
 export const formatPeriod = ({ year, month }: IYearMonth): string =>
   `${year}-${String(month).padStart(2, '0')}`

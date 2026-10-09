@@ -36,7 +36,9 @@ const draft = {
   monthService: 'svc-1',
   generalSum: 5300,
   currency: 'UAH',
+  // Issued in July for March: the summary must say March.
   invoiceCreationDate: new Date('2026-07-01'),
+  period: { year: 2026, month: 3 },
   reciever: { companyName: 'Acme' },
   invoice: [{ name: 'Оренда', sum: 5300 }],
 }
@@ -61,6 +63,8 @@ describe('previewInvoice tool', () => {
     // Compact summary is for the model's reply.
     expect(result.summary.generalSum).toBe(5300)
     expect(result.summary.company).toBe('Acme')
+    expect(result.summary.month).toBe(3)
+    expect(result.summary.year).toBe(2026)
   })
 
   it('passes the bound userContext (not from the model) to the draft', async () => {
