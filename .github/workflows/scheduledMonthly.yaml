@@ -1,0 +1,13 @@
+name: Monthly cron
+on:
+  schedule:
+    - cron: '0 6 10 * *' # 10th of every month at 06:00 UTC, after Derzhstat publishes the CPI
+  workflow_dispatch:
+jobs:
+  cron:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Hit monthly scheduled endpoint
+        run: |
+          curl --fail --silent --show-error \
+            "${{ secrets.CRON_BASE_URL }}/api/sceduled/monthly"
