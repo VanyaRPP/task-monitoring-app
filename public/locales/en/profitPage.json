@@ -48,7 +48,17 @@
     "amountCredit": "Incomes",
     "amountPlaceholder": "Enter amount",
     "description": "Description",
-    "descriptionPlaceholder": "Enter a description"
+    "descriptionPlaceholder": "Enter a description",
+    "amount": "Amount",
+    "items": "Lines",
+    "itemsRequired": "Add at least one line",
+    "itemCategoryPlaceholder": "Category or your own name",
+    "itemAmountRequired": "Enter an amount above zero",
+    "itemDescriptionPlaceholder": "Note",
+    "addItem": "Add line",
+    "removeItem": "Remove line",
+    "splitLegacy": "This record has one amount of {{amount}} for several categories. Split it across the lines.",
+    "scope": "Domain or company"
   },
   "filters": {
     "dateRange": "Date range",
@@ -59,5 +69,15 @@
     "add": "Add",
     "edit": "Edit",
     "delete": "Delete"
+  },
+  "dashboard": {
+    "uncategorized": "Uncategorized"
+  },
+  "scope": {
+    "placeholder": "Choose a domain or company",
+    "domainsGroup": "Domains",
+    "companiesGroup": "Companies",
+    "empty": "No domains or companies available for profits.",
+    "errorLoading": "Could not load domains and companies."
   }
 }
