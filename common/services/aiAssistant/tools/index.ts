@@ -26,37 +26,39 @@ import { sumProfitItems, PROFIT_DEFAULT_CATEGORIES } from '@utils/profit-items'
 
 // Identifier-only input for previewInvoice. The model supplies WHO/WHEN, never
 // the final amounts — those are computed server-side from the Service record.
-const now = new Date()
-const previewInputSchema = z.object({
-  companyId: z
-    .string()
-    .describe('id компанії (отримай через findCompanies за назвою).'),
-  month: z
-    .number()
-    .int()
-    .min(1)
-    .max(12)
-    .optional()
-    .describe(
-      `Місяць 1-12 (за замовчуванням поточний: ${now.getMonth() + 1}).`
-    ),
-  year: z
-    .number()
-    .int()
-    .optional()
-    .describe(`Рік (за замовчуванням поточний: ${now.getFullYear()}).`),
-  extraLines: z
-    .array(z.object({ name: z.string(), sum: z.number() }))
-    .optional()
-    .describe(
-      'Додаткові фіксовані позиції, напр. [{ "name": "Оренда", "sum": 5000 }].'
-    ),
-})
+// Built per request: "the current month" must be today's, not the month the
+// server process happened to start in.
+const makePreviewInputSchema = (now: Date) =>
+  z.object({
+    companyId: z
+      .string()
+      .describe('id компанії (отримай через findCompanies за назвою).'),
+    month: z
+      .number()
+      .int()
+      .min(1)
+      .max(12)
+      .optional()
+      .describe(
+        `Місяць 1-12 (за замовчуванням поточний: ${now.getMonth() + 1}).`
+      ),
+    year: z
+      .number()
+      .int()
+      .optional()
+      .describe(`Рік (за замовчуванням поточний: ${now.getFullYear()}).`),
+    extraLines: z
+      .array(z.object({ name: z.string(), sum: z.number() }))
+      .optional()
+      .describe(
+        'Додаткові фіксовані позиції, напр. [{ "name": "Оренда", "sum": 5000 }].'
+      ),
+  })
 
-type PreviewInput = z.infer<typeof previewInputSchema>
+type PreviewInput = z.infer<ReturnType<typeof makePreviewInputSchema>>
 
 // Normalises month/year defaults for both invoice tools.
-function withDefaults(input: PreviewInput) {
+function withDefaults(input: PreviewInput, now: Date) {
   return {
     companyId: input.companyId,
     month: input.month ?? now.getMonth() + 1,
@@ -141,6 +143,8 @@ const expenseInputSchema = z.object({
 })
 
 export function buildAssistantTools(userContext: UserContext): ToolSet {
+  const now = new Date()
+
   return {
     getMyPayments: tool({
       description:
@@ -220,10 +224,10 @@ export function buildAssistantTools(userContext: UserContext): ToolSet {
         'створення рахунку, заповнену цією чернеткою — НІЧОГО не зберігає в базі. ' +
         'Позиції та ціни беруться з Послуги за місяць (0, якщо не заповнено). ' +
         'Користувач перевіряє форму і зберігає сам. Виклич, коли просять створити рахунок.',
-      inputSchema: previewInputSchema,
+      inputSchema: makePreviewInputSchema(now),
       execute: async (input) => {
         const draft = await buildInvoiceDraft({
-          ...withDefaults(input),
+          ...withDefaults(input, now),
           ctx: userContext,
         })
         // `draft` is consumed by the frontend to open a prefilled AddPaymentModal;

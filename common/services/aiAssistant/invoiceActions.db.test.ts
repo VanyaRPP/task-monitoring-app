@@ -1,6 +1,8 @@
 import mongoose from 'mongoose'
 import { setupTestEnvironment } from '@utils/setupTestEnvironment'
-import { domains, realEstates, streets } from '@utils/testData'
+import { domains, realEstates, streets, users } from '@utils/testData'
+import CustomService from '@modules/models/CustomService'
+import Payment from '@modules/models/Payment'
 import RealEstate from '@modules/models/RealEstate'
 import Service from '@modules/models/Service'
 import type { UserContext } from '@common/services/paymentService/payment.service'
@@ -105,4 +107,184 @@ describe('buildInvoiceDraft against the database', () => {
 
     expect(draft.monthService).toBe(own._id.toString())
   })
+})
+
+describe('buildInvoiceDraft lines', () => {
+  // realEstates[0]: domains[0], street streets[0].
+  const companyId = realEstates[0]._id
+  const street = realEstates[0].street
+
+  // The form only keeps lines of services in the domain's catalog; give
+  // domains[0] electricity, as a real domain gets from its template.
+  beforeEach(() =>
+    CustomService.create({
+      name: 'Електроенергія',
+      fieldName: 'electricityPrice',
+      domain: domainId,
+    })
+  )
+
+  const addMonthService = (m: number, extra: Record<string, unknown> = {}) =>
+    Service.create({
+      domain: domainId,
+      street,
+      date: new Date(Date.UTC(year, m - 1, 1, 12)),
+      rentPrice: 0,
+      electricityPrice: 5,
+      waterPrice: 0,
+      waterPriceTotal: 0,
+      description: '',
+      ...extra,
+    })
+
+  const addDebit = (
+    monthService: unknown,
+    issued: Date,
+    electricityReading: number
+  ) =>
+    Payment.create({
+      invoiceNumber: 9000 + electricityReading,
+      type: 'debit',
+      domain: domainId,
+      street,
+      company: companyId,
+      monthService,
+      invoiceCreationDate: issued,
+      description: '',
+      invoice: [
+        {
+          type: 'electricityPrice',
+          amount: electricityReading,
+          price: 5,
+          sum: 0,
+        },
+      ],
+      generalSum: 0,
+      currency: 'UAH',
+    })
+
+  it("reads previous meters from last month's invoice, even one issued late", async () => {
+    const february = await addMonthService(2)
+    await addMonthService(3)
+    // January's invoice issued in February, and February's issued in March:
+    // by issue date the "previous" one would be the January invoice.
+    const january = await addMonthService(1)
+    await addDebit(january._id, new Date(Date.UTC(year, 1, 5)), 100)
+    // Saved through the API, so the month service id is a string.
+    await addDebit(
+      february._id.toString(),
+      new Date(Date.UTC(year, 2, 20)),
+      250
+    )
+
+    const draft = await buildInvoiceDraft({
+      companyId,
+      year,
+      month,
+      ctx: globalAdmin,
+    })
+
+    const electricity = draft.invoice.find(
+      (line) => line.type === 'electricityPrice'
+    )
+    expect(electricity).toMatchObject({ lastAmount: 250, price: 5 })
+  })
+
+  it('appends the extra lines and adds them up in kopecks', async () => {
+    await addMonthService(3)
+
+    const draft = await buildInvoiceDraft({
+      companyId,
+      year,
+      month,
+      extraLines: [
+        { name: 'Оренда', sum: 0.1 },
+        { name: 'Парковка', sum: 0.2 },
+      ],
+      ctx: globalAdmin,
+    })
+
+    expect(draft.extraLines.map(({ name }) => name)).toEqual([
+      'Оренда',
+      'Парковка',
+    ])
+    expect(draft.invoice.slice(-2)).toEqual(draft.extraLines)
+    const tariffs = draft.invoice
+      .slice(0, -2)
+      .reduce((total, line) => total + Number(line.sum), 0)
+    expect(draft.generalSum).toBeCloseTo(tariffs + 0.3, 2)
+  })
+
+  it('keeps an empty meter line so the form can take the new reading', async () => {
+    await addMonthService(3)
+
+    const draft = await buildInvoiceDraft({
+      companyId,
+      year,
+      month,
+      ctx: globalAdmin,
+    })
+
+    expect(draft.invoice.some((l) => l.type === 'electricityPrice')).toBe(true)
+  })
+
+  it('refuses a company the user may not bill, even by a known id', async () => {
+    await expect(
+      buildInvoiceDraft({
+        companyId: realEstates[1]._id,
+        year,
+        month,
+        ctx: {
+          isUser: false,
+          isDomainAdmin: true,
+          isGlobalAdmin: false,
+          user: { email: users.domainAdmin.email },
+        },
+      })
+    ).rejects.toThrow('company not accessible')
+  })
+})
+
+it('finds last month invoice whichever way its month service id was stored', async () => {
+  const street = realEstates[0].street
+  await CustomService.create({
+    name: 'Електроенергія',
+    fieldName: 'electricityPrice',
+    domain: domainId,
+  })
+  const february = await Service.create({
+    domain: domainId,
+    street,
+    date: new Date(Date.UTC(year, 1, 1, 12)),
+    rentPrice: 0,
+    electricityPrice: 5,
+    waterPrice: 0,
+    waterPriceTotal: 0,
+    description: '',
+  })
+  await Payment.create({
+    invoiceNumber: 9300,
+    type: 'debit',
+    domain: domainId,
+    street,
+    company: realEstates[0]._id,
+    // Written server-side: an ObjectId, not a string.
+    monthService: february._id,
+    invoiceCreationDate: new Date(Date.UTC(year, 1, 20)),
+    description: '',
+    invoice: [{ type: 'electricityPrice', amount: 300, price: 5, sum: 0 }],
+    generalSum: 0,
+    currency: 'UAH',
+  })
+
+  const draft = await buildInvoiceDraft({
+    companyId: realEstates[0]._id,
+    year,
+    month,
+    ctx: globalAdmin,
+  })
+
+  expect(
+    draft.invoice.find((line) => line.type === 'electricityPrice')
+  ).toMatchObject({ lastAmount: 300 })
 })

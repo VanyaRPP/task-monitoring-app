@@ -5,6 +5,7 @@ import { SYSTEM_PROMPT } from '@common/services/aiAssistant/prompt'
 import { AI_MAX_STEPS, getModel } from '@common/services/aiAssistant/config'
 import { buildAssistantTools } from '@common/services/aiAssistant/tools'
 import { withoutPhotos } from '@common/services/aiAssistant/documents'
+import { withoutDrafts } from '@common/services/aiAssistant/history'
 import {
   DOCUMENT_BATCH_PART,
   type IDocumentBatchPart,
@@ -64,7 +65,7 @@ export default async function handler(
     const model = getModel()
 
     const modelMessages = await convertToModelMessages(
-      withoutPhotos(uiMessages),
+      withoutDrafts(withoutPhotos(uiMessages)),
       {
         // Photos are read by the widget, outside this route; the model learns
         // what they held from the batch summary.

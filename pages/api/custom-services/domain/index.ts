@@ -1,10 +1,5 @@
-import CustomService from '@modules/models/CustomService'
-import Domain from '@modules/models/Domain'
 import start, { Data } from '@pages/api/api.config'
-import {
-  assembleDomainServiceCatalog,
-  collectReferencedServiceIds,
-} from '@common/services/customServiceService/customService.service'
+import { getDomainServiceCatalog } from '@common/services/customServiceService/customService.service'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
@@ -31,36 +26,14 @@ export default async function handler(
           })
         }
 
-        const domain = await Domain.findById(domainId).lean()
+        const responseData = await getDomainServiceCatalog(domainId)
 
-        if (!domain) {
+        if (!responseData) {
           return res.status(404).json({
             success: false,
             message: 'Domain not found',
           })
         }
-
-        // CustomServices scoped to this domain — the per-domain catalog. Used
-        // both to resolve group members and to expose un-grouped services as a
-        // synthetic bucket so the rest of the system (Payment Bulk,
-        // RealEstateModal, invoice) can use them just like grouped ones.
-        const allDomainServices = await CustomService.find({
-          domain: domainId,
-        }).lean()
-
-        // Group ids can reference shared/seeded services (e.g. utility services
-        // attached via a DomainTypeTemplate) that have no `domain` ref, so the
-        // domain-scoped query above misses them. Fetch those explicitly by _id.
-        const referencedIds = collectReferencedServiceIds(domain.customServices)
-        const referencedServices = referencedIds.length
-          ? await CustomService.find({ _id: { $in: referencedIds } }).lean()
-          : []
-
-        const responseData = assembleDomainServiceCatalog(
-          domain.customServices,
-          allDomainServices,
-          referencedServices
-        )
 
         return res.status(200).json({
           success: true,

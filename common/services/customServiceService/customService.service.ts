@@ -633,3 +633,42 @@ export function collectReferencedServiceIds(
     )
   )
 }
+
+/**
+ * A domain's service catalog (groups of full service documents), or `null`
+ * when the domain does not exist. The same data GET /custom-services/domain
+ * returns; also used server-side to filter invoice lines the way the payment
+ * form does.
+ */
+export async function getDomainServiceCatalog(
+  domainId: string
+): Promise<DomainServiceGroup[] | null> {
+  const domain = await Domain.findById(domainId).lean()
+  if (!domain) return null
+
+  // CustomServices scoped to this domain — the per-domain catalog. Used both to
+  // resolve group members and to expose un-grouped services as a synthetic
+  // bucket so the rest of the system (Payment Bulk, RealEstateModal, invoice)
+  // can use them just like grouped ones.
+  const allDomainServices = (await CustomService.find({
+    domain: domainId,
+  }).lean()) as LeanCustomService[]
+
+  // Group ids can reference shared/seeded services (e.g. utility services
+  // attached via a DomainTypeTemplate) that have no `domain` ref, so the
+  // domain-scoped query above misses them. Fetch those explicitly by _id.
+  const referencedIds = collectReferencedServiceIds(
+    domain.customServices as any
+  )
+  const referencedServices = (
+    referencedIds.length
+      ? await CustomService.find({ _id: { $in: referencedIds } }).lean()
+      : []
+  ) as LeanCustomService[]
+
+  return assembleDomainServiceCatalog(
+    domain.customServices as any,
+    allDomainServices,
+    referencedServices
+  )
+}

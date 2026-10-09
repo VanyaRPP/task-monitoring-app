@@ -31,6 +31,7 @@ import Link from 'next/link'
 import { useIsAdmin } from '@modules/hooks/useIsAdmin'
 import { useAppSelector } from '@modules/store/hooks'
 import AddPaymentModal from '@components/AddPaymentModal'
+import type { IPaymentField } from '@common/api/paymentApi/payment.api.types'
 import AddCostModal from '@components/AddCostModal'
 import type { ExpenseDraft } from '@common/services/aiAssistant/expenseActions'
 import { message } from 'antd'
@@ -246,6 +247,9 @@ const AIChat: React.FC = () => {
   // prefilled AddPaymentModal. `handledToolCalls` guards against the stream
   // re-rendering and re-opening the modal for a tool call already handled.
   const [invoiceDraft, setInvoiceDraft] = useState<any>(null)
+  const [invoiceExtraLines, setInvoiceExtraLines] = useState<IPaymentField[]>(
+    []
+  )
   const [invoiceModalOpen, setInvoiceModalOpen] = useState<boolean>(false)
   const handledToolCallsRef = useRef<Set<string>>(new Set())
   // previewExpenses works the same way, with the add-cost form.
@@ -319,6 +323,7 @@ const AIChat: React.FC = () => {
         ) {
           handledToolCallsRef.current.add(p.toolCallId)
           setInvoiceDraft(toPaymentFormData(p.output.draft))
+          setInvoiceExtraLines(p.output.draft.extraLines ?? [])
           setInvoiceModalOpen(true)
         }
         if (
@@ -601,6 +606,7 @@ const AIChat: React.FC = () => {
       {invoiceModalOpen && invoiceDraft && (
         <AddPaymentModal
           paymentData={invoiceDraft}
+          extraInvoiceLines={invoiceExtraLines}
           paymentActions={{ edit: false, preview: false }}
           closeModal={(success?: boolean) => {
             setInvoiceModalOpen(false)

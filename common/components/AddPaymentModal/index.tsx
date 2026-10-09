@@ -1,3 +1,4 @@
+import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
 import { useGetCustomServicesByDomainQuery } from '@common/api/customServicesApi/customServices.api'
 import { useCreateCustomServiceMutation } from '@common/api/customServicesApi/customServices.api'
 import {
@@ -71,6 +72,12 @@ interface Props {
   paymentActions?: { edit: boolean; preview: boolean; create?: boolean }
   preselectedCompany?: string
   preselectedDomain?: string
+  /**
+   * Lines to keep on top of the generated ones (an AI draft's "оренда 5000").
+   * The form re-seeds `invoice` from the tariffs whenever its inputs load or
+   * change; these are appended every time instead of being wiped.
+   */
+  extraInvoiceLines?: IPaymentField[]
 }
 
 export interface IPaymentContext {
@@ -124,6 +131,7 @@ const AddPaymentModal: FC<Props> = ({
   paymentActions,
   preselectedCompany,
   preselectedDomain,
+  extraInvoiceLines,
 }) => {
   const { preview, edit } = paymentActions ?? { preview: false, edit: false }
 
@@ -729,14 +737,27 @@ const AddPaymentModal: FC<Props> = ({
     // already short-circuited above, so user input on a CREATE form is reset
     // only when the user changes domain/street/company/month, which is the
     // intended behavior.
-    form.setFieldsValue({ invoice: filteredInvoices })
+    form.setFieldsValue({
+      invoice: extraInvoiceLines?.length
+        ? [...filteredInvoices, ...extraInvoiceLines]
+        : filteredInvoices,
+    })
 
     const isNewCompanySelected = lastLoadedCompanyId.current !== company._id
     if (isNewCompanySelected) {
       form.setFieldValue('currency', normalizeCurrency(company.currency))
       lastLoadedCompanyId.current = company._id
     }
-  }, [company, filteredInvoices, paymentId, edit, activeTabKey, saved, form])
+  }, [
+    company,
+    filteredInvoices,
+    extraInvoiceLines,
+    paymentId,
+    edit,
+    activeTabKey,
+    saved,
+    form,
+  ])
 
   return (
     <PaymentContext.Provider
