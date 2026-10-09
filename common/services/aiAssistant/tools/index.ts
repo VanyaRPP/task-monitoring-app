@@ -69,7 +69,6 @@ function withDefaults(input: PreviewInput) {
 // alongside this for the frontend to open the prefilled form.
 function toDraftSummary(draft: Awaited<ReturnType<typeof buildInvoiceDraft>>) {
   return {
-    invoiceNumber: draft.invoiceNumber,
     company: draft.reciever?.companyName ?? null,
     // The billed month, not the issue date - asking for March in April must
     // not be reported as April.

@@ -4,7 +4,6 @@ import Service from '@modules/models/Service'
 import { getInvoices } from '@utils/getInvoices'
 import { getPaymentProviderAndReciever } from '@utils/helpers'
 import {
-  getNextInvoiceNumber,
   getPayments,
   type UserContext,
 } from '@common/services/paymentService/payment.service'
@@ -225,11 +224,10 @@ export async function buildInvoiceDraft({
   )
   const generalSum = invoice.reduce((acc, line) => acc + +line.sum, 0)
 
+  // No invoice number: the server gives one when the form saves.
   const { provider, reciever } = getPaymentProviderAndReciever(company)
-  const invoiceNumber = await getNextInvoiceNumber()
 
   return {
-    invoiceNumber,
     type: 'debit',
     domain: domainId,
     ...(street ? { street } : {}),

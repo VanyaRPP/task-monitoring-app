@@ -162,7 +162,8 @@ describe('buildInvoiceDraft', () => {
     // 300 (kept) + 0 (dropped) + 5000 extra = 5300
     expect(draft.generalSum).toBe(5300)
     expect(draft.invoice).toHaveLength(2) // zero-sum line filtered out
-    expect(draft.invoiceNumber).toBe(101)
+    // The server numbers the invoice when the form saves it.
+    expect(draft).not.toHaveProperty('invoiceNumber')
     expect(draft.type).toBe('debit')
     expect(draft.company).toBe('co-1')
   })
