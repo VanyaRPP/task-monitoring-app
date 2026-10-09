@@ -69,7 +69,10 @@ function toDraftSummary(draft: Awaited<ReturnType<typeof buildInvoiceDraft>>) {
   return {
     invoiceNumber: draft.invoiceNumber,
     company: draft.reciever?.companyName ?? null,
-    month: new Date(draft.invoiceCreationDate).getMonth() + 1,
+    // The billed month, not the issue date - asking for March in April must
+    // not be reported as April.
+    month: draft.period.month,
+    year: draft.period.year,
     generalSum: draft.generalSum,
     currency: draft.currency,
     lines: draft.invoice.map((line: any) => ({
