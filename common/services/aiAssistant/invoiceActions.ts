@@ -118,20 +118,20 @@ export async function findCompaniesByName(
 
 /**
  * Finds the Service (monthly tariffs) record for a domain/street/month, or
- * creates an empty one (all prices 0) if none exists yet. Mirrors the client
- * hook `useResolveMonthServiceId`, but in the service layer without RTK Query.
+ * `null` when the month has none yet. Read-only: the preview must not write,
+ * so a missing Service is created by the form on save (via the month
+ * placeholder, see `useResolveMonthServiceId`) - not here.
  *
- * An empty Service is intentional: invoice line prices come from whatever the
- * user has (or hasn't) filled in for that month, so a missing Service simply
- * yields zero-value lines rather than an error.
+ * Without a street only a street-less Service matches: dropping the filter
+ * would pick any street's tariffs in that domain.
  */
-export async function resolveMonthService(
+export async function findMonthService(
   domainId: string,
   street: string | undefined,
   year: number,
   month: number,
   ctx: UserContext
-): Promise<any> {
+) {
   // Access guard: the caller must be able to see this specific domain.
   if (!ctx.isGlobalAdmin) {
     const canAccess = await Domain.exists({
@@ -146,24 +146,10 @@ export async function resolveMonthService(
   const monthStart = new Date(Date.UTC(year, month - 1, 1, 12, 0, 0))
   const monthEnd = new Date(Date.UTC(year, month, 1, 12, 0, 0))
 
-  const existing = await Service.findOne({
+  return Service.findOne({
     domain: domainId,
-    ...(street ? { street } : {}),
+    street: street ?? null,
     date: { $gte: monthStart, $lt: monthEnd },
-  })
-  if (existing) return existing
-
-  return Service.create({
-    domain: domainId,
-    // street is optional; sending '' fails the ObjectId cast on the backend.
-    ...(street ? { street } : {}),
-    date: monthStart,
-    rentPrice: 0,
-    electricityPrice: 0,
-    waterPrice: 0,
-    waterPriceTotal: 0,
-    description: '',
-    customServices: [],
   })
 }
 
@@ -199,7 +185,7 @@ export async function buildInvoiceDraft({
   const domainId = (company.domain as any)?._id?.toString()
   const street = company.street ? company.street.toString() : undefined
 
-  const service = await resolveMonthService(domainId, street, year, month, ctx)
+  const service = await findMonthService(domainId, street, year, month, ctx)
 
   // Previous month's payment seeds meter/previous-amount data for getInvoices.
   const prevMonth = month === 1 ? 12 : month - 1
@@ -217,11 +203,11 @@ export async function buildInvoiceDraft({
   )
   const prevPayment = prevPayments.data?.[0]
 
-  // Existing pure logic: line prices come from the Service, previous readings
-  // from prevPayment, otherwise 0.
+  // Existing pure logic: line prices come from the Service (0 without one),
+  // previous readings from prevPayment.
   const generatedInvoice = getInvoices({
     company: company as any,
-    service: service as any,
+    service: (service ?? undefined) as any,
     prevPayment: prevPayment as any,
   })
 
@@ -248,7 +234,11 @@ export async function buildInvoiceDraft({
     domain: domainId,
     ...(street ? { street } : {}),
     company: companyId,
-    monthService: service._id.toString(),
+    // null when the month has no Service yet - the form resolves `period`
+    // into its month placeholder and creates the Service on save.
+    monthService: service ? service._id.toString() : null,
+    /** The billed month; `invoiceCreationDate` is the day it is issued. */
+    period: { year, month },
     invoiceCreationDate: new Date(),
     description: '',
     generalSum,

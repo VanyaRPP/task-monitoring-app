@@ -8,8 +8,8 @@ import {
   buildTypedCustomColumn,
   getDefaultColumns,
   hasTypedColumn,
-} from '@components/Tables/PaymentsBulk/column.config'
-import { buildTypedInvoiceEntry } from '@components/Tables/PaymentsBulk/buildTypedInvoiceEntry'
+} from '@components/Tables/PaymentsBulk/columns/column.config'
+import { buildTypedInvoiceEntry } from '@components/Tables/PaymentsBulk/invoice/buildTypedInvoiceEntry'
 
 const SERVICE = {
   _id: '6ab0592bace46c818c26379b',

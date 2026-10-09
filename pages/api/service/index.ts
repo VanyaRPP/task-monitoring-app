@@ -28,8 +28,16 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
-        const { limit, skip, domainId, streetId, serviceId, year, month } =
-          req.query
+        const {
+          limit,
+          skip,
+          domainId,
+          streetId,
+          withoutStreet,
+          serviceId,
+          year,
+          month,
+        } = req.query
 
         if (!isUser && !isDomainAdmin && !isGlobalAdmin) {
           return res.status(200).json({ success: false, data: [] })
@@ -62,6 +70,10 @@ export default async function handler(
 
         if (streetsIds) {
           filters.street = { $in: streetsIds }
+        } else if (withoutStreet === 'true') {
+          // Month services with no address (missing or null street). Leaving
+          // the street out entirely would match every street's service.
+          filters.street = null
         }
 
         if (servicesIds) {

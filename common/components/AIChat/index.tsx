@@ -36,6 +36,7 @@ import {
   DOCUMENT_BATCH_PART,
   type IDocumentBatchPart,
 } from '@common/services/aiAssistant/documents/types'
+import { toPaymentFormData } from './invoiceDraft'
 import BatchCard from './photoImport/BatchCard'
 import { shrinkImage } from './photoImport/imageTools'
 import {
@@ -310,7 +311,7 @@ const AIChat: React.FC = () => {
           !handledToolCallsRef.current.has(p.toolCallId)
         ) {
           handledToolCallsRef.current.add(p.toolCallId)
-          setInvoiceDraft(p.output.draft)
+          setInvoiceDraft(toPaymentFormData(p.output.draft))
           setInvoiceModalOpen(true)
         }
       }
