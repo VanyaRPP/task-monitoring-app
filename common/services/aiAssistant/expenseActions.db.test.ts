@@ -98,12 +98,30 @@ describe('buildExpenseDraft', () => {
     ).rejects.toThrow('company not accessible')
   })
 
-  it('files a company of their domain under that company', async () => {
+  // A company ledger belongs to the company's own admins - running its
+  // domain is not enough, same as the profits API on save.
+  it('refuses a company of their domain they do not administer', async () => {
+    await expect(
+      buildExpenseDraft({
+        type: 'debit',
+        companyId: realEstates[0]._id,
+        items: [{ amount: 100 }],
+        ctx: domainAdmin,
+      })
+    ).rejects.toThrow('company not accessible')
+  })
+
+  it('files a company under it for the company own admin', async () => {
     const { draft } = await buildExpenseDraft({
       type: 'debit',
       companyId: realEstates[0]._id,
       items: [{ amount: 100 }],
-      ctx: domainAdmin,
+      ctx: {
+        isUser: true,
+        isDomainAdmin: false,
+        isGlobalAdmin: false,
+        user: { email: users.user.email },
+      },
     })
 
     expect(draft.scope).toEqual({
