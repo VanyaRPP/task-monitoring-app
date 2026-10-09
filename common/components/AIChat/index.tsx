@@ -302,15 +302,17 @@ const AIChat: React.FC = () => {
     updateCard,
   } = useDocumentImports(onBatchDone)
 
-  // Watch for completed `previewInvoice` / `previewExpenses` tool calls and
-  // open the prefilled AddPaymentModal / AddCostModal with their draft. Each
-  // toolCallId is handled at most once.
+  // Watch for completed `previewInvoice` / `previewCredit` /
+  // `previewExpenses` tool calls and open the prefilled AddPaymentModal /
+  // AddCostModal with their draft. Each toolCallId is handled at most once.
   useEffect(() => {
     for (const message of messages) {
       for (const part of message.parts ?? []) {
         const p = part as any
         if (
-          p.type === 'tool-previewInvoice' &&
+          // A credit opens the same payment form, as type `credit`.
+          (p.type === 'tool-previewInvoice' ||
+            p.type === 'tool-previewCredit') &&
           p.state === 'output-available' &&
           p.output?.draft &&
           !handledToolCallsRef.current.has(p.toolCallId)
@@ -604,7 +606,11 @@ const AIChat: React.FC = () => {
             setInvoiceModalOpen(false)
             setInvoiceDraft(null)
             if (success) {
-              message.success('Рахунок успішно створено!')
+              message.success(
+                invoiceDraft.type === 'credit'
+                  ? 'Оплату успішно створено!'
+                  : 'Рахунок успішно створено!'
+              )
             }
           }}
         />

@@ -5,6 +5,7 @@ import {
   type UserContext,
 } from '@common/services/paymentService/payment.service'
 import {
+  buildCreditDraft,
   buildInvoiceDraft,
   findCompaniesByName,
   findDomainsByName,
@@ -228,6 +229,64 @@ export function buildAssistantTools(userContext: UserContext): ToolSet {
         // `draft` is consumed by the frontend to open a prefilled AddPaymentModal;
         // `summary` lets the model describe the invoice in its reply.
         return { draft, summary: toDraftSummary(draft) }
+      },
+    }),
+
+    previewCredit: tool({
+      description:
+        'Підготувати ОПЛАТУ (кредит - гроші, що надійшли від компанії) і ВІДКРИТИ ' +
+        'форму, заповнену нею - НІЧОГО не зберігає. Користувач перевіряє і зберігає сам. ' +
+        'Для рахунку (нарахування) - previewInvoice, не цей.',
+      inputSchema: z.object({
+        companyId: z
+          .string()
+          .describe('id компанії, що заплатила (через findCompanies).'),
+        amount: z
+          .number()
+          .describe(
+            'Сума оплати, ДОДАТНЕ число в гривнях (або валюті компанії).'
+          ),
+        month: z
+          .number()
+          .int()
+          .min(1)
+          .max(12)
+          .optional()
+          .describe(
+            `За який місяць оплата 1-12 (за замовчуванням поточний: ${now.getMonth() + 1}).`
+          ),
+        year: z
+          .number()
+          .int()
+          .optional()
+          .describe(`Рік того місяця (за замовчуванням ${now.getFullYear()}).`),
+        date: z
+          .string()
+          .optional()
+          .describe('Дата надходження YYYY-MM-DD, лише якщо її названо.'),
+        description: z
+          .string()
+          .optional()
+          .describe('Призначення платежу, якщо назване.'),
+      }),
+      execute: async ({ month, year, ...input }) => {
+        const draft = await buildCreditDraft({
+          ...input,
+          month: month ?? now.getMonth() + 1,
+          year: year ?? now.getFullYear(),
+          ctx: userContext,
+        })
+        // `draft` opens the prefilled AddPaymentModal; `summary` is for the reply.
+        return {
+          draft,
+          summary: {
+            company: draft.reciever?.companyName ?? null,
+            amount: draft.generalSum,
+            currency: draft.currency,
+            month: draft.period.month,
+            year: draft.period.year,
+          },
+        }
       },
     }),
 

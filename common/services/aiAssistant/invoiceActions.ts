@@ -2,7 +2,7 @@ import Domain from '@modules/models/Domain'
 import RealEstate from '@modules/models/RealEstate'
 import Service from '@modules/models/Service'
 import { getInvoices } from '@utils/getInvoices'
-import { getPaymentProviderAndReciever } from '@utils/helpers'
+import { getPaymentProviderAndReciever, toRoundFixed } from '@utils/helpers'
 import {
   getNextInvoiceNumber,
   getPayments,
@@ -248,5 +248,73 @@ export async function buildInvoiceDraft({
     invoice,
     template: (company as any).defaultTemplate || 'classic',
     invoiceLang: 'uk' as const,
+  }
+}
+
+export interface BuildCreditDraftParams {
+  companyId: string
+  /** Positive; a credit is money received. */
+  amount: number
+  /** Billed month the payment settles (its month service). */
+  month: number
+  year: number
+  /** `YYYY-MM-DD` the money came in; today when absent. */
+  date?: string
+  description?: string
+  ctx: UserContext
+}
+
+const ISO_DAY = /^\d{4}-\d{2}-\d{2}$/
+
+/**
+ * A received payment (credit) for AddPaymentModal to open prefilled - same
+ * fields as the bank's quick-send credit. Nothing is written: the month's
+ * Service, when missing, is created by the form on save (see `period`).
+ */
+export async function buildCreditDraft({
+  companyId,
+  amount,
+  month,
+  year,
+  date,
+  description,
+  ctx,
+}: BuildCreditDraftParams) {
+  const sum = Math.abs(Number(amount))
+  if (!Number.isFinite(sum) || sum <= 0) {
+    throw new Error('amount must be a positive number')
+  }
+
+  // Only a company the user may bill - the same scoping as findCompanies.
+  const company = await RealEstate.findOne({
+    $and: [await companyOwnershipFilter(ctx), { _id: companyId }],
+  }).populate('domain')
+  if (!company) throw new Error('company not accessible')
+
+  const domainId = (company.domain as any)?._id?.toString()
+  const street = company.street ? company.street.toString() : undefined
+  const service = await findMonthService(domainId, street, year, month, ctx)
+
+  const { provider, reciever } = getPaymentProviderAndReciever(company)
+  const invoiceNumber = await getNextInvoiceNumber()
+  const period = { year, month }
+
+  return {
+    invoiceNumber,
+    type: 'credit' as const,
+    domain: domainId,
+    ...(street ? { street } : {}),
+    company: companyId,
+    monthService: service ? service._id.toString() : null,
+    period,
+    invoiceCreationDate: date && ISO_DAY.test(date) ? date : new Date(),
+    description:
+      description?.trim() ||
+      `Оплата за ${String(month).padStart(2, '0')}.${year}`,
+    generalSum: Number(toRoundFixed(sum)),
+    currency: (company as any).currency || 'UAH',
+    provider,
+    reciever,
+    invoice: [],
   }
 }
