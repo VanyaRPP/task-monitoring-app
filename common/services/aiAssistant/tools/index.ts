@@ -9,6 +9,8 @@ import {
   findCompaniesByName,
   findDomainsByName,
 } from '@common/services/aiAssistant/invoiceActions'
+import { buildExpenseDraft } from '@common/services/aiAssistant/expenseActions'
+import { sumProfitItems, PROFIT_DEFAULT_CATEGORIES } from '@utils/profit-items'
 
 /**
  * Builds the tool set the assistant may call, bound to a specific user.
@@ -81,6 +83,61 @@ function toDraftSummary(draft: Awaited<ReturnType<typeof buildInvoiceDraft>>) {
     })),
   }
 }
+
+// One call for a whole list: every line is an item of a single record, so a
+// long receipt costs one tool round-trip, not one per line.
+const expenseInputSchema = z.object({
+  type: z
+    .enum(['debit', 'credit'])
+    .default('debit')
+    .describe(
+      'debit - витрата (рядки з «-», «витратили», «заплатили»), credit - прибуток.'
+    ),
+  domainId: z
+    .string()
+    .optional()
+    .describe('id домену з findDomains, якщо користувач назвав домен.'),
+  companyId: z
+    .string()
+    .optional()
+    .describe(
+      'id компанії з findCompanies, якщо витрата саме компанії. Не разом з domainId.'
+    ),
+  date: z
+    .string()
+    .optional()
+    .describe('Дата руху грошей YYYY-MM-DD, лише якщо її названо.'),
+  periodMonth: z
+    .string()
+    .optional()
+    .describe('Місяць витрати YYYY-MM, лише якщо його названо.'),
+  currency: z.enum(['UAH', 'USD', 'EUR']).optional(),
+  description: z.string().optional().describe('Спільний опис усього запису.'),
+  items: z
+    .array(
+      z.object({
+        category: z
+          .string()
+          .optional()
+          .describe(
+            `Одна з: ${PROFIT_DEFAULT_CATEGORIES.join(', ')}. Якщо жодна не підходить - коротка своя назва з великої літери (напр. Корпоратив, Доставка).`
+          ),
+        amount: z
+          .number()
+          .describe('Сума рядка, ДОДАТНЕ число: «-2600» -> 2600.'),
+        description: z
+          .string()
+          .optional()
+          .describe('Що саме: «цукерки», «суші, піца», «13 × 200».'),
+        expression: z
+          .string()
+          .optional()
+          .describe('Вираз, якщо рядок його містить, напр. «13*200».'),
+      })
+    )
+    .min(1)
+    .max(50),
+})
 
 export function buildAssistantTools(userContext: UserContext): ToolSet {
   return {
@@ -171,6 +228,33 @@ export function buildAssistantTools(userContext: UserContext): ToolSet {
         // `draft` is consumed by the frontend to open a prefilled AddPaymentModal;
         // `summary` lets the model describe the invoice in its reply.
         return { draft, summary: toDraftSummary(draft) }
+      },
+    }),
+
+    previewExpenses: tool({
+      description:
+        'Підготувати витрату/прибуток з позиціями зі списку користувача і ВІДКРИТИ ' +
+        'форму, заповнену ними - НІЧОГО не зберігає. Увесь список - ОДИН виклик: ' +
+        'кожен рядок - позиція одного запису, сума запису = сума позицій. ' +
+        'Користувач перевіряє форму і зберігає сам.',
+      inputSchema: expenseInputSchema,
+      execute: async (input) => {
+        const { draft, warnings } = await buildExpenseDraft({
+          ...input,
+          ctx: userContext,
+        })
+        // `draft` opens the prefilled AddCostModal; the rest is for the reply.
+        return {
+          draft,
+          summary: {
+            type: draft.type,
+            target: draft.scope?.label ?? null,
+            lines: draft.items.length,
+            total: sumProfitItems(draft.items),
+            currency: draft.currency,
+          },
+          warnings,
+        }
       },
     }),
   }

@@ -1,4 +1,5 @@
 import { ObjectId } from 'mongoose'
+import type { IProfitItem } from '@utils/profit-items'
 
 export interface Profit {
   _id?: string
@@ -7,6 +8,8 @@ export interface Profit {
   amount: number
   type: 'debit' | 'credit'
   categories?: string[]
+  /** One receipt's lines; when set, `amount` is their sum. */
+  items?: IProfitItem[]
   description?: string
   /** Set when the record was generated from a Payment rather than by hand. */
   payment?: string

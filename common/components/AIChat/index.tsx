@@ -31,6 +31,8 @@ import Link from 'next/link'
 import { useIsAdmin } from '@modules/hooks/useIsAdmin'
 import { useAppSelector } from '@modules/store/hooks'
 import AddPaymentModal from '@components/AddPaymentModal'
+import AddCostModal from '@components/AddCostModal'
+import type { ExpenseDraft } from '@common/services/aiAssistant/expenseActions'
 import { message } from 'antd'
 import {
   DOCUMENT_BATCH_PART,
@@ -246,6 +248,8 @@ const AIChat: React.FC = () => {
   const [invoiceDraft, setInvoiceDraft] = useState<any>(null)
   const [invoiceModalOpen, setInvoiceModalOpen] = useState<boolean>(false)
   const handledToolCallsRef = useRef<Set<string>>(new Set())
+  // previewExpenses works the same way, with the add-cost form.
+  const [expenseDraft, setExpenseDraft] = useState<ExpenseDraft | null>(null)
 
   const { messages, setMessages, sendMessage, status, error } = useChat({
     transport: chatTransport,
@@ -298,8 +302,9 @@ const AIChat: React.FC = () => {
     updateCard,
   } = useDocumentImports(onBatchDone)
 
-  // Watch for a completed `previewInvoice` tool call and open the prefilled
-  // AddPaymentModal with its draft. Each toolCallId is handled at most once.
+  // Watch for completed `previewInvoice` / `previewExpenses` tool calls and
+  // open the prefilled AddPaymentModal / AddCostModal with their draft. Each
+  // toolCallId is handled at most once.
   useEffect(() => {
     for (const message of messages) {
       for (const part of message.parts ?? []) {
@@ -313,6 +318,15 @@ const AIChat: React.FC = () => {
           handledToolCallsRef.current.add(p.toolCallId)
           setInvoiceDraft(toPaymentFormData(p.output.draft))
           setInvoiceModalOpen(true)
+        }
+        if (
+          p.type === 'tool-previewExpenses' &&
+          p.state === 'output-available' &&
+          p.output?.draft &&
+          !handledToolCallsRef.current.has(p.toolCallId)
+        ) {
+          handledToolCallsRef.current.add(p.toolCallId)
+          setExpenseDraft(p.output.draft)
         }
       }
     }
@@ -573,6 +587,13 @@ const AIChat: React.FC = () => {
             />
           </div>
         </div>
+      )}
+
+      {expenseDraft && (
+        <AddCostModal
+          draft={expenseDraft}
+          closeModal={() => setExpenseDraft(null)}
+        />
       )}
 
       {invoiceModalOpen && invoiceDraft && (
