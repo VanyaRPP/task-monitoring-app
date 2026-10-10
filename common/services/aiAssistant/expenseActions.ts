@@ -1,7 +1,7 @@
 import Domain from '@modules/models/Domain'
 import RealEstate from '@modules/models/RealEstate'
 import type { UserContext } from '@common/services/paymentService/payment.service'
-import { companyOwnershipFilter } from '@common/services/aiAssistant/invoiceActions'
+import { canAccessProfitTarget } from '@common/services/profitService/profitAccess'
 import { multiplyFloat, normalizeCurrency } from '@utils/helpers'
 import { normalizeProfitItems, type IProfitItem } from '@utils/profit-items'
 
@@ -73,20 +73,29 @@ async function resolveScope(
     throw new Error('provide either domainId or companyId, not both')
   }
 
+  // The same rule the profits API applies on save (canAccessProfitTarget):
+  // a draft must not point at a ledger the user could not write to.
+  const access = { isGlobalAdmin: ctx.isGlobalAdmin, user: ctx.user }
+
   if (companyId) {
-    const company = await RealEstate.findOne({
-      $and: [await companyOwnershipFilter(ctx), { _id: companyId }],
-    })
-    if (!company) throw new Error('company not accessible')
+    const company = await RealEstate.findById(companyId)
+    if (
+      !company ||
+      !(await canAccessProfitTarget({ company: companyId }, access))
+    ) {
+      throw new Error('company not accessible')
+    }
     return { type: 'company', id: companyId, label: company.companyName }
   }
 
   if (domainId) {
-    const domain = await Domain.findOne({
-      _id: domainId,
-      ...(ctx.isGlobalAdmin ? {} : { adminEmails: ctx.user.email }),
-    })
-    if (!domain) throw new Error('domain not accessible')
+    const domain = await Domain.findById(domainId)
+    if (
+      !domain ||
+      !(await canAccessProfitTarget({ domain: domainId }, access))
+    ) {
+      throw new Error('domain not accessible')
+    }
     return { type: 'domain', id: domainId, label: domain.name }
   }
 

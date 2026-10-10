@@ -1,11 +1,10 @@
 import ProfitService, {
   CreateProfitInput,
 } from '@common/services/profitService/profit.service'
-import RealEstate from '@modules/models/RealEstate'
+import { canAccessProfitTarget } from '@common/services/profitService/profitAccess'
+import { parseProfitBody } from '@common/services/profitService/profitInput'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getCurrentUser } from '@utils/getCurrentUser'
-import { normalizeCurrency } from '@utils/helpers'
-import { normalizeProfitItems } from '@utils/profit-items'
 
 /**
  * @swagger
@@ -18,7 +17,7 @@ import { normalizeProfitItems } from '@utils/profit-items'
  *     tags:
  *       - Profit
  *     summary: Get all profit records separated by month
- *     description: Returns a paginated list of profit records grouped by month. Requires admin access.
+ *     description: Returns a paginated list of profit records grouped by month, across every domain. GlobalAdmin only.
  *     parameters:
  *       - in: query
  *         name: page
@@ -47,7 +46,7 @@ import { normalizeProfitItems } from '@utils/profit-items'
  *                 meta:
  *                   type: object
  *       403:
- *         description: Forbidden - Not an admin
+ *         description: Forbidden - Not a global admin
  *       500:
  *         description: Internal server error
  *
@@ -55,7 +54,7 @@ import { normalizeProfitItems } from '@utils/profit-items'
  *     tags:
  *       - Profit
  *     summary: Create a new profit record
- *     description: Adds a new profit record. Requires admin access.
+ *     description: Adds a new profit record to one domain or company ledger. The caller must administer that domain or company (GlobalAdmin: any).
  *     requestBody:
  *       required: true
  *       content:
@@ -100,7 +99,7 @@ import { normalizeProfitItems } from '@utils/profit-items'
  *                 data:
  *                   $ref: '#/components/schemas/Profit'
  *       403:
- *         description: Forbidden - Not an admin
+ *         description: Forbidden - caller does not administer that domain or company
  *       500:
  *         description: Internal server error
  */
@@ -109,14 +108,13 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const { isAdmin, user } = await getCurrentUser(req, res)
+  const { isGlobalAdmin, user } = await getCurrentUser(req, res)
+  const access = { isGlobalAdmin, user }
 
-  // The list-all overview stays admin-only. POST is more permissive: domain
-  // and company are symmetric scopes on the Прибутки page, so a plain User
-  // who administers a company (the only way they can reach this at all - see
-  // useProfitScopes) may write against that ONE company, checked below once
-  // `company` is known. Not an admin and not POST -> nothing to allow.
-  if (!isAdmin && req.method !== 'POST') {
+  // The list-all overview spans every domain, so it is GlobalAdmin's alone.
+  // POST is open to anyone who can reach a ledger: its target is checked
+  // against the caller below, once the body says what it is.
+  if (!isGlobalAdmin && req.method !== 'POST') {
     return res.status(403).json({ success: false })
   }
 
@@ -132,82 +130,18 @@ export default async function handler(
       }
 
       case 'POST': {
-        const {
-          domain,
-          company,
-          amount,
-          type,
-          description,
-          date,
-          categories,
-          items,
-          invoiceNumber,
-          payment,
-          periodMonth,
-          currency,
-        } = req.body
+        const { error, input } = parseProfitBody(req.body)
+        if (error) return res.status(400).json({ success: false, error })
 
-        // With items the record's amount and categories are theirs - never
-        // what the client sent alongside.
-        const lines = items === undefined ? null : normalizeProfitItems(items)
-        if (lines && !lines.ok) {
-          return res.status(400).json({ success: false, error: lines.error })
-        }
-
-        // Domain and company are symmetric scopes for a Profit record -
-        // exactly one of them, matching whichever ledger the record is
-        // filed under (see ProfitService.getLedgerFor).
-        if ((!domain && !company) || !(lines || amount) || !type || !date) {
-          return res.status(400).json({
-            success: false,
-            error:
-              'Missing required fields: domain or company, amount, type, or date',
-          })
-        }
-
-        if (domain && company) {
-          return res.status(400).json({
-            success: false,
-            error: 'Provide either domain or company, not both',
-          })
-        }
-
-        if (!isAdmin) {
-          // Only a company scope is reachable this way - domain still
-          // requires GlobalAdmin/DomainAdmin, unchanged.
-          const owns =
-            company &&
-            (await RealEstate.exists({ _id: company, adminEmails: user.email }))
-          if (!owns) return res.status(403).json({ success: false })
-        }
-
-        if (!['debit', 'credit'].includes(type)) {
-          return res.status(400).json({
-            success: false,
-            error: 'Invalid type. Allowed values: "debit" or "credit"',
-          })
+        // Writing into a ledger needs access to THAT domain or company -
+        // being a DomainAdmin somewhere is not enough.
+        if (!(await canAccessProfitTarget(input, access))) {
+          return res.status(403).json({ success: false })
         }
 
         const profitDocument: CreateProfitInput = {
-          ...(company ? { company } : { domain }),
+          ...input,
           createdBy: user._id.toString(),
-          amount: lines ? lines.amount : Number(amount),
-          type,
-          date: new Date(date),
-          description: description?.trim() || '',
-          categories: lines
-            ? lines.categories
-            : Array.isArray(categories)
-              ? categories
-              : [],
-          ...(lines ? { items: lines.items } : {}),
-          invoiceNumber: invoiceNumber?.trim(),
-          payment,
-          // Optional: the ledger falls back to the month of `date` without it.
-          periodMonth: /^\d{4}-\d{2}$/.test(periodMonth ?? '')
-            ? periodMonth
-            : undefined,
-          currency: normalizeCurrency(currency),
         }
 
         try {
