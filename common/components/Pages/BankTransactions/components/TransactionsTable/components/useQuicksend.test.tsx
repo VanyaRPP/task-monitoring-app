@@ -211,7 +211,12 @@ describe('useQuickSend', () => {
 
     const [args, opts] = (useGetAllServicesQuery as jest.Mock).mock.calls.at(-1)
     expect(opts.skip).toBe(false)
-    expect(args).toEqual({ domainId: 'domain_1', streetId: undefined })
+    // Only the provider's address-less services - not another street's.
+    expect(args).toEqual({
+      domainId: 'domain_1',
+      streetId: undefined,
+      withoutStreet: true,
+    })
     // the existing month is offered as-is, not as a placeholder to re-create
     expect(result.current.services.map((s) => s._id)).toContain('service_may')
   })
