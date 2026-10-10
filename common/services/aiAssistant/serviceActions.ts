@@ -58,7 +58,7 @@ export interface BuildServiceDraftParams {
   ctx: UserContext
 }
 
-interface CatalogEntry {
+export interface CatalogEntry {
   fieldName: string
   name: string
 }
@@ -118,7 +118,7 @@ function pricesOf(service: any): Record<string, number> {
   return prices
 }
 
-async function resolveStreet(domainId: string, said?: string) {
+export async function resolveStreet(domainId: string, said?: string) {
   if (!said?.trim()) return null
 
   const domain = await Domain.findById(domainId).select('streets').lean()

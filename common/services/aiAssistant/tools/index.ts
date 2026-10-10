@@ -12,6 +12,7 @@ import {
 } from '@common/services/aiAssistant/invoiceActions'
 import { buildExpenseDraft } from '@common/services/aiAssistant/expenseActions'
 import { buildServiceDraft } from '@common/services/aiAssistant/serviceActions'
+import { buildCompanyDraft } from '@common/services/aiAssistant/companyActions'
 import { sumProfitItems, PROFIT_DEFAULT_CATEGORIES } from '@utils/profit-items'
 
 /**
@@ -234,6 +235,60 @@ export function buildAssistantTools(userContext: UserContext): ToolSet {
         // `draft` is consumed by the frontend to open a prefilled AddPaymentModal;
         // `summary` lets the model describe the invoice in its reply.
         return { draft, summary: toDraftSummary(draft) }
+      },
+    }),
+
+    previewCompany: tool({
+      description:
+        'Підготувати НОВУ компанію (орендаря/квартиру) і ВІДКРИТИ форму, ' +
+        'заповнену нею - НІЧОГО не зберігає. Передавай лише те, що назвав ' +
+        'користувач; решту він заповнить у формі. Перед викликом перевір через ' +
+        'findCompanies, чи такої компанії ще немає.',
+      inputSchema: z.object({
+        domainId: z.string().describe('id надавача (через findDomains).'),
+        companyName: z.string().describe('Назва компанії / ПІБ.'),
+        street: z
+          .string()
+          .optional()
+          .describe('Адреса словами, лише якщо її назвали.'),
+        description: z
+          .string()
+          .optional()
+          .describe('Реквізити, договір, директор - якщо названі.'),
+        adminEmails: z
+          .array(z.string())
+          .optional()
+          .describe('Email-и адмінів компанії, якщо названі.'),
+        totalArea: z.number().optional().describe('Площа, м².'),
+        pricePerMeter: z.number().optional().describe('Ціна за м², грн.'),
+        currency: z.enum(['UAH', 'USD', 'EUR']).optional(),
+        contractNumber: z.string().optional(),
+        contractDate: z
+          .string()
+          .optional()
+          .describe('Дата договору YYYY-MM-DD.'),
+        prices: z
+          .array(z.object({ name: z.string(), price: z.number() }))
+          .optional()
+          .describe(
+            'Індивідуальні ціни компанії на послуги надавача, словами користувача.'
+          ),
+      }),
+      execute: async (input) => {
+        const result = await buildCompanyDraft({ ...input, ctx: userContext })
+        // `draft` opens the prefilled RealEstateModal; the rest is for the reply.
+        return {
+          draft: result.draft,
+          summary: {
+            companyName: result.draft.companyName,
+            domain: result.domainName,
+            street: result.streetAddress,
+            missingDescription: !result.draft.description,
+            unmatched: result.unmatched,
+            invalidEmails: result.invalidEmails,
+            similar: result.similar,
+          },
+        }
       },
     }),
 

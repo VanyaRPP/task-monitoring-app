@@ -34,6 +34,7 @@ import AddPaymentModal from '@components/AddPaymentModal'
 import type { IPaymentField } from '@common/api/paymentApi/payment.api.types'
 import AddCostModal from '@components/AddCostModal'
 import AddServiceModal from '@components/AddServiceModal'
+import RealEstateModal from '@components/UI/RealEstateComponents/RealEstateModal'
 import type { ExpenseDraft } from '@common/services/aiAssistant/expenseActions'
 import { message } from 'antd'
 import {
@@ -255,6 +256,8 @@ const AIChat: React.FC = () => {
   const handledToolCallsRef = useRef<Set<string>>(new Set())
   // previewExpenses works the same way, with the add-cost form.
   const [expenseDraft, setExpenseDraft] = useState<ExpenseDraft | null>(null)
+  // previewCompany: a new company to check and save.
+  const [companyDraft, setCompanyDraft] = useState<any>(null)
   // previewService: a new month's tariffs, or an existing month to edit.
   const [serviceDraft, setServiceDraft] = useState<{
     mode: 'create' | 'edit'
@@ -313,9 +316,9 @@ const AIChat: React.FC = () => {
   } = useDocumentImports(onBatchDone)
 
   // Watch for completed `previewInvoice` / `previewCredit` /
-  // `previewExpenses` / `previewService` tool calls and open the prefilled
-  // AddPaymentModal / AddCostModal / AddServiceModal with their draft. Each
-  // toolCallId is handled at most once.
+  // `previewExpenses` / `previewService` / `previewCompany` tool calls and
+  // open the prefilled payment / cost / service / company modal with their
+  // draft. Each toolCallId is handled at most once.
   useEffect(() => {
     for (const message of messages) {
       for (const part of message.parts ?? []) {
@@ -341,6 +344,15 @@ const AIChat: React.FC = () => {
         ) {
           handledToolCallsRef.current.add(p.toolCallId)
           setExpenseDraft(p.output.draft)
+        }
+        if (
+          p.type === 'tool-previewCompany' &&
+          p.state === 'output-available' &&
+          p.output?.draft &&
+          !handledToolCallsRef.current.has(p.toolCallId)
+        ) {
+          handledToolCallsRef.current.add(p.toolCallId)
+          setCompanyDraft(p.output.draft)
         }
         if (
           p.type === 'tool-previewService' &&
@@ -610,6 +622,18 @@ const AIChat: React.FC = () => {
             />
           </div>
         </div>
+      )}
+
+      {companyDraft && (
+        <RealEstateModal
+          chosenRealEstate={{
+            domain: companyDraft.domain,
+            street: companyDraft.street,
+          }}
+          draft={companyDraft}
+          editable
+          closeModal={() => setCompanyDraft(null)}
+        />
       )}
 
       {serviceDraft &&
