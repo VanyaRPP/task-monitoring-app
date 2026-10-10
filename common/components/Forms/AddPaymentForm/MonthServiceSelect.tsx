@@ -37,6 +37,9 @@ const MonthServiceSelect: React.FC<MonthServiceSelectProps> = ({
     {
       domainId,
       streetId,
+      // Without an address, only address-less services are this company's
+      // months - not another street's.
+      withoutStreet: streetId ? undefined : true,
     },
     { skip: !domainId || isNewEntityValue(domainId) }
   )

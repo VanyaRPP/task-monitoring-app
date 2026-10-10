@@ -15,7 +15,7 @@ import {
   type InvoiceEmailPayment,
 } from '@utils/email/sendInvoiceEmail'
 import { PaymentStatus } from '@common/api/paymentApi/payment.api.types'
-import { FilterQuery } from 'mongoose'
+import mongoose, { FilterQuery } from 'mongoose'
 import { isDev } from '@utils/env'
 
 function isEmailDebugEnabled() {
@@ -70,6 +70,21 @@ export interface UserContext {
   isGlobalAdmin: boolean
   user: {
     email: string
+  }
+}
+
+/**
+ * `monthService` is a Mixed field: saved through the API it holds the id as a
+ * string, but older or server-written payments may hold an ObjectId - and a
+ * Mixed field is never cast, so a string filter alone skips those. Match both.
+ */
+function anyMonthServiceId(ids: string[]) {
+  return {
+    $in: ids.flatMap((id) =>
+      mongoose.isValidObjectId(id)
+        ? [id, new mongoose.Types.ObjectId(id)]
+        : [id]
+    ),
   }
 }
 
@@ -208,7 +223,7 @@ export async function getPayments(
   }
   // TODO: add security
   if (servicesIds) {
-    options.monthService = { $in: servicesIds }
+    options.monthService = anyMonthServiceId(servicesIds)
   }
 
   const expr = filterPeriodOptions(reqQuery)
@@ -231,7 +246,7 @@ export async function getPayments(
       })
 
       options.$or = [
-        { monthService: { $in: serviceIds } },
+        { monthService: anyMonthServiceId(serviceIds) },
         {
           $and: [
             {

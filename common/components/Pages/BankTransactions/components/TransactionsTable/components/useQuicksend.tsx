@@ -80,7 +80,11 @@ export const useQuickSend = ({
 
   const { data: servicesData, isLoading: isServicesLoading } =
     useGetAllServicesQuery(
-      { domainId: domain._id, streetId: streetId || undefined },
+      {
+        domainId: domain._id,
+        streetId: streetId || undefined,
+        withoutStreet: streetId ? undefined : true,
+      },
       { skip: !domain._id }
     )
 
