@@ -1,6 +1,7 @@
 import mongoose from 'mongoose'
 import start from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
+import { canCreatePaymentFor } from '@common/services/paymentService/paymentAccess'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import {
   createPayment,
@@ -37,6 +38,17 @@ export default async function handler(
       }
 
       const { _templateScope, _bulk, _batchId, ...paymentBody } = req.body ?? {}
+
+      // Billing into a domain needs admin rights over THAT domain, for a
+      // company of that domain - being a DomainAdmin somewhere is not enough.
+      if (
+        !(await canCreatePaymentFor(
+          { domain: paymentBody.domain, company: paymentBody.company },
+          { isGlobalAdmin, user }
+        ))
+      ) {
+        return res.status(403).json({ success: false, message: 'not allowed' })
+      }
 
       const scopeResult = await applyTemplateScope({
         scope: _templateScope,

@@ -1,22 +1,36 @@
 import handler from '@pages/api/spacehub/payment/[id]/change-log'
 import PaymentChangeLog from '@common/modules/models/PaymentChangeLog'
 import Payment from '@common/modules/models/Payment'
+import { getServerSession } from 'next-auth'
 import { setupTestEnvironment } from '@utils/setupTestEnvironment'
+import { mockLoginAs } from '@utils/mockLoginAs'
+import { users } from '@utils/testData'
 import { expect } from '@jest/globals'
 import mongoose from 'mongoose'
 
 jest.mock('@utils/dbConnect', () => jest.fn())
+jest.mock('next-auth', () => ({ getServerSession: jest.fn() }))
+jest.mock('@pages/api/auth/[...nextauth]', () => ({ authOptions: {} }))
 jest.mock('@common/modules/models/PaymentChangeLog')
 jest.mock('@common/modules/models/Payment')
 
 setupTestEnvironment()
 
+// The route now reads the payment's domain/company to check access; a
+// GlobalAdmin passes that check without further lookups.
+const stubPayment = (payment: unknown = { domain: 'domain-id' }) =>
+  (Payment.findById as jest.Mock).mockReturnValue({
+    select: () => ({ lean: () => Promise.resolve(payment) }),
+  })
+
 describe('PaymentChangeLog API - POST', () => {
   const validPaymentId = new mongoose.Types.ObjectId().toString()
   const invalidPaymentId = 'invalid-id-123'
 
-  beforeEach(() => {
+  beforeEach(async () => {
     jest.clearAllMocks()
+    stubPayment()
+    await mockLoginAs(users.globalAdmin)
   })
 
   it('should create new change log with valid data', async () => {
@@ -36,7 +50,6 @@ describe('PaymentChangeLog API - POST', () => {
       date: new Date(),
     }
 
-    ;(Payment.exists as jest.Mock).mockResolvedValue(true)
     ;(PaymentChangeLog.create as jest.Mock).mockResolvedValue(mockCreatedLog)
 
     const mockReq = {
@@ -59,15 +72,15 @@ describe('PaymentChangeLog API - POST', () => {
 
     await handler(mockReq, mockRes)
 
-    expect(Payment.exists).toHaveBeenCalledWith({ _id: validPaymentId })
     expect(PaymentChangeLog.create).toHaveBeenCalledWith({
       paymentId: validPaymentId,
       invoiceData: mockInvoiceData,
       actionType: 'UPDATE',
       source: 'single',
       reason: 'manual',
-      actorId: 'user123',
-      actorEmail: 'admin@test.com',
+      // The author comes from the session, not from the request.
+      actorId: expect.anything(),
+      actorEmail: users.globalAdmin.email,
     })
     expect(mockRes.status).toHaveBeenCalledWith(201)
     expect(mockRes.json).toHaveBeenCalledWith({
@@ -79,7 +92,6 @@ describe('PaymentChangeLog API - POST', () => {
   it('should create log with default reason "manual" when reason is not provided', async () => {
     const mockInvoiceData = { amount: 2000 }
 
-    ;(Payment.exists as jest.Mock).mockResolvedValue(true)
     ;(PaymentChangeLog.create as jest.Mock).mockResolvedValue({})
 
     const mockReq = {
@@ -107,8 +119,9 @@ describe('PaymentChangeLog API - POST', () => {
       actionType: 'UPDATE',
       source: 'single',
       reason: 'manual',
-      actorId: 'user456',
-      actorEmail: 'user@test.com',
+      // The author comes from the session, not from the request.
+      actorId: expect.anything(),
+      actorEmail: users.globalAdmin.email,
     })
     expect(mockRes.status).toHaveBeenCalledWith(201)
   })
@@ -158,20 +171,14 @@ describe('PaymentChangeLog API - POST', () => {
     })
   })
 
-  it('should return 404 when payment does not exist', async () => {
-    const mockInvoiceData = { amount: 3000 }
-
-    ;(Payment.exists as jest.Mock).mockResolvedValue(null)
+  it('should answer 403, not 404, when the payment does not exist', async () => {
+    stubPayment(null)
 
     const mockReq = {
       method: 'POST',
       query: { id: validPaymentId },
-      body: {
-        invoiceData: mockInvoiceData,
-        reason: 'automatic',
-      },
+      body: { invoiceData: { amount: 1 } },
     } as any
-
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
@@ -179,12 +186,7 @@ describe('PaymentChangeLog API - POST', () => {
 
     await handler(mockReq, mockRes)
 
-    expect(Payment.exists).toHaveBeenCalledWith({ _id: validPaymentId })
-    expect(mockRes.status).toHaveBeenCalledWith(404)
-    expect(mockRes.json).toHaveBeenCalledWith({
-      success: false,
-      message: 'Payment not found',
-    })
+    expect(mockRes.status).toHaveBeenCalledWith(403)
     expect(PaymentChangeLog.create).not.toHaveBeenCalled()
   })
 
@@ -209,23 +211,17 @@ describe('PaymentChangeLog API - POST', () => {
       success: false,
       message: 'Invalid payment id',
     })
-    expect(Payment.exists).not.toHaveBeenCalled()
+    expect(Payment.findById).not.toHaveBeenCalled()
   })
 
-  it('should handle user data being undefined', async () => {
-    const mockInvoiceData = { amount: 1000 }
-
-    ;(Payment.exists as jest.Mock).mockResolvedValue(true)
-    ;(PaymentChangeLog.create as jest.Mock).mockResolvedValue({})
+  it('should answer 401 without a session', async () => {
+    ;(getServerSession as jest.Mock).mockReset()
 
     const mockReq = {
       method: 'POST',
       query: { id: validPaymentId },
-      body: {
-        invoiceData: mockInvoiceData,
-      },
+      body: { invoiceData: { amount: 1000 } },
     } as any
-
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
@@ -233,15 +229,7 @@ describe('PaymentChangeLog API - POST', () => {
 
     await handler(mockReq, mockRes)
 
-    expect(PaymentChangeLog.create).toHaveBeenCalledWith({
-      paymentId: validPaymentId,
-      invoiceData: mockInvoiceData,
-      actionType: 'UPDATE',
-      source: 'single',
-      reason: 'manual',
-      actorId: undefined,
-      actorEmail: undefined,
-    })
-    expect(mockRes.status).toHaveBeenCalledWith(201)
+    expect(mockRes.status).toHaveBeenCalledWith(401)
+    expect(PaymentChangeLog.create).not.toHaveBeenCalled()
   })
 })

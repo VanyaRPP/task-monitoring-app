@@ -1,5 +1,7 @@
 import CustomService from '@modules/models/CustomService'
 import Domain from '@modules/models/Domain'
+import RealEstate from '@modules/models/RealEstate'
+import { isValidObjectId } from 'mongoose'
 import start, { Data } from '@pages/api/api.config'
 import {
   assembleDomainServiceCatalog,
@@ -14,10 +16,7 @@ export default async function handler(
 ) {
   await start()
 
-  const { isGlobalAdmin, isDomainAdmin, isUser } = await getCurrentUser(
-    req,
-    res
-  )
+  const { isGlobalAdmin, user } = await getCurrentUser(req, res)
 
   switch (req.method) {
     case 'GET':
@@ -29,6 +28,27 @@ export default async function handler(
             success: false,
             message: 'Uncorrect domainId',
           })
+        }
+
+        // A domain's catalog is for those who bill in it or are billed by it:
+        // its admins and the owners of its companies (whose invoice preview
+        // groups lines by it). Not any signed-in user for any domain.
+        if (!isGlobalAdmin) {
+          const allowed =
+            isValidObjectId(domainId) &&
+            ((await Domain.exists({
+              _id: domainId,
+              adminEmails: user.email,
+            })) ||
+              (await RealEstate.exists({
+                domain: domainId,
+                adminEmails: user.email,
+              })))
+          if (!allowed) {
+            return res
+              .status(403)
+              .json({ success: false, message: 'not allowed' })
+          }
         }
 
         const domain = await Domain.findById(domainId).lean()
