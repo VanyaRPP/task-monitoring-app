@@ -20,7 +20,6 @@ jest.mock('@common/api/serviceApi/service.api', () => ({
 
 jest.mock('@common/api/paymentApi/payment.api', () => ({
   useAddPaymentMutation: jest.fn(() => [mockAddPayment]),
-  useGetPaymentNumberQuery: jest.fn().mockReturnValue({ data: 1 }),
 }))
 
 jest.mock('@utils/helpers', () => ({
@@ -69,12 +68,9 @@ describe('useQuickSend', () => {
     mockClose.mockClear()
   })
 
-  it('uses next invoice number from payment number query', async () => {
-    const {
-      useGetPaymentNumberQuery,
-    } = require('@common/api/paymentApi/payment.api')
-    useGetPaymentNumberQuery.mockReturnValue({ data: 42 })
-
+  // The server numbers an invoice when it saves it; a number picked here
+  // could already be taken by the time the request lands.
+  it('leaves the invoice number to the server', async () => {
     const { result } = renderHook(() =>
       useQuickSend({
         transaction,
@@ -91,11 +87,8 @@ describe('useQuickSend', () => {
       } as any)
     })
 
-    expect(mockAddPayment).toHaveBeenCalledWith(
-      expect.objectContaining({
-        invoiceNumber: 42,
-      })
-    )
+    expect(mockAddPayment).toHaveBeenCalledTimes(1)
+    expect(mockAddPayment.mock.calls[0][0]).not.toHaveProperty('invoiceNumber')
   })
 
   it('creates service for placeholder month and uses its id for monthService', async () => {
@@ -211,7 +204,12 @@ describe('useQuickSend', () => {
 
     const [args, opts] = (useGetAllServicesQuery as jest.Mock).mock.calls.at(-1)
     expect(opts.skip).toBe(false)
-    expect(args).toEqual({ domainId: 'domain_1', streetId: undefined })
+    // Only the provider's address-less services - not another street's.
+    expect(args).toEqual({
+      domainId: 'domain_1',
+      streetId: undefined,
+      withoutStreet: true,
+    })
     // the existing month is offered as-is, not as a placeholder to re-create
     expect(result.current.services.map((s) => s._id)).toContain('service_may')
   })

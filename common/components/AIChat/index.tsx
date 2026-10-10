@@ -31,7 +31,12 @@ import Link from 'next/link'
 import { useIsAdmin } from '@modules/hooks/useIsAdmin'
 import { useAppSelector } from '@modules/store/hooks'
 import AddPaymentModal from '@components/AddPaymentModal'
+import type { IPaymentField } from '@common/api/paymentApi/payment.api.types'
 import AddCostModal from '@components/AddCostModal'
+import AddServiceModal from '@components/AddServiceModal'
+import RealEstateModal from '@components/UI/RealEstateComponents/RealEstateModal'
+import AddStreetModal from '@components/AddStreetModal'
+import DomainModal from '@components/UI/DomainsComponents/DomainModal'
 import type { ExpenseDraft } from '@common/services/aiAssistant/expenseActions'
 import { message } from 'antd'
 import {
@@ -246,10 +251,24 @@ const AIChat: React.FC = () => {
   // prefilled AddPaymentModal. `handledToolCalls` guards against the stream
   // re-rendering and re-opening the modal for a tool call already handled.
   const [invoiceDraft, setInvoiceDraft] = useState<any>(null)
+  const [invoiceExtraLines, setInvoiceExtraLines] = useState<IPaymentField[]>(
+    []
+  )
   const [invoiceModalOpen, setInvoiceModalOpen] = useState<boolean>(false)
   const handledToolCallsRef = useRef<Set<string>>(new Set())
   // previewExpenses works the same way, with the add-cost form.
   const [expenseDraft, setExpenseDraft] = useState<ExpenseDraft | null>(null)
+  // previewCompany: a new company to check and save.
+  const [companyDraft, setCompanyDraft] = useState<any>(null)
+  // previewStreet: a new address for a domain.
+  const [streetDraft, setStreetDraft] = useState<any>(null)
+  // previewDomain: a new service provider.
+  const [domainDraft, setDomainDraft] = useState<any>(null)
+  // previewService: a new month's tariffs, or an existing month to edit.
+  const [serviceDraft, setServiceDraft] = useState<{
+    mode: 'create' | 'edit'
+    service: any
+  } | null>(null)
 
   const { messages, setMessages, sendMessage, status, error } = useChat({
     transport: chatTransport,
@@ -302,21 +321,26 @@ const AIChat: React.FC = () => {
     updateCard,
   } = useDocumentImports(onBatchDone)
 
-  // Watch for completed `previewInvoice` / `previewExpenses` tool calls and
-  // open the prefilled AddPaymentModal / AddCostModal with their draft. Each
-  // toolCallId is handled at most once.
+  // Watch for completed `previewInvoice` / `previewCredit` /
+  // `previewExpenses` / `previewService` / `previewCompany` /
+  // `previewStreet` / `previewDomain` tool calls and open the prefilled
+  // payment / cost / service / company / street / domain modal with their
+  // draft. Each toolCallId is handled at most once.
   useEffect(() => {
     for (const message of messages) {
       for (const part of message.parts ?? []) {
         const p = part as any
         if (
-          p.type === 'tool-previewInvoice' &&
+          // A credit opens the same payment form, as type `credit`.
+          (p.type === 'tool-previewInvoice' ||
+            p.type === 'tool-previewCredit') &&
           p.state === 'output-available' &&
           p.output?.draft &&
           !handledToolCallsRef.current.has(p.toolCallId)
         ) {
           handledToolCallsRef.current.add(p.toolCallId)
           setInvoiceDraft(toPaymentFormData(p.output.draft))
+          setInvoiceExtraLines(p.output.draft.extraLines ?? [])
           setInvoiceModalOpen(true)
         }
         if (
@@ -327,6 +351,42 @@ const AIChat: React.FC = () => {
         ) {
           handledToolCallsRef.current.add(p.toolCallId)
           setExpenseDraft(p.output.draft)
+        }
+        if (
+          p.type === 'tool-previewCompany' &&
+          p.state === 'output-available' &&
+          p.output?.draft &&
+          !handledToolCallsRef.current.has(p.toolCallId)
+        ) {
+          handledToolCallsRef.current.add(p.toolCallId)
+          setCompanyDraft(p.output.draft)
+        }
+        if (
+          p.type === 'tool-previewStreet' &&
+          p.state === 'output-available' &&
+          p.output?.draft &&
+          !handledToolCallsRef.current.has(p.toolCallId)
+        ) {
+          handledToolCallsRef.current.add(p.toolCallId)
+          setStreetDraft(p.output.draft)
+        }
+        if (
+          p.type === 'tool-previewDomain' &&
+          p.state === 'output-available' &&
+          p.output?.draft &&
+          !handledToolCallsRef.current.has(p.toolCallId)
+        ) {
+          handledToolCallsRef.current.add(p.toolCallId)
+          setDomainDraft(p.output.draft)
+        }
+        if (
+          p.type === 'tool-previewService' &&
+          p.state === 'output-available' &&
+          p.output?.draft &&
+          !handledToolCallsRef.current.has(p.toolCallId)
+        ) {
+          handledToolCallsRef.current.add(p.toolCallId)
+          setServiceDraft(p.output.draft)
         }
       }
     }
@@ -589,6 +649,48 @@ const AIChat: React.FC = () => {
         </div>
       )}
 
+      {domainDraft && (
+        <DomainModal
+          currentDomain={undefined}
+          draft={domainDraft}
+          editable
+          closeModal={() => setDomainDraft(null)}
+        />
+      )}
+
+      {streetDraft && (
+        <AddStreetModal
+          draft={streetDraft}
+          closeModal={() => setStreetDraft(null)}
+        />
+      )}
+
+      {companyDraft && (
+        <RealEstateModal
+          chosenRealEstate={{
+            domain: companyDraft.domain,
+            street: companyDraft.street,
+          }}
+          draft={companyDraft}
+          editable
+          closeModal={() => setCompanyDraft(null)}
+        />
+      )}
+
+      {serviceDraft &&
+        (serviceDraft.mode === 'edit' ? (
+          <AddServiceModal
+            currentService={serviceDraft.service}
+            serviceActions={{ edit: true, preview: false }}
+            closeModal={() => setServiceDraft(null)}
+          />
+        ) : (
+          <AddServiceModal
+            draft={serviceDraft.service}
+            closeModal={() => setServiceDraft(null)}
+          />
+        ))}
+
       {expenseDraft && (
         <AddCostModal
           draft={expenseDraft}
@@ -599,12 +701,17 @@ const AIChat: React.FC = () => {
       {invoiceModalOpen && invoiceDraft && (
         <AddPaymentModal
           paymentData={invoiceDraft}
+          extraInvoiceLines={invoiceExtraLines}
           paymentActions={{ edit: false, preview: false }}
           closeModal={(success?: boolean) => {
             setInvoiceModalOpen(false)
             setInvoiceDraft(null)
             if (success) {
-              message.success('Рахунок успішно створено!')
+              message.success(
+                invoiceDraft.type === 'credit'
+                  ? 'Оплату успішно створено!'
+                  : 'Рахунок успішно створено!'
+              )
             }
           }}
         />

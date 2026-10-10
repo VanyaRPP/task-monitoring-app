@@ -1,4 +1,5 @@
 import { expect } from '@jest/globals'
+import Payment from '@modules/models/Payment'
 import handler from '.'
 import { parseReceived } from '@utils/helpers'
 import { mockLoginAs } from '@utils/mockLoginAs'
@@ -496,15 +497,50 @@ describe('Payments API - POST', () => {
     await handler(mockReq, mockRes)
 
     expect(mockRes.status).toHaveBeenLastCalledWith(200)
+    // The email carries the number the server gave the invoice on save.
+    const saved = mockRes.json.mock.lastCall[0].data
     expect(sendInvoiceEmailMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        invoiceNumber: data.invoiceNumber,
+        invoiceNumber: saved.invoiceNumber,
         type: 'debit',
         reciever: expect.objectContaining({
           adminEmails: [users.domainAdmin.email],
         }),
       })
     )
+  })
+
+  describe('invoice numbers', () => {
+    const post = async (body: Record<string, unknown>) => {
+      await mockLoginAs(users.globalAdmin)
+      const res: any = { status: jest.fn(() => res), json: jest.fn() }
+      await handler({ method: 'POST', body } as any, res)
+      return res.json.mock.lastCall[0].data
+    }
+
+    const credit = () => {
+      const { _id, ...data } = payments[0]
+      return { ...data, type: 'credit', invoiceNumber: 1 }
+    }
+
+    it('gives the next free number, not the one the client sent', async () => {
+      const maxUsed = Math.max(...payments.map((p) => p.invoiceNumber))
+
+      const saved = await post(credit())
+
+      expect(saved.invoiceNumber).toBe(maxUsed + 1)
+    })
+
+    it('never gives two invoices saved at once the same number', async () => {
+      const bodies = Array.from({ length: 8 }, credit)
+      const saved = await Promise.all(bodies.map(post))
+
+      const numbers = saved.map(({ invoiceNumber }) => invoiceNumber)
+      expect(new Set(numbers).size).toBe(numbers.length)
+      expect(
+        await Payment.countDocuments({ invoiceNumber: { $in: numbers } })
+      ).toBe(numbers.length)
+    })
   })
 
   it('writes a CREATE audit log on payment creation', async () => {

@@ -576,9 +576,17 @@ class ProfitService {
       currency: string
       domain: Types.ObjectId | string
       company: Types.ObjectId | string
-    }>
+    }>,
+    /** Fields to remove - the old scope when a record changes ledger. */
+    unset: ('domain' | 'company')[] = []
   ) {
-    return ProfitModel.findByIdAndUpdate(id, data, { new: true })
+    return ProfitModel.findByIdAndUpdate(
+      id,
+      unset.length
+        ? { ...data, $unset: Object.fromEntries(unset.map((f) => [f, 1])) }
+        : data,
+      { new: true }
+    )
   }
 
   static async delete(id: string) {

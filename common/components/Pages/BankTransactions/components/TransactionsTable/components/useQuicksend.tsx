@@ -6,10 +6,7 @@ import {
   useGetAllServicesQuery,
   useAddServiceMutation,
 } from '@common/api/serviceApi/service.api'
-import {
-  useAddPaymentMutation,
-  useGetPaymentNumberQuery,
-} from '@common/api/paymentApi/payment.api'
+import { useAddPaymentMutation } from '@common/api/paymentApi/payment.api'
 import { getPaymentProviderAndReciever } from '@utils/helpers'
 import { getResolvedDescription } from './bankHelper'
 import { Operations } from '@utils/constants'
@@ -43,7 +40,6 @@ export const useQuickSend = ({
   const [loading, setLoading] = useState(false)
   const [addPayment] = useAddPaymentMutation()
   const [addService] = useAddServiceMutation()
-  const { data: nextInvoiceNumber = 1 } = useGetPaymentNumberQuery(undefined)
 
   const company = relatedCompanies.find((c) => c._id === selectedCompanyId)
   const streetId = getStreetId(company)
@@ -80,7 +76,11 @@ export const useQuickSend = ({
 
   const { data: servicesData, isLoading: isServicesLoading } =
     useGetAllServicesQuery(
-      { domainId: domain._id, streetId: streetId || undefined },
+      {
+        domainId: domain._id,
+        streetId: streetId || undefined,
+        withoutStreet: streetId ? undefined : true,
+      },
       { skip: !domain._id }
     )
 
@@ -140,7 +140,6 @@ export const useQuickSend = ({
           // street is optional; sending '' fails the ObjectId cast on the
           // backend, so omit it when the company has no street.
           ...(streetId ? { street: streetId } : {}),
-          invoiceNumber: nextInvoiceNumber,
           invoice: [],
           generalSum: parseFloat(transaction.SUM as string),
           description: getResolvedDescription(transaction, relatedCompanies),
@@ -187,7 +186,6 @@ export const useQuickSend = ({
       transaction,
       company,
       onSuccess,
-      nextInvoiceNumber,
       resolveMonthServiceId,
       streetId,
     ]

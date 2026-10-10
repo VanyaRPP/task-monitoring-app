@@ -1,10 +1,14 @@
 import { buildAssistantTools } from './index'
-import { buildInvoiceDraft } from '@common/services/aiAssistant/invoiceActions'
+import {
+  buildCreditDraft,
+  buildInvoiceDraft,
+} from '@common/services/aiAssistant/invoiceActions'
 import type { UserContext } from '@common/services/paymentService/payment.service'
 
 // The real `ai` package pulls in Web Streams at import; only `tool()` matters.
 jest.mock('ai', () => ({ tool: (def: unknown) => def }))
 jest.mock('@common/services/aiAssistant/invoiceActions', () => ({
+  buildCreditDraft: jest.fn(),
   buildInvoiceDraft: jest.fn(),
   findDomainsByName: jest.fn(),
   findCompaniesByName: jest.fn(),
@@ -14,6 +18,7 @@ jest.mock('@common/services/paymentService/payment.service', () => ({
 }))
 
 const mockBuildDraft = buildInvoiceDraft as jest.Mock
+const mockBuildCreditDraft = buildCreditDraft as jest.Mock
 
 const ctx: UserContext = {
   isUser: false,
@@ -75,5 +80,45 @@ describe('previewInvoice tool', () => {
   it('does not expose a createInvoice tool (form saving is user-driven)', () => {
     const tools = buildAssistantTools(ctx) as any
     expect(tools.createInvoice).toBeUndefined()
+  })
+})
+
+describe('previewCredit tool', () => {
+  const creditDraft = {
+    type: 'credit',
+    company: 'co-1',
+    generalSum: 3500,
+    currency: 'UAH',
+    period: { year: 2026, month: 9 },
+    reciever: { companyName: 'Acme' },
+  }
+
+  beforeEach(() => {
+    mockBuildCreditDraft.mockResolvedValue(creditDraft)
+  })
+
+  it('returns the draft for the payment form and a summary for the reply', async () => {
+    const result: any = await execOf('previewCredit')(
+      { companyId: 'co-1', amount: 3500, month: 9, year: 2026 },
+      {} as any
+    )
+
+    expect(result.draft).toBe(creditDraft)
+    expect(result.summary).toEqual({
+      company: 'Acme',
+      amount: 3500,
+      currency: 'UAH',
+      month: 9,
+      year: 2026,
+    })
+  })
+
+  it('binds the session user and defaults to the current month', async () => {
+    await execOf('previewCredit')({ companyId: 'co-1', amount: 1 }, {} as any)
+
+    const params = mockBuildCreditDraft.mock.calls[0][0]
+    expect(params.ctx).toBe(ctx)
+    expect(params.month).toBe(new Date().getMonth() + 1)
+    expect(params.year).toBe(new Date().getFullYear())
   })
 })

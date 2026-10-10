@@ -1,14 +1,19 @@
 import Domain from '@modules/models/Domain'
+import Payment from '@modules/models/Payment'
 import RealEstate from '@modules/models/RealEstate'
 import Service from '@modules/models/Service'
 import { getInvoices } from '@utils/getInvoices'
-import { getPaymentProviderAndReciever } from '@utils/helpers'
 import {
-  getNextInvoiceNumber,
-  getPayments,
-  type UserContext,
-} from '@common/services/paymentService/payment.service'
+  getPaymentProviderAndReciever,
+  plusFloat,
+  toRoundFixed,
+} from '@utils/helpers'
+import { getDomainServiceCatalog } from '@common/services/customServiceService/customService.service'
+import serviceFilter from '@components/AddPaymentModal/serviceFilter'
+import { keepInvoiceRow } from '@components/AddPaymentModal/invoiceRowFilter'
+import { type UserContext } from '@common/services/paymentService/payment.service'
 import type { FilterQuery } from 'mongoose'
+import { escapeRegexForMongo } from '@utils/escape-regex/escape-regex'
 
 /**
  * Building blocks for the AI-assisted invoice flow.
@@ -47,7 +52,7 @@ export async function findDomainsByName(
   const filter = await domainOwnershipFilter(ctx)
   const domains = await Domain.find({
     ...filter,
-    name: { $regex: name, $options: 'i' },
+    name: { $regex: escapeRegexForMongo(name), $options: 'i' },
   }).limit(10)
 
   return domains.map((d) => ({
@@ -100,7 +105,7 @@ export async function findCompaniesByName(
     $and: [
       options,
       {
-        companyName: { $regex: name, $options: 'i' },
+        companyName: { $regex: escapeRegexForMongo(name), $options: 'i' },
         ...(domainId ? { domain: domainId } : {}),
       },
     ],
@@ -169,8 +174,11 @@ export interface BuildInvoiceDraftParams {
 
 /**
  * Assembles a full payment draft (an `IPayment`-shaped object) WITHOUT writing
- * to the DB. Shared core of the preview and create tools — building it in one
- * place guarantees the created invoice equals the previewed one.
+ * to the DB. Its lines are built the way AddPaymentModal builds them
+ * (`filteredInvoices`): getInvoices with the previous month's Service and
+ * invoice, the domain's service catalog filter, the company discount, and
+ * keepInvoiceRow - so the summary the model reports matches the form. The
+ * form re-seeds its own lines on load and appends `extraLines` to them.
  */
 export async function buildInvoiceDraft({
   companyId,
@@ -179,37 +187,67 @@ export async function buildInvoiceDraft({
   extraLines = [],
   ctx,
 }: BuildInvoiceDraftParams) {
-  const company = await RealEstate.findById(companyId).populate('domain')
-  if (!company) throw new Error('company not found')
+  // Only a company the user may bill - the same scoping as findCompanies.
+  const company = await RealEstate.findOne({
+    $and: [await companyOwnershipFilter(ctx), { _id: companyId }],
+  }).populate('domain')
+  if (!company) throw new Error('company not accessible')
 
   const domainId = (company.domain as any)?._id?.toString()
   const street = company.street ? company.street.toString() : undefined
 
   const service = await findMonthService(domainId, street, year, month, ctx)
 
-  // Previous month's payment seeds meter/previous-amount data for getInvoices.
+  // Previous readings come from last month's invoice - the one billed for the
+  // previous month's Service, as in the form (usePaymentData), not whichever
+  // invoice happened to be issued in the previous calendar month.
   const prevMonth = month === 1 ? 12 : month - 1
   const prevYear = month === 1 ? year - 1 : year
-  const prevPayments = await getPayments(
-    {
-      companyIds: companyId,
-      type: 'debit',
-      year: prevYear,
-      month: prevMonth,
-      limit: '1',
-      skip: '0',
-    },
+  const prevService = await findMonthService(
+    domainId,
+    street,
+    prevYear,
+    prevMonth,
     ctx
   )
-  const prevPayment = prevPayments.data?.[0]
+  // `monthService` is a Mixed field: payments saved through the API hold the
+  // id as a string, ones written server-side as an ObjectId - match both. The
+  // company was already checked for access above.
+  const prevPayment = prevService
+    ? await Payment.findOne({
+        company: companyId,
+        type: 'debit',
+        monthService: {
+          $in: [prevService._id, prevService._id.toString()],
+        },
+      })
+        .sort({ invoiceCreationDate: -1 })
+        .lean()
+    : null
 
-  // Existing pure logic: line prices come from the Service (0 without one),
-  // previous readings from prevPayment.
   const generatedInvoice = getInvoices({
     company: company as any,
     service: (service ?? undefined) as any,
-    prevPayment: prevPayment as any,
+    prevService: (prevService ?? undefined) as any,
+    prevPayment: (prevPayment ?? undefined) as any,
   })
+
+  const catalog = (await getDomainServiceCatalog(domainId)) ?? []
+  const lines = serviceFilter(
+    generatedInvoice,
+    catalog.flatMap((group) => group.services)
+  )
+  if (
+    !lines.some((line) => line.type === 'discount') &&
+    (company as any).discount
+  ) {
+    lines.push({
+      type: 'discount',
+      name: 'Знижка',
+      price: (company as any).discount,
+      sum: (company as any).discount,
+    })
+  }
 
   const extraInvoiceLines = extraLines.map((line) => ({
     type: 'custom',
@@ -220,16 +258,16 @@ export async function buildInvoiceDraft({
     sum: line.sum,
   }))
 
-  const invoice = [...generatedInvoice, ...extraInvoiceLines].filter(
-    (line) => +line.sum !== 0
+  const invoice = [...lines.filter(keepInvoiceRow), ...extraInvoiceLines]
+  const generalSum = invoice.reduce(
+    (total, line) => plusFloat(total, Number(line.sum) || 0),
+    0
   )
-  const generalSum = invoice.reduce((acc, line) => acc + +line.sum, 0)
 
+  // No invoice number: the server gives one when the form saves.
   const { provider, reciever } = getPaymentProviderAndReciever(company)
-  const invoiceNumber = await getNextInvoiceNumber()
 
   return {
-    invoiceNumber,
     type: 'debit',
     domain: domainId,
     ...(street ? { street } : {}),
@@ -246,7 +284,77 @@ export async function buildInvoiceDraft({
     provider,
     reciever,
     invoice,
+    // Lines the user asked for on top of the tariffs; the form keeps them when
+    // it re-seeds its own lines.
+    extraLines: extraInvoiceLines,
     template: (company as any).defaultTemplate || 'classic',
     invoiceLang: 'uk' as const,
+  }
+}
+
+export interface BuildCreditDraftParams {
+  companyId: string
+  /** Positive; a credit is money received. */
+  amount: number
+  /** Billed month the payment settles (its month service). */
+  month: number
+  year: number
+  /** `YYYY-MM-DD` the money came in; today when absent. */
+  date?: string
+  description?: string
+  ctx: UserContext
+}
+
+const ISO_DAY = /^\d{4}-\d{2}-\d{2}$/
+
+/**
+ * A received payment (credit) for AddPaymentModal to open prefilled - same
+ * fields as the bank's quick-send credit. Nothing is written: the month's
+ * Service, when missing, is created by the form on save (see `period`).
+ */
+export async function buildCreditDraft({
+  companyId,
+  amount,
+  month,
+  year,
+  date,
+  description,
+  ctx,
+}: BuildCreditDraftParams) {
+  const sum = Math.abs(Number(amount))
+  if (!Number.isFinite(sum) || sum <= 0) {
+    throw new Error('amount must be a positive number')
+  }
+
+  // Only a company the user may bill - the same scoping as findCompanies.
+  const company = await RealEstate.findOne({
+    $and: [await companyOwnershipFilter(ctx), { _id: companyId }],
+  }).populate('domain')
+  if (!company) throw new Error('company not accessible')
+
+  const domainId = (company.domain as any)?._id?.toString()
+  const street = company.street ? company.street.toString() : undefined
+  const service = await findMonthService(domainId, street, year, month, ctx)
+
+  // No invoice number: the server gives one when the form saves.
+  const { provider, reciever } = getPaymentProviderAndReciever(company)
+  const period = { year, month }
+
+  return {
+    type: 'credit' as const,
+    domain: domainId,
+    ...(street ? { street } : {}),
+    company: companyId,
+    monthService: service ? service._id.toString() : null,
+    period,
+    invoiceCreationDate: date && ISO_DAY.test(date) ? date : new Date(),
+    description:
+      description?.trim() ||
+      `Оплата за ${String(month).padStart(2, '0')}.${year}`,
+    generalSum: Number(toRoundFixed(sum)),
+    currency: (company as any).currency || 'UAH',
+    provider,
+    reciever,
+    invoice: [],
   }
 }
