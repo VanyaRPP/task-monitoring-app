@@ -11,6 +11,7 @@ import {
   findDomainsByName,
 } from '@common/services/aiAssistant/invoiceActions'
 import { buildExpenseDraft } from '@common/services/aiAssistant/expenseActions'
+import { buildServiceDraft } from '@common/services/aiAssistant/serviceActions'
 import { sumProfitItems, PROFIT_DEFAULT_CATEGORIES } from '@utils/profit-items'
 
 /**
@@ -233,6 +234,69 @@ export function buildAssistantTools(userContext: UserContext): ToolSet {
         // `draft` is consumed by the frontend to open a prefilled AddPaymentModal;
         // `summary` lets the model describe the invoice in its reply.
         return { draft, summary: toDraftSummary(draft) }
+      },
+    }),
+
+    previewService: tool({
+      description:
+        'Підготувати ТАРИФИ надавача на місяць ("Послугу") і ВІДКРИТИ форму, ' +
+        'заповнену ними - НІЧОГО не зберігає. Назви тарифів передавай словами ' +
+        'користувача ("електрика", "вода"); інструмент сам знайде їх у каталозі ' +
+        'надавача. Неназвані тарифи береться з минулого місяця. Якщо Послуга за ' +
+        'місяць уже є - відкриє її на редагування з новими цінами.',
+      inputSchema: z.object({
+        domainId: z.string().describe('id надавача (через findDomains).'),
+        street: z
+          .string()
+          .optional()
+          .describe('Адреса словами, лише якщо її назвали.'),
+        month: z
+          .number()
+          .int()
+          .min(1)
+          .max(12)
+          .optional()
+          .describe(
+            `Місяць 1-12 (за замовчуванням поточний: ${now.getMonth() + 1}).`
+          ),
+        year: z
+          .number()
+          .int()
+          .optional()
+          .describe(`Рік (за замовчуванням ${now.getFullYear()}).`),
+        prices: z
+          .array(
+            z.object({
+              name: z.string().describe('Назва тарифу словами користувача.'),
+              price: z.number().describe('Ціна за одиницю, не відʼємна.'),
+            })
+          )
+          .min(1)
+          .max(40),
+        description: z.string().optional(),
+      }),
+      execute: async ({ month, year, ...input }) => {
+        const result = await buildServiceDraft({
+          ...input,
+          month: month ?? now.getMonth() + 1,
+          year: year ?? now.getFullYear(),
+          ctx: userContext,
+        })
+        // `draft` opens the prefilled AddServiceModal; the rest is for the reply.
+        return {
+          draft: { mode: result.mode, service: result.service },
+          summary: {
+            mode: result.mode,
+            domain: result.domainName,
+            street: result.streetAddress,
+            tariffs: result.lines.map(({ name, price, source }) => ({
+              name,
+              price,
+              source,
+            })),
+            unmatched: result.unmatched,
+          },
+        }
       },
     }),
 

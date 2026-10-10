@@ -14,6 +14,8 @@ import { ObjectId } from 'mongoose'
 interface Props {
   closeModal: VoidFunction
   currentService?: IService
+  /** Prefills a NEW service (an AI draft); saving creates it. */
+  draft?: Partial<IService>
   serviceActions?: {
     edit: boolean
     preview: boolean
@@ -46,6 +48,7 @@ type FormData = {
 const AddServiceModal: FC<Props> = ({
   closeModal,
   currentService,
+  draft,
   serviceActions,
 }) => {
   const [form] = Form.useForm()
@@ -143,6 +146,7 @@ const AddServiceModal: FC<Props> = ({
           form={form}
           edit={edit}
           currentService={currentService}
+          draft={draft}
           setIsValueChanged={setIsValueChanged}
         />
       )}
