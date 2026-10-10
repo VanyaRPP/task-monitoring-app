@@ -5,6 +5,7 @@ import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { applyTemplateScope } from '@common/services/paymentService/templateScope.service'
 import { logPaymentMutation } from '@common/modules/services/paymentAudit'
+import { canWritePayment } from '@common/services/paymentService/paymentAccess'
 
 const PROTECTED_PATCH_FIELDS = ['_id', 'domain', 'company', '_templateScope']
 
@@ -114,13 +115,6 @@ export default async function handler(
           before: payment,
         })
 
-        await logPaymentMutation({
-          actionType: 'DELETE',
-          source: 'single',
-          actor: user,
-          before: payment,
-        })
-
         return res.status(200).json({ success: true, data: deleted })
       } catch (error: any) {
         return res
@@ -159,7 +153,8 @@ export default async function handler(
           req.body.invoice === undefined
 
         if (isTemplateUpdate) {
-          if (!isGlobalAdmin && !isDomainAdmin) {
+          // Same ownership rule as a full edit: the payment's own domain.
+          if (!(await canWritePayment(current, { isGlobalAdmin, user }))) {
             return res
               .status(403)
               .json({ success: false, message: 'not allowed' })

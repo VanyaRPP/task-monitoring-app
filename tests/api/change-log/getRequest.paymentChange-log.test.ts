@@ -1,21 +1,35 @@
 import handler from '@pages/api/spacehub/payment/[id]/change-log'
 import PaymentChangeLog from '@common/modules/models/PaymentChangeLog'
+import Payment from '@common/modules/models/Payment'
 import { setupTestEnvironment } from '@utils/setupTestEnvironment'
+import { mockLoginAs } from '@utils/mockLoginAs'
+import { users } from '@utils/testData'
 import { expect } from '@jest/globals'
 import mongoose from 'mongoose'
 
 jest.mock('@utils/dbConnect', () => jest.fn())
+jest.mock('next-auth', () => ({ getServerSession: jest.fn() }))
+jest.mock('@pages/api/auth/[...nextauth]', () => ({ authOptions: {} }))
 jest.mock('@common/modules/models/PaymentChangeLog')
 jest.mock('@common/modules/models/Payment')
 
 setupTestEnvironment()
 
+// The route now reads the payment's domain/company to check access; a
+// GlobalAdmin passes that check without further lookups.
+const stubPayment = (payment: unknown = { domain: 'domain-id' }) =>
+  (Payment.findById as jest.Mock).mockReturnValue({
+    select: () => ({ lean: () => Promise.resolve(payment) }),
+  })
+
 describe('PaymentChangeLog API - GET', () => {
   const validPaymentId = new mongoose.Types.ObjectId().toString()
   const invalidPaymentId = 'invalid-id-123'
 
-  beforeEach(() => {
+  beforeEach(async () => {
     jest.clearAllMocks()
+    stubPayment()
+    await mockLoginAs(users.globalAdmin)
   })
 
   it('should return payment change logs for valid paymentId', async () => {
