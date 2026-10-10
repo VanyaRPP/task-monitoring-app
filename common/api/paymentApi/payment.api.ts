@@ -13,6 +13,7 @@ import {
   IHtmlToPdfZipResponse,
   IGetPaymentNumberResponse,
   IGetPaymentResponse,
+  INewPayment,
   IPayment,
   IGetCostPaymentResponse,
   IGeneratePaymentExcel,
@@ -137,7 +138,7 @@ export const paymentApi = createApi({
       }),
       providesTags: (result) => (result ? ['Profit'] : []),
     }),
-    addPayment: builder.mutation<IAddPaymentResponse, IPayment>({
+    addPayment: builder.mutation<IAddPaymentResponse, INewPayment>({
       query(body) {
         return {
           url: `spacehub/payment`,

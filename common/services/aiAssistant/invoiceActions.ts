@@ -11,10 +11,7 @@ import {
 import { getDomainServiceCatalog } from '@common/services/customServiceService/customService.service'
 import serviceFilter from '@components/AddPaymentModal/serviceFilter'
 import { keepInvoiceRow } from '@components/AddPaymentModal/invoiceRowFilter'
-import {
-  getNextInvoiceNumber,
-  type UserContext,
-} from '@common/services/paymentService/payment.service'
+import { type UserContext } from '@common/services/paymentService/payment.service'
 import type { FilterQuery } from 'mongoose'
 
 /**
@@ -266,11 +263,10 @@ export async function buildInvoiceDraft({
     0
   )
 
+  // No invoice number: the server gives one when the form saves.
   const { provider, reciever } = getPaymentProviderAndReciever(company)
-  const invoiceNumber = await getNextInvoiceNumber()
 
   return {
-    invoiceNumber,
     type: 'debit',
     domain: domainId,
     ...(street ? { street } : {}),
@@ -339,12 +335,11 @@ export async function buildCreditDraft({
   const street = company.street ? company.street.toString() : undefined
   const service = await findMonthService(domainId, street, year, month, ctx)
 
+  // No invoice number: the server gives one when the form saves.
   const { provider, reciever } = getPaymentProviderAndReciever(company)
-  const invoiceNumber = await getNextInvoiceNumber()
   const period = { year, month }
 
   return {
-    invoiceNumber,
     type: 'credit' as const,
     domain: domainId,
     ...(street ? { street } : {}),

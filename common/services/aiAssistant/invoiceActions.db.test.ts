@@ -64,6 +64,8 @@ describe('buildInvoiceDraft against the database', () => {
     expect(await Service.countDocuments()).toBe(before)
     expect(draft.monthService).toBeNull()
     expect(draft.period).toEqual({ year, month })
+    // The server numbers the invoice when the form saves it.
+    expect(draft).not.toHaveProperty('invoiceNumber')
   })
 
   it("does not take another street's tariffs for a company without a street", async () => {

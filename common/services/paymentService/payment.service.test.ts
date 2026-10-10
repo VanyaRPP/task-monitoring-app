@@ -31,6 +31,34 @@ jest.mock('@modules/models/Payment', () => ({
   },
 }))
 
+// The invoice-number counter, kept in memory: $max raises it, $inc hands out
+// the next values - the same contract the Mongo counter has.
+let mockCounterSeq: number | null = null
+jest.mock('@modules/models/Counter', () => ({
+  __esModule: true,
+  default: {
+    findById: jest.fn(() => ({
+      lean: () =>
+        Promise.resolve(
+          mockCounterSeq === null ? null : { seq: mockCounterSeq }
+        ),
+    })),
+    updateOne: jest.fn((_filter: unknown, update: any) => {
+      mockCounterSeq = Math.max(mockCounterSeq ?? 0, update.$max?.seq ?? 0)
+      return Promise.resolve()
+    }),
+    findOneAndUpdate: jest.fn((_filter: unknown, update: any) => {
+      mockCounterSeq = (mockCounterSeq ?? 0) + update.$inc.seq
+      const seq = mockCounterSeq
+      return { lean: () => Promise.resolve({ seq }) }
+    }),
+  },
+}))
+
+beforeEach(() => {
+  mockCounterSeq = null
+})
+
 jest.mock('@utils/email/sendInvoiceEmail', () => ({
   sendInvoiceEmail: jest.fn(),
 }))
@@ -476,6 +504,43 @@ describe('createPayment', () => {
   })
 })
 
+describe('createPayment numbering', () => {
+  const aggregateMock = Payment.aggregate as jest.Mock
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    paymentCreateMock.mockImplementation((data: any) => Promise.resolve(data))
+  })
+
+  // clearAllMocks keeps implementations; put the shared default back.
+  afterEach(() => {
+    aggregateMock.mockResolvedValue([])
+  })
+
+  it('ignores the number the client sent and gives the next free one', async () => {
+    aggregateMock.mockResolvedValue([{ maxNumber: 40 }])
+
+    await createPayment({ type: 'credit', invoiceNumber: 5 }, true)
+    await createPayment({ type: 'credit', invoiceNumber: 5 }, true)
+
+    expect(
+      paymentCreateMock.mock.calls.map(([data]) => data.invoiceNumber)
+    ).toEqual([41, 42])
+  })
+
+  it('starts above a number set by hand on an existing invoice', async () => {
+    aggregateMock.mockResolvedValueOnce([{ maxNumber: 40 }])
+    await createPayment({ type: 'credit' }, true)
+    // Someone edited an invoice to 900 in the meantime.
+    aggregateMock.mockResolvedValueOnce([{ maxNumber: 900 }])
+    await createPayment({ type: 'credit' }, true)
+
+    expect(
+      paymentCreateMock.mock.calls.map(([data]) => data.invoiceNumber)
+    ).toEqual([41, 901])
+  })
+})
+
 describe('getNextInvoiceNumber', () => {
   const aggregateMock = Payment.aggregate as jest.Mock
 
@@ -553,7 +618,7 @@ describe('duplicatePayments', () => {
     )
   })
 
-  it('clones each source, assigns sequential invoice numbers from one base, and never emails', async () => {
+  it('clones each source, gives each copy its own next number, and never emails', async () => {
     aggregateMock.mockResolvedValueOnce([{ maxNumber: 100 }])
     paymentFindMock.mockResolvedValue([
       makeSource('src-1', 'domain-1'),
@@ -582,8 +647,6 @@ describe('duplicatePayments', () => {
     expect(firstBody.generalSum).toBe(500)
     expect(firstBody.description).toBe('original')
 
-    // base invoice number resolved once, not once per payment
-    expect(aggregateMock).toHaveBeenCalledTimes(1)
     expect(sendInvoiceEmailMock).not.toHaveBeenCalled()
   })
 
@@ -613,9 +676,10 @@ describe('duplicatePayments', () => {
     const result = await duplicatePayments(['src-1', 'src-2'], globalPerms)
 
     expect(result.skippedIds).toContain('src-1')
-    expect(result.createdIds).toEqual(['new-201'])
-    // the failed number is reused (not burned): the second duplicate also gets 201
-    expect(paymentCreateMock.mock.calls[1][0].invoiceNumber).toBe(201)
+    // Numbers are handed out atomically before the write, so a failed copy
+    // leaves a gap (201) rather than risking two invoices sharing a number.
+    expect(result.createdIds).toEqual(['new-202'])
+    expect(paymentCreateMock.mock.calls[1][0].invoiceNumber).toBe(202)
 
     consoleErrorSpy.mockRestore()
   })

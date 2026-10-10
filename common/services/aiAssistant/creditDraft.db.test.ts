@@ -48,6 +48,8 @@ describe('buildCreditDraft', () => {
       description: 'Оплата за 03.2030',
     })
     expect(draft.reciever.companyName).toBe(realEstates[0].companyName)
+    // The server numbers the payment when the form saves it.
+    expect(draft).not.toHaveProperty('invoiceNumber')
   })
 
   it('stores a minus as a positive amount and keeps a named purpose', async () => {
