@@ -38,7 +38,7 @@ const ALIASES: [RegExp, string][] = [
   [/квартпл/, 'housingFeePrice'],
 ]
 
-const normalize = (value: string) =>
+export const normalize = (value: string) =>
   value.toLowerCase().replace(/[^a-zа-яіїєґ0-9]/g, '')
 
 export interface ServicePriceInput {

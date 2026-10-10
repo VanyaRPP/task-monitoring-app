@@ -35,6 +35,7 @@ import type { IPaymentField } from '@common/api/paymentApi/payment.api.types'
 import AddCostModal from '@components/AddCostModal'
 import AddServiceModal from '@components/AddServiceModal'
 import RealEstateModal from '@components/UI/RealEstateComponents/RealEstateModal'
+import AddStreetModal from '@components/AddStreetModal'
 import type { ExpenseDraft } from '@common/services/aiAssistant/expenseActions'
 import { message } from 'antd'
 import {
@@ -258,6 +259,8 @@ const AIChat: React.FC = () => {
   const [expenseDraft, setExpenseDraft] = useState<ExpenseDraft | null>(null)
   // previewCompany: a new company to check and save.
   const [companyDraft, setCompanyDraft] = useState<any>(null)
+  // previewStreet: a new address for a domain.
+  const [streetDraft, setStreetDraft] = useState<any>(null)
   // previewService: a new month's tariffs, or an existing month to edit.
   const [serviceDraft, setServiceDraft] = useState<{
     mode: 'create' | 'edit'
@@ -316,9 +319,9 @@ const AIChat: React.FC = () => {
   } = useDocumentImports(onBatchDone)
 
   // Watch for completed `previewInvoice` / `previewCredit` /
-  // `previewExpenses` / `previewService` / `previewCompany` tool calls and
-  // open the prefilled payment / cost / service / company modal with their
-  // draft. Each toolCallId is handled at most once.
+  // `previewExpenses` / `previewService` / `previewCompany` /
+  // `previewStreet` tool calls and open the prefilled payment / cost /
+  // service / company / street modal with their draft. Each toolCallId is handled at most once.
   useEffect(() => {
     for (const message of messages) {
       for (const part of message.parts ?? []) {
@@ -353,6 +356,15 @@ const AIChat: React.FC = () => {
         ) {
           handledToolCallsRef.current.add(p.toolCallId)
           setCompanyDraft(p.output.draft)
+        }
+        if (
+          p.type === 'tool-previewStreet' &&
+          p.state === 'output-available' &&
+          p.output?.draft &&
+          !handledToolCallsRef.current.has(p.toolCallId)
+        ) {
+          handledToolCallsRef.current.add(p.toolCallId)
+          setStreetDraft(p.output.draft)
         }
         if (
           p.type === 'tool-previewService' &&
@@ -622,6 +634,13 @@ const AIChat: React.FC = () => {
             />
           </div>
         </div>
+      )}
+
+      {streetDraft && (
+        <AddStreetModal
+          draft={streetDraft}
+          closeModal={() => setStreetDraft(null)}
+        />
       )}
 
       {companyDraft && (

@@ -12,6 +12,7 @@ import {
 } from '@common/services/aiAssistant/invoiceActions'
 import { buildExpenseDraft } from '@common/services/aiAssistant/expenseActions'
 import { buildServiceDraft } from '@common/services/aiAssistant/serviceActions'
+import { buildStreetDraft } from '@common/services/aiAssistant/streetActions'
 import { buildCompanyDraft } from '@common/services/aiAssistant/companyActions'
 import { sumProfitItems, PROFIT_DEFAULT_CATEGORIES } from '@utils/profit-items'
 
@@ -287,6 +288,35 @@ export function buildAssistantTools(userContext: UserContext): ToolSet {
             unmatched: result.unmatched,
             invalidEmails: result.invalidEmails,
             similar: result.similar,
+          },
+        }
+      },
+    }),
+
+    previewStreet: tool({
+      description:
+        'Підготувати НОВУ адресу (вулицю) надавача і ВІДКРИТИ форму, заповнену ' +
+        'нею - НІЧОГО не зберігає. Після збереження адреса одразу належить ' +
+        'надавачу, і на ній можна створювати компанії та тарифи.',
+      inputSchema: z.object({
+        domainId: z.string().describe('id надавача (через findDomains).'),
+        address: z
+          .string()
+          .describe(
+            'Вулиця з номером, як назвав користувач: "вул. Шевченка, 5".'
+          ),
+        city: z.string().describe('Місто.'),
+      }),
+      execute: async (input) => {
+        const result = await buildStreetDraft({ ...input, ctx: userContext })
+        // An address the domain already has opens nothing - it is reported.
+        return {
+          ...(result.existing ? {} : { draft: result.draft }),
+          summary: {
+            address: result.draft.address,
+            city: result.draft.city,
+            domain: result.domainName,
+            alreadyExists: !!result.existing,
           },
         }
       },
