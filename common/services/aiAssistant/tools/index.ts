@@ -12,6 +12,7 @@ import {
 } from '@common/services/aiAssistant/invoiceActions'
 import { buildExpenseDraft } from '@common/services/aiAssistant/expenseActions'
 import { buildServiceDraft } from '@common/services/aiAssistant/serviceActions'
+import { buildDomainDraft } from '@common/services/aiAssistant/domainActions'
 import { buildStreetDraft } from '@common/services/aiAssistant/streetActions'
 import { buildCompanyDraft } from '@common/services/aiAssistant/companyActions'
 import { sumProfitItems, PROFIT_DEFAULT_CATEGORIES } from '@utils/profit-items'
@@ -285,6 +286,41 @@ export function buildAssistantTools(userContext: UserContext): ToolSet {
             street: result.streetAddress,
             missingDescription: !result.draft.description,
             unmatched: result.unmatched,
+            invalidEmails: result.invalidEmails,
+            similar: result.similar,
+          },
+        }
+      },
+    }),
+
+    previewDomain: tool({
+      description:
+        'Підготувати НОВОГО надавача послуг (домен) і ВІДКРИТИ форму, ' +
+        'заповнену ним - НІЧОГО не зберігає. Лише назва й реквізити; ' +
+        'банківські токени, адреси й шаблон послуг користувач задає у формі.',
+      inputSchema: z.object({
+        name: z.string().describe('Назва надавача.'),
+        adminEmails: z
+          .array(z.string())
+          .optional()
+          .describe('Email-и інших адмінів, якщо названі.'),
+        iban: z.string().optional(),
+        rnokpp: z.string().optional().describe('РНОКПП або ЄДРПОУ.'),
+        mfo: z.string().optional(),
+        description: z
+          .string()
+          .optional()
+          .describe('Інші реквізити для рахунку: адреса, телефон, директор.'),
+      }),
+      execute: async (input) => {
+        const result = await buildDomainDraft({ ...input, ctx: userContext })
+        // `draft` opens the prefilled DomainModal; the rest is for the reply.
+        return {
+          draft: result.draft,
+          summary: {
+            name: result.draft.name,
+            hasIban: !!result.draft.iban,
+            invalid: result.invalid,
             invalidEmails: result.invalidEmails,
             similar: result.similar,
           },

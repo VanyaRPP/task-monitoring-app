@@ -13,6 +13,7 @@ import serviceFilter from '@components/AddPaymentModal/serviceFilter'
 import { keepInvoiceRow } from '@components/AddPaymentModal/invoiceRowFilter'
 import { type UserContext } from '@common/services/paymentService/payment.service'
 import type { FilterQuery } from 'mongoose'
+import { escapeRegexForMongo } from '@utils/escape-regex/escape-regex'
 
 /**
  * Building blocks for the AI-assisted invoice flow.
@@ -51,7 +52,7 @@ export async function findDomainsByName(
   const filter = await domainOwnershipFilter(ctx)
   const domains = await Domain.find({
     ...filter,
-    name: { $regex: name, $options: 'i' },
+    name: { $regex: escapeRegexForMongo(name), $options: 'i' },
   }).limit(10)
 
   return domains.map((d) => ({
@@ -104,7 +105,7 @@ export async function findCompaniesByName(
     $and: [
       options,
       {
-        companyName: { $regex: name, $options: 'i' },
+        companyName: { $regex: escapeRegexForMongo(name), $options: 'i' },
         ...(domainId ? { domain: domainId } : {}),
       },
     ],
