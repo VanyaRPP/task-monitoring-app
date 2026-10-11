@@ -6,10 +6,10 @@ import {
 } from '@common/services/paymentService/payment.service'
 import {
   buildCreditDraft,
-  buildInvoiceDraft,
   findCompaniesByName,
   findDomainsByName,
 } from '@common/services/aiAssistant/invoiceActions'
+import { buildPartiesInvoiceDraft } from '@common/services/aiAssistant/invoicePartiesActions'
 import { buildExpenseDraft } from '@common/services/aiAssistant/expenseActions'
 import { buildServiceDraft } from '@common/services/aiAssistant/serviceActions'
 import { buildDomainDraft } from '@common/services/aiAssistant/domainActions'
@@ -28,15 +28,44 @@ import { sumProfitItems, PROFIT_DEFAULT_CATEGORIES } from '@utils/profit-items'
  * same pattern.
  */
 
-// Identifier-only input for previewInvoice. The model supplies WHO/WHEN, never
-// the final amounts — those are computed server-side from the Service record.
-// Built per request: "the current month" must be today's, not the month the
-// server process happened to start in.
+// Input for previewInvoice. The model supplies WHO/WHEN and the lines the user
+// named, never the final amounts - those are computed server-side (tariffs
+// from the Service record, quantity × price for named lines). Built per
+// request: "the current month" must be today's, not the month the server
+// process happened to start in.
 const makePreviewInputSchema = (now: Date) =>
   z.object({
     companyId: z
       .string()
-      .describe('id компанії (отримай через findCompanies за назвою).'),
+      .optional()
+      .describe('id компанії, якщо findCompanies її знайшов.'),
+    companyName: z
+      .string()
+      .optional()
+      .describe(
+        'Назва компанії-отримувача, якщо findCompanies її НЕ знайшов: буде створена при збереженні.'
+      ),
+    companyEmail: z
+      .string()
+      .optional()
+      .describe('Пошта нової компанії, якщо названа.'),
+    domainId: z
+      .string()
+      .optional()
+      .describe(
+        'id надавача (виставляє рахунок), якщо findDomains його знайшов.'
+      ),
+    domainName: z
+      .string()
+      .optional()
+      .describe(
+        'Назва надавача, якщо findDomains його НЕ знайшов: буде створений при збереженні.'
+      ),
+    street: z
+      .string()
+      .optional()
+      .describe('Адреса нової компанії словами, лише якщо названа.'),
+    city: z.string().optional().describe('Місто нової адреси.'),
     month: z
       .number()
       .int()
@@ -51,30 +80,55 @@ const makePreviewInputSchema = (now: Date) =>
       .int()
       .optional()
       .describe(`Рік (за замовчуванням поточний: ${now.getFullYear()}).`),
+    currency: z
+      .enum(['UAH', 'USD', 'EUR'])
+      .optional()
+      .describe('Валюта, якщо названа: долари/баксі/$ - USD, євро - EUR.'),
     extraLines: z
-      .array(z.object({ name: z.string(), sum: z.number() }))
+      .array(
+        z.object({
+          name: z
+            .string()
+            .describe('Що саме: «Software engineering», «Оренда».'),
+          quantity: z
+            .number()
+            .optional()
+            .describe('Кількість: годин, штук. Без неї - 1.'),
+          price: z.number().optional().describe('Ціна за одиницю.'),
+          sum: z
+            .number()
+            .optional()
+            .describe('Сума рядка, якщо названа лише вона.'),
+        })
+      )
       .optional()
       .describe(
-        'Додаткові фіксовані позиції, напр. [{ "name": "Оренда", "sum": 5000 }].'
+        'Позиції, які назвав користувач: «168 годин по 6» -> { quantity: 168, price: 6 }, «оренда 5000» -> { sum: 5000 }.'
       ),
   })
 
 type PreviewInput = z.infer<ReturnType<typeof makePreviewInputSchema>>
 
-// Normalises month/year defaults for both invoice tools.
+// Normalises month/year defaults.
 function withDefaults(input: PreviewInput, now: Date) {
   return {
-    companyId: input.companyId,
+    ...input,
     month: input.month ?? now.getMonth() + 1,
     year: input.year ?? now.getFullYear(),
-    extraLines: input.extraLines,
+    lines: input.extraLines,
   }
 }
 
 // Compact, model-friendly view of a draft — lets the model describe the invoice
 // in text without echoing the full payload. The full `draft` is returned
 // alongside this for the frontend to open the prefilled form.
-function toDraftSummary(draft: Awaited<ReturnType<typeof buildInvoiceDraft>>) {
+function toDraftSummary(draft: {
+  reciever?: { companyName?: string }
+  period: { year: number; month: number }
+  generalSum: number
+  currency: string
+  invoice: any[]
+}) {
   return {
     company: draft.reciever?.companyName ?? null,
     // The billed month, not the issue date - asking for March in April must
@@ -85,6 +139,7 @@ function toDraftSummary(draft: Awaited<ReturnType<typeof buildInvoiceDraft>>) {
     currency: draft.currency,
     lines: draft.invoice.map((line: any) => ({
       name: line.name ?? line.customName ?? line.type,
+      ...(line.amount > 1 ? { quantity: line.amount, price: line.price } : {}),
       sum: line.sum,
     })),
   }
@@ -223,19 +278,37 @@ export function buildAssistantTools(userContext: UserContext): ToolSet {
 
     previewInvoice: tool({
       description:
-        'Підготувати ЧЕРНЕТКУ інвойсу для компанії за місяць і ВІДКРИТИ форму ' +
-        'створення рахунку, заповнену цією чернеткою — НІЧОГО не зберігає в базі. ' +
-        'Позиції та ціни беруться з Послуги за місяць (0, якщо не заповнено). ' +
-        'Користувач перевіряє форму і зберігає сам. Виклич, коли просять створити рахунок.',
+        'Підготувати ЧЕРНЕТКУ інвойсу (рахунку) і ВІДКРИТИ форму створення ' +
+        'рахунку, заповнену нею — НІЧОГО не зберігає в базі. Для наявної ' +
+        'компанії позиції й ціни беруться з Послуги за місяць, плюс extraLines. ' +
+        'Надавача чи компанію, яких немає, передай назвою (domainName / ' +
+        'companyName) - форма створить їх при збереженні. Користувач перевіряє ' +
+        'форму і зберігає сам. Виклич, коли просять створити рахунок.',
       inputSchema: makePreviewInputSchema(now),
       execute: async (input) => {
-        const draft = await buildInvoiceDraft({
+        const result = await buildPartiesInvoiceDraft({
           ...withDefaults(input, now),
           ctx: userContext,
         })
+        const { draft } = result
         // `draft` is consumed by the frontend to open a prefilled AddPaymentModal;
         // `summary` lets the model describe the invoice in its reply.
-        return { draft, summary: toDraftSummary(draft) }
+        return {
+          draft,
+          summary: {
+            ...toDraftSummary({
+              ...draft,
+              reciever: (draft as any).reciever ?? {
+                companyName: result.created.company,
+              },
+            }),
+            // Created on save, together with the invoice.
+            willCreate: result.created,
+            missingCompanyEmail:
+              !!result.created.company && !(draft as any).companyEmail,
+            invalidEmail: result.invalidEmail,
+          },
+        }
       },
     }),
 

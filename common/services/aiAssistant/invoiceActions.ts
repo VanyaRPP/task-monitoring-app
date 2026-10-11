@@ -5,6 +5,7 @@ import Service from '@modules/models/Service'
 import { getInvoices } from '@utils/getInvoices'
 import {
   getPaymentProviderAndReciever,
+  multiplyFloat,
   plusFloat,
   toRoundFixed,
 } from '@utils/helpers'
@@ -160,7 +161,34 @@ export async function findMonthService(
 
 export interface ExtraLine {
   name: string
-  sum: number
+  /** Units: hours, pieces. 1 when only a sum is given. */
+  quantity?: number
+  /** Per unit; `sum / quantity` when only a sum is given. */
+  price?: number
+  sum?: number
+}
+
+/**
+ * A line the user named ("168 годин по 6 за розробку", "оренда 5000") as the
+ * form's custom invoice row: `amount` × `price` = `sum`. Null for a line with
+ * no usable numbers.
+ */
+export function toCustomInvoiceLine({ name, quantity, price, sum }: ExtraLine) {
+  const label = name?.trim()
+  const amount = Number(quantity) > 0 ? Number(quantity) : 1
+  const unitPrice =
+    Number.isFinite(Number(price)) && price !== undefined
+      ? Number(price)
+      : Number(sum) / amount
+  if (!label || !Number.isFinite(unitPrice) || unitPrice < 0) return null
+  return {
+    type: 'custom',
+    name: label,
+    customName: label,
+    amount,
+    price: Number(toRoundFixed(unitPrice)),
+    sum: Number(toRoundFixed(multiplyFloat(unitPrice, amount))),
+  }
 }
 
 export interface BuildInvoiceDraftParams {
@@ -249,14 +277,10 @@ export async function buildInvoiceDraft({
     })
   }
 
-  const extraInvoiceLines = extraLines.map((line) => ({
-    type: 'custom',
-    name: line.name,
-    customName: line.name,
-    customService: true,
-    price: line.sum,
-    sum: line.sum,
-  }))
+  const extraInvoiceLines = extraLines
+    .map(toCustomInvoiceLine)
+    .filter(Boolean)
+    .map((line) => ({ ...line, customService: true }))
 
   const invoice = [...lines.filter(keepInvoiceRow), ...extraInvoiceLines]
   const generalSum = invoice.reduce(

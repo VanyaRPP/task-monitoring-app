@@ -1,8 +1,6 @@
 import { buildAssistantTools } from './index'
-import {
-  buildCreditDraft,
-  buildInvoiceDraft,
-} from '@common/services/aiAssistant/invoiceActions'
+import { buildCreditDraft } from '@common/services/aiAssistant/invoiceActions'
+import { buildPartiesInvoiceDraft } from '@common/services/aiAssistant/invoicePartiesActions'
 import type { UserContext } from '@common/services/paymentService/payment.service'
 
 // The real `ai` package pulls in Web Streams at import; only `tool()` matters.
@@ -13,11 +11,14 @@ jest.mock('@common/services/aiAssistant/invoiceActions', () => ({
   findDomainsByName: jest.fn(),
   findCompaniesByName: jest.fn(),
 }))
+jest.mock('@common/services/aiAssistant/invoicePartiesActions', () => ({
+  buildPartiesInvoiceDraft: jest.fn(),
+}))
 jest.mock('@common/services/paymentService/payment.service', () => ({
   getPayments: jest.fn(),
 }))
 
-const mockBuildDraft = buildInvoiceDraft as jest.Mock
+const mockBuildDraft = buildPartiesInvoiceDraft as jest.Mock
 const mockBuildCreditDraft = buildCreditDraft as jest.Mock
 
 const ctx: UserContext = {
@@ -50,7 +51,11 @@ const draft = {
 
 beforeEach(() => {
   jest.clearAllMocks()
-  mockBuildDraft.mockResolvedValue(draft)
+  mockBuildDraft.mockResolvedValue({
+    draft,
+    created: { domain: null, company: null, street: null },
+    invalidEmail: false,
+  })
 })
 
 describe('previewInvoice tool', () => {
@@ -70,6 +75,49 @@ describe('previewInvoice tool', () => {
     expect(result.summary.company).toBe('Acme')
     expect(result.summary.month).toBe(3)
     expect(result.summary.year).toBe(2026)
+    expect(result.summary.missingCompanyEmail).toBe(false)
+  })
+
+  it('names what the form will create for a provider and company not found', async () => {
+    mockBuildDraft.mockResolvedValue({
+      draft: {
+        ...draft,
+        domain: 'new::Олег',
+        company: 'new::Гугл про',
+        reciever: undefined,
+        currency: 'USD',
+        invoice: [
+          { name: 'Software engineering', amount: 168, price: 6, sum: 1008 },
+        ],
+      },
+      created: { domain: 'Олег', company: 'Гугл про', street: null },
+      invalidEmail: false,
+    })
+
+    const result: any = await execOf('previewInvoice')(
+      {
+        domainName: 'Олег',
+        companyName: 'Гугл про',
+        currency: 'USD',
+        extraLines: [{ name: 'Software engineering', quantity: 168, price: 6 }],
+      },
+      {} as any
+    )
+
+    expect(mockBuildDraft.mock.calls[0][0]).toMatchObject({
+      domainName: 'Олег',
+      companyName: 'Гугл про',
+      lines: [{ name: 'Software engineering', quantity: 168, price: 6 }],
+    })
+    expect(result.summary).toMatchObject({
+      company: 'Гугл про',
+      currency: 'USD',
+      lines: [
+        { name: 'Software engineering', quantity: 168, price: 6, sum: 1008 },
+      ],
+      willCreate: { domain: 'Олег', company: 'Гугл про', street: null },
+      missingCompanyEmail: true,
+    })
   })
 
   it('passes the bound userContext (not from the model) to the draft', async () => {

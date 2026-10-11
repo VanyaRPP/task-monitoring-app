@@ -820,6 +820,10 @@ const AddPaymentModal: FC<Props> = ({
             domain: preselectedDomain || getId(paymentData?.domain),
             street: getId(paymentData?.street),
             company: preselectedCompany || getId(paymentData?.company),
+            // An AI draft naming a provider/company that doesn't exist yet
+            // carries what the inline-create fields would hold.
+            companyEmail: paymentData?.companyEmail,
+            newDomainTemplateId: paymentData?.newDomainTemplateId,
             monthService: getId(paymentData?.monthService),
             invoice:
               paymentData?.invoice && paymentData.invoice.length > 0
