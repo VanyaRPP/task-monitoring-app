@@ -20,7 +20,6 @@ import {
   useDeleteUserMutation,
 } from '@common/api/userApi/user.api'
 import type { IUser } from '@common/api/userApi/user.api.types'
-import type { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 import { Roles } from '@utils/constants'
 import { EditUserModal } from '@common/components/EditUserModal'
 
@@ -54,7 +53,10 @@ const ROLE_FILTER_OPTIONS: SelectProps['options'] = [
 const getUserRoleValue = (u: any): string =>
   u?.role ?? u?.roles?.[0] ?? Roles.USER
 
-const EditUserButton: React.FC<{ userId?: IUser['_id'] }> = ({ userId }) => {
+const EditUserButton: React.FC<{
+  userId?: IUser['_id']
+  disabled?: boolean
+}> = ({ userId, disabled }) => {
   const [open, setOpen] = useState(false)
 
   return (
@@ -63,6 +65,7 @@ const EditUserButton: React.FC<{ userId?: IUser['_id'] }> = ({ userId }) => {
         type="link"
         icon={<EditOutlined />}
         onClick={() => setOpen(true)}
+        disabled={disabled}
       />
       <EditUserModal
         open={open}
@@ -112,14 +115,10 @@ const DeleteUserButton: React.FC<{ userId?: string; disabled?: boolean }> = ({
 }
 
 interface Props {
-  domains?: IExtendedDomain[]
   isDomainAdmin?: boolean
 }
 
-export const UsersTable: React.FC<Props> = ({
-  domains = [],
-  isDomainAdmin = false,
-}) => {
+export const UsersTable: React.FC<Props> = ({ isDomainAdmin = false }) => {
   const { data: currentUser } = useGetCurrentUserQuery()
   const { data: users = [], isLoading } = useGetAllUsersQuery()
   const [updateUser, { isLoading: isUpdatingUser }] = useUpdateUserMutation()
@@ -131,11 +130,6 @@ export const UsersTable: React.FC<Props> = ({
   const [searchEmail, setSearchEmail] = useState('')
   const [searchRole, setSearchRole] = useState<string>('all')
   const [pageSize, setPageSize] = useState(10)
-
-  const domainAdminEmails = useMemo(() => {
-    if (!isDomainAdmin) return null
-    return domains.flatMap((d) => d.adminEmails)
-  }, [domains, isDomainAdmin])
 
   const filteredUsers = useMemo(
     () =>
@@ -151,19 +145,9 @@ export const UsersTable: React.FC<Props> = ({
         const matchesEmail = email.includes(searchEmail.toLowerCase())
         const matchesRole = searchRole === 'all' || userRole === searchRole
 
-        const matchesDomain =
-          !isDomainAdmin || domainAdminEmails?.includes(user.email)
-
-        return matchesName && matchesEmail && matchesRole && matchesDomain
+        return matchesName && matchesEmail && matchesRole
       }),
-    [
-      users,
-      searchName,
-      searchEmail,
-      searchRole,
-      isDomainAdmin,
-      domainAdminEmails,
-    ]
+    [users, searchName, searchEmail, searchRole]
   )
 
   const columns = useMemo<ColumnsType<IUser>>(
@@ -311,14 +295,17 @@ export const UsersTable: React.FC<Props> = ({
           const isSelf = currentUser?._id?.toString() === userId
           const isTargetGlobalAdmin =
             getUserRoleValue(user) === Roles.GLOBAL_ADMIN
-          const notInDomain =
-            isDomainAdmin && !domainAdminEmails?.includes(user.email)
+          const isTargetAdmin =
+            isDomainAdmin &&
+            !isSelf &&
+            (getUserRoleValue(user) === Roles.DOMAIN_ADMIN ||
+              getUserRoleValue(user) === Roles.GLOBAL_ADMIN)
           return (
             <div style={{ display: 'flex', gap: 4 }}>
-              <EditUserButton userId={userId} />
+              <EditUserButton userId={userId} disabled={isTargetAdmin} />
               <DeleteUserButton
                 userId={userId}
-                disabled={isSelf || isTargetGlobalAdmin || notInDomain}
+                disabled={isSelf || isTargetAdmin || isTargetGlobalAdmin}
               />
             </div>
           )
@@ -334,7 +321,6 @@ export const UsersTable: React.FC<Props> = ({
       updateUser,
       currentUser,
       isDomainAdmin,
-      domainAdminEmails,
     ]
   )
 

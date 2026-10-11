@@ -166,6 +166,15 @@ export default async function handler(
               .json({ success: false, message: 'User not found' })
           }
 
+          if (targetUser.roles.includes(Roles.DOMAIN_ADMIN)) {
+            return res
+              .status(403)
+              .json({
+                success: false,
+                message: "You can't delete another domain admin",
+              })
+          }
+
           const adminDomains = await Domain.find({
             adminEmails: currentUser.email,
           })
