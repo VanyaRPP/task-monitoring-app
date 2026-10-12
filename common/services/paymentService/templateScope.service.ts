@@ -20,8 +20,7 @@ export interface ApplyTemplateScopeArgs {
 }
 
 export type ApplyTemplateScopeResult =
-  | { kind: 'ok'; applied: boolean }
-  | { kind: 'forbidden'; message: string }
+  { kind: 'ok'; applied: boolean } | { kind: 'forbidden'; message: string }
 
 const isPersistentScope = (
   scope: TemplateScope | undefined

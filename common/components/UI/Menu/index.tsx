@@ -4,6 +4,7 @@ import {
   UserOutlined,
 } from '@ant-design/icons'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+import { useDebtCalculationAccess } from '@modules/hooks/useDebtCalculationAccess'
 import useKeyCode from '@modules/hooks/useKeyCode'
 import { AppRoutes, Roles } from '@utils/constants'
 import { isAdminCheck } from '@utils/helpers'
@@ -56,6 +57,21 @@ export const Menu: React.FC<MenuProps> = ({ defaultOpenKeys, ...props }) => {
     [roles]
   )
 
+  // Mirrors getCurrentUser's own `isUser` derivation server-side: a plain
+  // User, and a not-yet-assigned account (no roles at all), are the same
+  // audience for the "Прибутки" self-service view below - company owners
+  // deliberately stay role User (see getCurrentUser.ts's comment on that).
+  const isUser = useMemo(
+    () => roles.length === 0 || roles.includes(Roles.USER),
+    [roles]
+  )
+
+  // The item appears only when at least one domain carries the housing-fee
+  // service. The endpoint is admin-only, so other roles never even ask.
+  const { hasAccess: hasDebtCalculation } = useDebtCalculationAccess(
+    !isAdminCheck(roles)
+  )
+
   const items = useMemo<AntdMenuProps['items']>(() => {
     return [
       {
@@ -96,7 +112,21 @@ export const Menu: React.FC<MenuProps> = ({ defaultOpenKeys, ...props }) => {
             key: AppRoutes.PROFIT,
             type: 'item',
             label: <Link href={AppRoutes.PROFIT}>Прибутки</Link>,
-            hidden: !isAdminCheck(roles),
+            // A plain User sees it too - if they administer a company, the
+            // page shows that company's own billing; if not, it shows the
+            // same "nothing to view here" state a User already gets
+            // elsewhere on this menu.
+            hidden: !isAdminCheck(roles) && !isUser,
+          },
+          {
+            key: AppRoutes.DEBT_CALCULATION,
+            type: 'item',
+            label: (
+              <Link href={AppRoutes.DEBT_CALCULATION}>
+                Розрахунок заборгованості
+              </Link>
+            ),
+            hidden: !hasDebtCalculation,
           },
         ].filter(({ hidden }) => !hidden),
       },
@@ -166,7 +196,14 @@ export const Menu: React.FC<MenuProps> = ({ defaultOpenKeys, ...props }) => {
         ].filter(({ hidden }) => !hidden),
       },
     ] as AntdMenuProps['items']
-  }, [isGlobalAdmin, isDomainAdmin, user?.roles, session?.user?.name])
+  }, [
+    isGlobalAdmin,
+    isDomainAdmin,
+    isUser,
+    hasDebtCalculation,
+    user?.roles,
+    session?.user?.name,
+  ])
 
   return (
     <AntdMenu

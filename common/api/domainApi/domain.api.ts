@@ -169,6 +169,17 @@ export const domainApi = createApi({
       ],
       transformResponse: (response: IGetDomainByPkResponse) => response.data,
     }),
+    /** `_id` доменів, у каталозі яких є послуга заданого ServiceType. */
+    getDomainIdsByServiceType: builder.query<string[], string>({
+      query: (type) => ({
+        url: 'domain/by-service-type',
+        method: 'GET',
+        params: { type },
+      }),
+      providesTags: ['IDomain'],
+      transformResponse: (response: { success: boolean; data: string[] }) =>
+        response.data,
+    }),
     getDomainTypeTemplates: builder.query<
       IDomainTypeTemplate[],
       { includeArchived?: boolean } | void
@@ -295,6 +306,7 @@ export const {
   useUpdateArchivedDomainMutation,
   useGetDomainByPkQuery,
   useGetDomainsByAdminQuery,
+  useGetDomainIdsByServiceTypeQuery,
   useGetDomainTypeTemplatesQuery,
   useGetDomainTypeTemplateByIdQuery,
   useAddDomainTypeTemplateMutation,

@@ -19,16 +19,23 @@
   .Content {
     height: 144px;
     margin: -72px 16px 16px 16px;
+    min-width: 0;
+
+    :global(.ant-card-meta-title) {
+      min-width: 0;
+    }
   }
 }
 
 .CardRepresentative {
   width: 400px;
+  min-width: 0;
 }
 
 .CardUserInformation {
   flex: 1;
   min-height: 395px;
+  min-width: 0;
 }
 
 .CardUserInformation :global(.ant-form-item-label > label) {

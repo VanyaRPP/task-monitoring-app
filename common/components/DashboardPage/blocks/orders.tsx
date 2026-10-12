@@ -1,6 +1,7 @@
 import OrdersTableHeader from '@components/UI/OrdersTableHeader'
 import StatusTag from '@components/UI/StatusTag'
 import TableCard from '@components/UI/TableCard'
+import { TruncatedText } from '@components/UI/TruncatedText'
 import { AppRoutes, TaskStatuses } from '@utils/constants'
 import { Input, Table } from 'antd'
 import dayjs from 'dayjs'
@@ -50,6 +51,7 @@ const Orders: FC = () => {
       key: 'name',
       width: '35%',
       ellipsis: true,
+      render: (text) => <TruncatedText text={text} />,
     },
     {
       title: 'Майстер',

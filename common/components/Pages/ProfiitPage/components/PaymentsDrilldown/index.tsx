@@ -3,6 +3,7 @@
 import { useGetAllPaymentsQuery } from '@common/api/paymentApi/payment.api'
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import Modal from '@components/UI/ModalWindow'
+import { TruncatedText } from '@components/UI/TruncatedText'
 import { AppRoutes, Operations } from '@utils/constants'
 import { Alert, Empty, Space, Table, Typography } from 'antd'
 import { ExportOutlined } from '@ant-design/icons'
@@ -16,7 +17,12 @@ import {
   numericCell,
   type DrillTarget,
 } from '../ProfitTable/tableConfig'
-import { normalizeCurrency, getCurrencySymbol } from '@utils/helpers'
+import {
+  normalizeCurrency,
+  getCurrencySymbol,
+  formatMonthServiceParam,
+  MONTH_SERVICE_QUERY_PARAM,
+} from '@utils/helpers'
 
 const { Text } = Typography
 
@@ -24,12 +30,15 @@ const { Text } = Typography
 const PAGE_LIMIT = 100
 
 export interface PaymentsDrilldownProps {
+  /** Exactly one of domainId/companyId is set, matching the ledger's scope. */
   domainId?: string
+  companyId?: string
   /** `YYYY-MM`; null keeps the modal closed. */
   month: string | null
   /**
    * Debit lists what was invoiced, credit what actually arrived, and
-   * `outstanding` rolls both up per company to answer "who still owes".
+   * `outstanding` rolls both up per company to answer "who still owes" -
+   * only offered from a domain scope; a company scope already IS one company.
    */
   target: DrillTarget
   /** The figure was per-currency, so the list behind it must be too. */
@@ -47,6 +56,7 @@ interface DebtorRow {
 
 const PaymentsDrilldown: FC<PaymentsDrilldownProps> = ({
   domainId,
+  companyId,
   month,
   target,
   currency,
@@ -71,6 +81,7 @@ const PaymentsDrilldown: FC<PaymentsDrilldownProps> = ({
       limit: PAGE_LIMIT,
       type,
       domainIds: domainId ? [domainId] : undefined,
+      companyIds: companyId ? [companyId] : undefined,
       year: period?.year,
       month: period?.month,
       // The ledger files a payment under the month it is FOR, so the list has
@@ -78,7 +89,7 @@ const PaymentsDrilldown: FC<PaymentsDrilldownProps> = ({
       // with the same fallback for rows that have none.
       dateField: 'date',
     },
-    { skip: !domainId || !period }
+    { skip: (!domainId && !companyId) || !period }
   )
 
   // The API has no currency filter, so narrow client-side to the currency
@@ -132,6 +143,7 @@ const PaymentsDrilldown: FC<PaymentsDrilldownProps> = ({
         dataIndex: 'companyName',
         key: 'companyName',
         ellipsis: true,
+        render: (companyName: string) => <TruncatedText text={companyName} />,
       },
       {
         title: t('profitPage:drilldown.invoiced'),
@@ -189,7 +201,11 @@ const PaymentsDrilldown: FC<PaymentsDrilldownProps> = ({
         render: (_, record) => {
           const name =
             (record.company as any)?.companyName || record.reciever?.companyName
-          return name || <Text type="secondary">—</Text>
+          return name ? (
+            <TruncatedText text={name} />
+          ) : (
+            <Text type="secondary">—</Text>
+          )
         },
       },
       {
@@ -222,6 +238,19 @@ const PaymentsDrilldown: FC<PaymentsDrilldownProps> = ({
     [t, type, currency]
   )
 
+  const paymentsHref = useMemo(() => {
+    const monthService = period
+      ? formatMonthServiceParam([`${period.year}-month-${period.month}`])
+      : undefined
+
+    return monthService
+      ? {
+          pathname: AppRoutes.PAYMENT,
+          query: { [MONTH_SERVICE_QUERY_PARAM]: monthService },
+        }
+      : AppRoutes.PAYMENT
+  }, [period])
+
   const shown = allPayments.length
   const isTruncated = total > shown
 
@@ -231,8 +260,12 @@ const PaymentsDrilldown: FC<PaymentsDrilldownProps> = ({
         isDebtors
           ? 'profitPage:drilldown.titleOutstanding'
           : type === Operations.Credit
-            ? 'profitPage:drilldown.titleActual'
-            : 'profitPage:drilldown.titleExpected',
+            ? companyId
+              ? 'profitPage:drilldown.titleActualCompany'
+              : 'profitPage:drilldown.titleActual'
+            : companyId
+              ? 'profitPage:drilldown.titleExpectedCompany'
+              : 'profitPage:drilldown.titleExpected',
         { period: month ? dayjs(month).format('MMMM YYYY') : '' }
       )}
       onOk={onClose}
@@ -253,74 +286,91 @@ const PaymentsDrilldown: FC<PaymentsDrilldownProps> = ({
               message={t('profitPage:drilldown.truncated', { shown, total })}
             />
           )}
-          {isDebtors ? (
-            <Table
-              size="small"
-              loading={isFetching}
-              columns={debtorColumns}
-              dataSource={debtors}
-              rowKey={(record) => record.companyId}
-              pagination={false}
-              scroll={{ y: 400 }}
-              locale={{
-                emptyText: (
-                  <Empty
-                    image={Empty.PRESENTED_IMAGE_SIMPLE}
-                    description={t('profitPage:drilldown.allSettled')}
-                  />
-                ),
-              }}
-              summary={(rows: readonly DebtorRow[]) => (
-                <Table.Summary fixed>
-                  <Table.Summary.Row>
-                    <Table.Summary.Cell index={0} colSpan={3}>
-                      <Text strong>{t('profitPage:drilldown.total')}</Text>
-                    </Table.Summary.Cell>
-                    <Table.Summary.Cell index={3} align="right">
-                      <Text strong style={numericCell}>
-                        {money(rows.reduce((acc, r) => acc + r.remaining, 0))}
-                      </Text>
-                    </Table.Summary.Cell>
-                  </Table.Summary.Row>
-                </Table.Summary>
-              )}
-            />
-          ) : (
-            <Table
-              size="small"
-              loading={isFetching}
-              columns={columns}
-              dataSource={payments}
-              rowKey={(record) => record._id}
-              pagination={false}
-              scroll={{ y: 400 }}
-              locale={{
-                emptyText: (
-                  <Empty
-                    image={Empty.PRESENTED_IMAGE_SIMPLE}
-                    description={t('profitPage:drilldown.empty')}
-                  />
-                ),
-              }}
-              summary={(rows: readonly IExtendedPayment[]) => (
-                <Table.Summary fixed>
-                  <Table.Summary.Row>
-                    <Table.Summary.Cell index={0} colSpan={3}>
-                      <Text strong>{t('profitPage:drilldown.total')}</Text>
-                    </Table.Summary.Cell>
-                    <Table.Summary.Cell index={3} align="right">
-                      <Text strong style={numericCell}>
-                        {money(
-                          rows.reduce((acc, r) => acc + (r.generalSum || 0), 0)
-                        )}
-                      </Text>
-                    </Table.Summary.Cell>
-                  </Table.Summary.Row>
-                </Table.Summary>
-              )}
-            />
-          )}
-          <Link href={AppRoutes.PAYMENT}>
+          {/*
+            No `scroll.y` here on purpose: giving a Table that prop makes antd
+            split it into two synced tables (header + body) and pad their
+            total width with an extra reserved column for wherever a
+            scrollbar might go. With macOS's classic, always-visible
+            scrollbars (a common Safari setting) that reserved column was
+            real and wide, showing up as an oversized horizontal scrollbar,
+            or - hidden - as content crammed against the modal's edge. A
+            plain max-height + overflow div sidesteps all of that; the only
+            cost is the header no longer stays pinned while scrolling, which
+            a two/three-row month list rarely needs anyway.
+          */}
+          <div style={{ maxHeight: 400, overflowY: 'auto' }}>
+            {isDebtors ? (
+              <Table
+                tableLayout="fixed"
+                size="small"
+                loading={isFetching}
+                columns={debtorColumns}
+                dataSource={debtors}
+                rowKey={(record) => record.companyId}
+                pagination={false}
+                locale={{
+                  emptyText: (
+                    <Empty
+                      image={Empty.PRESENTED_IMAGE_SIMPLE}
+                      description={t('profitPage:drilldown.allSettled')}
+                    />
+                  ),
+                }}
+                summary={(rows: readonly DebtorRow[]) => (
+                  <Table.Summary>
+                    <Table.Summary.Row>
+                      <Table.Summary.Cell index={0} colSpan={3}>
+                        <Text strong>{t('profitPage:drilldown.total')}</Text>
+                      </Table.Summary.Cell>
+                      <Table.Summary.Cell index={3} align="right">
+                        <Text strong style={numericCell}>
+                          {money(rows.reduce((acc, r) => acc + r.remaining, 0))}
+                        </Text>
+                      </Table.Summary.Cell>
+                    </Table.Summary.Row>
+                  </Table.Summary>
+                )}
+              />
+            ) : (
+              <Table
+                tableLayout="fixed"
+                size="small"
+                loading={isFetching}
+                columns={columns}
+                dataSource={payments}
+                rowKey={(record) => record._id}
+                pagination={false}
+                locale={{
+                  emptyText: (
+                    <Empty
+                      image={Empty.PRESENTED_IMAGE_SIMPLE}
+                      description={t('profitPage:drilldown.empty')}
+                    />
+                  ),
+                }}
+                summary={(rows: readonly IExtendedPayment[]) => (
+                  <Table.Summary>
+                    <Table.Summary.Row>
+                      <Table.Summary.Cell index={0} colSpan={3}>
+                        <Text strong>{t('profitPage:drilldown.total')}</Text>
+                      </Table.Summary.Cell>
+                      <Table.Summary.Cell index={3} align="right">
+                        <Text strong style={numericCell}>
+                          {money(
+                            rows.reduce(
+                              (acc, r) => acc + (r.generalSum || 0),
+                              0
+                            )
+                          )}
+                        </Text>
+                      </Table.Summary.Cell>
+                    </Table.Summary.Row>
+                  </Table.Summary>
+                )}
+              />
+            )}
+          </div>
+          <Link href={paymentsHref}>
             {t('profitPage:drilldown.openPayments')} <ExportOutlined />
           </Link>
         </Space>

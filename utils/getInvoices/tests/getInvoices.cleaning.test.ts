@@ -18,7 +18,7 @@ describe('getInvoices - cleaning', () => {
         expect.objectContaining({ type: ServiceType.Cleaning })
       )
     })
-    it('should NOT load when company = { cleaning: 10 }', () => {
+    it('should load without month service when company = { cleaning: 10 }', () => {
       const company: Partial<IRealestate> = {
         cleaning: 10,
       }
@@ -27,11 +27,11 @@ describe('getInvoices - cleaning', () => {
         company,
       })
 
-      expect(invoices).not.toContainEqual(
+      expect(invoices).toContainEqual(
         expect.objectContaining({ type: ServiceType.Cleaning })
       )
     })
-    it('should NOT load when company = { cleaning: 0 }', () => {
+    it('should load without month service when company = { cleaning: 0 }', () => {
       const company: Partial<IRealestate> = {
         cleaning: 0,
       }
@@ -40,7 +40,7 @@ describe('getInvoices - cleaning', () => {
         company,
       })
 
-      expect(invoices).not.toContainEqual(
+      expect(invoices).toContainEqual(
         expect.objectContaining({ type: ServiceType.Cleaning })
       )
     })
@@ -226,7 +226,7 @@ describe('getInvoices - cleaning', () => {
         expect.objectContaining({ type: ServiceType.Cleaning })
       )
     })
-    it('should NOT load when service = null, company = { cleaning: 10 }, prevPayment = { invoice: [Cleaning] }', () => {
+    it('should load without month service when service = null, company = { cleaning: 10 }, prevPayment = { invoice: [Cleaning] }', () => {
       const service: Partial<IService> = null
       const company: Partial<IRealestate> = {
         cleaning: 10,
@@ -247,11 +247,11 @@ describe('getInvoices - cleaning', () => {
         prevPayment,
       })
 
-      expect(invoices).not.toContainEqual(
+      expect(invoices).toContainEqual(
         expect.objectContaining({ type: ServiceType.Cleaning })
       )
     })
-    it('should NOT load when service = null, company = { cleaning: 10 }, prevPayment = { invoice: [Electricity] }', () => {
+    it('should load without month service when service = null, company = { cleaning: 10 }, prevPayment = { invoice: [Electricity] }', () => {
       const service: Partial<IService> = null
       const company: Partial<IRealestate> = {
         cleaning: 10,
@@ -272,7 +272,7 @@ describe('getInvoices - cleaning', () => {
         prevPayment,
       })
 
-      expect(invoices).not.toContainEqual(
+      expect(invoices).toContainEqual(
         expect.objectContaining({ type: ServiceType.Cleaning })
       )
     })

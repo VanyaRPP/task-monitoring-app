@@ -12,6 +12,9 @@ jest.mock('@pages/api/api.config', () => jest.fn())
 
 jest.mock('@modules/models/Payment')
 jest.mock('@modules/models/RealEstate')
+jest.mock('@utils/debt-calculation/debtors-inflation', () => ({
+  calculateDebtorsInflation: jest.fn().mockResolvedValue({}),
+}))
 
 setupTestEnvironment()
 
@@ -43,6 +46,7 @@ describe('Deptors API - GET', () => {
         companyId: '64d68421d9ba2fc8fea79d21',
         companyName: 'company_0',
         totalDebt: 1000,
+        inflation: null,
       },
     ])
   })

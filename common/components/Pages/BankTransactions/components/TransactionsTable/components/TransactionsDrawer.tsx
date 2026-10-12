@@ -25,7 +25,8 @@ import {
   useEditRealEstateMutation,
 } from '@common/api/realestateApi/realestate.api'
 import { useQuickSend } from './useQuicksend'
-import { Operations, DEFAULT_CATEGORIES, OTHER_KEY } from '@utils/constants'
+import { Operations, OTHER_KEY } from '@utils/constants'
+import { PROFIT_DEFAULT_CATEGORIES } from '@utils/profit-items'
 import {
   buildTransactionPayload,
   buildCompanyIdentifierPatch,
@@ -221,14 +222,14 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
                 </>
               ) : (
                 <>
-                  {DEFAULT_CATEGORIES.map((category) => (
+                  {PROFIT_DEFAULT_CATEGORIES.map((category) => (
                     <Select.Option key={category} value={category}>
                       {category}
                     </Select.Option>
                   ))}
 
                   {customCategory &&
-                    !DEFAULT_CATEGORIES.some((category) =>
+                    !PROFIT_DEFAULT_CATEGORIES.some((category) =>
                       category
                         .toLowerCase()
                         .includes(customCategory.toLowerCase())
@@ -354,17 +355,22 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
         (isDebit ? (
           <AddCostModal
             closeModal={closeModal}
-            activeDomain={domain._id}
-            transactionData={{
-              amount: transactionAmount,
-              date: parseDate(transaction.DAT_OD, 'DD.MM.YYYY').toDate(),
-              periodMonth: dayjs(),
+            draft={{
+              type: Operations.Debit,
+              scope: { type: 'domain', id: domain._id, label: domain.name },
+              date: parseDate(transaction.DAT_OD, 'DD.MM.YYYY').toISOString(),
+              periodMonth: dayjs().format('YYYY-MM'),
               description: getResolvedDescription(
                 transaction,
                 relatedCompanies
               ),
               currency: transaction.CCY,
-              category: selectedCategory ?? undefined,
+              items: [
+                {
+                  category: selectedCategory ?? undefined,
+                  amount: transactionAmount,
+                },
+              ],
             }}
           />
         ) : (

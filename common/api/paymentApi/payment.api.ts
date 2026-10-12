@@ -26,6 +26,19 @@ import {
   IPaymentAuditFacetsResponse,
   PaymentStatus,
 } from './payment.api.types'
+import type {
+  IStatementImportPlan,
+  IStatementImportResult,
+  Resolution,
+} from '@utils/debt-calculation/statement-plan'
+import type { IStatementImport } from '@utils/debt-calculation/statement'
+
+/** Months read off photos, bound for one company's payments. */
+export interface IStatementImportRequest {
+  domainId: string
+  companyId: string
+  statement: IStatementImport
+}
 
 /**
  * Refresh data in sibling RTK Query slices that a payment write can affect.
@@ -173,6 +186,37 @@ export const paymentApi = createApi({
       transformResponse: (response: {
         success: boolean
         data: { deletedIds: string[] }
+      }) => response.data,
+      invalidatesTags: (response) =>
+        response ? ['Payment', 'PaymentAudit'] : [],
+      onQueryStarted: invalidatePaymentSideEffects,
+    }),
+    planStatementImport: builder.mutation<
+      IStatementImportPlan,
+      IStatementImportRequest
+    >({
+      query: (body) => ({
+        url: 'spacehub/payment/import-statement',
+        method: 'POST',
+        body: { ...body, apply: false },
+      }),
+      transformResponse: (response: { data: { plan: IStatementImportPlan } }) =>
+        response.data.plan,
+    }),
+    importStatement: builder.mutation<
+      { plan: IStatementImportPlan; result: IStatementImportResult },
+      IStatementImportRequest & {
+        resolutions?: Record<string, Resolution>
+        source?: string
+      }
+    >({
+      query: (body) => ({
+        url: 'spacehub/payment/import-statement',
+        method: 'POST',
+        body: { ...body, apply: true },
+      }),
+      transformResponse: (response: {
+        data: { plan: IStatementImportPlan; result: IStatementImportResult }
       }) => response.data,
       invalidatesTags: (response) =>
         response ? ['Payment', 'PaymentAudit'] : [],
@@ -359,4 +403,6 @@ export const {
   useRestorePaymentMutation,
   useUpdatePaymentStatusMutation,
   useSendPaymentEmailMutation,
+  usePlanStatementImportMutation,
+  useImportStatementMutation,
 } = paymentApi

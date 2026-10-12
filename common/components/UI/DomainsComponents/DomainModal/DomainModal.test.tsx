@@ -5,12 +5,13 @@ import DomainModal from '.'
 const editDomainMock = jest.fn()
 const addDomainMock = jest.fn()
 const editRealEstateMock = jest.fn()
+let mockTemplates: any[] = []
 
 jest.mock('@common/api/domainApi/domain.api', () => ({
   useAddDomainMutation: () => [addDomainMock, { isLoading: false }],
   useEditDomainMutation: () => [editDomainMock, { isLoading: false }],
   useGetDomainsQuery: () => ({ data: [] }),
-  useGetDomainTypeTemplatesQuery: () => ({ data: [] }),
+  useGetDomainTypeTemplatesQuery: () => ({ data: mockTemplates }),
 }))
 
 jest.mock('@common/api/realestateApi/realestate.api', () => ({
@@ -106,13 +107,7 @@ jest.mock('./DomainForm', () => ({
         <Form.Item name="domainBankToken" hidden>
           <Input />
         </Form.Item>
-        <Form.Item name="customServices" hidden>
-          <Input />
-        </Form.Item>
         <Form.Item name="IEName" hidden>
-          <Input />
-        </Form.Item>
-        <Form.Item name="domainTypeTemplateId" hidden>
           <Input />
         </Form.Item>
         <Form.Item name="companiesAreas" hidden>
@@ -161,6 +156,52 @@ const baseDomain = {
 describe('DomainModal — save flow', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockTemplates = []
+  })
+
+  it('saves a new domain with the default «Комунальні» services without opening the template tab', async () => {
+    mockTemplates = [
+      {
+        _id: 'tpl-utility',
+        name: 'Комунальні',
+        isBuiltIn: true,
+        groups: [
+          {
+            groupName: 'Стандартні послуги',
+            serviceIds: [
+              '677d414283b6ef93c6b8ea2c',
+              '68156d2cf520914e5e1ad87c',
+            ],
+          },
+        ],
+      },
+    ]
+    addDomainMock.mockResolvedValue({ data: { _id: 'new-id' } })
+
+    render(
+      <DomainModal
+        currentDomain={undefined as any}
+        closeModal={jest.fn()}
+        editable
+      />
+    )
+
+    fireEvent.change(screen.getByTestId('name-input'), {
+      target: { value: 'Utility Provider' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: /Додати/i }))
+
+    await waitFor(() => expect(addDomainMock).toHaveBeenCalledTimes(1))
+    expect(addDomainMock.mock.calls[0][0]).toMatchObject({
+      name: 'Utility Provider',
+      domainTypeTemplateId: 'tpl-utility',
+      customServices: [
+        {
+          groupName: 'Стандартні послуги',
+          services: ['677d414283b6ef93c6b8ea2c', '68156d2cf520914e5e1ad87c'],
+        },
+      ],
+    })
   })
 
   it('calls addDomain mutation with form payload when no currentDomain', async () => {

@@ -266,15 +266,22 @@ describe('ProfitService.getByDomainWithMonthSeparation', () => {
     })
   })
 
-  it('counts hand-entered income towards the actual figure', async () => {
-    paymentAggregate.mockResolvedValue([income(2026, 6, 0, 1000)])
+  // A hand-entered credit is income, but it is not a client settling an
+  // invoice. Folding it into `actual` inflated the collection rate, shrank
+  // `outstanding`, and on a company - where `actual` reads as money paid out
+  // - filed income under an expense heading. It gets its own figure; only
+  // `net` adds the two together.
+  it('keeps hand-entered income out of the collected figure', async () => {
+    paymentAggregate.mockResolvedValue([income(2026, 6, 1000, 1000)])
     aggregate.mockResolvedValue([expense('2026-06', 200, 500)])
 
     const result = await ProfitService.getByDomainWithMonthSeparation(domainId)
 
     expect(result.data['2026-06'].byCurrency.UAH).toMatchObject({
-      actual: 1500,
+      actual: 1000,
+      income: 500,
       expenses: 200,
+      outstanding: 0,
       net: 1300,
     })
   })
@@ -427,5 +434,129 @@ describe('ProfitService.getByDomainWithMonthSeparation', () => {
 
     expect(result.meta.total).toBe(2)
     expect(result.data['2026-06'].transactions).toHaveLength(3)
+  })
+})
+
+describe('ProfitService.getByCompanyWithMonthSeparation', () => {
+  const companyId = '64d68421d9ba2fc8fea79d51'
+
+  const income = (
+    year: number,
+    month: number,
+    expected: number,
+    actual: number,
+    currency = 'UAH'
+  ) => ({
+    _id: { year, month, currency },
+    expected,
+    actual,
+    invoiceCount: 1,
+    paymentCount: 1,
+  })
+
+  const expense = (
+    monthKey: string,
+    expenses: number,
+    manualIncome = 0,
+    transactions: any[] = [],
+    currency = 'UAH'
+  ) => ({
+    _id: { monthKey, currency },
+    expenses,
+    manualIncome,
+    transactions,
+  })
+
+  it('reads expected/actual from Payment scoped by company, not domain', async () => {
+    paymentAggregate.mockResolvedValue([income(2026, 6, 15000, 12000)])
+    aggregate.mockResolvedValue([])
+
+    const result =
+      await ProfitService.getByCompanyWithMonthSeparation(companyId)
+
+    const pipeline = paymentAggregate.mock.calls[0][0]
+    expect(pipeline[0]).toEqual({
+      $match: { company: expect.anything() },
+    })
+    expect(result.data['2026-06'].byCurrency.UAH).toMatchObject({
+      expected: 15000,
+      actual: 12000,
+      outstanding: 3000,
+    })
+  })
+
+  // Domain and company are symmetric scopes now - a company can carry its
+  // own manual Profit records (e.g. a cost the client tracks against
+  // itself), matched by `company` instead of `domain`.
+  it('also reads its own expenses from Profit, matched by company', async () => {
+    paymentAggregate.mockResolvedValue([income(2026, 6, 15000, 12000)])
+    aggregate.mockResolvedValue([expense('2026-06', 4000)])
+
+    const result =
+      await ProfitService.getByCompanyWithMonthSeparation(companyId)
+
+    const pipeline = aggregate.mock.calls[0][0]
+    expect(pipeline[0]).toEqual({ $match: { company: expect.anything() } })
+    expect(result.data['2026-06'].byCurrency.UAH).toMatchObject({
+      expenses: 4000,
+    })
+  })
+
+  // A company's invoices are money it PAID OUT, not money it earned, so the
+  // domain formula would label an outflow as "profit". Its net subtracts both
+  // outflows from the one inflow it has: hand-entered income.
+  it('treats a paid invoice as an outflow when computing a company net', async () => {
+    paymentAggregate.mockResolvedValue([income(2026, 6, 15000, 12000)])
+    aggregate.mockResolvedValue([expense('2026-06', 4000)])
+
+    const result =
+      await ProfitService.getByCompanyWithMonthSeparation(companyId)
+
+    // NOT 8000 (12000 - 4000, the domain formula) - that would read as the
+    // company having "profited" from paying its own bills.
+    expect(result.data['2026-06'].byCurrency.UAH.net).toBe(-16000)
+  })
+
+  // Without this term every figure a company has is an outflow, and a page
+  // called "Прибутки" shows it no profit at all.
+  it('lets hand-entered income pull a company net back up', async () => {
+    paymentAggregate.mockResolvedValue([income(2026, 6, 15000, 12000)])
+    aggregate.mockResolvedValue([expense('2026-06', 4000, 20000)])
+
+    const result =
+      await ProfitService.getByCompanyWithMonthSeparation(companyId)
+
+    expect(result.data['2026-06'].byCurrency.UAH).toMatchObject({
+      // Income stays out of `actual`, which is purely what the invoices cost.
+      actual: 12000,
+      income: 20000,
+      // 20000 - 12000 - 4000
+      net: 4000,
+    })
+  })
+
+  it('adds income to actual instead of subtracting it, for a domain', async () => {
+    paymentAggregate.mockResolvedValue([income(2026, 6, 15000, 12000)])
+    aggregate.mockResolvedValue([expense('2026-06', 4000)])
+
+    const result = await ProfitService.getByDomainWithMonthSeparation(companyId)
+
+    expect(result.data['2026-06'].byCurrency.UAH.net).toBe(8000)
+  })
+
+  it('paginates over months the same way the domain ledger does', async () => {
+    paymentAggregate.mockResolvedValue([
+      income(2026, 6, 100, 100),
+      income(2026, 5, 200, 200),
+    ])
+
+    const result = await ProfitService.getByCompanyWithMonthSeparation(
+      companyId,
+      1,
+      1
+    )
+
+    expect(Object.keys(result.data)).toEqual(['2026-06'])
+    expect(result.meta).toMatchObject({ total: 2, totalPages: 2, limit: 1 })
   })
 })

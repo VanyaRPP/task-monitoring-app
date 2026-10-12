@@ -4,6 +4,11 @@ import { getCurrentUser } from '@utils/getCurrentUser'
 import { SYSTEM_PROMPT } from '@common/services/aiAssistant/prompt'
 import { AI_MAX_STEPS, getModel } from '@common/services/aiAssistant/config'
 import { buildAssistantTools } from '@common/services/aiAssistant/tools'
+import { withoutPhotos } from '@common/services/aiAssistant/documents'
+import {
+  DOCUMENT_BATCH_PART,
+  type IDocumentBatchPart,
+} from '@common/services/aiAssistant/documents/types'
 import type { UserContext } from '@common/services/paymentService/payment.service'
 
 export const config = {
@@ -48,9 +53,6 @@ export default async function handler(
       return
     }
 
-    // Resolves the active provider's model; throws if its API key is missing.
-    const model = getModel()
-
     const userContext: UserContext = {
       isUser: ctx.isUser,
       isDomainAdmin: ctx.isDomainAdmin,
@@ -58,7 +60,25 @@ export default async function handler(
       user: { email: ctx.user.email },
     }
 
-    const modelMessages = await convertToModelMessages(uiMessages)
+    // Resolves the active provider's model; throws if its API key is missing.
+    const model = getModel()
+
+    const modelMessages = await convertToModelMessages(
+      withoutPhotos(uiMessages),
+      {
+        // Photos are read by the widget, outside this route; the model learns
+        // what they held from the batch summary.
+        convertDataPart: (part) =>
+          part.type === `data-${DOCUMENT_BATCH_PART}`
+            ? {
+                type: 'text',
+                text:
+                  (part.data as IDocumentBatchPart)?.summary ??
+                  '[Фото документів ще обробляються]',
+              }
+            : undefined,
+      }
+    )
 
     const result = streamText({
       model,

@@ -53,15 +53,16 @@ const AddServiceModal: FC<Props> = ({
   const [addService, { isLoading: isAddingLoading }] = useAddServiceMutation()
   const [editService, { isLoading: isEditingLoading }] =
     useEditServiceMutation()
-  const { edit, preview } = serviceActions
+  const { edit, preview } = serviceActions ?? { edit: false, preview: false }
 
   const handleSubmit = async () => {
     const formData: FormData = await form.validateFields()
 
     const picked = dayjs(formData.date)
+    const street = currentService?.street?._id?.toString() || formData.street
     const serviceData = {
       domain: currentService?.domain?._id?.toString() || formData.domain,
-      street: currentService?.street?._id?.toString() || formData.street,
+      ...(street ? { street } : {}),
       date: new Date(Date.UTC(picked.year(), picked.month(), 1, 12, 0, 0)),
       rentPrice:
         formData.customServices?.find((c) => c.fieldName === 'rentPrice')
@@ -88,7 +89,11 @@ const AddServiceModal: FC<Props> = ({
         formData?.inflicionPrice ||
         0,
       description: formData?.description || '',
-      customServices: formData?.customServices || [],
+      customServices: (formData?.customServices || []).map((row) =>
+        row.fieldName === 'inflicionPrice' && row.price == null
+          ? { ...row, price: 0 }
+          : row
+      ),
       losses: formData?.losses || null,
       consumedElectricity: formData?.consumedElectricity || null,
       generalElectricity: formData?.generalElectricity || null,

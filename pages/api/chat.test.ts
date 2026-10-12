@@ -1,6 +1,6 @@
 import handler from './chat'
 import { getCurrentUser } from '@utils/getCurrentUser'
-import { streamText } from 'ai'
+import { convertToModelMessages, streamText } from 'ai'
 import { getModel } from '@common/services/aiAssistant/config'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
@@ -13,6 +13,17 @@ jest.mock('@common/services/aiAssistant/config', () => ({
 }))
 jest.mock('@common/services/aiAssistant/tools', () => ({
   buildAssistantTools: jest.fn(() => ({})),
+}))
+// The real module pulls in the vision model and Mongo models; the route only
+// needs its history filter.
+jest.mock('@common/services/aiAssistant/documents', () => ({
+  withoutPhotos: (messages: any[]) =>
+    messages.map((message) => ({
+      ...message,
+      parts: message.parts.map((part: any) =>
+        part.type === 'file' ? { type: 'text', text: '[Фото документа]' } : part
+      ),
+    })),
 }))
 jest.mock('ai', () => ({
   streamText: jest.fn(),
@@ -116,5 +127,65 @@ describe('/api/chat access gate', () => {
     await handler(req(), res)
     expect(res.status).toHaveBeenCalledWith(500)
     expect(mockStreamText).not.toHaveBeenCalled()
+  })
+})
+
+describe('/api/chat photo history', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockGetModel.mockReturnValue('mock-model')
+    mockGetCurrentUser.mockResolvedValue(adminCtx)
+    mockStreamText.mockReturnValue({ pipeUIMessageStreamToResponse: jest.fn() })
+  })
+
+  const history = [
+    {
+      id: 'photos',
+      role: 'user',
+      parts: [
+        {
+          type: 'file',
+          mediaType: 'image/jpeg',
+          url: 'data:image/jpeg;base64,QUJD',
+        },
+      ],
+    },
+    {
+      id: 'batch',
+      role: 'assistant',
+      parts: [
+        {
+          type: 'data-documentBatch',
+          data: { batchId: 'b1', summary: '[кв. 72: 93 міс.]' },
+        },
+      ],
+    },
+    {
+      id: 'q',
+      role: 'user',
+      parts: [{ type: 'text', text: 'скільки боргу?' }],
+    },
+  ]
+
+  it('чат-модель не бачить фото, а про прочитане дізнається з підсумку пачки', async () => {
+    await handler(req({ body: { messages: history } }), buildRes())
+
+    const [sent, options] = (convertToModelMessages as jest.Mock).mock.calls[0]
+    expect(JSON.stringify(sent)).not.toContain('data:image')
+    expect(
+      options.convertDataPart({
+        type: 'data-documentBatch',
+        data: { batchId: 'b1', summary: '[кв. 72: 93 міс.]' },
+      })
+    ).toEqual({ type: 'text', text: '[кв. 72: 93 міс.]' })
+    expect(
+      options.convertDataPart({
+        type: 'data-documentBatch',
+        data: { batchId: 'b1' },
+      })
+    ).toEqual({ type: 'text', text: '[Фото документів ще обробляються]' })
+    expect(options.convertDataPart({ type: 'data-other', data: {} })).toBe(
+      undefined
+    )
   })
 })

@@ -3,6 +3,7 @@ import { Form } from 'antd'
 import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { ServiceType } from '@utils/constants'
+import { resolvePlacingTariff } from '@utils/getInvoices/resolvePlacingTariff'
 import { usePrevPayment } from '@common/components/Tables/PaymentsBulk/hooks/usePrevPayment/usePrevPayment'
 
 export const useInflicionValues = (
@@ -24,8 +25,7 @@ export const useInflicionValues = (
     return (
       prevPayment?.invoice?.find((item) => item.type === ServiceType.Placing)
         ?.sum ||
-      (company?.totalArea || 0) *
-        (company?.pricePerMeter || 0 || service?.rentPrice || 0)
+      (company?.totalArea || 0) * resolvePlacingTariff({ company, service })
     )
   }, [prevPayment, company, service])
 

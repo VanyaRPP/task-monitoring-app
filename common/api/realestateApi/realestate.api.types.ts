@@ -55,6 +55,18 @@ export interface IGetRealestateResponse {
   realEstatesFilter: IFilter[]
   streetsFilter: IFilter[]
 }
+export interface IMyCompany {
+  _id: string
+  companyName: string
+  domain?: string
+  street?: string
+  archived?: boolean
+}
+
+export interface IGetMyCompaniesResponse {
+  success: boolean
+  data: IMyCompany[]
+}
 
 export interface IDeleteRealestateResponse {
   success: boolean

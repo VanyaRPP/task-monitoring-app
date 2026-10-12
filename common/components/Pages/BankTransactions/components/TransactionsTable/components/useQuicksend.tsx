@@ -85,8 +85,8 @@ export const useQuickSend = ({
 
   const { data: servicesData, isLoading: isServicesLoading } =
     useGetAllServicesQuery(
-      { domainId: domain._id, ...(streetId ? { streetId } : {}) },
-      { skip: !domain._id || (!isDebit && !streetId) }
+      { domainId: domain._id, streetId: streetId || undefined },
+      { skip: !domain._id }
     )
 
   const services = useMemo(() => {
@@ -133,10 +133,12 @@ export const useQuickSend = ({
             date: transaction.DAT_OD
               ? dayjs(parseDate(transaction.DAT_OD, 'DD.MM.YYYY')).toISOString()
               : service.date.toISOString(),
-            amount: parseFloat(transaction.SUM as string),
             description: getResolvedDescription(transaction, relatedCompanies),
             type: Operations.Debit,
-            categories: [category],
+            // The API derives amount and categories from the lines.
+            items: [
+              { category, amount: parseFloat(transaction.SUM as string) },
+            ],
             periodMonth: service.date.format('YYYY-MM'),
             currency: transaction.CCY || Currency.UAH,
           }).unwrap()
