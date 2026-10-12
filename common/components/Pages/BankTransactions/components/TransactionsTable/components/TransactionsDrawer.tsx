@@ -32,6 +32,7 @@ import {
   buildCompanyIdentifierPatch,
 } from './quickSendHelpers'
 import dayjs from 'dayjs'
+import { companySelectLabelRender } from '@components/UI/Reusable/CompanyStatusLabel'
 import styles from './style.module.scss'
 
 interface TransactionDrawerProps {
@@ -67,6 +68,24 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
   const relatedCompanies = useMemo(
     () => realEstatesData?.data || [],
     [realEstatesData]
+  )
+
+  // previousCompanyId may point to a company that has since been archived: it
+  // is no longer among relatedCompanies, so antd would render the raw id. Load
+  // the domain's archived companies only in that case to show it by status.
+  const isSelectedCompanyListed =
+    !selectedCompany || relatedCompanies.some((c) => c._id === selectedCompany)
+  const { data: archivedCompaniesData } = useGetAllRealEstateQuery(
+    { domainId: domain._id, archived: true },
+    { skip: isSelectedCompanyListed }
+  )
+  const companyLabelRender = useMemo(
+    () =>
+      companySelectLabelRender(
+        relatedCompanies,
+        archivedCompaniesData?.data || []
+      ),
+    [relatedCompanies, archivedCompaniesData]
   )
 
   const {
@@ -277,6 +296,7 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
               placeholder="Select a related company"
               onChange={handleCompanyChange}
               value={selectedCompany ?? undefined}
+              labelRender={companyLabelRender}
               style={{ width: 'calc(100% - 80px)', maxWidth: 300 }}
             >
               {relatedCompanies.map((company) => (
