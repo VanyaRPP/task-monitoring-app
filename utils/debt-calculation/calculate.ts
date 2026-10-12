@@ -84,6 +84,7 @@ export const calculateDebt = ({
   let debt = openingDebt
   let coefficient = 1
   let totalCharged = 0
+  let totalCorrection = 0
   let totalPaid = 0
   let totalInterest = 0
   let totalDays = 0
@@ -93,16 +94,21 @@ export const calculateDebt = ({
     const tariff = +month.tariff || 0
     const charged =
       month.charged == null ? round2(area * tariff) : +month.charged || 0
+    const correction = +month.correction || 0
     const paid = +month.paid || 0
     const inflationIndex = +month.inflationIndex || 100
 
     coefficient = index === 0 ? 1 : coefficient * (inflationIndex / 100)
 
+    // A correction adjusts what the month billed: it moves the debt with the
+    // charge. One that outweighs the charge settles older debt, like a payment.
+    const billed = charged + correction
+    const opening = debt
     const debtBeforeCharge = debt - paid
-    debt = debtBeforeCharge + charged
+    debt = debtBeforeCharge + billed
 
-    lots.push({ amount: charged, coefficient })
-    applyPayment(lots, paid)
+    if (billed > 0) lots.push({ amount: billed, coefficient })
+    applyPayment(lots, paid + Math.max(-billed, 0))
 
     const days = daysInMonth(month.year, month.month)
     const interestBase = interestOnCurrentCharge ? debt : debtBeforeCharge
@@ -114,9 +120,11 @@ export const calculateDebt = ({
     rows.push({
       year: month.year,
       month: month.month,
+      opening,
       area,
       tariff,
       charged,
+      correction,
       paid,
       debt,
       days,
@@ -130,6 +138,7 @@ export const calculateDebt = ({
     })
 
     totalCharged += charged
+    totalCorrection += correction
     totalPaid += paid
     totalInterest += interest
     totalDays += days
@@ -143,6 +152,7 @@ export const calculateDebt = ({
     rows,
     totals: {
       charged: totalCharged,
+      correction: totalCorrection,
       paid: totalPaid,
       interest: totalInterest,
       days: totalDays,

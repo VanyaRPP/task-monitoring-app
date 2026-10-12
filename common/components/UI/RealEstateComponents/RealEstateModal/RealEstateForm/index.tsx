@@ -24,12 +24,9 @@ import {
 } from '@common/api/domainApi/domain.api'
 import { IDomain } from '@modules/models/Domain'
 import { inputNumberParser } from '@utils/helpers'
-import {
-  CURRENCY_SELECT_OPTIONS,
-  Currency,
-  ServiceType,
-} from '@utils/constants'
+import { CURRENCY_SELECT_OPTIONS, Currency } from '@utils/constants'
 import { resolveServiceType } from '@utils/domain/resolve-service-type'
+import { isAreaBasedServiceType } from '@utils/domain/service-type-categories'
 import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
 import { shouldShowStandardServices } from '@utils/servicesVisibility'
 import CustomServicesCard from '../../../CustomServicesCard'
@@ -103,10 +100,9 @@ const RealEstateForm: FC<Props> = ({
   const isMeterBasedServiceExist =
     isServiceExistById('677d414283b6ef93c6b8ea2c') ||
     isServiceExistById('682dd48d9665126611c81950') ||
-    customServices.some((svc) => {
-      const type = resolveServiceType(svc)
-      return type === ServiceType.Placing || type === ServiceType.Maintenance
-    })
+    customServices.some((svc) =>
+      isAreaBasedServiceType(resolveServiceType(svc))
+    )
 
   const getSafeStreetId = () => {
     const val =

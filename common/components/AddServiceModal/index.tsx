@@ -89,7 +89,11 @@ const AddServiceModal: FC<Props> = ({
         formData?.inflicionPrice ||
         0,
       description: formData?.description || '',
-      customServices: formData?.customServices || [],
+      customServices: (formData?.customServices || []).map((row) =>
+        row.fieldName === 'inflicionPrice' && row.price == null
+          ? { ...row, price: 0 }
+          : row
+      ),
       losses: formData?.losses || null,
       consumedElectricity: formData?.consumedElectricity || null,
       generalElectricity: formData?.generalElectricity || null,

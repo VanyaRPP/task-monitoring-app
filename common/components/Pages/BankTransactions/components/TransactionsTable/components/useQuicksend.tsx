@@ -10,9 +10,10 @@ import {
   useAddPaymentMutation,
   useGetPaymentNumberQuery,
 } from '@common/api/paymentApi/payment.api'
+import { useCreateProfitMutation } from '@common/api/profitsApi/profits.api'
 import { getPaymentProviderAndReciever } from '@utils/helpers'
 import { getResolvedDescription } from './bankHelper'
-import { Operations } from '@utils/constants'
+import { Operations, Currency } from '@utils/constants'
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { formatDate, parseDate, toDate } from './datesHelper'
 import { getStreetId, buildTransactionPayload } from './quickSendHelpers'
@@ -30,6 +31,7 @@ interface UseQuickSendProps {
   domain: IExtendedDomain
   selectedCompanyId: string | null
   relatedCompanies: IRealestate[]
+  selectedCategory?: string | null
   onSuccess?: () => void
 }
 
@@ -38,12 +40,15 @@ export const useQuickSend = ({
   domain,
   selectedCompanyId,
   relatedCompanies,
+  selectedCategory,
   onSuccess,
 }: UseQuickSendProps) => {
   const [loading, setLoading] = useState(false)
   const [addPayment] = useAddPaymentMutation()
+  const [createProfit] = useCreateProfitMutation()
   const [addService] = useAddServiceMutation()
   const { data: nextInvoiceNumber = 1 } = useGetPaymentNumberQuery(undefined)
+  const isDebit = transaction.TRANTYPE === 'D'
 
   const company = relatedCompanies.find((c) => c._id === selectedCompanyId)
   const streetId = getStreetId(company)
@@ -111,14 +116,49 @@ export const useQuickSend = ({
   }, [servicesData])
 
   const handleQuickSend = useCallback(
-    async (service: any) => {
-      if (!selectedCompanyId) {
-        message.warning('Будь ласка, оберіть компанію')
-        return
-      }
+    async (service: { _id: string; date: dayjs.Dayjs }) => {
       setLoading(true)
 
       try {
+        if (isDebit) {
+          const category = selectedCategory?.trim()
+
+          if (!category) {
+            message.warning('Будь ласка, оберіть категорію')
+            return
+          }
+
+          await createProfit({
+            domain: domain._id,
+            date: transaction.DAT_OD
+              ? dayjs(parseDate(transaction.DAT_OD, 'DD.MM.YYYY')).toISOString()
+              : service.date.toISOString(),
+            description: getResolvedDescription(transaction, relatedCompanies),
+            type: Operations.Debit,
+            // The API derives amount and categories from the lines.
+            items: [
+              { category, amount: parseFloat(transaction.SUM as string) },
+            ],
+            periodMonth: service.date.format('YYYY-MM'),
+            currency: transaction.CCY || Currency.UAH,
+          }).unwrap()
+
+          message.success(
+            `Витрату за ${formatDate(
+              service.date,
+              'MMMM YYYY'
+            )} успішно створено!`
+          )
+
+          onSuccess?.()
+          return
+        }
+
+        if (!selectedCompanyId) {
+          message.warning('Будь ласка, оберіть компанію')
+          return
+        }
+
         if (!company) throw new Error('Company not found')
 
         // getPaymentProviderAndReciever takes the company directly (same as the
@@ -173,13 +213,17 @@ export const useQuickSend = ({
         message.error(
           serverMsg
             ? `Помилка при створенні рахунку: ${serverMsg}`
-            : 'Помилка при створенні рахунку'
+            : isDebit
+              ? 'Помилка при створенні витрати'
+              : 'Помилка при створенні рахунку'
         )
       } finally {
         setLoading(false)
       }
     },
     [
+      isDebit,
+      selectedCategory,
       selectedCompanyId,
       relatedCompanies,
       domain,
@@ -187,6 +231,7 @@ export const useQuickSend = ({
       transaction,
       company,
       onSuccess,
+      createProfit,
       nextInvoiceNumber,
       resolveMonthServiceId,
       streetId,

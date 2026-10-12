@@ -1,4 +1,5 @@
 import { IDebtCalculationModel } from '@modules/models/DebtCalculation'
+import { IDebtImportRow } from '@utils/debt-calculation/import'
 import { IDebtCalculationSnapshot } from '@utils/debt-calculation/serialize'
 
 export type { IDebtCalculationModel }
@@ -19,4 +20,10 @@ export type ISaveDebtCalculationRequest = IDebtCalculationSnapshot
 export interface IDebtCalculationResponse {
   success: boolean
   data: ISavedDebtCalculation | null
+}
+
+/** Months read off statement photos, merged into the company's calculation. */
+export interface IImportDebtCalculationRequest extends IDebtCalculationKey {
+  rows: IDebtImportRow[]
+  openingDebt?: number
 }

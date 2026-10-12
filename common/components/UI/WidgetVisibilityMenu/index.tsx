@@ -1,20 +1,19 @@
 import React from 'react'
 import { Checkbox, Divider, theme } from 'antd'
-import type { WidgetKey } from '@components/DashboardPage'
 
-interface Props {
-  hidden: WidgetKey[]
-  onChange: (updated: WidgetKey[]) => void
-  available: WidgetKey[]
-  labels: Record<WidgetKey, string>
+interface Props<K extends string = string> {
+  hidden: K[]
+  onChange: (updated: K[]) => void
+  available: K[]
+  labels: Record<K, string>
 }
 
-const WidgetVisibilityMenu: React.FC<Props> = ({
+function WidgetVisibilityMenu<K extends string = string>({
   hidden,
   onChange,
   available,
   labels,
-}) => {
+}: Props<K>) {
   const { token } = theme.useToken()
 
   return (
@@ -29,7 +28,7 @@ const WidgetVisibilityMenu: React.FC<Props> = ({
     >
       <Checkbox.Group
         value={hidden}
-        onChange={(checked) => onChange(checked as WidgetKey[])}
+        onChange={(checked) => onChange(checked as K[])}
         style={{
           display: 'flex',
           flexDirection: 'column',

@@ -38,3 +38,20 @@ export function companyHasCustomService(
   // `!= null` is intentional: 0 is a set price (render), undefined/null is not.
   return !!match && match.price != null
 }
+
+/**
+ * Ключі колонок, чию послугу не має ЖОДНА компанія в таблиці (напр. після
+ * видалення єдиної такої компанії) — колонка була б порожньою, тож її ховаємо.
+ */
+export const findUnusedCustomServices = (
+  gates: Record<string, { serviceKey: string; fieldName?: string }>,
+  companiesCustoms: unknown[]
+): string[] =>
+  Object.entries(gates)
+    .filter(
+      ([, target]) =>
+        !companiesCustoms.some((customs) =>
+          companyHasCustomService(customs, target)
+        )
+    )
+    .map(([key]) => key)

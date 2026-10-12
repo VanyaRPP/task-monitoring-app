@@ -189,12 +189,18 @@ body {
     background: white !important;
     color: black !important;
     border-collapse: collapse !important;
-    border: 1px solid #d9d9d9 !important;
+    border: none !important;
     margin: 0 !important;
     padding: 0 !important;
     overflow: visible !important;
     width: 100% !important;
     box-sizing: border-box !important;
+  }
+
+  // One outer frame only: bordering both .ant-table and its container drew a
+  // doubled line on the left that read as a clipped edge.
+  .ant-table-container {
+    border: 1px solid #d9d9d9 !important;
   }
 
   .ant-table thead {
@@ -280,9 +286,5 @@ body {
   .ant-table-footer,
   .ant-table-placeholder {
     display: none !important;
-  }
-
-  @page {
-    margin: 0 !important;
   }
 }

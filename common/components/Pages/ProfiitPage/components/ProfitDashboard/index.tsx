@@ -24,6 +24,7 @@ import {
   normalizeCurrency,
 } from '@utils/helpers'
 import { money } from '../ProfitTable/tableConfig'
+import { splitProfitByCategory } from '@utils/profit-items'
 import 'dayjs/locale/uk'
 
 dayjs.locale('uk')
@@ -360,14 +361,13 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({
         if (normalizeCurrency(tr.currency) !== normalizeCurrency(currency)) {
           return
         }
-        const cats = tr.categories?.length
-          ? tr.categories
-          : [t('profitPage:dashboard.uncategorized')]
-        // Split evenly when a record carries several categories, so the pie
-        // still sums to the month's expenses.
-        const share = tr.amount / cats.length
-        cats.forEach((cat) => {
-          categoriesMap[cat] = (categoriesMap[cat] || 0) + share
+        // Lines carry their own amounts; older multi-category records are
+        // split evenly so the pie still sums to the month's expenses.
+        splitProfitByCategory(
+          tr,
+          t('profitPage:dashboard.uncategorized')
+        ).forEach(({ category, amount }) => {
+          categoriesMap[category] = (categoriesMap[category] || 0) + amount
         })
       })
     })

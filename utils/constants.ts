@@ -36,6 +36,8 @@ export enum SortOrder {
   DESC = -1,
 }
 
+export const PAYMENTS_TIMEZONE = 'Europe/Kyiv'
+
 export enum ColumnsRoleView {
   GlobalAdmin = 1,
   User = 2,
@@ -300,3 +302,5 @@ export const CURRENCY_SELECT_OPTIONS = [
   { value: Currency.USD, label: `${Currency.USD} ($)` },
   { value: Currency.EUR, label: `${Currency.EUR} (€)` },
 ]
+
+export const OTHER_KEY = '__other__'

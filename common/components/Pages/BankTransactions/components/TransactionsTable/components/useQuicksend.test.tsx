@@ -23,6 +23,10 @@ jest.mock('@common/api/paymentApi/payment.api', () => ({
   useGetPaymentNumberQuery: jest.fn().mockReturnValue({ data: 1 }),
 }))
 
+jest.mock('@common/api/profitsApi/profits.api', () => ({
+  useCreateProfitMutation: jest.fn(() => [jest.fn()]),
+}))
+
 jest.mock('@utils/helpers', () => ({
   getPaymentProviderAndReciever: jest
     .fn()

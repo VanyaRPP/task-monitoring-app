@@ -527,6 +527,79 @@ describe('Service API - GET', () => {
 
     expect(received).toMatchObject(expected)
   })
+
+  describe('withoutStreet', () => {
+    const getIds = async (query: Record<string, unknown>) => {
+      const mockReq = { method: 'GET', query } as any
+      const mockRes = {
+        status: jest.fn(() => mockRes),
+        json: jest.fn(),
+      } as any
+
+      await handler(mockReq, mockRes)
+
+      return mockRes.json.mock.lastCall[0].data.map((service) =>
+        service._id.toString()
+      )
+    }
+
+    const addMonthService = (street?: string) =>
+      Service.create({
+        domain: domains[0]._id,
+        ...(street ? { street } : {}),
+        date: new Date(Date.UTC(2030, 2, 1, 12)),
+        rentPrice: 0,
+        electricityPrice: 0,
+        waterPrice: 0,
+        waterPriceTotal: 0,
+      })
+
+    it('returns only the services with no address', async () => {
+      await mockLoginAs(users.globalAdmin)
+      const withStreet = await addMonthService(streets[0]._id)
+      const noStreet = await addMonthService()
+
+      const ids = await getIds({
+        domainId: domains[0]._id,
+        withoutStreet: 'true',
+        year: '2030',
+        month: '3',
+      })
+
+      expect(ids).toEqual([noStreet._id.toString()])
+      expect(ids).not.toContain(withStreet._id.toString())
+    })
+
+    it('finds nothing when the month only has a street service', async () => {
+      await mockLoginAs(users.globalAdmin)
+      await addMonthService(streets[0]._id)
+
+      const ids = await getIds({
+        domainId: domains[0]._id,
+        withoutStreet: 'true',
+        year: '2030',
+        month: '3',
+      })
+
+      expect(ids).toEqual([])
+    })
+
+    it('is ignored when a streetId is given', async () => {
+      await mockLoginAs(users.globalAdmin)
+      const withStreet = await addMonthService(streets[0]._id)
+      await addMonthService()
+
+      const ids = await getIds({
+        domainId: domains[0]._id,
+        streetId: streets[0]._id,
+        withoutStreet: 'true',
+        year: '2030',
+        month: '3',
+      })
+
+      expect(ids).toEqual([withStreet._id.toString()])
+    })
+  })
 })
 
 describe('Service API - POST', () => {

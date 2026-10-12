@@ -313,3 +313,68 @@ describe('calculateDebt — межові випадки', () => {
     )
   })
 })
+
+describe('calculateDebt — коректура', () => {
+  // кв. 72, 9/2019-12/2019 from the billing printout: the 6,86 correction of
+  // November lowers the debt.
+  const months: IDebtMonthInput[] = [
+    { year: 2019, month: 9, charged: 424.46, paid: 0 },
+    { year: 2019, month: 10, charged: 424.46, paid: 400 },
+    { year: 2019, month: 11, charged: 424.46, correction: -6.86, paid: 0 },
+    { year: 2019, month: 12, charged: 424.46, paid: 0 },
+  ]
+
+  it('борг на кінець кожного місяця — як на роздруківці', () => {
+    const result = calculateDebt({ months, openingDebt: 16192.23 })
+
+    expect(result.rows.map(({ debt }) => Math.round(debt * 100) / 100)).toEqual(
+      [16616.69, 16641.15, 17058.75, 17483.21]
+    )
+    expect(result.rows[2].correction).toBe(-6.86)
+    expect(result.totals.correction).toBe(-6.86)
+    expect(result.totals.charged).toBeCloseTo(1697.84, 2)
+  })
+
+  it('коректура, більша за нарахування, гасить найстаріший борг, як оплата', () => {
+    const result = calculateDebt({
+      openingDebt: 1000,
+      inflationMethod: 'monthly',
+      months: [
+        { year: 2024, month: 1, charged: 100, inflationIndex: 100 },
+        {
+          year: 2024,
+          month: 2,
+          charged: 0,
+          correction: -300,
+          inflationIndex: 110,
+        },
+      ],
+    })
+
+    expect(result.body).toBe(800)
+    // What is left indexes as 800 of old debt, not a negative lot.
+    expect(result.inflation).toBeGreaterThan(0)
+  })
+})
+
+describe('calculateDebt — вхідне сальдо місяця', () => {
+  it('перший місяць відкривається боргом на початок, наступні — вихідним попереднього', () => {
+    const result = calculateDebt({
+      openingDebt: 16192.23,
+      months: [
+        { year: 2019, month: 9, charged: 424.46, paid: 0 },
+        { year: 2019, month: 10, charged: 424.46, paid: 400 },
+      ],
+    })
+
+    expect(
+      result.rows.map(({ opening, debt }) => [
+        opening,
+        Math.round(debt * 100) / 100,
+      ])
+    ).toEqual([
+      [16192.23, 16616.69],
+      [16616.69, 16641.15],
+    ])
+  })
+})

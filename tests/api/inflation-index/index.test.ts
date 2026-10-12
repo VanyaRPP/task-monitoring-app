@@ -132,14 +132,14 @@ describe('POST /api/inflation-index', () => {
       {
         updateOne: {
           filter: { year: 2021, month: 11 },
-          update: { $set: { value: 100.8 } },
+          update: { $set: { value: 100.8, source: 'manual' } },
           upsert: true,
         },
       },
       {
         updateOne: {
           filter: { year: 2021, month: 12 },
-          update: { $set: { value: 100.6 } },
+          update: { $set: { value: 100.6, source: 'manual' } },
           upsert: true,
         },
       },

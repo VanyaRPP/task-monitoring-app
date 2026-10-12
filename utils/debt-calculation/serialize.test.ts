@@ -176,3 +176,17 @@ describe('sanitizeSnapshot', () => {
     })
   })
 })
+
+describe('коректура в збереженні', () => {
+  it('зберігається разом з іншими полями місяця, мінус включно', () => {
+    const company = '507f1f77bcf86cd799439012'
+
+    expect(
+      sanitizeOverrides({
+        [company]: { months: { '2019-11': { correction: '-6.86', paid: 0 } } },
+      })
+    ).toEqual({
+      [company]: { months: { '2019-11': { correction: -6.86, paid: 0 } } },
+    })
+  })
+})

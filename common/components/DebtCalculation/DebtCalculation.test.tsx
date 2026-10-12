@@ -38,6 +38,8 @@ jest.mock('@common/api/realestateApi/realestate.api', () => ({
 
 jest.mock('@common/api/paymentApi/payment.api', () => ({
   useGetAllPaymentsQuery: jest.fn(),
+  usePlanStatementImportMutation: jest.fn(() => [jest.fn(), {}]),
+  useImportStatementMutation: jest.fn(() => [jest.fn(), {}]),
 }))
 
 jest.mock('@common/api/serviceApi/service.api', () => ({
@@ -367,5 +369,29 @@ describe('MonthsTable — позначка відсутнього індексу
     })
 
     expect(statusOf('Січень 2026')).not.toContain('status-error')
+  })
+})
+
+describe('місяці, заповнені з фото', () => {
+  const photoOverrides = {
+    openingDebt: 8371.52,
+    months: {
+      '2026-01': { charged: 352.17, paid: 0, source: 'photo' },
+      '2026-02': { charged: 352.17, paid: 500, source: 'photo' },
+    },
+  }
+
+  it('позначені в таблиці, а над таблицею — скільки їх і що робити далі', () => {
+    renderWithContext(<DebtCalculationBody />, { overrides: photoOverrides })
+
+    expect(screen.getByText('З фото заповнено місяців: 2')).toBeInTheDocument()
+    expect(screen.getAllByLabelText('camera')).toHaveLength(2)
+  })
+
+  it('без місяців з фото — ні банера, ні позначок', () => {
+    renderWithContext(<DebtCalculationBody />)
+
+    expect(screen.queryByText(/З фото заповнено/)).toBeNull()
+    expect(screen.queryByLabelText('camera')).toBeNull()
   })
 })

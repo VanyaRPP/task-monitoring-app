@@ -26,6 +26,8 @@ jest.mock('@common/api/realestateApi/realestate.api', () => ({
 
 jest.mock('@common/api/paymentApi/payment.api', () => ({
   useGetAllPaymentsQuery: jest.fn(),
+  usePlanStatementImportMutation: jest.fn(() => [jest.fn(), {}]),
+  useImportStatementMutation: jest.fn(() => [jest.fn(), {}]),
 }))
 
 jest.mock('@common/api/serviceApi/service.api', () => ({

@@ -16,6 +16,7 @@ import {
   IGetRealestateResponse,
 } from '@common/api/realestateApi/realestate.api.types'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+import type { IDebtorInflation } from '@common/api/debtorsApi/debtors.api.types'
 import { AppRoutes, Roles } from '@utils/constants'
 import {
   formatDebtAmount,
@@ -72,7 +73,13 @@ type CompanyWithPayments = {
   companyName: string
   debtPerMonth: DebtPerMonth[]
   totalDebt: number
+  inflation?: IDebtorInflation | null
 }
+
+const INFLATION_METHOD_LABEL = {
+  balance: 'за залишком',
+  monthly: 'помісячно',
+} as const
 
 const STANDARD_SERVICE_NAMES = [
   'Опис',
@@ -725,6 +732,16 @@ const getDefaultColumns = ({
                 {isCompanyDebtor ? 'Сума боргу' : 'Сума переплати'}:{' '}
                 {formatDebtAmount(debtor.totalDebt)}
               </p>
+              {isCompanyDebtor && debtor.inflation && (
+                <p>
+                  Інфляційні втрати: {formatDebtAmount(debtor.inflation.loss)}
+                  <br />
+                  <small>
+                    {debtor.inflation.from} – {debtor.inflation.to},{' '}
+                    {INFLATION_METHOD_LABEL[debtor.inflation.method]}
+                  </small>
+                </p>
+              )}
             </div>
           )
 

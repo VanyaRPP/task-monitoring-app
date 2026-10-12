@@ -11,6 +11,7 @@ import {
 } from 'antd'
 import { useMemo } from 'react'
 import { useDebtCalculationContext } from './'
+import CreatePayments from './CreatePayments'
 import { useExportExcel } from './useExportExcel'
 import s from './style.module.scss'
 
@@ -70,14 +71,17 @@ const DebtCalculationHeader: React.FC = () => {
           Розрахунок заборгованості
         </Typography.Title>
 
-        <Button
-          icon={<FileExcelOutlined />}
-          loading={isExporting}
-          disabled={!companyId}
-          onClick={exportExcel}
-        >
-          Експорт в Excel
-        </Button>
+        <Space>
+          <CreatePayments />
+          <Button
+            icon={<FileExcelOutlined />}
+            loading={isExporting}
+            disabled={!companyId}
+            onClick={exportExcel}
+          >
+            Експорт в Excel
+          </Button>
+        </Space>
       </div>
 
       <Space wrap size="middle" className={s.Controls}>

@@ -5,6 +5,7 @@ import RealEstate from '@modules/models/RealEstate'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import { normalizeCurrency } from '@utils/helpers'
+import { normalizeProfitItems } from '@utils/profit-items'
 
 /**
  * @swagger
@@ -72,6 +73,12 @@ import { normalizeCurrency } from '@utils/helpers'
  *                 description: Domain ID (ObjectId)
  *               amount:
  *                 type: number
+ *                 description: Ignored when items are sent - it is their sum
+ *               items:
+ *                 type: array
+ *                 description: Lines of one receipt; categories are derived from them
+ *                 items:
+ *                   $ref: '#/components/schemas/ProfitItem'
  *               type:
  *                 type: string
  *                 enum: [credit, debit]
@@ -133,16 +140,24 @@ export default async function handler(
           description,
           date,
           categories,
+          items,
           invoiceNumber,
           payment,
           periodMonth,
           currency,
         } = req.body
 
+        // With items the record's amount and categories are theirs - never
+        // what the client sent alongside.
+        const lines = items === undefined ? null : normalizeProfitItems(items)
+        if (lines && !lines.ok) {
+          return res.status(400).json({ success: false, error: lines.error })
+        }
+
         // Domain and company are symmetric scopes for a Profit record -
         // exactly one of them, matching whichever ledger the record is
         // filed under (see ProfitService.getLedgerFor).
-        if ((!domain && !company) || !amount || !type || !date) {
+        if ((!domain && !company) || !(lines || amount) || !type || !date) {
           return res.status(400).json({
             success: false,
             error:
@@ -176,11 +191,16 @@ export default async function handler(
         const profitDocument: CreateProfitInput = {
           ...(company ? { company } : { domain }),
           createdBy: user._id.toString(),
-          amount: Number(amount),
+          amount: lines ? lines.amount : Number(amount),
           type,
           date: new Date(date),
           description: description?.trim() || '',
-          categories: Array.isArray(categories) ? categories : [],
+          categories: lines
+            ? lines.categories
+            : Array.isArray(categories)
+              ? categories
+              : [],
+          ...(lines ? { items: lines.items } : {}),
           invoiceNumber: invoiceNumber?.trim(),
           payment,
           // Optional: the ledger falls back to the month of `date` without it.

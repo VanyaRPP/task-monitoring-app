@@ -19,7 +19,7 @@ import {
   resolveCommunalType,
   resolveServiceType,
   applyCustomColumnGate,
-} from './column.config'
+} from '../columns/column.config'
 import { buildInvoiceAddPayloadFromCatalogRow } from '@utils/domain/domain-invoice-selector'
 import { getInvoices } from '@utils/getInvoices'
 import { act, render, waitFor } from '@testing-library/react'
@@ -33,9 +33,9 @@ jest.mock('@common/components/DashboardPage/blocks/paymentsBulk', () => ({
 }))
 
 // eslint-disable-next-line import/first
-import { PlacingSum, PlacingPrice } from './cells/Placing'
+import { PlacingSum, PlacingPrice } from '../cells/Placing'
 // eslint-disable-next-line import/first
-import { buildTypedInvoiceEntry } from './buildTypedInvoiceEntry'
+import { buildTypedInvoiceEntry } from '../invoice/buildTypedInvoiceEntry'
 
 /** Per-domain копія: власний _id, своя назва, тег serviceType. */
 const CUSTOM_SERVICE = {

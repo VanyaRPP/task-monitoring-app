@@ -28,8 +28,8 @@ import { act, render, waitFor } from '@testing-library/react'
 import { Form } from 'antd'
 import React from 'react'
 
-import { buildBulkInvoiceMap } from './buildInvoiceMap'
-import { getDefaultColumns } from './column.config'
+import { buildBulkInvoiceMap } from '../invoice/buildInvoiceMap'
+import { getDefaultColumns } from '../columns/column.config'
 
 // Контекст булку — комірки читають із нього форму (і service/prevService).
 const mockBulkContext: { current: any } = { current: {} }
@@ -39,9 +39,9 @@ jest.mock('@common/components/DashboardPage/blocks/paymentsBulk', () => ({
 }))
 
 // eslint-disable-next-line import/first
-import { MaintenancePrice, MaintenanceSum } from './cells/Maintenance'
+import { MaintenancePrice, MaintenanceSum } from '../cells/Maintenance'
 // eslint-disable-next-line import/first
-import { PlacingPrice, PlacingSum } from './cells/Placing'
+import { PlacingPrice, PlacingSum } from '../cells/Placing'
 
 // Закріплені _id сидів (UTILITY_SERVICE_ID_ENTRIES у utils/constants.ts).
 const MAINTENANCE_SERVICE = {

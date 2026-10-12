@@ -1,21 +1,15 @@
-import CustomService from '@modules/models/CustomService'
-import Domain from '@modules/models/Domain'
 import { Data } from '@pages/api/api.config'
 import { withErrorHandler } from '@utils/api-handler'
 import { ServiceType } from '@utils/constants'
-import { builtInServiceIdsForType } from '@utils/domain/housing-fee-access'
+import { findDomainIdsByServiceType } from '@utils/domain/domains-by-service-type'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 const SERVICE_TYPE_VALUES = new Set<string>(Object.values(ServiceType))
 
 /**
- * Domains whose catalog carries a service of the given `serviceType`.
- *
- * Two lookups, because a domain's catalog gets filled in two ways:
- * - by cloning a template, which yields `CustomService` copies with a `domain`;
- * - the old way, where the domain's groups reference a GLOBAL service
- *   directly, so the pinned `_id`s of the built-in services must match too.
+ * Domains whose catalog carries a service of the given `serviceType`; see
+ * {@link findDomainIdsByServiceType} for how both catalog layouts are matched.
  */
 async function domainsByServiceTypeHandler(
   req: NextApiRequest,
@@ -39,30 +33,9 @@ async function domainsByServiceTypeHandler(
       .json({ success: false, message: `Невідомий тип послуги: ${type}` })
   }
 
-  const scoped = await CustomService.find(
-    { serviceType: type, domain: { $ne: null } },
-    'domain'
-  ).lean()
-  const domainIds = new Set(scoped.map(({ domain }) => String(domain)))
+  const domainIds = await findDomainIdsByServiceType(type as ServiceType)
 
-  const globalServices = await CustomService.find(
-    { serviceType: type, domain: null },
-    '_id'
-  ).lean()
-  const globalIds = new Set([
-    ...builtInServiceIdsForType(type as ServiceType),
-    ...globalServices.map(({ _id }) => String(_id)),
-  ])
-
-  if (globalIds.size > 0) {
-    const referencing = await Domain.find(
-      { 'customServices.services': { $in: [...globalIds] } },
-      '_id'
-    ).lean()
-    referencing.forEach(({ _id }) => domainIds.add(String(_id)))
-  }
-
-  return res.status(200).json({ success: true, data: [...domainIds] })
+  return res.status(200).json({ success: true, data: domainIds })
 }
 
 export default withErrorHandler(domainsByServiceTypeHandler)
