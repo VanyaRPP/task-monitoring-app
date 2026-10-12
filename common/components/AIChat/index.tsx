@@ -254,6 +254,9 @@ const AIChat: React.FC = () => {
   const [invoiceExtraLines, setInvoiceExtraLines] = useState<IPaymentField[]>(
     []
   )
+  // Set when the draft's lines are final (named rows repriced or the rest
+  // dropped), so the form must not re-seed them from the tariffs.
+  const [invoiceLines, setInvoiceLines] = useState<IPaymentField[]>()
   const [invoiceModalOpen, setInvoiceModalOpen] = useState<boolean>(false)
   const handledToolCallsRef = useRef<Set<string>>(new Set())
   // previewExpenses works the same way, with the add-cost form.
@@ -341,6 +344,9 @@ const AIChat: React.FC = () => {
           handledToolCallsRef.current.add(p.toolCallId)
           setInvoiceDraft(toPaymentFormData(p.output.draft))
           setInvoiceExtraLines(p.output.draft.extraLines ?? [])
+          setInvoiceLines(
+            p.output.draft.replaceLines ? p.output.draft.invoice : undefined
+          )
           setInvoiceModalOpen(true)
         }
         if (
@@ -702,6 +708,7 @@ const AIChat: React.FC = () => {
         <AddPaymentModal
           paymentData={invoiceDraft}
           extraInvoiceLines={invoiceExtraLines}
+          invoiceLines={invoiceLines}
           paymentActions={{ edit: false, preview: false }}
           closeModal={(success?: boolean) => {
             setInvoiceModalOpen(false)

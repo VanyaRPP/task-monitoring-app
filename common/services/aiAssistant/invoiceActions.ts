@@ -166,6 +166,8 @@ export interface ExtraLine {
   /** Per unit; `sum / quantity` when only a sum is given. */
   price?: number
   sum?: number
+  /** What goes under the name in the form: the period, the work done. */
+  description?: string
 }
 
 /**
@@ -173,7 +175,13 @@ export interface ExtraLine {
  * form's custom invoice row: `amount` × `price` = `sum`. Null for a line with
  * no usable numbers.
  */
-export function toCustomInvoiceLine({ name, quantity, price, sum }: ExtraLine) {
+export function toCustomInvoiceLine({
+  name,
+  quantity,
+  price,
+  sum,
+  description,
+}: ExtraLine) {
   const label = name?.trim()
   const amount = Number(quantity) > 0 ? Number(quantity) : 1
   const unitPrice =
@@ -188,6 +196,7 @@ export function toCustomInvoiceLine({ name, quantity, price, sum }: ExtraLine) {
     amount,
     price: Number(toRoundFixed(unitPrice)),
     sum: Number(toRoundFixed(multiplyFloat(unitPrice, amount))),
+    ...(description?.trim() ? { description: description.trim() } : {}),
   }
 }
 
@@ -197,7 +206,71 @@ export interface BuildInvoiceDraftParams {
   year: number
   /** Extra fixed lines the user asked for, e.g. { name: 'Оренда', sum: 5000 }. */
   extraLines?: ExtraLine[]
+  /** The invoice is exactly the named lines, not the company's usual ones. */
+  onlyNamedLines?: boolean
   ctx: UserContext
+}
+
+const comparable = (value?: string) =>
+  (value ?? '').toLowerCase().replace(/[^a-zа-яіїєґ0-9]/g, '')
+
+/** The one custom row a named line refers to: same name, or one containing it. */
+function findNamedRow(rows: any[], said: string) {
+  const key = comparable(said)
+  const custom = rows.filter((row) => row?.type === 'custom')
+  const exact = custom.filter((row) => comparable(row.name) === key)
+  if (exact.length === 1) return exact[0]
+  if (exact.length > 1 || key.length < 3) return null
+  const partial = custom.filter((row) => {
+    const name = comparable(row.name)
+    return name.length >= 3 && (name.includes(key) || key.includes(name))
+  })
+  return partial.length === 1 ? partial[0] : null
+}
+
+/**
+ * Puts the lines the user named into the company's usual ones. A named line
+ * that is one of those rows ("Artem 924" when the domain bills Artem every
+ * month) sets that row's price instead of adding a second Artem; the rest are
+ * added. With `onlyNamed` the invoice is just the named lines - "рахунок з
+ * полями A, B, C" means those three, not every row last month had.
+ */
+export function mergeNamedLines(
+  rows: any[],
+  named: ExtraLine[],
+  onlyNamed = false
+) {
+  const updated = new Map<any, any>()
+  const added: any[] = []
+  for (const said of named) {
+    const line = toCustomInvoiceLine(said)
+    if (!line) continue
+    const row = findNamedRow(rows, said.name)
+    if (row && !updated.has(row)) {
+      const amount = Number(said.quantity) > 0 ? line.amount : row.amount || 1
+      updated.set(row, {
+        ...row,
+        amount,
+        price: line.price,
+        sum: Number(toRoundFixed(multiplyFloat(line.price, amount))),
+        ...(line.description ? { description: line.description } : {}),
+      })
+    } else {
+      added.push({ ...line, customService: true })
+    }
+  }
+
+  const kept = onlyNamed
+    ? rows.filter((row) => updated.has(row)).map((row) => updated.get(row))
+    : rows.map((row) => updated.get(row) ?? row)
+
+  return {
+    invoice: [...kept, ...added],
+    added,
+    // The form re-seeds its lines from the tariffs and appends `added`; when
+    // rows were changed or dropped it must take `invoice` as it is instead.
+    replaceLines: onlyNamed || updated.size > 0,
+  }
 }
 
 /**
@@ -213,6 +286,7 @@ export async function buildInvoiceDraft({
   month,
   year,
   extraLines = [],
+  onlyNamedLines = false,
   ctx,
 }: BuildInvoiceDraftParams) {
   // Only a company the user may bill - the same scoping as findCompanies.
@@ -277,12 +351,11 @@ export async function buildInvoiceDraft({
     })
   }
 
-  const extraInvoiceLines = extraLines
-    .map(toCustomInvoiceLine)
-    .filter(Boolean)
-    .map((line) => ({ ...line, customService: true }))
-
-  const invoice = [...lines.filter(keepInvoiceRow), ...extraInvoiceLines]
+  const {
+    invoice,
+    added: extraInvoiceLines,
+    replaceLines,
+  } = mergeNamedLines(lines.filter(keepInvoiceRow), extraLines, onlyNamedLines)
   const generalSum = invoice.reduce(
     (total, line) => plusFloat(total, Number(line.sum) || 0),
     0
@@ -311,6 +384,8 @@ export async function buildInvoiceDraft({
     // Lines the user asked for on top of the tariffs; the form keeps them when
     // it re-seeds its own lines.
     extraLines: extraInvoiceLines,
+    // `invoice` is final: the form must not re-seed it from the tariffs.
+    replaceLines,
     template: (company as any).defaultTemplate || 'classic',
     invoiceLang: 'uk' as const,
   }

@@ -290,3 +290,122 @@ it('finds last month invoice whichever way its month service id was stored', asy
     draft.invoice.find((line) => line.type === 'electricityPrice')
   ).toMatchObject({ lastAmount: 300 })
 })
+
+describe('buildInvoiceDraft lines named by the user', () => {
+  // realEstates[0] in domains[0]: one catalog service per person, billed
+  // through last month's invoice (names are made up).
+  const companyId = realEstates[0]._id
+  const street = realEstates[0].street
+  const people = [
+    ['Oleksandra Koval', 3000],
+    ['Andrii Moroz', 1500],
+    ['Artem Lysenko', 924],
+    ['Denys Kravets', 2500],
+    ['Taras Melnyk', 800],
+  ] as const
+
+  beforeEach(async () => {
+    const services = await CustomService.insertMany(
+      [...people, ['Iryna Polishchuk', 1200]].map(([name], i) => ({
+        name,
+        fieldName: `person_${i}`,
+        domain: domainId,
+      }))
+    )
+    const february = await Service.create({
+      domain: domainId,
+      street,
+      date: new Date(Date.UTC(year, 1, 1, 12)),
+      rentPrice: 0,
+      electricityPrice: 0,
+      waterPrice: 0,
+      waterPriceTotal: 0,
+      description: '',
+    })
+    await Payment.create({
+      invoiceNumber: 9400,
+      type: 'debit',
+      domain: domainId,
+      street,
+      company: companyId,
+      monthService: february._id.toString(),
+      invoiceCreationDate: new Date(Date.UTC(year, 1, 28)),
+      description: '',
+      invoice: people.map(([name, price], i) => ({
+        type: 'custom',
+        name,
+        fieldName: `person_${i}`,
+        serviceId: services[i]._id.toString(),
+        price,
+        sum: price,
+      })),
+      generalSum: 0,
+      currency: 'USD',
+    })
+  })
+
+  const peopleOf = (draft: { invoice: any[] }) =>
+    draft.invoice
+      .filter((line) => line.type === 'custom')
+      .map(({ name, sum }) => [name, sum])
+
+  it("starts from last month's invoice: every person billed then", async () => {
+    const draft = await buildInvoiceDraft({
+      companyId,
+      year,
+      month,
+      ctx: globalAdmin,
+    })
+
+    expect(peopleOf(draft)).toEqual(people.map(([name, sum]) => [name, sum]))
+  })
+
+  it("also takes a person priced in the company's own prices", async () => {
+    await RealEstate.updateOne(
+      { _id: companyId },
+      {
+        customServices: [
+          { fieldName: 'person_5', label: 'Iryna Polishchuk', price: 1200 },
+        ],
+      }
+    )
+
+    const draft = await buildInvoiceDraft({
+      companyId,
+      year,
+      month,
+      ctx: globalAdmin,
+    })
+
+    // Not on last month's invoice, yet on this one - the form does the same.
+    expect(peopleOf(draft)).toContainEqual(['Iryna Polishchuk', 1200])
+  })
+
+  it('bills just the people the user listed, at their prices', async () => {
+    const draft = await buildInvoiceDraft({
+      companyId,
+      year,
+      month,
+      extraLines: [
+        { name: 'Andrii Moroz', sum: 1980 },
+        { name: 'Artem Lysenko', sum: 924 },
+        { name: 'Denys', sum: 2887.14 },
+      ],
+      onlyNamedLines: true,
+      ctx: globalAdmin,
+    })
+
+    expect(peopleOf(draft)).toEqual([
+      ['Andrii Moroz', 1980],
+      ['Artem Lysenko', 924],
+      ['Denys Kravets', 2887.14],
+    ])
+    expect(draft.invoice.map(({ fieldName }) => fieldName)).toEqual([
+      'person_1',
+      'person_2',
+      'person_3',
+    ])
+    expect(draft.generalSum).toBe(5791.14)
+    expect(draft.replaceLines).toBe(true)
+  })
+})

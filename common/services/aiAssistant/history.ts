@@ -27,3 +27,21 @@ export function withoutDrafts(messages: UIMessage[]): UIMessage[] {
     }),
   }))
 }
+
+/** How many of the latest chat messages the model still gets. */
+export const HISTORY_LIMIT = 12
+
+/**
+ * The tail of a long chat, starting at a user message. The whole history is
+ * resent with every step, so an hour-long chat alone would outgrow Groq's
+ * 8K tokens per minute; older turns rarely matter to the next request.
+ */
+export function recentMessages(
+  messages: UIMessage[],
+  limit = HISTORY_LIMIT
+): UIMessage[] {
+  if (messages.length <= limit) return messages
+  const tail = messages.slice(-limit)
+  const firstUser = tail.findIndex((message) => message.role === 'user')
+  return firstUser > 0 ? tail.slice(firstUser) : tail
+}

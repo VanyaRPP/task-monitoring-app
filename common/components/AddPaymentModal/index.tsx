@@ -78,6 +78,11 @@ interface Props {
    * change; these are appended every time instead of being wiped.
    */
   extraInvoiceLines?: IPaymentField[]
+  /**
+   * An AI draft's final lines, used as they are while its company is selected:
+   * named rows got the user's prices, unnamed ones may have been dropped.
+   */
+  invoiceLines?: IPaymentField[]
 }
 
 export interface IPaymentContext {
@@ -132,6 +137,7 @@ const AddPaymentModal: FC<Props> = ({
   preselectedCompany,
   preselectedDomain,
   extraInvoiceLines,
+  invoiceLines,
 }) => {
   const { preview, edit } = paymentActions ?? { preview: false, edit: false }
 
@@ -728,9 +734,13 @@ const AddPaymentModal: FC<Props> = ({
       return
     }
 
+    const draftLines =
+      invoiceLines && company._id === getId(paymentData?.company)
+        ? invoiceLines
+        : undefined
     const hasFilteredInvoices =
       Array.isArray(filteredInvoices) && filteredInvoices.length > 0
-    if (!hasFilteredInvoices) return
+    if (!draftLines && !hasFilteredInvoices) return
     // Re-seed `invoice` whenever upstream data (company, service, prevService,
     // prevPayment, customDomainServices) changes — that's exactly when
     // `filteredInvoices` gets a new reference. Editing existing payments is
@@ -738,20 +748,30 @@ const AddPaymentModal: FC<Props> = ({
     // only when the user changes domain/street/company/month, which is the
     // intended behavior.
     form.setFieldsValue({
-      invoice: extraInvoiceLines?.length
-        ? [...filteredInvoices, ...extraInvoiceLines]
-        : filteredInvoices,
+      invoice:
+        draftLines ??
+        (extraInvoiceLines?.length
+          ? [...filteredInvoices, ...extraInvoiceLines]
+          : filteredInvoices),
     })
 
     const isNewCompanySelected = lastLoadedCompanyId.current !== company._id
     if (isNewCompanySelected) {
-      form.setFieldValue('currency', normalizeCurrency(company.currency))
+      // A draft that names its currency ("у доларах") keeps it on first load.
+      const keepDraftCurrency =
+        lastLoadedCompanyId.current === null && !!paymentData?.currency
+      if (!keepDraftCurrency) {
+        form.setFieldValue('currency', normalizeCurrency(company.currency))
+      }
       lastLoadedCompanyId.current = company._id
     }
   }, [
     company,
     filteredInvoices,
     extraInvoiceLines,
+    invoiceLines,
+    paymentData?.company,
+    paymentData?.currency,
     paymentId,
     edit,
     activeTabKey,

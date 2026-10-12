@@ -1,5 +1,5 @@
 import type { UIMessage } from 'ai'
-import { withoutDrafts } from './history'
+import { recentMessages, withoutDrafts } from './history'
 
 const message = (parts: unknown[]): UIMessage =>
   ({ id: 'm1', role: 'assistant', parts }) as UIMessage
@@ -50,5 +50,30 @@ describe('withoutDrafts', () => {
     const [result] = withoutDrafts([message(parts)])
 
     expect(result.parts).toEqual(parts)
+  })
+})
+
+describe('recentMessages', () => {
+  const chat = (roles: string[]) =>
+    roles.map((role, i) => ({ id: `m${i}`, role, parts: [] }) as UIMessage)
+
+  it('keeps a short chat whole', () => {
+    const messages = chat(['user', 'assistant'])
+    expect(recentMessages(messages, 4)).toBe(messages)
+  })
+
+  it('keeps the tail of a long one, starting at a user message', () => {
+    const messages = chat([
+      'user',
+      'assistant',
+      'user',
+      'assistant',
+      'user',
+      'assistant',
+    ])
+
+    const kept = recentMessages(messages, 3)
+
+    expect(kept.map(({ id }) => id)).toEqual(['m4', 'm5'])
   })
 })

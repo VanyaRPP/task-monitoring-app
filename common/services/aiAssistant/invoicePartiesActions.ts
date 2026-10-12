@@ -41,6 +41,8 @@ export interface BuildPartiesInvoiceDraftParams {
   year: number
   currency?: string
   lines?: ExtraLine[]
+  /** For an existing company: bill only the named lines. */
+  onlyNamedLines?: boolean
   ctx: UserContext
 }
 
@@ -155,6 +157,7 @@ export async function buildPartiesInvoiceDraft(
       month,
       year,
       extraLines: params.lines,
+      onlyNamedLines: params.onlyNamedLines,
       ctx,
     })
     if (domain && draft.domain !== domain._id.toString()) {

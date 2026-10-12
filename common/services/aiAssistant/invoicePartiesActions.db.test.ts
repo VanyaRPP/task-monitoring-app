@@ -70,6 +70,22 @@ describe('buildPartiesInvoiceDraft', () => {
     })
   })
 
+  it("carries each line's description into the new company's invoice", async () => {
+    const result = await buildPartiesInvoiceDraft({
+      domainName: 'Олег',
+      companyName: 'Гугл про',
+      lines: [{ ...engineering[0], description: 'жовтень 2030, бекенд' }],
+      ...period,
+      ctx: domainAdmin,
+    })
+
+    expect(result.draft.invoice[0]).toMatchObject({
+      name: 'Software engineering',
+      description: 'жовтень 2030, бекенд',
+      sum: 1008,
+    })
+  })
+
   it("takes the user's own provider by name instead of a new one", async () => {
     const result = await buildPartiesInvoiceDraft({
       domainName: 'DOMAIN 0',
