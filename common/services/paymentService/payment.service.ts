@@ -62,6 +62,8 @@ export interface PaymentQueryParams {
   quarter?: string | number
   day?: string | number
   dateField?: 'invoiceCreationDate' | 'date' | 'paidAt'
+  dateFrom?: string
+  dateTo?: string
 }
 
 export interface UserContext {
@@ -209,6 +211,14 @@ export async function getPayments(
   // TODO: add security
   if (servicesIds) {
     options.monthService = { $in: servicesIds }
+  }
+
+  const invoiceDateRange = invoiceDateRangeCondition(
+    reqQuery.dateFrom,
+    reqQuery.dateTo
+  )
+  if (invoiceDateRange) {
+    options.invoiceCreationDate = invoiceDateRange
   }
 
   const expr = filterPeriodOptions(reqQuery)
@@ -467,6 +477,28 @@ export async function duplicatePayments(
     createdIds,
     skippedIds: [...skippedIds, ...notFoundIds],
     totalRequested: ids.length,
+  }
+}
+
+/**
+ * `dateFrom`/`dateTo` are ISO instants (the client already turned calendar
+ * days into the viewer's day boundaries). Invalid bounds are ignored.
+ */
+export function invoiceDateRangeCondition(
+  dateFrom?: string,
+  dateTo?: string
+): { $gte?: Date; $lte?: Date } | null {
+  const toDate = (value?: string) => {
+    if (!value || typeof value !== 'string') return null
+    const date = new Date(value)
+    return isNaN(date.getTime()) ? null : date
+  }
+  const from = toDate(dateFrom)
+  const to = toDate(dateTo)
+  if (!from && !to) return null
+  return {
+    ...(from ? { $gte: from } : {}),
+    ...(to ? { $lte: to } : {}),
   }
 }
 

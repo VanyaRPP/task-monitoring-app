@@ -66,6 +66,8 @@ import {
 import { RootState } from '@modules/store/store'
 import { resolvePaymentDateFilterQuery, getTypeOperation } from '@utils/helpers'
 import { PaymentDeleteItem } from '@components/Tables/Payment/Header'
+import { applyDateRangeToFilters } from '@utils/paymentDateRange'
+import { getDateRangeHistoryScope } from '@utils/dateRangeHistory'
 import { usePaymentsFilterUrlSync } from './usePaymentsFilterUrlSync'
 
 export interface PaymentsBlockProps {
@@ -105,7 +107,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
   const handleClose = () => dispatch(setCloseModal())
 
   const { isUrlApplied } = usePaymentsFilterUrlSync({
-    enabled: !sepDomainID && router.pathname === AppRoutes.PAYMENT,
+    enabled: Boolean(sepDomainID) || router.pathname === AppRoutes.PAYMENT,
   })
 
   const currentPage = rawCurrentPage || 1
@@ -471,12 +473,16 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
         ? (rawMonth.filter((x) => typeof x === 'string') as string[])
         : []
 
+      // The table only reports its own column filters; the header range
+      // picker lives outside it and must survive a column filter change.
       dispatch(
         setFilters({
           ...allFilters,
           invoiceCreationDate: invoiceVals,
           monthService: monthVals,
           street: filters?.street,
+          dateFrom: filters?.dateFrom,
+          dateTo: filters?.dateTo,
         })
       )
     }
@@ -537,14 +543,16 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
   const headerProps: React.ComponentProps<typeof PaymentsHeader> = {
     paymentsDeleteItems,
     closeEditModal: handleClose,
-    setCurrentDateFilter: (vals) => {
-      dispatch(
-        setFilters({
-          ...filters,
-          invoiceCreationDate: vals,
-        })
-      )
+    onDateRangeChange: (range) => {
+      dispatch(setFilters(applyDateRangeToFilters(filters, range)))
     },
+    showDateRangeFilter: Boolean(sepDomainID),
+    // Same ids the payments query is narrowed by, so a single-domain page
+    // shares its history with that domain picked on /payment.
+    dateHistoryScope: getDateRangeHistoryScope({
+      company: filters?.company,
+      domain: sepDomainID ? [sepDomainID] : filters?.domain,
+    }),
     currentPayment,
     paymentActions: { edit, preview },
     streets: filterProps.streetsFilter,

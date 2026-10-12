@@ -242,6 +242,92 @@ describe('Payments API - GET', () => {
     expect(received).toEqual(expected)
   })
 
+  describe('date range (dateFrom / dateTo)', () => {
+    const getAsGlobalAdmin = async (query: Record<string, string>) => {
+      await mockLoginAs(users.globalAdmin)
+      const mockReq = { method: 'GET', query } as any
+      const mockRes = {
+        status: jest.fn(() => mockRes),
+        json: jest.fn(),
+      } as any
+      await handler(mockReq, mockRes)
+      expect(mockRes.status).toHaveBeenCalledWith(200)
+      return mockRes.json.mock.lastCall[0]
+    }
+
+    const inRange = (from: string, to: string) =>
+      payments.filter((payment) => {
+        const time = new Date(payment.invoiceCreationDate).getTime()
+        return (
+          time >= new Date(from).getTime() && time <= new Date(to).getTime()
+        )
+      })
+
+    it('returns only payments inside the inclusive range', async () => {
+      const dateFrom = '2023-08-30T00:00:00.000Z'
+      const dateTo = '2023-08-31T23:59:59.999Z'
+
+      const body = await getAsGlobalAdmin({ dateFrom, dateTo })
+
+      const expected = inRange(dateFrom, dateTo)
+      expect(expected.length).toBeGreaterThan(0)
+      expect(parseReceived(body.data)).toEqual(expected)
+      expect(body.total).toBe(expected.length)
+    })
+
+    it('includes payments exactly on both bounds', async () => {
+      const body = await getAsGlobalAdmin({
+        dateFrom: '2023-06-01T00:00:00.000Z',
+        dateTo: '2023-07-01T00:00:00.000Z',
+      })
+
+      expect(
+        parseReceived(body.data).map((p) => p.invoiceCreationDate)
+      ).toEqual(
+        expect.arrayContaining([
+          '2023-06-01T00:00:00.000Z',
+          '2023-07-01T00:00:00.000Z',
+        ])
+      )
+    })
+
+    it('respects a local-day range across the year boundary', async () => {
+      // 01.11.2020 — 31.12.2020 in Kyiv (UTC+2): the 2020-11-09T22:00Z
+      // payments are 10.11.2020 locally and must be included.
+      const dateFrom = '2020-10-31T22:00:00.000Z'
+      const dateTo = '2020-12-31T21:59:59.999Z'
+
+      const body = await getAsGlobalAdmin({ dateFrom, dateTo })
+
+      expect(parseReceived(body.data)).toEqual(inRange(dateFrom, dateTo))
+    })
+
+    it('combines with the domain filter', async () => {
+      const dateFrom = '2020-01-01T00:00:00.000Z'
+      const dateTo = '2023-12-31T23:59:59.999Z'
+      const domainId = domains[0]._id.toString()
+
+      const body = await getAsGlobalAdmin({
+        dateFrom,
+        dateTo,
+        domainIds: domainId,
+      })
+
+      expect(parseReceived(body.data)).toEqual(
+        inRange(dateFrom, dateTo).filter((p) => p.domain === domainId)
+      )
+    })
+
+    it('ignores invalid bounds instead of failing', async () => {
+      const body = await getAsGlobalAdmin({
+        dateFrom: 'not-a-date',
+        dateTo: 'also-not',
+      })
+
+      expect(parseReceived(body.data)).toEqual(payments)
+    })
+  })
+
   // IF DOMAIN INCLUDES USER EMAIL - RETURN A PAYMENT BY THIS DOMAINID
   // FINISH TEST FOR USER AND CREATE A PR
 

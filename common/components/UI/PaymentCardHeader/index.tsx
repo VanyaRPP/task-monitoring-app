@@ -56,6 +56,7 @@ import {
 } from './preselect'
 const { useBreakpoint } = Grid
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
+import { PaymentDateRange } from '@utils/paymentDateRange'
 import { getInvoiceCustomServiceNames } from '@components/Tables/Payment/usePaymentColumns'
 import {
   getAllowedServices,
@@ -66,7 +67,11 @@ import {
 
 export interface PaymentCardHeaderProps {
   onDeleteClick?: () => void
-  setCurrentDateFilter: (val: any) => void
+  onDateRangeChange: (range: PaymentDateRange | null) => void
+  /** Show the range picker outside /payment (e.g. on a single-domain page). */
+  showDateRangeFilter?: boolean
+  /** Recent-ranges scope; defaults to one derived from `filters`. */
+  dateHistoryScope?: string
   currentPayment: any
   paymentActions: { edit: boolean; preview: boolean }
   closeEditModal: () => void
@@ -92,7 +97,9 @@ export interface PaymentCardHeaderProps {
 }
 
 const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
-  setCurrentDateFilter,
+  onDateRangeChange,
+  showDateRangeFilter,
+  dateHistoryScope,
   currentPayment,
   paymentActions,
   closeEditModal,
@@ -312,7 +319,9 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
           <PaymentCardLabel
             enablePaymentsButton={enablePaymentsButton}
             onColumnsSelect={onColumnsSelect}
-            setCurrentDateFilter={setCurrentDateFilter}
+            onDateRangeChange={onDateRangeChange}
+            showDateRangeFilter={showDateRangeFilter}
+            dateHistoryScope={dateHistoryScope}
             setFilters={setFilters}
             streets={streets}
             filters={filters}
@@ -478,7 +487,9 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
           <PaymentCardLabel
             enablePaymentsButton={enablePaymentsButton}
             onColumnsSelect={onColumnsSelect}
-            setCurrentDateFilter={setCurrentDateFilter}
+            onDateRangeChange={onDateRangeChange}
+            showDateRangeFilter={showDateRangeFilter}
+            dateHistoryScope={dateHistoryScope}
             setFilters={setFilters}
             streets={streets}
             filters={filters}
