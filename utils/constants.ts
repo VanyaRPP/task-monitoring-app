@@ -302,3 +302,5 @@ export const CURRENCY_SELECT_OPTIONS = [
   { value: Currency.USD, label: `${Currency.USD} ($)` },
   { value: Currency.EUR, label: `${Currency.EUR} (€)` },
 ]
+
+export const OTHER_KEY = '__other__'
