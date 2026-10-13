@@ -5,11 +5,16 @@ import {
   type UserContext,
 } from '@common/services/paymentService/payment.service'
 import {
-  buildInvoiceDraft,
+  buildCreditDraft,
   findCompaniesByName,
   findDomainsByName,
 } from '@common/services/aiAssistant/invoiceActions'
+import { buildPartiesInvoiceDraft } from '@common/services/aiAssistant/invoicePartiesActions'
 import { buildExpenseDraft } from '@common/services/aiAssistant/expenseActions'
+import { buildServiceDraft } from '@common/services/aiAssistant/serviceActions'
+import { buildDomainDraft } from '@common/services/aiAssistant/domainActions'
+import { buildStreetDraft } from '@common/services/aiAssistant/streetActions'
+import { buildCompanyDraft } from '@common/services/aiAssistant/companyActions'
 import { sumProfitItems, PROFIT_DEFAULT_CATEGORIES } from '@utils/profit-items'
 
 /**
@@ -23,53 +28,102 @@ import { sumProfitItems, PROFIT_DEFAULT_CATEGORIES } from '@utils/profit-items'
  * same pattern.
  */
 
-// Identifier-only input for previewInvoice. The model supplies WHO/WHEN, never
-// the final amounts — those are computed server-side from the Service record.
-const now = new Date()
-const previewInputSchema = z.object({
-  companyId: z
-    .string()
-    .describe('id компанії (отримай через findCompanies за назвою).'),
-  month: z
-    .number()
-    .int()
-    .min(1)
-    .max(12)
-    .optional()
-    .describe(
-      `Місяць 1-12 (за замовчуванням поточний: ${now.getMonth() + 1}).`
-    ),
-  year: z
-    .number()
-    .int()
-    .optional()
-    .describe(`Рік (за замовчуванням поточний: ${now.getFullYear()}).`),
-  extraLines: z
-    .array(z.object({ name: z.string(), sum: z.number() }))
-    .optional()
-    .describe(
-      'Додаткові фіксовані позиції, напр. [{ "name": "Оренда", "sum": 5000 }].'
-    ),
-})
+// What the model reads back from a preview tool: everything but `draft`. The
+// widget opens the form from the full output; the draft itself (an invoice
+// with every line, provider and receiver) would only be resent with every
+// step, against Groq's 8K tokens-per-minute budget.
+const withoutDraftForModel = {
+  toModelOutput: ({ output }: { output: unknown }) => {
+    const { draft: _draft, ...rest } = (output ?? {}) as Record<string, any>
+    return { type: 'json' as const, value: rest }
+  },
+}
 
-type PreviewInput = z.infer<typeof previewInputSchema>
+// Input for previewInvoice. The model supplies WHO/WHEN and the lines the user
+// named, never the final amounts - those are computed server-side (tariffs
+// from the Service record, quantity × price for named lines). Built per
+// request: "the current month" must be today's, not the month the server
+// process happened to start in.
+const makePreviewInputSchema = (now: Date) =>
+  z.object({
+    companyId: z.string().optional().describe('Знайдена компанія-отримувач.'),
+    companyName: z
+      .string()
+      .optional()
+      .describe('Отримувач, якого не знайдено (створиться).'),
+    companyEmail: z.string().optional(),
+    domainId: z.string().optional().describe('Знайдений надавач.'),
+    domainName: z
+      .string()
+      .optional()
+      .describe('Надавач, якого не знайдено (створиться).'),
+    street: z
+      .string()
+      .optional()
+      .describe('Адреса нової компанії, якщо названа.'),
+    city: z.string().optional(),
+    month: z
+      .number()
+      .int()
+      .min(1)
+      .max(12)
+      .optional()
+      .describe(`Поточний: ${now.getMonth() + 1}.`),
+    year: z
+      .number()
+      .int()
+      .optional()
+      .describe(`Поточний: ${now.getFullYear()}.`),
+    currency: z
+      .enum(['UAH', 'USD', 'EUR'])
+      .optional()
+      .describe('Лише якщо названа: $/баксі - USD, € - EUR.'),
+    extraLines: z
+      .array(
+        z.object({
+          name: z.string(),
+          quantity: z.number().optional(),
+          price: z.number().optional().describe('За одиницю.'),
+          sum: z.number().optional(),
+          description: z
+            .string()
+            .optional()
+            .describe('Решта тексту позиції: що зроблено, період, коментар.'),
+        })
+      )
+      .optional()
+      .describe(
+        'Названі позиції: «168 год по 6» -> {quantity:168, price:6}; «оренда 5000» -> {sum:5000}; «Andrii $1,980 - бекенд, жовтень» -> {name:"Andrii", sum:1980, description:"бекенд, жовтень"}.'
+      ),
+    onlyNamedLines: z
+      .boolean()
+      .optional()
+      .describe('Рахунок лише з extraLines, без інших позицій компанії.'),
+  })
 
-// Normalises month/year defaults for both invoice tools.
-function withDefaults(input: PreviewInput) {
+type PreviewInput = z.infer<ReturnType<typeof makePreviewInputSchema>>
+
+// Normalises month/year defaults.
+function withDefaults(input: PreviewInput, now: Date) {
   return {
-    companyId: input.companyId,
+    ...input,
     month: input.month ?? now.getMonth() + 1,
     year: input.year ?? now.getFullYear(),
-    extraLines: input.extraLines,
+    lines: input.extraLines,
   }
 }
 
 // Compact, model-friendly view of a draft — lets the model describe the invoice
 // in text without echoing the full payload. The full `draft` is returned
 // alongside this for the frontend to open the prefilled form.
-function toDraftSummary(draft: Awaited<ReturnType<typeof buildInvoiceDraft>>) {
+function toDraftSummary(draft: {
+  reciever?: { companyName?: string }
+  period: { year: number; month: number }
+  generalSum: number
+  currency: string
+  invoice: any[]
+}) {
   return {
-    invoiceNumber: draft.invoiceNumber,
     company: draft.reciever?.companyName ?? null,
     // The billed month, not the issue date - asking for March in April must
     // not be reported as April.
@@ -79,7 +133,9 @@ function toDraftSummary(draft: Awaited<ReturnType<typeof buildInvoiceDraft>>) {
     currency: draft.currency,
     lines: draft.invoice.map((line: any) => ({
       name: line.name ?? line.customName ?? line.type,
+      ...(line.amount > 1 ? { quantity: line.amount, price: line.price } : {}),
       sum: line.sum,
+      ...(line.description ? { description: line.description } : {}),
     })),
   }
 }
@@ -90,29 +146,13 @@ const expenseInputSchema = z.object({
   type: z
     .enum(['debit', 'credit'])
     .default('debit')
-    .describe(
-      'debit - витрата (рядки з «-», «витратили», «заплатили»), credit - прибуток.'
-    ),
-  domainId: z
-    .string()
-    .optional()
-    .describe('id домену з findDomains, якщо користувач назвав домен.'),
-  companyId: z
-    .string()
-    .optional()
-    .describe(
-      'id компанії з findCompanies, якщо витрата саме компанії. Не разом з domainId.'
-    ),
-  date: z
-    .string()
-    .optional()
-    .describe('Дата руху грошей YYYY-MM-DD, лише якщо її названо.'),
-  periodMonth: z
-    .string()
-    .optional()
-    .describe('Місяць витрати YYYY-MM, лише якщо його названо.'),
+    .describe('debit - витрата, credit - прибуток.'),
+  domainId: z.string().optional(),
+  companyId: z.string().optional().describe('Не разом з domainId.'),
+  date: z.string().optional().describe('YYYY-MM-DD, якщо названа.'),
+  periodMonth: z.string().optional().describe('YYYY-MM, якщо названий.'),
   currency: z.enum(['UAH', 'USD', 'EUR']).optional(),
-  description: z.string().optional().describe('Спільний опис усього запису.'),
+  description: z.string().optional(),
   items: z
     .array(
       z.object({
@@ -120,19 +160,11 @@ const expenseInputSchema = z.object({
           .string()
           .optional()
           .describe(
-            `Одна з: ${PROFIT_DEFAULT_CATEGORIES.join(', ')}. Якщо жодна не підходить - коротка своя назва з великої літери (напр. Корпоратив, Доставка).`
+            `${PROFIT_DEFAULT_CATEGORIES.join(', ')} або коротка своя (Корпоратив).`
           ),
-        amount: z
-          .number()
-          .describe('Сума рядка, ДОДАТНЕ число: «-2600» -> 2600.'),
-        description: z
-          .string()
-          .optional()
-          .describe('Що саме: «цукерки», «суші, піца», «13 × 200».'),
-        expression: z
-          .string()
-          .optional()
-          .describe('Вираз, якщо рядок його містить, напр. «13*200».'),
+        amount: z.number().describe('Додатне: «-2600» -> 2600.'),
+        description: z.string().optional().describe('«цукерки», «13 × 200»'),
+        expression: z.string().optional().describe('«13*200»'),
       })
     )
     .min(1)
@@ -140,12 +172,11 @@ const expenseInputSchema = z.object({
 })
 
 export function buildAssistantTools(userContext: UserContext): ToolSet {
+  const now = new Date()
+
   return {
     getMyPayments: tool({
-      description:
-        'Отримати останні платежі/рахунки поточного користувача. ' +
-        'Результат уже обмежений правами користувача. ' +
-        'Використовуй для запитів на кшталт "покажи мої платежі" / "останні рахунки".',
+      description: 'Останні рахунки/оплати користувача.',
       inputSchema: z.object({
         limit: z
           .number()
@@ -153,15 +184,11 @@ export function buildAssistantTools(userContext: UserContext): ToolSet {
           .min(1)
           .max(20)
           .optional()
-          .describe(
-            'Скільки платежів повернути (за замовчуванням 5, максимум 20).'
-          ),
+          .describe('За замовчуванням 5.'),
         type: z
           .enum(['debit', 'credit'])
           .optional()
-          .describe(
-            'Тип операції: debit (виставлені рахунки) або credit (надходження).'
-          ),
+          .describe('debit - рахунки, credit - оплати.'),
       }),
       execute: async ({ limit = 5, type }) => {
         const result = await getPayments(
@@ -184,12 +211,8 @@ export function buildAssistantTools(userContext: UserContext): ToolSet {
     }),
 
     findDomains: tool({
-      description:
-        'Знайти домени (провайдерів) поточного користувача за частиною назви. ' +
-        'Використовуй, щоб отримати id домену перед створенням інвойсу.',
-      inputSchema: z.object({
-        name: z.string().describe('Частина назви домену для пошуку.'),
-      }),
+      description: 'Надавачі користувача за частиною назви.',
+      inputSchema: z.object({ name: z.string() }),
       execute: async ({ name }) => {
         const domains = await findDomainsByName(name, userContext)
         return { domains }
@@ -198,14 +221,10 @@ export function buildAssistantTools(userContext: UserContext): ToolSet {
 
     findCompanies: tool({
       description:
-        'Знайти компанії (орендарів) поточного користувача за частиною назви. ' +
-        'Повертає id компанії та її домен — потрібно перед створенням інвойсу.',
+        'Компанії користувача за частиною назви (з їхнім надавачем).',
       inputSchema: z.object({
-        name: z.string().describe('Частина назви компанії для пошуку.'),
-        domainId: z
-          .string()
-          .optional()
-          .describe('Необовʼязково: обмежити пошук одним доменом за його id.'),
+        name: z.string(),
+        domainId: z.string().optional(),
       }),
       execute: async ({ name, domainId }) => {
         const companies = await findCompaniesByName(name, userContext, domainId)
@@ -215,29 +234,241 @@ export function buildAssistantTools(userContext: UserContext): ToolSet {
 
     previewInvoice: tool({
       description:
-        'Підготувати ЧЕРНЕТКУ інвойсу для компанії за місяць і ВІДКРИТИ форму ' +
-        'створення рахунку, заповнену цією чернеткою — НІЧОГО не зберігає в базі. ' +
-        'Позиції та ціни беруться з Послуги за місяць (0, якщо не заповнено). ' +
-        'Користувач перевіряє форму і зберігає сам. Виклич, коли просять створити рахунок.',
-      inputSchema: previewInputSchema,
+        'Відкрити форму рахунку, заповнену чернеткою. Наявній компанії - ' +
+        'позиції з Послуги за місяць; extraLines з тією ж назвою змінюють ' +
+        'ціну такої позиції, інші додаються.',
+      inputSchema: makePreviewInputSchema(now),
+      ...withoutDraftForModel,
       execute: async (input) => {
-        const draft = await buildInvoiceDraft({
-          ...withDefaults(input),
+        const result = await buildPartiesInvoiceDraft({
+          ...withDefaults(input, now),
           ctx: userContext,
         })
+        const { draft } = result
         // `draft` is consumed by the frontend to open a prefilled AddPaymentModal;
         // `summary` lets the model describe the invoice in its reply.
-        return { draft, summary: toDraftSummary(draft) }
+        return {
+          draft,
+          summary: {
+            ...toDraftSummary({
+              ...draft,
+              reciever: (draft as any).reciever ?? {
+                companyName: result.created.company,
+              },
+            }),
+            // Created on save, together with the invoice.
+            willCreate: result.created,
+            missingCompanyEmail:
+              !!result.created.company && !(draft as any).companyEmail,
+            invalidEmail: result.invalidEmail,
+          },
+        }
+      },
+    }),
+
+    previewCompany: tool({
+      description:
+        'Відкрити форму нової компанії. Передавай лише назване користувачем.',
+      inputSchema: z.object({
+        domainId: z.string(),
+        companyName: z.string(),
+        street: z.string().optional(),
+        description: z
+          .string()
+          .optional()
+          .describe('Реквізити, договір, директор.'),
+        adminEmails: z.array(z.string()).optional(),
+        totalArea: z.number().optional().describe('м²'),
+        pricePerMeter: z.number().optional(),
+        currency: z.enum(['UAH', 'USD', 'EUR']).optional(),
+        contractNumber: z.string().optional(),
+        contractDate: z.string().optional().describe('YYYY-MM-DD'),
+        prices: z
+          .array(z.object({ name: z.string(), price: z.number() }))
+          .optional()
+          .describe('Власні ціни компанії на послуги надавача.'),
+      }),
+      ...withoutDraftForModel,
+      execute: async (input) => {
+        const result = await buildCompanyDraft({ ...input, ctx: userContext })
+        // `draft` opens the prefilled RealEstateModal; the rest is for the reply.
+        return {
+          draft: result.draft,
+          summary: {
+            companyName: result.draft.companyName,
+            domain: result.domainName,
+            street: result.streetAddress,
+            missingDescription: !result.draft.description,
+            unmatched: result.unmatched,
+            invalidEmails: result.invalidEmails,
+            similar: result.similar,
+          },
+        }
+      },
+    }),
+
+    previewDomain: tool({
+      description: 'Відкрити форму нового надавача: назва й реквізити.',
+      inputSchema: z.object({
+        name: z.string(),
+        adminEmails: z.array(z.string()).optional(),
+        iban: z.string().optional(),
+        rnokpp: z.string().optional().describe('РНОКПП або ЄДРПОУ.'),
+        mfo: z.string().optional(),
+        description: z
+          .string()
+          .optional()
+          .describe('Адреса, телефон, директор.'),
+      }),
+      ...withoutDraftForModel,
+      execute: async (input) => {
+        const result = await buildDomainDraft({ ...input, ctx: userContext })
+        // `draft` opens the prefilled DomainModal; the rest is for the reply.
+        return {
+          draft: result.draft,
+          summary: {
+            name: result.draft.name,
+            hasIban: !!result.draft.iban,
+            invalid: result.invalid,
+            invalidEmails: result.invalidEmails,
+            similar: result.similar,
+          },
+        }
+      },
+    }),
+
+    previewStreet: tool({
+      description: 'Відкрити форму нової адреси надавача.',
+      inputSchema: z.object({
+        domainId: z.string(),
+        address: z.string().describe('«вул. Шевченка, 5»'),
+        city: z.string(),
+      }),
+      ...withoutDraftForModel,
+      execute: async (input) => {
+        const result = await buildStreetDraft({ ...input, ctx: userContext })
+        // An address the domain already has opens nothing - it is reported.
+        return {
+          ...(result.existing ? {} : { draft: result.draft }),
+          summary: {
+            address: result.draft.address,
+            city: result.draft.city,
+            domain: result.domainName,
+            alreadyExists: !!result.existing,
+          },
+        }
+      },
+    }),
+
+    previewService: tool({
+      description:
+        'Відкрити форму тарифів надавача на місяць. Неназвані тарифи - з ' +
+        'минулого місяця; наявний місяць відкривається на редагування.',
+      inputSchema: z.object({
+        domainId: z.string(),
+        street: z.string().optional(),
+        month: z
+          .number()
+          .int()
+          .min(1)
+          .max(12)
+          .optional()
+          .describe(`Поточний: ${now.getMonth() + 1}.`),
+        year: z
+          .number()
+          .int()
+          .optional()
+          .describe(`Поточний: ${now.getFullYear()}.`),
+        prices: z
+          .array(
+            z.object({
+              name: z.string().describe('Словами: «електрика», «вода».'),
+              price: z.number(),
+            })
+          )
+          .min(1)
+          .max(40),
+        description: z.string().optional(),
+      }),
+      ...withoutDraftForModel,
+      execute: async ({ month, year, ...input }) => {
+        const result = await buildServiceDraft({
+          ...input,
+          month: month ?? now.getMonth() + 1,
+          year: year ?? now.getFullYear(),
+          ctx: userContext,
+        })
+        // `draft` opens the prefilled AddServiceModal; the rest is for the reply.
+        return {
+          draft: { mode: result.mode, service: result.service },
+          summary: {
+            mode: result.mode,
+            domain: result.domainName,
+            street: result.streetAddress,
+            tariffs: result.lines.map(({ name, price, source }) => ({
+              name,
+              price,
+              source,
+            })),
+            unmatched: result.unmatched,
+          },
+        }
+      },
+    }),
+
+    previewCredit: tool({
+      description: 'Відкрити форму оплати (гроші, що надійшли від компанії).',
+      inputSchema: z.object({
+        companyId: z.string(),
+        amount: z.number().describe('Додатне.'),
+        month: z
+          .number()
+          .int()
+          .min(1)
+          .max(12)
+          .optional()
+          .describe(`За який місяць; поточний: ${now.getMonth() + 1}.`),
+        year: z
+          .number()
+          .int()
+          .optional()
+          .describe(`Поточний: ${now.getFullYear()}.`),
+        date: z
+          .string()
+          .optional()
+          .describe('Дата надходження YYYY-MM-DD, якщо названа.'),
+        description: z
+          .string()
+          .optional()
+          .describe('Призначення, якщо назване.'),
+      }),
+      ...withoutDraftForModel,
+      execute: async ({ month, year, ...input }) => {
+        const draft = await buildCreditDraft({
+          ...input,
+          month: month ?? now.getMonth() + 1,
+          year: year ?? now.getFullYear(),
+          ctx: userContext,
+        })
+        // `draft` opens the prefilled AddPaymentModal; `summary` is for the reply.
+        return {
+          draft,
+          summary: {
+            company: draft.reciever?.companyName ?? null,
+            amount: draft.generalSum,
+            currency: draft.currency,
+            month: draft.period.month,
+            year: draft.period.year,
+          },
+        }
       },
     }),
 
     previewExpenses: tool({
       description:
-        'Підготувати витрату/прибуток з позиціями зі списку користувача і ВІДКРИТИ ' +
-        'форму, заповнену ними - НІЧОГО не зберігає. Увесь список - ОДИН виклик: ' +
-        'кожен рядок - позиція одного запису, сума запису = сума позицій. ' +
-        'Користувач перевіряє форму і зберігає сам.',
+        'Відкрити форму витрати/прибутку: увесь список - позиції одного запису.',
       inputSchema: expenseInputSchema,
+      ...withoutDraftForModel,
       execute: async (input) => {
         const { draft, warnings } = await buildExpenseDraft({
           ...input,

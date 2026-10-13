@@ -181,11 +181,30 @@ export default async function handler(
             .json({ success: false, message: 'Access denied: not an admin' })
         }
 
-        const street = await Street.create(req.body)
-        if (req.body.domain) {
-          await Domain.findByIdAndUpdate(req.body.domain, {
-            $addToSet: { streets: street._id },
-          })
+        const { address, city, domain: domainId } = req.body ?? {}
+
+        // Linking into a domain is a write to that domain: only its own
+        // admins (or a global admin) may. Checked before the street exists.
+        const domain = domainId
+          ? mongoose.Types.ObjectId.isValid(domainId)
+            ? await Domain.findOne({
+                _id: domainId,
+                ...(isGlobalAdmin ? {} : { adminEmails: user.email }),
+              }).select('_id')
+            : null
+          : undefined
+        if (domain === null) {
+          return res
+            .status(403)
+            .json({ success: false, message: 'Access denied to this domain' })
+        }
+
+        const street = await Street.create({ address, city })
+        if (domain) {
+          await Domain.updateOne(
+            { _id: domain._id },
+            { $addToSet: { streets: street._id } }
+          )
         }
         return res.status(200).json({ success: true, data: street })
       } catch (error) {

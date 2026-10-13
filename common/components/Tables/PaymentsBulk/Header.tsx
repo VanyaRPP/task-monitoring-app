@@ -1,9 +1,6 @@
 import { SelectOutlined, LoadingOutlined } from '@ant-design/icons'
 import { useGetDomainByPkQuery } from '@common/api/domainApi/domain.api'
-import {
-  useAddPaymentMutation,
-  useGetPaymentNumberQuery,
-} from '@common/api/paymentApi/payment.api'
+import { useAddPaymentMutation } from '@common/api/paymentApi/payment.api'
 import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
 import { resolveTemplate } from '@common/components/AddPaymentModal/resolveTemplate'
 import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
@@ -23,7 +20,6 @@ const InvoicesHeader = () => {
   const router = useRouter()
   const { form, companies, service } = useInvoicesPaymentContext()
   const [addPayment] = useAddPaymentMutation()
-  const { data: newInvoiceNumber = 1 } = useGetPaymentNumberQuery({})
   const [isLoading, setIsLoading] = useState(false)
   const resolveMonthServiceId = useResolveMonthServiceId()
 
@@ -99,7 +95,6 @@ const InvoicesHeader = () => {
       )
 
       return {
-        invoiceNumber: newInvoiceNumber + index,
         type: Operations.Debit,
         domain: domainId,
         ...(streetId ? { street: streetId } : {}),
@@ -117,7 +112,12 @@ const InvoicesHeader = () => {
       }
     })
 
-    const responses = await Promise.all(payments.map(addPayment))
+    // One after another: the server numbers each invoice as it saves it, so
+    // this keeps the numbers in the order of the table.
+    const responses: Awaited<ReturnType<typeof addPayment>>[] = []
+    for (const payment of payments) {
+      responses.push(await addPayment(payment))
+    }
     const allSuccessful = responses.every((response) => response.data?.success)
 
     responses.forEach((response) => {

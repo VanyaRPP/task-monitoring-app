@@ -42,6 +42,14 @@ export interface IReciever {
   contractDate?: string | Date
 }
 
+/**
+ * A payment as sent to POST spacehub/payment. The server gives it its
+ * invoice number on save, so any number sent here is ignored.
+ */
+export type INewPayment = Omit<IPayment, 'invoiceNumber'> & {
+  invoiceNumber?: number
+}
+
 export interface IPayment {
   invoiceNumber: number
   type: string

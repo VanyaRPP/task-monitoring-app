@@ -1,21 +1,18 @@
-import {
-  useAddPaymentMutation,
-  useGetPaymentNumberQuery,
-} from '@common/api/paymentApi/payment.api'
+import { useAddPaymentMutation } from '@common/api/paymentApi/payment.api'
 import CompanySelect from '@components/Forms/AddPaymentForm/CompanySelect'
+import { useResolveMonthServiceId } from '@components/Forms/AddPaymentForm/useResolveMonthServiceId'
 import Modal from '@components/UI/ModalWindow'
 import AddressesSelect from '@components/UI/Reusable/AddressesSelect'
 import DomainsSelect from '@components/UI/Reusable/DomainsSelect'
 import PaymentTypeSelect from '@components/UI/Reusable/PaymentTypeSelect'
 import useCompany from '@modules/hooks/useCompany'
-import { Operations } from '@utils/constants'
 import {
   getPaymentProviderAndReciever,
-  importedPaymentDateToISOStringDate,
-  toRoundFixed,
+  normalizeCurrency,
 } from '@utils/helpers'
 import { Form, Input, message } from 'antd'
 import { useState } from 'react'
+import { attachMonthServices, buildImportPayments } from './buildImportPayments'
 
 const ImportInvoicesModal = ({ closeModal }) => {
   const [addPayment, { isLoading }] = useAddPaymentMutation()
@@ -27,21 +24,45 @@ const ImportInvoicesModal = ({ closeModal }) => {
   const paymentMethod = Form.useWatch('operation', form)
   const { company } = useCompany({ companyId })
   const { data: newInvoiceNumber = 1 } = useGetPaymentNumberQuery({})
+  const resolveMonthServiceId = useResolveMonthServiceId()
 
   const handleSave = async () => {
     const values = await form.validateFields()
+    const { provider, reciever } = getPaymentProviderAndReciever(company)
 
-    const invoices = await prepareInvoiceObjects(values, {
-      domainId,
-      streetId,
-      companyId,
-      company,
-      paymentMethod,
-      newInvoiceNumber,
+    const payments = buildImportPayments({
+      rows: JSON.parse(values.json),
+      firstInvoiceNumber: newInvoiceNumber,
+      formData: {
+        operation: paymentMethod,
+        domain: domainId,
+        street: streetId,
+        company: companyId,
+        currency: normalizeCurrency(company?.currency),
+      },
+      provider,
+      reciever,
     })
+
+    const invoices = await attachMonthServices(payments, (placeholder) =>
+      resolveMonthServiceId(placeholder, domainId, streetId)
+    ).catch((e) => {
+      console.error('resolveMonthServiceId failed', e)
+      message.error('Не вдалося підготувати місяць послуг')
+      return null
+    })
+    if (!invoices) return
+
     message.success(`Рахунків до імпорту: ${invoices.length}`)
-    const promises = invoices.map(addPayment)
-    await Promise.all(promises)
+    // One after another, so the server numbers them in the file's order.
+    const saveAll = async () => {
+      const responses: Awaited<ReturnType<typeof addPayment>>[] = []
+      for (const invoice of invoices) {
+        responses.push(await addPayment(invoice))
+      }
+      return responses
+    }
+    await saveAll()
       .then((responses) => {
         responses.forEach((response) => {
           if (response?.data?.success) {
@@ -83,77 +104,3 @@ const ImportInvoicesModal = ({ closeModal }) => {
 }
 
 export default ImportInvoicesModal
-
-function prepareInvoiceObjects(
-  formData,
-  { domainId, streetId, companyId, company, paymentMethod, newInvoiceNumber }
-) {
-  const { provider, reciever } = getPaymentProviderAndReciever(company)
-
-  const invoices = JSON.parse(formData.json).map((i, index) => ({
-    invoiceNumber: newInvoiceNumber + index,
-    type: paymentMethod,
-    invoiceCreationDate: importedPaymentDateToISOStringDate(i.monthService),
-    domain: domainId,
-    street: streetId,
-    company: companyId,
-    invoice:
-      paymentMethod === Operations.Debit ? getInvoiceInfo(i, company) : [],
-    provider,
-    reciever,
-    generalSum: toRoundFixed(i.generalSum.toString()),
-  }))
-
-  return invoices
-}
-
-function getInvoiceInfo(i, company) {
-  const res = [
-    {
-      type: 'maintenancePrice',
-      amount: company?.totalArea,
-      price: (+toRoundFixed(i.maintenancePrice) / company?.totalArea).toFixed(
-        2
-      ),
-      sum: toRoundFixed(i.maintenancePrice),
-    },
-    {
-      type: 'placingPrice',
-      amount: company?.totalArea,
-      price: (+toRoundFixed(i.placingPrice) / company?.totalArea).toFixed(2),
-      sum: toRoundFixed(i.placingPrice),
-    },
-    {
-      type: 'electricityPrice',
-      lastAmount: toRoundFixed(i.electricityPriceLastAmount),
-      amount: toRoundFixed(i.electricityPriceAmount),
-      price: toRoundFixed(i.electricityPricePrice),
-      sum: toRoundFixed(i.electricityPriceSum),
-    },
-    {
-      type: 'waterPrice',
-      price: toRoundFixed(i.waterPriceSum),
-      sum: toRoundFixed(i.waterPriceSum),
-    },
-  ]
-
-  if (company?.inflicion) {
-    res.push({
-      type: 'inflicionPrice',
-      price: '0',
-      sum: toRoundFixed(i.inflicionPrice),
-    })
-  }
-
-  if (i.custom) {
-    res.push({
-      type: 'custom',
-      sum: toRoundFixed(i.custom),
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      name: 'Донарахування',
-    })
-  }
-
-  return res
-}
