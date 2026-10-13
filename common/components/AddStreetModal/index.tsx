@@ -17,12 +17,15 @@ interface Props {
     preview: boolean
   }
   currentStreet?: IStreet
+  /** Prefills a new address; `domain` links it there on save. */
+  draft?: { address: string; city: string; domain?: string }
 }
 
 const AddStreetModal: FC<Props> = ({
   closeModal,
   streetActions,
   currentStreet,
+  draft,
 }) => {
   const [form] = Form.useForm()
   const [isValueChanged, setIsValueChanged] = useState(false)
@@ -51,7 +54,8 @@ const AddStreetModal: FC<Props> = ({
       const response = await addStreet({
         city: formData.city,
         address: formData.address,
-      })
+        ...(draft?.domain ? { domain: draft.domain } : {}),
+      } as Partial<IStreet>)
       if ('data' in response) {
         form.resetFields()
         message.success('Адресу додано')
@@ -69,8 +73,8 @@ const AddStreetModal: FC<Props> = ({
   }
 
   useEffect(() => {
-    form.setFieldsValue(currentStreet)
-  }, [form, currentStreet])
+    form.setFieldsValue(currentStreet ?? draft)
+  }, [form, currentStreet, draft])
 
   return (
     <Modal

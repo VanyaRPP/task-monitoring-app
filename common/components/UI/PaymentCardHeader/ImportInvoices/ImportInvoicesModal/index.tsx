@@ -1,7 +1,4 @@
-import {
-  useAddPaymentMutation,
-  useGetPaymentNumberQuery,
-} from '@common/api/paymentApi/payment.api'
+import { useAddPaymentMutation } from '@common/api/paymentApi/payment.api'
 import CompanySelect from '@components/Forms/AddPaymentForm/CompanySelect'
 import { useResolveMonthServiceId } from '@components/Forms/AddPaymentForm/useResolveMonthServiceId'
 import Modal from '@components/UI/ModalWindow'
@@ -57,8 +54,15 @@ const ImportInvoicesModal = ({ closeModal }) => {
     if (!invoices) return
 
     message.success(`Рахунків до імпорту: ${invoices.length}`)
-    const promises = invoices.map(addPayment)
-    await Promise.all(promises)
+    // One after another, so the server numbers them in the file's order.
+    const saveAll = async () => {
+      const responses: Awaited<ReturnType<typeof addPayment>>[] = []
+      for (const invoice of invoices) {
+        responses.push(await addPayment(invoice))
+      }
+      return responses
+    }
+    await saveAll()
       .then((responses) => {
         responses.forEach((response) => {
           if (response?.data?.success) {

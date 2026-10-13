@@ -1,10 +1,8 @@
-import CustomService from '@modules/models/CustomService'
 import Domain from '@modules/models/Domain'
+import RealEstate from '@modules/models/RealEstate'
+import { isValidObjectId } from 'mongoose'
 import start, { Data } from '@pages/api/api.config'
-import {
-  assembleDomainServiceCatalog,
-  collectReferencedServiceIds,
-} from '@common/services/customServiceService/customService.service'
+import { getDomainServiceCatalog } from '@common/services/customServiceService/customService.service'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
@@ -14,10 +12,7 @@ export default async function handler(
 ) {
   await start()
 
-  const { isGlobalAdmin, isDomainAdmin, isUser } = await getCurrentUser(
-    req,
-    res
-  )
+  const { isGlobalAdmin, user } = await getCurrentUser(req, res)
 
   switch (req.method) {
     case 'GET':
@@ -31,36 +26,35 @@ export default async function handler(
           })
         }
 
-        const domain = await Domain.findById(domainId).lean()
+        // A domain's catalog is for those who bill in it or are billed by it:
+        // its admins and the owners of its companies (whose invoice preview
+        // groups lines by it). Not any signed-in user for any domain.
+        if (!isGlobalAdmin) {
+          const allowed =
+            isValidObjectId(domainId) &&
+            ((await Domain.exists({
+              _id: domainId,
+              adminEmails: user.email,
+            })) ||
+              (await RealEstate.exists({
+                domain: domainId,
+                adminEmails: user.email,
+              })))
+          if (!allowed) {
+            return res
+              .status(403)
+              .json({ success: false, message: 'not allowed' })
+          }
+        }
 
-        if (!domain) {
+        const responseData = await getDomainServiceCatalog(domainId)
+
+        if (!responseData) {
           return res.status(404).json({
             success: false,
             message: 'Domain not found',
           })
         }
-
-        // CustomServices scoped to this domain — the per-domain catalog. Used
-        // both to resolve group members and to expose un-grouped services as a
-        // synthetic bucket so the rest of the system (Payment Bulk,
-        // RealEstateModal, invoice) can use them just like grouped ones.
-        const allDomainServices = await CustomService.find({
-          domain: domainId,
-        }).lean()
-
-        // Group ids can reference shared/seeded services (e.g. utility services
-        // attached via a DomainTypeTemplate) that have no `domain` ref, so the
-        // domain-scoped query above misses them. Fetch those explicitly by _id.
-        const referencedIds = collectReferencedServiceIds(domain.customServices)
-        const referencedServices = referencedIds.length
-          ? await CustomService.find({ _id: { $in: referencedIds } }).lean()
-          : []
-
-        const responseData = assembleDomainServiceCatalog(
-          domain.customServices,
-          allDomainServices,
-          referencedServices
-        )
 
         return res.status(200).json({
           success: true,

@@ -23,6 +23,11 @@ interface Props {
   form: FormInstance<any>
   edit: boolean
   currentService: IService
+  /**
+   * A new service filled in ahead of time (an AI draft): prefills like
+   * `currentService` but is not one - it is saved as a new service.
+   */
+  draft?: Partial<IService>
   setIsValueChanged: (value: boolean) => void
 }
 
@@ -30,9 +35,12 @@ const AddServiceForm: React.FC<Props> = ({
   form,
   edit,
   currentService,
+  draft,
   setIsValueChanged,
 }) => {
   const { MonthPicker } = DatePicker
+  // What the fields start from: the service being edited, or a draft.
+  const source = (currentService ?? draft) as IService | undefined
 
   const date = Form.useWatch('date', form)
   const domainId = Form.useWatch('domain', form)
@@ -59,8 +67,8 @@ const AddServiceForm: React.FC<Props> = ({
       switch (service.fieldName) {
         case 'electricityPrice':
           price =
-            currentService?.electricityPrice ??
-            currentService?.customServices?.find(
+            source?.electricityPrice ??
+            source?.customServices?.find(
               (service) => service.fieldName === 'electricityPrice'
             )?.price ??
             0
@@ -72,44 +80,44 @@ const AddServiceForm: React.FC<Props> = ({
                 (service) => service.fieldName === 'inflicionPrice'
               )?.price ??
               0)
-            : indexValue
+            : (draft?.inflicionPrice ?? indexValue)
           break
         case 'rentPrice':
           price =
-            currentService?.rentPrice ??
-            currentService?.customServices?.find(
+            source?.rentPrice ??
+            source?.customServices?.find(
               (service) => service.fieldName === 'rentPrice'
             )?.price ??
             0
           break
         case 'waterPrice':
           price =
-            currentService?.waterPrice ??
-            currentService?.customServices?.find(
+            source?.waterPrice ??
+            source?.customServices?.find(
               (service) => service.fieldName === 'waterPrice'
             )?.price ??
             0
           break
         case 'waterPriceTotal':
           price =
-            currentService?.waterPriceTotal ??
-            currentService?.customServices?.find(
+            source?.waterPriceTotal ??
+            source?.customServices?.find(
               (service) => service.fieldName === 'waterPriceTotal'
             )?.price ??
             0
           break
         case 'garbageCollectorPrice':
           price =
-            currentService?.garbageCollectorPrice ??
-            currentService?.customServices?.find(
+            source?.garbageCollectorPrice ??
+            source?.customServices?.find(
               (service) => service.fieldName === 'garbageCollectorPrice'
             )?.price ??
             0
           break
         default:
           price =
-            currentService?.[service?.fieldName] ??
-            currentService?.customServices?.find(
+            source?.[service?.fieldName] ??
+            source?.customServices?.find(
               (service) => service?.fieldName === service?.fieldName
             )?.price ??
             0
@@ -152,32 +160,27 @@ const AddServiceForm: React.FC<Props> = ({
     if (!currentCustomServices || currentCustomServices.length === 0) {
       form.setFieldsValue({
         electricityPrice:
-          currentService?.electricityPrice ??
-          previousMonth?.electricityPrice ??
-          0,
-        inflicionPrice: currentService?.inflicionPrice ?? indexValue,
-        rentPrice: currentService?.rentPrice ?? previousMonth?.rentPrice ?? 0,
-        waterPrice:
-          currentService?.waterPrice ?? previousMonth?.waterPrice ?? 0,
+          source?.electricityPrice ?? previousMonth?.electricityPrice ?? 0,
+        inflicionPrice: source?.inflicionPrice ?? indexValue,
+        rentPrice: source?.rentPrice ?? previousMonth?.rentPrice ?? 0,
+        waterPrice: source?.waterPrice ?? previousMonth?.waterPrice ?? 0,
         waterPriceTotal:
-          currentService?.waterPriceTotal ??
-          previousMonth?.waterPriceTotal ??
-          0,
+          source?.waterPriceTotal ?? previousMonth?.waterPriceTotal ?? 0,
         garbageCollectorPrice:
-          currentService?.garbageCollectorPrice ??
+          source?.garbageCollectorPrice ??
           previousMonth?.garbageCollectorPrice ??
           0,
         customServices:
-          (currentService?.customServices?.length > 0
-            ? currentService.customServices
+          (source?.customServices?.length > 0
+            ? source.customServices
             : filteredCustomServices) || [],
-        losses: currentService?.losses,
-        consumedElectricity: currentService?.consumedElectricity ?? null,
-        generalElectricity: currentService?.generalElectricity ?? null,
-        isVAT: currentService?.isVAT || true,
+        losses: source?.losses,
+        consumedElectricity: source?.consumedElectricity ?? null,
+        generalElectricity: source?.generalElectricity ?? null,
+        isVAT: source?.isVAT || true,
       })
     }
-  }, [form, currentService, previousMonth, initialCustomServices, indexValue])
+  }, [form, source, previousMonth, initialCustomServices, indexValue])
 
   const appliedIndex = useRef<number | null>(null)
   useEffect(() => {
@@ -195,15 +198,15 @@ const AddServiceForm: React.FC<Props> = ({
     form.setFields([
       {
         name: 'consumedElectricity',
-        value: currentService?.consumedElectricity ?? null,
+        value: source?.consumedElectricity ?? null,
       },
       {
         name: 'generalElectricity',
-        value: currentService?.generalElectricity ?? null,
+        value: source?.generalElectricity ?? null,
       },
-      { name: 'isVAT', value: currentService?.isVAT ?? true },
+      { name: 'isVAT', value: source?.isVAT ?? true },
     ])
-  }, [currentService, form])
+  }, [source, form])
 
   return (
     <ConfigProvider locale={ukUA}>
@@ -212,14 +215,14 @@ const AddServiceForm: React.FC<Props> = ({
         layout="vertical"
         className={s.Form}
         initialValues={{
-          domain: currentService?.domain?._id,
-          street: currentService?.street?._id,
-          date: dayjs(currentService?.date),
-          description: currentService?.description,
-          losses: currentService?.losses,
-          consumedElectricity: currentService?.consumedElectricity ?? null,
-          generalElectricity: currentService?.generalElectricity ?? null,
-          isVAT: currentService?.isVAT || true,
+          domain: source?.domain?._id,
+          street: source?.street?._id,
+          date: dayjs(source?.date),
+          description: source?.description,
+          losses: source?.losses,
+          consumedElectricity: source?.consumedElectricity ?? null,
+          generalElectricity: source?.generalElectricity ?? null,
+          isVAT: source?.isVAT || true,
         }}
         onValuesChange={() => setIsValueChanged(true)}
       >

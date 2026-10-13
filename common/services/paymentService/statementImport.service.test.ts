@@ -6,7 +6,7 @@ import Domain from '@modules/models/Domain'
 import Payment from '@common/modules/models/Payment'
 import RealEstate from '@modules/models/RealEstate'
 import { logPaymentMutation } from '@common/modules/services/paymentAudit'
-import { getNextInvoiceNumber } from '@common/services/paymentService/payment.service'
+import { reserveInvoiceNumbers } from '@common/services/paymentService/payment.service'
 import { Operations, ServiceType } from '@utils/constants'
 import { OPENING_BALANCE_FIELD } from '@utils/debt-calculation/prefill'
 import type { IStatementImport } from '@utils/debt-calculation/statement'
@@ -41,7 +41,7 @@ jest.mock('@common/modules/services/paymentAudit', () => ({
   logPaymentMutation: jest.fn(),
 }))
 jest.mock('@common/services/paymentService/payment.service', () => ({
-  getNextInvoiceNumber: jest.fn(),
+  reserveInvoiceNumbers: jest.fn(),
 }))
 
 const DOMAIN = '507f1f77bcf86cd799439011'
@@ -83,7 +83,7 @@ const statement: IStatementImport = {
 
 beforeEach(() => {
   jest.clearAllMocks()
-  ;(getNextInvoiceNumber as jest.Mock).mockResolvedValue(501)
+  ;(reserveInvoiceNumbers as jest.Mock).mockResolvedValue(501)
 })
 
 describe('buildStatementPayments', () => {
@@ -170,6 +170,13 @@ describe('applyCompanyStatementImport', () => {
     })
 
     expect(Payment.insertMany).toHaveBeenCalledTimes(1)
+    // One block of numbers for the whole import, consecutive in doc order.
+    expect(reserveInvoiceNumbers).toHaveBeenCalledTimes(1)
+    expect(reserveInvoiceNumbers).toHaveBeenCalledWith(4)
+    const inserted = (Payment.insertMany as jest.Mock).mock.calls[0][0]
+    expect(inserted.map(({ invoiceNumber }) => invoiceNumber)).toEqual([
+      501, 502, 503, 504,
+    ])
     expect(result.created).toEqual({ debits: 2, credits: 1, opening: true })
     expect(result.createdIds).toHaveLength(4)
     const logs = (logPaymentMutation as jest.Mock).mock.calls.map(
