@@ -4,6 +4,7 @@ import React, {
   createContext,
   useCallback,
   useContext,
+  useMemo,
   useRef,
   useEffect,
   useState,
@@ -12,6 +13,7 @@ import React, {
 import { useChat, type UIMessage } from '@ai-sdk/react'
 import { DefaultChatTransport, type FileUIPart } from 'ai'
 import {
+  ConfigProvider,
   FloatButton,
   Input,
   Button,
@@ -26,8 +28,14 @@ import {
   SendOutlined,
   UserOutlined,
   CloseOutlined,
+  MinusOutlined,
+  FullscreenOutlined,
+  FullscreenExitOutlined,
+  UndoOutlined,
 } from '@ant-design/icons'
+import cn from 'classnames'
 import Link from 'next/link'
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { useIsAdmin } from '@modules/hooks/useIsAdmin'
 import { useAppSelector } from '@modules/store/hooks'
 import AddPaymentModal from '@components/AddPaymentModal'
@@ -36,6 +44,8 @@ import {
   DOCUMENT_BATCH_PART,
   type IDocumentBatchPart,
 } from '@common/services/aiAssistant/documents/types'
+import ResizeHandles from './floatingWindow/ResizeHandles'
+import { useFloatingWindow } from './floatingWindow/useFloatingWindow'
 import BatchCard from './photoImport/BatchCard'
 import { shrinkImage } from './photoImport/imageTools'
 import {
@@ -151,7 +161,8 @@ const chatTransport = new DefaultChatTransport<UIMessage>({
   }),
 })
 
-const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
+// Memoized so window drag/resize/maximize re-renders skip the message list.
+const ChatMessage: React.FC<ChatMessageProps> = React.memo(({ message }) => {
   const { batches, updateCard } = useContext(DocumentBatchesContext)
   const isUser = message.role === 'user'
   const text = getMessageText(message)
@@ -218,7 +229,8 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
       )}
     </div>
   )
-}
+})
+ChatMessage.displayName = 'ChatMessage'
 
 const AIChat: React.FC = () => {
   // Gate: the assistant is currently available to admins only (matches the
@@ -231,7 +243,15 @@ const AIChat: React.FC = () => {
     '--ai-chat-window-bottom': `${144 + menuOffset}px`,
   } as React.CSSProperties
 
+  const { data: currentUser } = useGetCurrentUserQuery()
+  const floating = useFloatingWindow({
+    userKey: currentUser?._id ? String(currentUser._id) : undefined,
+    bottomOffset: 144 + menuOffset,
+  })
+
   const [open, setOpen] = useState<boolean>(false)
+  // Minimized keeps a marker on the open button; closed does not.
+  const [minimized, setMinimized] = useState<boolean>(false)
   const [showHint, setShowHint] = useState<boolean>(false)
   const [inputValue, setInputValue] = useState<string>('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -296,6 +316,10 @@ const AIChat: React.FC = () => {
     start: startBatch,
     updateCard,
   } = useDocumentImports(onBatchDone)
+  const batchesContext = useMemo(
+    () => ({ batches, updateCard }),
+    [batches, updateCard]
+  )
 
   // Watch for a completed `previewInvoice` tool call and open the prefilled
   // AddPaymentModal with its draft. Each toolCallId is handled at most once.
@@ -422,8 +446,11 @@ const AIChat: React.FC = () => {
         icon={<RobotOutlined />}
         type="primary"
         tooltip={{ title: 'AI Помічник', placement: 'left' }}
+        badge={minimized ? { dot: true } : undefined}
+        aria-label="AI Помічник"
         onClick={() => {
           setOpen(!open)
+          setMinimized(false)
           setShowHint(false)
         }}
         className={styles.floatButton}
@@ -457,8 +484,15 @@ const AIChat: React.FC = () => {
       {open && (
         <div
           data-ai-chat
-          className={`${styles.chatWindow} ${isDragging ? styles.chatDragging : ''}`}
-          style={windowStyle}
+          ref={floating.windowRef}
+          role="dialog"
+          aria-label="AI Помічник"
+          className={cn(styles.chatWindow, {
+            [styles.chatDragging]: isDragging,
+            [styles.floatingWindow]: floating.isFloating,
+            [styles.maximizedWindow]: floating.isMaximized,
+          })}
+          style={{ ...windowStyle, ...floating.style }}
           onPaste={handlePaste}
           onDragOver={(event) => {
             if (
@@ -482,8 +516,19 @@ const AIChat: React.FC = () => {
               Відпустіть, щоб надіслати фото
             </div>
           )}
-          <div className={styles.chatHeader}>
-            <Space>
+          {floating.isFloating && !floating.isMaximized && (
+            <ResizeHandles onResizePointerDown={floating.onResizePointerDown} />
+          )}
+          <div
+            className={cn(styles.chatHeader, {
+              [styles.draggableHeader]:
+                floating.isFloating && !floating.isMaximized,
+            })}
+            data-testid="ai-chat-header"
+            onPointerDown={floating.onHeaderPointerDown}
+            onDoubleClick={floating.onHeaderDoubleClick}
+          >
+            <Space className={styles.headerTitle}>
               <Avatar
                 size={24}
                 icon={<RobotOutlined />}
@@ -493,16 +538,62 @@ const AIChat: React.FC = () => {
                 AI Помічник
               </Text>
             </Space>
-            <Button
-              type="text"
-              icon={<CloseOutlined style={{ color: 'white' }} />}
-              onClick={() => setOpen(false)}
-              size="small"
-            />
+            <div className={styles.headerControls}>
+              {floating.isFloating && (
+                <>
+                  <Button
+                    type="text"
+                    size="small"
+                    icon={<UndoOutlined />}
+                    title="Стандартний розмір і позиція"
+                    aria-label="Стандартний розмір і позиція"
+                    onClick={floating.reset}
+                  />
+                  <Button
+                    type="text"
+                    size="small"
+                    icon={
+                      floating.isMaximized ? (
+                        <FullscreenExitOutlined />
+                      ) : (
+                        <FullscreenOutlined />
+                      )
+                    }
+                    title={floating.isMaximized ? 'Відновити' : 'Розгорнути'}
+                    aria-label={
+                      floating.isMaximized ? 'Відновити' : 'Розгорнути'
+                    }
+                    onClick={floating.toggleMaximize}
+                  />
+                </>
+              )}
+              <Button
+                type="text"
+                size="small"
+                icon={<MinusOutlined />}
+                title="Згорнути"
+                aria-label="Згорнути"
+                onClick={() => {
+                  setOpen(false)
+                  setMinimized(true)
+                }}
+              />
+              <Button
+                type="text"
+                size="small"
+                icon={<CloseOutlined />}
+                title="Закрити"
+                aria-label="Закрити"
+                onClick={() => {
+                  setOpen(false)
+                  setMinimized(false)
+                }}
+              />
+            </div>
           </div>
 
           <div className={styles.messagesContainer}>
-            <DocumentBatchesContext.Provider value={{ batches, updateCard }}>
+            <DocumentBatchesContext.Provider value={batchesContext}>
               {messages.map((message) => (
                 <ChatMessage key={message.id} message={message} />
               ))}
@@ -575,17 +666,21 @@ const AIChat: React.FC = () => {
       )}
 
       {invoiceModalOpen && invoiceDraft && (
-        <AddPaymentModal
-          paymentData={invoiceDraft}
-          paymentActions={{ edit: false, preview: false }}
-          closeModal={(success?: boolean) => {
-            setInvoiceModalOpen(false)
-            setInvoiceDraft(null)
-            if (success) {
-              message.success('Рахунок успішно створено!')
-            }
-          }}
-        />
+        // The chat window sits above antd's default popup layer (1000), so
+        // the modal it opens (and the modal's dropdowns) must go higher still.
+        <ConfigProvider theme={{ token: { zIndexPopupBase: 1100 } }}>
+          <AddPaymentModal
+            paymentData={invoiceDraft}
+            paymentActions={{ edit: false, preview: false }}
+            closeModal={(success?: boolean) => {
+              setInvoiceModalOpen(false)
+              setInvoiceDraft(null)
+              if (success) {
+                message.success('Рахунок успішно створено!')
+              }
+            }}
+          />
+        </ConfigProvider>
       )}
     </>
   )

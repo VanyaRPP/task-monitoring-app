@@ -56,7 +56,9 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
   display: flex;
   flex-direction: column;
-  z-index: 999;
+  // Above the sticky layout header/sidebar (1000) - the chat comes earlier in
+  // the DOM, so an equal z-index would leave it underneath.
+  z-index: 1001;
   overflow: hidden;
   animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border: 1px solid rgba(117, 47, 214, 0.2);
@@ -66,7 +68,106 @@
   @media (max-width: 576px) {
     width: calc(100% - 40px);
     right: 20px;
+    // Header and input stay on screen; only the messages shrink.
+    max-height: calc(100dvh - var(--ai-chat-window-bottom, 144px) - 16px);
   }
+
+  // Header, footer and messages must not catch the pointer mid drag/resize.
+  &[data-interacting] {
+    .messagesContainer,
+    .chatFooter {
+      pointer-events: none;
+    }
+  }
+}
+
+// Desktop: geometry comes from inline left/top/width/height (useFloatingWindow).
+.floatingWindow {
+  right: auto;
+  bottom: auto;
+  max-height: none;
+  transition: none;
+
+  .messagesContainer {
+    height: auto;
+  }
+}
+
+.maximizedWindow {
+  border-radius: 12px;
+}
+
+.resizeHandle {
+  position: absolute;
+  z-index: 3;
+  touch-action: none;
+}
+
+$edge: 6px;
+$corner: 14px;
+
+.resize-n,
+.resize-s {
+  left: $corner;
+  right: $corner;
+  height: $edge;
+  cursor: ns-resize;
+}
+
+.resize-e,
+.resize-w {
+  top: $corner;
+  bottom: $corner;
+  width: $edge;
+  cursor: ew-resize;
+}
+
+.resize-n {
+  top: 0;
+}
+
+.resize-s {
+  bottom: 0;
+}
+
+.resize-e {
+  right: 0;
+}
+
+.resize-w {
+  left: 0;
+}
+
+.resize-ne,
+.resize-nw,
+.resize-se,
+.resize-sw {
+  width: $corner;
+  height: $corner;
+}
+
+.resize-ne {
+  top: 0;
+  right: 0;
+  cursor: nesw-resize;
+}
+
+.resize-sw {
+  bottom: 0;
+  left: 0;
+  cursor: nesw-resize;
+}
+
+.resize-nw {
+  top: 0;
+  left: 0;
+  cursor: nwse-resize;
+}
+
+.resize-se {
+  bottom: 0;
+  right: 0;
+  cursor: nwse-resize;
 }
 
 @keyframes slideUp {
@@ -86,11 +187,41 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
   color: white;
+}
+
+.draggableHeader {
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+}
+
+.headerTitle {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.headerControls {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+  cursor: default;
+
+  :global(.ant-btn) {
+    color: white !important;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.15) !important;
+    }
+  }
 }
 
 .messagesContainer {
   flex: 1;
+  min-height: 0;
   padding: 16px;
   overflow-y: auto;
   display: flex;
@@ -181,6 +312,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
+  flex-shrink: 0;
 }
 
 .chatDragging {
