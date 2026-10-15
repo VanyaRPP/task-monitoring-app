@@ -4,7 +4,7 @@ import Domain from '@modules/models/Domain'
 import Payment from '@common/modules/models/Payment'
 import RealEstate from '@modules/models/RealEstate'
 import { logPaymentMutation } from '@common/modules/services/paymentAudit'
-import { getNextInvoiceNumber } from '@common/services/paymentService/payment.service'
+import { reserveInvoiceNumbers } from '@common/services/paymentService/payment.service'
 import {
   BUILT_IN_SERVICE_ID_TO_TYPE,
   Operations,
@@ -323,8 +323,16 @@ export async function applyCompanyStatementImport({
     months: resolved.months,
     createOpening: resolved.createOpening,
     source,
-    firstInvoiceNumber: await getNextInvoiceNumber(),
+    firstInvoiceNumber: 0,
   })
+  // Numbers are reserved only now that it is known how many are needed, in
+  // one block so the import's invoices stay consecutive.
+  if (docs.length) {
+    const first = await reserveInvoiceNumbers(docs.length)
+    docs.forEach((doc, index) => {
+      doc.invoiceNumber = first + index
+    })
+  }
 
   const created = docs.length ? ((await Payment.insertMany(docs)) as any[]) : []
   await Promise.all(

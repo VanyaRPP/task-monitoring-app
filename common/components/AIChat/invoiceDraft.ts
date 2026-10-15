@@ -9,6 +9,10 @@ export interface IInvoiceDraftPeriod {
 interface IInvoiceDraftLike {
   monthService: string | null
   period?: IInvoiceDraftPeriod
+  /** Passed to the modal on its own (`extraInvoiceLines`), not as a field. */
+  extraLines?: unknown[]
+  /** Read by the chat to pass `invoice` as the modal's final lines. */
+  replaceLines?: boolean
 }
 
 /**
@@ -20,8 +24,15 @@ interface IInvoiceDraftLike {
  */
 export function toPaymentFormData<T extends IInvoiceDraftLike>(
   draft: T
-): Omit<T, 'period'> & { monthService: string | null } {
-  const { period, ...payment } = draft
+): Omit<T, 'period' | 'extraLines' | 'replaceLines'> & {
+  monthService: string | null
+} {
+  const {
+    period,
+    extraLines: _extraLines,
+    replaceLines: _replaceLines,
+    ...payment
+  } = draft
   if (payment.monthService || !period) return payment
 
   return {

@@ -204,6 +204,40 @@ describe('DomainModal — save flow', () => {
     })
   })
 
+  it('saves the AI draft as a new domain, keeping the current user as admin', async () => {
+    addDomainMock.mockResolvedValue({ data: { _id: 'new-id' } })
+
+    render(
+      <DomainModal
+        currentDomain={undefined as any}
+        draft={{
+          name: 'ОСББ Сонячне',
+          adminEmails: ['admin@example.com', 'buh@example.com'],
+          iban: 'UA213223130000026007233566001',
+          rnokpp: '12345678',
+          mfo: '322313',
+          description: 'IBAN: UA213223130000026007233566001',
+        }}
+        closeModal={jest.fn()}
+        editable
+      />
+    )
+
+    expect(await screen.findByDisplayValue('ОСББ Сонячне')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /Додати/i }))
+
+    await waitFor(() => expect(addDomainMock).toHaveBeenCalledTimes(1))
+    expect(addDomainMock.mock.calls[0][0]).toMatchObject({
+      name: 'ОСББ Сонячне',
+      adminEmails: ['admin@example.com', 'buh@example.com'],
+      iban: 'UA213223130000026007233566001',
+      rnokpp: '12345678',
+      mfo: '322313',
+      description: 'IBAN: UA213223130000026007233566001',
+    })
+    expect(editDomainMock).not.toHaveBeenCalled()
+  })
+
   it('calls addDomain mutation with form payload when no currentDomain', async () => {
     addDomainMock.mockResolvedValue({ data: { _id: 'new-id' } })
     const closeModal = jest.fn()
