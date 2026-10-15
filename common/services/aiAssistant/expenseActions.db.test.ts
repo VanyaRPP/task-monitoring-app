@@ -56,6 +56,54 @@ describe('buildExpenseDraft', () => {
     })
   })
 
+  it("puts a line's name in the category when the model left it in the note", async () => {
+    // What the model sent for the same list once its schema got terse.
+    const { draft } = await buildExpenseDraft({
+      type: 'debit',
+      items: [
+        {
+          category: 'Прибирання',
+          amount: 2600,
+          description: 'Прибиральниця',
+          expression: '13*200',
+        },
+        { category: 'Корпоратив', amount: 3700, description: 'суші, піца' },
+        { amount: 300, description: 'Цукерки' },
+        { amount: 500, description: 'віск' },
+        { amount: 145, description: 'за посилку косметики' },
+      ],
+      ctx: domainAdmin,
+    })
+
+    expect(
+      draft.items.map(({ category, description }) => [category, description])
+    ).toEqual([
+      ['Прибирання', 'Прибиральниця, 13 × 200'],
+      ['Корпоратив', 'суші, піца'],
+      ['Цукерки', undefined],
+      ['Віск', undefined],
+      // A whole phrase is a note, not a category - the form asks for one.
+      [undefined, 'за посилку косметики'],
+    ])
+  })
+
+  it('does not repeat an expression the note already has', async () => {
+    const { draft } = await buildExpenseDraft({
+      type: 'debit',
+      items: [
+        {
+          category: 'Прибирання',
+          amount: 2600,
+          description: '13*200',
+          expression: '13 x 200',
+        },
+      ],
+      ctx: domainAdmin,
+    })
+
+    expect(draft.items[0].description).toBe('13*200')
+  })
+
   it('warns when a line disagrees with its own expression', async () => {
     const { warnings } = await buildExpenseDraft({
       type: 'debit',

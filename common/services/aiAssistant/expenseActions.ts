@@ -54,6 +54,36 @@ const MONTH = /^\d{4}-\d{2}$/
 // «13*200», «13 x 200», «13×200» - the only arithmetic receipts are written in.
 const PRODUCT = /^\s*(\d+(?:[.,]\d+)?)\s*[*xх×]\s*(\d+(?:[.,]\d+)?)\s*$/i
 
+/** «13*200» as the note shows it: «13 × 200»; null for anything else. */
+function productNote(expression?: string): string | null {
+  const match = expression ? PRODUCT.exec(expression) : null
+  return match ? `${match[1]} × ${match[2]}` : null
+}
+
+const capitalize = (value: string) =>
+  value.charAt(0).toUpperCase() + value.slice(1)
+
+/**
+ * A line as the form should show it: what it is in «Категорія», the rest in
+ * «Примітка». The model sometimes puts the line's name («Цукерки») in the
+ * note and leaves no category; a note of a word or two with no category is
+ * that name. A «13*200» the line was written as becomes part of the note.
+ */
+export function tidyExpenseLine(item: ExpenseLineInput): ExpenseLineInput {
+  let category = item.category?.trim() || undefined
+  let description = item.description?.trim() || undefined
+  if (!category && description && description.split(/\s+/).length <= 2) {
+    category = capitalize(description)
+    description = undefined
+  }
+  const product = productNote(item.expression)
+  const plain = (value = '') => value.replace(/\s/g, '').replace(/[*xх]/gi, '×')
+  if (product && !plain(description).includes(plain(product))) {
+    description = description ? `${description}, ${product}` : product
+  }
+  return { ...item, category, description }
+}
+
 /** The value of «a*b», or null for anything else. */
 export function evaluateProduct(expression: string): number | null {
   const match = PRODUCT.exec(expression)
@@ -121,13 +151,14 @@ export async function buildExpenseDraft({
 
   // «-2600» in a list means an expense, which `type` already says; the
   // amount itself is always stored positive.
+  const tidy = items.map(tidyExpenseLine)
   const lines = normalizeProfitItems(
-    items.map((item) => ({ ...item, amount: Math.abs(Number(item.amount)) }))
+    tidy.map((item) => ({ ...item, amount: Math.abs(Number(item.amount)) }))
   )
   if (!lines.ok) throw new Error(lines.error)
 
   const warnings: string[] = []
-  items.forEach((item, index) => {
+  tidy.forEach((item, index) => {
     if (!item.expression) return
     const value = evaluateProduct(item.expression)
     const amount = lines.items[index].amount
