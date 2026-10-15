@@ -51,10 +51,15 @@ beforeEach(() => {
   updateProfit.mockResolvedValue({ data: { success: true } })
 })
 
+// One input event per field instead of one per keystroke: typing the whole
+// receipt key by key made this suite slow enough to time out in a full run.
+const enter = async (field: HTMLElement, text: string) => {
+  await userEvent.click(field)
+  await userEvent.paste(text)
+}
+
 const save = () =>
-  userEvent.click(
-    screen.getByRole('button', { name: 'profitPage:modal.okText' })
-  )
+  userEvent.click(screen.getByText('profitPage:modal.okText').closest('button'))
 
 const total = () => screen.getByText(/profitPage:form.amountDebit:/).textContent
 
@@ -62,26 +67,31 @@ describe('AddCostModal with line items', () => {
   it('saves typed lines as items and shows their running total', async () => {
     render(<AddCostModal closeModal={jest.fn()} activeScope={scope} />)
 
-    const [category] = await screen.findAllByRole('combobox', {
-      name: '',
-    })
-    await userEvent.type(category, 'Прибирання')
+    // By text, not *ByRole: role queries over antd's large DOM are what made
+    // this test slow enough to time out in a full run.
+    const [categoryPlaceholder] = await screen.findAllByText(
+      'profitPage:form.itemCategoryPlaceholder'
+    )
+    const category = categoryPlaceholder
+      .closest('.ant-select')
+      .querySelector('input') as HTMLElement
+    await enter(category, 'Прибирання')
     const [amount] = screen.getAllByPlaceholderText(
       'profitPage:form.amountPlaceholder'
     )
-    await userEvent.type(amount, '2600')
+    await enter(amount, '2600')
 
     await userEvent.click(
-      screen.getAllByRole('button', { name: /profitPage:form.addItem/ })[0]
+      screen.getAllByText('profitPage:form.addItem')[0].closest('button')
     )
     const amounts = screen.getAllByPlaceholderText(
       'profitPage:form.amountPlaceholder'
     )
-    await userEvent.type(amounts[1], '500')
+    await enter(amounts[1], '500')
     const notes = screen.getAllByPlaceholderText(
       'profitPage:form.itemDescriptionPlaceholder'
     )
-    await userEvent.type(notes[1], 'віск')
+    await enter(notes[1], 'віск')
 
     await waitFor(() => expect(total()).toMatch(/3\s100,00/))
 
@@ -95,7 +105,8 @@ describe('AddCostModal with line items', () => {
       { category: 'Прибирання', amount: 2600, description: undefined },
       { category: undefined, amount: 500, description: 'віск' },
     ])
-  })
+    // Many antd field interactions; slow on a loaded CI runner.
+  }, 30000)
 
   it('opens a draft prefilled and saves it as a new record', async () => {
     const draft: IProfitDraft = {

@@ -3,6 +3,7 @@ import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
 import {
   buildMonthServicePlaceholder,
   isMonthServicePlaceholder,
+  parseMonthServicePlaceholder,
 } from '@common/components/Forms/AddPaymentForm/month-service-placeholder'
 import { Form, FormInstance, Select } from 'antd'
 import dayjs from 'dayjs'
@@ -21,7 +22,12 @@ const MonthServiceSelect: React.FC<MonthServiceSelectProps> = ({
 }) => {
   const streetId: string = Form.useWatch('street', form)
   const domainId: string = Form.useWatch('domain', form)
-  const monthService: string = Form.useWatch('monthService', form)
+  const watchedMonthService: string = Form.useWatch('monthService', form)
+  // useWatch is still empty on the first render even when the form already
+  // holds a month (an AI or bank draft); reading only the watch, the effect
+  // below took that for "no month" and replaced it with the newest one.
+  const monthService: string =
+    watchedMonthService ?? form.getFieldValue('monthService')
 
   const {
     data: { data: services } = { data: [] },
@@ -31,6 +37,9 @@ const MonthServiceSelect: React.FC<MonthServiceSelectProps> = ({
     {
       domainId,
       streetId,
+      // Without an address, only address-less services are this company's
+      // months - not another street's.
+      withoutStreet: streetId ? undefined : true,
     },
     { skip: !domainId || isNewEntityValue(domainId) }
   )
@@ -78,10 +87,31 @@ const MonthServiceSelect: React.FC<MonthServiceSelectProps> = ({
       }
     }
 
+    // A placeholder for a month older than the rolling window (an AI draft
+    // for last year) is offered too - otherwise the effect below would treat
+    // it as invalid and quietly switch the form to the newest month.
+    if (isCurrentValuePlaceholder) {
+      const m = parseMonthServicePlaceholder(monthService)
+      const key = m.format('YYYY-MM')
+      if (!byMonthKey.has(key)) {
+        byMonthKey.set(key, {
+          value: monthService,
+          label: m.format('MMMM YYYY'),
+          sortValue: m.valueOf(),
+        })
+      }
+    }
+
     return [...byMonthKey.values()]
       .sort((a, b) => b.sortValue - a.sortValue)
       .map(({ value, label }) => ({ value, label }))
-  }, [services, currentValueMissing, currentServiceRes])
+  }, [
+    services,
+    currentValueMissing,
+    currentServiceRes,
+    isCurrentValuePlaceholder,
+    monthService,
+  ])
 
   useEffect(() => {
     if (!edit) {

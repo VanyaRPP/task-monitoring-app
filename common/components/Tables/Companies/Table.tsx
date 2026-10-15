@@ -816,11 +816,29 @@ const getDefaultColumns = ({
     width: 200,
     filterSearch: true,
     onFilterDropdownOpenChange: widenFilterDropdown(240),
-    render: (i) => (
-      <>
-        {i?.address} (м. {i?.city})
-      </>
-    ),
+    render: (i: any) => {
+      const fullAddress = `${i?.address || ''} (м. ${i?.city || ''})`.trim()
+      if (!fullAddress || fullAddress === '(м. )') return ''
+
+      return (
+        <Tooltip title={fullAddress} placement="top">
+          <div
+            style={{
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'normal',
+              wordBreak: 'break-word',
+            }}
+            data-testid="truncated-address-cell"
+          >
+            {fullAddress}
+          </div>
+        </Tooltip>
+      )
+    },
   }
 
   if (isAdmin) {

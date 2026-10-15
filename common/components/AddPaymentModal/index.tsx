@@ -1,3 +1,4 @@
+import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
 import { useGetCustomServicesByDomainQuery } from '@common/api/customServicesApi/customServices.api'
 import { useCreateCustomServiceMutation } from '@common/api/customServicesApi/customServices.api'
 import {
@@ -71,6 +72,17 @@ interface Props {
   paymentActions?: { edit: boolean; preview: boolean; create?: boolean }
   preselectedCompany?: string
   preselectedDomain?: string
+  /**
+   * Lines to keep on top of the generated ones (an AI draft's "оренда 5000").
+   * The form re-seeds `invoice` from the tariffs whenever its inputs load or
+   * change; these are appended every time instead of being wiped.
+   */
+  extraInvoiceLines?: IPaymentField[]
+  /**
+   * An AI draft's final lines, used as they are while its company is selected:
+   * named rows got the user's prices, unnamed ones may have been dropped.
+   */
+  invoiceLines?: IPaymentField[]
 }
 
 export interface IPaymentContext {
@@ -124,6 +136,8 @@ const AddPaymentModal: FC<Props> = ({
   paymentActions,
   preselectedCompany,
   preselectedDomain,
+  extraInvoiceLines,
+  invoiceLines,
 }) => {
   const { preview, edit } = paymentActions ?? { preview: false, edit: false }
 
@@ -720,23 +734,50 @@ const AddPaymentModal: FC<Props> = ({
       return
     }
 
+    const draftLines =
+      invoiceLines && company._id === getId(paymentData?.company)
+        ? invoiceLines
+        : undefined
     const hasFilteredInvoices =
       Array.isArray(filteredInvoices) && filteredInvoices.length > 0
-    if (!hasFilteredInvoices) return
+    if (!draftLines && !hasFilteredInvoices) return
     // Re-seed `invoice` whenever upstream data (company, service, prevService,
     // prevPayment, customDomainServices) changes — that's exactly when
     // `filteredInvoices` gets a new reference. Editing existing payments is
     // already short-circuited above, so user input on a CREATE form is reset
     // only when the user changes domain/street/company/month, which is the
     // intended behavior.
-    form.setFieldsValue({ invoice: filteredInvoices })
+    form.setFieldsValue({
+      invoice:
+        draftLines ??
+        (extraInvoiceLines?.length
+          ? [...filteredInvoices, ...extraInvoiceLines]
+          : filteredInvoices),
+    })
 
     const isNewCompanySelected = lastLoadedCompanyId.current !== company._id
     if (isNewCompanySelected) {
-      form.setFieldValue('currency', normalizeCurrency(company.currency))
+      // A draft that names its currency ("у доларах") keeps it on first load.
+      const keepDraftCurrency =
+        lastLoadedCompanyId.current === null && !!paymentData?.currency
+      if (!keepDraftCurrency) {
+        form.setFieldValue('currency', normalizeCurrency(company.currency))
+      }
       lastLoadedCompanyId.current = company._id
     }
-  }, [company, filteredInvoices, paymentId, edit, activeTabKey, saved, form])
+  }, [
+    company,
+    filteredInvoices,
+    extraInvoiceLines,
+    invoiceLines,
+    paymentData?.company,
+    paymentData?.currency,
+    paymentId,
+    edit,
+    activeTabKey,
+    saved,
+    form,
+  ])
 
   return (
     <PaymentContext.Provider
@@ -799,6 +840,10 @@ const AddPaymentModal: FC<Props> = ({
             domain: preselectedDomain || getId(paymentData?.domain),
             street: getId(paymentData?.street),
             company: preselectedCompany || getId(paymentData?.company),
+            // An AI draft naming a provider/company that doesn't exist yet
+            // carries what the inline-create fields would hold.
+            companyEmail: paymentData?.companyEmail,
+            newDomainTemplateId: paymentData?.newDomainTemplateId,
             monthService: getId(paymentData?.monthService),
             invoice:
               paymentData?.invoice && paymentData.invoice.length > 0

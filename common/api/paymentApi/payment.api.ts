@@ -13,6 +13,7 @@ import {
   IHtmlToPdfZipResponse,
   IGetPaymentNumberResponse,
   IGetPaymentResponse,
+  INewPayment,
   IPayment,
   IGetCostPaymentResponse,
   IGeneratePaymentExcel,
@@ -84,6 +85,10 @@ export const paymentApi = createApi({
         serviceIds?: string[]
         status?: PaymentStatus | PaymentStatus[]
         dateField?: 'invoiceCreationDate' | 'date' | 'paidAt'
+        /** ISO instant, inclusive lower bound on invoiceCreationDate. */
+        dateFrom?: string
+        /** ISO instant, inclusive upper bound on invoiceCreationDate. */
+        dateTo?: string
       }
     >({
       query: ({
@@ -100,11 +105,15 @@ export const paymentApi = createApi({
         streetIds,
         serviceIds,
         dateField,
+        dateFrom,
+        dateTo,
         status,
       }) => {
         return {
           url: `spacehub/payment`,
           params: {
+            dateFrom,
+            dateTo,
             limit,
             type,
             skip,
@@ -137,7 +146,7 @@ export const paymentApi = createApi({
       }),
       providesTags: (result) => (result ? ['Profit'] : []),
     }),
-    addPayment: builder.mutation<IAddPaymentResponse, IPayment>({
+    addPayment: builder.mutation<IAddPaymentResponse, INewPayment>({
       query(body) {
         return {
           url: `spacehub/payment`,

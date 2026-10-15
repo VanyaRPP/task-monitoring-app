@@ -173,6 +173,9 @@ export function usePaymentFormData(
       {
         domainId,
         streetId: streetId || undefined,
+        // A company without an address bills on the address-less service;
+        // an unfiltered lookup would take any street's tariffs.
+        withoutStreet: streetId ? undefined : true,
         year: placeholderYear,
         month: placeholderMonth,
         limit: 1,
@@ -202,10 +205,14 @@ export function usePaymentFormData(
       ? anchorDate.year() - 1
       : anchorDate.year()
 
+  // Last month's service on the same address as this month's - previous
+  // readings come from the invoice billed on it.
+  const prevStreetId = service?.street?._id ?? (streetId || undefined)
   const { data: { data: { 0: prevService } } = { data: [null] } } =
     useGetAllServicesQuery(
       {
-        streetId: service?.street?._id ?? (streetId || undefined),
+        streetId: prevStreetId,
+        withoutStreet: prevStreetId ? undefined : true,
         domainId: service?.domain?._id ?? domainId,
         month: prevMonthMongo,
         year: prevYearMongo,
