@@ -160,11 +160,16 @@ const expenseInputSchema = z.object({
           .string()
           .optional()
           .describe(
-            `${PROFIT_DEFAULT_CATEGORIES.join(', ')} або коротка своя (Корпоратив).`
+            `ЩО це - завжди: ${PROFIT_DEFAULT_CATEGORIES.join(', ')} або назва з рядка («Цукерки», «Віск», «Посилка»).`
           ),
         amount: z.number().describe('Додатне: «-2600» -> 2600.'),
-        description: z.string().optional().describe('«цукерки», «13 × 200»'),
-        expression: z.string().optional().describe('«13*200»'),
+        description: z
+          .string()
+          .optional()
+          .describe(
+            'Лише решта рядка після суми чи в дужках: «суші, піца», «за посилку косметики». Не назва позиції.'
+          ),
+        expression: z.string().optional().describe('«13*200», якщо є.'),
       })
     )
     .min(1)
