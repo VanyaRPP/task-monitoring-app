@@ -88,6 +88,7 @@ export function usePaymentsBulkData({
 
   const service = realService ?? placeholderService
 
+  const prevStreetId = service?.street?._id ?? streetId
   const previousServiceDate = service?.date
     ? dayjs(service.date).subtract(1, 'month')
     : null
@@ -98,7 +99,9 @@ export function usePaymentsBulkData({
     isError: isPrevServiceError,
   } = useGetAllServicesQuery(
     {
-      streetId,
+      // Same address as this month's service; none means the address-less one.
+      streetId: prevStreetId,
+      withoutStreet: prevStreetId ? undefined : true,
       domainId,
       month: previousServiceDate ? previousServiceDate.month() + 1 : undefined,
       year: previousServiceDate ? previousServiceDate.year() : undefined,

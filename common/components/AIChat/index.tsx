@@ -39,6 +39,13 @@ import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { useIsAdmin } from '@modules/hooks/useIsAdmin'
 import { useAppSelector } from '@modules/store/hooks'
 import AddPaymentModal from '@components/AddPaymentModal'
+import type { IPaymentField } from '@common/api/paymentApi/payment.api.types'
+import AddCostModal from '@components/AddCostModal'
+import AddServiceModal from '@components/AddServiceModal'
+import RealEstateModal from '@components/UI/RealEstateComponents/RealEstateModal'
+import AddStreetModal from '@components/AddStreetModal'
+import DomainModal from '@components/UI/DomainsComponents/DomainModal'
+import type { ExpenseDraft } from '@common/services/aiAssistant/expenseActions'
 import { message } from 'antd'
 import {
   DOCUMENT_BATCH_PART,
@@ -46,6 +53,7 @@ import {
 } from '@common/services/aiAssistant/documents/types'
 import ResizeHandles from './floatingWindow/ResizeHandles'
 import { useFloatingWindow } from './floatingWindow/useFloatingWindow'
+import { toPaymentFormData } from './invoiceDraft'
 import BatchCard from './photoImport/BatchCard'
 import { shrinkImage } from './photoImport/imageTools'
 import {
@@ -263,8 +271,27 @@ const AIChat: React.FC = () => {
   // prefilled AddPaymentModal. `handledToolCalls` guards against the stream
   // re-rendering and re-opening the modal for a tool call already handled.
   const [invoiceDraft, setInvoiceDraft] = useState<any>(null)
+  const [invoiceExtraLines, setInvoiceExtraLines] = useState<IPaymentField[]>(
+    []
+  )
+  // Set when the draft's lines are final (named rows repriced or the rest
+  // dropped), so the form must not re-seed them from the tariffs.
+  const [invoiceLines, setInvoiceLines] = useState<IPaymentField[]>()
   const [invoiceModalOpen, setInvoiceModalOpen] = useState<boolean>(false)
   const handledToolCallsRef = useRef<Set<string>>(new Set())
+  // previewExpenses works the same way, with the add-cost form.
+  const [expenseDraft, setExpenseDraft] = useState<ExpenseDraft | null>(null)
+  // previewCompany: a new company to check and save.
+  const [companyDraft, setCompanyDraft] = useState<any>(null)
+  // previewStreet: a new address for a domain.
+  const [streetDraft, setStreetDraft] = useState<any>(null)
+  // previewDomain: a new service provider.
+  const [domainDraft, setDomainDraft] = useState<any>(null)
+  // previewService: a new month's tariffs, or an existing month to edit.
+  const [serviceDraft, setServiceDraft] = useState<{
+    mode: 'create' | 'edit'
+    service: any
+  } | null>(null)
 
   const { messages, setMessages, sendMessage, status, error } = useChat({
     transport: chatTransport,
@@ -321,21 +348,75 @@ const AIChat: React.FC = () => {
     [batches, updateCard]
   )
 
-  // Watch for a completed `previewInvoice` tool call and open the prefilled
-  // AddPaymentModal with its draft. Each toolCallId is handled at most once.
+  // Watch for completed `previewInvoice` / `previewCredit` /
+  // `previewExpenses` / `previewService` / `previewCompany` /
+  // `previewStreet` / `previewDomain` tool calls and open the prefilled
+  // payment / cost / service / company / street / domain modal with their
+  // draft. Each toolCallId is handled at most once.
   useEffect(() => {
     for (const message of messages) {
       for (const part of message.parts ?? []) {
         const p = part as any
         if (
-          p.type === 'tool-previewInvoice' &&
+          // A credit opens the same payment form, as type `credit`.
+          (p.type === 'tool-previewInvoice' ||
+            p.type === 'tool-previewCredit') &&
           p.state === 'output-available' &&
           p.output?.draft &&
           !handledToolCallsRef.current.has(p.toolCallId)
         ) {
           handledToolCallsRef.current.add(p.toolCallId)
-          setInvoiceDraft(p.output.draft)
+          setInvoiceDraft(toPaymentFormData(p.output.draft))
+          setInvoiceExtraLines(p.output.draft.extraLines ?? [])
+          setInvoiceLines(
+            p.output.draft.replaceLines ? p.output.draft.invoice : undefined
+          )
           setInvoiceModalOpen(true)
+        }
+        if (
+          p.type === 'tool-previewExpenses' &&
+          p.state === 'output-available' &&
+          p.output?.draft &&
+          !handledToolCallsRef.current.has(p.toolCallId)
+        ) {
+          handledToolCallsRef.current.add(p.toolCallId)
+          setExpenseDraft(p.output.draft)
+        }
+        if (
+          p.type === 'tool-previewCompany' &&
+          p.state === 'output-available' &&
+          p.output?.draft &&
+          !handledToolCallsRef.current.has(p.toolCallId)
+        ) {
+          handledToolCallsRef.current.add(p.toolCallId)
+          setCompanyDraft(p.output.draft)
+        }
+        if (
+          p.type === 'tool-previewStreet' &&
+          p.state === 'output-available' &&
+          p.output?.draft &&
+          !handledToolCallsRef.current.has(p.toolCallId)
+        ) {
+          handledToolCallsRef.current.add(p.toolCallId)
+          setStreetDraft(p.output.draft)
+        }
+        if (
+          p.type === 'tool-previewDomain' &&
+          p.state === 'output-available' &&
+          p.output?.draft &&
+          !handledToolCallsRef.current.has(p.toolCallId)
+        ) {
+          handledToolCallsRef.current.add(p.toolCallId)
+          setDomainDraft(p.output.draft)
+        }
+        if (
+          p.type === 'tool-previewService' &&
+          p.state === 'output-available' &&
+          p.output?.draft &&
+          !handledToolCallsRef.current.has(p.toolCallId)
+        ) {
+          handledToolCallsRef.current.add(p.toolCallId)
+          setServiceDraft(p.output.draft)
         }
       }
     }
@@ -665,23 +746,78 @@ const AIChat: React.FC = () => {
         </div>
       )}
 
-      {invoiceModalOpen && invoiceDraft && (
-        // The chat window sits above antd's default popup layer (1000), so
-        // the modal it opens (and the modal's dropdowns) must go higher still.
-        <ConfigProvider theme={{ token: { zIndexPopupBase: 1100 } }}>
+      {/* The chat window sits above antd's default popup layer (1000), so
+          the modals it opens (and their dropdowns) must go higher still. */}
+      <ConfigProvider theme={{ token: { zIndexPopupBase: 1100 } }}>
+        {domainDraft && (
+          <DomainModal
+            currentDomain={undefined}
+            draft={domainDraft}
+            editable
+            closeModal={() => setDomainDraft(null)}
+          />
+        )}
+
+        {streetDraft && (
+          <AddStreetModal
+            draft={streetDraft}
+            closeModal={() => setStreetDraft(null)}
+          />
+        )}
+
+        {companyDraft && (
+          <RealEstateModal
+            chosenRealEstate={{
+              domain: companyDraft.domain,
+              street: companyDraft.street,
+            }}
+            draft={companyDraft}
+            editable
+            closeModal={() => setCompanyDraft(null)}
+          />
+        )}
+
+        {serviceDraft &&
+          (serviceDraft.mode === 'edit' ? (
+            <AddServiceModal
+              currentService={serviceDraft.service}
+              serviceActions={{ edit: true, preview: false }}
+              closeModal={() => setServiceDraft(null)}
+            />
+          ) : (
+            <AddServiceModal
+              draft={serviceDraft.service}
+              closeModal={() => setServiceDraft(null)}
+            />
+          ))}
+
+        {expenseDraft && (
+          <AddCostModal
+            draft={expenseDraft}
+            closeModal={() => setExpenseDraft(null)}
+          />
+        )}
+
+        {invoiceModalOpen && invoiceDraft && (
           <AddPaymentModal
             paymentData={invoiceDraft}
+            extraInvoiceLines={invoiceExtraLines}
+            invoiceLines={invoiceLines}
             paymentActions={{ edit: false, preview: false }}
             closeModal={(success?: boolean) => {
               setInvoiceModalOpen(false)
               setInvoiceDraft(null)
               if (success) {
-                message.success('Рахунок успішно створено!')
+                message.success(
+                  invoiceDraft.type === 'credit'
+                    ? 'Оплату успішно створено!'
+                    : 'Рахунок успішно створено!'
+                )
               }
             }}
           />
-        </ConfigProvider>
-      )}
+        )}
+      </ConfigProvider>
     </>
   )
 }

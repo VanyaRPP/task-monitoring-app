@@ -364,8 +364,22 @@ export const getChildColumns = (
     dataIndex: 'categories',
     key: 'categories',
     width: 220,
-    render: (cats: string[]) =>
-      cats?.length ? (
+    render: (cats: string[], record) =>
+      record.items?.length ? (
+        // One tag per line with its own amount - that split is the point of
+        // entering a receipt as lines.
+        <Space size={[4, 4]} wrap>
+          {record.items.map((item, index) => (
+            <Tooltip key={index} title={item.description}>
+              <Tag style={{ marginInlineEnd: 0 }}>
+                {item.category ||
+                  t('dashboard.uncategorized', { ns: 'profitPage' })}
+                : {money(item.amount)}
+              </Tag>
+            </Tooltip>
+          ))}
+        </Space>
+      ) : cats?.length ? (
         <Space size={[4, 4]} wrap>
           {cats.map((cat) => (
             <Tag key={cat} style={{ marginInlineEnd: 0 }}>

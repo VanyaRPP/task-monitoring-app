@@ -105,7 +105,17 @@
     "periodMonthPlaceholder": "Місяць витрати",
     "currency": "Валюта",
     "domainScope": "Домен",
-    "companyScope": "Компанія"
+    "companyScope": "Компанія",
+    "amount": "Сума",
+    "items": "Позиції",
+    "itemsRequired": "Додайте хоча б одну позицію",
+    "itemCategoryPlaceholder": "Категорія або своя назва",
+    "itemAmountRequired": "Вкажіть суму більше нуля",
+    "itemDescriptionPlaceholder": "Примітка",
+    "addItem": "Додати позицію",
+    "removeItem": "Видалити позицію",
+    "splitLegacy": "Цей запис має одну суму {{amount}} на кілька категорій. Розподіліть її між позиціями.",
+    "scope": "Домен або компанія"
   },
   "filters": {
     "dateRange": "Діапазон дат",

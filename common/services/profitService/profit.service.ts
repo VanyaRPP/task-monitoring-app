@@ -1,6 +1,7 @@
 import ProfitModel, { ProfitDocument } from '@modules/models/Profit'
 import Payment from '@common/modules/models/Payment'
 import mongoose, { Types } from 'mongoose'
+import type { IProfitItem } from '@utils/profit-items'
 
 export interface CreateProfitInput {
   /** Exactly one of domain/company - see ProfitDocument for why. */
@@ -11,6 +12,7 @@ export interface CreateProfitInput {
   amount: number
   type: 'debit' | 'credit'
   categories?: string[]
+  items?: IProfitItem[]
   description?: string
   invoiceNumber?: string
   date: Date
@@ -111,6 +113,7 @@ class ProfitService {
             amount: 1,
             type: 1,
             categories: 1,
+            items: 1,
             description: 1,
             invoiceNumber: 1,
             date: 1,
@@ -430,6 +433,7 @@ class ProfitService {
           amount: 1,
           type: 1,
           categories: 1,
+          items: 1,
           description: 1,
           invoiceNumber: 1,
           date: 1,
@@ -565,15 +569,24 @@ class ProfitService {
       amount: number
       type: 'debit' | 'credit'
       categories: string[]
+      items: IProfitItem[]
       description: string
       date: Date
       periodMonth: string
       currency: string
       domain: Types.ObjectId | string
       company: Types.ObjectId | string
-    }>
+    }>,
+    /** Fields to remove - the old scope when a record changes ledger. */
+    unset: ('domain' | 'company')[] = []
   ) {
-    return ProfitModel.findByIdAndUpdate(id, data, { new: true })
+    return ProfitModel.findByIdAndUpdate(
+      id,
+      unset.length
+        ? { ...data, $unset: Object.fromEntries(unset.map((f) => [f, 1])) }
+        : data,
+      { new: true }
+    )
   }
 
   static async delete(id: string) {

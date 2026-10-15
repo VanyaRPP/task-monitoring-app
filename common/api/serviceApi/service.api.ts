@@ -21,6 +21,8 @@ export const serviceApi = createApi({
         userId?: string
         domainId?: string
         streetId?: string
+        /** Only services with no address; ignored when `streetId` is set. */
+        withoutStreet?: boolean
         serviceId?: string
         year?: number
         month?: number
@@ -31,13 +33,23 @@ export const serviceApi = createApi({
         userId,
         domainId,
         streetId,
+        withoutStreet,
         serviceId,
         year,
         month,
       }) => {
         return {
           url: `service`,
-          params: { limit, userId, domainId, streetId, serviceId, year, month },
+          params: {
+            limit,
+            userId,
+            domainId,
+            streetId,
+            withoutStreet,
+            serviceId,
+            year,
+            month,
+          },
         }
       },
       providesTags: (response: IGetServiceResponse) => [

@@ -14,7 +14,18 @@ import Link from 'next/link'
 import { CSSProperties, useEffect, useMemo, useState, useRef } from 'react'
 import { useAddStreetMutation } from '@common/api/streetApi/street.api'
 import { PlusOutlined } from '@ant-design/icons'
-import { isNewEntityValue } from '@utils/inlineCreate'
+import {
+  getNewEntityName,
+  isNewEntityValue,
+  makeNewEntityValue,
+} from '@utils/inlineCreate'
+
+// A street created on save is held as `new::<address>::<city>` (see
+// materializeQuickEntities in AddPaymentModal).
+const newStreetLabel = (value: string) => {
+  const [address, city] = getNewEntityName(value).split('::')
+  return `${address}${city ? ` (м. ${city})` : ''} — нова`
+}
 
 export interface AddressesSelectProps {
   form: FormInstance
@@ -51,12 +62,22 @@ const AddressesSelect: React.FC<AddressesSelectProps> = ({
   const [newCity, setNewCity] = useState('')
   const [addStreet] = useAddStreetMutation()
   const options = useMemo(() => {
-    return streets.map((i) => ({
+    const existing = streets.map((i) => ({
       value: i._id,
       label: `${i.address} (м. ${i.city})`,
       hasService: i.hasService,
     }))
-  }, [streets])
+    return isNewEntityValue(streetId)
+      ? [
+          ...existing,
+          {
+            value: streetId,
+            label: newStreetLabel(streetId),
+            hasService: false,
+          },
+        ]
+      : existing
+  }, [streets, streetId])
 
   const appliedPreselectRef = useRef<string | undefined>(undefined)
 
@@ -77,6 +98,10 @@ const AddressesSelect: React.FC<AddressesSelectProps> = ({
       autoPickedForDomainRef.current = undefined
       return
     }
+
+    // A street to create on save is the user's (or the AI draft's) choice,
+    // not something to validate against the loaded list.
+    if (isNewEntityValue(form.getFieldValue('street'))) return
 
     // The street list for this domain hasn't loaded yet. Don't touch the
     // field while we don't know the valid options — clearing here would
@@ -187,6 +212,18 @@ const AddressesSelect: React.FC<AddressesSelectProps> = ({
               block
               onClick={async () => {
                 if (!newAddress.trim() || !newCity.trim()) return
+                // A provider created on save has no id to link a street to
+                // yet: the street is created on save too, after it.
+                if (isNewEntityValue(domainId)) {
+                  form.setFieldValue(
+                    'street',
+                    makeNewEntityValue(
+                      `${newAddress.trim()}::${newCity.trim()}`
+                    )
+                  )
+                  exitCreateMode()
+                  return
+                }
                 try {
                   const result = await addStreet({
                     address: newAddress.trim(),

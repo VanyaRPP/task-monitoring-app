@@ -20,9 +20,25 @@ interface Props {
   currentDomain: IExtendedDomain
   closeModal: (createdDomain?: IExtendedDomain) => void
   editable: boolean
+  /** Prefills a new domain (no `currentDomain`); saving creates it. */
+  draft?: DomainDraft
 }
 
-const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
+export interface DomainDraft {
+  name: string
+  adminEmails?: string[]
+  iban?: string
+  rnokpp?: string
+  mfo?: string
+  description?: string
+}
+
+const DomainModal: FC<Props> = ({
+  currentDomain,
+  closeModal,
+  editable,
+  draft,
+}) => {
   const [form] = Form.useForm()
   const [isValueChanged, setIsValueChanged] = useState(false)
   const [addDomainEstate, { isLoading: isAdding }] = useAddDomainMutation()
@@ -54,26 +70,33 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
       }
     }
 
+    const source = currentDomain ?? draft
     form.setFieldsValue({
-      name: currentDomain?.name || '',
-      adminEmails:
-        currentDomain?.adminEmails || (user?.email ? [user.email] : []),
+      name: source?.name || '',
+      adminEmails: currentDomain
+        ? currentDomain.adminEmails
+        : [
+            ...new Set([
+              ...(user?.email ? [user.email] : []),
+              ...(draft?.adminEmails ?? []),
+            ]),
+          ],
       streets:
         currentDomain?.streets.map((i: any) => ({
           value: i._id,
           label: `${i.address} (м. ${i.city})`,
         })) || [],
-      description: currentDomain?.description || '',
+      description: source?.description || '',
       defaultTemplate: currentDomain?.defaultTemplate || null,
       IEName: currentDomain?.IEName || '',
       domainBankToken: currentDomain?.domainBankToken || '',
-      mfo: currentDomain?.mfo || '',
-      rnokpp: currentDomain?.rnokpp || '',
-      iban: currentDomain?.iban || '',
+      mfo: source?.mfo || '',
+      rnokpp: source?.rnokpp || '',
+      iban: source?.iban || '',
       domainTypeTemplateId: templateId,
       customServices,
     })
-  }, [currentDomain, form, user, templates, defaultTemplateId])
+  }, [currentDomain, draft, form, user, templates, defaultTemplateId])
 
   const handleSubmit = async () => {
     await form.validateFields()

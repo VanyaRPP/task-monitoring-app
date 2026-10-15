@@ -120,4 +120,38 @@ describe('MonthServiceSelect — поле вибору місяця', () => {
     // not fall to the bottom because its date lookup failed.
     expect(options[0].textContent).toContain(futureLabel)
   })
+
+  it('тримає місяць-плейсхолдер, старший за 12 останніх, а не скидає на поточний', () => {
+    mockedQuery.mockReturnValue({ data: { data: [] }, isLoading: false })
+    const old = dayjs().subtract(20, 'month')
+    const placeholder = buildMonthServicePlaceholder(old)
+
+    render(
+      <Wrapper initialValues={{ domain: 'd1', monthService: placeholder }} />
+    )
+
+    expect(
+      within(getMonthInput().closest('.ant-select') as HTMLElement).getByText(
+        old.format('MMMM YYYY')
+      )
+    ).toBeInTheDocument()
+  })
+
+  it('тримає місяць-плейсхолдер з початкових значень форми, а не скидає на найновіший', () => {
+    mockedQuery.mockReturnValue({ data: { data: [] }, isLoading: false })
+    const m = dayjs().subtract(3, 'month')
+    render(
+      <Wrapper
+        initialValues={{
+          domain: 'd1',
+          monthService: buildMonthServicePlaceholder(m),
+        }}
+      />
+    )
+    expect(
+      within(getMonthInput().closest('.ant-select') as HTMLElement).getByText(
+        m.format('MMMM YYYY')
+      )
+    ).toBeInTheDocument()
+  })
 })

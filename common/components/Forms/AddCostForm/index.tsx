@@ -1,10 +1,13 @@
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons'
 import { validateField } from '@assets/features/validators'
 import DomainsSelect from '@components/UI/Reusable/DomainsSelect'
+import ProfitScopeSelect from './ProfitScopeSelect'
 import type { ActiveScope } from '@components/AddCostModal'
 import { Profit } from '@common/api/profitsApi/profits.type'
 import { inputNumberParser } from '@utils/helpers'
 import {
+  Alert,
+  AutoComplete,
   Button,
   ConfigProvider,
   DatePicker,
@@ -13,8 +16,6 @@ import {
   Input,
   InputNumber,
   Select,
-  Space,
-  Table,
 } from 'antd'
 import ukUA from 'antd/lib/locale/uk_UA'
 import dayjs from 'dayjs'
@@ -22,8 +23,13 @@ import 'dayjs/locale/uk'
 import { useTranslation } from 'next-i18next'
 import s from './style.module.scss'
 import { formatDateWithGenitiveMonthCapitalized } from '@utils/helpers'
-import { useMemo, useState } from 'react'
 import { CURRENCY_SELECT_OPTIONS } from '@utils/constants'
+import {
+  PROFIT_DEFAULT_CATEGORIES,
+  PROFIT_ITEM_CATEGORY_MAX,
+  PROFIT_ITEM_DESCRIPTION_MAX,
+  sumProfitItems,
+} from '@utils/profit-items'
 
 dayjs.locale('uk')
 
@@ -34,162 +40,130 @@ interface Props {
   currentProfit?: Profit
   /** Set when opened from a scoped ledger - see ActiveScope's own doc. */
   activeScope?: ActiveScope
+  /** Pick the target among every domain and company (an AI draft). */
+  pickScope?: boolean
 }
 
-const DEFAULT_CATEGORIES = [
-  'Оренда',
-  'Електрика',
-  'Вода',
-  'Обслуговування',
-  'Прибирання',
-  'Майстри',
-  'Матеріали',
-  'Кава-чай',
-]
+const CATEGORY_OPTIONS = PROFIT_DEFAULT_CATEGORIES.map((value) => ({ value }))
 
-const OTHER_KEY = '__other__'
+const formatTotal = (value: number) =>
+  value.toLocaleString('uk-UA', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })
 
-interface CategoriesFieldProps {
-  value?: string[]
-  onChange?: (value: string[]) => void
+interface ItemsFieldProps {
   disabled?: boolean
+  totalLabel: string
 }
 
-interface CategoryRow {
-  key: string
-  value: string
-  index: number
-  editing?: boolean
-}
-
-const CategoriesField: React.FC<CategoriesFieldProps> = ({
-  value,
-  onChange,
-  disabled,
-}) => {
-  const categories = useMemo(() => value ?? [], [value])
-
-  const [extraCategories, setExtraCategories] = useState<string[]>([])
-  const [showOtherInput, setShowOtherInput] = useState(false)
-  const [otherValue, setOtherValue] = useState('')
-
-  const allCategories = useMemo(
-    () => Array.from(new Set([...DEFAULT_CATEGORIES, ...extraCategories])),
-    [extraCategories]
-  )
-
-  const options = useMemo(
-    () => [
-      ...allCategories
-        .filter((c) => !categories.includes(c))
-        .map((c) => ({ value: c, label: c })),
-      { value: OTHER_KEY, label: 'Інше' },
-    ],
-    [allCategories, categories]
-  )
-
-  const handleSelect = (val: string) => {
-    if (val === OTHER_KEY) {
-      setShowOtherInput(true)
-      return
-    }
-    if (!categories.includes(val)) {
-      onChange?.([...categories, val])
-    }
-  }
-
-  const handleRemove = (index: number) => {
-    onChange?.(categories.filter((_, i) => i !== index))
-  }
-
-  const handleAddOther = () => {
-    const val = otherValue.trim()
-    if (!val) return
-
-    if (!allCategories.includes(val)) {
-      setExtraCategories((prev) => [...prev, val])
-    }
-    if (!categories.includes(val)) {
-      onChange?.([...categories, val])
-    }
-
-    setOtherValue('')
-    setShowOtherInput(false)
-  }
-
-  const handleCancelOther = () => {
-    setOtherValue('')
-    setShowOtherInput(false)
-  }
-
-  const rows: CategoryRow[] = [
-    ...categories.map((c, index) => ({ key: `cat-${index}`, value: c, index })),
-    ...(showOtherInput
-      ? [{ key: '__other_input__', value: '', index: -1, editing: true }]
-      : []),
-  ]
-
-  const columns = [
-    {
-      title: 'Категорії',
-      render: (_: unknown, row: CategoryRow) =>
-        row.editing ? (
-          <Input
-            autoFocus
-            size="small"
-            value={otherValue}
-            disabled={disabled}
-            placeholder="Введіть свою категорію"
-            onChange={(e) => setOtherValue(e.target.value)}
-            onPressEnter={handleAddOther}
-          />
-        ) : (
-          row.value
-        ),
-    },
-    {
-      width: 120,
-      render: (_: unknown, row: CategoryRow) =>
-        row.editing ? (
-          <Space size={8}>
-            <Button type="primary" size="small" onClick={handleAddOther}>
-              Додати
-            </Button>
-            <MinusCircleOutlined onClick={handleCancelOther} />
-          </Space>
-        ) : (
-          <MinusCircleOutlined
-            onClick={() => !disabled && handleRemove(row.index)}
-            style={{ opacity: disabled ? 0.5 : 1 }}
-          />
-        ),
-    },
-  ]
+/**
+ * One receipt as lines: a category (a standard one, or any name typed in -
+ * the «Інше» case), its amount and a note. The record's amount is their sum,
+ * shown here and recomputed by the API on save.
+ */
+const ItemsField: React.FC<ItemsFieldProps> = ({ disabled, totalLabel }) => {
+  const { t } = useTranslation()
 
   return (
     <>
-      {rows.length > 0 && (
-        <Table
-          rowKey="key"
-          size="small"
-          showHeader={false}
-          pagination={false}
-          dataSource={rows}
-          columns={columns}
-          style={{ marginBottom: 8 }}
-        />
-      )}
-      <Select
-        style={{ width: '100%' }}
-        suffixIcon={<PlusOutlined />}
-        placeholder="Додати категорію..."
-        value={undefined}
-        options={options}
-        onSelect={handleSelect}
-        disabled={disabled}
-        showSearch
-        optionFilterProp="label"
-      />
+      <Form.List
+        name="items"
+        rules={[
+          {
+            validator: async (_, items) => {
+              if (!items?.length) {
+                throw new Error(t('profitPage:form.itemsRequired'))
+              }
+            },
+          },
+        ]}
+      >
+        {(fields, { add, remove }, { errors }) => (
+          <div className={s.items}>
+            {fields.map(({ key, name }) => (
+              <div key={key} className={s.itemRow}>
+                <Form.Item name={[name, 'category']} className={s.itemCategory}>
+                  <AutoComplete
+                    options={CATEGORY_OPTIONS}
+                    filterOption={(input, option) =>
+                      String(option?.value)
+                        .toLowerCase()
+                        .includes(input.toLowerCase())
+                    }
+                    maxLength={PROFIT_ITEM_CATEGORY_MAX}
+                    placeholder={t('profitPage:form.itemCategoryPlaceholder')}
+                    disabled={disabled}
+                  />
+                </Form.Item>
+                <Form.Item
+                  name={[name, 'amount']}
+                  className={s.itemAmount}
+                  rules={[
+                    {
+                      validator: async (_, value) => {
+                        if (!(Number(value) > 0)) {
+                          throw new Error(
+                            t('profitPage:form.itemAmountRequired')
+                          )
+                        }
+                      },
+                    },
+                  ]}
+                >
+                  <InputNumber
+                    parser={inputNumberParser}
+                    min={0.01}
+                    placeholder={t('profitPage:form.amountPlaceholder')}
+                    className={s.formInput}
+                    disabled={disabled}
+                  />
+                </Form.Item>
+                <Form.Item
+                  name={[name, 'description']}
+                  className={s.itemDescription}
+                >
+                  <Input
+                    maxLength={PROFIT_ITEM_DESCRIPTION_MAX}
+                    placeholder={t(
+                      'profitPage:form.itemDescriptionPlaceholder'
+                    )}
+                    disabled={disabled}
+                  />
+                </Form.Item>
+                {!disabled && (
+                  <Button
+                    type="text"
+                    icon={<MinusCircleOutlined />}
+                    aria-label={t('profitPage:form.removeItem')}
+                    onClick={() => remove(name)}
+                  />
+                )}
+              </div>
+            ))}
+            {!disabled && (
+              <Button
+                type="dashed"
+                block
+                icon={<PlusOutlined />}
+                onClick={() => add({})}
+              >
+                {t('profitPage:form.addItem')}
+              </Button>
+            )}
+            <Form.ErrorList errors={errors} />
+          </div>
+        )}
+      </Form.List>
+
+      <Form.Item noStyle shouldUpdate>
+        {({ getFieldValue }) => (
+          <div className={s.itemsTotal}>
+            {totalLabel}:{' '}
+            <b>{formatTotal(sumProfitItems(getFieldValue('items') ?? []))}</b>
+          </div>
+        )}
+      </Form.Item>
     </>
   )
 }
@@ -200,12 +174,27 @@ const AddCostForm: React.FC<Props> = ({
   disabled,
   currentProfit,
   activeScope,
+  pickScope,
 }) => {
   const { t } = useTranslation()
 
   const isPreview = !!disabled
-  const isDebit = currentProfit?.type === 'debit'
-  const isCredit = currentProfit?.type === 'credit'
+  const recordType = currentProfit?.type ?? type
+  const amountLabel =
+    recordType === 'debit'
+      ? t('profitPage:form.amountDebit')
+      : recordType === 'credit'
+        ? t('profitPage:form.amountCredit')
+        : t('profitPage:form.amount')
+  const hasItems = !!currentProfit?.items?.length
+  const isLegacyPreview = isPreview && !!currentProfit && !hasItems
+  // Editing an older multi-category record: its single amount can't be split
+  // for the user, so the lines come without amounts and this says why.
+  const needsSplit =
+    !isPreview &&
+    !!currentProfit &&
+    !hasItems &&
+    (currentProfit.categories?.length ?? 0) > 1
 
   return (
     <ConfigProvider locale={ukUA}>
@@ -253,6 +242,8 @@ const AddCostForm: React.FC<Props> = ({
           >
             <Input value={activeScope.label} disabled />
           </Form.Item>
+        ) : pickScope ? (
+          <ProfitScopeSelect form={form} disabled={isPreview} />
         ) : (
           <DomainsSelect
             form={form}
@@ -295,39 +286,41 @@ const AddCostForm: React.FC<Props> = ({
           />
         </Form.Item>
 
-        {isPreview ? (
-          <Form.Item
-            name="sum"
-            label={
-              isDebit
-                ? t('profitPage:form.amountDebit')
-                : isCredit
-                  ? t('profitPage:form.amountCredit')
-                  : t('profitPage:form.amount')
-            }
-          >
-            <Input
-              value={currentProfit?.amount}
-              disabled
-              className={s.formInput}
-            />
-          </Form.Item>
+        {isLegacyPreview ? (
+          // Records from before line items: one amount, categories apart.
+          <>
+            <Form.Item name="sum" label={amountLabel}>
+              <Input
+                value={currentProfit?.amount}
+                disabled
+                className={s.formInput}
+              />
+            </Form.Item>
+            <Form.Item label={t('profitPage:form.category')}>
+              <Input
+                value={
+                  currentProfit?.categories?.length
+                    ? currentProfit.categories.join(', ')
+                    : t('profitPage:dashboard.uncategorized')
+                }
+                disabled
+                className={s.formInput}
+              />
+            </Form.Item>
+          </>
         ) : (
-          <Form.Item
-            name="sum"
-            label={
-              type === 'debit'
-                ? t('profitPage:form.amountDebit')
-                : t('profitPage:form.amountCredit')
-            }
-            rules={!disabled && !currentProfit ? validateField('required') : []}
-          >
-            <InputNumber
-              parser={inputNumberParser}
-              placeholder={t('profitPage:form.amountPlaceholder')}
-              className={s.formInput}
-              disabled={disabled}
-            />
+          <Form.Item label={t('profitPage:form.items')} required={!isPreview}>
+            {needsSplit && (
+              <Alert
+                type="warning"
+                showIcon
+                className={s.itemsAlert}
+                message={t('profitPage:form.splitLegacy', {
+                  amount: formatTotal(currentProfit.amount),
+                })}
+              />
+            )}
+            <ItemsField disabled={isPreview} totalLabel={amountLabel} />
           </Form.Item>
         )}
 
@@ -350,22 +343,6 @@ const AddCostForm: React.FC<Props> = ({
             className={s.formInput}
             disabled={disabled}
           />
-        </Form.Item>
-
-        <Form.Item name="categories" label={t('profitPage:form.category')}>
-          {isPreview ? (
-            <Input
-              value={
-                currentProfit?.categories?.length
-                  ? currentProfit.categories.join(', ')
-                  : 'Без категорії'
-              }
-              disabled
-              className={s.formInput}
-            />
-          ) : (
-            <CategoriesField disabled={disabled} />
-          )}
         </Form.Item>
       </Form>
     </ConfigProvider>
