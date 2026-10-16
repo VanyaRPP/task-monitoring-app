@@ -65,6 +65,8 @@ const makeSlot = (
   zIndex: total - i,
 })
 
+const HOVER_CATCHUP_TIME_SCALE = 8
+
 const placeNow = (el: HTMLElement, slot: Slot, skew: number) =>
   gsap.set(el, {
     x: slot.x,
@@ -79,8 +81,8 @@ const placeNow = (el: HTMLElement, slot: Slot, skew: number) =>
   })
 
 const CardSwap: React.FC<CardSwapProps> = ({
-  width = 550,
-  height = 350,
+  width = 650,
+  height = 349,
   cardDistance = 630,
   verticalDistance = 70,
   delay = 5000,
@@ -204,10 +206,13 @@ const CardSwap: React.FC<CardSwapProps> = ({
     if (pauseOnHover) {
       const node = container.current!
       const pause = () => {
-        tlRef.current?.pause()
+        if (tlRef.current?.isActive()) {
+          tlRef.current.timeScale(HOVER_CATCHUP_TIME_SCALE)
+        }
         clearInterval(intervalRef.current)
       }
       const resume = () => {
+        tlRef.current?.timeScale(1)
         tlRef.current?.play()
         intervalRef.current = window.setInterval(swap, delay)
       }
