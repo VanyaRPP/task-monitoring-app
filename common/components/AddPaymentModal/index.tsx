@@ -1,5 +1,6 @@
 import { useGetCustomServicesByDomainQuery } from '@common/api/customServicesApi/customServices.api'
 import { useCreateCustomServiceMutation } from '@common/api/customServicesApi/customServices.api'
+import { buildPreviewMonthService } from '../Forms/AddPaymentForm/month-service-placeholder'
 import {
   useAddDomainMutation,
   useGetDomainByPkQuery,
@@ -542,6 +543,10 @@ const AddPaymentModal: FC<Props> = ({
       return
     }
 
+    // Keep the raw form value: it may be a month placeholder, which
+    // prepareMonthService replaces with a real id (and the date is lost).
+    const rawMonthService = values.monthService
+
     // A brand-new provider isn't created until final submit, so its month
     // service can't be resolved yet — keep the placeholder for the preview and
     // let handleSubmit materialize the provider and resolve it for real.
@@ -554,10 +559,16 @@ const AddPaymentModal: FC<Props> = ({
         return
       }
     }
-
     setCurrPayment({
       ...values,
-      monthService: monthServiceId,
+      // The preview templates read monthService.date, so pass { _id, date }
+      // instead of a bare id/placeholder.
+      monthService:
+        buildPreviewMonthService({
+          monthServiceId,
+          service,
+          placeholder: rawMonthService,
+        }) ?? monthServiceId,
       provider,
       reciever,
     })

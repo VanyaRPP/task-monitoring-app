@@ -2,6 +2,10 @@ import { render, screen } from '@testing-library/react'
 import dayjs from 'dayjs'
 import GroupedReceiptForm from './index'
 import PriceList from '../AddPaymentForm/PriceList'
+import {
+  buildMonthServicePlaceholder,
+  buildPreviewMonthService,
+} from '../AddPaymentForm/month-service-placeholder'
 
 /*
  * Repro: invoice duplicated from August, service month changed to September,
@@ -103,11 +107,14 @@ const savedPayment = {
 }
 
 // What the create/edit preview gets: AddPaymentModal.handleOk ->
-// setCurrPayment({ ...form.validateFields(), monthService: resolvedId }).
+// setCurrPayment({ ...values, monthService: { _id, date } }).
 const formPreviewPayment = (overrides: Record<string, unknown> = {}) => ({
   ...base,
   invoiceCreationDate: dayjs('2026-10-13T09:00:00.000Z'),
-  monthService: SEPTEMBER_SERVICE_ID,
+  monthService: buildPreviewMonthService({
+    monthServiceId: SEPTEMBER_SERVICE_ID,
+    service: { date: '2026-09-01T00:00:00.000Z' },
+  }),
   ...overrides,
 })
 
@@ -148,10 +155,17 @@ describe('Official template — "Призначення" service month', () => {
   })
 
   it('create preview with a new-provider month placeholder: shows the picked month', async () => {
+    const placeholder = buildMonthServicePlaceholder(dayjs('2026-09-15'))
+
     render(
       <GroupedReceiptForm
         currPayment={
-          formPreviewPayment({ monthService: 'month-2026-09' }) as any
+          formPreviewPayment({
+            monthService: buildPreviewMonthService({
+              monthServiceId: placeholder,
+              placeholder,
+            }),
+          }) as any
         }
         paymentActions={{ preview: false, edit: false }}
       />
