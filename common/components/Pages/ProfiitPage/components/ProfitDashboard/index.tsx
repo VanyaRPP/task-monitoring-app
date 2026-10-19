@@ -22,6 +22,8 @@ import {
   getCurrencySymbol,
   getCurrencyShortLabel,
   normalizeCurrency,
+  plusFloat,
+  toRoundFixed,
 } from '@utils/helpers'
 import { money } from '../ProfitTable/tableConfig'
 import { splitProfitByCategory } from '@utils/profit-items'
@@ -58,6 +60,9 @@ const compactMoney = (value: number, currency: string) => {
   if (abs >= 1_000) return `${symbol} ${Math.round(value / 1_000)} тис`
   return `${symbol} ${value}`
 }
+
+// Below this share a slice is too thin to hold its percentage label.
+const PIE_LABEL_MIN_PERCENT = 5
 
 const periodKeyOf = (d: Dayjs, periodType: string) => {
   if (periodType === 'Month') return d.format('YYYY-MM')
@@ -372,11 +377,21 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({
       })
     })
 
-    return Object.entries(categoriesMap).map(([type, value]) => ({
-      type,
-      value,
-    }))
+    // A zero or negative slice has no angle and only produces a stray label.
+    // Biggest first, so the legend reads in the same order as the ring.
+    return Object.entries(categoriesMap)
+      .map(([type, value]) => ({ type, value: Number(toRoundFixed(value)) }))
+      .filter((item) => item.value > 0)
+      .sort((a, b) => b.value - a.value)
   }, [filteredData, t, currency])
+
+  const pieTotal = useMemo(
+    () => pieData.reduce((sum, item) => plusFloat(sum, item.value), 0),
+    [pieData]
+  )
+
+  const piePercent = (value: number) =>
+    pieTotal ? (value / pieTotal) * 100 : 0
 
   const columnConfig = {
     data: columnData,
@@ -429,17 +444,26 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({
     radius: 1,
     innerRadius: 0.6,
     theme: isDarkMode ? 'dark' : 'light',
+    // Category names live in the legend: outside name labels collided on
+    // small neighbouring slices and got clipped by the card. The ring only
+    // carries a percentage, and only where the slice is wide enough for it.
     label: {
-      text: 'type',
-      position: 'outside',
-      style: { fill: token.colorText, textAlign: 'center' },
+      text: (d: { value: number }) => {
+        const percent = piePercent(d.value)
+        return percent >= PIE_LABEL_MIN_PERCENT ? `${percent.toFixed(0)}%` : ''
+      },
+      position: 'inside',
+      style: { fill: '#fff', fontWeight: 600, fontSize: 12 },
+      transform: [{ type: 'overlapHide' }],
     },
     tooltip: {
       items: [
         {
           channel: 'y',
           valueFormatter: (value: number) =>
-            `${getCurrencySymbol(currency)} ${money(value)}`,
+            `${getCurrencySymbol(currency)} ${money(value)} (${piePercent(
+              value
+            ).toFixed(1)}%)`,
         },
       ],
     },
