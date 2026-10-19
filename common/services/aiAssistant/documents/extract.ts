@@ -63,7 +63,7 @@ const providerError = (error: unknown): APICallError | null => {
  * whose `failed_generation` has already dropped the half-written rows, so
  * there is nothing to salvage - only to retry on a smaller strip.
  */
-const translate = (error: unknown): unknown => {
+export const translate = (error: unknown): unknown => {
   const cause = providerError(error)
   if (!cause) return error
 

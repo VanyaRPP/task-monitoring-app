@@ -1,105 +1,106 @@
-import { useAddPaymentMutation } from '@common/api/paymentApi/payment.api'
+import { useDraftInvoiceFromTextMutation } from '@common/api/paymentApi/payment.api'
+import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
+import type { InvoiceTextDraft } from '@common/services/aiAssistant/invoiceFromText'
+import { validateField } from '@assets/features/validators'
+import { toPaymentFormData } from '@components/AIChat/invoiceDraft'
+import AddPaymentModal from '@components/AddPaymentModal'
 import CompanySelect from '@components/Forms/AddPaymentForm/CompanySelect'
-import { useResolveMonthServiceId } from '@components/Forms/AddPaymentForm/useResolveMonthServiceId'
 import Modal from '@components/UI/ModalWindow'
 import AddressesSelect from '@components/UI/Reusable/AddressesSelect'
 import DomainsSelect from '@components/UI/Reusable/DomainsSelect'
 import PaymentTypeSelect from '@components/UI/Reusable/PaymentTypeSelect'
-import useCompany from '@modules/hooks/useCompany'
-import {
-  getPaymentProviderAndReciever,
-  normalizeCurrency,
-} from '@utils/helpers'
+import { Operations } from '@utils/constants'
 import { Form, Input, message } from 'antd'
 import { useState } from 'react'
-import { attachMonthServices, buildImportPayments } from './buildImportPayments'
+
+const INPUT_PLACEHOLDER = [
+  'September: rent 5000, electricity 150 kWh at 4.32, garbage removal 200',
+].join('\n')
+
+interface ITextInvoiceDraft {
+  paymentData: ReturnType<typeof toPaymentFormData<InvoiceTextDraft>>
+  extraLines: IPaymentField[]
+  lines?: IPaymentField[]
+}
 
 const ImportInvoicesModal = ({ closeModal }) => {
-  const [addPayment, { isLoading }] = useAddPaymentMutation()
   const [form] = Form.useForm()
   const [isValueChanged, setIsValueChanged] = useState(false)
   const domainId = Form.useWatch('domain', form)
-  const streetId = Form.useWatch('street', form)
   const companyId = Form.useWatch('company', form)
-  const paymentMethod = Form.useWatch('operation', form)
-  const { company } = useCompany({ companyId })
-  const { data: newInvoiceNumber = 1 } = useGetPaymentNumberQuery({})
-  const resolveMonthServiceId = useResolveMonthServiceId()
+  const [draftInvoiceFromText, { isLoading: isDrafting }] =
+    useDraftInvoiceFromTextMutation()
+  const [textDraft, setTextDraft] = useState<ITextInvoiceDraft | null>(null)
 
   const handleSave = async () => {
-    const values = await form.validateFields()
-    const { provider, reciever } = getPaymentProviderAndReciever(company)
+    const values = await form.validateFields().catch(() => null)
+    if (!values) return
 
-    const payments = buildImportPayments({
-      rows: JSON.parse(values.json),
-      firstInvoiceNumber: newInvoiceNumber,
-      formData: {
-        operation: paymentMethod,
-        domain: domainId,
-        street: streetId,
-        company: companyId,
-        currency: normalizeCurrency(company?.currency),
-      },
-      provider,
-      reciever,
-    })
-
-    const invoices = await attachMonthServices(payments, (placeholder) =>
-      resolveMonthServiceId(placeholder, domainId, streetId)
-    ).catch((e) => {
-      console.error('resolveMonthServiceId failed', e)
-      message.error('Не вдалося підготувати місяць послуг')
-      return null
-    })
-    if (!invoices) return
-
-    message.success(`Рахунків до імпорту: ${invoices.length}`)
-    // One after another, so the server numbers them in the file's order.
-    const saveAll = async () => {
-      const responses: Awaited<ReturnType<typeof addPayment>>[] = []
-      for (const invoice of invoices) {
-        responses.push(await addPayment(invoice))
-      }
-      return responses
+    if (!domainId || !companyId) {
+      message.warning('Спершу оберіть надавача і компанію')
+      return
     }
-    await saveAll()
-      .then((responses) => {
-        responses.forEach((response) => {
-          if (response?.data?.success) {
-            message.success(
-              `Додано рахунок для компанії ${response.data.data.reciever.companyName}`
-            )
-          } else {
-            message.error(`Помилка при додаванні рахунку для компанії`)
-          }
-        })
+
+    try {
+      const draft = await draftInvoiceFromText({
+        text: values.input.trim(),
+        companyId,
+        domainId,
+      }).unwrap()
+      setTextDraft({
+        paymentData: toPaymentFormData(draft),
+        extraLines: draft.extraLines ?? [],
+        lines:
+          'replaceLines' in draft && draft.replaceLines
+            ? draft.invoice
+            : undefined,
       })
-      .catch((err) => {
-        message.error(err?.message)
-      })
-    closeModal()
+    } catch (error) {
+      message.error(error?.data?.message || 'Не вдалося підготувати рахунок')
+    }
   }
 
   return (
-    <Modal
-      title="Імпорт інвойсів"
-      onOk={handleSave}
-      confirmLoading={isLoading}
-      changed={() => isValueChanged}
-      onCancel={closeModal}
-      okText="Імпортувати"
-      cancelText={'Закрити'}
-    >
-      <Form form={form} onValuesChange={() => setIsValueChanged(true)}>
-        <DomainsSelect form={form} />
-        <AddressesSelect form={form} />
-        <CompanySelect form={form} />
-        <PaymentTypeSelect />
-        <Form.Item name="json" label="Опис">
-          <Input.TextArea rows={20} />
-        </Form.Item>
-      </Form>
-    </Modal>
+    <>
+      <Modal
+        title="Імпорт інвойсів"
+        onOk={handleSave}
+        confirmLoading={isDrafting}
+        changed={() => isValueChanged}
+        onCancel={closeModal}
+        okText="Імпортувати"
+        cancelText={'Закрити'}
+      >
+        <Form
+          form={form}
+          initialValues={{ operation: Operations.Debit }}
+          onValuesChange={() => setIsValueChanged(true)}
+        >
+          <DomainsSelect form={form} />
+          <AddressesSelect form={form} />
+          <CompanySelect form={form} />
+          <PaymentTypeSelect />
+          <Form.Item
+            name="input"
+            label="Опис"
+            rules={validateField('required')}
+          >
+            <Input.TextArea rows={14} placeholder={INPUT_PLACEHOLDER} />
+          </Form.Item>
+        </Form>
+      </Modal>
+      {textDraft && (
+        <AddPaymentModal
+          paymentData={textDraft.paymentData}
+          invoiceLines={textDraft.lines}
+          paymentActions={{ edit: false, preview: false }}
+          closeModal={(success) => {
+            setTextDraft(null)
+            if (success) closeModal()
+          }}
+        />
+      )}
+    </>
   )
 }
 

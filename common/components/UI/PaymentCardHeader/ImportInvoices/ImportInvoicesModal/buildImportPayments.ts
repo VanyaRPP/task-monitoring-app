@@ -27,13 +27,34 @@ export interface ImportedInvoiceRow {
 
 export interface BuildImportPaymentsParams {
   rows: ImportedInvoiceRow[]
-  firstInvoiceNumber: number
   formData: Pick<
     BuildPaymentFormData,
     'operation' | 'domain' | 'street' | 'company' | 'currency'
   >
   provider: IProvider
   reciever: IReciever
+}
+
+export type ImportInput =
+  | { kind: 'rows'; rows: ImportedInvoiceRow[] }
+  | { kind: 'text'; text: string }
+  | { kind: 'invalid'; reason: string }
+
+export const parseImportInput = (input: string): ImportInput => {
+  const value = (input ?? '').trim()
+  if (!/^[[{]/.test(value)) return { kind: 'text', text: value }
+
+  try {
+    const parsed = JSON.parse(value)
+    return Array.isArray(parsed)
+      ? { kind: 'rows', rows: parsed }
+      : { kind: 'invalid', reason: 'JSON має бути масивом: [ {...}, {...} ]' }
+  } catch {
+    return {
+      kind: 'invalid',
+      reason: 'JSON містить помилку - перевірте лапки й коми',
+    }
+  }
 }
 
 const parseImportDate = (value: string, index: number): Dayjs => {
@@ -56,7 +77,6 @@ const parseImportSum = (value: number | string, index: number): number => {
 
 export const buildImportPayments = ({
   rows,
-  firstInvoiceNumber,
   formData,
   provider,
   reciever,
@@ -65,7 +85,6 @@ export const buildImportPayments = ({
     buildPaymentPayload({
       formData: {
         ...formData,
-        invoiceNumber: firstInvoiceNumber + index,
         invoiceCreationDate: parseImportDate(row.monthService, index),
         generalSum: parseImportSum(row.generalSum, index),
       },

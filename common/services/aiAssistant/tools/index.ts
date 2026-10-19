@@ -44,7 +44,7 @@ const withoutDraftForModel = {
 // from the Service record, quantity × price for named lines). Built per
 // request: "the current month" must be today's, not the month the server
 // process happened to start in.
-const makePreviewInputSchema = (now: Date) =>
+export const makePreviewInputSchema = (now: Date) =>
   z.object({
     companyId: z.string().optional().describe('Знайдена компанія-отримувач.'),
     companyName: z
@@ -104,7 +104,7 @@ const makePreviewInputSchema = (now: Date) =>
 type PreviewInput = z.infer<ReturnType<typeof makePreviewInputSchema>>
 
 // Normalises month/year defaults.
-function withDefaults(input: PreviewInput, now: Date) {
+export function withDefaults(input: PreviewInput, now: Date) {
   return {
     ...input,
     month: input.month ?? now.getMonth() + 1,

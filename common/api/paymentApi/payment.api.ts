@@ -33,6 +33,7 @@ import type {
   Resolution,
 } from '@utils/debt-calculation/statement-plan'
 import type { IStatementImport } from '@utils/debt-calculation/statement'
+import type { InvoiceTextDraft } from '@common/services/aiAssistant/invoiceFromText'
 
 /** Months read off photos, bound for one company's payments. */
 export interface IStatementImportRequest {
@@ -231,6 +232,18 @@ export const paymentApi = createApi({
         response ? ['Payment', 'PaymentAudit'] : [],
       onQueryStarted: invalidatePaymentSideEffects,
     }),
+    draftInvoiceFromText: builder.mutation<
+      InvoiceTextDraft,
+      { text: string; companyId: string; domainId: string }
+    >({
+      query: (body) => ({
+        url: 'spacehub/payment/draft-from-text',
+        method: 'POST',
+        body,
+      }),
+      transformResponse: (response: { data: { draft: InvoiceTextDraft } }) =>
+        response.data.draft,
+    }),
     getPaymentNumber: builder.query<number, object>({
       query: () => `spacehub/payment/number`,
       transformResponse: (response: IGetPaymentNumberResponse) => response.data,
@@ -414,4 +427,5 @@ export const {
   useSendPaymentEmailMutation,
   usePlanStatementImportMutation,
   useImportStatementMutation,
+  useDraftInvoiceFromTextMutation,
 } = paymentApi
