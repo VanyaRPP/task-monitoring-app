@@ -86,11 +86,19 @@ export default async function handler(
       }
     )
 
+    // "Stop" in the widget aborts the fetch; stop generating (and paying for)
+    // the rest of the answer once the client is gone.
+    const abortController = new AbortController()
+    res.on('close', () => {
+      if (!res.writableFinished) abortController.abort()
+    })
+
     const result = streamText({
       model,
       system: SYSTEM_PROMPT,
       messages: modelMessages,
       tools: buildAssistantTools(userContext),
+      abortSignal: abortController.signal,
       // Without this the SDK stops after the first step (a tool call) and never
       // produces a textual answer. Allow a few steps so the model can call a
       // tool and then respond based on its result.

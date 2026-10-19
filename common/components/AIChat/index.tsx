@@ -4,30 +4,27 @@ import React, {
   createContext,
   useCallback,
   useContext,
+  useMemo,
   useRef,
   useEffect,
   useState,
-  KeyboardEvent,
 } from 'react'
 import { useChat, type UIMessage } from '@ai-sdk/react'
-import { DefaultChatTransport, type FileUIPart } from 'ai'
+import { DefaultChatTransport } from 'ai'
+import { ConfigProvider, FloatButton, Button, Avatar, Typography } from 'antd'
 import {
-  FloatButton,
-  Input,
-  Button,
-  Avatar,
-  Typography,
-  Space,
-  Spin,
-} from 'antd'
-import {
+  ArrowDownOutlined,
   CameraOutlined,
   RobotOutlined,
-  SendOutlined,
-  UserOutlined,
   CloseOutlined,
+  MinusOutlined,
+  FullscreenOutlined,
+  FullscreenExitOutlined,
+  ReloadOutlined,
+  UndoOutlined,
 } from '@ant-design/icons'
-import Link from 'next/link'
+import cn from 'classnames'
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { useIsAdmin } from '@modules/hooks/useIsAdmin'
 import { useAppSelector } from '@modules/store/hooks'
 import AddPaymentModal from '@components/AddPaymentModal'
@@ -38,13 +35,26 @@ import RealEstateModal from '@components/UI/RealEstateComponents/RealEstateModal
 import AddStreetModal from '@components/AddStreetModal'
 import DomainModal from '@components/UI/DomainsComponents/DomainModal'
 import type { ExpenseDraft } from '@common/services/aiAssistant/expenseActions'
-import { previewReply } from '@common/services/aiAssistant/previewReply'
 import { message } from 'antd'
 import {
   DOCUMENT_BATCH_PART,
   type IDocumentBatchPart,
 } from '@common/services/aiAssistant/documents/types'
+import ResizeHandles from './floatingWindow/ResizeHandles'
+import { useFloatingWindow } from './floatingWindow/useFloatingWindow'
 import { toPaymentFormData } from './invoiceDraft'
+import ChatComposer from './messages/ChatComposer'
+import ChatMarkdown from './messages/ChatMarkdown'
+import ChatTooltip from './messages/ChatTooltip'
+import MessageActions from './messages/MessageActions'
+import {
+  WELCOME_MESSAGE_ID,
+  describeChatError,
+  getMessageText,
+  isPhoto,
+  producedDraft,
+} from './messages/messageParts'
+import { useChatScroll } from './messages/useChatScroll'
 import BatchCard from './photoImport/BatchCard'
 import { shrinkImage } from './photoImport/imageTools'
 import {
@@ -56,73 +66,17 @@ import styles from './style.module.scss'
 
 const { Text } = Typography
 
+const REGENERATE_BLOCKED_REASON =
+  'Ця відповідь відкрила форму. Щоб не створити запис двічі, поставте нове запитання.'
+
+type RegenerateState = 'none' | 'enabled' | 'blocked'
+
 interface ChatMessageProps {
   message: UIMessage
+  showActions: boolean
+  regenerate: RegenerateState
+  onRegenerate: (messageId: string) => void
 }
-
-/**
- * Simple parser to render Markdown links [Text](/path) as Next.js Links
- * and handle recommendation blocks.
- */
-const renderMessageContent = (content: string) => {
-  const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g
-  const parts = content.split(linkRegex)
-  const elements = []
-
-  for (let i = 0; i < parts.length; i++) {
-    if (i % 3 === 0) {
-      const text = parts[i]
-      if (text) {
-        if (text.trim().startsWith('>')) {
-          elements.push(
-            <div key={`quote-${i}`} className={styles.recommendationBlock}>
-              {text.replace(/^>\s*/, '')}
-            </div>
-          )
-        } else {
-          elements.push(<span key={`text-${i}`}>{text}</span>)
-        }
-      }
-    } else if (i % 3 === 1) {
-      const linkText = parts[i]
-      const linkUrl = parts[i + 1]
-      elements.push(
-        <Link key={`link-${i}`} href={linkUrl} className={styles.chatLink}>
-          {linkText}
-        </Link>
-      )
-      i++
-    }
-  }
-
-  return elements
-}
-
-const getMessageText = (message: UIMessage): string => {
-  if (message.parts && message.parts.length > 0) {
-    const text = message.parts
-      .filter(
-        (part): part is { type: 'text'; text: string } => part.type === 'text'
-      )
-      .map((part) => part.text)
-      .join('')
-    // A preview tool ends the turn without model text: its reply is written
-    // here, from the tool's summary.
-    const previews = message.parts
-      .map((part) => {
-        const p = part as { type: string; state?: string; output?: unknown }
-        return p.type.startsWith('tool-') && p.state === 'output-available'
-          ? previewReply(p.type.slice('tool-'.length), p.output)
-          : ''
-      })
-      .filter(Boolean)
-    return [text, ...previews].filter(Boolean).join('\n\n')
-  }
-  return ''
-}
-
-const isPhoto = (part: UIMessage['parts'][number]): part is FileUIPart =>
-  part.type === 'file' && part.mediaType?.startsWith('image/')
 
 const BATCH_PART_TYPE = `data-${DOCUMENT_BATCH_PART}`
 
@@ -171,81 +125,124 @@ const chatTransport = new DefaultChatTransport<UIMessage>({
   }),
 })
 
-const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
-  const { batches, updateCard } = useContext(DocumentBatchesContext)
-  const isUser = message.role === 'user'
-  const text = getMessageText(message)
-  const photos = (message.parts ?? []).filter(isPhoto)
-  const batchIds = getBatchIds(message)
+const AiAvatar: React.FC = () => (
+  <Avatar size={20} icon={<RobotOutlined />} className={styles.aiAvatar} />
+)
 
-  if (!text && photos.length === 0 && batchIds.length === 0) return null
+// Memoized so window drag/resize/maximize re-renders skip the message list.
+const ChatMessage: React.FC<ChatMessageProps> = React.memo(
+  ({ message, showActions, regenerate, onRegenerate }) => {
+    const { batches, updateCard } = useContext(DocumentBatchesContext)
+    const isUser = message.role === 'user'
+    const text = getMessageText(message)
+    const photos = (message.parts ?? []).filter(isPhoto)
+    const batchIds = getBatchIds(message)
 
-  // The import cards need the full width of the window, not a bubble.
-  if (batchIds.length > 0) {
+    if (!text && photos.length === 0 && batchIds.length === 0) return null
+
+    // The import cards need the full width of the window, not a bubble.
+    if (batchIds.length > 0) {
+      return (
+        <div className={cn(styles.messageRow, styles.aiRow)}>
+          <AiAvatar />
+          <div className={styles.cardColumn}>
+            {batchIds.map((batchId) => (
+              <BatchCard
+                key={batchId}
+                batch={batches[batchId]}
+                onCardChange={(key, patch) => updateCard(batchId, key, patch)}
+              />
+            ))}
+          </div>
+        </div>
+      )
+    }
+
+    if (isUser) {
+      return (
+        <div className={cn(styles.messageRow, styles.userRow)}>
+          <div className={cn(styles.messageBubble, styles.userBubble)}>
+            {photos.map((photo, index) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                key={index}
+                src={photo.url}
+                alt="Фото документа"
+                className={styles.messagePhoto}
+              />
+            ))}
+            {/* What the user typed is shown as typed, not as Markdown. */}
+            {text && <div className={styles.plainText}>{text}</div>}
+          </div>
+        </div>
+      )
+    }
+
     return (
-      <div className={`${styles.messageRow} ${styles.aiRow} ${styles.cardRow}`}>
-        <Avatar
-          size={24}
-          icon={<RobotOutlined />}
-          className={styles.aiAvatar}
-        />
-        <div className={styles.cardColumn}>
-          {batchIds.map((batchId) => (
-            <BatchCard
-              key={batchId}
-              batch={batches[batchId]}
-              onCardChange={(key, patch) => updateCard(batchId, key, patch)}
+      <div className={cn(styles.messageRow, styles.aiRow)}>
+        <AiAvatar />
+        <div className={styles.aiColumn}>
+          <div className={cn(styles.messageBubble, styles.aiBubble)}>
+            <ChatMarkdown text={text} />
+          </div>
+          {showActions && (
+            <MessageActions
+              text={text}
+              onRegenerate={
+                regenerate === 'enabled'
+                  ? () => onRegenerate(message.id)
+                  : undefined
+              }
+              regenerateDisabledReason={
+                regenerate === 'blocked' ? REGENERATE_BLOCKED_REASON : undefined
+              }
             />
-          ))}
+          )}
         </div>
       </div>
     )
   }
+)
+ChatMessage.displayName = 'ChatMessage'
 
-  return (
+const TypingIndicator: React.FC = () => (
+  <div className={cn(styles.messageRow, styles.aiRow)}>
+    <AiAvatar />
     <div
-      className={`${styles.messageRow} ${isUser ? styles.userRow : styles.aiRow}`}
+      className={cn(styles.messageBubble, styles.aiBubble, styles.typing)}
+      role="status"
     >
-      {!isUser && (
-        <Avatar
-          size={24}
-          icon={<RobotOutlined />}
-          className={styles.aiAvatar}
-        />
-      )}
-      <div
-        className={`${styles.messageBubble} ${isUser ? styles.userBubble : styles.aiBubble}`}
-      >
-        {photos.map((photo, index) => (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            key={index}
-            src={photo.url}
-            alt="Фото документа"
-            className={styles.messagePhoto}
-          />
-        ))}
-        {text && (
-          <div className={styles.messageText}>{renderMessageContent(text)}</div>
-        )}
-      </div>
-      {isUser && (
-        <Avatar
-          size={24}
-          icon={<UserOutlined />}
-          className={styles.userAvatar}
-        />
-      )}
+      <span className={styles.typingDots} aria-hidden>
+        <i />
+        <i />
+        <i />
+      </span>
+      Генерую відповідь…
     </div>
-  )
+  </div>
+)
+
+interface HeaderButtonProps {
+  label: string
+  icon: React.ReactNode
+  onClick: () => void
 }
 
-// The server explains a failed answer in Ukrainian (see describeChatError);
-// anything else - a dropped connection, a gateway page - gets the generic line.
-const chatErrorText = (error: Error) =>
-  /[а-яіїєґ]/i.test(error?.message ?? '')
-    ? error.message
-    : "Помилка з'єднання. Спробуйте ще раз."
+const HeaderButton: React.FC<HeaderButtonProps> = ({
+  label,
+  icon,
+  onClick,
+}) => (
+  <ChatTooltip title={label} placement="bottom">
+    <Button
+      type="text"
+      size="small"
+      icon={icon}
+      aria-label={label}
+      onClick={onClick}
+    />
+  </ChatTooltip>
+)
 
 const AIChat: React.FC = () => {
   // Gate: the assistant is currently available to admins only (matches the
@@ -258,10 +255,18 @@ const AIChat: React.FC = () => {
     '--ai-chat-window-bottom': `${144 + menuOffset}px`,
   } as React.CSSProperties
 
+  const { data: currentUser } = useGetCurrentUserQuery()
+  const floating = useFloatingWindow({
+    userKey: currentUser?._id ? String(currentUser._id) : undefined,
+    bottomOffset: 144 + menuOffset,
+  })
+
   const [open, setOpen] = useState<boolean>(false)
+  // Minimized keeps a marker on the open button; closed does not.
+  const [minimized, setMinimized] = useState<boolean>(false)
   const [showHint, setShowHint] = useState<boolean>(false)
+  // Lives here, not in the window, so closing/moving the window keeps it.
   const [inputValue, setInputValue] = useState<string>('')
-  const messagesEndRef = useRef<HTMLDivElement>(null)
   const photoInputRef = useRef<HTMLInputElement>(null)
   const [isPreparingPhoto, setIsPreparingPhoto] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
@@ -292,11 +297,19 @@ const AIChat: React.FC = () => {
     service: any
   } | null>(null)
 
-  const { messages, setMessages, sendMessage, status, error } = useChat({
+  const {
+    messages,
+    setMessages,
+    sendMessage,
+    regenerate,
+    stop,
+    status,
+    error,
+  } = useChat({
     transport: chatTransport,
     messages: [
       {
-        id: 'welcome',
+        id: WELCOME_MESSAGE_ID,
         role: 'assistant',
         parts: [
           {
@@ -308,9 +321,11 @@ const AIChat: React.FC = () => {
     ],
   })
 
+  // warn, not error: in dev Next's overlay treats `console.error(_, Error)` as
+  // an unhandled runtime error, though the chat already shows it with Retry.
   useEffect(() => {
     if (error) {
-      console.error('AIChat Error:', error)
+      console.warn('AIChat Error:', error.message)
     }
   }, [error])
 
@@ -342,6 +357,10 @@ const AIChat: React.FC = () => {
     start: startBatch,
     updateCard,
   } = useDocumentImports(onBatchDone)
+  const batchesContext = useMemo(
+    () => ({ batches, updateCard }),
+    [batches, updateCard]
+  )
 
   // Watch for completed `previewInvoice` / `previewCredit` /
   // `previewExpenses` / `previewService` / `previewCompany` /
@@ -418,12 +437,23 @@ const AIChat: React.FC = () => {
   }, [messages])
 
   const isLoading = status === 'streaming' || status === 'submitted'
+  const lastMessage = messages[messages.length - 1]
+  // Tool calls stream before any text, and an empty answer renders nothing.
+  const showTyping =
+    isLoading &&
+    (lastMessage?.role === 'user' ||
+      (lastMessage?.role === 'assistant' && !getMessageText(lastMessage)))
+  // Only the latest answer can be regenerated: an older one would drop
+  // everything said after it.
+  const regenerableId =
+    !isLoading &&
+    lastMessage?.role === 'assistant' &&
+    lastMessage.id !== WELCOME_MESSAGE_ID &&
+    getBatchIds(lastMessage).length === 0
+      ? lastMessage.id
+      : undefined
 
-  useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' })
-    }
-  }, [messages, open])
+  const scroll = useChatScroll({ enabled: open, contentKey: messages })
 
   // Hint effect: show after 1s, hide after 5s more
   useEffect(() => {
@@ -447,6 +477,23 @@ const AIChat: React.FC = () => {
 
     sendMessage({ text: trimmed })
     setInputValue('')
+    scroll.scrollToBottom()
+  }
+
+  const { scrollToBottom } = scroll
+  const handleRegenerate = useCallback(
+    (messageId: string) => {
+      scrollToBottom()
+      void regenerate({ messageId })
+    },
+    [regenerate, scrollToBottom]
+  )
+
+  // A failed request leaves the history as it was (plus any partial answer,
+  // which regenerate replaces), so retrying is a regenerate.
+  const handleRetry = (): void => {
+    scrollToBottom()
+    void regenerate()
   }
 
   /**
@@ -478,6 +525,7 @@ const AIChat: React.FC = () => {
           parts: [{ type: BATCH_PART_TYPE, data: { batchId } } as any],
         },
       ])
+      scrollToBottom()
     } catch {
       message.error('Не вдалося відкрити фото. Спробуйте JPG або PNG.')
     } finally {
@@ -505,13 +553,6 @@ const AIChat: React.FC = () => {
     void handleFiles(Array.from(event.dataTransfer?.files ?? []))
   }
 
-  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>): void => {
-    if (e.key === 'Enter' && !e.shiftKey && !isLoading) {
-      e.preventDefault()
-      handleSend()
-    }
-  }
-
   // Hidden for non-admins. Placed after all hooks so the Rules of Hooks hold.
   if (!isAdmin) return null
 
@@ -522,8 +563,11 @@ const AIChat: React.FC = () => {
         icon={<RobotOutlined />}
         type="primary"
         tooltip={{ title: 'AI Помічник', placement: 'left' }}
+        badge={minimized ? { dot: true } : undefined}
+        aria-label="AI Помічник"
         onClick={() => {
           setOpen(!open)
+          setMinimized(false)
           setShowHint(false)
         }}
         className={styles.floatButton}
@@ -557,8 +601,15 @@ const AIChat: React.FC = () => {
       {open && (
         <div
           data-ai-chat
-          className={`${styles.chatWindow} ${isDragging ? styles.chatDragging : ''}`}
-          style={windowStyle}
+          ref={floating.windowRef}
+          role="dialog"
+          aria-label="AI Помічник"
+          className={cn(styles.chatWindow, {
+            [styles.chatDragging]: isDragging,
+            [styles.floatingWindow]: floating.isFloating,
+            [styles.maximizedWindow]: floating.isMaximized,
+          })}
+          style={{ ...windowStyle, ...floating.style }}
           onPaste={handlePaste}
           onDragOver={(event) => {
             if (
@@ -582,166 +633,236 @@ const AIChat: React.FC = () => {
               Відпустіть, щоб надіслати фото
             </div>
           )}
-          <div className={styles.chatHeader}>
-            <Space>
+          {floating.isFloating && !floating.isMaximized && (
+            <ResizeHandles onResizePointerDown={floating.onResizePointerDown} />
+          )}
+          <div
+            className={cn(styles.chatHeader, {
+              [styles.draggableHeader]:
+                floating.isFloating && !floating.isMaximized,
+            })}
+            data-testid="ai-chat-header"
+            onPointerDown={floating.onHeaderPointerDown}
+            onDoubleClick={floating.onHeaderDoubleClick}
+          >
+            <div className={styles.headerTitle}>
               <Avatar
-                size={24}
+                size={22}
                 icon={<RobotOutlined />}
-                className={styles.aiAvatar}
+                className={styles.headerAvatar}
               />
-              <Text strong style={{ color: 'white' }}>
+              <Text strong ellipsis className={styles.headerText}>
                 AI Помічник
               </Text>
-            </Space>
-            <Button
-              type="text"
-              icon={<CloseOutlined style={{ color: 'white' }} />}
-              onClick={() => setOpen(false)}
-              size="small"
-            />
-          </div>
-
-          <div className={styles.messagesContainer}>
-            <DocumentBatchesContext.Provider value={{ batches, updateCard }}>
-              {messages.map((message) => (
-                <ChatMessage key={message.id} message={message} />
-              ))}
-            </DocumentBatchesContext.Provider>
-
-            {isLoading &&
-              (messages[messages.length - 1]?.role as string) === 'user' && (
-                <div className={`${styles.messageRow} ${styles.aiRow}`}>
-                  <Avatar
-                    size={24}
-                    icon={<RobotOutlined />}
-                    className={styles.aiAvatar}
+            </div>
+            <div className={styles.headerControls}>
+              {floating.isFloating && (
+                <>
+                  <HeaderButton
+                    label="Стандартний розмір і позиція"
+                    icon={<UndoOutlined />}
+                    onClick={floating.reset}
                   />
-                  <div className={`${styles.messageBubble} ${styles.aiBubble}`}>
-                    <Spin size="small" />
-                  </div>
-                </div>
+                  <HeaderButton
+                    label={floating.isMaximized ? 'Відновити' : 'Розгорнути'}
+                    icon={
+                      floating.isMaximized ? (
+                        <FullscreenExitOutlined />
+                      ) : (
+                        <FullscreenOutlined />
+                      )
+                    }
+                    onClick={floating.toggleMaximize}
+                  />
+                </>
               )}
+              <HeaderButton
+                label="Згорнути"
+                icon={<MinusOutlined />}
+                onClick={() => {
+                  setOpen(false)
+                  setMinimized(true)
+                }}
+              />
+              <HeaderButton
+                label="Закрити"
+                icon={<CloseOutlined />}
+                onClick={() => {
+                  setOpen(false)
+                  setMinimized(false)
+                }}
+              />
+            </div>
+          </div>
 
-            {error && (
-              <div className={styles.errorMessage}>
-                <Text type="danger" style={{ fontSize: '12px' }}>
-                  {chatErrorText(error)}
-                </Text>
+          <div className={styles.messagesArea}>
+            <div
+              ref={scroll.containerRef}
+              className={styles.messagesContainer}
+              data-testid="ai-chat-messages"
+              // Focusable so the history scrolls with arrows/PageUp/PageDown.
+              tabIndex={0}
+              role="region"
+              aria-label="Повідомлення чату"
+              onScroll={scroll.onScroll}
+            >
+              <div ref={scroll.contentRef} className={styles.messagesContent}>
+                <DocumentBatchesContext.Provider value={batchesContext}>
+                  {messages.map((message) => (
+                    <ChatMessage
+                      key={message.id}
+                      message={message}
+                      showActions={
+                        message.id !== WELCOME_MESSAGE_ID &&
+                        !(isLoading && message === lastMessage)
+                      }
+                      regenerate={
+                        message.id !== regenerableId
+                          ? 'none'
+                          : producedDraft(message)
+                            ? 'blocked'
+                            : 'enabled'
+                      }
+                      onRegenerate={handleRegenerate}
+                    />
+                  ))}
+                </DocumentBatchesContext.Provider>
+
+                {showTyping && <TypingIndicator />}
+
+                {error && !isLoading && (
+                  <div className={styles.errorMessage} role="alert">
+                    <Text type="danger">{describeChatError(error)}</Text>
+                    <Button
+                      size="small"
+                      icon={<ReloadOutlined />}
+                      onClick={handleRetry}
+                    >
+                      Повторити
+                    </Button>
+                  </div>
+                )}
               </div>
+            </div>
+
+            {scroll.isAwayFromBottom && (
+              <ChatTooltip title="До останнього повідомлення" placement="left">
+                <Button
+                  shape="circle"
+                  icon={<ArrowDownOutlined />}
+                  aria-label="До останнього повідомлення"
+                  className={styles.scrollToBottom}
+                  onClick={() => scroll.scrollToBottom('smooth')}
+                />
+              </ChatTooltip>
             )}
-            <div ref={messagesEndRef} />
           </div>
 
-          <div className={styles.chatFooter}>
-            <input
-              ref={photoInputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              hidden
-              data-testid="ai-chat-photo-input"
-              onChange={handlePicked}
-            />
-            <Button
-              type="text"
-              icon={<CameraOutlined />}
-              title="Надіслати фото документів (можна кілька, або вставити Ctrl+V чи перетягнути у вікно)"
-              aria-label="Надіслати фото документів"
-              loading={isPreparingPhoto}
-              onClick={() => photoInputRef.current?.click()}
-              className={styles.photoButton}
-            />
-            <Input
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Запитайте щось..."
-              disabled={isLoading}
-              className={styles.chatInput}
-              suffix={
-                <Button
-                  type="primary"
-                  icon={<SendOutlined />}
-                  loading={isLoading}
-                  disabled={!inputValue.trim() || isLoading}
-                  size="small"
-                  shape="circle"
-                  onClick={handleSend}
+          <ChatComposer
+            value={inputValue}
+            onChange={setInputValue}
+            onSend={handleSend}
+            onStop={() => void stop()}
+            isLoading={isLoading}
+            leading={
+              <>
+                <input
+                  ref={photoInputRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  hidden
+                  data-testid="ai-chat-photo-input"
+                  onChange={handlePicked}
                 />
-              }
-            />
-          </div>
+                <ChatTooltip title="Надіслати фото документів (можна кілька, або вставити Ctrl+V чи перетягнути у вікно)">
+                  <Button
+                    type="text"
+                    icon={<CameraOutlined />}
+                    aria-label="Надіслати фото документів"
+                    loading={isPreparingPhoto}
+                    onClick={() => photoInputRef.current?.click()}
+                    className={styles.photoButton}
+                  />
+                </ChatTooltip>
+              </>
+            }
+          />
         </div>
       )}
 
-      {domainDraft && (
-        <DomainModal
-          currentDomain={undefined}
-          draft={domainDraft}
-          editable
-          closeModal={() => setDomainDraft(null)}
-        />
-      )}
-
-      {streetDraft && (
-        <AddStreetModal
-          draft={streetDraft}
-          closeModal={() => setStreetDraft(null)}
-        />
-      )}
-
-      {companyDraft && (
-        <RealEstateModal
-          chosenRealEstate={{
-            domain: companyDraft.domain,
-            street: companyDraft.street,
-          }}
-          draft={companyDraft}
-          editable
-          closeModal={() => setCompanyDraft(null)}
-        />
-      )}
-
-      {serviceDraft &&
-        (serviceDraft.mode === 'edit' ? (
-          <AddServiceModal
-            currentService={serviceDraft.service}
-            serviceActions={{ edit: true, preview: false }}
-            closeModal={() => setServiceDraft(null)}
+      {/* The chat window sits above antd's default popup layer (1000), so
+          the modals it opens (and their dropdowns) must go higher still. */}
+      <ConfigProvider theme={{ token: { zIndexPopupBase: 1100 } }}>
+        {domainDraft && (
+          <DomainModal
+            currentDomain={undefined}
+            draft={domainDraft}
+            editable
+            closeModal={() => setDomainDraft(null)}
           />
-        ) : (
-          <AddServiceModal
-            draft={serviceDraft.service}
-            closeModal={() => setServiceDraft(null)}
+        )}
+
+        {streetDraft && (
+          <AddStreetModal
+            draft={streetDraft}
+            closeModal={() => setStreetDraft(null)}
           />
-        ))}
+        )}
 
-      {expenseDraft && (
-        <AddCostModal
-          draft={expenseDraft}
-          closeModal={() => setExpenseDraft(null)}
-        />
-      )}
+        {companyDraft && (
+          <RealEstateModal
+            chosenRealEstate={{
+              domain: companyDraft.domain,
+              street: companyDraft.street,
+            }}
+            draft={companyDraft}
+            editable
+            closeModal={() => setCompanyDraft(null)}
+          />
+        )}
 
-      {invoiceModalOpen && invoiceDraft && (
-        <AddPaymentModal
-          paymentData={invoiceDraft}
-          extraInvoiceLines={invoiceExtraLines}
-          invoiceLines={invoiceLines}
-          paymentActions={{ edit: false, preview: false }}
-          closeModal={(success?: boolean) => {
-            setInvoiceModalOpen(false)
-            setInvoiceDraft(null)
-            if (success) {
-              message.success(
-                invoiceDraft.type === 'credit'
-                  ? 'Оплату успішно створено!'
-                  : 'Рахунок успішно створено!'
-              )
-            }
-          }}
-        />
-      )}
+        {serviceDraft &&
+          (serviceDraft.mode === 'edit' ? (
+            <AddServiceModal
+              currentService={serviceDraft.service}
+              serviceActions={{ edit: true, preview: false }}
+              closeModal={() => setServiceDraft(null)}
+            />
+          ) : (
+            <AddServiceModal
+              draft={serviceDraft.service}
+              closeModal={() => setServiceDraft(null)}
+            />
+          ))}
+
+        {expenseDraft && (
+          <AddCostModal
+            draft={expenseDraft}
+            closeModal={() => setExpenseDraft(null)}
+          />
+        )}
+
+        {invoiceModalOpen && invoiceDraft && (
+          <AddPaymentModal
+            paymentData={invoiceDraft}
+            extraInvoiceLines={invoiceExtraLines}
+            invoiceLines={invoiceLines}
+            paymentActions={{ edit: false, preview: false }}
+            closeModal={(success?: boolean) => {
+              setInvoiceModalOpen(false)
+              setInvoiceDraft(null)
+              if (success) {
+                message.success(
+                  invoiceDraft.type === 'credit'
+                    ? 'Оплату успішно створено!'
+                    : 'Рахунок успішно створено!'
+                )
+              }
+            }}
+          />
+        )}
+      </ConfigProvider>
     </>
   )
 }
