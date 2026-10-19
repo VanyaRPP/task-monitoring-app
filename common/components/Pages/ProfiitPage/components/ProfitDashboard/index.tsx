@@ -64,6 +64,20 @@ const compactMoney = (value: number, currency: string) => {
 // Below this share a slice is too thin to hold its percentage label.
 const PIE_LABEL_MIN_PERCENT = 5
 
+// G2 v5 "classic" categorical palette - the colours the pie already used.
+const PIE_PALETTE = [
+  '#1783FF',
+  '#00C9C9',
+  '#F0884D',
+  '#D580FF',
+  '#7863FF',
+  '#60C42D',
+  '#BD8F24',
+  '#FF80CA',
+  '#2491B3',
+  '#17C76F',
+]
+
 const periodKeyOf = (d: Dayjs, periodType: string) => {
   if (periodType === 'Month') return d.format('YYYY-MM')
   if (periodType === 'Quarter')
@@ -393,6 +407,17 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({
   const piePercent = (value: number) =>
     pieTotal ? (value / pieTotal) * 100 : 0
 
+  // Explicit category -> colour pairs. Left to G2, the ordinal scale indexes
+  // colours by data order, and after a data update the legend and the ring
+  // ended up indexing differently - slices swapped colours with each other.
+  const pieColorScale = useMemo(
+    () => ({
+      domain: pieData.map((item) => item.type),
+      range: pieData.map((_, i) => PIE_PALETTE[i % PIE_PALETTE.length]),
+    }),
+    [pieData]
+  )
+
   const columnConfig = {
     data: columnData,
     xField: 'period',
@@ -444,6 +469,7 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({
     radius: 1,
     innerRadius: 0.6,
     theme: isDarkMode ? 'dark' : 'light',
+    scale: { color: pieColorScale },
     // Category names live in the legend: outside name labels collided on
     // small neighbouring slices and got clipped by the card. The ring only
     // carries a percentage, and only where the slice is wide enough for it.
@@ -458,13 +484,14 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({
     },
     tooltip: {
       items: [
-        {
-          channel: 'y',
-          valueFormatter: (value: number) =>
-            `${getCurrencySymbol(currency)} ${money(value)} (${piePercent(
-              value
-            ).toFixed(1)}%)`,
-        },
+        // A `channel: 'y'` item is named after the field ("value"), so the
+        // category name has to be passed in explicitly.
+        (d: { type: string; value: number }) => ({
+          name: d.type,
+          value: `${getCurrencySymbol(currency)} ${money(d.value)} (${piePercent(
+            d.value
+          ).toFixed(1)}%)`,
+        }),
       ],
     },
     legend: {
