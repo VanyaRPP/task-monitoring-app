@@ -55,6 +55,7 @@ import TableFilterLink from '@components/UI/Reusable/TableFilterLink'
 import { TruncatedText } from '@components/UI/TruncatedText'
 import { widenFilterDropdown } from '../tableFilterHelpers'
 import {
+  excludeDisabledServices,
   extractDomainsFromRealEstates,
   getVisibleServices,
   shouldShowStandardServices,
@@ -280,8 +281,11 @@ const CompaniesTable: React.FC<Props> = ({
         }
       })
 
-      return withoutStandard.filter((s) =>
-        activeServiceKeys.has(String(s.fieldName || s._id))
+      return excludeDisabledServices(
+        withoutStandard.filter((s) =>
+          activeServiceKeys.has(String(s.fieldName || s._id))
+        ),
+        visibleDomains
       )
     }
 

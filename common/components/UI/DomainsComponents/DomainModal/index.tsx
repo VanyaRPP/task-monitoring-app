@@ -95,6 +95,7 @@ const DomainModal: FC<Props> = ({
       iban: source?.iban || '',
       domainTypeTemplateId: templateId,
       customServices,
+      disabledServiceIds: currentDomain?.disabledServiceIds ?? [],
     })
   }, [currentDomain, draft, form, user, templates, defaultTemplateId])
 
@@ -129,6 +130,7 @@ const DomainModal: FC<Props> = ({
       rnokpp: formData.rnokpp,
       iban: formData.iban,
       customServices: formData.customServices,
+      disabledServiceIds: formData.disabledServiceIds ?? [],
       domainTypeTemplateId: formData.domainTypeTemplateId || undefined,
     }
 

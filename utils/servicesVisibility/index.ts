@@ -11,6 +11,14 @@ export interface IDomainServiceGroup {
 export interface IDomainForVisibility {
   _id?: string
   customServices?: IDomainServiceGroup[]
+  disabledServiceIds?: string[]
+}
+
+type DomainsInput =
+  IDomainForVisibility | IDomainForVisibility[] | null | undefined
+
+function toDomainList(domains: DomainsInput): IDomainForVisibility[] {
+  return Array.isArray(domains) ? domains : domains ? [domains] : []
 }
 
 export interface ICustomServiceItem {
@@ -26,18 +34,15 @@ export function isDomainAdmin(roles: string[] | undefined): boolean {
   return !!roles?.includes(Roles.DOMAIN_ADMIN)
 }
 
-export function getSelectedServiceIds(
-  domains: IDomainForVisibility | IDomainForVisibility[] | null | undefined
-): string[] {
-  const list = Array.isArray(domains) ? domains : domains ? [domains] : []
-
+export function getSelectedServiceIds(domains: DomainsInput): string[] {
   const seen = new Set<string>()
   const result: string[] = []
 
-  for (const domain of list) {
+  for (const domain of toDomainList(domains)) {
+    const disabled = new Set(domain?.disabledServiceIds ?? [])
     for (const group of domain?.customServices ?? []) {
       for (const id of group?.services ?? []) {
-        if (!seen.has(id)) {
+        if (!seen.has(id) && !disabled.has(id)) {
           seen.add(id)
           result.push(id)
         }
@@ -48,14 +53,35 @@ export function getSelectedServiceIds(
   return result
 }
 
+export function getDisabledServiceIds(domains: DomainsInput): string[] {
+  const list = toDomainList(domains)
+  const enabled = new Set(getSelectedServiceIds(list))
+  const result = new Set<string>()
+  for (const domain of list) {
+    for (const id of domain?.disabledServiceIds ?? []) {
+      if (!enabled.has(id)) result.add(id)
+    }
+  }
+  return Array.from(result)
+}
+
+export function excludeDisabledServices<T extends { _id: string }>(
+  services: T[],
+  domains: DomainsInput
+): T[] {
+  const disabled = new Set(getDisabledServiceIds(domains))
+  if (!disabled.size) return services
+  return services.filter((s) => !disabled.has(String(s._id)))
+}
+
 export function getVisibleServices(
   roles: string[] | undefined,
-  domains: IDomainForVisibility | IDomainForVisibility[] | null | undefined,
+  domains: DomainsInput,
   allServices: ICustomServiceItem[]
 ): ICustomServiceItem[] {
   if (!allServices?.length) return []
 
-  if (isGlobalAdmin(roles)) return allServices
+  if (isGlobalAdmin(roles)) return excludeDisabledServices(allServices, domains)
 
   const selectedIds = getSelectedServiceIds(domains)
   if (!selectedIds.length) return []
