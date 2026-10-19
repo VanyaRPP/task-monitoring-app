@@ -38,6 +38,7 @@ import RealEstateModal from '@components/UI/RealEstateComponents/RealEstateModal
 import AddStreetModal from '@components/AddStreetModal'
 import DomainModal from '@components/UI/DomainsComponents/DomainModal'
 import type { ExpenseDraft } from '@common/services/aiAssistant/expenseActions'
+import { previewReply } from '@common/services/aiAssistant/previewReply'
 import { message } from 'antd'
 import {
   DOCUMENT_BATCH_PART,
@@ -99,12 +100,23 @@ const renderMessageContent = (content: string) => {
 
 const getMessageText = (message: UIMessage): string => {
   if (message.parts && message.parts.length > 0) {
-    return message.parts
+    const text = message.parts
       .filter(
         (part): part is { type: 'text'; text: string } => part.type === 'text'
       )
       .map((part) => part.text)
       .join('')
+    // A preview tool ends the turn without model text: its reply is written
+    // here, from the tool's summary.
+    const previews = message.parts
+      .map((part) => {
+        const p = part as { type: string; state?: string; output?: unknown }
+        return p.type.startsWith('tool-') && p.state === 'output-available'
+          ? previewReply(p.type.slice('tool-'.length), p.output)
+          : ''
+      })
+      .filter(Boolean)
+    return [text, ...previews].filter(Boolean).join('\n\n')
   }
   return ''
 }
@@ -227,6 +239,13 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
     </div>
   )
 }
+
+// The server explains a failed answer in Ukrainian (see describeChatError);
+// anything else - a dropped connection, a gateway page - gets the generic line.
+const chatErrorText = (error: Error) =>
+  /[а-яіїєґ]/i.test(error?.message ?? '')
+    ? error.message
+    : "Помилка з'єднання. Спробуйте ще раз."
 
 const AIChat: React.FC = () => {
   // Gate: the assistant is currently available to admins only (matches the
@@ -606,7 +625,7 @@ const AIChat: React.FC = () => {
             {error && (
               <div className={styles.errorMessage}>
                 <Text type="danger" style={{ fontSize: '12px' }}>
-                  Помилка з&apos;єднання. Спробуйте ще раз.
+                  {chatErrorText(error)}
                 </Text>
               </div>
             )}
