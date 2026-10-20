@@ -765,6 +765,14 @@ $corner: 14px;
   object-fit: cover;
 }
 
+.messageFile {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+  word-break: break-all;
+}
+
 .cardColumn {
   flex: 1;
   min-width: 0;

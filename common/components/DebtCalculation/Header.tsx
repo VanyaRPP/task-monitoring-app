@@ -9,9 +9,10 @@ import {
   Tooltip,
   Typography,
 } from 'antd'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useDebtCalculationContext } from './'
 import CreatePayments from './CreatePayments'
+import PrintPreview from './PrintPreview'
 import { useExportExcel } from './useExportExcel'
 import s from './style.module.scss'
 
@@ -20,6 +21,12 @@ const METHOD_HINT =
   'період множиться на весь поточний залишок боргу. Помісячний — як вимагає ' +
   'ст. 625 ЦК: кожне нарахування індексується від свого місяця, оплати ' +
   'гасять найстаріший борг. Помісячний дає помітно меншу суму.'
+
+/** The street filter's value for companies that have no address. */
+export const NO_STREET = '__no-street__'
+
+const streetKey = (street: unknown): string =>
+  (street as { _id?: string } | undefined)?._id ?? NO_STREET
 
 const DebtCalculationHeader: React.FC = () => {
   const {
@@ -40,6 +47,9 @@ const DebtCalculationHeader: React.FC = () => {
   } = useDebtCalculationContext()
 
   const { data: domains = [] } = useGetDomainsQuery({ archived: false })
+  // An address holds many companies: narrowing by it first makes the company
+  // list short. A filter only - nothing on the page depends on it.
+  const [streetId, setStreetId] = useState<string | undefined>()
 
   const domainName = useMemo(
     () => domains.find(({ _id }) => String(_id) === domainId)?.name,
@@ -55,14 +65,54 @@ const DebtCalculationHeader: React.FC = () => {
       .map(({ _id, name }) => ({ value: String(_id), label: name }))
   }, [domains, allowedDomainIds])
 
+  const streetOptions = useMemo(() => {
+    const byStreet = new Map<string, { label: string; count: number }>()
+    for (const { street } of companies) {
+      const key = streetKey(street)
+      const entry = byStreet.get(key) ?? {
+        label:
+          key === NO_STREET
+            ? 'Без адреси'
+            : `${street.address}${street.city ? ` (м. ${street.city})` : ''}`,
+        count: 0,
+      }
+      entry.count += 1
+      byStreet.set(key, entry)
+    }
+    return [...byStreet]
+      .map(([value, { label, count }]) => ({
+        value,
+        label: `${label} — ${count}`,
+        sortKey: label,
+      }))
+      .sort((a, b) =>
+        a.value === NO_STREET
+          ? 1
+          : b.value === NO_STREET
+            ? -1
+            : a.sortKey.localeCompare(b.sortKey, 'uk', { numeric: true })
+      )
+      .map(({ value, label }) => ({ value, label }))
+  }, [companies])
+
   const companyOptions = useMemo(
     () =>
-      companies.map(({ _id, companyName }) => ({
-        value: _id,
-        label: companyName,
-      })),
-    [companies]
+      companies
+        .filter(({ street }) => !streetId || streetKey(street) === streetId)
+        .map(({ _id, companyName }) => ({
+          value: _id,
+          label: companyName,
+        })),
+    [companies, streetId]
   )
+
+  const changeStreet = (value?: string): void => {
+    setStreetId(value)
+    const current = companies.find(({ _id }) => _id === companyId)
+    if (value && current && streetKey(current.street) !== value) {
+      setCompanyId(undefined)
+    }
+  }
 
   return (
     <div className={s.Header}>
@@ -81,6 +131,7 @@ const DebtCalculationHeader: React.FC = () => {
           >
             Експорт в Excel
           </Button>
+          <PrintPreview domainName={domainName} disabled={!companyId} />
         </Space>
       </div>
 
@@ -91,12 +142,29 @@ const DebtCalculationHeader: React.FC = () => {
             value={domainId}
             onChange={(value) => {
               setDomainId(value)
+              setStreetId(undefined)
               setCompanyId(undefined)
             }}
             options={domainOptions}
             aria-label="Домен"
             placeholder="Оберіть домен"
             className={s.Domain}
+            showSearch
+            optionFilterProp="label"
+          />
+        </label>
+
+        <label className={s.Field}>
+          <span className={s.Label}>Адреса</span>
+          <Select
+            value={streetId}
+            onChange={changeStreet}
+            options={streetOptions}
+            aria-label="Адреса"
+            placeholder="Усі адреси"
+            className={s.Street}
+            disabled={!domainId || streetOptions.length === 0}
+            allowClear
             showSearch
             optionFilterProp="label"
           />

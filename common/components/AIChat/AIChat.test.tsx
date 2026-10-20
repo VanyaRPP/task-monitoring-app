@@ -447,3 +447,58 @@ describe('AIChat messages', () => {
     ).not.toBeInTheDocument()
   })
 })
+
+describe('AIChat statement files', () => {
+  beforeEach(() => mockImports.start.mockReset().mockReturnValue('batch-1'))
+
+  const pick = async (file: File) => {
+    await openChat()
+    await userEvent.upload(screen.getByTestId('ai-chat-photo-input'), file)
+  }
+
+  it('reads a picked PDF as a statement, not as a photo', async () => {
+    render(<AIChat />)
+    await pick(new File(['%PDF-1.4'], 'кв. 7.pdf', { type: 'application/pdf' }))
+
+    expect(mockImports.start).toHaveBeenCalledWith([
+      {
+        name: 'кв. 7.pdf',
+        url: expect.stringMatching(/^data:application\/pdf;base64,/),
+        kind: 'pdf',
+      },
+    ])
+  })
+
+  it('refuses a PDF too big for the server', async () => {
+    render(<AIChat />)
+    await pick(
+      new File([new Uint8Array(3 * 1024 * 1024)], 'великий.pdf', {
+        type: 'application/pdf',
+      })
+    )
+
+    expect(mockImports.start).not.toHaveBeenCalled()
+  })
+
+  it('shows a sent PDF by its name', async () => {
+    mockChat.messages = [
+      WELCOME,
+      {
+        id: 'files-1',
+        role: 'user',
+        parts: [
+          {
+            type: 'file',
+            mediaType: 'application/pdf',
+            filename: 'кв. 7.pdf',
+            url: 'data:application/pdf;base64,JVBERi0=',
+          },
+        ],
+      },
+    ]
+    render(<AIChat />)
+    await openChat()
+
+    expect(screen.getByText('кв. 7.pdf')).toBeInTheDocument()
+  })
+})

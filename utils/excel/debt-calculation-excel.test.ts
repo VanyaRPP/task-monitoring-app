@@ -45,21 +45,41 @@ const findRow = (rows: Row[], text: string): Row =>
 const textOf = (rows: Row[]): string =>
   rows.flatMap((line) => line.map((cell) => String(cell?.v ?? ''))).join('|')
 
+describe('buildDebtCalculationDocument — обʼєднані клітинки', () => {
+  it('нічого не лежить під чужим обʼєднанням, де Excel би це сховав', () => {
+    const { rows, columns } = buildDebtCalculationDocument(input())
+
+    rows.forEach((line, r) => {
+      let coveredUntil = -1
+      line.forEach((cell, c) => {
+        if (!cell) return
+        if (c <= coveredUntil) {
+          throw new Error(
+            `рядок ${r}: «${cell.v}» у колонці ${c} схований обʼєднанням`
+          )
+        }
+        coveredUntil = c + (cell.span ?? 1) - 1
+        expect(coveredUntil).toBeLessThan(columns.length)
+      })
+    })
+  })
+})
+
 describe('buildDebtCalculationDocument — шапка', () => {
   const { rows } = buildDebtCalculationDocument(input())
 
   it('несе всі параметри, що видно на сторінці', () => {
-    expect(findRow(rows, 'Надавач послуг')[1].v).toBe('ОСББ Крошенська 8')
-    expect(findRow(rows, 'Компанія')[1].v).toBe(
+    expect(findRow(rows, 'Надавач послуг')[3].v).toBe('ОСББ Крошенська 8')
+    expect(findRow(rows, 'Компанія')[3].v).toBe(
       'Квартира №18, вул. Крошенська 8'
     )
-    expect(findRow(rows, 'Опис')[1].v).toBe('о/р 123456')
-    expect(findRow(rows, 'Період')[1].v).toBe('2026-01 — 2026-03')
-    expect(findRow(rows, 'Загальна площа')[1].v).toBe(67.08)
-    expect(findRow(rows, 'Тариф')[1].v).toBe(5.25)
-    expect(findRow(rows, 'Борг на початок')[1].v).toBe(8371.52)
-    expect(findRow(rows, 'Ставка річних')[1].v).toBe(3)
-    expect(findRow(rows, 'Метод інфляційних')[1].v).toMatch(/За залишком/)
+    expect(findRow(rows, 'Опис')[3].v).toBe('о/р 123456')
+    expect(findRow(rows, 'Період')[3].v).toBe('2026-01 — 2026-03')
+    expect(findRow(rows, 'Загальна площа')[3].v).toBe(67.08)
+    expect(findRow(rows, 'Тариф')[3].v).toBe(5.25)
+    expect(findRow(rows, 'Борг на початок')[3].v).toBe(8371.52)
+    expect(findRow(rows, 'Ставка річних')[3].v).toBe(3)
+    expect(findRow(rows, 'Метод інфляційних')[3].v).toMatch(/За залишком/)
   })
 
   it('пропускає рядок опису, коли його немає', () => {
@@ -73,7 +93,7 @@ describe('buildDebtCalculationDocument — шапка', () => {
       input({ inflationMethod: 'monthly' })
     )
 
-    expect(findRow(monthly.rows, 'Метод інфляційних')[1].v).toMatch(
+    expect(findRow(monthly.rows, 'Метод інфляційних')[3].v).toMatch(
       /ст. 625 ЦК/
     )
   })
