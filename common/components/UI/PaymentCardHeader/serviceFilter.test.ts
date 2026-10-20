@@ -4,6 +4,7 @@ import { getInvoiceCustomServiceNames } from '@components/Tables/Payment/usePaym
 import {
   getAllowedServices,
   getAvailableColumns,
+  getDisabledBuiltInTypes,
   getFilteredBuiltInEntries,
 } from './serviceFilter'
 
@@ -125,5 +126,50 @@ describe('payments service filter — invoice-derived, domain-narrowed', () => {
   it('getAllowedServices is undefined when there are no payments', () => {
     expect(getAllowedServices({ data: [] }, [])).toBeUndefined()
     expect(getAllowedServices(undefined, [])).toBeUndefined()
+  })
+})
+
+describe('payments service filter — services disabled in the domain', () => {
+  const GARBAGE_ID = '68156d58f520914e5e1ad881'
+  const domain = (services: string[], disabledServiceIds: string[]) => ({
+    _id: 'd1',
+    customServices: [{ groupName: 'g', services }],
+    disabledServiceIds,
+  })
+
+  it('hides a disabled built-in service even with "Доступні сервіси" off', () => {
+    const disabled = getDisabledBuiltInTypes([
+      domain([GARBAGE_ID], [GARBAGE_ID]),
+    ])
+    const values = getFilteredBuiltInEntries(
+      new Set<string>(),
+      false,
+      disabled
+    ).map(([value]) => value)
+
+    expect(values).not.toContain(ServiceType.GarbageCollector)
+    expect(values).toContain(ServiceType.Electricity)
+  })
+
+  it('keeps a disabled service while loaded invoices still use it', () => {
+    const disabled = getDisabledBuiltInTypes([
+      domain([GARBAGE_ID], [GARBAGE_ID]),
+    ])
+    const values = getFilteredBuiltInEntries(
+      new Set<string>([ServiceType.GarbageCollector]),
+      true,
+      disabled
+    ).map(([value]) => value)
+
+    expect(values).toContain(ServiceType.GarbageCollector)
+  })
+
+  it('does not hide a type another domain still has enabled', () => {
+    const disabled = getDisabledBuiltInTypes([
+      domain([GARBAGE_ID], [GARBAGE_ID]),
+      domain([GARBAGE_ID], []),
+    ])
+
+    expect(disabled.has(ServiceType.GarbageCollector)).toBe(false)
   })
 })

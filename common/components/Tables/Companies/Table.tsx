@@ -57,8 +57,10 @@ import { widenFilterDropdown } from '../tableFilterHelpers'
 import {
   excludeDisabledServices,
   extractDomainsFromRealEstates,
+  getDisabledServiceIds,
   getVisibleServices,
   shouldShowStandardServices,
+  STANDARD_COLUMN_SERVICE_IDS,
 } from '@utils/servicesVisibility'
 import { getTableScrollX } from '@utils/getTableScrollX'
 
@@ -250,6 +252,10 @@ const CompaniesTable: React.FC<Props> = ({
     () => extractDomainsFromRealEstates(filteredData),
     [filteredData]
   )
+  const disabledServiceIds = useMemo(
+    () => getDisabledServiceIds(visibleDomains),
+    [visibleDomains]
+  )
   const { data: domainTypeTemplates = [] } = useGetDomainTypeTemplatesQuery()
   const hasActiveFilters = !!(
     filters?.domain?.length ||
@@ -327,6 +333,7 @@ const CompaniesTable: React.FC<Props> = ({
     customServices: filteredCustomServices,
     setFilters,
     showStandardServices,
+    disabledServiceIds,
   })
 
   return (
@@ -421,6 +428,7 @@ const getDefaultColumns = ({
   customServices,
   setFilters,
   showStandardServices,
+  disabledServiceIds,
 }: {
   domainId?: string
   streetId?: string
@@ -444,14 +452,19 @@ const getDefaultColumns = ({
   customServices?: { _id: string; name: string; fieldName?: string }[]
   setFilters?: (filters: any) => void
   showStandardServices?: boolean
+  disabledServiceIds?: string[]
 }): ColumnType<any>[] => {
   const isOnPage = pathname === AppRoutes.REAL_ESTATE
 
   const selectedServices: string[] = filters?.services || []
   const showAllServices = selectedServices.length === 0
 
-  const shouldShowService = (key: string) =>
-    showAllServices || selectedServices.includes(key)
+  const disabledSet = new Set(disabledServiceIds ?? [])
+  const shouldShowService = (key: string) => {
+    const serviceId = STANDARD_COLUMN_SERVICE_IDS[key]
+    if (serviceId && disabledSet.has(serviceId)) return false
+    return showAllServices || selectedServices.includes(key)
+  }
 
   const columns: ColumnType<any>[] = [
     {

@@ -28,7 +28,10 @@ import { CURRENCY_SELECT_OPTIONS, Currency } from '@utils/constants'
 import { resolveServiceType } from '@utils/domain/resolve-service-type'
 import { isAreaBasedServiceType } from '@utils/domain/service-type-categories'
 import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
-import { shouldShowStandardServices } from '@utils/servicesVisibility'
+import {
+  shouldShowStandardServices,
+  STANDARD_COLUMN_SERVICE_IDS,
+} from '@utils/servicesVisibility'
 import CustomServicesCard from '../../../CustomServicesCard'
 
 interface Props {
@@ -86,6 +89,11 @@ const RealEstateForm: FC<Props> = ({
       group.services?.includes(serviceId)
     )
   }
+
+  const isStandardServiceDisabled = (columnKey: string) =>
+    !!domain?.disabledServiceIds
+      ?.map(String)
+      .includes(STANDARD_COLUMN_SERVICE_IDS[columnKey])
 
   const isServiceExist = (value: string) => {
     if (!domain?._id || !services || !services?.length) return false
@@ -203,25 +211,27 @@ const RealEstateForm: FC<Props> = ({
         </>
       )}
 
-      {showStandardServices && (
-        <Form.Item
-          valuePropName="checked"
-          name="garbageCollector"
-          label="Вивіз сміття"
-        >
-          <Checkbox disabled={!editable} />
-        </Form.Item>
-      )}
+      {showStandardServices &&
+        !isStandardServiceDisabled('garbageCollector') && (
+          <Form.Item
+            valuePropName="checked"
+            name="garbageCollector"
+            label="Вивіз сміття"
+          >
+            <Checkbox disabled={!editable} />
+          </Form.Item>
+        )}
 
-      {isServiceExist('inflicionPrice') && (
-        <Form.Item
-          valuePropName="checked"
-          name="inflicion"
-          label="Індекс інфляції"
-        >
-          <Checkbox disabled={!editable} />
-        </Form.Item>
-      )}
+      {isServiceExist('inflicionPrice') &&
+        !isStandardServiceDisabled('inflicion') && (
+          <Form.Item
+            valuePropName="checked"
+            name="inflicion"
+            label="Індекс інфляції"
+          >
+            <Checkbox disabled={!editable} />
+          </Form.Item>
+        )}
     </>
   )
 

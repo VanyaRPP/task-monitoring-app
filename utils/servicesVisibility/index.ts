@@ -65,6 +65,20 @@ export function getDisabledServiceIds(domains: DomainsInput): string[] {
   return Array.from(result)
 }
 
+/**
+ * Built-in company-table columns that are driven by a fixed-id catalog
+ * service. Disabling that service in the domain hides the column.
+ */
+export const STANDARD_COLUMN_SERVICE_IDS: Readonly<Record<string, string>> = {
+  rentPart: '677d437c83b6ef93c6b8ea50',
+  waterPart: '677d412483b6ef93c6b8e9fa',
+  cleaning: '677d434c83b6ef93c6b8ea3a',
+  garbageCollector: '68156d58f520914e5e1ad881',
+  inflicion: '68230f76a51fddf0ae165d77',
+  pricePerMeter: '677d414283b6ef93c6b8ea2c',
+  servicePricePerMeter: '677d414283b6ef93c6b8ea2c',
+}
+
 export function excludeDisabledServices<T extends { _id: string }>(
   services: T[],
   domains: DomainsInput

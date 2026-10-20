@@ -28,6 +28,7 @@ const PaymentCardLabel = ({
   realEstatesFilter,
   isAdmin,
   allowedServices,
+  disabledBuiltInTypes,
   customServices,
 }: any) => {
   const router = useRouter()
@@ -75,6 +76,7 @@ const PaymentCardLabel = ({
               className={styles.select}
               onSelect={onColumnsSelect}
               allowedServices={allowedServices}
+              disabledBuiltInTypes={disabledBuiltInTypes}
               customServices={customServices}
             />
             {dateRangeFilter}
