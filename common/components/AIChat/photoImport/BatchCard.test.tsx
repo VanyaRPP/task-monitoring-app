@@ -109,6 +109,34 @@ describe('BatchCard', () => {
     ).toBeInTheDocument()
   })
 
+  it('для PDF каже «PDF», а не «фото»', () => {
+    const pdf = {
+      id: 'f1',
+      name: 'кв. 7.pdf',
+      kind: 'pdf' as const,
+      status: 'reading' as const,
+      stripsDone: 0,
+      stripsTotal: 1,
+    }
+    const { rerender } = render(
+      <BatchCard batch={batch({ photos: [pdf] })} onCardChange={jest.fn()} />
+    )
+    expect(screen.getByText('Читаю PDF…')).toBeInTheDocument()
+
+    rerender(
+      <BatchCard
+        batch={batch({
+          done: true,
+          photos: [{ ...pdf, status: 'unrecognized' }],
+        })}
+        onCardChange={jest.fn()}
+      />
+    )
+    expect(
+      screen.getByText(/Не знайшов у PDF таблиці боргу/)
+    ).toBeInTheDocument()
+  })
+
   it('після перезавантаження сторінки фото вже немає — так і каже', () => {
     render(<BatchCard batch={undefined} onCardChange={jest.fn()} />)
 

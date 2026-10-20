@@ -81,12 +81,14 @@ const BatchCard: React.FC<{
     return (
       <div className={styles.importCard}>
         <Text type="secondary">
-          Фото більше не доступні — надішліть їх ще раз.
+          Файли більше не доступні — надішліть їх ще раз.
         </Text>
       </div>
     )
   }
 
+  const onlyPdf =
+    batch.photos.length > 0 && batch.photos.every(({ kind }) => kind === 'pdf')
   const unread = batch.photos.filter(
     ({ status }) => status === 'unrecognized' || status === 'failed'
   )
@@ -106,9 +108,7 @@ const BatchCard: React.FC<{
           <div className={styles.importCard}>
             {batch.groups.length === 0 && (
               <Text>
-                Не знайшов на фото таблиці боргу по місяцях. Поки що я вмію
-                читати саме її (вхідне сальдо, нарахування, оплати, вихідне
-                сальдо).
+                {`Не знайшов ${onlyPdf ? 'у PDF' : 'на фото'} таблиці боргу по місяцях. Поки що я вмію читати саме її (вхідне сальдо, нарахування, оплати, вихідне сальдо).`}
               </Text>
             )}
             {unread.map((photo) => (
@@ -129,7 +129,12 @@ const BatchCard: React.FC<{
   return (
     <div className={styles.importCard}>
       <Text strong>
-        Читаю {batch.photos.length > 1 ? `${batch.photos.length} фото` : 'фото'}
+        Читаю{' '}
+        {batch.photos.length > 1
+          ? `${batch.photos.length} ${onlyPdf ? 'PDF' : 'фото'}`
+          : onlyPdf
+            ? 'PDF'
+            : 'фото'}
         …
       </Text>
       {batch.photos.map((photo) => (
