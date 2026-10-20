@@ -33,10 +33,12 @@ import {
 import { IDebtCalculationSnapshot } from '@utils/debt-calculation/serialize'
 import {
   DEFAULT_ANNUAL_RATE_PERCENT,
+  DEFAULT_INFLATION_METHOD,
   IDebtCalculationResult,
   InflationMethod,
 } from '@utils/debt-calculation/types'
-import { Alert } from 'antd'
+import { Alert, ConfigProvider } from 'antd'
+import ukUA from 'antd/lib/locale/uk_UA'
 import dayjs, { Dayjs } from 'dayjs'
 import { useRouter } from 'next/compat/router'
 import {
@@ -131,8 +133,9 @@ const DebtCalculationBlock: React.FC = () => {
   const [annualRatePercent, setAnnualRatePercent] = useState(
     DEFAULT_ANNUAL_RATE_PERCENT
   )
-  const [inflationMethod, setInflationMethod] =
-    useState<InflationMethod>('balance')
+  const [inflationMethod, setInflationMethod] = useState<InflationMethod>(
+    DEFAULT_INFLATION_METHOD
+  )
   const [overrides, setOverrides] = useState<IApartmentOverrides>({})
 
   // Deep link, e.g. from the assistant's photo import:
@@ -399,11 +402,14 @@ const DebtCalculationBlock: React.FC = () => {
   }
 
   return (
-    <DebtCalculationContext.Provider value={value}>
-      <TableCard title={<DebtCalculationHeader />}>
-        <DebtCalculationBody />
-      </TableCard>
-    </DebtCalculationContext.Provider>
+    // The month pickers' panels (month names, «Цей місяць») in Ukrainian.
+    <ConfigProvider locale={ukUA}>
+      <DebtCalculationContext.Provider value={value}>
+        <TableCard title={<DebtCalculationHeader />}>
+          <DebtCalculationBody />
+        </TableCard>
+      </DebtCalculationContext.Provider>
+    </ConfigProvider>
   )
 }
 
