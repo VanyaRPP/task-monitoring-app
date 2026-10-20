@@ -4,6 +4,7 @@ import DomainCustomServicesSnapshot, {
   DOMAIN_SNAPSHOT_REASONS,
   DomainSnapshotReason,
 } from '@modules/models/domain-custom-services-snapshot'
+import { normalizeDisabledServiceIds } from '@common/services/customServiceService/customService.service'
 import { Data } from '@pages/api/api.config'
 import { withErrorHandler } from '@utils/api-handler'
 import { getCurrentUser } from '@utils/getCurrentUser'
@@ -135,6 +136,10 @@ async function domainSnapshotsHandler(
           (domain.domainTypeTemplateId as mongoose.Types.ObjectId) ?? null
       }
 
+      const disabledServiceIds =
+        normalizeDisabledServiceIds(req.body?.disabledServiceIds) ??
+        (domain.disabledServiceIds ?? []).map(String)
+
       let templateName: string | null = null
       if (typeof req.body?.templateName === 'string') {
         templateName = req.body.templateName.trim() || null
@@ -150,6 +155,7 @@ async function domainSnapshotsHandler(
         templateId,
         templateName,
         groups,
+        disabledServiceIds,
         reason: parseReason(req.body?.reason),
         createdBy: user?._id ?? null,
       })

@@ -8,7 +8,7 @@ import { useGetAllPaymentsQuery } from '@common/api/paymentApi/payment.api'
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
 import { render, screen } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
+import userEvent, { PointerEventsCheckLevel } from '@testing-library/user-event'
 import DebtCalculationBlock from './'
 
 jest.mock('@common/api/domainApi/domain.api', () => ({
@@ -78,10 +78,20 @@ const SAVED: Record<string, unknown> = {
   },
 }
 
+// Why: antd's CSS-in-JS makes jsdom getComputedStyle slow, and both
+// user-event's pointer-events check and getByRole's visibility check run it up
+// the ancestor chain. Under a full parallel run that timed tests out, and a
+// closing dropdown still animating with `pointer-events: none` failed the
+// next click outright. The selects are always on screen, so neither check
+// adds anything here.
+const user = userEvent.setup({
+  pointerEventsCheck: PointerEventsCheckLevel.Never,
+})
+
 /** Picks an option out of an antd Select addressed by its aria-label. */
 const choose = async (select: string, option: string): Promise<void> => {
-  await userEvent.click(screen.getByRole('combobox', { name: select }))
-  await userEvent.click(await screen.findByTitle(option))
+  await user.click(screen.getByRole('combobox', { name: select, hidden: true }))
+  await user.click(await screen.findByTitle(option))
 }
 
 const openingDebt = (): HTMLInputElement =>
@@ -179,7 +189,7 @@ describe('switching the company filter', () => {
 
     await choose('Домен', 'ОСББ Тест')
     await choose('Компанія', 'Перша компанія')
-    await userEvent.type(openingDebt(), '999')
+    await user.type(openingDebt(), '999')
     expect(openingDebt()).toHaveValue('999')
 
     await choose('Компанія', 'Друга компанія')

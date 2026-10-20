@@ -36,9 +36,12 @@ export const customServicesApi = createApi({
       IGetCustomDomainServicesResponse,
       IGetCustomServicesByDomainRequest
     >({
-      query: ({ domainId }) => ({
+      query: ({ domainId, includeDisabled }) => ({
         url: 'custom-services/domain',
-        params: { domainId },
+        params: {
+          domainId,
+          ...(includeDisabled ? { includeDisabled: true } : {}),
+        },
       }),
       providesTags: ['CustomService'],
     }),

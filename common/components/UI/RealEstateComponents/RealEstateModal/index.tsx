@@ -60,24 +60,37 @@ const RealEstateModal: FC<Props> = ({
     domainId ||
     chosenRealEstate?.domain
   const { data: customDomainServices } = useGetCustomServicesByDomainQuery(
-    { domainId: currentDomainId },
+    { domainId: currentDomainId, includeDisabled: true },
     { skip: !currentDomainId }
+  )
+
+  const disabledDomainServiceIds = useMemo(
+    () =>
+      new Set(
+        (customDomainServices?.data ?? [])
+          .flatMap((group) => group?.services ?? [])
+          .filter((s) => s.isEnabled === false)
+          .map((s) => String(s._id))
+      ),
+    [customDomainServices]
   )
 
   const domainCustomServices = useMemo(() => {
     return (
       customDomainServices?.data?.flatMap((group) =>
         Array.isArray(group?.services)
-          ? group.services.map((s) => ({
-              _id: s._id,
-              label: s.name,
-              fieldName: s.fieldName,
-              // Тег типу потрібен формі, щоб зрозуміти, чи є в домені послуга
-              // «за площею» (див. isMeterBasedServiceExist). У БД не потрапляє:
-              // схема RealEstate.customServices його не містить.
-              serviceType: (s as { serviceType?: string }).serviceType,
-              price: undefined,
-            }))
+          ? group.services
+              .filter((s) => s.isEnabled !== false)
+              .map((s) => ({
+                _id: s._id,
+                label: s.name,
+                fieldName: s.fieldName,
+                // Тег типу потрібен формі, щоб зрозуміти, чи є в домені послуга
+                // «за площею» (див. isMeterBasedServiceExist). У БД не потрапляє:
+                // схема RealEstate.customServices його не містить.
+                serviceType: (s as { serviceType?: string }).serviceType,
+                price: undefined,
+              }))
           : []
       ) || []
     )
@@ -141,10 +154,15 @@ const RealEstateModal: FC<Props> = ({
   const handleSubmit = async () => {
     const formData: IRealestate = await form.validateFields()
 
-    const filteredCustomServices =
-      formData.customServices?.filter(
+    const keptDisabledServices = (
+      currentRealEstate?.customServices ?? []
+    ).filter((s) => disabledDomainServiceIds.has(String(s._id)))
+    const filteredCustomServices = [
+      ...(formData.customServices?.filter(
         (s) => typeof s.price === 'number' && s.price >= 0
-      ) || []
+      ) || []),
+      ...keptDisabledServices,
+    ]
 
     const realEstateData = {
       domain: getEntityId(formData.domain),
