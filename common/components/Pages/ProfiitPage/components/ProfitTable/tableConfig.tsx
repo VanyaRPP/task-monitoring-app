@@ -11,6 +11,9 @@ import { Button, Popconfirm, Space, Tag, Tooltip, Typography } from 'antd'
 import { EyeOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import type { GlobalToken } from 'antd'
 import { Operations } from '@utils/constants'
+import type { IProfitItem } from '@utils/profit-items'
+import { useMemo, useState } from 'react'
+import s from './style.module.scss'
 
 const { Text } = Typography
 
@@ -78,6 +81,58 @@ export const MoneyCell: React.FC<{
         )
       })}
     </Space>
+  )
+}
+
+// A receipt with dozens of lines made its row as tall as the screen.
+const ITEMS_COLLAPSED_LIMIT = 8
+
+/**
+ * One tag per line with its own amount - that split is the point of entering
+ * a receipt as lines. Biggest first, so the collapsed view shows what the
+ * money actually went on.
+ */
+export const ProfitItemsCell: React.FC<{
+  items: IProfitItem[]
+  currency?: string
+}> = ({ items, currency }) => {
+  const [expanded, setExpanded] = useState(false)
+  const sorted = useMemo(
+    () => [...items].sort((a, b) => b.amount - a.amount),
+    [items]
+  )
+  const hidden = sorted.length - ITEMS_COLLAPSED_LIMIT
+  const visible =
+    expanded || hidden <= 0 ? sorted : sorted.slice(0, ITEMS_COLLAPSED_LIMIT)
+
+  return (
+    <div className={s.items}>
+      {visible.map((item, index) => (
+        <Tooltip key={index} title={item.description}>
+          <Tag className={s.itemTag}>
+            <span className={s.itemCategory}>
+              {item.category ||
+                t('dashboard.uncategorized', { ns: 'profitPage' })}
+            </span>
+            <Text type="secondary" style={numericCell}>
+              {getCurrencySymbol(currency)} {money(item.amount)}
+            </Text>
+          </Tag>
+        </Tooltip>
+      ))}
+      {hidden > 0 && (
+        <Button
+          type="link"
+          size="small"
+          className={s.itemsToggle}
+          onClick={() => setExpanded((v) => !v)}
+        >
+          {expanded
+            ? t('table.child.showLess', { ns: 'profitPage' })
+            : t('table.child.showMore', { ns: 'profitPage', count: hidden })}
+        </Button>
+      )}
+    </div>
   )
 }
 
@@ -355,30 +410,26 @@ export const getChildColumns = (
     title: t('table.child.description', { ns: 'profitPage' }),
     dataIndex: 'description',
     key: 'description',
+    // Usually one short line; the free width goes to the categories instead.
+    width: 220,
     ellipsis: true,
     render: (description: string) =>
-      description || <Text type="secondary">—</Text>,
+      description ? (
+        <Tooltip title={description} placement="topLeft">
+          <span>{description}</span>
+        </Tooltip>
+      ) : (
+        <Text type="secondary">—</Text>
+      ),
   },
   {
     title: t('table.child.categories', { ns: 'profitPage' }),
     dataIndex: 'categories',
     key: 'categories',
-    width: 220,
+    // No width: takes whatever the fixed columns leave over.
     render: (cats: string[], record) =>
       record.items?.length ? (
-        // One tag per line with its own amount - that split is the point of
-        // entering a receipt as lines.
-        <Space size={[4, 4]} wrap>
-          {record.items.map((item, index) => (
-            <Tooltip key={index} title={item.description}>
-              <Tag style={{ marginInlineEnd: 0 }}>
-                {item.category ||
-                  t('dashboard.uncategorized', { ns: 'profitPage' })}
-                : {money(item.amount)}
-              </Tag>
-            </Tooltip>
-          ))}
-        </Space>
+        <ProfitItemsCell items={record.items} currency={record.currency} />
       ) : cats?.length ? (
         <Space size={[4, 4]} wrap>
           {cats.map((cat) => (

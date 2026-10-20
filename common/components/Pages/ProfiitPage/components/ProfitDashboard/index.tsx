@@ -28,6 +28,8 @@ import {
 import { money } from '../ProfitTable/tableConfig'
 import { splitProfitByCategory } from '@utils/profit-items'
 import 'dayjs/locale/uk'
+import cn from 'classnames'
+import s from './style.module.scss'
 
 dayjs.locale('uk')
 
@@ -77,6 +79,16 @@ const PIE_PALETTE = [
   '#2491B3',
   '#17C76F',
 ]
+
+// Up to this many categories the legend fits one column beside the ring.
+const PIE_COMPACT_MAX_CATEGORIES = 6
+
+// Past the palette, repeating it would give two legend rows the same colour;
+// golden-angle hues stay apart however many categories a month has.
+const pieColorAt = (i: number) =>
+  i < PIE_PALETTE.length
+    ? PIE_PALETTE[i]
+    : `hsl(${Math.round((i * 137.508) % 360)}, 62%, 58%)`
 
 const periodKeyOf = (d: Dayjs, periodType: string) => {
   if (periodType === 'Month') return d.format('YYYY-MM')
@@ -399,6 +411,11 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({
       .sort((a, b) => b.value - a.value)
   }, [filteredData, t, currency])
 
+  // A busy month gets the pie its own full-width row: squeezed beside the
+  // trend chart its two legend columns cut every name to a few letters, and
+  // a legend stacked under the ring stretched the trend card to match.
+  const isPieWide = pieData.length > PIE_COMPACT_MAX_CATEGORIES
+
   const pieTotal = useMemo(
     () => pieData.reduce((sum, item) => plusFloat(sum, item.value), 0),
     [pieData]
@@ -413,7 +430,7 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({
   const pieColorScale = useMemo(
     () => ({
       domain: pieData.map((item) => item.type),
-      range: pieData.map((_, i) => PIE_PALETTE[i % PIE_PALETTE.length]),
+      range: pieData.map((_, i) => pieColorAt(i)),
     }),
     [pieData]
   )
@@ -494,9 +511,9 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({
         }),
       ],
     },
-    legend: {
-      color: { position: 'left', itemLabelFill: token.colorText },
-    },
+    // Rendered as our own list below: G2's legend paginated a busy month and
+    // clipped the first column's names against the card edge.
+    legend: false,
   }
 
   const currencySuffix =
@@ -695,13 +712,15 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({
       </Row>
 
       <Row gutter={[16, 16]}>
-        <Col span={14}>
+        <Col xs={24} xl={isPieWide ? 24 : 14}>
           <Card
             title={`${t('profitPage:dashboard.trendTitle')}${currencySuffix}`}
             size="small"
-            style={{ height: '100%' }}
+            className={s.chartCard}
           >
-            <div style={{ height: 280 }}>
+            {/* Grows with the pie card beside it, so a long legend there does
+                not leave a gap under the bars. */}
+            <div className={s.trendChart}>
               {columnData.length > 0 ? (
                 <Column {...columnConfig} />
               ) : (
@@ -712,21 +731,51 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({
             </div>
           </Card>
         </Col>
-        <Col span={10}>
+        <Col xs={24} xl={isPieWide ? 24 : 10}>
           <Card
             title={`${t('profitPage:dashboard.structureTitle')}${currencySuffix}`}
             size="small"
-            style={{ height: '100%' }}
+            className={s.chartCard}
           >
-            <div style={{ height: 280, display: 'flex', alignItems: 'center' }}>
-              {pieData.length > 0 ? (
-                <Pie {...pieConfig} />
-              ) : (
-                <Text type="secondary">
-                  {t('profitPage:dashboard.notEnoughData')}
-                </Text>
-              )}
-            </div>
+            {pieData.length > 0 ? (
+              <div
+                className={cn(s.pieLayout, { [s.pieLayoutWide]: isPieWide })}
+              >
+                <div className={s.pieChart}>
+                  <Pie {...pieConfig} />
+                </div>
+                <ul
+                  className={cn(s.pieLegend, {
+                    [s.pieLegendTwoColumns]: isPieWide,
+                  })}
+                >
+                  {pieData.map((item, i) => (
+                    <Tooltip
+                      key={item.type}
+                      // Long names are cut with an ellipsis; this is where
+                      // the full one (and the amount) can still be read.
+                      title={`${item.type}: ${getCurrencySymbol(currency)} ${money(item.value)}`}
+                      placement="left"
+                    >
+                      <li className={s.pieLegendItem}>
+                        <span
+                          className={s.pieLegendSwatch}
+                          style={{ background: pieColorAt(i) }}
+                        />
+                        <span className={s.pieLegendName}>{item.type}</span>
+                        <Text type="secondary" className={s.pieLegendPercent}>
+                          {piePercent(item.value).toFixed(1)}%
+                        </Text>
+                      </li>
+                    </Tooltip>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              <Text type="secondary">
+                {t('profitPage:dashboard.notEnoughData')}
+              </Text>
+            )}
           </Card>
         </Col>
       </Row>

@@ -19,7 +19,11 @@
       "description": "Description",
       "categories": "Categories",
       "debit": "Expenses",
-      "credit": "Incomes"
+      "credit": "Incomes",
+      "author": "Added by",
+      "noExpenses": "No expenses recorded for this month",
+      "showMore": "{{count}} more",
+      "showLess": "Show less"
     },
     "noData": "No profit data available.",
     "tooltipExpand": "Expand all rows",

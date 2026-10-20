@@ -39,6 +39,7 @@ import { useRouter } from 'next/router'
 import { AppRoutes, Operations } from '@utils/constants'
 import PaymentsDrilldown from '../PaymentsDrilldown'
 import type { ProfitScope } from '../../hook/useProfitScopes'
+import s from './style.module.scss'
 
 interface ProfitTableProps {
   scope: ProfitScope & { label: string }
@@ -240,6 +241,7 @@ const ProfitTable: FC<ProfitTableProps> = ({ scope }) => {
                 // No border here: a bordered grid inside a bordered grid reads
                 // as two stacked tables rather than one nested detail view.
                 size="small"
+                className={s.childTable}
                 columns={getChildColumns(
                   (record) => {
                     setSelectedProfit(record)

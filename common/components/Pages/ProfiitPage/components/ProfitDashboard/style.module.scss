@@ -1,0 +1,88 @@
+.chartCard {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  :global(.ant-card-body) {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+.trendChart {
+  flex: 1;
+  min-height: 280px;
+}
+
+.pieLayout {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 16px 48px;
+}
+
+.pieChart {
+  flex: 0 0 220px;
+  height: 220px;
+  margin: 0 auto;
+}
+
+// Never more than two columns: a busy month grows downwards instead of
+// squeezing names into a third column or paging them away.
+.pieLegend {
+  flex: 1 1 240px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 6px 32px;
+}
+
+// Capped so the percentage stays next to its name on a wide screen.
+.pieLegendTwoColumns {
+  flex-basis: 480px;
+  max-width: 640px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+// The full-width card has room for a ring that matches its legend's height.
+.pieLayoutWide .pieChart {
+  flex-basis: 280px;
+  height: 280px;
+  margin: 0;
+}
+
+.pieLegendItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  font-size: 13px;
+  line-height: 20px;
+  cursor: default;
+}
+
+.pieLegendSwatch {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+.pieLegendName {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pieLegendPercent {
+  flex: none;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
