@@ -36,7 +36,7 @@ describe('resolveSnapshotSettings', () => {
     expect(resolveSnapshotSettings(null, 'c1')).toEqual({
       overrides: {},
       annualRatePercent: 3,
-      inflationMethod: 'balance',
+      inflationMethod: 'monthly',
       periodFrom: undefined,
       periodTo: undefined,
     })
@@ -69,7 +69,7 @@ describe('calculateCompanyDebt', () => {
   }
   const indexByPeriod = { '2025-01': 101.2, '2025-02': 100.8, '2025-03': 101.5 }
 
-  it('рахує як сторінка: 3 місяці по 500 грн за залишком', () => {
+  it('рахує як сторінка: 3 місяці по 500 грн, помісячно (ст. 625)', () => {
     const { result, period, inflationMethod } = calculateCompanyDebt({
       companyId: 'c1',
       company: { totalArea: 50, pricePerMeter: 10 },
@@ -78,6 +78,20 @@ describe('calculateCompanyDebt', () => {
     })
 
     expect(period).toEqual(defaultPeriod)
+    expect(inflationMethod).toBe('monthly')
+    // січень 500 × (1.008 × 1.015 − 1) + лютий 500 × 1.5%; березень ще ні
+    expect(result.inflation).toBeCloseTo(11.56 + 7.5, 2)
+  })
+
+  it('збережений «за залишком» рахується за залишком', () => {
+    const { result, inflationMethod } = calculateCompanyDebt({
+      companyId: 'c1',
+      company: { totalArea: 50, pricePerMeter: 10 },
+      indexByPeriod,
+      saved: { inflationMethod: 'balance' },
+      defaultPeriod,
+    })
+
     expect(inflationMethod).toBe('balance')
     // 1500 × (1.008 × 1.015 − 1); see calculate.test.ts
     expect(result.inflation).toBeCloseTo(34.68, 2)

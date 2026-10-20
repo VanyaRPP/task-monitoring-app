@@ -200,14 +200,14 @@ describe('calculateDebtorsInflation', () => {
     const expected = await viaPage(fixture, {
       from: { year: 2024, month: 4 },
       to: { year: 2025, month: 3 },
-      inflationMethod: 'balance',
+      inflationMethod: 'monthly',
     })
 
     expect(result[String(fixture.company)]).toEqual({
       loss: expected,
       from: '2024-04',
       to: '2025-03',
-      method: 'balance',
+      method: 'monthly',
     })
   })
 

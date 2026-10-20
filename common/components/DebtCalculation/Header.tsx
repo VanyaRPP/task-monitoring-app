@@ -220,8 +220,8 @@ const DebtCalculationHeader: React.FC = () => {
             aria-label="Метод інфляційних"
             className={s.Method}
             options={[
-              { value: 'balance', label: 'За залишком (як в Акті)' },
               { value: 'monthly', label: 'Помісячний (ст. 625 ЦК)' },
+              { value: 'balance', label: 'За залишком (як в Акті)' },
             ]}
           />
         </label>

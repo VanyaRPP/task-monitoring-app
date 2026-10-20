@@ -16,6 +16,12 @@ export type InflationMethod = 'balance' | 'monthly'
 /** Annual rate under art. 625 of the Civil Code, absent a contractual one. */
 export const DEFAULT_ANNUAL_RATE_PERCENT = 3
 
+/**
+ * The method a new calculation starts with: the one art. 625 requires. A saved
+ * calculation keeps the method it was saved with.
+ */
+export const DEFAULT_INFLATION_METHOD: InflationMethod = 'monthly'
+
 /** One month of the period - typed in by hand or prefilled from the DB. */
 export interface IDebtMonthInput extends IYearMonth {
   /** Total area, m². */
