@@ -463,43 +463,72 @@ export const getChildColumns = (
     key: 'action',
     align: 'right',
     width: 120,
-    // Three actions do not need a dropdown - inline icons cost one click
-    // instead of two and stay visible.
     render: (_, record) => (
-      <Space size={0}>
-        <Tooltip title={t('actions.preview', { ns: 'profitPage' })}>
-          <Button
-            type="text"
-            icon={<EyeOutlined />}
-            onClick={() => onPreview(record)}
-            aria-label={t('actions.preview', { ns: 'profitPage' })}
-          />
-        </Tooltip>
-        <Tooltip title={t('actions.edit', { ns: 'profitPage' })}>
-          <Button
-            type="text"
-            icon={<EditOutlined />}
-            onClick={() => onEdit(record)}
-            aria-label={t('actions.edit', { ns: 'profitPage' })}
-          />
-        </Tooltip>
-        <Popconfirm
-          title={t('prompts.confirmDelete', { ns: 'profitPage' })}
-          onConfirm={() => onDelete(record._id)}
-          okText={t('actions.delete', { ns: 'profitPage' })}
-          cancelText={t('actions.cancel', { ns: 'profitPage' })}
-          okButtonProps={{ danger: true, loading: isDeleting }}
-        >
-          <Tooltip title={t('actions.delete', { ns: 'profitPage' })}>
-            <Button
-              type="text"
-              danger
-              icon={<DeleteOutlined />}
-              aria-label={t('actions.delete', { ns: 'profitPage' })}
-            />
-          </Tooltip>
-        </Popconfirm>
-      </Space>
+      <RecordActions
+        record={record}
+        onPreview={onPreview}
+        onEdit={onEdit}
+        onDelete={onDelete}
+        isDeleting={isDeleting}
+      />
     ),
   },
 ]
+
+/**
+ * Three actions do not need a dropdown - inline icons cost one click instead
+ * of two and stay visible. `canDelete` is off for a single line of a
+ * multi-line receipt: deleting it would silently remove the whole receipt.
+ */
+export const RecordActions: React.FC<{
+  record: Profit
+  onPreview: (record: Profit) => void
+  onEdit: (record: Profit) => void
+  onDelete: (id: string) => void
+  isDeleting: boolean
+  canDelete?: boolean
+}> = ({
+  record,
+  onPreview,
+  onEdit,
+  onDelete,
+  isDeleting,
+  canDelete = true,
+}) => (
+  <Space size={0}>
+    <Tooltip title={t('actions.preview', { ns: 'profitPage' })}>
+      <Button
+        type="text"
+        icon={<EyeOutlined />}
+        onClick={() => onPreview(record)}
+        aria-label={t('actions.preview', { ns: 'profitPage' })}
+      />
+    </Tooltip>
+    <Tooltip title={t('actions.edit', { ns: 'profitPage' })}>
+      <Button
+        type="text"
+        icon={<EditOutlined />}
+        onClick={() => onEdit(record)}
+        aria-label={t('actions.edit', { ns: 'profitPage' })}
+      />
+    </Tooltip>
+    {canDelete && (
+      <Popconfirm
+        title={t('prompts.confirmDelete', { ns: 'profitPage' })}
+        onConfirm={() => onDelete(record._id)}
+        okText={t('actions.delete', { ns: 'profitPage' })}
+        cancelText={t('actions.cancel', { ns: 'profitPage' })}
+        okButtonProps={{ danger: true, loading: isDeleting }}
+      >
+        <Tooltip title={t('actions.delete', { ns: 'profitPage' })}>
+          <Button
+            type="text"
+            danger
+            icon={<DeleteOutlined />}
+            aria-label={t('actions.delete', { ns: 'profitPage' })}
+          />
+        </Tooltip>
+      </Popconfirm>
+    )}
+  </Space>
+)

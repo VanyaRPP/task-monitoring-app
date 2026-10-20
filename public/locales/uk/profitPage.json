@@ -64,7 +64,13 @@
       "author": "Хто додав",
       "noExpenses": "За цей місяць витрат не записано",
       "showMore": "Ще {{count}}",
-      "showLess": "Згорнути"
+      "showLess": "Згорнути",
+      "category": "Категорія",
+      "lines": "Позицій",
+      "share": "Частка",
+      "approximateHint": "Орієнтовно: сума старого запису поділена порівну між категоріями",
+      "expensesTitle": "Витрати за категоріями",
+      "recordsTitle": "Записи ({{count}})"
     },
     "noData": "Дані про прибуток відсутні.",
     "tooltipExpand": "Розгорнути всі рядки",
@@ -116,6 +122,9 @@
     "itemDescriptionPlaceholder": "Примітка",
     "addItem": "Додати позицію",
     "removeItem": "Видалити позицію",
+    "itemsViewGroups": "По групах",
+    "itemsViewFlat": "Кожна",
+    "newItems": "Нові позиції",
     "splitLegacy": "Цей запис має одну суму {{amount}} на кілька категорій. Розподіліть її між позиціями.",
     "scope": "Домен або компанія"
   },
