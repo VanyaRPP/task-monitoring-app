@@ -7,7 +7,8 @@ import {
   IStatementGroup,
 } from './grouping'
 import { cropStrip } from './imageTools'
-import { readPage, readStrip, surveyPhoto } from './readerApi'
+import { readPage, readPdf, readStrip, surveyPhoto } from './readerApi'
+import { readStatementPdf } from './readStatementPdf'
 import {
   IPhotoProgress as IReadProgress,
   readStatementPhoto,
@@ -16,6 +17,7 @@ import {
 export interface IPhotoProgress extends IReadProgress {
   id: string
   name: string
+  kind?: 'photo' | 'pdf'
 }
 
 /** What the user did on one statement's card - kept here so it outlives a closed chat window. */
@@ -39,8 +41,10 @@ export interface IDocumentBatch {
 
 export interface IQueuedPhoto {
   name: string
-  /** The shrunk photo as a data URL. */
+  /** The shrunk photo, or the PDF file, as a data URL. */
   url: string
+  /** A PDF is read from its own text, at once; a photo by the vision model. */
+  kind?: 'photo' | 'pdf'
 }
 
 const sleep = (ms: number) =>
@@ -85,6 +89,7 @@ export function useDocumentImports(
       const progress: IPhotoProgress[] = photos.map((photo) => ({
         id: generateId(),
         name: photo.name,
+        kind: photo.kind ?? 'photo',
         status: 'queued',
         stripsDone: 0,
         stripsTotal: 0,
@@ -102,6 +107,22 @@ export function useDocumentImports(
         for (let index = 0; index < photos.length; index += 1) {
           if (!alive.current) return
           const photoId = progress[index].id
+          const onProgress = (patch: Partial<IReadProgress>) =>
+            patchBatch(id, (batch) => ({
+              ...batch,
+              photos: batch.photos.map((photo) =>
+                photo.id === photoId ? { ...photo, ...patch } : photo
+              ),
+            }))
+
+          if (photos[index].kind === 'pdf') {
+            const result = await readStatementPdf(photos[index], {
+              readPdf,
+              onProgress,
+            })
+            if (result) read.push({ ...result, jobId: photoId })
+            continue
+          }
 
           const result = await readStatementPhoto(photos[index], {
             readPage,
@@ -114,13 +135,7 @@ export function useDocumentImports(
               await sleep(resumeAt - Date.now())
               patchBatch(id, (batch) => ({ ...batch, resumeAt: undefined }))
             },
-            onProgress: (patch) =>
-              patchBatch(id, (batch) => ({
-                ...batch,
-                photos: batch.photos.map((photo) =>
-                  photo.id === photoId ? { ...photo, ...patch } : photo
-                ),
-              })),
+            onProgress,
             isCancelled: () => !alive.current,
           })
 

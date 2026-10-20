@@ -45,6 +45,7 @@ const adminCtx = {
 }
 
 function buildRes() {
+  const listeners: Record<string, () => void> = {}
   const res: Partial<NextApiResponse> & {
     socket: { setNoDelay: jest.Mock }
   } = {
@@ -52,8 +53,16 @@ function buildRes() {
     json: jest.fn(),
     setHeader: jest.fn(),
     socket: { setNoDelay: jest.fn() } as any,
+    writableFinished: false,
+    on: jest.fn((event: string, listener: () => void) => {
+      listeners[event] = listener
+      return res
+    }) as any,
   }
-  return res as unknown as NextApiResponse
+  // Why: the route only needs `on`/`writableFinished` of ServerResponse.
+  return Object.assign(res as unknown as NextApiResponse, {
+    emit: (event: string) => listeners[event]?.(),
+  })
 }
 
 function req(overrides: Partial<NextApiRequest> = {}) {
@@ -107,7 +116,54 @@ describe('/api/chat access gate', () => {
     await handler(req(), res)
 
     expect(mockStreamText).toHaveBeenCalledTimes(1)
-    expect(pipe).toHaveBeenCalledWith(res)
+    expect(pipe).toHaveBeenCalledWith(res, { onError: expect.any(Function) })
+  })
+
+  it('fails fast on a rate limit and tells the user why', async () => {
+    mockGetCurrentUser.mockResolvedValueOnce(adminCtx)
+    const pipe = jest.fn()
+    mockStreamText.mockReturnValueOnce({ pipeUIMessageStreamToResponse: pipe })
+    jest.spyOn(console, 'error').mockImplementationOnce(() => undefined)
+
+    await handler(req(), buildRes())
+
+    // Waiting out Groq's retry-after outlasts production's 30s request limit.
+    expect(mockStreamText.mock.calls[0][0].maxRetries).toBe(0)
+    const { onError } = pipe.mock.calls[0][1]
+    expect(
+      onError(
+        Object.assign(new Error('Rate limit reached'), { statusCode: 429 })
+      )
+    ).toBe('Вичерпано хвилинний ліміт моделі. Спробуй ще раз за хвилину.')
+  })
+
+  it('зупиняє генерацію, коли клієнт обірвав запит (кнопка «Зупинити»)', async () => {
+    mockGetCurrentUser.mockResolvedValueOnce(adminCtx)
+    mockStreamText.mockReturnValueOnce({
+      pipeUIMessageStreamToResponse: jest.fn(),
+    })
+
+    const res = buildRes()
+    await handler(req(), res)
+    const { abortSignal } = mockStreamText.mock.calls[0][0]
+    expect(abortSignal.aborted).toBe(false)
+
+    res.emit('close')
+    expect(abortSignal.aborted).toBe(true)
+  })
+
+  it('не скасовує генерацію після повної відповіді', async () => {
+    mockGetCurrentUser.mockResolvedValueOnce(adminCtx)
+    mockStreamText.mockReturnValueOnce({
+      pipeUIMessageStreamToResponse: jest.fn(),
+    })
+
+    const res = buildRes()
+    await handler(req(), res)
+    Object.assign(res, { writableFinished: true })
+    res.emit('close')
+
+    expect(mockStreamText.mock.calls[0][0].abortSignal.aborted).toBe(false)
   })
 
   it('returns 400 when messages are missing', async () => {

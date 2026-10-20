@@ -1,13 +1,7 @@
-import {
-  buildDebtCalculationDocument,
-  debtCalculationFileName,
-  toXlsxStyle,
-} from '@utils/excel/debt-calculation-excel'
-import { IYearMonth } from '@utils/debt-calculation/months'
+import { toXlsxStyle } from '@utils/excel/debt-calculation-excel'
 import { message } from 'antd'
-import { Dayjs } from 'dayjs'
 import { useState } from 'react'
-import { useDebtCalculationContext } from './'
+import { useDebtDocument } from './useDebtDocument'
 
 export interface IExportExcel {
   exportExcel: () => Promise<void>
@@ -27,26 +21,17 @@ export interface IExportExcel {
 export const interop = <T>(imported: T & { default?: T }): T =>
   imported?.default ?? imported
 
-const toYearMonth = (value?: Dayjs): IYearMonth | undefined =>
-  value ? { year: value.year(), month: value.month() + 1 } : undefined
-
 export const useExportExcel = (domainName?: string): IExportExcel => {
-  const {
-    company,
-    result,
-    overrides = {},
-    from,
-    to,
-    annualRatePercent,
-    inflationMethod,
-  } = useDebtCalculationContext()
+  const buildDocument = useDebtDocument(domainName)
   const [isExporting, setIsExporting] = useState(false)
 
   const exportExcel = async (): Promise<void> => {
-    if (!result?.rows?.length) {
+    const built = buildDocument()
+    if (!built) {
       message.warning('Немає що експортувати — оберіть компанію й період')
       return
     }
+    const { document, fileName } = built
 
     setIsExporting(true)
 
@@ -59,24 +44,6 @@ export const useExportExcel = (domainName?: string): IExportExcel => {
       ])
       const XLSX = interop(xlsxModule)
       const { saveAs } = interop(fileSaverModule)
-
-      const periodFrom = toYearMonth(from)
-      const periodTo = toYearMonth(to)
-      const companyName = company?.companyName ?? 'Компанія'
-
-      const document = buildDebtCalculationDocument({
-        companyName,
-        description: company?.description,
-        domainName,
-        result,
-        from: periodFrom,
-        to: periodTo,
-        annualRatePercent,
-        inflationMethod,
-        area: overrides.area ?? company?.totalArea,
-        tariff: overrides.tariff ?? company?.pricePerMeter,
-        openingDebt: overrides.openingDebt,
-      })
 
       const worksheet = XLSX.utils.aoa_to_sheet(
         document.rows.map((line) => line.map((cell) => cell?.v ?? null))
@@ -109,7 +76,7 @@ export const useExportExcel = (domainName?: string): IExportExcel => {
       const buffer = XLSX.write(workbook, { type: 'array', bookType: 'xlsx' })
       saveAs(
         new Blob([buffer], { type: 'application/octet-stream' }),
-        `${debtCalculationFileName(companyName, periodFrom, periodTo)}.xlsx`
+        `${fileName}.xlsx`
       )
     } catch (error) {
       // Without this a failure looked like nothing happened: no network, no logs.

@@ -99,3 +99,24 @@ describe('buildSnapshotPayloadOnTemplateSwitch', () => {
     expect(payload.templateName).toBeNull()
   })
 })
+
+describe('buildSnapshotPayloadOnTemplateSwitch — disabledServiceIds', () => {
+  it('carries the current disabled services into the snapshot', () => {
+    const payload = buildSnapshotPayloadOnTemplateSwitch({
+      previousTemplateId: 'tpl-it',
+      templates: TEMPLATES,
+      currentGroups: [{ groupName: 'G', services: ['s1', 's2'] }],
+      currentDisabledServiceIds: ['s2', 7],
+    })
+    expect(payload.disabledServiceIds).toEqual(['s2', '7'])
+  })
+
+  it('defaults to [] when the form has no list yet', () => {
+    const payload = buildSnapshotPayloadOnTemplateSwitch({
+      previousTemplateId: null,
+      templates: TEMPLATES,
+      currentGroups: [{ groupName: 'G', services: ['s1'] }],
+    })
+    expect(payload.disabledServiceIds).toEqual([])
+  })
+})

@@ -47,7 +47,9 @@ export default async function handler(
           }
         }
 
-        const responseData = await getDomainServiceCatalog(domainId)
+        const responseData = await getDomainServiceCatalog(domainId, {
+          includeDisabled: req.query.includeDisabled === 'true',
+        })
 
         if (!responseData) {
           return res.status(404).json({

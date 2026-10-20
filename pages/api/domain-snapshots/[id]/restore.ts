@@ -43,6 +43,8 @@ async function restoreSnapshotHandler(
     services: g.services.map(String),
   })) as typeof domain.customServices
   domain.domainTypeTemplateId = snapshot.templateId ?? undefined
+  const disabledServiceIds = (snapshot.disabledServiceIds ?? []).map(String)
+  domain.disabledServiceIds = disabledServiceIds
   await domain.save()
 
   return res.status(200).json({
@@ -51,6 +53,7 @@ async function restoreSnapshotHandler(
       restored: true,
       domainId: String(snapshot.domainId),
       templateId: snapshot.templateId ? String(snapshot.templateId) : null,
+      disabledServiceIds,
     },
   })
 }

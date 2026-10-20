@@ -12,14 +12,21 @@ export interface ISnapshotPayload {
   templateId: string | null
   templateName: string | null
   groups: { groupName: string; services: string[] }[]
+  disabledServiceIds: string[]
 }
 
 export function buildSnapshotPayloadOnTemplateSwitch(args: {
   previousTemplateId: string | null
   templates: ITemplateLite[]
   currentGroups: ISnapshotGroupInput[]
+  currentDisabledServiceIds?: unknown[]
 }): ISnapshotPayload {
-  const { previousTemplateId, templates, currentGroups } = args
+  const {
+    previousTemplateId,
+    templates,
+    currentGroups,
+    currentDisabledServiceIds,
+  } = args
   const previousTemplate = previousTemplateId
     ? templates.find((t) => t._id === previousTemplateId)
     : undefined
@@ -32,5 +39,8 @@ export function buildSnapshotPayloadOnTemplateSwitch(args: {
         ? g.services.map((id) => String(id))
         : [],
     })),
+    disabledServiceIds: (currentDisabledServiceIds ?? []).map((id) =>
+      String(id)
+    ),
   }
 }

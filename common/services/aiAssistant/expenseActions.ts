@@ -4,6 +4,10 @@ import type { UserContext } from '@common/services/paymentService/payment.servic
 import { canAccessProfitTarget } from '@common/services/profitService/profitAccess'
 import { multiplyFloat, normalizeCurrency } from '@utils/helpers'
 import { normalizeProfitItems, type IProfitItem } from '@utils/profit-items'
+import {
+  findCompaniesByName,
+  findDomainsByName,
+} from '@common/services/aiAssistant/invoiceActions'
 
 /**
  * Builds the draft behind the `previewExpenses` tool: a hand-entered Profit
@@ -24,6 +28,9 @@ export interface BuildExpenseDraftParams {
   type: 'debit' | 'credit'
   domainId?: string
   companyId?: string
+  /** Named in words: looked up here, saving the model a find* round trip. */
+  domainName?: string
+  companyName?: string
   date?: string
   periodMonth?: string
   currency?: string
@@ -92,13 +99,59 @@ export function evaluateProduct(expression: string): number | null {
   return multiplyFloat(a, b)
 }
 
+/**
+ * The one record a name refers to: the exact (case-insensitive) match, or the
+ * only partial one. Anything else is a question for the user.
+ */
+function pickByName<T>(
+  said: string,
+  matches: T[],
+  nameOf: (match: T) => string,
+  what: string
+): T {
+  const key = said.trim().toLowerCase()
+  const exact = matches.filter((m) => nameOf(m).trim().toLowerCase() === key)
+  if (exact.length === 1) return exact[0]
+  if (exact.length === 0 && matches.length === 1) return matches[0]
+  if (matches.length === 0) {
+    throw new Error(`no ${what} named «${said.trim()}»: ask the user which one`)
+  }
+  const names = (exact.length ? exact : matches).map(nameOf).join(', ')
+  throw new Error(
+    `several ${what} match «${said.trim()}» (${names}): ask which`
+  )
+}
+
 async function resolveScope(
   {
-    domainId,
-    companyId,
-  }: Pick<BuildExpenseDraftParams, 'domainId' | 'companyId'>,
+    domainId: givenDomainId,
+    companyId: givenCompanyId,
+    domainName,
+    companyName,
+  }: Pick<
+    BuildExpenseDraftParams,
+    'domainId' | 'companyId' | 'domainName' | 'companyName'
+  >,
   ctx: UserContext
 ): Promise<ExpenseScope | null> {
+  let domainId = givenDomainId
+  let companyId = givenCompanyId
+  if (!companyId && companyName?.trim()) {
+    const matches = await findCompaniesByName(companyName, ctx, domainId)
+    companyId = pickByName(
+      companyName,
+      matches,
+      (c) => c.companyName,
+      'companies'
+    ).id
+    // Named together, the provider only narrowed the search.
+    domainId = undefined
+  }
+  if (!domainId && !companyId && domainName?.trim()) {
+    const matches = await findDomainsByName(domainName, ctx)
+    domainId = pickByName(domainName, matches, (d) => d.name, 'providers').id
+  }
+
   if (domainId && companyId) {
     throw new Error('provide either domainId or companyId, not both')
   }
@@ -137,6 +190,8 @@ export async function buildExpenseDraft({
   type,
   domainId,
   companyId,
+  domainName,
+  companyName,
   date,
   periodMonth,
   currency,
@@ -147,7 +202,10 @@ export async function buildExpenseDraft({
   draft: ExpenseDraft
   warnings: string[]
 }> {
-  const scope = await resolveScope({ domainId, companyId }, ctx)
+  const scope = await resolveScope(
+    { domainId, companyId, domainName, companyName },
+    ctx
+  )
 
   // «-2600» in a list means an expense, which `type` already says; the
   // amount itself is always stored positive.

@@ -1,4 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import { realestateApi } from '@common/api/realestateApi/realestate.api'
 import { customServicesApi } from '@common/api/customServicesApi/customServices.api'
 import {
   IDomainModel,
@@ -127,6 +128,8 @@ export const domainApi = createApi({
         try {
           await queryFulfilled
           dispatch(customServicesApi.util.invalidateTags(['CustomService']))
+          // Company lists embed the domain (incl. disabledServiceIds).
+          dispatch(realestateApi.util.invalidateTags(['RealEstate']))
         } catch {
           // mutation failed — nothing to invalidate
         }
