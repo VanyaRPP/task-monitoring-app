@@ -149,14 +149,15 @@ describe('sanitizeSnapshot', () => {
     expect(result.periodTo).toBeUndefined()
   })
 
-  it('метод за замовчуванням — balance, будь-що інше теж balance', () => {
-    expect(sanitizeSnapshot({}).inflationMethod).toBe('balance')
+  it('метод за замовчуванням — помісячний (ст. 625), будь-що чуже теж', () => {
+    expect(sanitizeSnapshot({}).inflationMethod).toBe('monthly')
     expect(sanitizeSnapshot({ inflationMethod: 'хакер' }).inflationMethod).toBe(
-      'balance'
+      'monthly'
     )
+    // A calculation saved «за залишком» stays so.
     expect(
-      sanitizeSnapshot({ inflationMethod: 'monthly' }).inflationMethod
-    ).toBe('monthly')
+      sanitizeSnapshot({ inflationMethod: 'balance' }).inflationMethod
+    ).toBe('balance')
   })
 
   it('відкидає ставку поза 0–100', () => {
@@ -171,7 +172,7 @@ describe('sanitizeSnapshot', () => {
 
   it('не падає на порожньому вході', () => {
     expect(sanitizeSnapshot(null)).toEqual({
-      inflationMethod: 'balance',
+      inflationMethod: 'monthly',
       overrides: {},
     })
   })

@@ -197,3 +197,45 @@ describe('switching the company filter', () => {
     expect(openingDebt()).toHaveValue('')
   })
 })
+
+describe('page defaults', () => {
+  it('starts with the monthly method of art. 625', () => {
+    render(<DebtCalculationBlock />)
+
+    const method = screen.getByRole('combobox', { name: 'Метод інфляційних' })
+    expect(method.closest('.ant-select')).toHaveTextContent(
+      'Помісячний (ст. 625 ЦК)'
+    )
+  })
+
+  it('a saved «за залишком» calculation keeps its method', async () => {
+    ;(useGetDebtCalculationQuery as jest.Mock).mockImplementation(
+      ({ companyId }: { companyId?: string }) => ({
+        data: companyId
+          ? { ...(SAVED[FIRST] as object), inflationMethod: 'balance' }
+          : null,
+        isFetching: false,
+      })
+    )
+    render(<DebtCalculationBlock />)
+
+    await choose('Домен', 'ОСББ Тест')
+    await choose('Компанія', 'Перша компанія')
+
+    const method = screen.getByRole('combobox', { name: 'Метод інфляційних' })
+    expect(method.closest('.ant-select')).toHaveTextContent(
+      'За залишком (як в Акті)'
+    )
+  })
+
+  it('shows the month picker in Ukrainian', async () => {
+    render(<DebtCalculationBlock />)
+
+    await userEvent.click(screen.getByLabelText('Період з'))
+
+    expect(
+      await screen.findByRole('button', { name: 'Обрати рік' })
+    ).toBeInTheDocument()
+    expect(screen.getByText('Січ')).toBeInTheDocument()
+  })
+})

@@ -19,7 +19,17 @@
       "description": "Description",
       "categories": "Categories",
       "debit": "Expenses",
-      "credit": "Incomes"
+      "credit": "Incomes",
+      "author": "Added by",
+      "noExpenses": "No expenses recorded for this month",
+      "showMore": "{{count}} more",
+      "showLess": "Show less",
+      "category": "Category",
+      "lines": "Lines",
+      "share": "Share",
+      "approximateHint": "Estimate: the amount of an older record was split evenly between its categories",
+      "expensesTitle": "Expenses by category",
+      "recordsTitle": "Records ({{count}})"
     },
     "noData": "No profit data available.",
     "tooltipExpand": "Expand all rows",
@@ -57,6 +67,9 @@
     "itemDescriptionPlaceholder": "Note",
     "addItem": "Add line",
     "removeItem": "Remove line",
+    "itemsViewGroups": "By group",
+    "itemsViewFlat": "Each",
+    "newItems": "New lines",
     "splitLegacy": "This record has one amount of {{amount}} for several categories. Split it across the lines.",
     "scope": "Domain or company"
   },

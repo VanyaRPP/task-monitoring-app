@@ -10,7 +10,6 @@ import { useAppDispatch, useAppSelector } from '@modules/store/hooks'
 import { FC, useEffect, useMemo, useState, useCallback } from 'react'
 import {
   getParentColumns,
-  getChildColumns,
   MoneyCell,
   sumRowsByCurrency,
   type DrillTarget,
@@ -30,7 +29,6 @@ import {
   Tooltip,
   message,
   Card,
-  Empty,
   Typography,
   theme,
 } from 'antd'
@@ -38,7 +36,9 @@ import { useTranslation } from 'react-i18next'
 import { useRouter } from 'next/router'
 import { AppRoutes, Operations } from '@utils/constants'
 import PaymentsDrilldown from '../PaymentsDrilldown'
+import CategoryBreakdown from './CategoryBreakdown'
 import type { ProfitScope } from '../../hook/useProfitScopes'
+import s from './style.module.scss'
 
 interface ProfitTableProps {
   scope: ProfitScope & { label: string }
@@ -52,6 +52,7 @@ const ProfitTable: FC<ProfitTableProps> = ({ scope }) => {
   const { token } = theme.useToken()
   const { t } = useTranslation()
   const [selectedProfit, setSelectedProfit] = useState<Profit | null>(null)
+  const [focusItemIndex, setFocusItemIndex] = useState<number>()
   const dispatch = useAppDispatch()
   const { currentPage, pageSize } = useAppSelector(
     (state) => state.profitPage.transactionTablePagination
@@ -236,36 +237,20 @@ const ProfitTable: FC<ProfitTableProps> = ({ scope }) => {
           }
           expandable={{
             expandedRowRender: (record) => (
-              <Table
-                // No border here: a bordered grid inside a bordered grid reads
-                // as two stacked tables rather than one nested detail view.
-                size="small"
-                columns={getChildColumns(
-                  (record) => {
-                    setSelectedProfit(record)
-                    setIsEditing(false)
-                  },
-                  (record) => {
-                    setSelectedProfit(record)
-                    setIsEditing(true)
-                  },
-                  handleDelete,
-                  isDeleting
-                )}
-                dataSource={record.transactions.map((t: Profit) => ({
-                  ...t,
-                  key: t._id,
-                }))}
-                pagination={false}
-                rowKey={(record) => record._id}
-                locale={{
-                  emptyText: (
-                    <Empty
-                      image={Empty.PRESENTED_IMAGE_SIMPLE}
-                      description={t('profitPage:table.child.noExpenses')}
-                    />
-                  ),
+              <CategoryBreakdown
+                transactions={record.transactions}
+                onPreview={(profit, itemIndex) => {
+                  setSelectedProfit(profit)
+                  setFocusItemIndex(itemIndex)
+                  setIsEditing(false)
                 }}
+                onEdit={(profit, itemIndex) => {
+                  setSelectedProfit(profit)
+                  setFocusItemIndex(itemIndex)
+                  setIsEditing(true)
+                }}
+                onDelete={handleDelete}
+                isDeleting={isDeleting}
               />
             ),
             expandedRowKeys,
@@ -325,10 +310,12 @@ const ProfitTable: FC<ProfitTableProps> = ({ scope }) => {
       {selectedProfit && (
         <AddCostModal
           currentProfit={selectedProfit}
+          focusItemIndex={focusItemIndex}
           activeScope={scope}
           profitActions={{ preview: !isEditing, edit: isEditing }}
           closeModal={() => {
             setSelectedProfit(null)
+            setFocusItemIndex(undefined)
             setIsEditing(false)
           }}
         />

@@ -1,6 +1,6 @@
 import { IApartmentOverrides, IMonthOverride } from './build-input'
 import { IYearMonth } from './months'
-import { InflationMethod } from './types'
+import { DEFAULT_INFLATION_METHOD, InflationMethod } from './types'
 
 /** What gets persisted: INPUTS only, never the computed result. */
 export interface IDebtCalculationSnapshot {
@@ -161,7 +161,10 @@ export const sanitizeSnapshot = (source: unknown): IDebtCalculationSnapshot => {
     ...(rate !== undefined && rate >= 0 && rate <= 100
       ? { annualRatePercent: rate }
       : {}),
-    inflationMethod: raw.inflationMethod === 'monthly' ? 'monthly' : 'balance',
+    inflationMethod:
+      raw.inflationMethod === 'balance' || raw.inflationMethod === 'monthly'
+        ? raw.inflationMethod
+        : DEFAULT_INFLATION_METHOD,
     overrides: sanitizeOverrides(raw.overrides),
   }
 }
