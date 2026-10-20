@@ -10,11 +10,12 @@ import React, {
   useState,
 } from 'react'
 import { useChat, type UIMessage } from '@ai-sdk/react'
-import { DefaultChatTransport } from 'ai'
+import { DefaultChatTransport, type FileUIPart } from 'ai'
 import { ConfigProvider, FloatButton, Button, Avatar, Typography } from 'antd'
 import {
   ArrowDownOutlined,
-  CameraOutlined,
+  FilePdfOutlined,
+  PaperClipOutlined,
   RobotOutlined,
   CloseOutlined,
   MinusOutlined,
@@ -51,6 +52,7 @@ import {
   WELCOME_MESSAGE_ID,
   describeChatError,
   getMessageText,
+  isPdfFile,
   isPhoto,
   producedDraft,
 } from './messages/messageParts'
@@ -86,17 +88,38 @@ const getBatchIds = (message: UIMessage): string[] =>
     .map((part) => (part as { data: IDocumentBatchPart }).data.batchId)
 
 /**
- * Photos never go to /api/chat: the widget reads them itself (see
+ * Photos and PDFs never go to /api/chat: the widget reads them itself (see
  * `useDocumentImports`), and the chat model learns what they held from the
- * batch summary. Each resent image would add hundreds of KB to every request.
+ * batch summary. Each resent file would add hundreds of KB to every request.
  */
 const withoutPhotos = (messages: UIMessage[]): UIMessage[] =>
   messages.map((message) => ({
     ...message,
     parts: message.parts.map((part) =>
-      isPhoto(part) ? { type: 'text' as const, text: '[Фото документа]' } : part
+      isPhoto(part)
+        ? { type: 'text' as const, text: '[Фото документа]' }
+        : isPdfFile(part)
+          ? { type: 'text' as const, text: '[PDF документа]' }
+          : part
     ),
   }))
+
+/** A PDF goes to the server whole (base64 adds a third); the route takes 4 MB. */
+const MAX_PDF_BYTES = 2.5 * 1024 * 1024
+
+const isPdf = (file: File): boolean =>
+  file.type === 'application/pdf' || /\.pdf$/i.test(file.name)
+
+const isSupportedFile = (file: File): boolean =>
+  file.type.startsWith('image/') || isPdf(file)
+
+const readAsDataUrl = (file: File): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(String(reader.result))
+    reader.onerror = () => reject(reader.error)
+    reader.readAsDataURL(file)
+  })
 
 interface IDocumentBatchesContext {
   batches: Record<string, IDocumentBatch>
@@ -136,9 +159,17 @@ const ChatMessage: React.FC<ChatMessageProps> = React.memo(
     const isUser = message.role === 'user'
     const text = getMessageText(message)
     const photos = (message.parts ?? []).filter(isPhoto)
+    const pdfs = (message.parts ?? []).filter(isPdfFile)
     const batchIds = getBatchIds(message)
 
-    if (!text && photos.length === 0 && batchIds.length === 0) return null
+    if (
+      !text &&
+      photos.length === 0 &&
+      pdfs.length === 0 &&
+      batchIds.length === 0
+    ) {
+      return null
+    }
 
     // The import cards need the full width of the window, not a bubble.
     if (batchIds.length > 0) {
@@ -170,6 +201,11 @@ const ChatMessage: React.FC<ChatMessageProps> = React.memo(
                 alt="Фото документа"
                 className={styles.messagePhoto}
               />
+            ))}
+            {pdfs.map((pdf, index) => (
+              <div key={`pdf-${index}`} className={styles.messageFile}>
+                <FilePdfOutlined /> {pdf.filename ?? 'PDF'}
+              </div>
             ))}
             {/* What the user typed is shown as typed, not as Markdown. */}
             {text && <div className={styles.plainText}>{text}</div>}
@@ -497,28 +533,55 @@ const AIChat: React.FC = () => {
   }
 
   /**
-   * Photos from the picker, the clipboard or a drop. They need no text: the
-   * widget works out what they are and reads them in the background. The
-   * photos and their card are added to the chat locally - nothing is sent to
-   * the chat model.
+   * Photos and PDFs from the picker, the clipboard or a drop. They need no
+   * text: the widget works out what they are and reads them in the
+   * background. The files and their card are added to the chat locally -
+   * nothing is sent to the chat model.
    */
   const handleFiles = async (files: File[]): Promise<void> => {
     const images = files.filter((file) => file.type.startsWith('image/'))
-    if (images.length === 0) return
+    const pdfs = files.filter(isPdf)
+    if (images.length === 0 && pdfs.length === 0) return
+
+    const tooBig = pdfs.filter(({ size }) => size > MAX_PDF_BYTES)
+    if (tooBig.length > 0) {
+      message.error(
+        `PDF завеликий (до 2,5 МБ): ${tooBig.map(({ name }) => name).join(', ')}`
+      )
+      return
+    }
 
     setIsPreparingPhoto(true)
     try {
       const shrunk = await Promise.all(images.map(shrinkImage))
-      const batchId = startBatch(
-        shrunk.map((photo, index) => ({
-          name: images[index].name || `Фото ${index + 1}`,
-          url: photo.url,
+      const pdfParts: FileUIPart[] = await Promise.all(
+        pdfs.map(async (pdf) => ({
+          type: 'file' as const,
+          mediaType: 'application/pdf',
+          filename: pdf.name,
+          url: await readAsDataUrl(pdf),
         }))
       )
+      const batchId = startBatch([
+        ...shrunk.map((photo, index) => ({
+          name: images[index].name || `Фото ${index + 1}`,
+          url: photo.url,
+          kind: 'photo' as const,
+        })),
+        ...pdfParts.map((pdf, index) => ({
+          name: pdf.filename || `PDF ${index + 1}`,
+          url: pdf.url,
+          kind: 'pdf' as const,
+        })),
+      ])
       const stamp = Date.now()
       setMessages((prev) => [
         ...prev,
-        { id: `photos-${stamp}`, role: 'user', parts: shrunk },
+        {
+          id: `photos-${stamp}`,
+          role: 'user',
+          parts: [...shrunk, ...pdfParts],
+        },
         {
           id: `batch-${stamp}`,
           role: 'assistant',
@@ -527,7 +590,9 @@ const AIChat: React.FC = () => {
       ])
       scrollToBottom()
     } catch {
-      message.error('Не вдалося відкрити фото. Спробуйте JPG або PNG.')
+      message.error(
+        'Не вдалося відкрити файл. Надішліть фото (JPG, PNG) або PDF.'
+      )
     } finally {
       setIsPreparingPhoto(false)
     }
@@ -542,7 +607,7 @@ const AIChat: React.FC = () => {
 
   const handlePaste = (event: React.ClipboardEvent): void => {
     const files = Array.from(event.clipboardData?.files ?? [])
-    if (!files.some((file) => file.type.startsWith('image/'))) return
+    if (!files.some(isSupportedFile)) return
     event.preventDefault()
     void handleFiles(files)
   }
@@ -630,7 +695,7 @@ const AIChat: React.FC = () => {
         >
           {isDragging && (
             <div className={styles.dropOverlay}>
-              Відпустіть, щоб надіслати фото
+              Відпустіть, щоб надіслати фото чи PDF
             </div>
           )}
           {floating.isFloating && !floating.isMaximized && (
@@ -769,17 +834,17 @@ const AIChat: React.FC = () => {
                 <input
                   ref={photoInputRef}
                   type="file"
-                  accept="image/*"
+                  accept="image/*,application/pdf"
                   multiple
                   hidden
                   data-testid="ai-chat-photo-input"
                   onChange={handlePicked}
                 />
-                <ChatTooltip title="Надіслати фото документів (можна кілька, або вставити Ctrl+V чи перетягнути у вікно)">
+                <ChatTooltip title="Надіслати фото чи PDF документів (можна кілька, або вставити Ctrl+V чи перетягнути у вікно)">
                   <Button
                     type="text"
-                    icon={<CameraOutlined />}
-                    aria-label="Надіслати фото документів"
+                    icon={<PaperClipOutlined />}
+                    aria-label="Надіслати фото чи PDF документів"
                     loading={isPreparingPhoto}
                     onClick={() => photoInputRef.current?.click()}
                     className={styles.photoButton}

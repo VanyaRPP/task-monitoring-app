@@ -97,6 +97,7 @@
     "sass": "^1.105.1",
     "sharp": "^0.35.5",
     "swagger-ui-react": "^5.33.1",
+    "unpdf": "^1.9.1",
     "use-places-autocomplete": "^4.0.0",
     "xlsx-js-style": "^1.2.0",
     "zod": "^4.6.5"

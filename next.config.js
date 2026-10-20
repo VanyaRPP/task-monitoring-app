@@ -19,7 +19,13 @@ const nextConfig = {
   // @sparticuz/chromium-min (see utils/pdf/bufferGenerators.ts), so we only
   // need to keep these out of the webpack bundle — no asset tracing required.
   // Promoted out of `experimental` in Next 15.
-  serverExternalPackages: ['@sparticuz/chromium-min', 'puppeteer-core'],
+  // unpdf (statement PDFs in the AI chat) loads its pdf.js build with a
+  // runtime `import('unpdf/pdfjs')`, which only works left to Node.
+  serverExternalPackages: [
+    '@sparticuz/chromium-min',
+    'puppeteer-core',
+    'unpdf',
+  ],
   // utils/pdf/bufferGenerators.ts serves the invoice fonts to puppeteer from
   // public/ on disk; serverless functions don't ship public/ unless traced.
   outputFileTracingIncludes: {

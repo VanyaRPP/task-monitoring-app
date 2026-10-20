@@ -14,6 +14,11 @@ export const getMessageText = (message: UIMessage): string =>
 export const isPhoto = (part: UIMessage['parts'][number]): part is FileUIPart =>
   part.type === 'file' && part.mediaType?.startsWith('image/')
 
+export const isPdfFile = (
+  part: UIMessage['parts'][number]
+): part is FileUIPart =>
+  part.type === 'file' && part.mediaType === 'application/pdf'
+
 /** Tools whose output opens a prefilled form the user can save. */
 const DRAFT_TOOL_TYPES = new Set([
   'tool-previewInvoice',
