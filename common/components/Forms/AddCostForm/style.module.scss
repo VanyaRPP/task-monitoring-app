@@ -68,3 +68,45 @@
 .itemsAlert {
   margin-bottom: 8px;
 }
+
+.previewLines {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.previewLine {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px 12px;
+  align-items: baseline;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+// With a category column (flat list of a short receipt).
+.previewLine:has(> :nth-child(3)) {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) auto;
+}
+
+.previewFocus {
+  background: rgba(22, 119, 255, 0.14);
+}
+
+.previewAmount {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+// The «Позиції» label spans the row so the view switch can sit on its right.
+.itemsLabel :global(.ant-form-item-label > label) {
+  width: 100%;
+}
+
+.itemsLabelRow {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
