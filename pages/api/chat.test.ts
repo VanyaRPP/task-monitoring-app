@@ -116,7 +116,25 @@ describe('/api/chat access gate', () => {
     await handler(req(), res)
 
     expect(mockStreamText).toHaveBeenCalledTimes(1)
-    expect(pipe).toHaveBeenCalledWith(res)
+    expect(pipe).toHaveBeenCalledWith(res, { onError: expect.any(Function) })
+  })
+
+  it('fails fast on a rate limit and tells the user why', async () => {
+    mockGetCurrentUser.mockResolvedValueOnce(adminCtx)
+    const pipe = jest.fn()
+    mockStreamText.mockReturnValueOnce({ pipeUIMessageStreamToResponse: pipe })
+    jest.spyOn(console, 'error').mockImplementationOnce(() => undefined)
+
+    await handler(req(), buildRes())
+
+    // Waiting out Groq's retry-after outlasts production's 30s request limit.
+    expect(mockStreamText.mock.calls[0][0].maxRetries).toBe(0)
+    const { onError } = pipe.mock.calls[0][1]
+    expect(
+      onError(
+        Object.assign(new Error('Rate limit reached'), { statusCode: 429 })
+      )
+    ).toBe('Вичерпано хвилинний ліміт моделі. Спробуй ще раз за хвилину.')
   })
 
   it('зупиняє генерацію, коли клієнт обірвав запит (кнопка «Зупинити»)', async () => {

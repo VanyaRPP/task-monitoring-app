@@ -147,8 +147,14 @@ const expenseInputSchema = z.object({
     .enum(['debit', 'credit'])
     .default('debit')
     .describe('debit - витрата, credit - прибуток.'),
-  domainId: z.string().optional(),
-  companyId: z.string().optional().describe('Не разом з domainId.'),
+  companyName: z
+    .string()
+    .optional()
+    .describe('Компанія, якщо названа - словами, без findCompanies.'),
+  domainName: z
+    .string()
+    .optional()
+    .describe('Надавач, якщо названий (і не компанія) - словами.'),
   date: z.string().optional().describe('YYYY-MM-DD, якщо названа.'),
   periodMonth: z.string().optional().describe('YYYY-MM, якщо названий.'),
   currency: z.enum(['UAH', 'USD', 'EUR']).optional(),

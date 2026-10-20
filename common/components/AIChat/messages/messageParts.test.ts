@@ -20,6 +20,27 @@ describe('getMessageText', () => {
       )
     ).toBe('Борг: 100 грн')
   })
+
+  it('пише відповідь за preview-інструмент, після якого модель мовчить', () => {
+    const text = getMessageText(
+      message([
+        {
+          type: 'tool-previewStreet',
+          state: 'output-available',
+          output: {
+            summary: {
+              address: 'вул. Шевченка, 5',
+              domain: 'ОСББ',
+              alreadyExists: true,
+            },
+          },
+        },
+      ])
+    )
+    expect(text).toBe(
+      'Адреса «вул. Шевченка, 5» у «ОСББ» вже є — форму не відкривав.'
+    )
+  })
 })
 
 describe('producedDraft', () => {
@@ -50,6 +71,16 @@ describe('producedDraft', () => {
 })
 
 describe('describeChatError', () => {
+  it('показує пояснення сервера як є (ліміт моделі)', () => {
+    expect(
+      describeChatError(
+        new Error(
+          'Вичерпано хвилинний ліміт моделі. Спробуй ще раз за хвилину.'
+        )
+      )
+    ).toBe('Вичерпано хвилинний ліміт моделі. Спробуй ще раз за хвилину.')
+  })
+
   it.each([
     ['{"error":"Unauthorized"}', 'Сесія завершилася'],
     ['{"error":"Forbidden"}', 'Немає доступу'],

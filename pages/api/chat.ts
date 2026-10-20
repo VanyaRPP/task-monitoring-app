@@ -14,6 +14,8 @@ import {
   type IDocumentBatchPart,
 } from '@common/services/aiAssistant/documents/types'
 import type { UserContext } from '@common/services/paymentService/payment.service'
+import { describeChatError } from '@common/services/aiAssistant/chatErrors'
+import { previewOpened } from '@common/services/aiAssistant/previewReply'
 
 export const config = {
   api: {
@@ -100,11 +102,22 @@ export default async function handler(
       // Without this the SDK stops after the first step (a tool call) and never
       // produces a textual answer. Allow a few steps so the model can call a
       // tool and then respond based on its result.
-      stopWhen: stepCountIs(AI_MAX_STEPS),
+      // A form opened is the end of the turn: the widget writes the reply
+      // from the tool's summary, saving a whole request (see previewReply).
+      stopWhen: [stepCountIs(AI_MAX_STEPS), previewOpened],
+      // No waiting out a rate limit: the SDK would sleep up to a minute per
+      // retry on Groq's retry-after, and production cuts a request at 30s
+      // with an empty 500. A limit hit is reported to the user instead.
+      maxRetries: 0,
     })
 
     res.socket?.setNoDelay(true)
-    result.pipeUIMessageStreamToResponse(res)
+    result.pipeUIMessageStreamToResponse(res, {
+      onError: (error) => {
+        console.error('AI Chat stream error:', error)
+        return describeChatError(error)
+      },
+    })
   } catch (error: any) {
     console.error('AI Chat API Error:', error)
     res.status(500).json({ error: error.message || 'Internal Server Error' })
