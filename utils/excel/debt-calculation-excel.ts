@@ -46,7 +46,8 @@ export interface IDebtExcelDocument {
 export const SHEET_NAME = 'Розрахунок'
 
 const THIN = { style: 'thin', color: { rgb: '9E9E9E' } }
-const FILL: Record<NonNullable<IExcelCell['fill']>, string> = {
+/** Cell fills (hex RGB), shared by the Excel file and the printout. */
+export const FILL: Record<NonNullable<IExcelCell['fill']>, string> = {
   head: 'DDE5F0',
   total: 'F0F0F0',
 }
@@ -136,6 +137,14 @@ const value = (text: string | number, span = 5): IExcelCell => ({
 })
 
 /**
+ * A parameter line: the label over A-C, the value from D. The cells a merge
+ * covers stay `null` - a value put inside the label's merge (column B) is
+ * hidden by Excel.
+ */
+const param = (text: string, content: string | number) =>
+  row(label(text), null, null, value(content))
+
+/**
  * The date the debt is stated as of: the first day of the month FOLLOWING the
  * end of the period. A period through June 2025 → debt as of 01.07.2025.
  */
@@ -174,15 +183,15 @@ export const buildDebtCalculationDocument = ({
   const head: (IExcelCell | null)[][] = [
     row({ v: 'Розрахунок заборгованості', bold: true, span: COLUMN_COUNT }),
     blank(),
-    row(label('Надавач послуг'), value(domainName ?? '—')),
-    row(label('Компанія'), value(companyName)),
-    ...(description ? [row(label('Опис'), value(description))] : []),
-    row(label('Період'), value(`${periodLabel(from)} — ${periodLabel(to)}`)),
-    row(label('Загальна площа, м²'), value(money(area))),
-    row(label('Тариф, грн за 1 м²'), value(money(tariff))),
-    row(label('Борг на початок періоду'), value(money(openingDebt))),
-    row(label('Ставка річних, %'), value(annualRatePercent)),
-    row(label('Метод інфляційних'), value(METHOD_LABEL[inflationMethod])),
+    param('Надавач послуг', domainName ?? '—'),
+    param('Компанія', companyName),
+    ...(description ? [param('Опис', description)] : []),
+    param('Період', `${periodLabel(from)} — ${periodLabel(to)}`),
+    param('Загальна площа, м²', money(area)),
+    param('Тариф, грн за 1 м²', money(tariff)),
+    param('Борг на початок періоду', money(openingDebt)),
+    param('Ставка річних, %', annualRatePercent),
+    param('Метод інфляційних', METHOD_LABEL[inflationMethod]),
     blank(),
   ]
 

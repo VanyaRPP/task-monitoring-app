@@ -12,6 +12,7 @@ import {
 import { useMemo } from 'react'
 import { useDebtCalculationContext } from './'
 import CreatePayments from './CreatePayments'
+import PrintPreview from './PrintPreview'
 import { useExportExcel } from './useExportExcel'
 import s from './style.module.scss'
 
@@ -81,6 +82,7 @@ const DebtCalculationHeader: React.FC = () => {
           >
             Експорт в Excel
           </Button>
+          <PrintPreview domainName={domainName} disabled={!companyId} />
         </Space>
       </div>
 
