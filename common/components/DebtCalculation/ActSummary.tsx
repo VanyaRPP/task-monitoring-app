@@ -75,7 +75,9 @@ const DebtActSummary: React.FC<{ result: IDebtCalculationResult }> = ({
         </Fragment>
       ))}
 
-      <span className={s.ActSignLabel}>Голова правління</span>
+      <span className={s.ActSignLabel}>
+        Директор ПП «Нова Крошня - ВЖРЕП 4»
+      </span>
       <span className={s.ActSignLine} />
     </div>
   )
