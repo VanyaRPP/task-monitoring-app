@@ -366,7 +366,7 @@ export const buildDebtCalculationDocument = ({
       true
     ),
     row({ v: 'в т.ч.', span: COLUMN_COUNT }),
-    actRow('внесок', result.body),
+    actRow('квартплата', result.body),
     actRow(interestLabel, result.interest),
     actRow('Інфляційні витрати', result.inflation),
     actRow('Юридичні послуги', result.legalFees),

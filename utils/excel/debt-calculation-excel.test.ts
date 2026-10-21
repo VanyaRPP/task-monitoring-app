@@ -168,7 +168,7 @@ describe('buildDebtCalculationDocument — блок Акта', () => {
   })
 
   it('розбиває на складові, включно з юр. послугами й держмитом', () => {
-    expect(findRow(rows, 'внесок')[5].v).toBeCloseTo(result.body, 2)
+    expect(findRow(rows, 'квартплата')[5].v).toBeCloseTo(result.body, 2)
     expect(findRow(rows, '3% річних')[5].v).toBeCloseTo(result.interest, 2)
     expect(findRow(rows, 'Інфляційні витрати')[5].v).toBeCloseTo(
       result.inflation,
