@@ -186,7 +186,7 @@ describe('buildDebtCalculationDocument — блок Акта', () => {
   })
 
   it('має місце для підпису голови правління', () => {
-    expect(textOf(rows)).toContain('Голова правління')
+    expect(textOf(rows)).toContain('Директор ПП «Нова Крошня - ВЖРЕП 4»')
   })
 
   it('попереджає, що інфляційні — не сума колонки', () => {
@@ -257,7 +257,7 @@ describe('наскрізь: документ → справжній .xlsx → н
     const text = XLSX.utils.sheet_to_csv(reopened.Sheets['Розрахунок'])
     expect(text).toContain('Квартира №18, вул. Крошенська 8')
     expect(text).toContain('Заборгованість станом на 01.04.2026 року')
-    expect(text).toContain('Голова правління')
+    expect(text).toContain('Директор ПП «Нова Крошня - ВЖРЕП 4»')
   })
 
   it('рамки й заливка справді потрапляють у файл', () => {

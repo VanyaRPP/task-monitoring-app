@@ -264,7 +264,9 @@ describe('ActSummary — підсумок у стилі Акта', () => {
   it('має місце для підпису голови правління', () => {
     renderWithContext(<DebtActSummary result={result} />)
 
-    expect(screen.getByText('Голова правління')).toBeInTheDocument()
+    expect(
+      screen.getByText('Директор ПП «Нова Крошня - ВЖРЕП 4»')
+    ).toBeInTheDocument()
   })
 })
 

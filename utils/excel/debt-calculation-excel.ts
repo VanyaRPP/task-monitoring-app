@@ -384,7 +384,7 @@ export const buildDebtCalculationDocument = ({
       null,
       null,
       null,
-      { v: 'Голова правління', bold: true, span: 2 },
+      { v: 'Директор ПП «Нова Крошня - ВЖРЕП 4»', bold: true, span: 2 },
       null,
       { v: '______________________', span: 3 }
     ),
