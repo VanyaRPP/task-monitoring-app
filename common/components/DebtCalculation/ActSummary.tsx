@@ -20,7 +20,7 @@ const DebtActSummary: React.FC<{ result: IDebtCalculationResult }> = ({
     useDebtCalculationContext()
 
   const amounts: { label: string; value: number }[] = [
-    { label: 'внесок', value: result.body },
+    { label: 'квартплата', value: result.body },
     { label: `${annualRatePercent}% річних`, value: result.interest },
     { label: 'Інфляційні витрати', value: result.inflation },
   ]
