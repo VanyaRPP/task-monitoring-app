@@ -21,7 +21,7 @@ const HomePage: React.FC = () => {
           src="/animations/WaveForBG.json"
           loop
           style={{
-            width: '100%',
+            width: 'auto',
             height: '100%',
             objectFit: 'cover',
             transform: 'rotate(180deg) scale(1.05)',
