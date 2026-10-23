@@ -348,160 +348,32 @@ describe('createPayment', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     sendInvoiceEmailMock.mockResolvedValue(true)
-    domainFindByIdMock.mockReturnValue({
-      select: jest.fn().mockResolvedValue(null),
-    })
   })
 
-  it('sends invoice email after creating a debit payment', async () => {
-    const paymentObject = {
-      _id: 'payment-id',
-      id: 'payment-id',
-      domain: 'domain-id',
-      type: 'debit',
-      generalSum: 1250,
-      invoiceCreationDate: new Date('2026-03-16T00:00:00.000Z'),
-      invoiceNumber: 77,
-      description: '',
-      reciever: {
-        companyName: 'Domain Admin',
-        adminEmails: ['admin@example.com'],
-        description: 'Receiver',
-      },
-      provider: {
-        description: 'Provider',
-      },
-      toObject: jest.fn(),
-    }
-
-    paymentObject.toObject.mockReturnValue({
-      ...paymentObject,
-      toObject: undefined,
-    })
-
-    paymentCreateMock.mockResolvedValue(paymentObject)
-
-    const result = await createPayment({ invoiceNumber: 77 }, true)
-
-    expect(result).toBe(paymentObject)
-    expect(sendInvoiceEmailMock).toHaveBeenCalledWith(
-      expect.objectContaining({
+  it.each(['debit', 'credit'])(
+    'creates a %s payment without emailing it - sending is the Send button',
+    async (type) => {
+      const paymentObject = {
+        _id: 'payment-id',
+        id: 'payment-id',
+        domain: 'domain-id',
+        type,
+        generalSum: 1250,
         invoiceNumber: 77,
-        reciever: expect.objectContaining({
+        reciever: {
+          companyName: 'Domain Admin',
           adminEmails: ['admin@example.com'],
-        }),
-      })
-    )
-  })
+          description: 'Receiver',
+        },
+      }
+      paymentCreateMock.mockResolvedValue(paymentObject)
 
-  it('does not send invoice email for credit payments', async () => {
-    const paymentObject = {
-      _id: 'payment-id',
-      id: 'payment-id',
-      domain: 'domain-id',
-      type: 'credit',
-      generalSum: 300,
-      invoiceCreationDate: new Date('2026-03-16T00:00:00.000Z'),
-      invoiceNumber: 78,
-      description: 'Credit payment',
-      reciever: {
-        companyName: 'Domain Admin',
-        adminEmails: ['admin@example.com'],
-        description: 'Receiver',
-      },
-      provider: {
-        description: 'Provider',
-      },
-      toObject: jest.fn(() => ({})),
+      const result = await createPayment({ type }, true)
+
+      expect(result).toBe(paymentObject)
+      expect(sendInvoiceEmailMock).not.toHaveBeenCalled()
     }
-
-    paymentCreateMock.mockResolvedValue(paymentObject)
-
-    await createPayment({ invoiceNumber: 78 }, true)
-
-    expect(sendInvoiceEmailMock).not.toHaveBeenCalled()
-  })
-
-  it('keeps payment creation successful when email sending fails', async () => {
-    const paymentObject = {
-      _id: 'payment-id',
-      id: 'payment-id',
-      domain: 'domain-id',
-      type: 'debit',
-      generalSum: 1250,
-      invoiceCreationDate: new Date('2026-03-16T00:00:00.000Z'),
-      invoiceNumber: 79,
-      description: '',
-      reciever: {
-        companyName: 'Domain Admin',
-        adminEmails: ['admin@example.com'],
-        description: 'Receiver',
-      },
-      provider: {
-        description: 'Provider',
-      },
-      toObject: jest.fn(),
-    }
-
-    paymentObject.toObject.mockReturnValue({
-      ...paymentObject,
-      toObject: undefined,
-    })
-
-    paymentCreateMock.mockResolvedValue(paymentObject)
-    sendInvoiceEmailMock.mockRejectedValue(new Error('smtp unavailable'))
-    const consoleErrorSpy = jest
-      .spyOn(console, 'error')
-      .mockImplementation(() => undefined)
-
-    await expect(createPayment({ invoiceNumber: 79 }, true)).resolves.toBe(
-      paymentObject
-    )
-    expect(sendInvoiceEmailMock).toHaveBeenCalled()
-
-    consoleErrorSpy.mockRestore()
-  })
-
-  it('falls back to domain admin emails when payment snapshot has no recipients', async () => {
-    const paymentObject = {
-      _id: 'payment-id',
-      id: 'payment-id',
-      domain: 'domain-id',
-      type: 'debit',
-      generalSum: 1250,
-      invoiceCreationDate: new Date('2026-03-16T00:00:00.000Z'),
-      invoiceNumber: 80,
-      description: '',
-      provider: {
-        description: 'Provider',
-      },
-      toObject: jest.fn(),
-    }
-
-    paymentObject.toObject.mockReturnValue({
-      ...paymentObject,
-      toObject: undefined,
-    })
-
-    paymentCreateMock.mockResolvedValue(paymentObject)
-    domainFindByIdMock.mockReturnValue({
-      select: jest.fn().mockResolvedValue({
-        name: 'Fallback Domain',
-        adminEmails: ['domain-admin@example.com'],
-      }),
-    })
-
-    await createPayment({ invoiceNumber: 80 }, true)
-
-    expect(sendInvoiceEmailMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        reciever: expect.objectContaining({
-          companyName: 'Fallback Domain',
-          adminEmails: ['domain-admin@example.com'],
-        }),
-      })
-    )
-  })
+  )
 })
 
 describe('createPayment numbering', () => {
