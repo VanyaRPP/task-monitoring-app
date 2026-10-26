@@ -16,13 +16,13 @@
     "@ai-sdk/provider-utils" "4.0.41"
     "@vercel/oidc" "3.2.0"
 
-"@ai-sdk/google@^3.0.67":
-  version "3.0.103"
-  resolved "https://registry.yarnpkg.com/@ai-sdk/google/-/google-3.0.103.tgz#48c5a002b5954b1729c14969d57bab0281d7f57b"
-  integrity sha512-i/I92bfAeRPBvAwrW052NmPTkc+ZgVYs3vZjGhHgReE04cV37xJtbhZgr6U3CZKDArIAN0NhL0GoLpZ7FYV+dA==
+"@ai-sdk/google@^4.0.93":
+  version "4.0.93"
+  resolved "https://registry.yarnpkg.com/@ai-sdk/google/-/google-4.0.93.tgz#e382110c68af5be3e02a8db6abb73c6707ed7c41"
+  integrity sha512-hubOUxbG2W7oD3acdCxxnrQ84NlnLqfzcHe9uWMmwkglHxq/rwsbjloPhvebeQlcQ2G0gaX+akDF1Ddm/fNAnQ==
   dependencies:
-    "@ai-sdk/provider" "3.0.14"
-    "@ai-sdk/provider-utils" "4.0.41"
+    "@ai-sdk/provider" "4.0.26"
+    "@ai-sdk/provider-utils" "5.0.58"
 
 "@ai-sdk/groq@3.0.52":
   version "3.0.52"
@@ -51,10 +51,28 @@
     eventsource-parser "^3.0.8"
     undici "^5.29.0"
 
+"@ai-sdk/provider-utils@5.0.58":
+  version "5.0.58"
+  resolved "https://registry.yarnpkg.com/@ai-sdk/provider-utils/-/provider-utils-5.0.58.tgz#75e802ad299562b87afa178f97d3f629d5753355"
+  integrity sha512-iXSwKR/7LpHzAlyrUl+bTinwzmZ3Nmup1viwPisM5Gn5cogRdIG4rV9w1ZDuKFcrXyu/AeVs42E1CX/0aNwrfQ==
+  dependencies:
+    "@ai-sdk/provider" "4.0.26"
+    "@standard-schema/spec" "^1.1.0"
+    "@workflow/serde" "4.1.0"
+    eventsource-parser "^3.0.8"
+    undici "^7.29.0"
+
 "@ai-sdk/provider@3.0.14":
   version "3.0.14"
   resolved "https://registry.yarnpkg.com/@ai-sdk/provider/-/provider-3.0.14.tgz#5893a90e0b5355ec6a5c148f06bd7f08355c1a6f"
   integrity sha512-5X1k57JBJ4H7H1QjX7CnJYAB1I19r/trVZTMcSms7/kLNZ8RaU4Nt2agcwZzv82Hfx6Q7/TOLU7agAKeFfc8cA==
+  dependencies:
+    json-schema "^0.4.0"
+
+"@ai-sdk/provider@4.0.26":
+  version "4.0.26"
+  resolved "https://registry.yarnpkg.com/@ai-sdk/provider/-/provider-4.0.26.tgz#d08d74ecaf28d4e23366b6ca47ffb96f61ca2c49"
+  integrity sha512-BZ443uBEq6HuMA+Z4b7Hpm65GpZSo7pWqnYqpf/7tAO3C48JbtvAhOE2JnODFj+jodsZzfRHkAyQb64xuD2tZQ==
   dependencies:
     json-schema "^0.4.0"
 
@@ -4131,6 +4149,11 @@
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/@vercel/oidc/-/oidc-3.2.0.tgz#5782a4d4904443f015808705b5537cf9c3b68528"
   integrity sha512-UycprH3T6n3jH0k44NHMa7pnFHGu/N05MjojYr+Mc6I7obkoLIJujSWwin1pCvdy/eOxrI/l3uDLQsmcrOb4ug==
+
+"@workflow/serde@4.1.0":
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/@workflow/serde/-/serde-4.1.0.tgz#82dbbaf2370f7b8ae46d9a9a4ab0917258f8db62"
+  integrity sha512-pav4F2BoirECWR7Nf1TKt+2eETcBj7jj4cBefQ8VXQCA6NPkaKeLfj/zMgi+3zYV5ZIBT4GuUiphsj0/b9hPQQ==
 
 "@xmldom/xmldom@^0.8.3":
   version "0.8.15"
@@ -11655,7 +11678,7 @@ undici-types@~8.3.0:
   resolved "https://registry.yarnpkg.com/undici-types/-/undici-types-8.3.0.tgz#44e9fc9f3244648cdea35e4f9bb2d681e9410809"
   integrity sha512-j375ScV60dom+YkPFIfTLcOiPxkN/buHz5GobjLhixFuANaNs3C9l4GmrWqejgXWJ7BbJcFYpTEUkS1Ge8bpZQ==
 
-undici@^5.29.0, undici@^6.28.1:
+undici@^5.29.0, undici@^6.28.1, undici@^7.29.0:
   version "6.29.0"
   resolved "https://registry.yarnpkg.com/undici/-/undici-6.29.0.tgz#140fa16e337ac706d6ff12f03fbe5c4357e5f9a3"
   integrity sha512-R+RODBqp6i2pPflGdq+xIOUkl+RNfGgHwoinecKu/JCuf2uO06cOKoDbI2P7Dn6KcswdKwrczbU6IYJ6K8X+wg==
