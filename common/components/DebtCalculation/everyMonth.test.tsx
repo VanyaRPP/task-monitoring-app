@@ -5,7 +5,7 @@ import {
 } from '@utils/debt-calculation/build-input'
 import { calculateDebt } from '@utils/debt-calculation/calculate'
 import { IExtendedRealestate } from '@common/api/realestateApi/realestate.api.types'
-import { render, screen, within } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import dayjs from 'dayjs'
 import { useState } from 'react'
@@ -76,6 +76,17 @@ const Page: React.FC = () => {
   )
 }
 
+/**
+ * The inputs of a month's table row. Plain DOM queries: role queries with a
+ * name crawl on a page with this many inputs, and the suite timed out under load.
+ */
+const inputsOfRow = (label: string): HTMLInputElement[] => {
+  const row = Array.from(document.querySelectorAll('tbody tr')).find((tr) =>
+    tr.textContent?.includes(label)
+  )
+  return Array.from(row?.querySelectorAll('input') ?? [])
+}
+
 const body = () => screen.getByTestId('body').textContent
 const interest = () => Number(screen.getByTestId('interest').textContent)
 
@@ -103,8 +114,7 @@ describe('the same figures for every month, on the page', () => {
     await userEvent.type(screen.getByLabelText('Нараховано щомісяця'), '500')
 
     // February billed nothing: a typed 0 stays 0, it is not refilled with 500.
-    const february = screen.getByRole('row', { name: /Лютий 2026/ })
-    const [, charged] = within(february).getAllByRole('spinbutton')
+    const [, charged] = inputsOfRow('Лютий 2026')
     await userEvent.type(charged, '0')
 
     expect(body()).toBe(formatMoney(2 * 500))
@@ -113,7 +123,9 @@ describe('the same figures for every month, on the page', () => {
 
 describe('the day the debt starts on, and days per month', () => {
   const daysCell = (index: number) =>
-    screen.getAllByRole('spinbutton', { name: /^Днів,/ })[index]
+    document.querySelectorAll<HTMLInputElement>('input[aria-label^="Днів,"]')[
+      index
+    ]
 
   it('shows the whole month until a start day is picked', () => {
     render(<Page />)
@@ -126,7 +138,7 @@ describe('the day the debt starts on, and days per month', () => {
     const before = interest()
 
     await userEvent.click(
-      screen.getByRole('combobox', { name: 'Перший місяць — з числа' })
+      document.querySelector('input[aria-label="Перший місяць — з числа"]')
     )
     await userEvent.click(await screen.findByTitle('10'))
 
@@ -134,8 +146,7 @@ describe('the day the debt starts on, and days per month', () => {
     expect(daysCell(0)).toHaveAttribute('placeholder', '22')
     expect(daysCell(1)).toHaveAttribute('placeholder', '28')
     // The charge is for those days too: 500 × 22 / 31, then two full months.
-    const january = screen.getByRole('row', { name: /Січень 2026/ })
-    expect(within(january).getAllByRole('spinbutton')[1]).toHaveAttribute(
+    expect(inputsOfRow('Січень 2026')[1]).toHaveAttribute(
       'placeholder',
       '354.84'
     )

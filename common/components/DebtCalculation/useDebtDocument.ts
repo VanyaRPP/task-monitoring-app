@@ -58,6 +58,7 @@ export const useDebtDocument = (
         area: overrides.area ?? company?.totalArea,
         tariff: overrides.tariff ?? company?.pricePerMeter,
         openingDebt: overrides.openingDebt,
+        startDay: overrides.startDay,
         // What the calculation applied: the periods cut to its span.
         excludedPeriods:
           periodFrom && periodTo

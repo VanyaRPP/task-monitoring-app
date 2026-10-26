@@ -1,5 +1,6 @@
 import { IApartmentOverrides, IMonthOverride } from './build-input'
 import { IYearMonth } from './months'
+import { dayNumber, IExcludedPeriod } from './exclusions'
 import { DEFAULT_INFLATION_METHOD, InflationMethod } from './types'
 
 /** What gets persisted: INPUTS only, never the computed result. */
@@ -81,6 +82,43 @@ const keepWhole = <T extends object>(
   }
 }
 
+const MAX_EXCLUDED_PERIODS = 50
+const MAX_ID_LENGTH = 64
+
+/**
+ * Excluded periods as they may be stored: a known type, real dates in order,
+ * an id. Anything else is dropped - a period that cannot be read would
+ * otherwise be written back on every save.
+ */
+const sanitizeExcludedPeriods = (
+  source: unknown
+): IExcludedPeriod[] | undefined => {
+  if (!Array.isArray(source)) return undefined
+
+  const out: IExcludedPeriod[] = []
+  for (const raw of source.slice(0, MAX_EXCLUDED_PERIODS)) {
+    const { id, type, startDate, endDate } = (raw ?? {}) as Record<
+      string,
+      unknown
+    >
+    const start = typeof startDate === 'string' ? dayNumber(startDate) : null
+    const end = typeof endDate === 'string' ? dayNumber(endDate) : null
+    if (start === null || end === null || start > end) continue
+
+    out.push({
+      id:
+        typeof id === 'string' && id
+          ? id.slice(0, MAX_ID_LENGTH)
+          : `excluded-${out.length + 1}`,
+      type: type === 'cmu_206' ? 'cmu_206' : 'custom',
+      startDate: startDate as string,
+      endDate: endDate as string,
+    })
+  }
+
+  return out.length > 0 ? out : undefined
+}
+
 /** Accepts only a parseable ISO date, normalized to canonical form. */
 const sanitizeTimestamp = (value: unknown): string | undefined => {
   if (typeof value !== 'string' || value.length > MAX_TIMESTAMP_LENGTH) {
@@ -151,6 +189,10 @@ export const sanitizeOverrides = (
 
     const apartment: IApartmentOverrides = pickNumbers(raw, APARTMENT_FIELDS)
     keepWhole(apartment, 'startDay', 1, 31)
+    const excludedPeriods = sanitizeExcludedPeriods(
+      (raw as IApartmentOverrides)?.excludedPeriods
+    )
+    if (excludedPeriods) apartment.excludedPeriods = excludedPeriods
     const months = sanitizeMonths((raw as IApartmentOverrides)?.months)
     if (months) apartment.months = months
 

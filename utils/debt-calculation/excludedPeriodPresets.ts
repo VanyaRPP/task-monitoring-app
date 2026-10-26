@@ -20,6 +20,41 @@ export const EXCLUDED_PERIOD_TYPES: Record<
   custom: { label: 'Довільний' },
 }
 
+/**
+ * Whether a calculation that was never saved starts with the КМУ №206
+ * moratorium on. A calculation already saved keeps what it was saved with, so
+ * switching this changes only new ones.
+ *
+ * On by default because it is the safe side for a claim: switched on where it
+ * does not apply, a claim comes out smaller; switched off where it does, it
+ * claims what the moratorium forbids. Pending the lawyer's confirmation that it
+ * applies to HOA contributions.
+ */
+export const CMU_206_BY_DEFAULT = true
+
+/** The КМУ №206 span as an excluded period. */
+export const cmu206Period = (id = 'cmu_206'): IExcludedPeriod => ({
+  id,
+  type: 'cmu_206',
+  startDate: EXCLUDED_PERIOD_TYPES.cmu_206.startDate,
+  endDate: EXCLUDED_PERIOD_TYPES.cmu_206.endDate,
+})
+
+const DEFAULT_EXCLUDED_PERIODS: IExcludedPeriod[] = CMU_206_BY_DEFAULT
+  ? [cmu206Period('cmu_206_default')]
+  : []
+
+/**
+ * The excluded periods a calculation runs with: its own list when it has one,
+ * else - only for a calculation that was never saved - the default. One rule
+ * for the page and for the debtors list, so their sums agree.
+ */
+export const resolveExcludedPeriods = (
+  own: IExcludedPeriod[] | undefined,
+  hasSavedCalculation: boolean
+): IExcludedPeriod[] =>
+  own ?? (hasSavedCalculation ? [] : DEFAULT_EXCLUDED_PERIODS)
+
 /** `2022-02-24` → `24.02.2022`. */
 export const formatExclusionDate = (value: string): string =>
   value.split('-').reverse().join('.')

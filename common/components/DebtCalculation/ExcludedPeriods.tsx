@@ -1,12 +1,25 @@
 import { CloseOutlined, PlusOutlined, StopOutlined } from '@ant-design/icons'
-import { Badge, Button, DatePicker, Popover, Select, Typography } from 'antd'
 import {
+  Badge,
+  Button,
+  DatePicker,
+  Popover,
+  Select,
+  Space,
+  Switch,
+  Tooltip,
+  Typography,
+} from 'antd'
+import {
+  cmu206Period,
+  describeExcludedPeriod,
   EXCLUDED_PERIOD_TYPES,
   EXCLUSION_NOTE,
 } from '@utils/debt-calculation/excludedPeriodPresets'
-import type {
-  ExcludedPeriodType,
-  IExcludedPeriod,
+import {
+  periodsWithin,
+  type ExcludedPeriodType,
+  type IExcludedPeriod,
 } from '@utils/debt-calculation/exclusions'
 import dayjs, { Dayjs } from 'dayjs'
 import { useDebtCalculationContext } from './'
@@ -37,8 +50,31 @@ const periodOf = (type: ExcludedPeriodType, id = newId()): IExcludedPeriod => ({
  * the rate. Settings of this calculation only - nothing is saved.
  */
 const ExcludedPeriods: React.FC = () => {
-  const { excludedPeriods = [], setExcludedPeriods } =
-    useDebtCalculationContext()
+  const {
+    excludedPeriods = [],
+    setExcludedPeriods,
+    from,
+    to,
+  } = useDebtCalculationContext()
+
+  // The calculation's span as dates, to see which exclusions touch it.
+  const span: [string, string] | undefined =
+    from && to
+      ? [from.startOf('month').format(ISO), to.endOf('month').format(ISO)]
+      : undefined
+  const applying = span
+    ? periodsWithin(excludedPeriods, span[0], span[1])
+    : excludedPeriods
+  const cmuOverlaps =
+    !!span && periodsWithin([cmu206Period()], span[0], span[1]).length > 0
+  const cmuOn = excludedPeriods.some(({ type }) => type === 'cmu_206')
+
+  const switchCmu = (on: boolean): void =>
+    setExcludedPeriods(
+      on
+        ? [...excludedPeriods, cmu206Period(newId())]
+        : excludedPeriods.filter(({ type }) => type !== 'cmu_206')
+    )
 
   const update = (id: string, patch: Partial<IExcludedPeriod>): void =>
     setExcludedPeriods(
@@ -106,32 +142,41 @@ const ExcludedPeriods: React.FC = () => {
         >
           Додати період
         </Button>
-        <Button
-          size="small"
-          onClick={() =>
-            setExcludedPeriods([...excludedPeriods, periodOf('cmu_206')])
-          }
-        >
-          + {EXCLUDED_PERIOD_TYPES.cmu_206.label}
-        </Button>
       </div>
       <Typography.Text type="secondary" className={s.ExclusionNote}>
-        {EXCLUSION_NOTE} Налаштування не зберігаються з розрахунком.
+        {EXCLUSION_NOTE} Зберігаються разом з розрахунком цієї компанії.
       </Typography.Text>
     </div>
   )
 
   return (
-    <Popover
-      title="Виключені періоди"
-      trigger="click"
-      placement="bottomRight"
-      content={content}
-    >
-      <Badge count={excludedPeriods.length} size="small">
-        <Button icon={<StopOutlined />} aria-label="Виключені періоди" />
-      </Badge>
-    </Popover>
+    <Space size="small">
+      {cmuOverlaps && (
+        <Tooltip
+          title={`${describeExcludedPeriod(cmu206Period())}. Для нового розрахунку ввімкнений одразу; збережений розрахунок лишається як є.`}
+        >
+          <label className={s.CmuSwitch}>
+            <Switch
+              size="small"
+              checked={cmuOn}
+              onChange={switchCmu}
+              aria-label="Мораторій КМУ №206"
+            />
+            <span>КМУ №206</span>
+          </label>
+        </Tooltip>
+      )}
+      <Popover
+        title="Виключені періоди"
+        trigger="click"
+        placement="bottomRight"
+        content={content}
+      >
+        <Badge count={applying.length} size="small">
+          <Button icon={<StopOutlined />} aria-label="Виключені періоди" />
+        </Badge>
+      </Popover>
+    </Space>
   )
 }
 

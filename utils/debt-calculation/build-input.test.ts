@@ -368,3 +368,37 @@ describe('the same figures for every month', () => {
     expect(months.map(({ days }) => days)).toEqual([undefined, 15, undefined])
   })
 })
+
+describe('excluded periods of the company', () => {
+  const exclusion = {
+    id: 'p1',
+    type: 'custom' as const,
+    startDate: '2024-02-01',
+    endDate: '2024-02-29',
+  }
+
+  it('are taken from the company edits', () => {
+    const input = buildDebtCalculationInput({
+      from: FROM,
+      to: TO,
+      overrides: { excludedPeriods: [exclusion] },
+    })
+    expect(input.excludedPeriods).toEqual([exclusion])
+  })
+
+  it('there are none for a company without them', () => {
+    expect(
+      buildDebtCalculationInput({ from: FROM, to: TO }).excludedPeriods
+    ).toEqual([])
+  })
+
+  it('a list given outright wins over the saved one', () => {
+    const input = buildDebtCalculationInput({
+      from: FROM,
+      to: TO,
+      overrides: { excludedPeriods: [exclusion] },
+      excludedPeriods: [],
+    })
+    expect(input.excludedPeriods).toEqual([])
+  })
+})

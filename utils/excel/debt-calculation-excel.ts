@@ -1,5 +1,9 @@
 import { cascaderMonths } from '@utils/constants'
-import { formatPeriod, IYearMonth } from '@utils/debt-calculation/months'
+import {
+  daysInMonth,
+  formatPeriod,
+  IYearMonth,
+} from '@utils/debt-calculation/months'
 import {
   describeExcludedPeriod,
   EXCLUSION_NOTE,
@@ -23,6 +27,8 @@ export interface IDebtExcelInput {
   area?: number
   tariff?: number
   openingDebt?: number
+  /** Day of the first month the debt starts on, for the period's dates. */
+  startDay?: number
   /** As applied to the period (see `periodsWithin`); each becomes a tag line. */
   excludedPeriods?: IExcludedPeriod[]
   generatedAt?: Date
@@ -90,7 +96,7 @@ const METHOD_LABEL: Record<InflationMethod, string> = {
 }
 
 const TABLE_HEAD = [
-  'Місяць',
+  'Місяць / Рік',
   'Вхідне сальдо',
   'Сплачено',
   'Нараховано',
@@ -111,8 +117,25 @@ const money = (value?: number): number =>
 const monthLabel = ({ year, month }: IYearMonth): string =>
   `${cascaderMonths[month - 1]?.label ?? month} ${year}`
 
-const periodLabel = (value?: IYearMonth): string =>
-  value ? formatPeriod(value) : '—'
+const pad = (value: number): string => String(value).padStart(2, '0')
+
+/**
+ * The period as whole dates: from the start day of the first month (the 1st
+ * unless the debt began mid-month) to the last day of the last one.
+ */
+const periodLabel = (
+  from?: IYearMonth,
+  to?: IYearMonth,
+  startDay?: number
+): string => {
+  if (!from || !to) return '—'
+  const firstDay = Math.min(
+    Math.max(Math.round(Number(startDay) || 1), 1),
+    daysInMonth(from.year, from.month)
+  )
+  const lastDay = daysInMonth(to.year, to.month)
+  return `${pad(firstDay)}.${pad(from.month)}.${from.year} — ${pad(lastDay)}.${pad(to.month)}.${to.year}`
+}
 
 /** `2026-09-23T14:32:00Z` → `23.09.2026 14:32`; empty when there is no stamp. */
 const timestampLabel = (value?: string): string => {
@@ -183,18 +206,23 @@ export const buildDebtCalculationDocument = ({
   area,
   tariff,
   openingDebt,
+  startDay,
   excludedPeriods = [],
   generatedAt = new Date(),
 }: IDebtExcelInput): IDebtExcelDocument => {
   const interestLabel = `${annualRatePercent}% річних`
 
   const head: (IExcelCell | null)[][] = [
-    row({ v: 'Розрахунок заборгованості', bold: true, span: COLUMN_COUNT }),
+    row({
+      v: 'Розрахунок заборгованості за послуги з управління багатоквартирним будинком',
+      bold: true,
+      span: COLUMN_COUNT,
+    }),
     blank(),
     param('Надавач послуг', domainName ?? '—'),
-    param('Компанія', companyName),
-    ...(description ? [param('Опис', description)] : []),
-    param('Період', `${periodLabel(from)} — ${periodLabel(to)}`),
+    param('Власник', companyName),
+    ...(description ? [param('Адреса', description)] : []),
+    param('Період', periodLabel(from, to, startDay)),
     param('Загальна площа, м²', money(area)),
     param('Тариф, грн за 1 м²', money(tariff)),
     param('Борг на початок періоду', money(openingDebt)),
@@ -385,16 +413,13 @@ export const buildDebtCalculationDocument = ({
       true
     ),
     row({ v: 'в т.ч.', span: COLUMN_COUNT }),
-    actRow('внесок', result.body),
+    actRow('за послуги', result.body),
     actRow(interestLabel, result.interest),
     actRow('Інфляційні витрати', result.inflation),
-    actRow('Юридичні послуги', result.legalFees),
-    actRow('Держмито', result.courtFee),
-    blank(),
-    row({
-      v: 'Інфляційні втрати — це значення останнього місяця, а не сума по колонці: коефіцієнт індексації накопичувальний.',
-      span: COLUMN_COUNT,
-    }),
+    // Left out unless entered, but never left out of the total: a figure that
+    // is in the sum has to be among its parts.
+    ...(result.legalFees ? [actRow('Юридичні послуги', result.legalFees)] : []),
+    ...(result.courtFee ? [actRow('Держмито', result.courtFee)] : []),
     blank(),
     row(
       null,
@@ -403,7 +428,7 @@ export const buildDebtCalculationDocument = ({
       null,
       null,
       null,
-      { v: 'Голова правління', bold: true, span: 2 },
+      { v: 'Директор', bold: true, span: 2 },
       null,
       { v: '______________________', span: 3 }
     ),

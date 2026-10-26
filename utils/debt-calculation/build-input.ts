@@ -46,6 +46,11 @@ export interface IApartmentOverrides {
   correction?: number
   /** Day of the first month the debt starts accruing on (1-31). */
   startDay?: number
+  /**
+   * Spans with no inflation losses or interest (a moratorium), kept with the
+   * company like the rest of its edits.
+   */
+  excludedPeriods?: IExcludedPeriod[]
   openingDebt?: number
   legalFees?: number
   courtFee?: number
@@ -77,7 +82,7 @@ export interface IBuildDebtInputArgs {
   prefillOpeningDebt?: number
   annualRatePercent?: number
   inflationMethod?: InflationMethod
-  /** Passed through to the calculation; see `exclusions.ts`. */
+  /** Overrides the company's own `overrides.excludedPeriods`, when given. */
   excludedPeriods?: IExcludedPeriod[]
 }
 
@@ -110,7 +115,7 @@ export const buildDebtCalculationInput = ({
   prefillOpeningDebt,
   annualRatePercent = DEFAULT_ANNUAL_RATE_PERCENT,
   inflationMethod = 'balance',
-  excludedPeriods = [],
+  excludedPeriods = overrides.excludedPeriods ?? [],
 }: IBuildDebtInputArgs): IDebtCalculationInput => {
   const months: IDebtMonthInput[] = buildMonthRange(from, to).map(
     (yearMonth, index) => {

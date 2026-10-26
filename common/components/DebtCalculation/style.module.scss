@@ -295,3 +295,11 @@ $hairline: rgba(140, 140, 140, 0.4);
 .StartDay {
   width: 80px;
 }
+
+.CmuSwitch {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+}

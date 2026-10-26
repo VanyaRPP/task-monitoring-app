@@ -38,6 +38,7 @@ import {
   InflationMethod,
 } from '@utils/debt-calculation/types'
 import type { IExcludedPeriod } from '@utils/debt-calculation/exclusions'
+import { resolveExcludedPeriods } from '@utils/debt-calculation/excludedPeriodPresets'
 import { Alert, ConfigProvider } from 'antd'
 import ukUA from 'antd/lib/locale/uk_UA'
 import dayjs, { Dayjs } from 'dayjs'
@@ -83,9 +84,8 @@ export interface IDebtCalculationContext {
   inflationMethod: InflationMethod
   setInflationMethod: (value: InflationMethod) => void
   /**
-   * No inflation losses or interest during these. A setting of this visit
-   * only: not saved with the calculation, so nothing changes until the user
-   * adds one.
+   * No inflation losses or interest during these. Kept with the company like
+   * its other edits; a calculation that has none is not changed.
    */
   excludedPeriods: IExcludedPeriod[]
   setExcludedPeriods: (value: IExcludedPeriod[]) => void
@@ -126,6 +126,8 @@ export const useDebtCalculationContext = (): IDebtCalculationContext =>
  * an editable month × field matrix in a Form.List would cost more than any
  * validation it might buy.
  */
+const NO_PERIODS: IExcludedPeriod[] = []
+
 const DebtCalculationBlock: React.FC = () => {
   const { domainIds: allowedDomainIds, isLoading: isAccessLoading } =
     useDebtCalculationAccess()
@@ -145,7 +147,12 @@ const DebtCalculationBlock: React.FC = () => {
     DEFAULT_INFLATION_METHOD
   )
   const [overrides, setOverrides] = useState<IApartmentOverrides>({})
-  const [excludedPeriods, setExcludedPeriods] = useState<IExcludedPeriod[]>([])
+  const excludedPeriods = overrides.excludedPeriods ?? NO_PERIODS
+  const setExcludedPeriods = (value: IExcludedPeriod[]) =>
+    setOverrides((prev) => ({
+      ...prev,
+      excludedPeriods: value.length > 0 ? value : undefined,
+    }))
 
   // Deep link, e.g. from the assistant's photo import:
   // /debt-calculation?domainId=…&companyId=…
@@ -254,7 +261,17 @@ const DebtCalculationBlock: React.FC = () => {
       : (saved as IDebtCalculationSnapshot | undefined)
 
     const settings = resolveSnapshotSettings(snapshot, companyId)
-    setOverrides(settings.overrides)
+    // A calculation never saved starts with the default exclusions; one that
+    // exists keeps its own. Written into the state so it holds whatever the
+    // saved copy later looks like.
+    const excluded = resolveExcludedPeriods(
+      settings.overrides.excludedPeriods,
+      !!snapshot
+    )
+    setOverrides({
+      ...settings.overrides,
+      excludedPeriods: excluded.length > 0 ? excluded : undefined,
+    })
     setAnnualRatePercent(settings.annualRatePercent)
     setInflationMethod(settings.inflationMethod)
     if (settings.periodFrom) setFrom(toDayjs(settings.periodFrom))
@@ -302,7 +319,6 @@ const DebtCalculationBlock: React.FC = () => {
               prefillOpeningDebt: openingDebtPrefill,
               annualRatePercent,
               inflationMethod,
-              excludedPeriods,
             })
           )
         : undefined,
@@ -317,7 +333,6 @@ const DebtCalculationBlock: React.FC = () => {
       openingDebtPrefill,
       annualRatePercent,
       inflationMethod,
-      excludedPeriods,
     ]
   )
 

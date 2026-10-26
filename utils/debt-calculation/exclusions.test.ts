@@ -1,4 +1,5 @@
 import { calculateDebt } from './calculate'
+import { resolveExcludedPeriods } from './excludedPeriodPresets'
 import {
   dayNumber,
   excludedRanges,
@@ -441,5 +442,29 @@ describe('calculateDebt - the charge follows the days', () => {
   it('a full month, with no start day, is billed exactly as before', () => {
     const odd = { year: 2025, month: 3, area: 67.08, tariff: 5.25 }
     expect(calculateDebt({ months: [odd] }).rows[0].charged).toBe(352.17)
+  })
+})
+
+describe('resolveExcludedPeriods', () => {
+  const own = [period('2025-03-01', '2025-03-31')]
+
+  it('uses the calculation own list, even an empty one', () => {
+    expect(resolveExcludedPeriods(own, false)).toBe(own)
+    expect(resolveExcludedPeriods([], false)).toEqual([])
+    expect(resolveExcludedPeriods(own, true)).toBe(own)
+  })
+
+  it('gives a calculation never saved the КМУ №206 moratorium', () => {
+    expect(resolveExcludedPeriods(undefined, false)).toEqual([
+      expect.objectContaining({
+        type: 'cmu_206',
+        startDate: '2022-02-24',
+        endDate: '2023-12-29',
+      }),
+    ])
+  })
+
+  it('gives a saved calculation without a list nothing', () => {
+    expect(resolveExcludedPeriods(undefined, true)).toEqual([])
   })
 })
