@@ -242,3 +242,56 @@ $hairline: rgba(140, 140, 140, 0.4);
 .PrintBordered {
   border: 1px solid #9e9e9e;
 }
+
+// Excluded periods (moratorium): the settings popover and the table marks.
+.Exclusions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 520px;
+}
+
+.ExclusionRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ExclusionType {
+  width: 130px;
+}
+
+.ExclusionActions {
+  display: flex;
+  gap: 8px;
+}
+
+.ExclusionNote {
+  font-size: 12px;
+}
+
+.ExclusionMark {
+  font-size: 13px;
+  line-height: 1;
+}
+
+.ExclusionAllowed {
+  color: #52c41a;
+}
+
+.ExclusionPartial {
+  color: #faad14;
+}
+
+.ExclusionExcluded {
+  color: #ff4d4f;
+}
+
+// The same figure for every month, and the day the debt starts on.
+.EveryMonth {
+  margin-top: 8px;
+}
+
+.StartDay {
+  width: 80px;
+}

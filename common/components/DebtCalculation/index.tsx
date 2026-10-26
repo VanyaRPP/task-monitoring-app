@@ -37,6 +37,7 @@ import {
   IDebtCalculationResult,
   InflationMethod,
 } from '@utils/debt-calculation/types'
+import type { IExcludedPeriod } from '@utils/debt-calculation/exclusions'
 import { Alert, ConfigProvider } from 'antd'
 import ukUA from 'antd/lib/locale/uk_UA'
 import dayjs, { Dayjs } from 'dayjs'
@@ -81,6 +82,13 @@ export interface IDebtCalculationContext {
   setAnnualRatePercent: (value: number) => void
   inflationMethod: InflationMethod
   setInflationMethod: (value: InflationMethod) => void
+  /**
+   * No inflation losses or interest during these. A setting of this visit
+   * only: not saved with the calculation, so nothing changes until the user
+   * adds one.
+   */
+  excludedPeriods: IExcludedPeriod[]
+  setExcludedPeriods: (value: IExcludedPeriod[]) => void
   /** The selected company's calculation. */
   result?: IDebtCalculationResult
   overrides: IApartmentOverrides
@@ -137,6 +145,7 @@ const DebtCalculationBlock: React.FC = () => {
     DEFAULT_INFLATION_METHOD
   )
   const [overrides, setOverrides] = useState<IApartmentOverrides>({})
+  const [excludedPeriods, setExcludedPeriods] = useState<IExcludedPeriod[]>([])
 
   // Deep link, e.g. from the assistant's photo import:
   // /debt-calculation?domainId=…&companyId=…
@@ -293,6 +302,7 @@ const DebtCalculationBlock: React.FC = () => {
               prefillOpeningDebt: openingDebtPrefill,
               annualRatePercent,
               inflationMethod,
+              excludedPeriods,
             })
           )
         : undefined,
@@ -307,6 +317,7 @@ const DebtCalculationBlock: React.FC = () => {
       openingDebtPrefill,
       annualRatePercent,
       inflationMethod,
+      excludedPeriods,
     ]
   )
 
@@ -374,6 +385,8 @@ const DebtCalculationBlock: React.FC = () => {
     setAnnualRatePercent,
     inflationMethod,
     setInflationMethod,
+    excludedPeriods,
+    setExcludedPeriods,
     result,
     overrides,
     prefillMonths,

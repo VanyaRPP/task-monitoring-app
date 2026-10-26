@@ -282,3 +282,89 @@ describe('withoutTypedFigures', () => {
     expect(withoutTypedFigures(overrides, [], false).openingDebt).toBe(16616.69)
   })
 })
+
+describe('the same figures for every month', () => {
+  const company = { totalArea: 50, pricePerMeter: 10 }
+  const build = (extra: Parameters<typeof buildDebtCalculationInput>[0]) =>
+    buildDebtCalculationInput({ company, from: FROM, to: TO, ...extra })
+
+  it('fills the months that have nothing of their own', () => {
+    const { months } = build({
+      overrides: { charged: 498.67, paid: 100, correction: -5 },
+    })
+
+    expect(months.map(({ charged }) => charged)).toEqual([
+      498.67, 498.67, 498.67,
+    ])
+    expect(months.map(({ paid }) => paid)).toEqual([100, 100, 100])
+    expect(months.map(({ correction }) => correction)).toEqual([-5, -5, -5])
+  })
+
+  it('never overwrites a typed month or a month the payments cover', () => {
+    const { months } = build({
+      overrides: {
+        charged: 498.67,
+        paid: 100,
+        months: { '2024-01': { charged: 0, paid: 250 } },
+      },
+      prefillMonths: { '2024-02': { charged: 300, paid: 40 } },
+    })
+
+    // Typed 0 stays 0 (a month billed nothing); the DB month keeps its own.
+    expect(months.map(({ charged }) => charged)).toEqual([0, 300, 498.67])
+    expect(months.map(({ paid }) => paid)).toEqual([250, 40, 100])
+  })
+
+  it('without them nothing changes: the charge is still area × tariff', () => {
+    const { months } = build({})
+    expect(months.every(({ charged }) => charged === undefined)).toBe(true)
+    expect(calculateDebt({ months: build({}).months }).rows[0].charged).toBe(
+      500
+    )
+  })
+
+  it('keeps an opening balance brought into a month on top of the figure', () => {
+    const { months } = build({
+      overrides: { charged: 100 },
+      prefillMonths: { '2024-02': { openingBalance: 40 } },
+    })
+
+    expect(months[1].charged).toBe(140)
+  })
+
+  it('prorates the general charge of a month that starts mid-month', () => {
+    // 31-day January from the 10th: 22 days of 300; the other months in full.
+    const { months } = build({
+      overrides: {
+        charged: 300,
+        startDay: 10,
+        months: { '2024-02': { days: 15 } },
+      },
+    })
+
+    expect(months.map(({ charged }) => charged)).toEqual([212.9, 155.17, 300])
+  })
+
+  it('does not prorate a figure of the month itself', () => {
+    const { months } = build({
+      overrides: {
+        charged: 300,
+        startDay: 10,
+        months: { '2024-01': { charged: 400 } },
+      },
+      prefillMonths: { '2024-02': { charged: 280 } },
+    })
+
+    expect(months.map(({ charged }) => charged)).toEqual([400, 280, 300])
+  })
+
+  it('passes the start day to the first month only, and typed days through', () => {
+    const { months } = build({
+      overrides: { startDay: 10, months: { '2024-02': { days: 15 } } },
+    })
+
+    expect(months[0].startDay).toBe(10)
+    expect(months[1].startDay).toBeUndefined()
+    expect(months.map(({ days }) => days)).toEqual([undefined, 15, undefined])
+  })
+})

@@ -1,5 +1,13 @@
 import { IInflationIndex } from '@modules/models/InflationIndex'
-import { buildMonthRange, formatPeriod, IYearMonth } from './months'
+import type { IExcludedPeriod } from './exclusions'
+import {
+  accrualDays,
+  buildMonthRange,
+  daysInMonth,
+  formatPeriod,
+  IYearMonth,
+} from './months'
+import { toRoundFixed } from '@utils/helpers'
 import {
   DEFAULT_ANNUAL_RATE_PERCENT,
   IDebtCalculationInput,
@@ -16,6 +24,8 @@ export interface IMonthOverride {
   correction?: number
   paid?: number
   inflationIndex?: number
+  /** Days interest accrues for in this month; see `IDebtMonthInput.days`. */
+  days?: number
   /** `'photo'` while the month holds figures read off a photo, untouched since. */
   source?: string
   /** ISO stamp of the last manual edit of this month, surfaced in the UI. */
@@ -26,6 +36,16 @@ export interface IMonthOverride {
 export interface IApartmentOverrides {
   area?: number
   tariff?: number
+  /**
+   * The same charge, payment and correction for every month - for the months
+   * that have none typed in and none from the payments. A month's own figure
+   * (typed or from the DB) always wins.
+   */
+  charged?: number
+  paid?: number
+  correction?: number
+  /** Day of the first month the debt starts accruing on (1-31). */
+  startDay?: number
   openingDebt?: number
   legalFees?: number
   courtFee?: number
@@ -57,6 +77,8 @@ export interface IBuildDebtInputArgs {
   prefillOpeningDebt?: number
   annualRatePercent?: number
   inflationMethod?: InflationMethod
+  /** Passed through to the calculation; see `exclusions.ts`. */
+  excludedPeriods?: IExcludedPeriod[]
 }
 
 /** Collapses the reference-table response into a map keyed by period. */
@@ -88,9 +110,10 @@ export const buildDebtCalculationInput = ({
   prefillOpeningDebt,
   annualRatePercent = DEFAULT_ANNUAL_RATE_PERCENT,
   inflationMethod = 'balance',
+  excludedPeriods = [],
 }: IBuildDebtInputArgs): IDebtCalculationInput => {
   const months: IDebtMonthInput[] = buildMonthRange(from, to).map(
-    (yearMonth) => {
+    (yearMonth, index) => {
       const period = formatPeriod(yearMonth)
       const month = overrides.months?.[period] ?? {}
       const prefill = prefillMonths[period] ?? {}
@@ -117,9 +140,28 @@ export const buildDebtCalculationInput = ({
           prefill.tariff ??
           company?.pricePerMeter ??
           0,
-        charged: month.charged ?? prefillCharged,
-        correction: month.correction ?? prefill.correction,
-        paid: month.paid ?? prefill.paid ?? 0,
+        // A general figure stands in only where nothing else is known; the
+        // opening balance brought into the month still comes on top of it.
+        charged:
+          month.charged ??
+          (prefill.charged !== undefined || overrides.charged === undefined
+            ? prefillCharged
+            : // A debt from the 10th is billed for the days left of its month.
+              +toRoundFixed(
+                (overrides.charged *
+                  accrualDays(yearMonth.year, yearMonth.month, {
+                    startDay: index === 0 ? overrides.startDay : undefined,
+                    days: month.days,
+                  })) /
+                  daysInMonth(yearMonth.year, yearMonth.month)
+              ) + brought),
+        correction:
+          month.correction ?? prefill.correction ?? overrides.correction,
+        paid: month.paid ?? prefill.paid ?? overrides.paid ?? 0,
+        ...(index === 0 && overrides.startDay
+          ? { startDay: overrides.startDay }
+          : {}),
+        ...(month.days === undefined ? {} : { days: month.days }),
         inflationIndex:
           month.inflationIndex ??
           prefill.inflationIndex ??
@@ -135,6 +177,7 @@ export const buildDebtCalculationInput = ({
     inflationMethod,
     legalFees: overrides.legalFees ?? 0,
     courtFee: overrides.courtFee ?? 0,
+    excludedPeriods,
   }
 }
 

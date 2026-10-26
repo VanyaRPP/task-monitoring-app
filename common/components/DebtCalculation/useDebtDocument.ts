@@ -3,7 +3,8 @@ import {
   debtCalculationFileName,
   IDebtExcelDocument,
 } from '@utils/excel/debt-calculation-excel'
-import { IYearMonth } from '@utils/debt-calculation/months'
+import { periodsWithin } from '@utils/debt-calculation/exclusions'
+import { daysInMonth, IYearMonth } from '@utils/debt-calculation/months'
 import { Dayjs } from 'dayjs'
 import { useDebtCalculationContext } from './'
 
@@ -12,6 +13,8 @@ export interface IDebtDocument {
   /** Without an extension: `.xlsx` for Excel, the print dialog's PDF name. */
   fileName: string
 }
+
+const pad = (value: number): string => String(value).padStart(2, '0')
 
 const toYearMonth = (value?: Dayjs): IYearMonth | undefined =>
   value ? { year: value.year(), month: value.month() + 1 } : undefined
@@ -32,6 +35,7 @@ export const useDebtDocument = (
     to,
     annualRatePercent,
     inflationMethod,
+    excludedPeriods = [],
   } = useDebtCalculationContext()
 
   return () => {
@@ -54,6 +58,18 @@ export const useDebtDocument = (
         area: overrides.area ?? company?.totalArea,
         tariff: overrides.tariff ?? company?.pricePerMeter,
         openingDebt: overrides.openingDebt,
+        // What the calculation applied: the periods cut to its span.
+        excludedPeriods:
+          periodFrom && periodTo
+            ? periodsWithin(
+                excludedPeriods,
+                `${periodFrom.year}-${pad(periodFrom.month)}-01`,
+                `${periodTo.year}-${pad(periodTo.month)}-${daysInMonth(
+                  periodTo.year,
+                  periodTo.month
+                )}`
+              )
+            : [],
       }),
       fileName: debtCalculationFileName(companyName, periodFrom, periodTo),
     }

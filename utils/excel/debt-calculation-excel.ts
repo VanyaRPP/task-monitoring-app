@@ -1,6 +1,11 @@
 import { cascaderMonths } from '@utils/constants'
 import { formatPeriod, IYearMonth } from '@utils/debt-calculation/months'
 import {
+  describeExcludedPeriod,
+  EXCLUSION_NOTE,
+} from '@utils/debt-calculation/excludedPeriodPresets'
+import type { IExcludedPeriod } from '@utils/debt-calculation/exclusions'
+import {
   IDebtCalculationResult,
   InflationMethod,
 } from '@utils/debt-calculation/types'
@@ -18,6 +23,8 @@ export interface IDebtExcelInput {
   area?: number
   tariff?: number
   openingDebt?: number
+  /** As applied to the period (see `periodsWithin`); each becomes a tag line. */
+  excludedPeriods?: IExcludedPeriod[]
   generatedAt?: Date
 }
 
@@ -141,8 +148,8 @@ const value = (text: string | number, span = 5): IExcelCell => ({
  * covers stay `null` - a value put inside the label's merge (column B) is
  * hidden by Excel.
  */
-const param = (text: string, content: string | number) =>
-  row(label(text), null, null, value(content))
+const param = (text: string, content: string | number, span = 5) =>
+  row(label(text), null, null, value(content, span))
 
 /**
  * The date the debt is stated as of: the first day of the month FOLLOWING the
@@ -176,6 +183,7 @@ export const buildDebtCalculationDocument = ({
   area,
   tariff,
   openingDebt,
+  excludedPeriods = [],
   generatedAt = new Date(),
 }: IDebtExcelInput): IDebtExcelDocument => {
   const interestLabel = `${annualRatePercent}% річних`
@@ -192,6 +200,17 @@ export const buildDebtCalculationDocument = ({
     param('Борг на початок періоду', money(openingDebt)),
     param('Ставка річних, %', annualRatePercent),
     param('Метод інфляційних', METHOD_LABEL[inflationMethod]),
+    // One line per period, so many of them wrap down instead of over the table.
+    ...excludedPeriods.map((period, index) =>
+      param(
+        index === 0 ? 'Виключені періоди' : '',
+        describeExcludedPeriod(period),
+        COLUMN_COUNT - 3
+      )
+    ),
+    ...(excludedPeriods.length > 0
+      ? [row(null, null, null, value(EXCLUSION_NOTE, COLUMN_COUNT - 3))]
+      : []),
     blank(),
   ]
 

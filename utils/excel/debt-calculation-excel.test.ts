@@ -290,3 +290,59 @@ describe('наскрізь: документ → справжній .xlsx → н
     expect(numeric.length).toBeGreaterThan(20)
   })
 })
+
+describe('buildDebtCalculationDocument — виключені періоди', () => {
+  const excludedPeriods = [
+    {
+      id: 'p1',
+      type: 'cmu_206' as const,
+      startDate: '2026-01-01',
+      endDate: '2026-01-31',
+    },
+    {
+      id: 'p2',
+      type: 'custom' as const,
+      startDate: '2026-03-10',
+      endDate: '2026-03-31',
+    },
+  ]
+  const excluded = calculateDebt(
+    buildDebtCalculationInput({
+      company: { totalArea: 67.08, pricePerMeter: 5.25 },
+      from: FROM,
+      to: TO,
+      indexByPeriod: { '2026-01': 100.7, '2026-02': 101, '2026-03': 101.7 },
+      overrides: { openingDebt: 8371.52 },
+      inflationMethod: 'monthly',
+      excludedPeriods,
+    })
+  )
+  const { rows } = buildDebtCalculationDocument(
+    input({ result: excluded, excludedPeriods, inflationMethod: 'monthly' })
+  )
+
+  it('пише кожен період тегом і примітку під ними', () => {
+    expect(findRow(rows, 'Виключені періоди')[3].v).toBe(
+      'КМУ №206: 01.01.2026—31.01.2026'
+    )
+    expect(textOf(rows)).toContain('Довільний: 10.03.2026—31.03.2026')
+    expect(textOf(rows)).toContain(
+      'Інфляційні втрати та річні за зазначені періоди не нараховувалися.'
+    )
+  })
+
+  it('підсумки документа — ті самі, що в розрахунку на сторінці', () => {
+    const totals = findRow(rows, 'Всього')
+    expect(totals[7].v).toBeCloseTo(excluded.interest, 2)
+    expect(totals[9].v).toBe(excluded.totals.days)
+    expect(textOf(rows)).toContain(String(+excluded.inflation.toFixed(2)))
+    // January wholly out, 9 of 31 March days left: 0 + 28 + 9.
+    expect(excluded.totals.days).toBe(37)
+  })
+
+  it('без виключень — жодного рядка про них', () => {
+    const plain = buildDebtCalculationDocument(input())
+    expect(findRow(plain.rows, 'Виключені періоди')).toBeUndefined()
+    expect(textOf(plain.rows)).not.toContain('не нараховувалися')
+  })
+})

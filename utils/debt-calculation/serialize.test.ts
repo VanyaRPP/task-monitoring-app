@@ -191,3 +191,36 @@ describe('коректура в збереженні', () => {
     })
   })
 })
+
+describe('загальні значення місяця, число початку і дні', () => {
+  it('зберігає щомісячні нараховано, сплачено, коректуру, число початку й дні місяця', () => {
+    const saved = {
+      [APT]: {
+        charged: 498.67,
+        paid: 100,
+        correction: -5,
+        startDay: 10,
+        months: { '2025-04': { days: 20, paid: 50 } },
+      },
+    }
+
+    expect(sanitizeOverrides(saved)).toEqual(saved)
+  })
+
+  it('відкидає число початку й дні, що не є днями місяця', () => {
+    const result = sanitizeOverrides({
+      [APT]: {
+        area: 10,
+        startDay: 40,
+        months: { '2025-04': { days: 2.5 }, '2025-05': { days: -3, paid: 1 } },
+      },
+      [APT2]: { startDay: 0, courtFee: 5 },
+    })
+
+    expect(result[APT]).toEqual({
+      area: 10,
+      months: { '2025-05': { paid: 1 } },
+    })
+    expect(result[APT2]).toEqual({ courtFee: 5 })
+  })
+})

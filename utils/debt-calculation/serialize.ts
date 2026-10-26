@@ -21,11 +21,16 @@ const MONTH_FIELDS = [
   'correction',
   'paid',
   'inflationIndex',
+  'days',
 ] as const
 
 const APARTMENT_FIELDS = [
   'area',
   'tariff',
+  'charged',
+  'paid',
+  'correction',
+  'startDay',
   'openingDebt',
   'legalFees',
   'courtFee',
@@ -62,6 +67,20 @@ const pickNumbers = <K extends string>(
   return out
 }
 
+/** A whole number in `[min, max]`, else dropped: a day is never 2.5 or 40. */
+const keepWhole = <T extends object>(
+  target: T,
+  field: keyof T,
+  min: number,
+  max: number
+): void => {
+  const value = target[field] as unknown as number | undefined
+  if (value === undefined) return
+  if (!Number.isInteger(value) || value < min || value > max) {
+    delete target[field]
+  }
+}
+
 /** Accepts only a parseable ISO date, normalized to canonical form. */
 const sanitizeTimestamp = (value: unknown): string | undefined => {
   if (typeof value !== 'string' || value.length > MAX_TIMESTAMP_LENGTH) {
@@ -85,6 +104,7 @@ const sanitizeMonths = (
     if (!PERIOD.test(period) || count >= MAX_MONTHS) continue
 
     const month: IMonthOverride = pickNumbers(raw, MONTH_FIELDS)
+    keepWhole(month, 'days', 0, 31)
     const updatedAt = sanitizeTimestamp((raw as IMonthOverride)?.updatedAt)
     // A timestamp on its own, with no value beside it, is an empty row.
     if (Object.keys(month).length === 0) continue
@@ -130,6 +150,7 @@ export const sanitizeOverrides = (
     if (!OBJECT_ID.test(companyId) || count >= MAX_APARTMENTS) continue
 
     const apartment: IApartmentOverrides = pickNumbers(raw, APARTMENT_FIELDS)
+    keepWhole(apartment, 'startDay', 1, 31)
     const months = sanitizeMonths((raw as IApartmentOverrides)?.months)
     if (months) apartment.months = months
 
