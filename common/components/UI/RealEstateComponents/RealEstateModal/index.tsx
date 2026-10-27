@@ -171,7 +171,8 @@ const RealEstateModal: FC<Props> = ({
         getEntityId(currentRealEstate?.street) ||
         undefined,
       companyName: formData.companyName,
-      description: formData.description,
+      // Always send the key: an omitted field would keep the old value on PATCH.
+      description: formData.description ?? '',
       adminEmails: formData.adminEmails,
       pricePerMeter: formData.pricePerMeter,
       totalArea: formData.totalArea,

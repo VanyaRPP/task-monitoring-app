@@ -1,6 +1,7 @@
 import { expect } from '@jest/globals'
 import handler from '.'
 import Domain from '@modules/models/Domain'
+import RealEstate from '@modules/models/RealEstate'
 import { mockLoginAs } from '@utils/mockLoginAs'
 import { setupTestEnvironment } from '@utils/setupTestEnvironment'
 import { realEstates, users, domains } from '@utils/testData'
@@ -66,6 +67,38 @@ describe('RealEstate API - PATCH', () => {
 
     expect(response.status).toHaveBeenCalledWith(200)
     expect(response.data.description).toBe(updatedData.description)
+  })
+
+  it.each([
+    ['GlobalAdmin', users.globalAdmin],
+    ['DomainAdmin', users.domainAdmin],
+  ])('clears a previously filled description as %s', async (_, actor) => {
+    await RealEstate.updateOne(
+      { _id: realEstates[0]._id },
+      { $set: { description: 'old description' } }
+    )
+    await mockLoginAs(actor)
+
+    const mockReq = {
+      method: 'PATCH',
+      query: { id: realEstates[0]._id },
+      body: {
+        ...realEstates[0],
+        domain: domains[0]._id,
+        description: '',
+      },
+    } as any
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockReq, mockRes)
+
+    expect(mockRes.status).toHaveBeenCalledWith(200)
+    const stored = await RealEstate.findById(realEstates[0]._id).lean()
+    expect(stored?.description).toBe('')
+    expect(stored?.companyName).toBe(realEstates[0].companyName)
   })
 
   it('should not update not valid realEstates as DomainAdmin', async () => {
