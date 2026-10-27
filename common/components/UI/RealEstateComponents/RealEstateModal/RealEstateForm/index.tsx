@@ -154,11 +154,7 @@ const RealEstateForm: FC<Props> = ({
           disabled={!editable}
         />
       </Form.Item>
-      <Form.Item
-        name="description"
-        label="Опис"
-        rules={validateField('required')}
-      >
+      <Form.Item name="description" label="Опис">
         <Input.TextArea
           rows={4}
           placeholder="Опис"

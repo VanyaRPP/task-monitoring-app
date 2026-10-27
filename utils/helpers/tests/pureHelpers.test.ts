@@ -163,6 +163,24 @@ describe('getPaymentProviderAndReciever', () => {
     expect(reciever.contractNumber).toBeUndefined()
   })
 
+  it.each([undefined, null, ''])(
+    'gives an empty reciever description when the company description is %p',
+    (description) => {
+      const { reciever } = getPaymentProviderAndReciever({
+        companyName: 'Acme',
+        adminEmails: ['a@b.c'],
+        description,
+        domain: { description: 'domain desc' },
+      })
+
+      expect(reciever).toMatchObject({
+        companyName: 'Acme',
+        adminEmails: ['a@b.c'],
+        description: '',
+      })
+    }
+  )
+
   it('falls back to an empty provider description when domain is missing', () => {
     const { provider } = getPaymentProviderAndReciever({ companyName: 'C' })
     expect(provider).toEqual({ description: '' })
