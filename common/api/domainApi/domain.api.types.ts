@@ -9,18 +9,14 @@ export interface IDomainModel {
   IEName: string
   domainBankToken: IDomainBankToken[]
   customServices: ICustomService[]
+  disabledServiceIds?: string[]
   domainTypeTemplateId?: string
   defaultTemplate?: string
   archived?: boolean
 }
 
 export type DomainTypeTemplateCategory =
-  | 'utility'
-  | 'it'
-  | 'edu'
-  | 'auto'
-  | 'real-estate'
-  | 'other'
+  'utility' | 'it' | 'edu' | 'auto' | 'real-estate' | 'other'
 
 export interface IDomainTypeTemplateGroup {
   groupName: string

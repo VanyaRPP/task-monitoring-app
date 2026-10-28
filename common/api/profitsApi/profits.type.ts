@@ -1,4 +1,5 @@
 import { ObjectId } from 'mongoose'
+import type { IProfitItem } from '@utils/profit-items'
 
 export interface Profit {
   _id?: string
@@ -7,6 +8,8 @@ export interface Profit {
   amount: number
   type: 'debit' | 'credit'
   categories?: string[]
+  /** One receipt's lines; when set, `amount` is their sum. */
+  items?: IProfitItem[]
   description?: string
   /** Set when the record was generated from a Payment rather than by hand. */
   payment?: string
@@ -33,15 +36,20 @@ export interface Meta {
 }
 
 export interface CurrencyTotals {
-  /** Invoiced to clients this month. */
+  /** Invoiced this month. */
   expected: number
-  /** Money that actually arrived this month. */
+  /** Invoiced money that actually moved this month. */
   actual: number
-  /** What the domain spent this month. */
+  /** Hand-entered `credit` records - income that no invoice produced. */
+  income: number
+  /** Hand-entered `debit` records. */
   expenses: number
-  /** expected - actual: invoiced but not yet collected. */
+  /** expected - actual: invoiced but not yet settled. */
   outstanding: number
-  /** actual - expenses */
+  /**
+   * domain:  actual + income - expenses
+   * company: income - actual - expenses  (its invoices are outflows)
+   */
   net: number
 }
 

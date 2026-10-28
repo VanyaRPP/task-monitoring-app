@@ -25,8 +25,13 @@ import {
 import { IDomain } from '@modules/models/Domain'
 import { inputNumberParser } from '@utils/helpers'
 import { CURRENCY_SELECT_OPTIONS, Currency } from '@utils/constants'
+import { resolveServiceType } from '@utils/domain/resolve-service-type'
+import { isAreaBasedServiceType } from '@utils/domain/service-type-categories'
 import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
-import { shouldShowStandardServices } from '@utils/servicesVisibility'
+import {
+  shouldShowStandardServices,
+  STANDARD_COLUMN_SERVICE_IDS,
+} from '@utils/servicesVisibility'
 import CustomServicesCard from '../../../CustomServicesCard'
 
 interface Props {
@@ -85,15 +90,27 @@ const RealEstateForm: FC<Props> = ({
     )
   }
 
+  const isStandardServiceDisabled = (columnKey: string) =>
+    !!domain?.disabledServiceIds
+      ?.map(String)
+      .includes(STANDARD_COLUMN_SERVICE_IDS[columnKey])
+
   const isServiceExist = (value: string) => {
     if (!domain?._id || !services || !services?.length) return false
     const existedValues = services.map((x) => !!x[value])
     return existedValues.includes(true)
   }
 
+  // Площа й ціна за м² потрібні будь-якій послузі «за площею»: сидованим
+  // Утриманню/Розміщенню (за закріпленим _id) і per-domain копії з тегом
+  // serviceType, яка рахується тією ж формулою в Payment Bulk. Без другої
+  // умови копія множила б тариф на незаповнену площу і давала 0.
   const isMeterBasedServiceExist =
     isServiceExistById('677d414283b6ef93c6b8ea2c') ||
-    isServiceExistById('682dd48d9665126611c81950')
+    isServiceExistById('682dd48d9665126611c81950') ||
+    customServices.some((svc) =>
+      isAreaBasedServiceType(resolveServiceType(svc))
+    )
 
   const getSafeStreetId = () => {
     const val =
@@ -194,25 +211,27 @@ const RealEstateForm: FC<Props> = ({
         </>
       )}
 
-      {showStandardServices && (
-        <Form.Item
-          valuePropName="checked"
-          name="garbageCollector"
-          label="Вивіз сміття"
-        >
-          <Checkbox disabled={!editable} />
-        </Form.Item>
-      )}
+      {showStandardServices &&
+        !isStandardServiceDisabled('garbageCollector') && (
+          <Form.Item
+            valuePropName="checked"
+            name="garbageCollector"
+            label="Вивіз сміття"
+          >
+            <Checkbox disabled={!editable} />
+          </Form.Item>
+        )}
 
-      {isServiceExist('inflicionPrice') && (
-        <Form.Item
-          valuePropName="checked"
-          name="inflicion"
-          label="Індекс інфляції"
-        >
-          <Checkbox disabled={!editable} />
-        </Form.Item>
-      )}
+      {isServiceExist('inflicionPrice') &&
+        !isStandardServiceDisabled('inflicion') && (
+          <Form.Item
+            valuePropName="checked"
+            name="inflicion"
+            label="Індекс інфляції"
+          >
+            <Checkbox disabled={!editable} />
+          </Form.Item>
+        )}
     </>
   )
 

@@ -16,6 +16,7 @@ import {
   IGetRealestateResponse,
 } from '@common/api/realestateApi/realestate.api.types'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+import type { IDebtorInflation } from '@common/api/debtorsApi/debtors.api.types'
 import { AppRoutes, Roles } from '@utils/constants'
 import {
   formatDebtAmount,
@@ -51,10 +52,15 @@ import { useEffect, useState, useMemo } from 'react'
 import { useGetDebtorsQuery } from '@common/api/debtorsApi/debtors.api'
 import CollapsedTags from '@components/UI/CollapsedTags'
 import TableFilterLink from '@components/UI/Reusable/TableFilterLink'
+import { TruncatedText } from '@components/UI/TruncatedText'
+import { widenFilterDropdown } from '../tableFilterHelpers'
 import {
+  excludeDisabledServices,
   extractDomainsFromRealEstates,
+  getDisabledServiceIds,
   getVisibleServices,
   shouldShowStandardServices,
+  STANDARD_COLUMN_SERVICE_IDS,
 } from '@utils/servicesVisibility'
 import { getTableScrollX } from '@utils/getTableScrollX'
 
@@ -70,7 +76,13 @@ type CompanyWithPayments = {
   companyName: string
   debtPerMonth: DebtPerMonth[]
   totalDebt: number
+  inflation?: IDebtorInflation | null
 }
+
+const INFLATION_METHOD_LABEL = {
+  balance: 'за залишком',
+  monthly: 'помісячно',
+} as const
 
 const STANDARD_SERVICE_NAMES = [
   'Опис',
@@ -240,6 +252,10 @@ const CompaniesTable: React.FC<Props> = ({
     () => extractDomainsFromRealEstates(filteredData),
     [filteredData]
   )
+  const disabledServiceIds = useMemo(
+    () => getDisabledServiceIds(visibleDomains),
+    [visibleDomains]
+  )
   const { data: domainTypeTemplates = [] } = useGetDomainTypeTemplatesQuery()
   const hasActiveFilters = !!(
     filters?.domain?.length ||
@@ -271,8 +287,11 @@ const CompaniesTable: React.FC<Props> = ({
         }
       })
 
-      return withoutStandard.filter((s) =>
-        activeServiceKeys.has(String(s.fieldName || s._id))
+      return excludeDisabledServices(
+        withoutStandard.filter((s) =>
+          activeServiceKeys.has(String(s.fieldName || s._id))
+        ),
+        visibleDomains
       )
     }
 
@@ -314,6 +333,7 @@ const CompaniesTable: React.FC<Props> = ({
     customServices: filteredCustomServices,
     setFilters,
     showStandardServices,
+    disabledServiceIds,
   })
 
   return (
@@ -408,6 +428,7 @@ const getDefaultColumns = ({
   customServices,
   setFilters,
   showStandardServices,
+  disabledServiceIds,
 }: {
   domainId?: string
   streetId?: string
@@ -431,14 +452,19 @@ const getDefaultColumns = ({
   customServices?: { _id: string; name: string; fieldName?: string }[]
   setFilters?: (filters: any) => void
   showStandardServices?: boolean
+  disabledServiceIds?: string[]
 }): ColumnType<any>[] => {
   const isOnPage = pathname === AppRoutes.REAL_ESTATE
 
   const selectedServices: string[] = filters?.services || []
   const showAllServices = selectedServices.length === 0
 
-  const shouldShowService = (key: string) =>
-    showAllServices || selectedServices.includes(key)
+  const disabledSet = new Set(disabledServiceIds ?? [])
+  const shouldShowService = (key: string) => {
+    const serviceId = STANDARD_COLUMN_SERVICE_IDS[key]
+    if (serviceId && disabledSet.has(serviceId)) return false
+    return showAllServices || selectedServices.includes(key)
+  }
 
   const columns: ColumnType<any>[] = [
     {
@@ -604,73 +630,91 @@ const getDefaultColumns = ({
       fixed: 'right',
       title: '',
       width: 98,
-      render: (_, realEstate: IExtendedRealestate) => (
-        <Dropdown
-          menu={{
-            items: [
-              {
-                key: 'archive',
-                label: (
-                  <Popconfirm
-                    id="popconfirm_archive"
-                    title={`Ви впевнені що хочете ${
-                      realEstate.archived ? 'розархівувати' : 'архівувати'
-                    } цей елемент?`}
-                    onConfirm={() =>
-                      handleArchive(realEstate?._id, !realEstate.archived)
-                    }
-                    okText={
-                      realEstate.archived ? 'Розархівувати' : 'Архівувати'
-                    }
-                    cancelText="Ні"
-                    disabled={archiveLoading}
-                  >
-                    <Button
-                      type="text"
-                      icon={<InboxOutlined />}
-                      style={{
-                        color: realEstate.archived ? '#722ed1' : '#ff4d4f',
-                        paddingLeft: '10px',
-                        paddingRight: '10px',
-                      }}
+      render: (_, realEstate: IExtendedRealestate) => {
+        const isDomainArchived = !!realEstate.domain?.archived
+        const preventUnarchive = realEstate.archived && isDomainArchived
+
+        const archiveButton = (
+          <Button
+            type="text"
+            icon={<InboxOutlined />}
+            disabled={preventUnarchive}
+            style={{
+              color: preventUnarchive
+                ? undefined
+                : realEstate.archived
+                  ? '#722ed1'
+                  : '#ff4d4f',
+              paddingLeft: '10px',
+              paddingRight: '10px',
+            }}
+          >
+            {realEstate.archived ? 'Розархівувати' : 'Архівувати'}
+          </Button>
+        )
+
+        return (
+          <Dropdown
+            menu={{
+              items: [
+                {
+                  key: 'archive',
+                  label: preventUnarchive ? (
+                    <Tooltip title="Неможливо розархівувати компанію, оскільки її надавач послуг заархівований">
+                      {archiveButton}
+                    </Tooltip>
+                  ) : (
+                    <Popconfirm
+                      id="popconfirm_archive"
+                      title={`Ви впевнені що хочете ${
+                        realEstate.archived ? 'розархівувати' : 'архівувати'
+                      } цей елемент?`}
+                      onConfirm={() =>
+                        handleArchive(realEstate?._id, !realEstate.archived)
+                      }
+                      okText={
+                        realEstate.archived ? 'Розархівувати' : 'Архівувати'
+                      }
+                      cancelText="Ні"
+                      disabled={archiveLoading}
                     >
-                      {realEstate.archived ? 'Розархівувати' : 'Архівувати'}
-                    </Button>
-                  </Popconfirm>
-                ),
-              },
-              (isGlobalAdmin || isAdmin) && {
-                key: 'delete',
-                label: (
-                  <Popconfirm
-                    id="popconfirm_custom"
-                    title={`Ви впевнені що хочете видалити компанію?`}
-                    onConfirm={() => handleDelete(realEstate?._id)}
-                    okText="Видалити"
-                    cancelText="Ні"
-                    disabled={deleteLoading}
-                  >
-                    <Button
-                      type="text"
-                      icon={<DeleteOutlined />}
-                      style={{
-                        color: '#ff4d4f',
-                        paddingLeft: '10px',
-                        paddingRight: '10px',
-                      }}
+                      {archiveButton}
+                    </Popconfirm>
+                  ),
+                },
+                (isGlobalAdmin || isAdmin) && {
+                  key: 'delete',
+                  label: (
+                    <Popconfirm
+                      id="popconfirm_custom"
+                      title={`Ви впевнені що хочете видалити компанію?`}
+                      onConfirm={() => handleDelete(realEstate?._id)}
+                      okText="Видалити"
+                      cancelText="Ні"
+                      disabled={deleteLoading}
                     >
-                      Видалити
-                    </Button>
-                  </Popconfirm>
-                ),
-              },
-            ],
-          }}
-          placement="bottomRight"
-        >
-          <Button icon={<MoreOutlined />} />
-        </Dropdown>
-      ),
+                      <Button
+                        type="text"
+                        icon={<DeleteOutlined />}
+                        style={{
+                          color: '#ff4d4f',
+                          paddingLeft: '10px',
+                          paddingRight: '10px',
+                        }}
+                      >
+                        Видалити
+                      </Button>
+                    </Popconfirm>
+                  ),
+                },
+              ],
+            }}
+            placement="bottomRight"
+          >
+            <Button icon={<MoreOutlined />} />
+          </Dropdown>
+        )
+      },
     })
   }
 
@@ -680,6 +724,7 @@ const getDefaultColumns = ({
     dataIndex: 'companyName',
     width: 200,
     filterSearch: true,
+    onFilterDropdownOpenChange: widenFilterDropdown(240),
     render: (i: string) => {
       const companyId = realEstatesFilter?.find((f) => f.text === i)?.value
       const canFilter =
@@ -704,6 +749,16 @@ const getDefaultColumns = ({
                 {isCompanyDebtor ? 'Сума боргу' : 'Сума переплати'}:{' '}
                 {formatDebtAmount(debtor.totalDebt)}
               </p>
+              {isCompanyDebtor && debtor.inflation && (
+                <p>
+                  Інфляційні втрати: {formatDebtAmount(debtor.inflation.loss)}
+                  <br />
+                  <small>
+                    {debtor.inflation.from} – {debtor.inflation.to},{' '}
+                    {INFLATION_METHOD_LABEL[debtor.inflation.method]}
+                  </small>
+                </p>
+              )}
             </div>
           )
 
@@ -715,9 +770,10 @@ const getDefaultColumns = ({
               filters={filters}
               setFilters={setFilters}
               tooltipTitle=""
+              maxWidth={180}
             />
           ) : (
-            i
+            <TruncatedText text={i} maxWidth={180} />
           )
 
           return (
@@ -747,7 +803,7 @@ const getDefaultColumns = ({
           setFilters={setFilters}
         />
       ) : (
-        i
+        <TruncatedText text={i} />
       )
     },
   }
@@ -765,21 +821,41 @@ const getDefaultColumns = ({
           setFilters={setFilters}
         />
       ) : (
-        i?.name
+        <TruncatedText text={i?.name} />
       ),
     hidden: domainsFilter?.length <= 1,
     filterSearch: true,
+    onFilterDropdownOpenChange: widenFilterDropdown(240),
   }
   const streetColumn: any = {
     title: 'Адреса',
     dataIndex: 'street',
     width: 200,
     filterSearch: true,
-    render: (i) => (
-      <>
-        {i?.address} (м. {i?.city})
-      </>
-    ),
+    onFilterDropdownOpenChange: widenFilterDropdown(240),
+    render: (i: any) => {
+      const fullAddress = `${i?.address || ''} (м. ${i?.city || ''})`.trim()
+      if (!fullAddress || fullAddress === '(м. )') return ''
+
+      return (
+        <Tooltip title={fullAddress} placement="top">
+          <div
+            style={{
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'normal',
+              wordBreak: 'break-word',
+            }}
+            data-testid="truncated-address-cell"
+          >
+            {fullAddress}
+          </div>
+        </Tooltip>
+      )
+    },
   }
 
   if (isAdmin) {

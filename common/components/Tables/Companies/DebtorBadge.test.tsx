@@ -92,13 +92,13 @@ const mockProps = {
   customServices: [],
 }
 
-const mockDebtors = (totalDebt: number) => {
+const mockDebtors = (totalDebt: number, companyName = 'Company A') => {
   ;(useGetDebtorsQuery as jest.Mock).mockReturnValue({
     data: {
       companies: [
         {
           companyId: '1',
-          companyName: 'Company A',
+          companyName,
           debtPerMonth: [],
           totalDebt,
         },
@@ -197,6 +197,33 @@ describe('CompaniesTable debtor badge', () => {
     render(<CompaniesTable {...mockProps} />)
 
     expect(document.querySelector('.ant-badge')).not.toBeInTheDocument()
+  })
+
+  test('caps a long debtor company name with an explicit max-width (Badge has no width of its own to constrain a percentage-based one)', () => {
+    const longName =
+      'Товариство з обмеженою відповідальністю "Інноваційні рішення для бізнесу"'
+    mockDebtors(1500, longName)
+    render(
+      <CompaniesTable
+        {...mockProps}
+        realEstates={
+          {
+            data: [
+              {
+                _id: '1',
+                companyName: longName,
+                domain: { _id: 'domain1', name: 'Domain 1' },
+                street: { address: 'Street 1', city: 'City 1' },
+                adminEmails: [],
+              },
+            ],
+            success: true,
+          } as IGetRealestateResponse
+        }
+      />
+    )
+
+    expect(screen.getByText(longName)).toHaveStyle({ maxWidth: '180px' })
   })
 })
 

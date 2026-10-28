@@ -227,7 +227,7 @@ describe('getInvoices - CUSTOM', () => {
         expect.objectContaining({ type: ServiceType.Custom })
       )
     })
-    it('should NOT load when service = null, company = { cleaning: 1000 }, prevPayment = { invoice: [Electricity] }', () => {
+    it('should load without month service when service = null, company = { cleaning: 1000 }, prevPayment = { invoice: [Electricity] }', () => {
       const service: Partial<IService> = null
       const company: Partial<IRealestate> = {
         cleaning: 1000,
@@ -248,7 +248,7 @@ describe('getInvoices - CUSTOM', () => {
         prevPayment,
       })
 
-      expect(invoices).not.toContainEqual(
+      expect(invoices).toContainEqual(
         expect.objectContaining({ type: ServiceType.Cleaning })
       )
     })

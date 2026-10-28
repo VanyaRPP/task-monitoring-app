@@ -5,11 +5,13 @@ import { mockBankApi } from '@common/api/bankApi/mockBank.api'
 import { categoryApi } from '@common/api/categoriesApi/category.api'
 import { customerApi } from '@common/api/customerApi/customer.api'
 import { customServicesApi } from '@common/api/customServicesApi/customServices.api'
+import { debtCalculationApi } from '@common/api/debtCalculationApi/debtCalculation.api'
 import { debtorsApi } from '@common/api/debtorsApi/debtors.api'
 import { domainApi } from '@common/api/domainApi/domain.api'
 import { domainSnapshotsApi } from '@common/api/domainSnapshotsApi/domain-snapshots.api'
 import { FeatureFlagApi } from '@common/api/featureFlagsApi/featureFlag.api'
 import { filterApi } from '@common/api/filterApi/filter.api'
+import { inflationIndexApi } from '@common/api/inflationIndexApi/inflationIndex.api'
 import { notificationApi } from '@common/api/notificationApi/notification.api'
 import { paymentApi } from '@common/api/paymentApi/payment.api'
 import { profitApi } from '@common/api/profitsApi/profits.api'
@@ -51,6 +53,8 @@ export const store = configureStore({
     [mockBankApi.reducerPath]: mockBankApi.reducer,
     [FeatureFlagApi.reducerPath]: FeatureFlagApi.reducer,
     [invoiceTemplateApi.reducerPath]: invoiceTemplateApi.reducer,
+    [inflationIndexApi.reducerPath]: inflationIndexApi.reducer,
+    [debtCalculationApi.reducerPath]: debtCalculationApi.reducer,
 
     sidebar: sidebarReducer,
     theme: themeReducer,
@@ -86,7 +90,9 @@ export const store = configureStore({
       .concat(debtorsApi.middleware)
       .concat(FeatureFlagApi.middleware)
       .concat(invoiceTemplateApi.middleware)
-      .concat(profitApi.middleware),
+      .concat(profitApi.middleware)
+      .concat(inflationIndexApi.middleware)
+      .concat(debtCalculationApi.middleware),
 })
 
 export type AppDispatch = typeof store.dispatch

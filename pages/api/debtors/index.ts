@@ -3,11 +3,27 @@ import start from '@pages/api/api.config'
 import RealEstate from '@modules/models/RealEstate'
 import Payment from '@modules/models/Payment'
 import { getCurrentUser } from '@utils/getCurrentUser'
+import {
+  calculateDebtorsInflation,
+  IDebtorInflation,
+} from '@utils/debt-calculation/debtors-inflation'
 
 type CompanyWithPayments = {
   companyId: any
   companyName: string
   totalDebt: number
+  inflation?: IDebtorInflation | null
+}
+
+const inflationOrEmpty = async (
+  companyIds: string[]
+): Promise<Record<string, IDebtorInflation>> => {
+  try {
+    return await calculateDebtorsInflation(companyIds)
+  } catch (error) {
+    console.error('Debtors inflation failed', error)
+    return {}
+  }
 }
 
 type Data = {
@@ -111,9 +127,16 @@ export default async function handler(
             totalDebt: Number(company.totalDebt),
           }))
 
+        const inflation = await inflationOrEmpty(
+          companyWithPayments.map(({ companyId }) => companyId)
+        )
+
         return res.status(200).json({
           success: true,
-          companies: companyWithPayments,
+          companies: companyWithPayments.map((company) => ({
+            ...company,
+            inflation: inflation[company.companyId] ?? null,
+          })),
         })
       } catch (error) {
         return res.status(500).json({

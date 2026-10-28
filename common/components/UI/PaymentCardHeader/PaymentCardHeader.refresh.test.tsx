@@ -30,6 +30,10 @@ jest.mock('@common/api/userApi/user.api', () => ({
   useGetCurrentUserQuery: jest.fn(),
 }))
 
+jest.mock('@common/api/domainApi/domain.api', () => ({
+  useGetDomainsQuery: jest.fn(() => ({ data: [] })),
+}))
+
 jest.mock('@common/api/customServicesApi/customServices.api', () => ({
   useGetCustomServicesQuery: jest.fn(() => ({ data: { data: [] } })),
 }))
@@ -76,7 +80,7 @@ const { useGetCurrentUserQuery } = jest.requireMock(
 )
 
 const makeProps = (overrides: Record<string, any> = {}) => ({
-  setCurrentDateFilter: jest.fn(),
+  onDateRangeChange: jest.fn(),
   currentPayment: {},
   paymentActions: { edit: false, preview: false },
   closeEditModal: jest.fn(),
@@ -144,7 +148,7 @@ describe('PaymentCardHeader — кнопка "Оновити"', () => {
     fireEvent.click(screen.getByText('Оновити'))
 
     expect(props.setFilters).not.toHaveBeenCalled()
-    expect(props.setCurrentDateFilter).not.toHaveBeenCalled()
+    expect(props.onDateRangeChange).not.toHaveBeenCalled()
     expect(props.setSelectedPayments).not.toHaveBeenCalled()
     expect(props.setPaymentsDeleteItems).not.toHaveBeenCalled()
   })

@@ -3,24 +3,61 @@ const skipMock = jest.fn().mockReturnThis()
 const limitMock = jest.fn().mockReturnThis()
 const populateMock = jest.fn().mockReturnThis()
 const leanMock = jest.fn().mockResolvedValue([])
-const findMock = jest.fn(() => ({
+const findChain: any = {
   sort: sortMock,
   skip: skipMock,
   limit: limitMock,
   populate: populateMock,
   lean: leanMock,
-}))
+  then: (onFulfilled: any, onRejected: any) =>
+    Promise.resolve([]).then(onFulfilled, onRejected),
+}
+let lastFindFilter: any
+const findMock = jest.fn((conditions?: any) => {
+  lastFindFilter = conditions
+  return findChain
+})
+findChain.cast = jest.fn(() => lastFindFilter)
+const aggregateMock = jest.fn().mockResolvedValue([])
 
 jest.mock('@modules/models/Payment', () => ({
   __esModule: true,
   default: {
     create: jest.fn(),
     find: findMock,
-    aggregate: jest.fn().mockResolvedValue([]),
+    aggregate: aggregateMock,
     countDocuments: jest.fn().mockResolvedValue(0),
     distinct: jest.fn().mockResolvedValue([]),
   },
 }))
+
+// The invoice-number counter, kept in memory: $max raises it, $inc hands out
+// the next values - the same contract the Mongo counter has.
+let mockCounterSeq: number | null = null
+jest.mock('@modules/models/Counter', () => ({
+  __esModule: true,
+  default: {
+    findById: jest.fn(() => ({
+      lean: () =>
+        Promise.resolve(
+          mockCounterSeq === null ? null : { seq: mockCounterSeq }
+        ),
+    })),
+    updateOne: jest.fn((_filter: unknown, update: any) => {
+      mockCounterSeq = Math.max(mockCounterSeq ?? 0, update.$max?.seq ?? 0)
+      return Promise.resolve()
+    }),
+    findOneAndUpdate: jest.fn((_filter: unknown, update: any) => {
+      mockCounterSeq = (mockCounterSeq ?? 0) + update.$inc.seq
+      const seq = mockCounterSeq
+      return { lean: () => Promise.resolve({ seq }) }
+    }),
+  },
+}))
+
+beforeEach(() => {
+  mockCounterSeq = null
+})
 
 jest.mock('@utils/email/sendInvoiceEmail', () => ({
   sendInvoiceEmail: jest.fn(),
@@ -47,6 +84,7 @@ jest.mock('@modules/models/Service', () => ({
 }))
 
 jest.mock('@pages/api/spacehub/payment/pipelines', () => ({
+  getPaymentsOrderPipeline: jest.fn(() => [{ $match: 'ordered' }]),
   getCreditDebitPipeline: jest.fn(),
   getMaxInvoiceNumber: jest.fn(() => [
     { $group: { _id: null, maxNumber: { $max: '$invoiceNumber' } } },
@@ -75,6 +113,7 @@ import {
   getNextInvoiceNumber,
   getPayments,
 } from './payment.service'
+import { getPaymentsOrderPipeline } from '@pages/api/spacehub/payment/pipelines'
 import { SortOrder, Operations } from '@utils/constants'
 import { PaymentStatus } from '@common/api/paymentApi/payment.api.types'
 
@@ -92,13 +131,51 @@ const globalAdminContext = {
 describe('getPayments — sorting', () => {
   beforeEach(() => jest.clearAllMocks())
 
-  it('passes correct sort params to MongoDB', async () => {
-    await getPayments({}, globalAdminContext)
-    expect(sortMock).toHaveBeenCalledWith({
-      invoiceCreationDate: SortOrder.DESC,
-      type: SortOrder.ASC,
-      _id: SortOrder.ASC,
+  it('orders the page through the aggregation, not find().sort()', async () => {
+    await getPayments({ skip: '20', limit: '10' }, globalAdminContext)
+
+    // find() no longer carries the ordering - a calendar-day bucket cannot be
+    // expressed as a plain sort spec.
+    expect(sortMock).not.toHaveBeenCalled()
+    expect(skipMock).not.toHaveBeenCalled()
+    expect(limitMock).not.toHaveBeenCalled()
+
+    expect(getPaymentsOrderPipeline).toHaveBeenCalledWith(expect.any(Object), {
+      skip: '20',
+      limit: '10',
     })
+    expect(aggregateMock).toHaveBeenCalledWith([{ $match: 'ordered' }])
+  })
+
+  it('hydrates exactly the ids the ordering pipeline returned', async () => {
+    const ids = ['aaa', 'bbb']
+    aggregateMock.mockResolvedValueOnce(ids.map((_id) => ({ _id })))
+
+    await getPayments({}, globalAdminContext)
+
+    expect(findMock).toHaveBeenCalledWith({ _id: { $in: ids } })
+  })
+
+  it('restores the pipeline order that find({ $in }) does not preserve', async () => {
+    const credit = { _id: 'credit-id', type: Operations.Credit }
+    const debit = { _id: 'debit-id', type: Operations.Debit }
+
+    aggregateMock.mockResolvedValueOnce([
+      { _id: credit._id },
+      { _id: debit._id },
+    ])
+    findChain.then = (onFulfilled: any, onRejected: any) =>
+      Promise.resolve([debit, credit]).then(onFulfilled, onRejected)
+
+    const result = await getPayments({}, globalAdminContext)
+
+    expect(result.data.map((payment: any) => payment.type)).toEqual([
+      Operations.Credit,
+      Operations.Debit,
+    ])
+
+    findChain.then = (onFulfilled: any, onRejected: any) =>
+      Promise.resolve([]).then(onFulfilled, onRejected)
   })
 
   it('SortOrder.ASC on type puts credit before debit (alphabetical invariant)', () => {
@@ -112,7 +189,8 @@ describe('getPayments — sorting', () => {
 describe('getPayments — period filtering by dateField', () => {
   beforeEach(() => jest.clearAllMocks())
 
-  const filterOf = () => (findMock as jest.Mock).mock.calls[0][0]
+  const filterOf = () =>
+    (getPaymentsOrderPipeline as jest.Mock).mock.calls[0][0]
 
   it('filters on invoiceCreationDate by default', async () => {
     await getPayments({ year: 2026, month: 6 }, globalAdminContext)
@@ -198,7 +276,8 @@ describe('getPayments — period filtering by dateField', () => {
 describe('getPayments — status filtering', () => {
   beforeEach(() => jest.clearAllMocks())
 
-  const filterOf = () => (findMock as jest.Mock).mock.calls[0][0]
+  const filterOf = () =>
+    (getPaymentsOrderPipeline as jest.Mock).mock.calls[0][0]
 
   it('applies no $or when status is omitted', async () => {
     await getPayments({}, globalAdminContext)
@@ -425,6 +504,43 @@ describe('createPayment', () => {
   })
 })
 
+describe('createPayment numbering', () => {
+  const aggregateMock = Payment.aggregate as jest.Mock
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    paymentCreateMock.mockImplementation((data: any) => Promise.resolve(data))
+  })
+
+  // clearAllMocks keeps implementations; put the shared default back.
+  afterEach(() => {
+    aggregateMock.mockResolvedValue([])
+  })
+
+  it('ignores the number the client sent and gives the next free one', async () => {
+    aggregateMock.mockResolvedValue([{ maxNumber: 40 }])
+
+    await createPayment({ type: 'credit', invoiceNumber: 5 }, true)
+    await createPayment({ type: 'credit', invoiceNumber: 5 }, true)
+
+    expect(
+      paymentCreateMock.mock.calls.map(([data]) => data.invoiceNumber)
+    ).toEqual([41, 42])
+  })
+
+  it('starts above a number set by hand on an existing invoice', async () => {
+    aggregateMock.mockResolvedValueOnce([{ maxNumber: 40 }])
+    await createPayment({ type: 'credit' }, true)
+    // Someone edited an invoice to 900 in the meantime.
+    aggregateMock.mockResolvedValueOnce([{ maxNumber: 900 }])
+    await createPayment({ type: 'credit' }, true)
+
+    expect(
+      paymentCreateMock.mock.calls.map(([data]) => data.invoiceNumber)
+    ).toEqual([41, 901])
+  })
+})
+
 describe('getNextInvoiceNumber', () => {
   const aggregateMock = Payment.aggregate as jest.Mock
 
@@ -502,7 +618,7 @@ describe('duplicatePayments', () => {
     )
   })
 
-  it('clones each source, assigns sequential invoice numbers from one base, and never emails', async () => {
+  it('clones each source, gives each copy its own next number, and never emails', async () => {
     aggregateMock.mockResolvedValueOnce([{ maxNumber: 100 }])
     paymentFindMock.mockResolvedValue([
       makeSource('src-1', 'domain-1'),
@@ -531,8 +647,6 @@ describe('duplicatePayments', () => {
     expect(firstBody.generalSum).toBe(500)
     expect(firstBody.description).toBe('original')
 
-    // base invoice number resolved once, not once per payment
-    expect(aggregateMock).toHaveBeenCalledTimes(1)
     expect(sendInvoiceEmailMock).not.toHaveBeenCalled()
   })
 
@@ -562,9 +676,10 @@ describe('duplicatePayments', () => {
     const result = await duplicatePayments(['src-1', 'src-2'], globalPerms)
 
     expect(result.skippedIds).toContain('src-1')
-    expect(result.createdIds).toEqual(['new-201'])
-    // the failed number is reused (not burned): the second duplicate also gets 201
-    expect(paymentCreateMock.mock.calls[1][0].invoiceNumber).toBe(201)
+    // Numbers are handed out atomically before the write, so a failed copy
+    // leaves a gap (201) rather than risking two invoices sharing a number.
+    expect(result.createdIds).toEqual(['new-202'])
+    expect(paymentCreateMock.mock.calls[1][0].invoiceNumber).toBe(202)
 
     consoleErrorSpy.mockRestore()
   })

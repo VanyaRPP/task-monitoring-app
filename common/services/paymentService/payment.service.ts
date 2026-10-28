@@ -1,20 +1,22 @@
 import Domain from '@modules/models/Domain'
+import Counter from '@modules/models/Counter'
 import Payment from '@modules/models/Payment'
 import RealEstate from '@modules/models/RealEstate'
 import Service from '@modules/models/Service'
 import {
   getCreditDebitPipeline,
   getMaxInvoiceNumber,
+  getPaymentsOrderPipeline,
   getServiceTotalsPipeline,
   getTotalGeneralSumPipeline,
 } from '@pages/api/spacehub/payment/pipelines'
-import { quarters, SortOrder } from '@utils/constants'
+import { quarters } from '@utils/constants'
 import {
   sendInvoiceEmail,
   type InvoiceEmailPayment,
 } from '@utils/email/sendInvoiceEmail'
 import { PaymentStatus } from '@common/api/paymentApi/payment.api.types'
-import { FilterQuery } from 'mongoose'
+import mongoose, { FilterQuery } from 'mongoose'
 import { isDev } from '@utils/env'
 
 function isEmailDebugEnabled() {
@@ -61,6 +63,8 @@ export interface PaymentQueryParams {
   quarter?: string | number
   day?: string | number
   dateField?: 'invoiceCreationDate' | 'date' | 'paidAt'
+  dateFrom?: string
+  dateTo?: string
 }
 
 export interface UserContext {
@@ -69,6 +73,21 @@ export interface UserContext {
   isGlobalAdmin: boolean
   user: {
     email: string
+  }
+}
+
+/**
+ * `monthService` is a Mixed field: saved through the API it holds the id as a
+ * string, but older or server-written payments may hold an ObjectId - and a
+ * Mixed field is never cast, so a string filter alone skips those. Match both.
+ */
+function anyMonthServiceId(ids: string[]) {
+  return {
+    $in: ids.flatMap((id) =>
+      mongoose.isValidObjectId(id)
+        ? [id, new mongoose.Types.ObjectId(id)]
+        : [id]
+    ),
   }
 }
 
@@ -207,7 +226,15 @@ export async function getPayments(
   }
   // TODO: add security
   if (servicesIds) {
-    options.monthService = { $in: servicesIds }
+    options.monthService = anyMonthServiceId(servicesIds)
+  }
+
+  const invoiceDateRange = invoiceDateRangeCondition(
+    reqQuery.dateFrom,
+    reqQuery.dateTo
+  )
+  if (invoiceDateRange) {
+    options.invoiceCreationDate = invoiceDateRange
   }
 
   const expr = filterPeriodOptions(reqQuery)
@@ -230,7 +257,7 @@ export async function getPayments(
       })
 
       options.$or = [
-        { monthService: { $in: serviceIds } },
+        { monthService: anyMonthServiceId(serviceIds) },
         {
           $and: [
             {
@@ -248,34 +275,40 @@ export async function getPayments(
     }
   }
 
-  const payments = await Payment.find(options)
-    .sort({
-      invoiceCreationDate: SortOrder.DESC,
-      type: SortOrder.ASC,
-      _id: SortOrder.ASC,
-    })
-    .skip(+skip)
-    .limit(+limit)
+  const filter = Payment.find(options).cast(Payment)
+
+  const orderedIds = (
+    await Payment.aggregate(getPaymentsOrderPipeline(filter, { skip, limit }))
+  ).map(({ _id }) => _id)
+
+  const unorderedPayments = await Payment.find({ _id: { $in: orderedIds } })
     .populate('company')
     .populate('street')
     // bank tokens are admin-only: never ship them inside an embedded domain
     .populate('domain', '-domainBankToken')
     .populate('monthService')
 
-  const total = await Payment.countDocuments(options)
+  const paymentById = new Map(
+    unorderedPayments.map((payment) => [payment._id.toString(), payment])
+  )
+  const payments = orderedIds
+    .map((id) => paymentById.get(id.toString()))
+    .filter(Boolean)
+
+  const total = await Payment.countDocuments(filter)
 
   const [distinctDomainIds, distinctCompanyIds] = await Promise.all([
-    Payment.distinct('domain', options),
-    Payment.distinct('company', options),
+    Payment.distinct('domain', filter),
+    Payment.distinct('company', filter),
   ])
 
-  const creditDebitPipeline = getCreditDebitPipeline(options)
+  const creditDebitPipeline = getCreditDebitPipeline(filter)
   const totalPayments = await Payment.aggregate(creditDebitPipeline)
 
-  const genralSumPipeline = getTotalGeneralSumPipeline(options)
+  const genralSumPipeline = getTotalGeneralSumPipeline(filter)
   const totalGeneralSum = await Payment.aggregate(genralSumPipeline)
 
-  const serviceTotalsPipeline = getServiceTotalsPipeline(options)
+  const serviceTotalsPipeline = getServiceTotalsPipeline(filter)
   const serviceTotals = await Payment.aggregate(serviceTotalsPipeline)
 
   const totalPaymentsData = [
@@ -296,11 +329,62 @@ export async function getPayments(
   }
 }
 
-export async function getNextInvoiceNumber(): Promise<number> {
+const INVOICE_COUNTER_ID = 'invoiceNumber'
+
+async function getMaxUsedInvoiceNumber(): Promise<number> {
   const result = (await Payment.aggregate(getMaxInvoiceNumber())) as Array<{
     maxNumber?: number
   }>
-  return (result[0]?.maxNumber ?? 0) + 1
+  return Number(result[0]?.maxNumber) || 0
+}
+
+/**
+ * The number the next invoice will most likely get - for showing in a form
+ * before it is saved. Not reserved: the real one is given out on save by
+ * reserveInvoiceNumbers, and may differ if someone else saves first.
+ */
+export async function getNextInvoiceNumber(): Promise<number> {
+  const [maxUsed, counter] = await Promise.all([
+    getMaxUsedInvoiceNumber(),
+    Counter.findById(INVOICE_COUNTER_ID).lean(),
+  ])
+  return Math.max(maxUsed, counter?.seq ?? 0) + 1
+}
+
+/**
+ * Reserves `count` consecutive invoice numbers and returns the first.
+ *
+ * Numbers used to be "max + 1" read by the browser when a form opened, so two
+ * invoices saved close together got the same number. Now they are handed out
+ * only here, on the server, at save time, by an atomic `$inc` on a counter.
+ * The counter is first raised to the highest number already in use, so it
+ * starts after existing data and skips past numbers edited in by hand.
+ */
+export async function reserveInvoiceNumbers(count = 1): Promise<number> {
+  const maxUsed = await getMaxUsedInvoiceNumber()
+
+  try {
+    await Counter.updateOne(
+      { _id: INVOICE_COUNTER_ID },
+      { $max: { seq: maxUsed } },
+      { upsert: true }
+    )
+  } catch (error: any) {
+    // Two first-ever reservations racing to create the counter: one upsert
+    // loses with a duplicate key, and the document now exists - raise it.
+    if (error?.code !== 11000) throw error
+    await Counter.updateOne(
+      { _id: INVOICE_COUNTER_ID },
+      { $max: { seq: maxUsed } }
+    )
+  }
+
+  const counter = await Counter.findOneAndUpdate(
+    { _id: INVOICE_COUNTER_ID },
+    { $inc: { seq: count } },
+    { new: true }
+  ).lean()
+  return counter.seq - count + 1
 }
 
 export async function createPayment(
@@ -313,7 +397,12 @@ export async function createPayment(
   // Renamed locally to avoid shadowing the imported `sendInvoiceEmail` function.
   const { sendInvoiceEmail: shouldSendInvoiceEmail = true } = options
 
-  const payment = await Payment.create(body)
+  // The number is the server's to give, at save time - whatever the client
+  // showed in the form was only a preview.
+  const payment = await Payment.create({
+    ...body,
+    invoiceNumber: await reserveInvoiceNumbers(),
+  })
 
   if (shouldSendInvoiceEmail && payment.type === 'debit') {
     try {
@@ -419,8 +508,6 @@ export async function duplicatePayments(
 
   // Resolve the next invoice number once and increment locally, instead of
   // running a `$max` aggregation per payment inside the loop.
-  let nextInvoiceNumber = await getNextInvoiceNumber()
-
   for (const source of sources) {
     const domainId = source.domain ? source.domain.toString() : null
     if (allowedDomainIds && (!domainId || !allowedDomainIds.has(domainId))) {
@@ -432,7 +519,7 @@ export async function duplicatePayments(
     for (const field of NON_COPYABLE_PAYMENT_FIELDS) {
       delete body[field]
     }
-    body.invoiceNumber = nextInvoiceNumber
+    // createPayment gives the copy its own number.
     body.invoiceCreationDate = new Date()
 
     try {
@@ -440,9 +527,6 @@ export async function duplicatePayments(
         sendInvoiceEmail: false,
       })
       createdIds.push(created.id.toString())
-      // Only advance the counter once the payment actually persisted, so a
-      // failed create leaves the number free for the next duplicate.
-      nextInvoiceNumber += 1
     } catch (error) {
       console.error('[payment-duplicate] create_failed', {
         sourceId: source._id.toString(),
@@ -460,6 +544,28 @@ export async function duplicatePayments(
     createdIds,
     skippedIds: [...skippedIds, ...notFoundIds],
     totalRequested: ids.length,
+  }
+}
+
+/**
+ * `dateFrom`/`dateTo` are ISO instants (the client already turned calendar
+ * days into the viewer's day boundaries). Invalid bounds are ignored.
+ */
+export function invoiceDateRangeCondition(
+  dateFrom?: string,
+  dateTo?: string
+): { $gte?: Date; $lte?: Date } | null {
+  const toDate = (value?: string) => {
+    if (!value || typeof value !== 'string') return null
+    const date = new Date(value)
+    return isNaN(date.getTime()) ? null : date
+  }
+  const from = toDate(dateFrom)
+  const to = toDate(dateTo)
+  if (!from && !to) return null
+  return {
+    ...(from ? { $gte: from } : {}),
+    ...(to ? { $lte: to } : {}),
   }
 }
 

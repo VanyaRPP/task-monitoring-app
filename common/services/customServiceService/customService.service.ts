@@ -633,3 +633,95 @@ export function collectReferencedServiceIds(
     )
   )
 }
+
+/**
+ * Sanitises a client-supplied `disabledServiceIds` list into unique, valid
+ * ObjectId strings. Returns `undefined` when the field wasn't sent at all, so
+ * a PATCH that doesn't carry it leaves the stored list untouched.
+ */
+export function normalizeDisabledServiceIds(
+  raw: unknown
+): string[] | undefined {
+  if (raw === undefined) return undefined
+  if (!Array.isArray(raw)) return []
+  return Array.from(
+    new Set(
+      raw
+        .map((id) => String(id))
+        .filter((id) => mongoose.Types.ObjectId.isValid(id))
+    )
+  )
+}
+
+export interface DomainServiceAvailabilityOptions {
+  disabledServiceIds?: unknown[]
+  includeDisabled?: boolean
+}
+
+/**
+ * Applies a domain's per-service on/off switches to its assembled catalog.
+ * Every service gets an `isEnabled` flag; disabled ones are dropped unless
+ * `includeDisabled` is set. Named groups are kept even when emptied, the
+ * synthetic ungrouped bucket (`groupName: null`) only while non-empty.
+ */
+export function applyDomainServiceAvailability(
+  groups: DomainServiceGroup[],
+  { disabledServiceIds, includeDisabled }: DomainServiceAvailabilityOptions
+): DomainServiceGroup[] {
+  const disabled = new Set((disabledServiceIds ?? []).map(String))
+
+  return groups
+    .map((group) => ({
+      ...group,
+      services: group.services
+        .map((service) => ({
+          ...service,
+          isEnabled: !disabled.has(String(service._id)),
+        }))
+        .filter((service) => includeDisabled || service.isEnabled),
+    }))
+    .filter((group) => group.groupName !== null || group.services.length > 0)
+}
+
+/**
+ * A domain's service catalog (groups of full service documents), or `null`
+ * when the domain does not exist. The same data GET /custom-services/domain
+ * returns; also used server-side to filter invoice lines the way the payment
+ * form does.
+ */
+export async function getDomainServiceCatalog(
+  domainId: string,
+  { includeDisabled = false }: { includeDisabled?: boolean } = {}
+): Promise<DomainServiceGroup[] | null> {
+  const domain = await Domain.findById(domainId).lean()
+  if (!domain) return null
+
+  // CustomServices scoped to this domain — the per-domain catalog. Used both to
+  // resolve group members and to expose un-grouped services as a synthetic
+  // bucket so the rest of the system (Payment Bulk, RealEstateModal, invoice)
+  // can use them just like grouped ones.
+  const allDomainServices = (await CustomService.find({
+    domain: domainId,
+  }).lean()) as LeanCustomService[]
+
+  // Group ids can reference shared/seeded services (e.g. utility services
+  // attached via a DomainTypeTemplate) that have no `domain` ref, so the
+  // domain-scoped query above misses them. Fetch those explicitly by _id.
+  const referencedIds = collectReferencedServiceIds(
+    domain.customServices as any
+  )
+  const referencedServices = (
+    referencedIds.length
+      ? await CustomService.find({ _id: { $in: referencedIds } }).lean()
+      : []
+  ) as LeanCustomService[]
+
+  return applyDomainServiceAvailability(
+    assembleDomainServiceCatalog(
+      domain.customServices as any,
+      allDomainServices,
+      referencedServices
+    ),
+    { disabledServiceIds: domain.disabledServiceIds, includeDisabled }
+  )
+}

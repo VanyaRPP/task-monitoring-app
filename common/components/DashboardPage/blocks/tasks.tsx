@@ -2,6 +2,7 @@ import { SelectOutlined } from '@ant-design/icons'
 import { TaskButton } from '@components/UI/Buttons'
 import StatusTag from '@components/UI/StatusTag'
 import TableCard from '@components/UI/TableCard'
+import { TruncatedText } from '@components/UI/TruncatedText'
 import { AppRoutes, TaskStatuses } from '@utils/constants'
 import { Button, Table } from 'antd'
 import dayjs from 'dayjs'
@@ -50,7 +51,7 @@ const Tasks = () => {
       key: 'name',
       width: '20%',
       ellipsis: true,
-      render: (text) => text,
+      render: (text) => <TruncatedText text={text} />,
     },
     {
       title: 'Адреса',

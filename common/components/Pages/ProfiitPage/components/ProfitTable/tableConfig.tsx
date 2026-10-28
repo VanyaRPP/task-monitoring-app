@@ -11,6 +11,9 @@ import { Button, Popconfirm, Space, Tag, Tooltip, Typography } from 'antd'
 import { EyeOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import type { GlobalToken } from 'antd'
 import { Operations } from '@utils/constants'
+import type { IProfitItem } from '@utils/profit-items'
+import { useMemo, useState } from 'react'
+import s from './style.module.scss'
 
 const { Text } = Typography
 
@@ -81,6 +84,58 @@ export const MoneyCell: React.FC<{
   )
 }
 
+// A receipt with dozens of lines made its row as tall as the screen.
+const ITEMS_COLLAPSED_LIMIT = 8
+
+/**
+ * One tag per line with its own amount - that split is the point of entering
+ * a receipt as lines. Biggest first, so the collapsed view shows what the
+ * money actually went on.
+ */
+export const ProfitItemsCell: React.FC<{
+  items: IProfitItem[]
+  currency?: string
+}> = ({ items, currency }) => {
+  const [expanded, setExpanded] = useState(false)
+  const sorted = useMemo(
+    () => [...items].sort((a, b) => b.amount - a.amount),
+    [items]
+  )
+  const hidden = sorted.length - ITEMS_COLLAPSED_LIMIT
+  const visible =
+    expanded || hidden <= 0 ? sorted : sorted.slice(0, ITEMS_COLLAPSED_LIMIT)
+
+  return (
+    <div className={s.items}>
+      {visible.map((item, index) => (
+        <Tooltip key={index} title={item.description}>
+          <Tag className={s.itemTag}>
+            <span className={s.itemCategory}>
+              {item.category ||
+                t('dashboard.uncategorized', { ns: 'profitPage' })}
+            </span>
+            <Text type="secondary" style={numericCell}>
+              {getCurrencySymbol(currency)} {money(item.amount)}
+            </Text>
+          </Tag>
+        </Tooltip>
+      ))}
+      {hidden > 0 && (
+        <Button
+          type="link"
+          size="small"
+          className={s.itemsToggle}
+          onClick={() => setExpanded((v) => !v)}
+        >
+          {expanded
+            ? t('table.child.showLess', { ns: 'profitPage' })
+            : t('table.child.showMore', { ns: 'profitPage', count: hidden })}
+        </Button>
+      )}
+    </div>
+  )
+}
+
 /**
  * `onDrill` opens the list of payments behind a figure. Only the two income
  * columns get it - expenses are already itemised in the expandable row.
@@ -123,12 +178,14 @@ export const sumRowsByCurrency = (rows: readonly ProfitMonthRow[]) => {
       const dst = (byCurrency[currency] ??= {
         expected: 0,
         actual: 0,
+        income: 0,
         expenses: 0,
         outstanding: 0,
         net: 0,
       })
       dst.expected += src.expected
       dst.actual += src.actual
+      dst.income += src.income
       dst.expenses += src.expenses
       dst.outstanding += src.outstanding
       dst.net += src.net
@@ -273,10 +330,30 @@ export const getParentColumns = (
       ),
     },
     {
+      // Hand-entered credits. For a company this is the ONLY inflow the
+      // billing model gives it, so it is the column that stops every figure
+      // on the page from being an outflow; it used to be folded into
+      // `actual`, i.e. filed under an expense heading.
+      title: (
+        <Tooltip title={t('table.parent.incomeHint', { ns: 'profitPage' })}>
+          <span>
+            {t(
+              isDomain ? 'table.parent.income' : 'table.parent.incomeCompany',
+              { ns: 'profitPage' }
+            )}
+          </span>
+        </Tooltip>
+      ),
+      key: 'income',
+      width: 170,
+      align: 'right',
+      render: (_, record) => <MoneyCell row={record} pick={(c) => c.income} />,
+    },
+    {
       // The only figure with a good/bad direction, so the only one we colour.
-      // For a company this is not "profit" - a client has no income side in
-      // this model - so it is a negated total outflow instead (see
-      // ProfitService.getLedgerFor), always <= 0, labelled accordingly.
+      // A company's invoices are outflows, so its net is
+      // income - actual - expenses (see ProfitService.getLedgerFor): it can
+      // go positive, but only on the back of real recorded income.
       title: t(isDomain ? 'table.parent.net' : 'table.parent.netCompany', {
         ns: 'profitPage',
       }),
@@ -333,17 +410,27 @@ export const getChildColumns = (
     title: t('table.child.description', { ns: 'profitPage' }),
     dataIndex: 'description',
     key: 'description',
+    // Usually one short line; the free width goes to the categories instead.
+    width: 220,
     ellipsis: true,
     render: (description: string) =>
-      description || <Text type="secondary">—</Text>,
+      description ? (
+        <Tooltip title={description} placement="topLeft">
+          <span>{description}</span>
+        </Tooltip>
+      ) : (
+        <Text type="secondary">—</Text>
+      ),
   },
   {
     title: t('table.child.categories', { ns: 'profitPage' }),
     dataIndex: 'categories',
     key: 'categories',
-    width: 220,
-    render: (cats: string[]) =>
-      cats?.length ? (
+    // No width: takes whatever the fixed columns leave over.
+    render: (cats: string[], record) =>
+      record.items?.length ? (
+        <ProfitItemsCell items={record.items} currency={record.currency} />
+      ) : cats?.length ? (
         <Space size={[4, 4]} wrap>
           {cats.map((cat) => (
             <Tag key={cat} style={{ marginInlineEnd: 0 }}>
@@ -376,43 +463,72 @@ export const getChildColumns = (
     key: 'action',
     align: 'right',
     width: 120,
-    // Three actions do not need a dropdown - inline icons cost one click
-    // instead of two and stay visible.
     render: (_, record) => (
-      <Space size={0}>
-        <Tooltip title={t('actions.preview', { ns: 'profitPage' })}>
-          <Button
-            type="text"
-            icon={<EyeOutlined />}
-            onClick={() => onPreview(record)}
-            aria-label={t('actions.preview', { ns: 'profitPage' })}
-          />
-        </Tooltip>
-        <Tooltip title={t('actions.edit', { ns: 'profitPage' })}>
-          <Button
-            type="text"
-            icon={<EditOutlined />}
-            onClick={() => onEdit(record)}
-            aria-label={t('actions.edit', { ns: 'profitPage' })}
-          />
-        </Tooltip>
-        <Popconfirm
-          title={t('prompts.confirmDelete', { ns: 'profitPage' })}
-          onConfirm={() => onDelete(record._id)}
-          okText={t('actions.delete', { ns: 'profitPage' })}
-          cancelText={t('actions.cancel', { ns: 'profitPage' })}
-          okButtonProps={{ danger: true, loading: isDeleting }}
-        >
-          <Tooltip title={t('actions.delete', { ns: 'profitPage' })}>
-            <Button
-              type="text"
-              danger
-              icon={<DeleteOutlined />}
-              aria-label={t('actions.delete', { ns: 'profitPage' })}
-            />
-          </Tooltip>
-        </Popconfirm>
-      </Space>
+      <RecordActions
+        record={record}
+        onPreview={onPreview}
+        onEdit={onEdit}
+        onDelete={onDelete}
+        isDeleting={isDeleting}
+      />
     ),
   },
 ]
+
+/**
+ * Three actions do not need a dropdown - inline icons cost one click instead
+ * of two and stay visible. `canDelete` is off for a single line of a
+ * multi-line receipt: deleting it would silently remove the whole receipt.
+ */
+export const RecordActions: React.FC<{
+  record: Profit
+  onPreview: (record: Profit) => void
+  onEdit: (record: Profit) => void
+  onDelete: (id: string) => void
+  isDeleting: boolean
+  canDelete?: boolean
+}> = ({
+  record,
+  onPreview,
+  onEdit,
+  onDelete,
+  isDeleting,
+  canDelete = true,
+}) => (
+  <Space size={0}>
+    <Tooltip title={t('actions.preview', { ns: 'profitPage' })}>
+      <Button
+        type="text"
+        icon={<EyeOutlined />}
+        onClick={() => onPreview(record)}
+        aria-label={t('actions.preview', { ns: 'profitPage' })}
+      />
+    </Tooltip>
+    <Tooltip title={t('actions.edit', { ns: 'profitPage' })}>
+      <Button
+        type="text"
+        icon={<EditOutlined />}
+        onClick={() => onEdit(record)}
+        aria-label={t('actions.edit', { ns: 'profitPage' })}
+      />
+    </Tooltip>
+    {canDelete && (
+      <Popconfirm
+        title={t('prompts.confirmDelete', { ns: 'profitPage' })}
+        onConfirm={() => onDelete(record._id)}
+        okText={t('actions.delete', { ns: 'profitPage' })}
+        cancelText={t('actions.cancel', { ns: 'profitPage' })}
+        okButtonProps={{ danger: true, loading: isDeleting }}
+      >
+        <Tooltip title={t('actions.delete', { ns: 'profitPage' })}>
+          <Button
+            type="text"
+            danger
+            icon={<DeleteOutlined />}
+            aria-label={t('actions.delete', { ns: 'profitPage' })}
+          />
+        </Tooltip>
+      </Popconfirm>
+    )}
+  </Space>
+)

@@ -4,7 +4,18 @@ import { getCurrentUser } from '@utils/getCurrentUser'
 import { SYSTEM_PROMPT } from '@common/services/aiAssistant/prompt'
 import { AI_MAX_STEPS, getModel } from '@common/services/aiAssistant/config'
 import { buildAssistantTools } from '@common/services/aiAssistant/tools'
+import { withoutPhotos } from '@common/services/aiAssistant/documents'
+import {
+  recentMessages,
+  withoutDrafts,
+} from '@common/services/aiAssistant/history'
+import {
+  DOCUMENT_BATCH_PART,
+  type IDocumentBatchPart,
+} from '@common/services/aiAssistant/documents/types'
 import type { UserContext } from '@common/services/paymentService/payment.service'
+import { describeChatError } from '@common/services/aiAssistant/chatErrors'
+import { previewOpened } from '@common/services/aiAssistant/previewReply'
 
 export const config = {
   api: {
@@ -48,9 +59,6 @@ export default async function handler(
       return
     }
 
-    // Resolves the active provider's model; throws if its API key is missing.
-    const model = getModel()
-
     const userContext: UserContext = {
       isUser: ctx.isUser,
       isDomainAdmin: ctx.isDomainAdmin,
@@ -58,21 +66,58 @@ export default async function handler(
       user: { email: ctx.user.email },
     }
 
-    const modelMessages = await convertToModelMessages(uiMessages)
+    // Resolves the active provider's model; throws if its API key is missing.
+    const model = getModel()
+
+    const modelMessages = await convertToModelMessages(
+      withoutDrafts(withoutPhotos(recentMessages(uiMessages))),
+      {
+        // Photos are read by the widget, outside this route; the model learns
+        // what they held from the batch summary.
+        convertDataPart: (part) =>
+          part.type === `data-${DOCUMENT_BATCH_PART}`
+            ? {
+                type: 'text',
+                text:
+                  (part.data as IDocumentBatchPart)?.summary ??
+                  '[Фото документів ще обробляються]',
+              }
+            : undefined,
+      }
+    )
+
+    // "Stop" in the widget aborts the fetch; stop generating (and paying for)
+    // the rest of the answer once the client is gone.
+    const abortController = new AbortController()
+    res.on('close', () => {
+      if (!res.writableFinished) abortController.abort()
+    })
 
     const result = streamText({
       model,
       system: SYSTEM_PROMPT,
       messages: modelMessages,
       tools: buildAssistantTools(userContext),
+      abortSignal: abortController.signal,
       // Without this the SDK stops after the first step (a tool call) and never
       // produces a textual answer. Allow a few steps so the model can call a
       // tool and then respond based on its result.
-      stopWhen: stepCountIs(AI_MAX_STEPS),
+      // A form opened is the end of the turn: the widget writes the reply
+      // from the tool's summary, saving a whole request (see previewReply).
+      stopWhen: [stepCountIs(AI_MAX_STEPS), previewOpened],
+      // No waiting out a rate limit: the SDK would sleep up to a minute per
+      // retry on Groq's retry-after, and production cuts a request at 30s
+      // with an empty 500. A limit hit is reported to the user instead.
+      maxRetries: 0,
     })
 
     res.socket?.setNoDelay(true)
-    result.pipeUIMessageStreamToResponse(res)
+    result.pipeUIMessageStreamToResponse(res, {
+      onError: (error) => {
+        console.error('AI Chat stream error:', error)
+        return describeChatError(error)
+      },
+    })
   } catch (error: any) {
     console.error('AI Chat API Error:', error)
     res.status(500).json({ error: error.message || 'Internal Server Error' })

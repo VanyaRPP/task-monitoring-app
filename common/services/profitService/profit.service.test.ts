@@ -266,15 +266,22 @@ describe('ProfitService.getByDomainWithMonthSeparation', () => {
     })
   })
 
-  it('counts hand-entered income towards the actual figure', async () => {
-    paymentAggregate.mockResolvedValue([income(2026, 6, 0, 1000)])
+  // A hand-entered credit is income, but it is not a client settling an
+  // invoice. Folding it into `actual` inflated the collection rate, shrank
+  // `outstanding`, and on a company - where `actual` reads as money paid out
+  // - filed income under an expense heading. It gets its own figure; only
+  // `net` adds the two together.
+  it('keeps hand-entered income out of the collected figure', async () => {
+    paymentAggregate.mockResolvedValue([income(2026, 6, 1000, 1000)])
     aggregate.mockResolvedValue([expense('2026-06', 200, 500)])
 
     const result = await ProfitService.getByDomainWithMonthSeparation(domainId)
 
     expect(result.data['2026-06'].byCurrency.UAH).toMatchObject({
-      actual: 1500,
+      actual: 1000,
+      income: 500,
       expenses: 200,
+      outstanding: 0,
       net: 1300,
     })
   })
@@ -495,11 +502,10 @@ describe('ProfitService.getByCompanyWithMonthSeparation', () => {
     })
   })
 
-  // A company has no income side in this billing model - `actual` is money
-  // it paid OUT, not money it earned - so `actual - expenses` would label an
-  // outflow as "profit". This is the regression guard for that: `net` must
-  // be a negated total outflow instead, always <= 0.
-  it('computes net as a negated total outflow, not actual minus expenses', async () => {
+  // A company's invoices are money it PAID OUT, not money it earned, so the
+  // domain formula would label an outflow as "profit". Its net subtracts both
+  // outflows from the one inflow it has: hand-entered income.
+  it('treats a paid invoice as an outflow when computing a company net', async () => {
     paymentAggregate.mockResolvedValue([income(2026, 6, 15000, 12000)])
     aggregate.mockResolvedValue([expense('2026-06', 4000)])
 
@@ -511,7 +517,25 @@ describe('ProfitService.getByCompanyWithMonthSeparation', () => {
     expect(result.data['2026-06'].byCurrency.UAH.net).toBe(-16000)
   })
 
-  it('keeps net as actual minus expenses for a domain, unlike a company', async () => {
+  // Without this term every figure a company has is an outflow, and a page
+  // called "Прибутки" shows it no profit at all.
+  it('lets hand-entered income pull a company net back up', async () => {
+    paymentAggregate.mockResolvedValue([income(2026, 6, 15000, 12000)])
+    aggregate.mockResolvedValue([expense('2026-06', 4000, 20000)])
+
+    const result =
+      await ProfitService.getByCompanyWithMonthSeparation(companyId)
+
+    expect(result.data['2026-06'].byCurrency.UAH).toMatchObject({
+      // Income stays out of `actual`, which is purely what the invoices cost.
+      actual: 12000,
+      income: 20000,
+      // 20000 - 12000 - 4000
+      net: 4000,
+    })
+  })
+
+  it('adds income to actual instead of subtracting it, for a domain', async () => {
     paymentAggregate.mockResolvedValue([income(2026, 6, 15000, 12000)])
     aggregate.mockResolvedValue([expense('2026-06', 4000)])
 

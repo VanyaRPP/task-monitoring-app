@@ -1,6 +1,7 @@
 import { LeftOutlined } from '@ant-design/icons'
 import { Button, Flex, FlexProps, Tag, Tooltip } from 'antd'
 import { useCallback, useMemo, useState } from 'react'
+import { TruncatedText } from '@components/UI/TruncatedText'
 
 export interface TagsProps<T = unknown> extends Omit<
   FlexProps,
@@ -44,7 +45,7 @@ export const Tags = <T,>({
   size = 5,
   render = (item, index, items) => (
     <Tag key={index} bordered={false} color="blue" style={{ margin: 0 }}>
-      {item as any}
+      <TruncatedText text={item as any} maxWidth={160} />
     </Tag>
   ),
   title,

@@ -110,7 +110,7 @@ describe('getInvoices - WATER', () => {
         expect.objectContaining({ type: ServiceType.Water })
       )
     })
-    it('should NOT load when company = { waterPart: 0 }', () => {
+    it('should load without month service when company = { waterPart: 0 }', () => {
       const company: Partial<IRealestate> = {
         waterPart: 0,
       }
@@ -119,11 +119,11 @@ describe('getInvoices - WATER', () => {
         company,
       })
 
-      expect(invoices).not.toContainEqual(
+      expect(invoices).toContainEqual(
         expect.objectContaining({ type: ServiceType.Water })
       )
     })
-    it('should NOT load when company = { waterPart: NaN }', () => {
+    it('should load without month service when company = { waterPart: NaN }', () => {
       const company: Partial<IRealestate> = {
         waterPart: NaN,
       }
@@ -132,11 +132,11 @@ describe('getInvoices - WATER', () => {
         company,
       })
 
-      expect(invoices).not.toContainEqual(
+      expect(invoices).toContainEqual(
         expect.objectContaining({ type: ServiceType.Water })
       )
     })
-    it('should NOT load when company = { waterPart: null }', () => {
+    it('should load without month service when company = { waterPart: null }', () => {
       const company: Partial<IRealestate> = {
         waterPart: null,
       }
@@ -145,11 +145,11 @@ describe('getInvoices - WATER', () => {
         company,
       })
 
-      expect(invoices).not.toContainEqual(
+      expect(invoices).toContainEqual(
         expect.objectContaining({ type: ServiceType.Water })
       )
     })
-    it('should NOT load when company = { waterPart: undefined }', () => {
+    it('should load without month service when company = { waterPart: undefined }', () => {
       const company: Partial<IRealestate> = {
         waterPart: undefined,
       }
@@ -158,7 +158,7 @@ describe('getInvoices - WATER', () => {
         company,
       })
 
-      expect(invoices).not.toContainEqual(
+      expect(invoices).toContainEqual(
         expect.objectContaining({ type: ServiceType.Water })
       )
     })

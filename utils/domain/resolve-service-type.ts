@@ -1,4 +1,4 @@
-import { ServiceType, UTILITY_SERVICE_ID_TO_TYPE } from '../constants'
+import { ServiceType, BUILT_IN_SERVICE_ID_TO_TYPE } from '../constants'
 
 const SERVICE_TYPE_VALUES = new Set<string>(Object.values(ServiceType))
 
@@ -17,7 +17,7 @@ export function resolveServiceType(row: {
 
   const id = row._id != null ? String(row._id) : ''
   if (id) {
-    const mapped = UTILITY_SERVICE_ID_TO_TYPE[id]
+    const mapped = BUILT_IN_SERVICE_ID_TO_TYPE[id]
     if (mapped) return mapped
   }
 

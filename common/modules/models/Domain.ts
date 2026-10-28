@@ -13,6 +13,7 @@ export interface IDomain {
   domainBankToken: IDomainBankToken[]
   domainServices: string[]
   customServices: ICustomService[]
+  disabledServiceIds?: string[]
   domainTypeTemplateId?: Types.ObjectId
   defaultTemplate?: string
   archived?: boolean
@@ -58,6 +59,7 @@ const DomainSchema = new Schema<IDomain>({
       services: [{ type: String, required: true }],
     },
   ],
+  disabledServiceIds: { type: [String], default: [] },
   domainTypeTemplateId: {
     type: Schema.Types.ObjectId,
     ref: 'DomainTypeTemplate',
