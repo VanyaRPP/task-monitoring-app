@@ -155,6 +155,29 @@ describe('POST /spacehub/payment/[id]/send-email', () => {
     )
   })
 
+  it('sends to the company admins when the receiver has no recipients', async () => {
+    const res = await performRequest(
+      'POST',
+      { id: 'p1' },
+      {
+        invoiceNumber: 6,
+        reciever: { companyName: 'Acme', description: 'Acme LLC' },
+        company: { adminEmails: ['owner@real.com'] },
+        domain: { name: 'Domain', adminEmails: ['domain@real.com'] },
+      }
+    )
+
+    expect(res.status).toHaveBeenCalledWith(200)
+    expect(sendInvoiceEmailMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        reciever: expect.objectContaining({
+          adminEmails: ['owner@real.com'],
+        }),
+      }),
+      { html: undefined }
+    )
+  })
+
   it('returns 400 when no recipients exist anywhere', async () => {
     sendInvoiceEmailMock.mockResolvedValue(false)
     const res = await performRequest(

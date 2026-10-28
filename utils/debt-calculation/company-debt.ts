@@ -6,6 +6,7 @@ import {
 import { calculateDebt } from './calculate'
 import { IYearMonth, periodKey, yearMonthOf } from './months'
 import { buildMonthPrefill, IPrefillPayment, IPrefillService } from './prefill'
+import { resolveExcludedPeriods } from './excludedPeriodPresets'
 import { IDebtCalculationSnapshot } from './serialize'
 import {
   DEFAULT_ANNUAL_RATE_PERCENT,
@@ -104,6 +105,10 @@ export const calculateCompanyDebt = ({
       }),
       annualRatePercent: settings.annualRatePercent,
       inflationMethod: settings.inflationMethod,
+      excludedPeriods: resolveExcludedPeriods(
+        settings.overrides.excludedPeriods,
+        !!saved
+      ),
     })
   )
 
