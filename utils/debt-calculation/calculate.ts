@@ -1,5 +1,6 @@
 import { toRoundFixed } from '@utils/helpers'
-import { daysInMonth, daysInYear } from './months'
+import { excludedRanges, monthExclusion } from './exclusions'
+import { accrualDays, clampStartDay, daysInMonth, daysInYear } from './months'
 import {
   DEFAULT_ANNUAL_RATE_PERCENT,
   IDebtCalculationInput,
@@ -21,12 +22,27 @@ const EPSILON = 1e-9
 
 const round2 = (value: number): number => +toRoundFixed(value)
 
-/** A payment settles the oldest charges first (FIFO). */
-const applyPayment = (lots: IDebtLot[], paid: number): void => {
+const lotLoss = (amount: number, lot: IDebtLot, coefficient: number) =>
+  amount * Math.max(coefficient / lot.coefficient - 1, 0)
+
+/**
+ * A payment settles the oldest charges first (FIFO). Returns the inflation
+ * losses the settled amounts had run up by `coefficient` - paying a debt stops
+ * its indexation, it does not undo what already accrued (art. 625 § 2) - and
+ * what was left over once no charge was open (an overpayment).
+ */
+const applyPayment = (
+  lots: IDebtLot[],
+  paid: number,
+  coefficient: number
+): { settledLoss: number; overpaid: number } => {
   let rest = paid
+  let settledLoss = 0
 
   while (rest > EPSILON && lots.length > 0) {
     const [oldest] = lots
+    const settled = Math.min(oldest.amount, rest)
+    settledLoss += lotLoss(settled, oldest, coefficient)
 
     if (oldest.amount <= rest + EPSILON) {
       rest -= oldest.amount
@@ -36,6 +52,7 @@ const applyPayment = (lots: IDebtLot[], paid: number): void => {
       rest = 0
     }
   }
+  return { settledLoss, overpaid: Math.max(rest, 0) }
 }
 
 /**
@@ -43,11 +60,7 @@ const applyPayment = (lots: IDebtLot[], paid: number): void => {
  * slice of the period, and a deflationary slice never goes negative.
  */
 const lotsInflation = (lots: IDebtLot[], coefficient: number): number =>
-  lots.reduce(
-    (acc, lot) =>
-      acc + lot.amount * Math.max(coefficient / lot.coefficient - 1, 0),
-    0
-  )
+  lots.reduce((acc, lot) => acc + lotLoss(lot.amount, lot, coefficient), 0)
 
 /**
  * Debt for multi-apartment building management services, plus annual interest
@@ -64,7 +77,13 @@ const lotsInflation = (lots: IDebtLot[], coefficient: number): number =>
  * - inflation losses are the last month's value, NOT a sum across months, as
  *   the coefficient is already cumulative;
  * - interest, by contrast, IS summed month by month;
- * - deflation never produces negative losses.
+ * - deflation never produces negative losses;
+ * - monthly method: what a paid lot had run up stays in the losses - a
+ *   payment is applied at the start of its month, so that month's index does
+ *   not reach the paid part;
+ * - an excluded period (moratorium) takes its days out of the interest and
+ *   its months out of the coefficient (see `exclusions.ts`); the debt moves
+ *   as usual.
  */
 export const calculateDebt = ({
   months = [],
@@ -74,7 +93,9 @@ export const calculateDebt = ({
   interestOnCurrentCharge = true,
   legalFees = 0,
   courtFee = 0,
+  excludedPeriods = [],
 }: IDebtCalculationInput): IDebtCalculationResult => {
+  const exclusions = excludedRanges(excludedPeriods)
   const lots: IDebtLot[] = []
   if (openingDebt > 0) {
     lots.push({ amount: openingDebt, coefficient: 1 })
@@ -83,6 +104,10 @@ export const calculateDebt = ({
   const rows: IDebtMonthRow[] = []
   let debt = openingDebt
   let coefficient = 1
+  // Monthly method: losses of the debt already paid off, kept as they were.
+  let settledLoss = 0
+  // Paid beyond what was owed: it settles the next charges, as it lowers the debt.
+  let credit = 0
   let totalCharged = 0
   let totalCorrection = 0
   let totalPaid = 0
@@ -92,13 +117,38 @@ export const calculateDebt = ({
   months.forEach((month, index) => {
     const area = +month.area || 0
     const tariff = +month.tariff || 0
+    const calendarDays = daysInMonth(month.year, month.month)
+    // The days the debt runs for in this month: the whole month, or from the
+    // start day, or as typed. A charge worked out here follows them - a debt
+    // from the 10th is billed for the days left - while one typed in or taken
+    // from an invoice is the figure itself.
+    const accrual = accrualDays(month.year, month.month, month)
     const charged =
-      month.charged == null ? round2(area * tariff) : +month.charged || 0
+      month.charged == null
+        ? round2((area * tariff * accrual) / calendarDays)
+        : +month.charged || 0
     const correction = +month.correction || 0
     const paid = +month.paid || 0
     const inflationIndex = +month.inflationIndex || 100
 
-    coefficient = index === 0 ? 1 : coefficient * (inflationIndex / 100)
+    const exclusion = monthExclusion(
+      exclusions,
+      month.year,
+      month.month,
+      // Excluded days count only among the days that accrue: from the start
+      // day, or - for days typed in - anywhere in the month.
+      month.days == null ? clampStartDay(month.startDay, calendarDays) : 1
+    )
+    const excludedDays = exclusion.excludedDays
+    // The first month's index never applies (see above).
+    const indexApplied = index > 0 && exclusion.indexApplies
+    const previousCoefficient = coefficient
+    coefficient =
+      index === 0
+        ? 1
+        : indexApplied
+          ? coefficient * (inflationIndex / 100)
+          : coefficient
 
     // A correction adjusts what the month billed: it moves the debt with the
     // charge. One that outweighs the charge settles older debt, like a payment.
@@ -107,10 +157,23 @@ export const calculateDebt = ({
     const debtBeforeCharge = debt - paid
     debt = debtBeforeCharge + billed
 
-    if (billed > 0) lots.push({ amount: billed, coefficient })
-    applyPayment(lots, paid + Math.max(-billed, 0))
+    if (billed > 0) {
+      const covered = Math.min(credit, billed)
+      credit -= covered
+      if (billed - covered > EPSILON) {
+        lots.push({ amount: billed - covered, coefficient })
+      }
+    }
+    const settled = applyPayment(
+      lots,
+      paid + Math.max(-billed, 0),
+      previousCoefficient
+    )
+    settledLoss += settled.settledLoss
+    credit += settled.overpaid
 
-    const days = daysInMonth(month.year, month.month)
+    // Interest days: those accruing, less any in an excluded period.
+    const days = Math.max(accrual - excludedDays, 0)
     const interestBase = interestOnCurrentCharge ? debt : debtBeforeCharge
     const interest =
       ((Math.max(interestBase, 0) * (annualRatePercent / 100)) /
@@ -128,11 +191,13 @@ export const calculateDebt = ({
       paid,
       debt,
       days,
+      excludedDays,
+      indexApplied,
       inflationIndex,
       coefficient,
       inflationLoss:
         inflationMethod === 'monthly'
-          ? lotsInflation(lots, coefficient)
+          ? settledLoss + lotsInflation(lots, coefficient)
           : Math.max(debt * coefficient - debt, 0),
       interest,
     })

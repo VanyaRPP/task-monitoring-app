@@ -64,8 +64,8 @@ export default async function handler(
       return res.status(403).json({ success: false, message: 'not allowed' })
     }
 
-    // Mirror createPayment: the stored receiver no longer carries recipients,
-    // so send to the company's admins; fall back to the domain's admins
+    // The stored receiver no longer carries recipients, so send to the
+    // company's admins; fall back to the domain's admins
     // instead of silently sending to nobody.
     const currentReceiver = payment.reciever || {}
     const reciever = {

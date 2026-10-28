@@ -12,6 +12,7 @@ import {
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useDebtCalculationContext } from './'
 import CreatePayments from './CreatePayments'
+import ExcludedPeriods from './ExcludedPeriods'
 import PrintPreview from './PrintPreview'
 import { useExportExcel } from './useExportExcel'
 import s from './style.module.scss'
@@ -261,6 +262,11 @@ const DebtCalculationHeader: React.FC = () => {
             step={0.5}
           />
         </label>
+
+        <div className={s.Field}>
+          <span className={s.Label}>Виключення</span>
+          <ExcludedPeriods />
+        </div>
       </Space>
     </div>
   )
