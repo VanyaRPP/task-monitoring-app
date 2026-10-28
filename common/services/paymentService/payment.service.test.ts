@@ -73,7 +73,7 @@ jest.mock('@modules/models/Domain', () => ({
 
 jest.mock('@modules/models/RealEstate', () => ({
   __esModule: true,
-  default: {},
+  default: { findById: jest.fn() },
 }))
 
 import Service from '@modules/models/Service'
