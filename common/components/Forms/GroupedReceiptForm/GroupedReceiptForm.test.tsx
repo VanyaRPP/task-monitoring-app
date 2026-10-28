@@ -156,9 +156,9 @@ describe('OLIMP template', () => {
   // once OLIMP template starts rendering provider info explicitly.
   test.todo('OLIMP template: displays provider data when implemented')
 
-  test('відображає email Отримувача', () => {
+  test('не відображає email Отримувача (лише опис компанії)', () => {
     renderOlimp()
-    expect(screen.getByText('test@gmail.com')).toBeInTheDocument()
+    expect(screen.queryByText('test@gmail.com')).not.toBeInTheDocument()
   })
 
   test('повертає null якщо paymentData відсутній', () => {
