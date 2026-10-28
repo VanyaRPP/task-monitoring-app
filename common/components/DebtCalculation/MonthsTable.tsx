@@ -1,6 +1,16 @@
 import { IDebtCalculationResult } from '@utils/debt-calculation/types'
+import type { IExcludedPeriod } from '@utils/debt-calculation/exclusions'
 import { formatPeriod } from '@utils/debt-calculation/months'
-import { CameraOutlined } from '@ant-design/icons'
+import {
+  CameraOutlined,
+  CheckOutlined,
+  CloseOutlined,
+  MinusCircleOutlined,
+  StopOutlined,
+} from '@ant-design/icons'
+import { describeExcludedPeriod } from '@utils/debt-calculation/excludedPeriodPresets'
+import { periodsInMonth } from '@utils/debt-calculation/exclusions'
+import { daysInMonth } from '@utils/debt-calculation/months'
 import { InputNumber, Table, Tooltip, Typography } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { useDebtCalculationContext } from './'
@@ -13,6 +23,55 @@ interface Props {
   result: IDebtCalculationResult
 }
 
+/**
+ * A narrow mark per month: whether inflation losses and interest accrued.
+ * Shape and label, not only colour, tell the three states apart.
+ */
+const exclusionColumn = (
+  periods: IExcludedPeriod[]
+): ColumnsType<MonthRow>[number] => ({
+  title: (
+    <Tooltip title="Нарахування інфляційних і річних: ✓ — так, ✕ — виключено, ◐ — частину місяця">
+      <StopOutlined aria-label="Виключені періоди" />
+    </Tooltip>
+  ),
+  width: 36,
+  align: 'center',
+  render: (_, row) => {
+    const total = daysInMonth(row.year, row.month)
+    if (row.excludedDays === 0) {
+      return (
+        <CheckOutlined
+          aria-label="Нараховується"
+          className={`${s.ExclusionMark} ${s.ExclusionAllowed}`}
+        />
+      )
+    }
+    const why = periodsInMonth(periods, row.year, row.month)
+      .map(describeExcludedPeriod)
+      .join('; ')
+    const whole = row.excludedDays >= total
+    const label = whole
+      ? `Не нараховується: ${why}`
+      : `Виключено ${row.excludedDays} з ${total} днів (${why}). Річні — за ${row.days} дн.; індекс місяця ${row.indexApplied ? 'враховано' : 'не враховано'}.`
+    return (
+      <Tooltip title={label}>
+        {whole ? (
+          <CloseOutlined
+            aria-label={label}
+            className={`${s.ExclusionMark} ${s.ExclusionExcluded}`}
+          />
+        ) : (
+          <MinusCircleOutlined
+            aria-label={label}
+            className={`${s.ExclusionMark} ${s.ExclusionPartial}`}
+          />
+        )}
+      </Tooltip>
+    )
+  },
+})
+
 const MonthsTable: React.FC<Props> = ({ result }) => {
   const {
     overrides,
@@ -20,7 +79,9 @@ const MonthsTable: React.FC<Props> = ({ result }) => {
     indexByPeriod,
     setMonthOverride,
     inflationMethod,
+    excludedPeriods = [],
   } = useDebtCalculationContext()
+  const hasExclusions = excludedPeriods.length > 0
 
   const monthOverrides = overrides.months ?? {}
   const prefill = prefillMonths ?? {}
@@ -38,7 +99,13 @@ const MonthsTable: React.FC<Props> = ({ result }) => {
   const valueOf = (
     row: MonthRow,
     field:
-      'paid' | 'charged' | 'correction' | 'area' | 'tariff' | 'inflationIndex'
+      | 'paid'
+      | 'charged'
+      | 'correction'
+      | 'area'
+      | 'tariff'
+      | 'inflationIndex'
+      | 'days'
   ): number | undefined => {
     const period = formatPeriod(row)
 
@@ -156,10 +223,27 @@ const MonthsTable: React.FC<Props> = ({ result }) => {
       render: (_, row) => <strong>{formatMoney(row.debt)}</strong>,
     },
     {
-      title: 'Днів',
-      width: 70,
+      title: (
+        <Tooltip title="Днів нарахування в місяці. Можна змінити: Нараховано (якщо не введене вручну) і 3% річних рахуються за цими днями. Дні виключених періодів віднімаються від річних окремо.">
+          Днів
+        </Tooltip>
+      ),
+      width: 90,
       align: 'right',
-      dataIndex: 'days',
+      render: (_, row) => (
+        <InputNumber
+          size="small"
+          min={0}
+          max={daysInMonth(row.year, row.month)}
+          precision={0}
+          value={valueOf(row, 'days')}
+          placeholder={String(row.days)}
+          // Nothing to change in a month that is wholly excluded.
+          disabled={row.excludedDays >= daysInMonth(row.year, row.month)}
+          onChange={(value) => patch(row, 'days', value as number)}
+          aria-label={`Днів, ${formatMonthLabel(row.year, row.month)}`}
+        />
+      ),
     },
     {
       title: 'Індекс, %',
@@ -209,6 +293,7 @@ const MonthsTable: React.FC<Props> = ({ result }) => {
       align: 'right',
       render: (_, row) => formatMoney(row.inflationLoss),
     },
+    ...(hasExclusions ? [exclusionColumn(excludedPeriods)] : []),
   ]
 
   return (
@@ -254,6 +339,7 @@ const MonthsTable: React.FC<Props> = ({ result }) => {
               <Table.Summary.Cell index={12} align="right">
                 <strong>{formatMoney(result.inflation)}</strong>
               </Table.Summary.Cell>
+              {hasExclusions && <Table.Summary.Cell index={13} />}
             </Table.Summary.Row>
           </Table.Summary>
         )}

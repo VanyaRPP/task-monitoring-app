@@ -1,4 +1,4 @@
-import { Alert, Empty, InputNumber, Space, Typography } from 'antd'
+import { Alert, Empty, InputNumber, Select, Space, Typography } from 'antd'
 import { formatPeriod } from '@utils/debt-calculation/months'
 import { useDebtCalculationContext } from './'
 import DebtActSummary from './ActSummary'
@@ -36,13 +36,16 @@ const DebtCalculationBody: React.FC = () => {
 
   const param = (
     label: string,
-    field: 'area' | 'tariff' | 'openingDebt',
-    placeholder: string
+    field:
+      'area' | 'tariff' | 'openingDebt' | 'charged' | 'paid' | 'correction',
+    placeholder: string,
+    hint?: string
   ) => (
-    <label className={s.Field}>
+    <label className={s.Field} title={hint}>
       <span className={s.Label}>{label}</span>
       <InputNumber
-        min={0}
+        // A correction lowers the debt when negative.
+        min={field === 'correction' ? undefined : 0}
         value={overrides[field]}
         placeholder={placeholder}
         onChange={(value) =>
@@ -53,6 +56,9 @@ const DebtCalculationBody: React.FC = () => {
       />
     </label>
   )
+
+  const EVERY_MONTH =
+    'Одне значення на кожен місяць, де немає ні ручної правки, ні даних з платежів. Свої значення місяця мають перевагу.'
 
   const fromPhoto = result.rows.filter(
     (row) => overrides.months?.[formatPeriod(row)]?.source === 'photo'
@@ -87,6 +93,37 @@ const DebtCalculationBody: React.FC = () => {
             'openingDebt',
             (openingDebtPrefill ?? 0).toFixed(2)
           )}
+        </Space>
+
+        <Space wrap size="middle" className={s.EveryMonth}>
+          {param(
+            'Нараховано щомісяця',
+            'charged',
+            'за площею й тарифом',
+            EVERY_MONTH
+          )}
+          {param('Сплачено щомісяця', 'paid', '0.00', EVERY_MONTH)}
+          {param('Коректура щомісяця', 'correction', '0.00', EVERY_MONTH)}
+          <label
+            className={s.Field}
+            title="З якого числа першого місяця періоду йде борг: з 10 числа — 22 дні замість 31. Нараховано за цей місяць (якщо не введене вручну) і річні рахуються лише за ці дні."
+          >
+            <span className={s.Label}>Перший місяць — з числа</span>
+            <Select
+              value={overrides.startDay}
+              onChange={(value) =>
+                setApartmentOverride({ startDay: value ?? undefined })
+              }
+              options={Array.from({ length: 31 }, (_, index) => ({
+                value: index + 1,
+                label: String(index + 1),
+              }))}
+              placeholder="1"
+              allowClear
+              className={s.StartDay}
+              aria-label="Перший місяць — з числа"
+            />
+          </label>
         </Space>
       </div>
 
