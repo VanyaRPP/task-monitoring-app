@@ -372,9 +372,12 @@ describe('page defaults', () => {
 
     await userEvent.click(screen.getByLabelText('Період з'))
 
-    expect(
-      await screen.findByRole('button', { name: 'Обрати рік' })
-    ).toBeInTheDocument()
+    // Plain DOM query: a role query with a name crawls on a page this big.
+    await waitFor(() =>
+      expect(
+        document.querySelector('button[aria-label="Обрати рік"]')
+      ).not.toBeNull()
+    )
     expect(screen.getByText('Січ')).toBeInTheDocument()
   })
 })
