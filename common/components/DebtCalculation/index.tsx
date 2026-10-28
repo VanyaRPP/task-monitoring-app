@@ -164,8 +164,13 @@ const DebtCalculationBlock: React.FC = () => {
     if (typeof queryCompanyId === 'string') setCompanyId(queryCompanyId)
   }, [queryDomainId, queryCompanyId])
 
-  const { data: { data: companies } = { data: [] }, isLoading: isCompanies } =
-    useGetAllRealEstateQuery({ domainId, archived: false }, { skip: !domainId })
+  const {
+    currentData: { data: companies } = { data: [] },
+    isLoading: isCompanies,
+  } = useGetAllRealEstateQuery(
+    { domainId, archived: false },
+    { skip: !domainId }
+  )
 
   const company = useMemo(
     () => (companies ?? []).find(({ _id }) => _id === companyId),

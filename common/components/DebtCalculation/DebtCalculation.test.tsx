@@ -115,7 +115,7 @@ beforeEach(() => {
     isLoading: false,
   })
   ;(useGetAllRealEstateQuery as jest.Mock).mockReturnValue({
-    data: { data: [] },
+    currentData: { data: [] },
     isLoading: false,
   })
   ;(useGetInflationIndexesQuery as jest.Mock).mockReturnValue({
