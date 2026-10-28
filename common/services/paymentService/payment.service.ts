@@ -11,43 +11,8 @@ import {
   getTotalGeneralSumPipeline,
 } from '@pages/api/spacehub/payment/pipelines'
 import { quarters } from '@utils/constants'
-import {
-  sendInvoiceEmail,
-  type InvoiceEmailPayment,
-} from '@utils/email/sendInvoiceEmail'
 import { PaymentStatus } from '@common/api/paymentApi/payment.api.types'
 import mongoose, { FilterQuery } from 'mongoose'
-import { isDev } from '@utils/env'
-
-function isEmailDebugEnabled() {
-  return process.env.EMAIL_DEBUG === 'true' || isDev
-}
-
-function maskEmail(email?: string) {
-  if (!email) {
-    return 'missing'
-  }
-
-  const [localPart = '', domainPart = ''] = email.split('@')
-
-  if (!domainPart) {
-    return `${localPart.slice(0, 2)}***`
-  }
-
-  return `${localPart.slice(0, 2)}***@${domainPart}`
-}
-
-function maskEmails(emails: string[] = []) {
-  return emails.map((email) => maskEmail(email))
-}
-
-function logPaymentEmailDebug(stage: string, details: Record<string, unknown>) {
-  if (!isEmailDebugEnabled()) {
-    return
-  }
-  // eslint-disable-next-line no-console
-  console.info(`[payment-email] ${stage}`, details)
-}
 
 export interface PaymentQueryParams {
   streetIds?: string | string[]
@@ -387,15 +352,8 @@ export async function reserveInvoiceNumbers(count = 1): Promise<number> {
   return counter.seq - count + 1
 }
 
-export async function createPayment(
-  body: any,
-  isAdmin: boolean,
-  options: { sendInvoiceEmail?: boolean } = {}
-) {
+export async function createPayment(body: any, isAdmin: boolean) {
   if (!isAdmin) throw new Error('not allowed')
-
-  // Renamed locally to avoid shadowing the imported `sendInvoiceEmail` function.
-  const { sendInvoiceEmail: shouldSendInvoiceEmail = true } = options
 
   // The number is the server's to give, at save time - whatever the client
   // showed in the form was only a preview.
@@ -403,70 +361,6 @@ export async function createPayment(
     ...body,
     invoiceNumber: await reserveInvoiceNumbers(),
   })
-
-  if (shouldSendInvoiceEmail && payment.type === 'debit') {
-    try {
-      logPaymentEmailDebug('prepare_started', {
-        paymentId: payment.id?.toString?.() || 'unknown',
-        invoiceNumber: payment.invoiceNumber,
-        domainId: payment.domain?.toString?.() || 'unknown',
-      })
-
-      const paymentSnapshot = (
-        typeof payment.toObject === 'function' ? payment.toObject() : payment
-      ) as InvoiceEmailPayment
-      const currentReceiver = paymentSnapshot.reciever || {}
-      const company =
-        !currentReceiver.adminEmails?.length && payment.company
-          ? await RealEstate.findById(payment.company).select('adminEmails')
-          : null
-      const receiverEmails = currentReceiver.adminEmails?.length
-        ? currentReceiver.adminEmails
-        : company?.adminEmails || []
-      const shouldLoadDomainData =
-        !currentReceiver.companyName ||
-        !currentReceiver.description ||
-        !receiverEmails.length
-      const domain =
-        shouldLoadDomainData && payment.domain
-          ? await Domain.findById(payment.domain).select(
-              'adminEmails name description'
-            )
-          : null
-
-      paymentSnapshot.reciever = {
-        companyName: currentReceiver.companyName || domain?.name || 'invoice',
-        adminEmails: receiverEmails.length
-          ? receiverEmails
-          : domain?.adminEmails || [],
-        description: currentReceiver.description || domain?.description || '',
-      }
-
-      logPaymentEmailDebug('receiver_resolved', {
-        paymentId: payment.id?.toString?.() || 'unknown',
-        invoiceNumber: payment.invoiceNumber,
-        usedDomainFallback: Boolean(domain),
-        recipients: maskEmails(paymentSnapshot.reciever.adminEmails),
-        sender: maskEmail(
-          process.env.EMAIL_FROM || process.env.EMAIL_SERVER_USER || 'missing'
-        ),
-      })
-
-      const emailSent = await sendInvoiceEmail(paymentSnapshot)
-
-      logPaymentEmailDebug('send_finished', {
-        paymentId: payment.id?.toString?.() || 'unknown',
-        invoiceNumber: payment.invoiceNumber,
-        emailSent,
-      })
-    } catch (error) {
-      console.error('[payment-email] send_failed', {
-        paymentId: payment.id?.toString?.() || 'unknown',
-        invoiceNumber: payment.invoiceNumber,
-        message: error?.message,
-      })
-    }
-  }
 
   return payment
 }
@@ -530,9 +424,7 @@ export async function duplicatePayments(
     body.invoiceCreationDate = new Date()
 
     try {
-      const created = await createPayment(body, true, {
-        sendInvoiceEmail: false,
-      })
+      const created = await createPayment(body, true)
       createdIds.push(created.id.toString())
     } catch (error) {
       console.error('[payment-duplicate] create_failed', {
