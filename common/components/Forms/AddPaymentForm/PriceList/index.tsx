@@ -139,12 +139,7 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
               <div className={styles.approvalSection}>
                 <div>
                   <strong>{isEnglish ? 'APPROVED' : 'ЗАТВЕРДЖУЮ'}</strong>
-                  <pre>
-                    {payment?.reciever?.description?.trim()}
-                    {payment?.reciever?.adminEmails?.map((email) => (
-                      <div key={email}>{email}</div>
-                    ))}
-                  </pre>
+                  <pre>{payment?.reciever?.description?.trim()}</pre>
                 </div>
               </div>
             </div>

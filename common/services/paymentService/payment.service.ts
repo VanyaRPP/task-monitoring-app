@@ -416,10 +416,17 @@ export async function createPayment(
         typeof payment.toObject === 'function' ? payment.toObject() : payment
       ) as InvoiceEmailPayment
       const currentReceiver = paymentSnapshot.reciever || {}
+      const company =
+        !currentReceiver.adminEmails?.length && payment.company
+          ? await RealEstate.findById(payment.company).select('adminEmails')
+          : null
+      const receiverEmails = currentReceiver.adminEmails?.length
+        ? currentReceiver.adminEmails
+        : company?.adminEmails || []
       const shouldLoadDomainData =
         !currentReceiver.companyName ||
         !currentReceiver.description ||
-        !currentReceiver.adminEmails?.length
+        !receiverEmails.length
       const domain =
         shouldLoadDomainData && payment.domain
           ? await Domain.findById(payment.domain).select(
@@ -429,8 +436,8 @@ export async function createPayment(
 
       paymentSnapshot.reciever = {
         companyName: currentReceiver.companyName || domain?.name || 'invoice',
-        adminEmails: currentReceiver.adminEmails?.length
-          ? currentReceiver.adminEmails
+        adminEmails: receiverEmails.length
+          ? receiverEmails
           : domain?.adminEmails || [],
         description: currentReceiver.description || domain?.description || '',
       }
