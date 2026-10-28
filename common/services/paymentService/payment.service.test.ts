@@ -73,7 +73,7 @@ jest.mock('@modules/models/Domain', () => ({
 
 jest.mock('@modules/models/RealEstate', () => ({
   __esModule: true,
-  default: {},
+  default: { findById: jest.fn() },
 }))
 
 import Service from '@modules/models/Service'
@@ -106,6 +106,7 @@ jest.mock('@utils/pipelines', () => ({
 
 import Domain from '@modules/models/Domain'
 import Payment from '@modules/models/Payment'
+import RealEstate from '@modules/models/RealEstate'
 import { sendInvoiceEmail } from '@utils/email/sendInvoiceEmail'
 import {
   createPayment,
@@ -118,6 +119,7 @@ import { SortOrder, Operations } from '@utils/constants'
 import { PaymentStatus } from '@common/api/paymentApi/payment.api.types'
 
 const domainFindByIdMock = Domain.findById as jest.Mock
+const realEstateFindByIdMock = RealEstate.findById as jest.Mock
 const paymentCreateMock = Payment.create as jest.Mock
 const sendInvoiceEmailMock = sendInvoiceEmail as jest.Mock
 
@@ -498,6 +500,51 @@ describe('createPayment', () => {
         reciever: expect.objectContaining({
           companyName: 'Fallback Domain',
           adminEmails: ['domain-admin@example.com'],
+        }),
+      })
+    )
+  })
+
+  it('emails the company admins when the receiver carries no emails', async () => {
+    const paymentObject = {
+      _id: 'payment-id',
+      id: 'payment-id',
+      domain: 'domain-id',
+      company: 'company-id',
+      type: 'debit',
+      generalSum: 1250,
+      invoiceCreationDate: new Date('2026-03-16T00:00:00.000Z'),
+      invoiceNumber: 81,
+      description: '',
+      reciever: { companyName: 'Acme', description: 'Receiver' },
+      provider: { description: 'Provider' },
+      toObject: jest.fn(),
+    }
+
+    paymentObject.toObject.mockReturnValue({
+      ...paymentObject,
+      toObject: undefined,
+    })
+
+    paymentCreateMock.mockResolvedValue(paymentObject)
+    realEstateFindByIdMock.mockReturnValue({
+      select: jest.fn().mockResolvedValue({
+        adminEmails: ['company-admin@example.com'],
+      }),
+    })
+    domainFindByIdMock.mockReturnValue({
+      select: jest.fn().mockResolvedValue({
+        adminEmails: ['domain-admin@example.com'],
+      }),
+    })
+
+    await createPayment({ invoiceNumber: 81 }, true)
+
+    expect(realEstateFindByIdMock).toHaveBeenCalledWith('company-id')
+    expect(sendInvoiceEmailMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        reciever: expect.objectContaining({
+          adminEmails: ['company-admin@example.com'],
         }),
       })
     )

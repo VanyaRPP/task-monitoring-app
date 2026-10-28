@@ -121,8 +121,8 @@ describe('useQuickSend — payment payload parity with the standard send', () =>
     expect(payload.reciever?.companyName).toBe('Acme LLC')
   })
 
-  it('populates reciever.adminEmails from the company', async () => {
+  it('does not send the company admin emails in the reciever', async () => {
     const payload = await runQuickSend()
-    expect(payload.reciever?.adminEmails).toEqual(['owner@acme.co'])
+    expect(payload.reciever).not.toHaveProperty('adminEmails')
   })
 })
