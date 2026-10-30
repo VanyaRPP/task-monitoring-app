@@ -1,4 +1,5 @@
 import { cascaderMonths } from '@utils/constants'
+import { IValueRun, valueRuns } from '@utils/debt-calculation/changes'
 import {
   daysInMonth,
   formatPeriod,
@@ -23,7 +24,10 @@ export interface IDebtExcelInput {
   to?: IYearMonth
   annualRatePercent: number
   inflationMethod: InflationMethod
-  /** Area and tariff as they stand in the page header. */
+  /**
+   * Area and tariff as they stand in the page header - only for a document
+   * with no months; otherwise they are read off the months, changes and all.
+   */
   area?: number
   tariff?: number
   openingDebt?: number
@@ -137,6 +141,50 @@ const periodLabel = (
   return `${pad(firstDay)}.${pad(from.month)}.${from.year} — ${pad(lastDay)}.${pad(to.month)}.${to.year}`
 }
 
+const dateOf = (day: number, { year, month }: IYearMonth): string =>
+  `${pad(day)}.${pad(month)}.${year}`
+
+const decimal = (value: number): string => money(value).toFixed(2)
+
+/**
+ * A value that changed within the period, one line per stretch with its
+ * dates: «5.25 — з 01.08.2018 по 31.01.2019». The first stretch starts on the
+ * period's start day.
+ */
+const runLines = (
+  text: string,
+  runs: IValueRun[],
+  startDay?: number
+): (IExcelCell | null)[][] =>
+  runs.map((run, index) => {
+    const firstDay =
+      index === 0
+        ? Math.min(
+            Math.max(Math.round(Number(startDay) || 1), 1),
+            daysInMonth(run.from.year, run.from.month)
+          )
+        : 1
+    return param(
+      index === 0 ? text : '',
+      `${decimal(run.value)} — з ${dateOf(firstDay, run.from)} по ${dateOf(
+        daysInMonth(run.to.year, run.to.month),
+        run.to
+      )}`,
+      COLUMN_COUNT - 3
+    )
+  })
+
+/** One number when it held all period, else its stretches with dates. */
+const valueParam = (
+  text: string,
+  runs: IValueRun[],
+  fallback: number | undefined,
+  startDay?: number
+): (IExcelCell | null)[][] =>
+  runs.length > 1
+    ? runLines(text, runs, startDay)
+    : [param(text, money(runs[0]?.value ?? fallback))]
+
 /** `2026-09-23T14:32:00Z` → `23.09.2026 14:32`; empty when there is no stamp. */
 const timestampLabel = (value?: string): string => {
   if (!value) return ''
@@ -223,8 +271,18 @@ export const buildDebtCalculationDocument = ({
     param('Власник', companyName),
     ...(description ? [param('Адреса', description)] : []),
     param('Період', periodLabel(from, to, startDay)),
-    param('Загальна площа, м²', money(area)),
-    param('Тариф, грн за 1 м²', money(tariff)),
+    ...valueParam(
+      'Загальна площа, м²',
+      valueRuns(result.rows, (month) => month.area),
+      area,
+      startDay
+    ),
+    ...valueParam(
+      'Тариф, грн за 1 м²',
+      valueRuns(result.rows, (month) => month.tariff),
+      tariff,
+      startDay
+    ),
     param('Борг на початок періоду', money(openingDebt)),
     param('Ставка річних, %', annualRatePercent),
     param('Метод інфляційних', METHOD_LABEL[inflationMethod]),
