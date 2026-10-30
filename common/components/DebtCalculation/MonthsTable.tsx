@@ -7,17 +7,25 @@ import {
   CloseOutlined,
   MinusCircleOutlined,
   StopOutlined,
+  SwapOutlined,
 } from '@ant-design/icons'
+import { ChangeField, changesInMonth } from '@utils/debt-calculation/changes'
 import { describeExcludedPeriod } from '@utils/debt-calculation/excludedPeriodPresets'
 import { periodsInMonth } from '@utils/debt-calculation/exclusions'
 import { daysInMonth } from '@utils/debt-calculation/months'
 import { InputNumber, Table, Tooltip, Typography } from 'antd'
-import type { ColumnsType } from 'antd/es/table'
+import type { ColumnsType, ColumnType } from 'antd/es/table'
 import { useDebtCalculationContext } from './'
 import { formatCoefficient, formatMoney, formatMonthLabel } from './format'
+import { EVERY_MONTH_HINT, GeneralInput, StartDaySelect } from './GeneralFields'
 import s from './style.module.scss'
 
 type MonthRow = IDebtCalculationResult['rows'][number]
+
+/** A table row: a month, or the row of values for every month above them. */
+type TableRow = MonthRow & { general?: true }
+
+const GENERAL_ROW = { general: true } as TableRow
 
 interface Props {
   result: IDebtCalculationResult
@@ -72,6 +80,14 @@ const exclusionColumn = (
   },
 })
 
+const CHANGE_LABEL: Record<ChangeField, string> = {
+  area: 'площа',
+  tariff: 'тариф',
+  charged: 'нараховано',
+  paid: 'сплачено',
+  correction: 'коректура',
+}
+
 const MonthsTable: React.FC<Props> = ({ result }) => {
   const {
     overrides,
@@ -80,6 +96,8 @@ const MonthsTable: React.FC<Props> = ({ result }) => {
     setMonthOverride,
     inflationMethod,
     excludedPeriods = [],
+    company,
+    openingDebtPrefill,
   } = useDebtCalculationContext()
   const hasExclusions = excludedPeriods.length > 0
 
@@ -109,24 +127,45 @@ const MonthsTable: React.FC<Props> = ({ result }) => {
   ): number | undefined => {
     const period = formatPeriod(row)
 
-    return monthOverrides[period]?.[field] ?? prefill[period]?.[field]
+    const value = monthOverrides[period]?.[field] ?? prefill[period]?.[field]
+    // An index of 0 is no index: the engine takes 100, and so does the cell.
+    return field === 'inflationIndex' && value === 0 ? undefined : value
   }
 
-  const columns: ColumnsType<MonthRow> = [
+  const leaves: ColumnsType<MonthRow> = [
     {
       title: 'Місяць',
-      width: 140,
       fixed: 'left',
-      render: (_, row) =>
-        monthOverrides[formatPeriod(row)]?.source === 'photo' ? (
-          <Tooltip title="Заповнено з фото — перевірте. Будь-яка правка місяця знімає позначку.">
-            <span className={s.FromPhoto}>
-              <CameraOutlined /> {formatMonthLabel(row.year, row.month)}
-            </span>
+      render: (_, row) => {
+        const changed = changesInMonth(overrides.changes, row)
+        const mark = changed.length > 0 && (
+          <Tooltip
+            title={`З цього місяця: ${changed
+              .map(({ field, value }) => `${CHANGE_LABEL[field]} ${value}`)
+              .join(', ')}`}
+          >
+            <SwapOutlined
+              aria-label="Зміна загального значення"
+              className={s.ChangeMark}
+            />
           </Tooltip>
+        )
+        return monthOverrides[formatPeriod(row)]?.source === 'photo' ? (
+          <>
+            <Tooltip title="Заповнено з фото — перевірте. Будь-яка правка місяця знімає позначку.">
+              <span className={s.FromPhoto}>
+                <CameraOutlined /> {formatMonthLabel(row.year, row.month)}
+              </span>
+            </Tooltip>
+            {mark}
+          </>
         ) : (
-          formatMonthLabel(row.year, row.month)
-        ),
+          <>
+            {formatMonthLabel(row.year, row.month)}
+            {mark}
+          </>
+        )
+      },
     },
     {
       title: (
@@ -134,26 +173,24 @@ const MonthsTable: React.FC<Props> = ({ result }) => {
           Вхідне сальдо
         </Tooltip>
       ),
-      width: 120,
       align: 'right',
       render: (_, row) => formatMoney(row.opening),
     },
     {
       title: 'Сплачено',
-      width: 120,
       render: (_, row) => (
         <InputNumber
           size="small"
           min={0}
           value={valueOf(row, 'paid')}
-          placeholder="0.00"
+          // A general figure (or its change) shows here, as the charge does.
+          placeholder={formatMoney(row.paid)}
           onChange={(value) => patch(row, 'paid', value as number)}
         />
       ),
     },
     {
       title: 'Нараховано',
-      width: 130,
       render: (_, row) => (
         <InputNumber
           size="small"
@@ -172,19 +209,17 @@ const MonthsTable: React.FC<Props> = ({ result }) => {
           Коректура
         </Tooltip>
       ),
-      width: 120,
       render: (_, row) => (
         <InputNumber
           size="small"
           value={valueOf(row, 'correction')}
-          placeholder="0.00"
+          placeholder={formatMoney(row.correction)}
           onChange={(value) => patch(row, 'correction', value as number)}
         />
       ),
     },
     {
       title: 'Площа, м²',
-      width: 110,
       render: (_, row) => (
         <InputNumber
           size="small"
@@ -197,7 +232,6 @@ const MonthsTable: React.FC<Props> = ({ result }) => {
     },
     {
       title: 'Тариф, грн/м²',
-      width: 120,
       render: (_, row) => (
         <InputNumber
           size="small"
@@ -210,7 +244,6 @@ const MonthsTable: React.FC<Props> = ({ result }) => {
     },
     {
       title: `${'Річних'}`,
-      width: 110,
       align: 'right',
       render: (_, row) => formatMoney(row.interest),
     },
@@ -218,7 +251,6 @@ const MonthsTable: React.FC<Props> = ({ result }) => {
       title: (
         <Tooltip title="Сума боргу на кінець місяця.">Вихідне сальдо</Tooltip>
       ),
-      width: 120,
       align: 'right',
       render: (_, row) => <strong>{formatMoney(row.debt)}</strong>,
     },
@@ -228,7 +260,6 @@ const MonthsTable: React.FC<Props> = ({ result }) => {
           Днів
         </Tooltip>
       ),
-      width: 90,
       align: 'right',
       render: (_, row) => (
         <InputNumber
@@ -247,7 +278,6 @@ const MonthsTable: React.FC<Props> = ({ result }) => {
     },
     {
       title: 'Індекс, %',
-      width: 110,
       render: (_, row) => {
         const override = valueOf(row, 'inflationIndex')
         // Ask the reference table, never the value: an index of exactly 100 is
@@ -267,8 +297,11 @@ const MonthsTable: React.FC<Props> = ({ result }) => {
               row.year,
               row.month
             )}`}
-            placeholder={String(row.inflationIndex)}
-            onChange={(value) => patch(row, 'inflationIndex', value as number)}
+            precision={1}
+            placeholder={row.inflationIndex.toFixed(1)}
+            onChange={(value) =>
+              patch(row, 'inflationIndex', value ? Number(value) : null)
+            }
           />
         )
 
@@ -283,29 +316,95 @@ const MonthsTable: React.FC<Props> = ({ result }) => {
     },
     {
       title: 'Коеф.',
-      width: 100,
       align: 'right',
       render: (_, row) => formatCoefficient(row.coefficient),
     },
     {
       title: 'Інфляційні',
-      width: 130,
       align: 'right',
       render: (_, row) => formatMoney(row.inflationLoss),
     },
     ...(hasExclusions ? [exclusionColumn(excludedPeriods)] : []),
   ]
 
+  /**
+   * The row of company-wide values: each over the column it fills,
+   * by the column's place (the same places the totals row uses).
+   */
+  const general: Record<number, React.ReactNode> = {
+    0: (
+      <Tooltip title={EVERY_MONTH_HINT}>
+        <span className={s.GeneralTitle}>Для всіх місяців</span>
+      </Tooltip>
+    ),
+    1: (
+      <GeneralInput
+        field="openingDebt"
+        label="Борг на початок періоду"
+        placeholder={(openingDebtPrefill ?? 0).toFixed(2)}
+      />
+    ),
+    2: (
+      <GeneralInput field="paid" label="Сплачено щомісяця" placeholder="0.00" />
+    ),
+    3: (
+      <GeneralInput
+        field="charged"
+        label="Нараховано щомісяця"
+        placeholder="авто"
+      />
+    ),
+    4: (
+      <GeneralInput
+        field="correction"
+        label="Коректура щомісяця"
+        placeholder="0.00"
+      />
+    ),
+    5: (
+      <GeneralInput
+        field="area"
+        label="Площа, м²"
+        placeholder={String(company?.totalArea ?? 0)}
+      />
+    ),
+    6: (
+      <GeneralInput
+        field="tariff"
+        label="Тариф, грн/м²"
+        placeholder={String(company?.pricePerMeter ?? 0)}
+      />
+    ),
+    9: <StartDaySelect />,
+  }
+
+  // The first row of the table holds them, in the very cells the months
+  // below use - not the header: a column's title is also copied into a
+  // hidden measuring row, which would render every input twice.
+  const columns: ColumnsType<TableRow> = leaves.map((leaf, index) => {
+    const column = leaf as ColumnType<TableRow>
+    return {
+      ...column,
+      // A 1px width in an auto-sized table means "as narrow as the content":
+      // the spare width then goes to the month column alone instead of
+      // padding every figure. Long titles wrap onto two lines.
+      width: index === 0 ? undefined : (column.width ?? 1),
+      render: (value, row, at) =>
+        row.general ? (general[index] ?? null) : column.render(value, row, at),
+    }
+  })
+
   return (
     <div className={s.MonthsWrap}>
-      <Table<MonthRow>
+      <Table<TableRow>
         size="small"
         bordered
         pagination={false}
         scroll={{ x: 'max-content' }}
-        rowKey={(row) => formatPeriod(row)}
+        rowKey={(row) => (row.general ? 'general' : formatPeriod(row))}
+        rowClassName={(row) => (row.general ? s.GeneralRow : '')}
         columns={columns}
-        dataSource={result.rows}
+        dataSource={[GENERAL_ROW, ...result.rows]}
         summary={() => (
           <Table.Summary fixed>
             <Table.Summary.Row>
