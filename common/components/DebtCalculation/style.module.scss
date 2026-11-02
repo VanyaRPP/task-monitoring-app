@@ -89,6 +89,12 @@ $hairline: rgba(140, 140, 140, 0.4);
  * scrolling inside. Full-bleed made its borders butt into the card's rounded
  * corners, which read as unfinished.
  */
+// Columns are as wide as their content - the title or the input, whichever
+// is wider. A stretching (100%) input would take all the spare width.
+.MonthsWrap :global(.ant-table-tbody .ant-input-number) {
+  width: 96px;
+}
+
 .MonthsWrap {
   display: flex;
   flex-direction: column;
@@ -288,12 +294,63 @@ $hairline: rgba(140, 140, 140, 0.4);
 }
 
 // The same figure for every month, and the day the debt starts on.
-.EveryMonth {
-  margin-top: 8px;
+
+.General {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  font-weight: 400;
 }
 
-.StartDay {
-  width: 80px;
+.GeneralInput {
+  width: 96px;
+}
+
+.GeneralNote {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.GeneralTitle {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+// The row of values for every month: tinted over the cell's own opaque
+// background, so the fixed «Місяць» cell still hides what scrolls under it.
+.GeneralRow > td {
+  vertical-align: top;
+  box-shadow: inset 0 0 0 9999px rgba(127, 127, 127, 0.1);
+}
+
+.ChangesButton {
+  align-self: flex-start;
+  height: auto;
+  padding: 0;
+  font-size: 12px;
+}
+
+.Changes {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  max-width: 320px;
+}
+
+.ChangeRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ChangeFrom {
+  width: 120px;
+}
+
+.ChangeMark {
+  margin-left: 4px;
 }
 
 .CmuSwitch {
