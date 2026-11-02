@@ -69,6 +69,7 @@
     "removeItem": "Remove line",
     "itemsViewGroups": "By group",
     "itemsViewFlat": "Each",
+    "dragHint": "Press and hold a line outside its fields, then drag it to another category",
     "newItems": "New lines",
     "splitLegacy": "This record has one amount of {{amount}} for several categories. Split it across the lines.",
     "scope": "Domain or company"
