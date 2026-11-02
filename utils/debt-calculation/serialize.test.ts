@@ -295,3 +295,23 @@ describe('виключені періоди в збереженні', () => {
     })
   })
 })
+
+describe('sanitizeOverrides — inflation index', () => {
+  const ID = '0123456789abcdef01234567'
+
+  it('drops an index of 0: it is no index, and the table would show it', () => {
+    const saved = sanitizeOverrides({
+      [ID]: {
+        months: {
+          '2026-10': { inflationIndex: 0, paid: 5 },
+          '2026-09': { inflationIndex: 102.1 },
+        },
+      },
+    })
+
+    expect(saved[ID].months).toEqual({
+      '2026-10': { paid: 5 },
+      '2026-09': { inflationIndex: 102.1 },
+    })
+  })
+})

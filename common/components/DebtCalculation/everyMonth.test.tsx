@@ -172,3 +172,33 @@ describe('the day the debt starts on, and days per month', () => {
     expect(daysCell(1)).toHaveAttribute('aria-valuemax', '28')
   })
 })
+
+describe('a general value that changes from a month on', () => {
+  const byLabel = (label: string) =>
+    document.querySelector<HTMLElement>(`[aria-label="${label}"]`)
+
+  it('a tariff rise from February bills February and March by it', async () => {
+    render(<Page />)
+    await userEvent.type(screen.getByLabelText('Тариф, грн/м²'), '10')
+    expect(body()).toBe(formatMoney(3 * 500))
+
+    await userEvent.click(byLabel('Тариф, грн/м²: зміни з місяця'))
+    await userEvent.click(await screen.findByText('Додати зміну'))
+    // A new change starts a month after the period start, at the same value.
+    const value = byLabel('Тариф, грн/м²: значення') as HTMLInputElement
+    expect(value).toHaveValue('10')
+    await userEvent.clear(value)
+    await userEvent.type(value, '12')
+
+    expect(body()).toBe(formatMoney(500 + 600 + 600))
+    expect(byLabel('Тариф, грн/м²: зміни з місяця')).toHaveTextContent(
+      '1 зміна'
+    )
+    // The month the tariff changes in is marked in the table.
+    const marked = Array.from(
+      document.querySelectorAll('[aria-label="Зміна загального значення"]')
+    ).map((mark) => mark.closest('tr')?.textContent)
+    expect(marked).toHaveLength(1)
+    expect(marked[0]).toContain('Лютий 2026')
+  })
+})

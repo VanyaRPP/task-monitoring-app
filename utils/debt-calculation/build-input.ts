@@ -1,4 +1,5 @@
 import { IInflationIndex } from '@modules/models/InflationIndex'
+import { IValueChanges, valueInMonth } from './changes'
 import type { IExcludedPeriod } from './exclusions'
 import {
   accrualDays,
@@ -44,6 +45,11 @@ export interface IApartmentOverrides {
   charged?: number
   paid?: number
   correction?: number
+  /**
+   * Later values of area, tariff and the monthly figures: each holds from its
+   * month on, the field above stands until the first one (see `changes.ts`).
+   */
+  changes?: IValueChanges
   /** Day of the first month the debt starts accruing on (1-31). */
   startDay?: number
   /**
@@ -99,7 +105,8 @@ export const indexesByPeriod = (
  * Assembles the input for {@link calculateDebt} out of what the page holds.
  *
  * Precedence runs from most to least specific:
- * month edit → company edit → DB prefill → company record.
+ * month edit → company edit (with its changes by month) → DB prefill →
+ * company record.
  *
  * `charged` deliberately has no default: until it is typed in, the engine
  * derives `area × tariff` itself, so editing either shows up in the total at
@@ -128,6 +135,10 @@ export const buildDebtCalculationInput = ({
         prefill.openingBalance && from && formatPeriod(from) !== period
           ? prefill.openingBalance
           : 0
+      // The company-wide value for this month, its changes included.
+      const general = (field: keyof IValueChanges) =>
+        valueInMonth(overrides.changes?.[field], overrides[field], period)
+      const generalCharged = general('charged')
       const prefillCharged =
         brought !== 0 ? (prefill.charged ?? 0) + brought : prefill.charged
 
@@ -135,13 +146,13 @@ export const buildDebtCalculationInput = ({
         ...yearMonth,
         area:
           month.area ??
-          overrides.area ??
+          general('area') ??
           prefill.area ??
           company?.totalArea ??
           0,
         tariff:
           month.tariff ??
-          overrides.tariff ??
+          general('tariff') ??
           prefill.tariff ??
           company?.pricePerMeter ??
           0,
@@ -149,11 +160,11 @@ export const buildDebtCalculationInput = ({
         // opening balance brought into the month still comes on top of it.
         charged:
           month.charged ??
-          (prefill.charged !== undefined || overrides.charged === undefined
+          (prefill.charged !== undefined || generalCharged === undefined
             ? prefillCharged
             : // A debt from the 10th is billed for the days left of its month.
               +toRoundFixed(
-                (overrides.charged *
+                (generalCharged *
                   accrualDays(yearMonth.year, yearMonth.month, {
                     startDay: index === 0 ? overrides.startDay : undefined,
                     days: month.days,
@@ -161,8 +172,8 @@ export const buildDebtCalculationInput = ({
                   daysInMonth(yearMonth.year, yearMonth.month)
               ) + brought),
         correction:
-          month.correction ?? prefill.correction ?? overrides.correction,
-        paid: month.paid ?? prefill.paid ?? overrides.paid ?? 0,
+          month.correction ?? prefill.correction ?? general('correction'),
+        paid: month.paid ?? prefill.paid ?? general('paid') ?? 0,
         ...(index === 0 && overrides.startDay
           ? { startDay: overrides.startDay }
           : {}),

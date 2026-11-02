@@ -100,6 +100,45 @@ describe('buildDebtCalculationDocument — шапка', () => {
   })
 })
 
+describe('buildDebtCalculationDocument — тариф, що змінювався', () => {
+  const changed = calculateDebt(
+    buildDebtCalculationInput({
+      company: { totalArea: 67.08, pricePerMeter: 5.25 },
+      from: { year: 2018, month: 8 },
+      to: { year: 2024, month: 2 },
+      overrides: {
+        startDay: 10,
+        changes: {
+          tariff: [
+            { from: '2019-02', value: 5.89 },
+            { from: '2024-01', value: 9.91 },
+          ],
+        },
+      },
+    })
+  )
+  const { rows } = buildDebtCalculationDocument(
+    input({ result: changed, startDay: 10 })
+  )
+
+  it('пише кожен тариф з датами, коли він діяв', () => {
+    const at = rows.findIndex((line) =>
+      String(line[0]?.v ?? '').startsWith('Тариф')
+    )
+
+    expect(rows.slice(at, at + 3).map((line) => line[3].v)).toEqual([
+      '5.25 — з 10.08.2018 по 31.01.2019',
+      '5.89 — з 01.02.2019 по 31.12.2023',
+      '9.91 — з 01.01.2024 по 29.02.2024',
+    ])
+    expect(rows[at + 1][0].v).toBe('')
+  })
+
+  it('лишає площу одним числом, бо вона не змінювалась', () => {
+    expect(findRow(rows, 'Загальна площа')[3].v).toBe(67.08)
+  })
+})
+
 describe('buildDebtCalculationDocument — таблиця', () => {
   const { rows, columns } = buildDebtCalculationDocument(input())
   const header = findRow(rows, 'Місяць / Рік')

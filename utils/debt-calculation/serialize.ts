@@ -1,4 +1,10 @@
 import { IApartmentOverrides, IMonthOverride } from './build-input'
+import {
+  CHANGE_FIELDS,
+  IValueChange,
+  IValueChanges,
+  normalizeChanges,
+} from './changes'
 import { IYearMonth } from './months'
 import { dayNumber, IExcludedPeriod } from './exclusions'
 import { DEFAULT_INFLATION_METHOD, InflationMethod } from './types'
@@ -119,6 +125,32 @@ const sanitizeExcludedPeriods = (
   return out.length > 0 ? out : undefined
 }
 
+/** A tariff that changed monthly for a century is still under this. */
+const MAX_CHANGES_PER_FIELD = 240
+
+/** Changes by month as they may be stored: a `YYYY-MM` and a number each. */
+const sanitizeChanges = (source: unknown): IValueChanges | undefined => {
+  if (!source || typeof source !== 'object') return undefined
+
+  const out: IValueChanges = {}
+  for (const field of CHANGE_FIELDS) {
+    const list = (source as Record<string, unknown>)[field]
+    if (!Array.isArray(list)) continue
+
+    const valid: IValueChange[] = []
+    for (const raw of list.slice(0, MAX_CHANGES_PER_FIELD)) {
+      const from = (raw as IValueChange)?.from
+      const value = finite((raw as IValueChange)?.value)
+      if (typeof from !== 'string' || !PERIOD.test(from)) continue
+      if (value === undefined) continue
+      valid.push({ from, value })
+    }
+    if (valid.length > 0) out[field] = normalizeChanges(valid)
+  }
+
+  return Object.keys(out).length > 0 ? out : undefined
+}
+
 /** Accepts only a parseable ISO date, normalized to canonical form. */
 const sanitizeTimestamp = (value: unknown): string | undefined => {
   if (typeof value !== 'string' || value.length > MAX_TIMESTAMP_LENGTH) {
@@ -143,6 +175,10 @@ const sanitizeMonths = (
 
     const month: IMonthOverride = pickNumbers(raw, MONTH_FIELDS)
     keepWhole(month, 'days', 0, 31)
+    // A zero index is no index; stored, it would read as one in the table.
+    if (month.inflationIndex !== undefined && month.inflationIndex <= 0) {
+      delete month.inflationIndex
+    }
     const updatedAt = sanitizeTimestamp((raw as IMonthOverride)?.updatedAt)
     // A timestamp on its own, with no value beside it, is an empty row.
     if (Object.keys(month).length === 0) continue
@@ -193,6 +229,8 @@ export const sanitizeOverrides = (
       (raw as IApartmentOverrides)?.excludedPeriods
     )
     if (excludedPeriods) apartment.excludedPeriods = excludedPeriods
+    const changes = sanitizeChanges((raw as IApartmentOverrides)?.changes)
+    if (changes) apartment.changes = changes
     const months = sanitizeMonths((raw as IApartmentOverrides)?.months)
     if (months) apartment.months = months
 
