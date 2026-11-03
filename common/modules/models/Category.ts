@@ -1,11 +1,11 @@
-import mongoose, { Schema, ObjectId } from 'mongoose'
+import mongoose, { Schema, Types } from 'mongoose'
 import { ITask } from './Task'
 
 export interface ICategory {
   _id?: string
   name: string
   description?: string
-  taskincategory?: [ITask | ObjectId]
+  taskincategory?: [ITask | Types.ObjectId]
 }
 
 const CategorySchema = new Schema<ICategory>({
@@ -14,6 +14,8 @@ const CategorySchema = new Schema<ICategory>({
   description: { type: String, default: 'no description' },
 })
 
-const Category =
-  mongoose.models.Category || mongoose.model('Category', CategorySchema)
+const Category: mongoose.Model<ICategory> =
+  mongoose.models?.Category ||
+  mongoose.model<ICategory>('Category', CategorySchema)
+
 export default Category

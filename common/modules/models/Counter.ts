@@ -19,8 +19,7 @@ const CounterSchema = new Schema<ICounter>(
   { versionKey: false }
 )
 
-const Counter =
-  (mongoose.models.Counter as mongoose.Model<ICounter>) ||
-  mongoose.model<ICounter>('Counter', CounterSchema)
+const Counter: mongoose.Model<ICounter> =
+  mongoose.models?.Counter || mongoose.model<ICounter>('Counter', CounterSchema)
 
 export default Counter

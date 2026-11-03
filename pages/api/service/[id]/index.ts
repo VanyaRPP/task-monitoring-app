@@ -24,7 +24,7 @@ export default async function handler(
             .status(400)
             .json({ success: false, message: 'not allowed' })
         }
-        await Service.findByIdAndRemove(req.query.id).then((service) => {
+        await Service.findByIdAndDelete(req.query.id).then((service) => {
           if (service) {
             return res.status(200).json({
               success: true,
@@ -48,7 +48,7 @@ export default async function handler(
             const response = await Service.findOneAndUpdate(
               { _id: req.query.id },
               req.body,
-              { new: true }
+              { returnDocument: 'after' }
             )
             return res.status(200).json({ success: true, data: response })
           } else {
@@ -61,7 +61,7 @@ export default async function handler(
               const response = await Service.findOneAndUpdate(
                 { _id: req.query.id },
                 req.body,
-                { new: true }
+                { returnDocument: 'after' }
               )
               return res.status(200).json({ success: true, data: response })
             }

@@ -159,7 +159,7 @@ describe('Payment access', () => {
   })
 
   describe('/api/spacehub/payment/[id]/change-log', () => {
-    const logFor = (paymentId: unknown) =>
+    const logFor = (paymentId: mongoose.Types.ObjectId | string) =>
       PaymentChangeLog.create({
         paymentId,
         invoiceData: invoiceIn(ownDomain, ownCompany),

@@ -20,7 +20,7 @@ export default async function handler(
       }
     case 'DELETE':
       try {
-        await Category.findByIdAndRemove(req.query.id).then((category) => {
+        await Category.findByIdAndDelete(req.query.id).then((category) => {
           if (!category) {
             return res.status(400).json({
               success: false,

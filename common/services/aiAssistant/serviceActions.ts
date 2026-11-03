@@ -122,7 +122,9 @@ export async function resolveStreet(domainId: string, said?: string) {
   if (!said?.trim()) return null
 
   const domain = await Domain.findById(domainId).select('streets').lean()
-  const streets = await Street.find({ _id: { $in: domain?.streets ?? [] } })
+  const streets = await Street.find({
+    _id: { $in: (domain?.streets ?? []).map(String) },
+  })
     .select('address city')
     .lean()
   const key = normalize(said)

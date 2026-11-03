@@ -17,7 +17,7 @@ export default async function handler(
       const dateOfCreating = dayjs(notification.timestamp)
       const currentDay = dayjs(new Date())
       if (dateOfCreating.add(2, 'days').isAfter(currentDay)) {
-        await Notification.findOneAndRemove({ _id: notification._id })
+        await Notification.findOneAndDelete({ _id: notification._id })
       }
     })
 

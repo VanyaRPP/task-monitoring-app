@@ -1,6 +1,6 @@
 import Domain from '@modules/models/Domain'
 import Counter from '@modules/models/Counter'
-import Payment from '@modules/models/Payment'
+import Payment, { IPaymentModel } from '@modules/models/Payment'
 import RealEstate from '@modules/models/RealEstate'
 import Service from '@modules/models/Service'
 import {
@@ -12,7 +12,7 @@ import {
 } from '@pages/api/spacehub/payment/pipelines'
 import { quarters } from '@utils/constants'
 import { PaymentStatus } from '@common/api/paymentApi/payment.api.types'
-import mongoose, { FilterQuery } from 'mongoose'
+import mongoose, { QueryFilter } from 'mongoose'
 
 export interface PaymentQueryParams {
   streetIds?: string | string[]
@@ -84,14 +84,14 @@ export async function getPayments(
       ? serviceIds.split(',').map((id) => decodeURIComponent(id))
       : serviceIds.map((id) => decodeURIComponent(id))
     : null
-  const options: FilterQuery<typeof Payment> = {}
+  const options: QueryFilter<IPaymentModel> = {}
 
   if (isGlobalAdmin) {
     if (companiesIds) {
       options.company = { $in: companiesIds }
     }
     if (streetsIds) {
-      options.street = { $in: streetIds }
+      options.street = { $in: streetsIds }
     }
     if (domainsIds) {
       options.domain = { $in: domainsIds }
@@ -116,7 +116,7 @@ export async function getPayments(
     }
 
     if (streetsIds) {
-      options.street = { $in: streetIds }
+      options.street = { $in: streetsIds }
     }
 
     const domains = await Domain.find({
@@ -131,7 +131,7 @@ export async function getPayments(
     const companies = await RealEstate.find({
       ...(companiesIds ? { _id: { $in: companiesIds } } : {}),
       adminEmails: user.email,
-      ...(domainIds ? { domain: { $in: domainIds } } : {}),
+      ...(domainsIds ? { domain: { $in: domainsIds } } : {}),
     })
 
     options.company = {
@@ -142,7 +142,7 @@ export async function getPayments(
     }
 
     if (streetsIds) {
-      options.street = { $in: streetIds }
+      options.street = { $in: streetsIds }
     }
   }
 
@@ -347,7 +347,7 @@ export async function reserveInvoiceNumbers(count = 1): Promise<number> {
   const counter = await Counter.findOneAndUpdate(
     { _id: INVOICE_COUNTER_ID },
     { $inc: { seq: count } },
-    { new: true }
+    { returnDocument: 'after' }
   ).lean()
   return counter.seq - count + 1
 }
@@ -416,7 +416,7 @@ export async function duplicatePayments(
       continue
     }
 
-    const body = source.toObject() as Record<string, unknown>
+    const body: Record<string, unknown> = { ...source.toObject() }
     for (const field of NON_COPYABLE_PAYMENT_FIELDS) {
       delete body[field]
     }

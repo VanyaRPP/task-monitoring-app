@@ -585,7 +585,7 @@ class ProfitService {
       unset.length
         ? { ...data, $unset: Object.fromEntries(unset.map((f) => [f, 1])) }
         : data,
-      { new: true }
+      { returnDocument: 'after' }
     )
   }
 

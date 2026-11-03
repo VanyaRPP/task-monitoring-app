@@ -37,7 +37,7 @@ const inflationRow = {
 }
 
 const fillEmpty = async (
-  domainIds: unknown[],
+  domainIds: string[],
   year: number,
   month: number,
   value: number

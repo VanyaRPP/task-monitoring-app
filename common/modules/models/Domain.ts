@@ -1,10 +1,10 @@
-import mongoose, { ObjectId, Schema, Types } from 'mongoose'
+import mongoose, { Schema, Types } from 'mongoose'
 
 export interface IDomain {
   _id: string
   name: string
   adminEmails: [string]
-  streets: [ObjectId]
+  streets: [Types.ObjectId]
   description: string
   mfo: string
   iban: string
@@ -67,8 +67,7 @@ const DomainSchema = new Schema<IDomain>({
   },
 })
 
-const Domain =
-  (mongoose.models?.Domain as mongoose.Model<IDomain>) ||
-  mongoose.model('Domain', DomainSchema)
+const Domain: mongoose.Model<IDomain> =
+  mongoose.models?.Domain || mongoose.model<IDomain>('Domain', DomainSchema)
 
 export default Domain

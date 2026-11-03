@@ -327,7 +327,7 @@ describe('Payment API Endpoint - [id]', () => {
     it('should allow GlobalAdmin to delete', async () => {
       await mockLoginAs(users.globalAdmin)
       ;(Payment.findById as jest.Mock).mockResolvedValue(debitPayment)
-      ;(Payment.findByIdAndRemove as jest.Mock).mockResolvedValue(debitPayment)
+      ;(Payment.findByIdAndDelete as jest.Mock).mockResolvedValue(debitPayment)
 
       const res = await performRequest('DELETE', debitPayment._id)
 
@@ -352,7 +352,7 @@ describe('Payment API Endpoint - [id]', () => {
       ;(Payment.findById as jest.Mock).mockResolvedValue(null)
       const res = await performRequest('DELETE', debitPayment._id)
       expect(res.status).toHaveBeenCalledWith(404)
-      expect(Payment.findByIdAndRemove).not.toHaveBeenCalled()
+      expect(Payment.findByIdAndDelete).not.toHaveBeenCalled()
     })
 
     it('allows domain admin to DELETE own-domain payment', async () => {
@@ -362,7 +362,7 @@ describe('Payment API Endpoint - [id]', () => {
         _id: debitPayment.domain,
         adminEmails: [users.domainAdmin.email],
       })
-      ;(Payment.findByIdAndRemove as jest.Mock).mockResolvedValue(debitPayment)
+      ;(Payment.findByIdAndDelete as jest.Mock).mockResolvedValue(debitPayment)
 
       const res = await performRequest('DELETE', debitPayment._id)
       expect(res.status).toHaveBeenCalledWith(200)
@@ -378,7 +378,7 @@ describe('Payment API Endpoint - [id]', () => {
 
       const res = await performRequest('DELETE', debitPayment._id)
       expect(res.status).toHaveBeenCalledWith(403)
-      expect(Payment.findByIdAndRemove).not.toHaveBeenCalled()
+      expect(Payment.findByIdAndDelete).not.toHaveBeenCalled()
     })
   })
 })

@@ -39,7 +39,7 @@ async function invoiceTemplateByIdHandler(
       const updated = await InvoiceTemplate.findOneAndUpdate(
         { _id: id, isBuiltIn: false },
         { $set: update },
-        { new: true }
+        { returnDocument: 'after' }
       ).lean()
 
       if (!updated) {

@@ -167,12 +167,10 @@ export default async function handler(
           }
 
           if (targetUser.roles.includes(Roles.DOMAIN_ADMIN)) {
-            return res
-              .status(403)
-              .json({
-                success: false,
-                message: "You can't delete another domain admin",
-              })
+            return res.status(403).json({
+              success: false,
+              message: "You can't delete another domain admin",
+            })
           }
 
           const adminDomains = await Domain.find({

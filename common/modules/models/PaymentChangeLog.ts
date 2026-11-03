@@ -1,4 +1,4 @@
-import mongoose, { Schema, ObjectId } from 'mongoose'
+import mongoose, { Schema, Types } from 'mongoose'
 import {
   IPaymentField,
   IPaymentSnapshot,
@@ -9,12 +9,12 @@ import {
 } from '@common/api/paymentApi/payment.api.types'
 
 export interface IPaymentChangeLogModel {
-  paymentId: ObjectId
+  paymentId: Types.ObjectId
 
   date: Date
   reason?: string
 
-  actorId?: ObjectId
+  actorId?: Types.ObjectId
   actorEmail?: string
 
   actionType: PaymentActionType
@@ -23,9 +23,9 @@ export interface IPaymentChangeLogModel {
   before?: IPaymentSnapshot
   after?: IPaymentSnapshot
 
-  domainId?: ObjectId
-  companyId?: ObjectId
-  batchId?: ObjectId
+  domainId?: Types.ObjectId
+  companyId?: Types.ObjectId
+  batchId?: Types.ObjectId
 
   invoiceData: {
     invoiceNumber: number
@@ -127,9 +127,11 @@ const PaymentChangeLogSchema = new Schema<IPaymentChangeLogModel>(
   { timestamps: true }
 )
 
-const PaymentChangeLog =
-  (mongoose.models
-    .PaymentChangeLog as mongoose.Model<IPaymentChangeLogModel>) ||
-  mongoose.model('PaymentChangeLog', PaymentChangeLogSchema)
+const PaymentChangeLog: mongoose.Model<IPaymentChangeLogModel> =
+  mongoose.models?.PaymentChangeLog ||
+  mongoose.model<IPaymentChangeLogModel>(
+    'PaymentChangeLog',
+    PaymentChangeLogSchema
+  )
 
 export default PaymentChangeLog
