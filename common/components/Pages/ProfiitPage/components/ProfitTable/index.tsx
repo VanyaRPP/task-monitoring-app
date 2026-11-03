@@ -1,13 +1,15 @@
 'use client'
 
 import { setTransactionTablePagination } from '@modules/store/profitPageSlice'
-import { useGetByDomainQuery } from '@common/api/profitsApi/profits.api'
-import { useDeleteProfitMutation } from '@common/api/profitsApi/profits.api'
+import {
+  useGetByDomainQuery,
+  useGetByCompanyQuery,
+  useDeleteProfitMutation,
+} from '@common/api/profitsApi/profits.api'
 import { useAppDispatch, useAppSelector } from '@modules/store/hooks'
 import { FC, useEffect, useMemo, useState, useCallback } from 'react'
 import {
   getParentColumns,
-  getChildColumns,
   MoneyCell,
   sumRowsByCurrency,
   type DrillTarget,
@@ -27,7 +29,6 @@ import {
   Tooltip,
   message,
   Card,
-  Empty,
   Typography,
   theme,
 } from 'antd'
@@ -35,32 +36,47 @@ import { useTranslation } from 'react-i18next'
 import { useRouter } from 'next/router'
 import { AppRoutes, Operations } from '@utils/constants'
 import PaymentsDrilldown from '../PaymentsDrilldown'
+import CategoryBreakdown from './CategoryBreakdown'
+import type { ProfitScope } from '../../hook/useProfitScopes'
+import s from './style.module.scss'
 
 interface ProfitTableProps {
-  domainId?: string
+  scope: ProfitScope & { label: string }
 }
 
 const { Text } = Typography
 
-const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
+const ProfitTable: FC<ProfitTableProps> = ({ scope }) => {
   const router = useRouter()
   const isOnPage = router.pathname === AppRoutes.PROFIT
   const { token } = theme.useToken()
   const { t } = useTranslation()
   const [selectedProfit, setSelectedProfit] = useState<Profit | null>(null)
+  const [focusItemIndex, setFocusItemIndex] = useState<number>()
   const dispatch = useAppDispatch()
   const { currentPage, pageSize } = useAppSelector(
     (state) => state.profitPage.transactionTablePagination
   )
 
+  // Domain and company are symmetric scopes now (both carry their own
+  // expenses, both allow adding records) - this only picks which query to
+  // run and which perspective labels the invoice figures use (an invoice is
+  // income for a domain, an expense for a company - see tableConfig.tsx).
+  const isDomainScope = scope.type === 'domain'
+
+  const domainQuery = useGetByDomainQuery(
+    { domainId: scope.id, page: currentPage, limit: pageSize },
+    { skip: !isDomainScope }
+  )
+  const companyQuery = useGetByCompanyQuery(
+    { companyId: scope.id, page: currentPage, limit: pageSize },
+    { skip: isDomainScope }
+  )
   const {
     data: profitsGrouped,
     isLoading,
     isError,
-  } = useGetByDomainQuery(
-    { domainId: domainId || '', page: currentPage, limit: pageSize },
-    { skip: !domainId }
-  )
+  } = isDomainScope ? domainQuery : companyQuery
 
   // The server already returns each month fully aggregated - expected income
   // from invoices, actual income from payments, expenses from manual records.
@@ -141,7 +157,10 @@ const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
 
   return (
     <>
-      <ProfitDashboard dataSource={dataSource} />
+      <ProfitDashboard
+        dataSource={dataSource}
+        perspective={isDomainScope ? 'domain' : 'company'}
+      />
 
       <Card size="small" style={{ marginTop: 16 }}>
         <Space style={{ marginBottom: 16 }}>
@@ -180,8 +199,20 @@ const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
         <Table
           bordered={true}
           loading={isLoading}
-          columns={getParentColumns(token, (month, target, currency) =>
-            setDrilldown({ month, target, currency })
+          // Seven money columns no longer fit a narrow viewport; without this
+          // antd squeezes them until the figures wrap mid-number.
+          scroll={{ x: 'max-content' }}
+          columns={getParentColumns(
+            token,
+            (month, target, currency) =>
+              setDrilldown({ month, target, currency }),
+            {
+              perspective: isDomainScope ? 'domain' : 'company',
+              // A debtor breakdown for a single company is a no-op (it would
+              // list exactly one row - itself), not a business rule about
+              // domain vs company, so this stays scope-specific.
+              allowDebtorDrill: isDomainScope,
+            }
           )}
           dataSource={dataSource}
           pagination={
@@ -206,36 +237,20 @@ const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
           }
           expandable={{
             expandedRowRender: (record) => (
-              <Table
-                // No border here: a bordered grid inside a bordered grid reads
-                // as two stacked tables rather than one nested detail view.
-                size="small"
-                columns={getChildColumns(
-                  (record) => {
-                    setSelectedProfit(record)
-                    setIsEditing(false)
-                  },
-                  (record) => {
-                    setSelectedProfit(record)
-                    setIsEditing(true)
-                  },
-                  handleDelete,
-                  isDeleting
-                )}
-                dataSource={record.transactions.map((t: Profit) => ({
-                  ...t,
-                  key: t._id,
-                }))}
-                pagination={false}
-                rowKey={(record) => record._id}
-                locale={{
-                  emptyText: (
-                    <Empty
-                      image={Empty.PRESENTED_IMAGE_SIMPLE}
-                      description={t('profitPage:table.child.noExpenses')}
-                    />
-                  ),
+              <CategoryBreakdown
+                transactions={record.transactions}
+                onPreview={(profit, itemIndex) => {
+                  setSelectedProfit(profit)
+                  setFocusItemIndex(itemIndex)
+                  setIsEditing(false)
                 }}
+                onEdit={(profit, itemIndex) => {
+                  setSelectedProfit(profit)
+                  setFocusItemIndex(itemIndex)
+                  setIsEditing(true)
+                }}
+                onDelete={handleDelete}
+                isDeleting={isDeleting}
               />
             ),
             expandedRowKeys,
@@ -246,25 +261,27 @@ const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
           aria-label={t('profitPage:table.tableAriaLabel')}
           summary={(rows: readonly ProfitMonthRow[]) => {
             const totals = sumRowsByCurrency(rows)
+            const picks: ((c: CurrencyTotals) => number)[] = [
+              (c) => c.expected,
+              (c) => c.actual,
+              (c) => c.outstanding,
+              (c) => c.expenses,
+              (c) => c.income,
+            ]
             return (
               <Table.Summary fixed>
                 <Table.Summary.Row>
-                  <Table.Summary.Cell index={0}>
+                  <Table.Summary.Cell index={0} />
+                  <Table.Summary.Cell index={1}>
                     <Text strong>{t('profitPage:table.summary')}</Text>
                   </Table.Summary.Cell>
-                  {(
-                    [
-                      (c) => c.expected,
-                      (c) => c.actual,
-                      (c) => c.outstanding,
-                      (c) => c.expenses,
-                    ] as ((c: CurrencyTotals) => number)[]
-                  ).map((pick, i) => (
+
+                  {picks.map((pick, i) => (
                     <Table.Summary.Cell key={i} index={i + 1} align="right">
                       <MoneyCell row={totals} pick={pick} />
                     </Table.Summary.Cell>
                   ))}
-                  <Table.Summary.Cell index={5} align="right">
+                  <Table.Summary.Cell index={6} align="right">
                     <MoneyCell
                       row={totals}
                       pick={(c) => c.net}
@@ -281,7 +298,8 @@ const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
 
       {drilldown && (
         <PaymentsDrilldown
-          domainId={domainId}
+          domainId={isDomainScope ? scope.id : undefined}
+          companyId={isDomainScope ? undefined : scope.id}
           month={drilldown.month}
           target={drilldown.target}
           currency={drilldown.currency}
@@ -292,9 +310,12 @@ const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
       {selectedProfit && (
         <AddCostModal
           currentProfit={selectedProfit}
+          focusItemIndex={focusItemIndex}
+          activeScope={scope}
           profitActions={{ preview: !isEditing, edit: isEditing }}
           closeModal={() => {
             setSelectedProfit(null)
+            setFocusItemIndex(undefined)
             setIsEditing(false)
           }}
         />

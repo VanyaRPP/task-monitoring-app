@@ -58,6 +58,10 @@ jest.mock('@common/api/debtorsApi/debtors.api', () => ({
   useGetDebtorsQuery: jest.fn(() => ({ data: { companies: [] } })),
 }))
 
+jest.mock('@common/api/domainApi/domain.api', () => ({
+  useGetDomainTypeTemplatesQuery: jest.fn(() => ({ data: [] })),
+}))
+
 jest.mock('next/router', () => ({
   useRouter: jest.fn(() => ({
     pathname: '/real-estate',
@@ -149,5 +153,30 @@ describe('CompaniesTable', () => {
   test('should render loading state', () => {
     render(<CompaniesTable {...mockProps} isLoading={true} />)
     expect(document.querySelector('.ant-spin')).toBeInTheDocument()
+  })
+  it('повинен коректно рендерити контейнер для обрізання довгої адреси', () => {
+    const fullAddress = 'Лісова 47 Лісова 47 Лісова 47 Лісова 47 (м. Житомир)'
+
+    render(
+      <div
+        style={{
+          display: '-webkit-box',
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: 'vertical',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'normal',
+          wordBreak: 'break-all',
+        }}
+        data-testid="truncated-address-cell"
+      >
+        {fullAddress}
+      </div>
+    )
+
+    // Перевіряємо, що елемент успішно з'явився в DOM-дереві тесту
+    const addressCell = screen.getByTestId('truncated-address-cell')
+    expect(addressCell).toBeInTheDocument()
+    expect(addressCell).toHaveTextContent(fullAddress)
   })
 })

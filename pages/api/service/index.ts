@@ -28,8 +28,16 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
-        const { limit, skip, domainId, streetId, serviceId, year, month } =
-          req.query
+        const {
+          limit,
+          skip,
+          domainId,
+          streetId,
+          withoutStreet,
+          serviceId,
+          year,
+          month,
+        } = req.query
 
         if (!isUser && !isDomainAdmin && !isGlobalAdmin) {
           return res.status(200).json({ success: false, data: [] })
@@ -62,6 +70,10 @@ export default async function handler(
 
         if (streetsIds) {
           filters.street = { $in: streetsIds }
+        } else if (withoutStreet === 'true') {
+          // Month services with no address (missing or null street). Leaving
+          // the street out entirely would match every street's service.
+          filters.street = null
         }
 
         if (servicesIds) {
@@ -200,7 +212,12 @@ export default async function handler(
           }
 
           // TODO: body validation
-          const service = await Service.create(req.body)
+          const body = { ...req.body }
+          if (!body.street) {
+            delete body.street
+          }
+
+          const service = await Service.create(body)
           return res.status(200).json({ success: true, data: service })
         } else {
           return res
@@ -208,7 +225,9 @@ export default async function handler(
             .json({ success: false, message: 'not allowed' })
         }
       } catch (error) {
-        return res.status(400).json({ success: false, message: error })
+        return res
+          .status(400)
+          .json({ success: false, message: error?.message ?? error })
       }
   }
 }

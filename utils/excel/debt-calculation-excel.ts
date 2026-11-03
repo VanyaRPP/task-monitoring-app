@@ -1,0 +1,520 @@
+import { cascaderMonths } from '@utils/constants'
+import { IValueRun, valueRuns } from '@utils/debt-calculation/changes'
+import {
+  daysInMonth,
+  formatPeriod,
+  IYearMonth,
+} from '@utils/debt-calculation/months'
+import {
+  describeExcludedPeriod,
+  EXCLUSION_NOTE,
+} from '@utils/debt-calculation/excludedPeriodPresets'
+import type { IExcludedPeriod } from '@utils/debt-calculation/exclusions'
+import {
+  IDebtCalculationResult,
+  InflationMethod,
+} from '@utils/debt-calculation/types'
+
+export interface IDebtExcelInput {
+  companyName: string
+  description?: string
+  domainName?: string
+  result: IDebtCalculationResult
+  from?: IYearMonth
+  to?: IYearMonth
+  annualRatePercent: number
+  inflationMethod: InflationMethod
+  /**
+   * Area and tariff as they stand in the page header - only for a document
+   * with no months; otherwise they are read off the months, changes and all.
+   */
+  area?: number
+  tariff?: number
+  openingDebt?: number
+  /** Day of the first month the debt starts on, for the period's dates. */
+  startDay?: number
+  /** As applied to the period (see `periodsWithin`); each becomes a tag line. */
+  excludedPeriods?: IExcludedPeriod[]
+  generatedAt?: Date
+}
+
+export type CellAlign = 'left' | 'center' | 'right'
+
+export interface IExcelCell {
+  v: string | number
+  bold?: boolean
+  align?: CellAlign
+  /** Border around the cell. */
+  border?: boolean
+  /** Fill - table header and total rows. */
+  fill?: 'head' | 'total'
+  /** How many columns to span, this one included. */
+  span?: number
+  /** Number format, e.g. `0.00`. */
+  numFmt?: string
+}
+
+export interface IDebtExcelDocument {
+  rows: (IExcelCell | null)[][]
+  columns: { wch: number }[]
+  sheetName: string
+}
+
+export const SHEET_NAME = 'Розрахунок'
+
+const THIN = { style: 'thin', color: { rgb: '9E9E9E' } }
+/** Cell fills (hex RGB), shared by the Excel file and the printout. */
+export const FILL: Record<NonNullable<IExcelCell['fill']>, string> = {
+  head: 'DDE5F0',
+  total: 'F0F0F0',
+}
+
+/**
+ * Translates the cell flags into an `xlsx-js-style` style object.
+ *
+ * Lives here beside the document rather than in the hook, so the export and
+ * the round-trip test share one conversion instead of two similar ones.
+ */
+export const toXlsxStyle = (cell: IExcelCell): Record<string, unknown> => ({
+  font: { name: 'Calibri', sz: 11, bold: !!cell.bold },
+  alignment: {
+    horizontal: cell.align ?? 'left',
+    vertical: 'center',
+  },
+  ...(cell.border
+    ? { border: { top: THIN, bottom: THIN, left: THIN, right: THIN } }
+    : {}),
+  ...(cell.fill ? { fill: { fgColor: { rgb: FILL[cell.fill] } } } : {}),
+})
+
+/** Column widths: the first fits month names, the rest fit numbers. */
+const COLUMN_WIDTHS = [18, 14, 13, 13, 12, 11, 14, 12, 14, 8, 13, 12, 14]
+const COLUMN_COUNT = COLUMN_WIDTHS.length
+
+const MONEY = '0.00'
+const COEFFICIENT = '0.000000'
+
+const METHOD_LABEL: Record<InflationMethod, string> = {
+  balance: 'За залишком боргу (як у паперовому Акті)',
+  monthly: 'Помісячний (ст. 625 ЦК)',
+}
+
+const TABLE_HEAD = [
+  'Місяць / Рік',
+  'Вхідне сальдо',
+  'Сплачено',
+  'Нараховано',
+  'Коректура',
+  'Площа, м²',
+  'Тариф, грн/м²',
+  'Річних',
+  'Вихідне сальдо',
+  'Днів',
+  'Індекс інфляції, %',
+  'Коефіцієнт',
+  'Інфляційні',
+]
+
+const money = (value?: number): number =>
+  Number.isFinite(value) ? +(value as number).toFixed(2) : 0
+
+const monthLabel = ({ year, month }: IYearMonth): string =>
+  `${cascaderMonths[month - 1]?.label ?? month} ${year}`
+
+const pad = (value: number): string => String(value).padStart(2, '0')
+
+/**
+ * The period as whole dates: from the start day of the first month (the 1st
+ * unless the debt began mid-month) to the last day of the last one.
+ */
+const periodLabel = (
+  from?: IYearMonth,
+  to?: IYearMonth,
+  startDay?: number
+): string => {
+  if (!from || !to) return '—'
+  const firstDay = Math.min(
+    Math.max(Math.round(Number(startDay) || 1), 1),
+    daysInMonth(from.year, from.month)
+  )
+  const lastDay = daysInMonth(to.year, to.month)
+  return `${pad(firstDay)}.${pad(from.month)}.${from.year} — ${pad(lastDay)}.${pad(to.month)}.${to.year}`
+}
+
+const dateOf = (day: number, { year, month }: IYearMonth): string =>
+  `${pad(day)}.${pad(month)}.${year}`
+
+const decimal = (value: number): string => money(value).toFixed(2)
+
+/**
+ * A value that changed within the period, one line per stretch with its
+ * dates: «5.25 — з 01.08.2018 по 31.01.2019». The first stretch starts on the
+ * period's start day.
+ */
+const runLines = (
+  text: string,
+  runs: IValueRun[],
+  startDay?: number
+): (IExcelCell | null)[][] =>
+  runs.map((run, index) => {
+    const firstDay =
+      index === 0
+        ? Math.min(
+            Math.max(Math.round(Number(startDay) || 1), 1),
+            daysInMonth(run.from.year, run.from.month)
+          )
+        : 1
+    return param(
+      index === 0 ? text : '',
+      `${decimal(run.value)} — з ${dateOf(firstDay, run.from)} по ${dateOf(
+        daysInMonth(run.to.year, run.to.month),
+        run.to
+      )}`,
+      COLUMN_COUNT - 3
+    )
+  })
+
+/** One number when it held all period, else its stretches with dates. */
+const valueParam = (
+  text: string,
+  runs: IValueRun[],
+  fallback: number | undefined,
+  startDay?: number
+): (IExcelCell | null)[][] =>
+  runs.length > 1
+    ? runLines(text, runs, startDay)
+    : [param(text, money(runs[0]?.value ?? fallback))]
+
+/** `2026-09-23T14:32:00Z` → `23.09.2026 14:32`; empty when there is no stamp. */
+const timestampLabel = (value?: string): string => {
+  if (!value) return ''
+
+  const date = new Date(value)
+
+  return Number.isNaN(date.getTime())
+    ? ''
+    : `${String(date.getDate()).padStart(2, '0')}.${String(
+        date.getMonth() + 1
+      ).padStart(2, '0')}.${date.getFullYear()} ${String(
+        date.getHours()
+      ).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
+}
+
+const row = (...cells: (IExcelCell | null)[]): (IExcelCell | null)[] => cells
+const blank = (): (IExcelCell | null)[] => []
+
+const label = (text: string, span = 3): IExcelCell => ({
+  v: text,
+  span,
+  bold: true,
+})
+
+const value = (text: string | number, span = 5): IExcelCell => ({
+  v: text,
+  span,
+})
+
+/**
+ * A parameter line: the label over A-C, the value from D. The cells a merge
+ * covers stay `null` - a value put inside the label's merge (column B) is
+ * hidden by Excel.
+ */
+const param = (text: string, content: string | number, span = 5) =>
+  row(label(text), null, null, value(content, span))
+
+/**
+ * The date the debt is stated as of: the first day of the month FOLLOWING the
+ * end of the period. A period through June 2025 → debt as of 01.07.2025.
+ */
+export const asOfLabel = (to?: IYearMonth): string => {
+  if (!to) return '—'
+
+  const year = to.month === 12 ? to.year + 1 : to.year
+  const month = to.month === 12 ? 1 : to.month + 1
+
+  return `01.${String(month).padStart(2, '0')}.${year}`
+}
+
+/**
+ * Assembles the whole document the way the page shows it: a parameter header,
+ * the monthly table, and a summary block styled after the paper Act.
+ *
+ * Pure: no `xlsx` here. Styling is expressed as flags, and `useExportExcel`
+ * turns them into real borders and fills in the browser.
+ */
+export const buildDebtCalculationDocument = ({
+  companyName,
+  description,
+  domainName,
+  result,
+  from,
+  to,
+  annualRatePercent,
+  inflationMethod,
+  area,
+  tariff,
+  openingDebt,
+  startDay,
+  excludedPeriods = [],
+  generatedAt = new Date(),
+}: IDebtExcelInput): IDebtExcelDocument => {
+  const interestLabel = `${annualRatePercent}% річних`
+
+  const head: (IExcelCell | null)[][] = [
+    row({
+      v: 'Розрахунок заборгованості за послуги з управління багатоквартирним будинком',
+      bold: true,
+      span: COLUMN_COUNT,
+    }),
+    blank(),
+    param('Надавач послуг', domainName ?? '—'),
+    param('Власник', companyName),
+    ...(description ? [param('Адреса', description)] : []),
+    param('Період', periodLabel(from, to, startDay)),
+    ...valueParam(
+      'Загальна площа, м²',
+      valueRuns(result.rows, (month) => month.area),
+      area,
+      startDay
+    ),
+    ...valueParam(
+      'Тариф, грн за 1 м²',
+      valueRuns(result.rows, (month) => month.tariff),
+      tariff,
+      startDay
+    ),
+    param('Борг на початок періоду', money(openingDebt)),
+    param('Ставка річних, %', annualRatePercent),
+    param('Метод інфляційних', METHOD_LABEL[inflationMethod]),
+    // One line per period, so many of them wrap down instead of over the table.
+    ...excludedPeriods.map((period, index) =>
+      param(
+        index === 0 ? 'Виключені періоди' : '',
+        describeExcludedPeriod(period),
+        COLUMN_COUNT - 3
+      )
+    ),
+    ...(excludedPeriods.length > 0
+      ? [row(null, null, null, value(EXCLUSION_NOTE, COLUMN_COUNT - 3))]
+      : []),
+    blank(),
+  ]
+
+  const table: (IExcelCell | null)[][] = [
+    row(
+      ...TABLE_HEAD.map<IExcelCell>((title) => ({
+        v: title,
+        bold: true,
+        border: true,
+        fill: 'head',
+        align: 'center',
+      }))
+    ),
+    ...result.rows.map((month) =>
+      row(
+        { v: monthLabel(month), border: true },
+        {
+          v: money(month.opening),
+          border: true,
+          numFmt: MONEY,
+          align: 'right',
+        },
+        { v: money(month.paid), border: true, numFmt: MONEY, align: 'right' },
+        {
+          v: money(month.charged),
+          border: true,
+          numFmt: MONEY,
+          align: 'right',
+        },
+        {
+          v: money(month.correction),
+          border: true,
+          numFmt: MONEY,
+          align: 'right',
+        },
+        { v: money(month.area), border: true, numFmt: MONEY, align: 'right' },
+        { v: money(month.tariff), border: true, numFmt: MONEY, align: 'right' },
+        {
+          v: money(month.interest),
+          border: true,
+          numFmt: MONEY,
+          align: 'right',
+        },
+        {
+          v: money(month.debt),
+          border: true,
+          numFmt: MONEY,
+          align: 'right',
+          bold: true,
+        },
+        { v: month.days, border: true, align: 'right' },
+        {
+          v: money(month.inflationIndex),
+          border: true,
+          numFmt: MONEY,
+          align: 'right',
+        },
+        {
+          v: +month.coefficient.toFixed(6),
+          border: true,
+          numFmt: COEFFICIENT,
+          align: 'right',
+        },
+        {
+          v: money(month.inflationLoss),
+          border: true,
+          numFmt: MONEY,
+          align: 'right',
+        }
+      )
+    ),
+    row(
+      { v: 'Всього', bold: true, border: true, fill: 'total' },
+      { v: '', border: true, fill: 'total' },
+      {
+        v: money(result.totals.paid),
+        bold: true,
+        border: true,
+        fill: 'total',
+        numFmt: MONEY,
+        align: 'right',
+      },
+      {
+        v: money(result.totals.charged),
+        bold: true,
+        border: true,
+        fill: 'total',
+        numFmt: MONEY,
+        align: 'right',
+      },
+      {
+        v: money(result.totals.correction),
+        bold: true,
+        border: true,
+        fill: 'total',
+        numFmt: MONEY,
+        align: 'right',
+      },
+      { v: '', border: true, fill: 'total' },
+      { v: '', border: true, fill: 'total' },
+      {
+        v: money(result.interest),
+        bold: true,
+        border: true,
+        fill: 'total',
+        numFmt: MONEY,
+        align: 'right',
+      },
+      {
+        v: money(result.body),
+        bold: true,
+        border: true,
+        fill: 'total',
+        numFmt: MONEY,
+        align: 'right',
+      },
+      {
+        v: result.totals.days,
+        bold: true,
+        border: true,
+        fill: 'total',
+        align: 'right',
+      },
+      { v: '', border: true, fill: 'total' },
+      {
+        v: +result.coefficient.toFixed(6),
+        bold: true,
+        border: true,
+        fill: 'total',
+        numFmt: COEFFICIENT,
+        align: 'right',
+      },
+      {
+        v: money(result.inflation),
+        bold: true,
+        border: true,
+        fill: 'total',
+        numFmt: MONEY,
+        align: 'right',
+      }
+    ),
+  ]
+
+  const actRow = (
+    text: string,
+    amount: number,
+    bold = false
+  ): (IExcelCell | null)[] =>
+    row(
+      { v: text, span: 5, bold, border: true },
+      null,
+      null,
+      null,
+      null,
+      {
+        v: money(amount),
+        span: 2,
+        bold,
+        border: true,
+        numFmt: MONEY,
+        align: 'right',
+      },
+      null,
+      { v: 'грн', border: true }
+    )
+
+  const act: (IExcelCell | null)[][] = [
+    blank(),
+    actRow(
+      `Заборгованість станом на ${asOfLabel(to)} року`,
+      result.total,
+      true
+    ),
+    row({ v: 'в т.ч.', span: COLUMN_COUNT }),
+    actRow('за послуги', result.body),
+    actRow(interestLabel, result.interest),
+    actRow('Інфляційні витрати', result.inflation),
+    // Left out unless entered, but never left out of the total: a figure that
+    // is in the sum has to be among its parts.
+    ...(result.legalFees ? [actRow('Юридичні послуги', result.legalFees)] : []),
+    ...(result.courtFee ? [actRow('Держмито', result.courtFee)] : []),
+    blank(),
+    row(
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      { v: 'Директор', bold: true, span: 2 },
+      null,
+      { v: '______________________', span: 3 }
+    ),
+    blank(),
+    row({
+      v: `Сформовано ${timestampLabel(generatedAt.toISOString())}`,
+      span: COLUMN_COUNT,
+    }),
+  ]
+
+  return {
+    rows: [...head, ...table, ...act],
+    columns: COLUMN_WIDTHS.map((wch) => ({ wch })),
+    sheetName: SHEET_NAME,
+  }
+}
+
+/** File name: company and period, stripped of spaces and slashes. */
+export const debtCalculationFileName = (
+  companyName?: string,
+  from?: IYearMonth,
+  to?: IYearMonth
+): string =>
+  [
+    'Розрахунок-заборгованості',
+    (companyName ?? '').trim().replace(/[\s/\\,]+/g, '-'),
+    from && to ? `${formatPeriod(from)}_${formatPeriod(to)}` : '',
+  ]
+    .filter(Boolean)
+    .join('_')
+    .replace(/-+/g, '-')

@@ -17,6 +17,8 @@ import {
   PaymentActionType,
 } from '@common/api/paymentApi/payment.api.types'
 import { renderCurrency, getCurrencySymbol } from '@utils/helpers'
+import { TruncatedText } from '@components/UI/TruncatedText'
+import { widenFilterDropdown } from '../tableFilterHelpers'
 
 const { Text } = Typography
 const { RangePicker } = DatePicker
@@ -40,6 +42,7 @@ const SOURCE_OPTIONS = [
   { text: 'bulk', value: 'bulk' },
   { text: 'quick-pay', value: 'quick-pay' },
   { text: 'admin-restore', value: 'admin-restore' },
+  { text: 'debt-import', value: 'debt-import' },
 ]
 
 const dateRangeDropdown = ({
@@ -246,6 +249,7 @@ export const usePaymentAuditColumns = ({
         filters: domainOptions,
         filterMultiple: false,
         filterSearch: true,
+        onFilterDropdownOpenChange: widenFilterDropdown(240),
         render: (_, record) => {
           const rawDomain =
             record.domainId ??
@@ -255,11 +259,7 @@ export const usePaymentAuditColumns = ({
             typeof rawDomain === 'object' ? rawDomain.name : undefined
           const name = record.domainName ?? snapshotName
           return name ? (
-            <Tooltip title={String(name)}>
-              <Text style={{ maxWidth: 140 }} ellipsis>
-                {String(name)}
-              </Text>
-            </Tooltip>
+            <TruncatedText text={String(name)} maxWidth={140} />
           ) : (
             <Text type="secondary">Не знайдено</Text>
           )
@@ -275,6 +275,7 @@ export const usePaymentAuditColumns = ({
         filters: companyOptions,
         filterMultiple: false,
         filterSearch: true,
+        onFilterDropdownOpenChange: widenFilterDropdown(240),
         render: (_, record) => {
           const rawCompany =
             record.companyId ??
@@ -284,11 +285,7 @@ export const usePaymentAuditColumns = ({
             typeof rawCompany === 'object' ? rawCompany.companyName : undefined
           const name = record.companyName ?? snapshotName
           return name ? (
-            <Tooltip title={String(name)}>
-              <Text style={{ maxWidth: 150 }} ellipsis>
-                {String(name)}
-              </Text>
-            </Tooltip>
+            <TruncatedText text={String(name)} maxWidth={150} />
           ) : (
             <Text type="secondary">Не знайдено</Text>
           )

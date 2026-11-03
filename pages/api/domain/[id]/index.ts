@@ -7,6 +7,7 @@ import { isValidEmail } from '@common/assets/features/validators'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import EncryptionService from '@utils/encryptionService'
 import { hidePercentCharacters } from '@utils/hidePercentCharacters/hidePercentCharacters'
+import { normalizeDisabledServiceIds } from '@common/services/customServiceService/customService.service'
 
 export default async function handler(
   req: NextApiRequest,
@@ -136,6 +137,15 @@ export default async function handler(
 
         if ('archived' in req.body) {
           delete req.body.archived
+        }
+
+        const disabledServiceIds = normalizeDisabledServiceIds(
+          req.body?.disabledServiceIds
+        )
+        if (disabledServiceIds === undefined) {
+          delete req.body.disabledServiceIds
+        } else {
+          req.body.disabledServiceIds = disabledServiceIds
         }
 
         const incomingEmails = req.body?.adminEmails

@@ -488,7 +488,7 @@ $surface-hover-l: rgba(0, 0, 0, 0.03);
   }
 }
 
-@media (max-width: 820px) {
+@media screen and (max-width: 820px) {
   .mlInvoice {
     padding: 1.8rem 1.4rem;
   }
@@ -520,11 +520,6 @@ $surface-hover-l: rgba(0, 0, 0, 0.03);
 }
 
 @media print {
-  @page {
-    size: A4;
-    margin: 14mm 16mm;
-  }
-
   .mlInvoice {
     max-width: none !important;
     width: 100% !important;

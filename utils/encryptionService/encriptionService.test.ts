@@ -1,3 +1,4 @@
+import CryptoJS from 'crypto-js'
 import EncryptionService from './index'
 
 describe('EncryptionService', () => {
@@ -85,5 +86,19 @@ describe('EncryptionService', () => {
   it('should handle decrypt(undefined) gracefully', () => {
     const result = service.decrypt(undefined as unknown as string)
     expect(result).toMatch(/^Error:/)
+  })
+
+  it('falls back to "Unknown error" when a non-Error value is thrown', () => {
+    const decryptSpy = jest
+      .spyOn(CryptoJS.AES, 'decrypt')
+      .mockImplementationOnce(() => {
+        // eslint-disable-next-line @typescript-eslint/no-throw-literal
+        throw 'boom'
+      })
+
+    const result = service.decrypt('anything')
+
+    expect(result).toBe('Error: Unknown error')
+    decryptSpy.mockRestore()
   })
 })

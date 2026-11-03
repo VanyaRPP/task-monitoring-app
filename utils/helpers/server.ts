@@ -1,10 +1,6 @@
 import Domain from '@modules/models/Domain'
 import RealEstate from '@modules/models/RealEstate'
-import User, { IUser } from '@modules/models/User'
-import type { Types } from 'mongoose'
-
-import { Roles } from '../constants'
-import { PaymentOptions } from '../types'
+import type { IUser } from '@modules/models/User'
 
 /**
  * Helpers that query the database, moved out of `utils/helpers` untouched.
@@ -17,36 +13,6 @@ import { PaymentOptions } from '../types'
  * the AWS SDK, tls/net/child_process — is what follows the models into the
  * browser now, and webpack cannot resolve any of it.
  */
-
-export const getPaymentOptions = async ({
-  searchEmail,
-  userEmail,
-}: PaymentOptions) => {
-  const options: { payer?: string | Types.ObjectId } = {}
-  // searching for original user
-  const user = await User.findOne({ email: userEmail })
-
-  const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
-
-  if (isGlobalAdmin) {
-    if (searchEmail) {
-      // 1. admin looking for someone items
-      const searchUser = await User.findOne({ email: searchEmail })
-      // TODO: what if user not exists? if (!searchUser) {}
-
-      options.payer = searchUser._id
-      return options
-    }
-
-    // 2. admin looking for all items
-    return options
-  }
-
-  // 3. user can see only his items
-  options.payer = user._id
-
-  return options
-}
 
 // DOMAIN ADMIN HELPER
 export async function isDomainAdmin(user?: IUser): Promise<boolean> {

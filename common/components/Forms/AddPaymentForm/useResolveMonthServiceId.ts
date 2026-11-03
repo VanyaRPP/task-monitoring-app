@@ -27,6 +27,9 @@ export function useResolveMonthServiceId() {
           {
             domainId: domain,
             streetId: street || undefined,
+            // Without an address only an address-less service is this month's:
+            // an unfiltered lookup would reuse another street's tariffs.
+            withoutStreet: street ? undefined : true,
             year,
             month,
             limit: 1,

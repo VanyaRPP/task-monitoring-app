@@ -88,4 +88,16 @@ describe('resolveAccessScope', () => {
       referencedServiceIds: [],
     })
   })
+
+  it('tolerates a customServices group with no `services` array', async () => {
+    mockFind([{ _id: 'd1', customServices: [{ groupName: 'G' }] }])
+    const scope = await resolveAccessScope(
+      ctx({ isDomainAdmin: true, user: { email: 'admin@x' } })
+    )
+    expect(scope).toEqual({
+      kind: 'domains',
+      domainIds: ['d1'],
+      referencedServiceIds: [],
+    })
+  })
 })

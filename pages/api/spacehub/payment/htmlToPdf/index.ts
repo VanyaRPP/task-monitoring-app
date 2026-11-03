@@ -1,3 +1,5 @@
+import start from '@pages/api/api.config'
+import { getCurrentUser } from '@utils/getCurrentUser'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { generatePdfFromHtml } from '@utils/pdf/bufferGenerators'
 
@@ -20,6 +22,16 @@ export default async function handler(
 ) {
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed' })
+    return
+  }
+
+  // Signed-in users only: an open endpoint let anyone on the internet make
+  // the server run headless Chrome on HTML of their choosing.
+  try {
+    await start()
+    await getCurrentUser(req, res)
+  } catch {
+    res.status(401).json({ error: 'Unauthorized' })
     return
   }
 

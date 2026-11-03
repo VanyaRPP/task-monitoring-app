@@ -1,5 +1,7 @@
 import archiver from 'archiver'
 import { existsSync, rmSync } from 'fs'
+import { INVOICE_PAGE_MARGIN } from './invoicePageStyle'
+import { InterceptingPage, serveInvoiceFonts } from './serveInvoiceFonts'
 
 const isServerless =
   !!process.env.VERCEL_ENV || !!process.env.AWS_LAMBDA_FUNCTION_NAME
@@ -106,20 +108,41 @@ async function launchBrowser() {
   })
 }
 
+// Structural, because launchBrowser() returns either puppeteer's or
+// puppeteer-core's Page and their union isn't callable for evaluate().
+interface PdfPage extends InterceptingPage {
+  setContent(html: string, options: { waitUntil: 'networkidle0' }): unknown
+  evaluate(expression: string): Promise<unknown>
+  pdf(options: {
+    format: 'a4'
+    printBackground: boolean
+    margin: Record<keyof typeof INVOICE_PAGE_MARGIN, string>
+  }): Promise<Uint8Array>
+}
+
+// Explicit margins rather than relying on the html's @page rule, mirroring the
+// browser print path so both produce the same page box.
+async function renderPdf(page: PdfPage, html: string): Promise<Buffer> {
+  await serveInvoiceFonts(page)
+  await page.setContent(html, { waitUntil: 'networkidle0' })
+  await page.evaluate('document.fonts.ready.then(() => true)')
+
+  // Wrap in Buffer.from() so this compiles whether puppeteer-core returns
+  // Buffer (v22) or Uint8Array (v23+) — downstream callers expect Buffer.
+  return Buffer.from(
+    await page.pdf({
+      format: 'a4',
+      printBackground: true,
+      margin: { ...INVOICE_PAGE_MARGIN },
+    })
+  )
+}
+
 export async function generatePdfFromHtml(html: string): Promise<Buffer> {
   const browser = await launchBrowser()
   const page = await browser.newPage()
 
-  await page.setContent(html, { waitUntil: 'networkidle0' })
-
-  // Wrap in Buffer.from() so this compiles whether puppeteer-core returns
-  // Buffer (v22) or Uint8Array (v23+) — downstream callers expect Buffer.
-  const pdfBuffer = Buffer.from(
-    await page.pdf({
-      format: 'a4',
-      printBackground: true,
-    })
-  )
+  const pdfBuffer = await renderPdf(page, html)
 
   await browser.close()
 
@@ -158,14 +181,7 @@ export async function generateZipFromHtmls(
   try {
     for (const item of items) {
       const page = await browser.newPage()
-      await page.setContent(item.html, { waitUntil: 'networkidle0' })
-
-      const pdfBuffer = Buffer.from(
-        await page.pdf({
-          format: 'a4',
-          printBackground: true,
-        })
-      )
+      const pdfBuffer = await renderPdf(page, item.html)
       await page.close()
 
       const baseName = item.fileName || 'invoice'

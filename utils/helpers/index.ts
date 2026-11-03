@@ -17,10 +17,10 @@ import {
   getRealEstatesPipeline,
   getStreetsPipeline,
 } from '../pipelines'
-import { PaymentOptions } from '../types'
 import type { IPermissions } from '@modules/models/User'
 import { useGetUserByEmailQuery } from '@common/api/userApi/user.api'
 import { AppRoutes, Operations } from '@utils/constants'
+import { dateRangeToQueryBounds } from '@utils/paymentDateRange'
 import { useState, useEffect } from 'react'
 
 export const toFirstUpperCase = (text: string) => {
@@ -280,7 +280,6 @@ export const getPaymentProviderAndReciever = (company) => {
   }
   const reciever: IReciever = company && {
     companyName: company?.companyName,
-    adminEmails: company?.adminEmails,
     description: company?.description,
     contractNumber: company?.contractNumber,
     contractDate: company?.contractDate,
@@ -689,22 +688,30 @@ export function isGlobalAdmin(user?: IUser): boolean {
 
 export function formatDateFilterForQuery(raw?: string[]) {
   if (!raw?.length) return {}
-  const numbers = raw
-    .map((v) => {
-      const leading = parseInt(v, 10)
-      if (!isNaN(leading)) {
-        const m = v.match(/-(\d+)\s*$/)
-        if (m) {
-          return [leading, parseInt(m[1], 10)]
-        }
-        return [leading]
+  let year: number | undefined
+  const months: number[] = []
+  // A leading number is the year; a "-N" suffix (checking one month under a
+  // year in the date-filter tree) contributes N to `months` instead of being
+  // flattened alongside the year, so multiple months checked under the same
+  // year don't leak the repeated year value into the month list.
+  for (const v of raw) {
+    const leading = parseInt(v, 10)
+    if (!isNaN(leading)) {
+      const m = v.match(/-(\d+)\s*$/)
+      if (m) {
+        year = leading
+        months.push(parseInt(m[1], 10))
+      } else if (year === undefined) {
+        year = leading
       }
+    } else {
       const n = Number(v)
-      return isNaN(n) ? [] : [n]
-    })
-    .flat()
-    .filter((n) => !isNaN(n)) as number[]
-  const [year, ...months] = numbers
+      if (!isNaN(n)) {
+        if (year === undefined) year = n
+        else months.push(n)
+      }
+    }
+  }
   const query: any = {}
   if (year != null) {
     query.year = year
@@ -716,6 +723,87 @@ export function formatDateFilterForQuery(raw?: string[]) {
   }
   return query
 }
+/**
+ * Визначає, за яким полем дати фільтрувати платежі на бекенді: за датою
+ * створення (`invoiceCreationDate`) чи за місяцем надання послуг
+ * (`monthService`, бекенд очікує `dateField: 'date'`). Бекенд підтримує
+ * фільтрацію лише за одним полем дати одночасно, тому фільтр за місяцем
+ * надання послуг має пріоритет, коли він активний.
+ */
+export function resolvePaymentDateFilterQuery(filters?: {
+  invoiceCreationDate?: string[]
+  monthService?: string[]
+  dateFrom?: string
+  dateTo?: string
+}): {
+  dateField: 'invoiceCreationDate' | 'date'
+  year?: number
+  month?: number | number[]
+  dateFrom?: string
+  dateTo?: string
+} {
+  const dateField: 'invoiceCreationDate' | 'date' = filters?.monthService
+    ?.length
+    ? 'date'
+    : 'invoiceCreationDate'
+
+  const query = formatDateFilterForQuery(
+    dateField === 'date' ? filters?.monthService : filters?.invoiceCreationDate
+  )
+
+  // The "За проміжок" range always applies to invoiceCreationDate, on top of
+  // whichever year/month filter is active.
+  return { dateField, ...query, ...dateRangeToQueryBounds(filters) }
+}
+
+export const MONTH_SERVICE_QUERY_PARAM = 'monthService'
+
+const MONTH_SERVICE_FILTER_PATTERN = /^(\d{4})-month-(\d{1,2})$/
+const MONTH_SERVICE_PARAM_PATTERN = /^(\d{4})-(\d{1,2})$/
+const YEAR_PATTERN = /^\d{4}$/
+
+export function parseMonthServiceParam(
+  raw?: string | string[] | null
+): string[] {
+  const tokens = (Array.isArray(raw) ? raw : [raw])
+    .flatMap((value) => (value ? String(value).split(',') : []))
+    .map((token) => token.trim())
+    .filter(Boolean)
+
+  const values = tokens.reduce<string[]>((acc, token) => {
+    if (YEAR_PATTERN.test(token)) {
+      acc.push(token)
+      return acc
+    }
+
+    const matched = token.match(MONTH_SERVICE_PARAM_PATTERN)
+    const month = matched ? Number(matched[2]) : NaN
+    if (month >= 1 && month <= 12) {
+      acc.push(`${matched[1]}-month-${month}`)
+    }
+    return acc
+  }, [])
+
+  return Array.from(new Set(values))
+}
+
+export function formatMonthServiceParam(values?: string[]): string | undefined {
+  const tokens = (values ?? []).reduce<string[]>((acc, value) => {
+    if (YEAR_PATTERN.test(value)) {
+      acc.push(value)
+      return acc
+    }
+
+    const matched = value.match(MONTH_SERVICE_FILTER_PATTERN)
+    if (matched) {
+      acc.push(`${matched[1]}-${matched[2].padStart(2, '0')}`)
+    }
+    return acc
+  }, [])
+
+  return tokens.length ? Array.from(new Set(tokens)).join(',') : undefined
+}
+
 export function getTypeOperation(value?: string) {
   if (value === Operations.Debit) {
     return { type: Operations.Debit }
@@ -724,8 +812,6 @@ export function getTypeOperation(value?: string) {
   }
   return {}
 }
-
-// usePermissions
 
 export function usePermissions(user?: IUser): IPermissions | null {
   const [permissions, setPermissions] = useState<IPermissions | null>(null)

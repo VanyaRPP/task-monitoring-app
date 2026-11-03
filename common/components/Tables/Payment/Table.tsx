@@ -9,6 +9,7 @@ import {
   IGetPaymentResponse,
 } from '@common/api/paymentApi/payment.api.types'
 import { AppRoutes, Roles, ServiceType } from '@utils/constants'
+import { getTableScrollX } from '@utils/getTableScrollX'
 import { usePaymentColumns, CompanyWithPayments } from './usePaymentColumns'
 import PaymentTableSummary from './PaymentTableSummary'
 
@@ -242,12 +243,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
         handleTableChange(pagination, allFilters, sorter, extra)
       }
       scroll={{
-        x:
-          (pathname === AppRoutes.PAYMENT
-            ? 1300 + selectedColumns.length * 132
-            : 1300) -
-          (payments?.domainsFilter?.length <= 1 ? 200 : 0) -
-          (payments?.realEstatesFilter?.length <= 1 ? 200 : 0),
+        x: getTableScrollX(visibleColumns, hasRowSelection ? 28 : 0),
       }}
       summary={() => (
         <PaymentTableSummary

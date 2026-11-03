@@ -9,6 +9,7 @@ import {
   toFirstUpperCase,
   toRoundFixed,
 } from '@utils/helpers'
+import { resolvePlacingTariff } from '@utils/getInvoices/resolvePlacingTariff'
 import validator from '@utils/validator'
 import { Form, Input, Typography } from 'antd'
 import { useMemo } from 'react'
@@ -62,7 +63,8 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
   const rentPrice = useMemo(() => {
     return (
       prevPlacingInvoice?.sum ||
-      company?.totalArea * (company?.pricePerMeter || prevService?.rentPrice)
+      company?.totalArea *
+        resolvePlacingTariff({ company, service: prevService })
     )
   }, [prevPlacingInvoice, company, prevService])
 

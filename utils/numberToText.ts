@@ -60,9 +60,13 @@ export default function numberToTextNumber(number) {
   const str = (number || '').toString()
   let out = ''
 
+  // `p` only covers 11-19; a bare "10" (tens digit 1, units digit 0) has to
+  // come from `t[1]` ("десять") instead, or every branch below either crashes
+  // (p[-1] is undefined) or silently drops the word entirely.
   if (str.length === 1) return o[number]
   else if (str.length === 2) {
-    if (parseInt(str[0]) === 1) out = p[parseInt(str[1]) - 1]
+    if (parseInt(str[0]) === 1)
+      out = str[1] === '0' ? t[1] : p[parseInt(str[1]) - 1]
     else
       out =
         t[parseInt(str[0])] + (str[1] !== '0' ? ' ' + o[parseInt(str[1])] : '')
@@ -70,7 +74,8 @@ export default function numberToTextNumber(number) {
     if (parseInt(str[1]) === 1)
       out =
         h[parseInt(str[0]) - 1] +
-        (str[2] !== '0' ? ' ' + p[parseInt(str[2]) - 1] : '')
+        ' ' +
+        (str[2] === '0' ? t[1] : p[parseInt(str[2]) - 1])
     else
       out =
         h[parseInt(str[0]) - 1] +
@@ -81,7 +86,8 @@ export default function numberToTextNumber(number) {
       out =
         k[parseInt(str[0]) - 1] +
         (str[1] !== '0' ? ' ' + h[parseInt(str[1]) - 1] : '') +
-        (str[2] !== '0' ? ' ' + p[parseInt(str[3]) - 1] : '')
+        ' ' +
+        (str[3] === '0' ? t[1] : p[parseInt(str[3]) - 1])
     else
       out =
         k[parseInt(str[0]) - 1] +

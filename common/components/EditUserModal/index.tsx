@@ -10,6 +10,7 @@ import {
   useGetDomainFiltersQuery,
   useGetRealEstateFiltersQuery,
 } from '@common/api/filterApi/filter.api'
+import { companySelectLabelRender } from '@components/UI/Reusable/CompanyStatusLabel'
 
 interface EditUserModalProps {
   open: boolean
@@ -121,6 +122,11 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({
                 value: c.value,
                 label: c.text,
               }))}
+              // a user may still reference a deleted company: show its status,
+              // not the raw id
+              labelRender={
+                isCompaniesLoading ? undefined : companySelectLabelRender([])
+              }
               filterOption={(input, option) =>
                 (option?.label ?? '')
                   .toLowerCase()

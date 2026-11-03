@@ -13,6 +13,7 @@ export interface IDomainCustomServicesSnapshot {
   templateId?: string | null
   templateName?: string | null
   groups: IDomainSnapshotGroup[]
+  disabledServiceIds?: string[]
   reason: DomainSnapshotReason
   createdBy?: string | null
   createdAt: string
@@ -47,6 +48,7 @@ export const domainSnapshotsApi = createApi({
         domainId: string
         reason?: DomainSnapshotReason
         groups?: IDomainSnapshotGroup[]
+        disabledServiceIds?: string[]
         templateId?: string | null
         templateName?: string | null
       }
@@ -81,7 +83,12 @@ export const domainSnapshotsApi = createApi({
       }) => response.data,
     }),
     restoreDomainSnapshot: builder.mutation<
-      { restored: true; domainId: string; templateId: string | null },
+      {
+        restored: true
+        domainId: string
+        templateId: string | null
+        disabledServiceIds: string[]
+      },
       { _id: string; domainId: string }
     >({
       query: ({ _id }) => ({
@@ -97,6 +104,7 @@ export const domainSnapshotsApi = createApi({
           restored: true
           domainId: string
           templateId: string | null
+          disabledServiceIds: string[]
         }
       }) => response.data,
     }),

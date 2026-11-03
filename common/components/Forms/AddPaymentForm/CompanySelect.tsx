@@ -9,6 +9,7 @@ import {
   isNewEntityValue,
   makeNewEntityValue,
 } from '@utils/inlineCreate'
+import { companySelectLabelRender } from '@components/UI/Reusable/CompanyStatusLabel'
 import s from './CompanySelect.module.scss'
 
 const COMPANY_TOOLTIP = 'Кому виставляється рахунок — орендар/платник.'
@@ -81,6 +82,27 @@ function CompanyPicker({
   )
 
   const companies = useMemo(() => data?.data ?? [], [data])
+
+  // An existing invoice may belong to a company that was archived since: it is
+  // not among the options, so antd would show its raw id. Resolve it from the
+  // payment's populated company or, failing that, the domain's archived list.
+  const isValueListed =
+    !companyValue ||
+    isNewCompany ||
+    isLoading ||
+    companies.some((c) => c._id === companyValue)
+  const { data: archivedData } = useGetAllRealEstateQuery(
+    { domainId, archived: true },
+    { skip: isNewDomain || isValueListed }
+  )
+  const companyLabelRender = useMemo(
+    () =>
+      companySelectLabelRender(companies, [
+        ...(company && typeof company === 'object' ? [company] : []),
+        ...(archivedData?.data ?? []),
+      ]),
+    [companies, company, archivedData]
+  )
 
   useEffect(() => {
     if (edit) return
@@ -206,6 +228,7 @@ function CompanyPicker({
     >
       <Select
         options={options}
+        labelRender={companyLabelRender}
         optionFilterProp="label"
         placeholder={
           allowCreate ? 'Пошук або назва нової компанії' : 'Пошук компанії'

@@ -23,6 +23,7 @@ import {
 import HeadlessReceiptRenderer from '@components/Forms/GroupedReceiptForm/HeadlessReceiptRenderer'
 import dayjs from 'dayjs'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
 import AddPaymentModal from '@components/AddPaymentModal'
 import ImportInvoices from '@components/UI/PaymentCardHeader/ImportInvoices'
 import { AppRoutes, Operations, Roles } from '@utils/constants'
@@ -56,17 +57,23 @@ import {
 } from './preselect'
 const { useBreakpoint } = Grid
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
+import { PaymentDateRange } from '@utils/paymentDateRange'
 import { getInvoiceCustomServiceNames } from '@components/Tables/Payment/usePaymentColumns'
 import {
   getAllowedServices,
   getAvailableColumns,
+  getDisabledBuiltInTypes,
   getFilteredBuiltInEntries,
   ServiceFilterOption,
 } from './serviceFilter'
 
 export interface PaymentCardHeaderProps {
   onDeleteClick?: () => void
-  setCurrentDateFilter: (val: any) => void
+  onDateRangeChange: (range: PaymentDateRange | null) => void
+  /** Show the range picker outside /payment (e.g. on a single-domain page). */
+  showDateRangeFilter?: boolean
+  /** Recent-ranges scope; defaults to one derived from `filters`. */
+  dateHistoryScope?: string
   currentPayment: any
   paymentActions: { edit: boolean; preview: boolean }
   closeEditModal: () => void
@@ -92,7 +99,9 @@ export interface PaymentCardHeaderProps {
 }
 
 const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
-  setCurrentDateFilter,
+  onDateRangeChange,
+  showDateRangeFilter,
+  dateHistoryScope,
   currentPayment,
   paymentActions,
   closeEditModal,
@@ -303,6 +312,12 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
     [payments, customServiceNames]
   )
 
+  const { data: domains } = useGetDomainsQuery({})
+  const disabledBuiltInTypes = useMemo(
+    () => getDisabledBuiltInTypes(domains),
+    [domains]
+  )
+
   const { preview, edit } = paymentActions
 
   if (!isAdmin && !isGlobalAdmin) {
@@ -312,7 +327,9 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
           <PaymentCardLabel
             enablePaymentsButton={enablePaymentsButton}
             onColumnsSelect={onColumnsSelect}
-            setCurrentDateFilter={setCurrentDateFilter}
+            onDateRangeChange={onDateRangeChange}
+            showDateRangeFilter={showDateRangeFilter}
+            dateHistoryScope={dateHistoryScope}
             setFilters={setFilters}
             streets={streets}
             filters={filters}
@@ -478,7 +495,9 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
           <PaymentCardLabel
             enablePaymentsButton={enablePaymentsButton}
             onColumnsSelect={onColumnsSelect}
-            setCurrentDateFilter={setCurrentDateFilter}
+            onDateRangeChange={onDateRangeChange}
+            showDateRangeFilter={showDateRangeFilter}
+            dateHistoryScope={dateHistoryScope}
             setFilters={setFilters}
             streets={streets}
             filters={filters}
@@ -487,6 +506,7 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
             isAdmin={isAdmin}
             className={styles.select}
             allowedServices={allowedServices}
+            disabledBuiltInTypes={disabledBuiltInTypes}
             customServices={customServiceOptions}
           />
         </div>
@@ -554,12 +574,14 @@ interface ColumnSelectProps {
   style?: React.CSSProperties
   className?: string
   allowedServices?: Set<string>
+  disabledBuiltInTypes?: Set<string>
   customServices?: ServiceFilterOption[]
 }
 
 const ColumnSelect: React.FC<ColumnSelectProps> = ({
   onSelect,
   allowedServices,
+  disabledBuiltInTypes,
   customServices,
   ...props
 }) => {
@@ -567,8 +589,13 @@ const ColumnSelect: React.FC<ColumnSelectProps> = ({
   const [filterByAvailable, setFilterByAvailable] = useState(true)
 
   const filteredEntries = useMemo(
-    () => getFilteredBuiltInEntries(allowedServices, filterByAvailable),
-    [filterByAvailable, allowedServices]
+    () =>
+      getFilteredBuiltInEntries(
+        allowedServices,
+        filterByAvailable,
+        disabledBuiltInTypes
+      ),
+    [filterByAvailable, allowedServices, disabledBuiltInTypes]
   )
 
   // Custom entries come straight from the invoices, so they are all "available"

@@ -56,7 +56,7 @@ export const AdminPanelPage: React.FC = () => {
                       Користувачі
                     </Typography.Title>
                   </Flex>
-                  <UsersTable domains={domains} isDomainAdmin={isDomainAdmin} />
+                  <UsersTable isDomainAdmin={isDomainAdmin} />
                 </>
               ),
             },

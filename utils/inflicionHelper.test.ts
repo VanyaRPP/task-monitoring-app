@@ -12,4 +12,7 @@ describe('getInflicionValue', () => {
     expect(getInflicionValue(1000, 99.5)).toBe('0.00')
     expect(getInflicionValue(100, 99.5)).toBe('0.00')
   })
+  test('defaults inflicionPrice to 0 when omitted', () => {
+    expect(getInflicionValue(1000)).toBe('0.00')
+  })
 })

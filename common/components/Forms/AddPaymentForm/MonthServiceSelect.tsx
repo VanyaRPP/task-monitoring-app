@@ -22,7 +22,12 @@ const MonthServiceSelect: React.FC<MonthServiceSelectProps> = ({
 }) => {
   const streetId: string = Form.useWatch('street', form)
   const domainId: string = Form.useWatch('domain', form)
-  const monthService: string = Form.useWatch('monthService', form)
+  const watchedMonthService: string = Form.useWatch('monthService', form)
+  // useWatch is still empty on the first render even when the form already
+  // holds a month (an AI or bank draft); reading only the watch, the effect
+  // below took that for "no month" and replaced it with the newest one.
+  const monthService: string =
+    watchedMonthService ?? form.getFieldValue('monthService')
 
   const {
     data: { data: services } = { data: [] },
@@ -32,6 +37,9 @@ const MonthServiceSelect: React.FC<MonthServiceSelectProps> = ({
     {
       domainId,
       streetId,
+      // Without an address, only address-less services are this company's
+      // months - not another street's.
+      withoutStreet: streetId ? undefined : true,
     },
     { skip: !domainId || isNewEntityValue(domainId) }
   )
@@ -49,7 +57,10 @@ const MonthServiceSelect: React.FC<MonthServiceSelectProps> = ({
     )
 
   const options = useMemo(() => {
-    const byMonthKey = new Map<string, { value: string; label: string }>()
+    const byMonthKey = new Map<
+      string,
+      { value: string; label: string; sortValue: number }
+    >()
 
     const allServices = currentValueMissing
       ? [...(services ?? []), ...(currentServiceRes ?? [])]
@@ -60,6 +71,7 @@ const MonthServiceSelect: React.FC<MonthServiceSelectProps> = ({
       byMonthKey.set(key, {
         value: svc._id,
         label: dayjs(svc.date).format('MMMM YYYY'),
+        sortValue: dayjs(svc.date).valueOf(),
       })
     }
 
@@ -70,20 +82,36 @@ const MonthServiceSelect: React.FC<MonthServiceSelectProps> = ({
         byMonthKey.set(key, {
           value: buildMonthServicePlaceholder(m),
           label: m.format('MMMM YYYY'),
+          sortValue: m.valueOf(),
         })
       }
     }
 
-    const sortKey = (opt: { value: string }) => {
-      if (isMonthServicePlaceholder(opt.value)) {
-        return parseMonthServicePlaceholder(opt.value).valueOf()
+    // A placeholder for a month older than the rolling window (an AI draft
+    // for last year) is offered too - otherwise the effect below would treat
+    // it as invalid and quietly switch the form to the newest month.
+    if (isCurrentValuePlaceholder) {
+      const m = parseMonthServicePlaceholder(monthService)
+      const key = m.format('YYYY-MM')
+      if (!byMonthKey.has(key)) {
+        byMonthKey.set(key, {
+          value: monthService,
+          label: m.format('MMMM YYYY'),
+          sortValue: m.valueOf(),
+        })
       }
-      const svc = services?.find((s) => s._id === opt.value)
-      return svc ? dayjs(svc.date).valueOf() : 0
     }
 
-    return [...byMonthKey.values()].sort((a, b) => sortKey(b) - sortKey(a))
-  }, [services, currentValueMissing, currentServiceRes])
+    return [...byMonthKey.values()]
+      .sort((a, b) => b.sortValue - a.sortValue)
+      .map(({ value, label }) => ({ value, label }))
+  }, [
+    services,
+    currentValueMissing,
+    currentServiceRes,
+    isCurrentValuePlaceholder,
+    monthService,
+  ])
 
   useEffect(() => {
     if (!edit) {

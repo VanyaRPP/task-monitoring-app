@@ -123,6 +123,69 @@ describe('buildPaymentPayload', () => {
     )
   })
 
+  describe('invoiceCreationDate when editing', () => {
+    const stored = new Date(2026, 3, 27, 9, 30, 12, 345)
+
+    it('keeps the stored value when "Оплата від" is left on the same day', () => {
+      const inputs = baseInputs()
+      inputs.formData = {
+        ...inputs.formData,
+        description: 'changed',
+        invoiceCreationDate: dayjs(stored),
+      }
+      const result = buildPaymentPayload({
+        ...inputs,
+        originalInvoiceCreationDate: stored,
+      })
+      expect(result.invoiceCreationDate.getTime()).toBe(stored.getTime())
+    })
+
+    it('keeps the stored value when the same day is re-picked (time reset to midnight)', () => {
+      const inputs = baseInputs()
+      inputs.formData = {
+        ...inputs.formData,
+        invoiceCreationDate: dayjs(new Date(2026, 3, 27)),
+      }
+      const result = buildPaymentPayload({
+        ...inputs,
+        originalInvoiceCreationDate: stored.toISOString(),
+      })
+      expect(result.invoiceCreationDate.getTime()).toBe(stored.getTime())
+    })
+
+    it('keeps the stored value when the date field is empty', () => {
+      const result = buildPaymentPayload({
+        ...baseInputs(),
+        originalInvoiceCreationDate: stored,
+      })
+      expect(result.invoiceCreationDate.getTime()).toBe(stored.getTime())
+    })
+
+    it('applies the new day with the current time when "Оплата від" changes', () => {
+      const inputs = baseInputs()
+      inputs.formData = {
+        ...inputs.formData,
+        invoiceCreationDate: dayjs(new Date(2026, 3, 29)),
+      }
+      const result = buildPaymentPayload({
+        ...inputs,
+        originalInvoiceCreationDate: stored,
+      })
+      const now = new Date()
+      expect(result.invoiceCreationDate.getTime()).toBe(
+        new Date(
+          2026,
+          3,
+          29,
+          now.getHours(),
+          now.getMinutes(),
+          now.getSeconds(),
+          now.getMilliseconds()
+        ).getTime()
+      )
+    })
+  })
+
   it('invoiceLang: included in payload when set to uk', () => {
     const inputs = baseInputs()
     expect(

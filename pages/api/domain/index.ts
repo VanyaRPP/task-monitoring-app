@@ -8,6 +8,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import EncryptionService from '@utils/encryptionService'
 import { hidePercentCharacters } from '@utils/hidePercentCharacters/hidePercentCharacters'
 import { DOMAIN_GENERAL_PROJECTION } from '@utils/domain/domain-view-access'
+import { normalizeDisabledServiceIds } from '@common/services/customServiceService/customService.service'
 
 export default async function handler(
   req: NextApiRequest,
@@ -137,6 +138,8 @@ export default async function handler(
 
         const updatedObj = encryptDomainBankTokens(req.body, SECURE_TOKEN)
         delete updatedObj.archived
+        updatedObj.disabledServiceIds =
+          normalizeDisabledServiceIds(updatedObj.disabledServiceIds) ?? []
         if (!isGlobalAdmin) {
           if (
             !updatedObj.adminEmails ||

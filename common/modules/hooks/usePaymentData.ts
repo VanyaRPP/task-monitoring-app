@@ -172,7 +172,10 @@ export function usePaymentFormData(
     useGetAllServicesQuery(
       {
         domainId,
-        streetId,
+        streetId: streetId || undefined,
+        // A company without an address bills on the address-less service;
+        // an unfiltered lookup would take any street's tariffs.
+        withoutStreet: streetId ? undefined : true,
         year: placeholderYear,
         month: placeholderMonth,
         limit: 1,
@@ -181,7 +184,6 @@ export function usePaymentFormData(
         skip:
           !isMonthPlaceholder ||
           !domainId ||
-          !streetId ||
           placeholderYear === undefined ||
           placeholderMonth === undefined,
       }
@@ -203,21 +205,21 @@ export function usePaymentFormData(
       ? anchorDate.year() - 1
       : anchorDate.year()
 
+  // Last month's service on the same address as this month's - previous
+  // readings come from the invoice billed on it.
+  const prevStreetId = service?.street?._id ?? (streetId || undefined)
   const { data: { data: { 0: prevService } } = { data: [null] } } =
     useGetAllServicesQuery(
       {
-        streetId: service?.street?._id ?? streetId,
+        streetId: prevStreetId,
+        withoutStreet: prevStreetId ? undefined : true,
         domainId: service?.domain?._id ?? domainId,
         month: prevMonthMongo,
         year: prevYearMongo,
         limit: 1,
       },
       {
-        skip:
-          !hasAnchor ||
-          !streetId ||
-          !domainId ||
-          (!service && !isMonthPlaceholder),
+        skip: !hasAnchor || !domainId || (!service && !isMonthPlaceholder),
       }
     )
 
@@ -225,14 +227,14 @@ export function usePaymentFormData(
     useGetAllPaymentsQuery(
       {
         companyIds: [companyId],
-        streetIds: [streetId],
+        streetIds: streetId ? [streetId] : undefined,
         domainIds: [domainId],
         serviceIds: [prevService?._id],
         type: Operations.Debit,
         limit: 1,
       },
       {
-        skip: !prevService || !companyId || !streetId || !domainId,
+        skip: !prevService || !companyId || !domainId,
       }
     )
   return {
@@ -240,12 +242,10 @@ export function usePaymentFormData(
     service,
     payment: paymentData,
     prevService:
-      hasAnchor && streetId && domainId && (service || isMonthPlaceholder)
+      hasAnchor && domainId && (service || isMonthPlaceholder)
         ? prevService
         : null,
     prevPayment:
-      !!prevService && !!companyId && !!streetId && !!domainId
-        ? prevPayment
-        : null,
+      !!prevService && !!companyId && !!domainId ? prevPayment : null,
   }
 }

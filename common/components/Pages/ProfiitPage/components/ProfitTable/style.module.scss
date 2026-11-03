@@ -1,0 +1,32 @@
+// A row with many category tags is tall; centring date/amount/actions in it
+// pushed them away from the line they describe.
+.childTable :global(.ant-table-tbody > tr > td) {
+  vertical-align: top;
+}
+
+.items {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.itemTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  margin-inline-end: 0;
+}
+
+.itemCategory {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.itemsToggle {
+  height: auto;
+  padding: 0 4px;
+}

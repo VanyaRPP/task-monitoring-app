@@ -97,7 +97,7 @@ describe('getInvoices - WATER-PART', () => {
         expect.objectContaining({ type: ServiceType.WaterPart })
       )
     })
-    it('should NOT load when company = { waterPart: 10 }', () => {
+    it('should load without month service when company = { waterPart: 10 }', () => {
       const company: Partial<IRealestate> = {
         waterPart: 10,
       }
@@ -106,11 +106,11 @@ describe('getInvoices - WATER-PART', () => {
         company,
       })
 
-      expect(invoices).not.toContainEqual(
+      expect(invoices).toContainEqual(
         expect.objectContaining({ type: ServiceType.WaterPart })
       )
     })
-    it('should NOT load when company = { waterPart: 0 }', () => {
+    it('should load without month service when company = { waterPart: 0 }', () => {
       const company: Partial<IRealestate> = {
         waterPart: 0,
       }
@@ -119,7 +119,7 @@ describe('getInvoices - WATER-PART', () => {
         company,
       })
 
-      expect(invoices).not.toContainEqual(
+      expect(invoices).toContainEqual(
         expect.objectContaining({ type: ServiceType.WaterPart })
       )
     })

@@ -21,13 +21,20 @@ export default function InvoiceNumber({ form, paymentActions }) {
     <Form.Item
       name="invoiceNumber"
       label="№ інвойса"
-      tooltip="Порядковий номер рахунку. Підставляється автоматично, можна змінити."
+      tooltip={
+        // A new invoice gets its number from the server when it is saved, so
+        // two invoices saved at once can't share one. The form only shows
+        // the number it will most likely get.
+        paymentInCreation
+          ? 'Номер присвоюється автоматично при збереженні. Тут — очікуваний номер; він може зсунутися, якщо хтось збереже рахунок раніше.'
+          : 'Порядковий номер рахунку.'
+      }
     >
       <InputNumber
         parser={inputNumberParser}
         style={{ minWidth: '166px' }}
         placeholder="Вкажіть № інвойса"
-        disabled={paymentActions?.preview}
+        disabled={paymentActions?.preview || paymentInCreation}
       />
     </Form.Item>
   )

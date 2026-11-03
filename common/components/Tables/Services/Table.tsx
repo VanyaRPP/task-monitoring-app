@@ -16,6 +16,8 @@ import { dateToYear } from '@common/assets/features/formatDate'
 import { AppRoutes, Roles, ServiceName } from '@utils/constants'
 import { isAdminCheck, renderCurrency } from '@utils/helpers'
 import TableFilterLink from '@components/UI/Reusable/TableFilterLink'
+import { TruncatedText } from '@components/UI/TruncatedText'
+import { widenFilterDropdown } from '../tableFilterHelpers'
 import { Alert, Button, Popconfirm, Table, Tooltip, message } from 'antd'
 import { ColumnType } from 'antd/lib/table'
 import { useRouter } from 'next/router'
@@ -254,9 +256,10 @@ const getDefaultColumns = (
             setFilters={setFilter}
           />
         ) : (
-          i?.name
+          <TruncatedText text={i?.name} />
         ),
       filterSearch: true,
+      onFilterDropdownOpenChange: widenFilterDropdown(240),
     },
     {
       title: 'Рік',
@@ -278,6 +281,7 @@ const getDefaultColumns = (
       onFilter: (value, record) => String(record.street?._id) === String(value),
       render: (i) => formatStreetValue(i?.address, i?.city),
       filterSearch: true,
+      onFilterDropdownOpenChange: widenFilterDropdown(240),
     },
     {
       title: 'Місяць',

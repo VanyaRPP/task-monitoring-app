@@ -103,7 +103,7 @@ describe('getInvoices - Placing', () => {
       )
     })
 
-    it('should NOT load when company = { totalArea: 0 }', () => {
+    it('should load without month service when company = { totalArea: 0 }', () => {
       const company: Partial<IRealestate> = {
         totalArea: 0,
       }
@@ -112,12 +112,12 @@ describe('getInvoices - Placing', () => {
         company,
       })
 
-      expect(invoices).not.toContainEqual(
+      expect(invoices).toContainEqual(
         expect.objectContaining({ type: ServiceType.Placing })
       )
     })
 
-    it('should NOT load when company = { totalArea: 10 }', () => {
+    it('should load without month service when company = { totalArea: 10 }', () => {
       const company: Partial<IRealestate> = {
         totalArea: 10,
       }
@@ -126,12 +126,12 @@ describe('getInvoices - Placing', () => {
         company,
       })
 
-      expect(invoices).not.toContainEqual(
+      expect(invoices).toContainEqual(
         expect.objectContaining({ type: ServiceType.Placing })
       )
     })
 
-    it('should NOT load when company = { totalArea: NaN }', () => {
+    it('should load without month service when company = { totalArea: NaN }', () => {
       const company: Partial<IRealestate> = {
         totalArea: NaN,
       }
@@ -140,12 +140,12 @@ describe('getInvoices - Placing', () => {
         company,
       })
 
-      expect(invoices).not.toContainEqual(
+      expect(invoices).toContainEqual(
         expect.objectContaining({ type: ServiceType.Placing })
       )
     })
 
-    it('should NOT load when company = { totalArea: null }', () => {
+    it('should load without month service when company = { totalArea: null }', () => {
       const company: Partial<IRealestate> = {
         totalArea: null,
       }
@@ -154,12 +154,12 @@ describe('getInvoices - Placing', () => {
         company,
       })
 
-      expect(invoices).not.toContainEqual(
+      expect(invoices).toContainEqual(
         expect.objectContaining({ type: ServiceType.Placing })
       )
     })
 
-    it('should NOT load when company = { totalArea: undefined }', () => {
+    it('should load without month service when company = { totalArea: undefined }', () => {
       const company: Partial<IRealestate> = {
         totalArea: undefined,
       }
@@ -168,12 +168,12 @@ describe('getInvoices - Placing', () => {
         company,
       })
 
-      expect(invoices).not.toContainEqual(
+      expect(invoices).toContainEqual(
         expect.objectContaining({ type: ServiceType.Placing })
       )
     })
 
-    it('should NOT load when company = { inflicion: true }', () => {
+    it('should load without month service when company = { inflicion: true }', () => {
       const company: Partial<IRealestate> = {
         inflicion: true,
       }
@@ -182,12 +182,12 @@ describe('getInvoices - Placing', () => {
         company,
       })
 
-      expect(invoices).not.toContainEqual(
+      expect(invoices).toContainEqual(
         expect.objectContaining({ type: ServiceType.Placing })
       )
     })
 
-    it('should NOT load when company = { inflicion: false }', () => {
+    it('should load without month service when company = { inflicion: false }', () => {
       const company: Partial<IRealestate> = {
         inflicion: false,
       }
@@ -196,7 +196,7 @@ describe('getInvoices - Placing', () => {
         company,
       })
 
-      expect(invoices).not.toContainEqual(
+      expect(invoices).toContainEqual(
         expect.objectContaining({ type: ServiceType.Placing })
       )
     })
@@ -316,7 +316,7 @@ describe('getInvoices - Placing', () => {
       )
     })
 
-    it('should NOT load when service = null, company = { totalArea: 10, inflicion: true }', () => {
+    it('should load without month service when service = null, company = { totalArea: 10, inflicion: true }', () => {
       const service: Partial<IService> = null
       const company: Partial<IRealestate> = {
         totalArea: 10,
@@ -328,7 +328,7 @@ describe('getInvoices - Placing', () => {
         company,
       })
 
-      expect(invoices).not.toContainEqual(
+      expect(invoices).toContainEqual(
         expect.objectContaining({ type: ServiceType.Placing })
       )
     })

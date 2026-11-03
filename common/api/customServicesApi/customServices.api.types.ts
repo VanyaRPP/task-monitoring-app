@@ -22,6 +22,7 @@ export interface ICustomDomainService {
     name: string
     fieldName: string
     serviceType?: string
+    isEnabled?: boolean
     __v?: number
   }[]
 }
@@ -34,6 +35,7 @@ export interface IGetCustomServicesRequest {
 
 export interface IGetCustomServicesByDomainRequest {
   domainId?: string[]
+  includeDisabled?: boolean
 }
 
 export interface IGetCustomServicesResponse {

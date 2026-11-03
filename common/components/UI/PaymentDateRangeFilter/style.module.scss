@@ -1,0 +1,73 @@
+.wrapper {
+  min-width: 240px;
+
+  @media (max-width: 425px) {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+.picker {
+  width: 100%;
+}
+
+.panelWithRecent {
+  display: flex;
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+  }
+}
+
+.recent {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  // Sized by the longest label ("01.08.2026 — 28.09.2026") so it never clips.
+  flex: none;
+  width: max-content;
+  min-width: 170px;
+  max-width: 260px;
+  padding: 12px 8px;
+  border-inline-end: 1px solid;
+
+  @media (max-width: 600px) {
+    width: auto;
+    max-width: none;
+    border-inline-end: none;
+    border-block-end: 1px solid;
+  }
+}
+
+.recentTitle {
+  padding: 0 8px 4px;
+}
+
+.recentList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+// antd Button is a centered inline-flex: without this a long label overflows
+// on both sides instead of being start-aligned.
+.recentItem {
+  justify-content: flex-start;
+  text-align: start;
+
+  > span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.recentItemActive {
+  font-weight: 600;
+}
+
+.recentEmpty {
+  padding: 0 8px;
+  font-size: 12px;
+}

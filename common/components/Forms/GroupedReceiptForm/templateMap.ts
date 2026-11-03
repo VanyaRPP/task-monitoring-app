@@ -11,8 +11,8 @@ export const templateMap: Record<string, ComponentType<TemplateProps>> = {
   official: dynamic(() => import('./templates/official'), { ssr: false }),
 }
 
-export function resolveBuiltinTemplateKey(data: any): BuiltinTemplateKey {
-  const candidate =
+export function resolveTemplateCandidate(data: any): string {
+  return (
     data?.template ||
     (typeof data?.company === 'object'
       ? data?.company?.defaultTemplate
@@ -21,6 +21,11 @@ export function resolveBuiltinTemplateKey(data: any): BuiltinTemplateKey {
       ? data?.domain?.defaultTemplate
       : undefined) ||
     'classic'
+  )
+}
+
+export function resolveBuiltinTemplateKey(data: any): BuiltinTemplateKey {
+  const candidate = resolveTemplateCandidate(data)
 
   if (candidate in templateMap) {
     return candidate as BuiltinTemplateKey

@@ -86,12 +86,7 @@ const ClassicTemplate: FC<TemplateProps> = ({
           defaultValue={data?.reciever?.description?.trim() ?? ''}
         >
           <pre className={cs.preLabel}>
-            {data?.reciever?.description?.trim()} <br />
-            {data?.reciever?.adminEmails?.map((email: string) => (
-              <div key={email}>
-                {email} <br />
-              </div>
-            ))}
+            {data?.reciever?.description?.trim()}
           </pre>
         </EditableText>
       </div>

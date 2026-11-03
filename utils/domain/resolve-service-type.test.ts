@@ -29,7 +29,7 @@ describe('resolveServiceType', () => {
     expect(t).toBe(ServiceType.Maintenance)
   })
 
-  it('falls back to UTILITY_SERVICE_ID_TO_TYPE when serviceType missing', () => {
+  it('falls back to BUILT_IN_SERVICE_ID_TO_TYPE when serviceType missing', () => {
     const id = defaultServices[1]
     const t = resolveServiceType({ _id: id })
     expect(t).toBe(ServiceType.Electricity)

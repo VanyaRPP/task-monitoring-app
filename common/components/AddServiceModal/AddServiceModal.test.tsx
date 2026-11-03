@@ -66,6 +66,45 @@ describe('AddServiceModal Sync', () => {
   })
 })
 
+describe('AddServiceModal without an address', () => {
+  const mockAddService = jest.fn()
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockAddService.mockResolvedValue({ data: { success: true } })
+    ;(useAddServiceMutation as jest.Mock).mockReturnValue([
+      mockAddService,
+      { isLoading: false },
+    ])
+    ;(useEditServiceMutation as jest.Mock).mockReturnValue([
+      jest.fn(),
+      { isLoading: false },
+    ])
+  })
+
+  it('creates a month service without sending a street', async () => {
+    render(
+      <AddServiceModal
+        closeModal={jest.fn()}
+        serviceActions={{ edit: false, preview: false }}
+      />
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: /Додати/i }))
+
+    await waitFor(() => expect(mockAddService).toHaveBeenCalledTimes(1))
+    expect(mockAddService.mock.calls[0][0]).not.toHaveProperty('street')
+  })
+
+  it('opens without serviceActions (e.g. from the dashboard card)', async () => {
+    render(<AddServiceModal closeModal={jest.fn()} />)
+
+    fireEvent.click(screen.getByRole('button', { name: /Додати/i }))
+
+    await waitFor(() => expect(mockAddService).toHaveBeenCalledTimes(1))
+  })
+})
+
 describe('AddServiceModal Date Logic (Timezone Fix)', () => {
   it('має зберігати травень (MonthPicker) як травень в UTC, незалежно від таймзони (UTC+)', () => {
     // Симулюємо вибір Травня 2026 в локальній таймзоні (наприклад, Київ UTC+3)

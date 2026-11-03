@@ -22,6 +22,7 @@ import Custom from './Custom'
 import Discount from './Discount'
 import Electricity from './Electricity'
 import GarbageCollector from './GarbageCollector'
+import HousingFee from './HousingFee'
 import Inflicion from './Inflicion'
 import Maintenance from './Maintenance'
 import Placing from './Placing'
@@ -344,6 +345,7 @@ const ComponentsCollection: {
 } = {
   [ServiceType.Maintenance]: Maintenance,
   [ServiceType.Placing]: Placing,
+  [ServiceType.HousingFee]: HousingFee,
   [ServiceType.Inflicion]: Inflicion,
   [ServiceType.GarbageCollector]: GarbageCollector,
   [ServiceType.Electricity]: Electricity,

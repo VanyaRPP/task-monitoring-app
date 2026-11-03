@@ -7,6 +7,7 @@ import { Roles } from '@utils/constants'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import Payment from '@modules/models/Payment'
 import RealEstate from '@modules/models/RealEstate'
+import { calculateDebtorsInflation } from '@utils/debt-calculation/debtors-inflation'
 
 jest.mock('next-auth', () => ({ getServerSession: jest.fn() }))
 jest.mock('@pages/api/auth/[...nextauth]', () => ({ authOptions: {} }))
@@ -16,6 +17,9 @@ jest.mock('@modules/models/RealEstate')
 jest.mock('@utils/getCurrentUser', () => ({
   getCurrentUser: jest.fn(),
 }))
+jest.mock('@utils/debt-calculation/debtors-inflation', () => ({
+  calculateDebtorsInflation: jest.fn(),
+}))
 
 setupTestEnvironment()
 
@@ -24,6 +28,7 @@ const realDomainId = domains[0]._id
 describe('Debtors API - Debt Calculation Logic', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    ;(calculateDebtorsInflation as jest.Mock).mockResolvedValue({})
     ;(getCurrentUser as jest.Mock).mockResolvedValue({
       isUser: false,
       isDomainAdmin: false,
@@ -575,5 +580,67 @@ describe('Debtors API - Debt Calculation Logic', () => {
         ],
       })
     )
+  })
+
+  describe('інфляційні втрати', () => {
+    const run = async () => {
+      ;(Payment.find as jest.Mock).mockResolvedValue([
+        {
+          _id: 'payment1',
+          company: 'company1',
+          type: 'debit',
+          generalSum: 1500,
+          monthService: 'service1',
+        },
+      ])
+      ;(RealEstate.find as jest.Mock).mockResolvedValue([
+        { _id: 'company1', companyName: 'Test Company', domain: realDomainId },
+      ])
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      } as any
+      await handler(
+        { method: 'GET', query: { domainIds: [realDomainId] } } as any,
+        res
+      )
+      return res
+    }
+
+    it('додає до боржника інфляційні втрати з двигуна', async () => {
+      const inflation = {
+        loss: 34.68,
+        from: '2025-01',
+        to: '2025-03',
+        method: 'balance',
+      }
+      ;(calculateDebtorsInflation as jest.Mock).mockResolvedValue({
+        company1: inflation,
+      })
+
+      const res = await run()
+
+      expect(calculateDebtorsInflation).toHaveBeenCalledWith(['company1'])
+      expect(res.json.mock.calls[0][0].companies).toEqual([
+        expect.objectContaining({ companyId: 'company1', inflation }),
+      ])
+    })
+
+    it('збій розрахунку інфляції не ламає бейдж боргу', async () => {
+      ;(calculateDebtorsInflation as jest.Mock).mockRejectedValue(
+        new Error('boom')
+      )
+      const error = jest
+        .spyOn(console, 'error')
+        .mockImplementation(() => undefined)
+
+      const res = await run()
+
+      expect(res.status).toHaveBeenCalledWith(200)
+      expect(res.json.mock.calls[0][0].companies).toEqual([
+        expect.objectContaining({ totalDebt: 1500, inflation: null }),
+      ])
+      error.mockRestore()
+    })
   })
 })

@@ -1,10 +1,7 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
 import RealEstate from '@modules/models/RealEstate'
 import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { REACT_LOADABLE_MANIFEST } from 'next/dist/shared/lib/constants'
 
 export default async function handler(
   req: NextApiRequest,
@@ -12,24 +9,22 @@ export default async function handler(
 ) {
   await start()
 
-  const { isGlobalAdmin, user } = await getCurrentUser(req, res)
-
-  if (!isGlobalAdmin) {
+  if (req.method !== 'GET') {
     return res
-      .status(400)
-      .json({ success: false, message: 'not allowed' } as Data)
+      .status(405)
+      .json({ success: false, message: 'Method not allowed' })
   }
 
-  switch (req.method) {
-    case 'GET':
-      try {
-        const my = await RealEstate.find({
-          adminEmails: { $in: [user.email] },
-        })
+  try {
+    const { user } = await getCurrentUser(req, res)
 
-        return res.status(200).json({ success: true, data: my })
-      } catch (error) {
-        return res.status(400).json({ success: false })
-      }
+    const myCompanies = await RealEstate.find({ adminEmails: user.email })
+      .select('companyName domain street archived')
+      .sort({ companyName: 1 })
+      .lean()
+
+    return res.status(200).json({ success: true, data: myCompanies })
+  } catch (error) {
+    return res.status(400).json({ success: false, error: error.message })
   }
 }

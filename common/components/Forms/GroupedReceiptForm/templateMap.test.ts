@@ -1,4 +1,8 @@
-import { resolveBuiltinTemplateKey, templateMap } from './templateMap'
+import {
+  resolveBuiltinTemplateKey,
+  resolveTemplateCandidate,
+  templateMap,
+} from './templateMap'
 
 jest.mock('next/dynamic', () => () => () => null)
 
@@ -63,5 +67,30 @@ describe('templateMap', () => {
     expect(Object.keys(templateMap).sort()).toEqual(
       ['classic', 'ledger', 'official', 'olimp'].sort()
     )
+  })
+})
+
+describe('resolveTemplateCandidate', () => {
+  it('keeps a custom template id instead of coercing it to a builtin', () => {
+    expect(
+      resolveTemplateCandidate({ template: '65f0a1b2c3d4e5f601020304' })
+    ).toBe('65f0a1b2c3d4e5f601020304')
+  })
+
+  it('falls back to company then domain defaults', () => {
+    expect(
+      resolveTemplateCandidate({ company: { defaultTemplate: 'olimp' } })
+    ).toBe('olimp')
+    expect(
+      resolveTemplateCandidate({
+        company: {},
+        domain: { defaultTemplate: 'custom-id' },
+      })
+    ).toBe('custom-id')
+  })
+
+  it('defaults to "classic"', () => {
+    expect(resolveTemplateCandidate({})).toBe('classic')
+    expect(resolveTemplateCandidate(null)).toBe('classic')
   })
 })

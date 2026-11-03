@@ -333,7 +333,7 @@
   }
 }
 
-@media (max-width: 900px) {
+@media screen and (max-width: 900px) {
   .invoiceContainer {
     padding: 1.2rem;
   }
@@ -377,11 +377,6 @@
 }
 
 @media print {
-  @page {
-    size: A4;
-    margin: 0;
-  }
-
   .invoiceContainer,
   .invoiceContainer * {
     -webkit-print-color-adjust: exact;

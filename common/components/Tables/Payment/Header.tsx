@@ -5,6 +5,7 @@ import {
   IFilter,
 } from '@common/api/paymentApi/payment.api.types'
 import { ServiceType } from '@utils/constants'
+import { PaymentDateRange } from '@utils/paymentDateRange'
 
 export interface PaymentDeleteItem {
   id: string
@@ -16,7 +17,9 @@ export interface PaymentDeleteItem {
 export interface PaymentsHeaderProps {
   paymentsDeleteItems: PaymentDeleteItem[]
   closeEditModal: () => void
-  setCurrentDateFilter: (v: string[] | undefined) => void
+  onDateRangeChange: (range: PaymentDateRange | null) => void
+  showDateRangeFilter?: boolean
+  dateHistoryScope?: string
   currentPayment: Partial<IExtendedPayment>
   paymentActions: { edit: boolean; preview: boolean }
   streets: IFilter[]
@@ -41,7 +44,9 @@ export interface PaymentsHeaderProps {
 const PaymentsHeader: React.FC<PaymentsHeaderProps> = ({
   paymentsDeleteItems,
   closeEditModal,
-  setCurrentDateFilter,
+  onDateRangeChange,
+  showDateRangeFilter,
+  dateHistoryScope,
   currentPayment,
   paymentActions,
   streets,
@@ -66,7 +71,9 @@ const PaymentsHeader: React.FC<PaymentsHeaderProps> = ({
     <PaymentCardHeader
       paymentsDeleteItems={paymentsDeleteItems}
       closeEditModal={closeEditModal}
-      setCurrentDateFilter={setCurrentDateFilter}
+      onDateRangeChange={onDateRangeChange}
+      showDateRangeFilter={showDateRangeFilter}
+      dateHistoryScope={dateHistoryScope}
       currentPayment={currentPayment}
       paymentActions={paymentActions}
       streets={streets}

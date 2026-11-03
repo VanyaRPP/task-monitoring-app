@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import GroupedReceiptForm from './index'
 
 jest.mock('./style.module.scss', () => ({}))
@@ -156,9 +156,9 @@ describe('OLIMP template', () => {
   // once OLIMP template starts rendering provider info explicitly.
   test.todo('OLIMP template: displays provider data when implemented')
 
-  test('відображає email Отримувача', () => {
+  test('не відображає email Отримувача (лише опис компанії)', () => {
     renderOlimp()
-    expect(screen.getByText('test@gmail.com')).toBeInTheDocument()
+    expect(screen.queryByText('test@gmail.com')).not.toBeInTheDocument()
   })
 
   test('повертає null якщо paymentData відсутній', () => {
@@ -249,7 +249,10 @@ describe('GroupedReceiptForm - Send Email Button', () => {
 
   test('renders toolbar with multiple icons', () => {
     const { container } = renderWithMail()
-    const icons = container.querySelectorAll('svg')
+    // Printer/template/table icons live inside the "..." dropdown menu, which
+    // antd renders into a body-level portal once opened.
+    fireEvent.click(container.querySelector('button'))
+    const icons = document.querySelectorAll('svg')
     expect(icons.length).toBeGreaterThanOrEqual(3)
   })
 
@@ -265,7 +268,8 @@ describe('GroupedReceiptForm - Send Email Button', () => {
 
   test('renders all expected toolbar icons (printer, template, table, language selector)', () => {
     const { container } = renderWithMail()
-    const svgs = container.querySelectorAll('svg')
+    fireEvent.click(container.querySelector('button'))
+    const svgs = document.querySelectorAll('svg')
     expect(svgs.length).toBeGreaterThanOrEqual(4)
   })
 

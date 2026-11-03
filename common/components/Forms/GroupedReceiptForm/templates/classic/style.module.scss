@@ -91,3 +91,11 @@
     display: flex;
   }
 }
+
+@media print {
+  // overflow-x: auto clips the table's 1px outer border at the page edge.
+  .invoiceContainer .tableSum {
+    width: 100%;
+    overflow: visible;
+  }
+}

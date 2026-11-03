@@ -1,9 +1,10 @@
 import ProfitService, {
   CreateProfitInput,
 } from '@common/services/profitService/profit.service'
+import { canAccessProfitTarget } from '@common/services/profitService/profitAccess'
+import { parseProfitBody } from '@common/services/profitService/profitInput'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getCurrentUser } from '@utils/getCurrentUser'
-import { normalizeCurrency } from '@utils/helpers'
 
 /**
  * @swagger
@@ -16,7 +17,7 @@ import { normalizeCurrency } from '@utils/helpers'
  *     tags:
  *       - Profit
  *     summary: Get all profit records separated by month
- *     description: Returns a paginated list of profit records grouped by month. Requires admin access.
+ *     description: Returns a paginated list of profit records grouped by month, across every domain. GlobalAdmin only.
  *     parameters:
  *       - in: query
  *         name: page
@@ -45,7 +46,7 @@ import { normalizeCurrency } from '@utils/helpers'
  *                 meta:
  *                   type: object
  *       403:
- *         description: Forbidden - Not an admin
+ *         description: Forbidden - Not a global admin
  *       500:
  *         description: Internal server error
  *
@@ -53,7 +54,7 @@ import { normalizeCurrency } from '@utils/helpers'
  *     tags:
  *       - Profit
  *     summary: Create a new profit record
- *     description: Adds a new profit record. Requires admin access.
+ *     description: Adds a new profit record to one domain or company ledger. The caller must administer that domain or company (GlobalAdmin: any).
  *     requestBody:
  *       required: true
  *       content:
@@ -71,6 +72,12 @@ import { normalizeCurrency } from '@utils/helpers'
  *                 description: Domain ID (ObjectId)
  *               amount:
  *                 type: number
+ *                 description: Ignored when items are sent - it is their sum
+ *               items:
+ *                 type: array
+ *                 description: Lines of one receipt; categories are derived from them
+ *                 items:
+ *                   $ref: '#/components/schemas/ProfitItem'
  *               type:
  *                 type: string
  *                 enum: [credit, debit]
@@ -92,7 +99,7 @@ import { normalizeCurrency } from '@utils/helpers'
  *                 data:
  *                   $ref: '#/components/schemas/Profit'
  *       403:
- *         description: Forbidden - Not an admin
+ *         description: Forbidden - caller does not administer that domain or company
  *       500:
  *         description: Internal server error
  */
@@ -101,8 +108,15 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const { isAdmin, user } = await getCurrentUser(req, res)
-  if (!isAdmin) return res.status(403).json({ success: false })
+  const { isGlobalAdmin, user } = await getCurrentUser(req, res)
+  const access = { isGlobalAdmin, user }
+
+  // The list-all overview spans every domain, so it is GlobalAdmin's alone.
+  // POST is open to anyone who can reach a ledger: its target is checked
+  // against the caller below, once the body says what it is.
+  if (!isGlobalAdmin && req.method !== 'POST') {
+    return res.status(403).json({ success: false })
+  }
 
   try {
     switch (req.method) {
@@ -116,48 +130,18 @@ export default async function handler(
       }
 
       case 'POST': {
-        const {
-          domain,
-          amount,
-          type,
-          description,
-          date,
-          categories,
-          invoiceNumber,
-          payment,
-          periodMonth,
-          currency,
-        } = req.body
+        const { error, input } = parseProfitBody(req.body)
+        if (error) return res.status(400).json({ success: false, error })
 
-        if (!domain || !amount || !type || !date) {
-          return res.status(400).json({
-            success: false,
-            error: 'Missing required fields: domain, amount, type, or date',
-          })
-        }
-
-        if (!['debit', 'credit'].includes(type)) {
-          return res.status(400).json({
-            success: false,
-            error: 'Invalid type. Allowed values: "debit" or "credit"',
-          })
+        // Writing into a ledger needs access to THAT domain or company -
+        // being a DomainAdmin somewhere is not enough.
+        if (!(await canAccessProfitTarget(input, access))) {
+          return res.status(403).json({ success: false })
         }
 
         const profitDocument: CreateProfitInput = {
-          domain,
+          ...input,
           createdBy: user._id.toString(),
-          amount: Number(amount),
-          type,
-          date: new Date(date),
-          description: description?.trim() || '',
-          categories: Array.isArray(categories) ? categories : [],
-          invoiceNumber: invoiceNumber?.trim(),
-          payment,
-          // Optional: the ledger falls back to the month of `date` without it.
-          periodMonth: /^\d{4}-\d{2}$/.test(periodMonth ?? '')
-            ? periodMonth
-            : undefined,
-          currency: normalizeCurrency(currency),
         }
 
         try {

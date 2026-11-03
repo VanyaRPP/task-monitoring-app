@@ -10,6 +10,7 @@ import {
   message,
   Collapse,
   Popconfirm,
+  Tooltip,
 } from 'antd'
 import type { CollapseProps } from 'antd'
 import {
@@ -17,6 +18,8 @@ import {
   EditOutlined,
   CheckOutlined,
   CloseOutlined,
+  MinusOutlined,
+  PlusOutlined,
 } from '@ant-design/icons'
 import {
   useDeleteCustomServiceMutation,
@@ -48,7 +51,11 @@ interface Props {
   onClose: () => void
   data: ServiceItem[]
   serviceGroups: ServiceGroup[]
-  onSave: (orderedGroups: IDomainServiceGroupSavePayload[]) => void
+  disabledServiceIds?: string[]
+  onSave: (
+    orderedGroups: IDomainServiceGroupSavePayload[],
+    disabledServiceIds: string[]
+  ) => void
   onCreateCustomService: (name: string) => Promise<any>
   onDeleteCustomService?: (serviceKey: string) => void
   onUpdateCustomService?: (id: string, newTitle: string) => Promise<void>
@@ -62,6 +69,7 @@ const DomainModal: FC<Props> = ({
   onClose,
   data,
   serviceGroups,
+  disabledServiceIds,
   onSave,
   onCreateCustomService,
   onDeleteCustomService,
@@ -82,6 +90,7 @@ const DomainModal: FC<Props> = ({
   const [activePanel, setActivePanel] = useState<string | string[]>([])
   const [editingGroupKey, setEditingGroupKey] = useState<string | null>(null)
   const [tempGroupName, setTempGroupName] = useState('')
+  const [localDisabledIds, setLocalDisabledIds] = useState<string[]>([])
   const { data: user } = useGetCurrentUserQuery()
 
   isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
@@ -102,8 +111,20 @@ const DomainModal: FC<Props> = ({
   }, [open, serviceGroups])
 
   useEffect(() => {
+    setLocalDisabledIds((disabledServiceIds ?? []).map(String))
+  }, [open, disabledServiceIds])
+
+  useEffect(() => {
     setLocalData(data)
   }, [data])
+
+  const toggleServiceEnabled = (serviceKey: string) => {
+    setLocalDisabledIds((prev) =>
+      prev.includes(serviceKey)
+        ? prev.filter((id) => id !== serviceKey)
+        : [...prev, serviceKey]
+    )
+  }
 
   const handleChange = (
     groupName: string,
@@ -149,6 +170,7 @@ const DomainModal: FC<Props> = ({
           services: group.services.filter((s) => s !== serviceKey),
         }))
       )
+      setLocalDisabledIds((prev) => prev.filter((id) => id !== serviceKey))
 
       onDeleteCustomService?.(serviceKey)
     } catch (error: any) {
@@ -344,6 +366,7 @@ const DomainModal: FC<Props> = ({
         render={(item) => {
           const isEditing = editingKey === item.key
           const isCustom = !isProtectedService(item.key)
+          const isEnabled = !localDisabledIds.includes(item.key)
 
           return (
             <div
@@ -373,13 +396,36 @@ const DomainModal: FC<Props> = ({
                   ellipsis={{
                     tooltip: { title: item.title, placement: 'top' },
                   }}
-                  style={{ display: 'block', flex: 1, minWidth: 0 }}
+                  style={{
+                    display: 'block',
+                    flex: 1,
+                    minWidth: 0,
+                    opacity: isEnabled ? 1 : 0.45,
+                  }}
                 >
                   {item.title}
                 </Text>
               )}
 
               <Space size="small">
+                {editable && (
+                  <Tooltip
+                    title={isEnabled ? 'Вимкнути послугу' : 'Увімкнути послугу'}
+                  >
+                    <Button
+                      type="text"
+                      size="small"
+                      aria-label={
+                        isEnabled ? 'Вимкнути послугу' : 'Увімкнути послугу'
+                      }
+                      icon={isEnabled ? <MinusOutlined /> : <PlusOutlined />}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        toggleServiceEnabled(item.key)
+                      }}
+                    />
+                  </Tooltip>
+                )}
                 {editable &&
                   isCustom &&
                   isAdmin &&
@@ -456,7 +502,7 @@ const DomainModal: FC<Props> = ({
       groupName: g.groupName,
       services: (targetKeys[g.groupName] || []).map(String),
     }))
-    onSave(orderedGroups)
+    onSave(orderedGroups, localDisabledIds)
     onClose()
   }
 

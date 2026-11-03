@@ -1,4 +1,5 @@
 import StatusTag from '@components/UI/StatusTag'
+import { TruncatedText } from '@components/UI/TruncatedText'
 import { ITask } from '@modules/models/Task'
 import { AppRoutes } from '@utils/constants'
 import { Table } from 'antd'
@@ -20,7 +21,7 @@ const ListOneTask: React.FC<Props> = ({ tasks }) => {
       key: 'name',
       width: '16.6%',
       ellipsis: true,
-      render: (name) => name,
+      render: (name) => <TruncatedText text={name} />,
     },
     {
       title: 'Статус',

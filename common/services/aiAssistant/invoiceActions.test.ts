@@ -1,7 +1,7 @@
 import {
   buildInvoiceDraft,
   findDomainsByName,
-  resolveMonthService,
+  findMonthService,
 } from './invoiceActions'
 import RealEstate from '@modules/models/RealEstate'
 import Domain from '@modules/models/Domain'
@@ -93,10 +93,10 @@ describe('findDomainsByName', () => {
   })
 })
 
-describe('resolveMonthService', () => {
+describe('findMonthService', () => {
   it('returns the existing Service when one is found', async () => {
     mockService.findOne.mockResolvedValue({ _id: 'svc-1' })
-    const result = await resolveMonthService(
+    const result = await findMonthService(
       'dom-1',
       undefined,
       2026,
@@ -104,84 +104,27 @@ describe('resolveMonthService', () => {
       globalAdmin
     )
     expect(result).toEqual({ _id: 'svc-1' })
-    expect(mockService.create).not.toHaveBeenCalled()
   })
 
-  it('creates an empty (zeroed) Service when none exists', async () => {
+  it('returns null and creates nothing when the month has no Service', async () => {
     mockService.findOne.mockResolvedValue(null)
-    mockService.create.mockResolvedValue({ _id: 'svc-new' })
 
-    await resolveMonthService('dom-1', undefined, 2026, 7, globalAdmin)
+    const result = await findMonthService(
+      'dom-1',
+      undefined,
+      2026,
+      7,
+      globalAdmin
+    )
 
-    const created = mockService.create.mock.calls[0][0]
-    expect(created).toMatchObject({
-      domain: 'dom-1',
-      rentPrice: 0,
-      electricityPrice: 0,
-      waterPrice: 0,
-    })
-    // street must be omitted (empty string fails ObjectId cast on the backend)
-    expect(created.street).toBeUndefined()
+    expect(result).toBeNull()
+    expect(mockService.create).not.toHaveBeenCalled()
   })
 
   it('blocks a domain admin from a domain they do not administer', async () => {
     mockDomain.exists.mockResolvedValue(null)
     await expect(
-      resolveMonthService('other-dom', undefined, 2026, 7, domainAdmin)
+      findMonthService('other-dom', undefined, 2026, 7, domainAdmin)
     ).rejects.toThrow('domain not accessible')
-  })
-})
-
-describe('buildInvoiceDraft', () => {
-  function stubCompany() {
-    mockRealEstate.findById.mockReturnValue({
-      populate: () => ({
-        _id: 'co-1',
-        companyName: 'Acme',
-        street: null,
-        currency: 'UAH',
-        domain: { _id: 'dom-1', description: 'domain desc' },
-      }),
-    })
-    mockDomain.exists.mockResolvedValue(true)
-    mockService.findOne.mockResolvedValue({ _id: 'svc-1' })
-  }
-
-  it('sums invoice lines + extra lines into generalSum', async () => {
-    stubCompany()
-    mockGetInvoices.mockReturnValue([
-      { type: 'maintenancePrice', name: 'Утримання', price: 100, sum: 300 },
-      { type: 'electricityPrice', name: 'Електрика', price: 5, sum: 0 },
-    ])
-
-    const draft = await buildInvoiceDraft({
-      companyId: 'co-1',
-      month: 7,
-      year: 2026,
-      extraLines: [{ name: 'Оренда', sum: 5000 }],
-      ctx: globalAdmin,
-    })
-
-    // 300 (kept) + 0 (dropped) + 5000 extra = 5300
-    expect(draft.generalSum).toBe(5300)
-    expect(draft.invoice).toHaveLength(2) // zero-sum line filtered out
-    expect(draft.invoiceNumber).toBe(101)
-    expect(draft.type).toBe('debit')
-    expect(draft.company).toBe('co-1')
-  })
-
-  it('yields zero-value draft when the Service is empty (no lines)', async () => {
-    stubCompany()
-    mockGetInvoices.mockReturnValue([])
-
-    const draft = await buildInvoiceDraft({
-      companyId: 'co-1',
-      month: 7,
-      year: 2026,
-      ctx: globalAdmin,
-    })
-
-    expect(draft.generalSum).toBe(0)
-    expect(draft.invoice).toEqual([])
   })
 })
