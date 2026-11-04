@@ -464,6 +464,7 @@ describe('duplicatePayments', () => {
       invoiceNumber: 7,
       invoiceCreationDate: new Date('2020-01-01T00:00:00.000Z'),
       transaction: { paid: true },
+      status: 'sent',
       type,
       domain,
       generalSum: 500,
@@ -513,6 +514,7 @@ describe('duplicatePayments', () => {
     expect(firstBody).not.toHaveProperty('_id')
     expect(firstBody).not.toHaveProperty('__v')
     expect(firstBody).not.toHaveProperty('transaction')
+    expect(firstBody).not.toHaveProperty('status')
     expect(firstBody.invoiceCreationDate).toBeInstanceOf(Date)
 
     // copied fields survive

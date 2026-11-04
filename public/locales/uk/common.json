@@ -3,7 +3,7 @@
   "payments": {
     "statusLabel": "Статус",
     "statuses": {
-      "draft": "Драфт",
+      "draft": "Оповістити",
       "sent": "Відправлено"
     },
     "tooltips": {

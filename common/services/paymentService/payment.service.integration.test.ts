@@ -9,7 +9,8 @@ import Payment from '@modules/models/Payment'
 import RealEstate from '@modules/models/RealEstate'
 import Domain from '@modules/models/Domain'
 import Street from '@modules/models/Street'
-import { getPayments } from './payment.service'
+import { PaymentStatus } from '@common/api/paymentApi/payment.api.types'
+import { duplicatePayments, getPayments } from './payment.service'
 import { testConnectOptions } from '@utils/setupTestEnvironment'
 
 jest.mock('@common/services/profitService/profit.service', () => ({
@@ -578,5 +579,66 @@ describe('getPayments — scoped filters reach the aggregation stages', () => {
 
     expect(result.data).toHaveLength(1)
     expect(result.totalPayments).toMatchObject({ debit: 100 })
+  })
+})
+
+describe('duplicatePayments — send status', () => {
+  const asGlobalAdmin = {
+    isGlobalAdmin: true,
+    isDomainAdmin: false,
+    user: { email: 'admin@test.com' },
+  }
+
+  async function seedWithStatus(status?: PaymentStatus) {
+    const { domain, street, company } = await seedScope({
+      companyAdminEmail: 'company@test.com',
+    })
+    const source = await seedPayment({
+      domain: domain._id,
+      street: street._id,
+      company: company._id,
+      invoiceNumber: 1,
+    })
+    if (status) await Payment.updateOne({ _id: source._id }, { status })
+    return source
+  }
+
+  async function duplicateOne(sourceId: string) {
+    const { createdIds } = await duplicatePayments([sourceId], asGlobalAdmin)
+    expect(createdIds).toHaveLength(1)
+    return Payment.findById(createdIds[0]).lean()
+  }
+
+  it('a copy of a sent invoice starts as draft, the original stays sent', async () => {
+    const source = await seedWithStatus(PaymentStatus.Sent)
+
+    const copy = await duplicateOne(source._id.toString())
+
+    expect(copy.status).toBe(PaymentStatus.Draft)
+    const original = await Payment.findById(source._id).lean()
+    expect(original.status).toBe(PaymentStatus.Sent)
+    expect(original.invoiceNumber).toBe(1)
+  })
+
+  it('a copy of a draft invoice stays draft', async () => {
+    const source = await seedWithStatus()
+
+    const copy = await duplicateOne(source._id.toString())
+
+    expect(copy.status).toBe(PaymentStatus.Draft)
+  })
+
+  it('a copy is marked sent once it is actually sent, apart from the original', async () => {
+    const source = await seedWithStatus()
+    const copy = await duplicateOne(source._id.toString())
+
+    await Payment.updateOne({ _id: copy._id }, { status: PaymentStatus.Sent })
+
+    const [sentCopy, original] = await Promise.all([
+      Payment.findById(copy._id).lean(),
+      Payment.findById(source._id).lean(),
+    ])
+    expect(sentCopy.status).toBe(PaymentStatus.Sent)
+    expect(original.status).toBe(PaymentStatus.Draft)
   })
 })
