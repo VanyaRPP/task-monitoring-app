@@ -1,11 +1,11 @@
 import Domain from '@modules/models/Domain'
-import RealEstate from '@modules/models/RealEstate'
+import RealEstate, { IRealEstateModel } from '@modules/models/RealEstate'
 import { IStreet } from '@modules/models/Street'
 import start, { ExtendedData } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import { getDistinctCompanyAndDomain, getDistinctStreets } from '@utils/helpers'
 import { isValidEmail } from '@common/assets/features/validators'
-import { FilterQuery } from 'mongoose'
+import { QueryFilter } from 'mongoose'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 export default async function handler(
@@ -55,7 +55,7 @@ export default async function handler(
         /**
          * request data filters
          */
-        const filters: FilterQuery<typeof RealEstate> = {
+        const filters: QueryFilter<IRealEstateModel> = {
           archived: isArchived !== undefined ? isArchived : false,
           ...(!!companiesIds?.length && { _id: { $in: companiesIds } }),
           ...(!!domainsIds?.length && { domain: { $in: domainsIds } }),
@@ -106,7 +106,7 @@ export default async function handler(
         /**
          * access restrictions
          */
-        const options: FilterQuery<typeof RealEstate> = {}
+        const options: QueryFilter<IRealEstateModel> = {}
 
         if (isGlobalAdmin) {
         } else if (isDomainAdmin) {

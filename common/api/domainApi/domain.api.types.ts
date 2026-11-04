@@ -50,7 +50,8 @@ export interface IDomainService {
 
 export interface IDomainBankToken {
   acc?: string
-  token: string
+  // No `token`: the encrypted value never leaves the server (see the Domain
+  // model). The bank routes take a domainId and use it there.
   shortToken: string
   tokenName: string
   confidant: string[]

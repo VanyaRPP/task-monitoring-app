@@ -3,6 +3,7 @@
  */
 
 import { MongoMemoryServer } from 'mongodb-memory-server'
+import { testConnectOptions } from '@utils/setupTestEnvironment'
 import mongoose from 'mongoose'
 
 import InflationIndex from '@modules/models/InflationIndex'
@@ -14,7 +15,7 @@ let mongo: MongoMemoryServer
 
 beforeAll(async () => {
   mongo = await MongoMemoryServer.create({ instance: { launchTimeout: 60000 } })
-  await mongoose.connect(mongo.getUri())
+  await mongoose.connect(mongo.getUri(), testConnectOptions)
   await InflationIndex.syncIndexes()
 }, 120000)
 

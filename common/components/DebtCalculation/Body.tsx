@@ -1,4 +1,4 @@
-import { Alert, Empty, InputNumber, Space, Typography } from 'antd'
+import { Alert, Empty, Typography } from 'antd'
 import { formatPeriod } from '@utils/debt-calculation/months'
 import { useDebtCalculationContext } from './'
 import DebtActSummary from './ActSummary'
@@ -6,15 +6,8 @@ import MonthsTable from './MonthsTable'
 import s from './style.module.scss'
 
 const DebtCalculationBody: React.FC = () => {
-  const {
-    domainId,
-    companyId,
-    company,
-    result,
-    overrides,
-    openingDebtPrefill,
-    setApartmentOverride,
-  } = useDebtCalculationContext()
+  const { domainId, companyId, company, result, overrides } =
+    useDebtCalculationContext()
 
   if (!domainId) {
     return (
@@ -34,26 +27,6 @@ const DebtCalculationBody: React.FC = () => {
     )
   }
 
-  const param = (
-    label: string,
-    field: 'area' | 'tariff' | 'openingDebt',
-    placeholder: string
-  ) => (
-    <label className={s.Field}>
-      <span className={s.Label}>{label}</span>
-      <InputNumber
-        min={0}
-        value={overrides[field]}
-        placeholder={placeholder}
-        onChange={(value) =>
-          setApartmentOverride({
-            [field]: value == null ? undefined : Number(value),
-          })
-        }
-      />
-    </label>
-  )
-
   const fromPhoto = result.rows.filter(
     (row) => overrides.months?.[formatPeriod(row)]?.source === 'photo'
   ).length
@@ -72,22 +45,6 @@ const DebtCalculationBody: React.FC = () => {
             </Typography.Text>
           )}
         </div>
-
-        <Space wrap size="middle">
-          {param('Площа, м²', 'area', String(company?.totalArea ?? 0))}
-          {param(
-            'Тариф, грн/м²',
-            'tariff',
-            String(company?.pricePerMeter ?? 0)
-          )}
-          {/* Imported history («Вхідне сальдо» + months before the period)
-              fills this in; typing a value still overrides it. */}
-          {param(
-            'Борг на початок періоду',
-            'openingDebt',
-            (openingDebtPrefill ?? 0).toFixed(2)
-          )}
-        </Space>
       </div>
 
       {fromPhoto > 0 && (

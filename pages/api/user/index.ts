@@ -56,12 +56,10 @@ export default async function handler(
           .status(403)
           .json({ success: false, message: 'Access denied' })
       } catch (error) {
-        return res
-          .status(400)
-          .json({
-            success: false,
-            message: 'An error occurred while fetching users',
-          })
+        return res.status(400).json({
+          success: false,
+          message: 'An error occurred while fetching users',
+        })
       }
 
     default:

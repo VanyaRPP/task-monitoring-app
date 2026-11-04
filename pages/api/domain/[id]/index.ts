@@ -5,8 +5,10 @@ import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import { isValidEmail } from '@common/assets/features/validators'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import EncryptionService from '@utils/encryptionService'
-import { hidePercentCharacters } from '@utils/hidePercentCharacters/hidePercentCharacters'
+import {
+  loadStoredBankTokens,
+  prepareDomainBankTokens,
+} from '@common/services/bankTokenService/bankToken.service'
 import { normalizeDisabledServiceIds } from '@common/services/customServiceService/customService.service'
 
 export default async function handler(
@@ -18,67 +20,20 @@ export default async function handler(
   const { isGlobalAdmin, isDomainAdmin, isAdmin, isUser, user } =
     await getCurrentUser(req, res)
 
-  const SECURE_TOKEN = process.env.NEXT_PUBLIC_MONGODB_SECRET_TOKEN
-
-  async function encryptDomainBankTokens(
-    obj: any,
-    secretKey: string,
-    domainId: string
-  ) {
-    // If the form didn't carry tokens at all, leave existing ones alone.
-    // This guards against an undefined / '' / [] body field silently
-    // wiping a domain's PrivatBank integration on any unrelated PATCH.
-    if (
-      !Array.isArray(obj.domainBankToken) ||
-      obj.domainBankToken.length === 0
-    ) {
+  // Turns the form's bank tokens into what is stored - see
+  // prepareDomainBankTokens. Leaves the stored ones alone when none were sent.
+  async function encryptDomainBankTokens(obj: any, domainId: string) {
+    const prepared = Array.isArray(obj.domainBankToken)
+      ? prepareDomainBankTokens(
+          obj.domainBankToken,
+          await loadStoredBankTokens(domainId)
+        )
+      : undefined
+    if (prepared === undefined) {
       delete obj.domainBankToken
-      return obj
+    } else {
+      obj.domainBankToken = prepared
     }
-
-    const encryptionService = new EncryptionService(secretKey)
-
-    // The form re-submits existing tokens with a masked shortToken and
-    // no real `token` field — naively re-encrypting that masked string
-    // replaces the live PrivatBank token with garbage. Pull the current
-    // values from the DB so we can preserve `token` for entries that
-    // weren't actually edited.
-    const existing = await Domain.findById(domainId)
-      .select('domainBankToken')
-      .lean()
-    const existingTokens = (existing?.domainBankToken ?? []) as any[]
-
-    obj.domainBankToken = obj.domainBankToken
-      .map((item: any) => {
-        const looksLikeMaskedExisting =
-          !item.token &&
-          typeof item.shortToken === 'string' &&
-          item.shortToken.includes('*')
-
-        if (looksLikeMaskedExisting) {
-          const matched = existingTokens.find(
-            (e) => e?.shortToken === item.shortToken || e?.name === item.name
-          )
-          if (!matched?.token) {
-            // No way to recover the original token — drop the entry
-            // rather than persisting a bogus one.
-            return null
-          }
-          return {
-            ...item,
-            token: matched.token,
-            shortToken: matched.shortToken,
-          }
-        }
-
-        return {
-          ...item,
-          token: item.token || encryptionService.encrypt(item.shortToken),
-          shortToken: hidePercentCharacters(item.shortToken),
-        }
-      })
-      .filter(Boolean)
-
     return obj
   }
 
@@ -110,7 +65,7 @@ export default async function handler(
           }
         }
 
-        await Domain.findByIdAndRemove(req.query.id).then((domain) => {
+        await Domain.findByIdAndDelete(req.query.id).then((domain) => {
           if (domain) {
             return res.status(200).json({
               success: true,
@@ -174,7 +129,6 @@ export default async function handler(
 
           const updatedObj = await encryptDomainBankTokens(
             req.body,
-            SECURE_TOKEN,
             req.query.id as string
           )
           if (
@@ -190,19 +144,18 @@ export default async function handler(
           const response = await Domain.findOneAndUpdate(
             { _id: req.query.id },
             updatedObj,
-            { new: true }
+            { returnDocument: 'after' }
           )
           return res.status(200).json({ success: true, data: response })
         } else {
           const updatedObj = await encryptDomainBankTokens(
             req.body,
-            SECURE_TOKEN,
             req.query.id as string
           )
           const response = await Domain.findOneAndUpdate(
             { _id: req.query.id },
             updatedObj,
-            { new: true }
+            { returnDocument: 'after' }
           )
           return res.status(200).json({ success: true, data: response })
         }

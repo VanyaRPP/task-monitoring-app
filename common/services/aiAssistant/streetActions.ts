@@ -39,7 +39,9 @@ export async function buildStreetDraft({
     .lean()
   if (!domain) throw new Error('domain not accessible')
 
-  const own = await Street.find({ _id: { $in: domain.streets ?? [] } })
+  const own = await Street.find({
+    _id: { $in: (domain.streets ?? []).map(String) },
+  })
     .select('address city')
     .lean()
   const existing = own.find(

@@ -19,6 +19,36 @@ export const daysInYear = (year: number): number =>
 export const daysInMonth = (year: number, month: number): number =>
   new Date(year, month, 0).getDate()
 
+export interface IAccrual {
+  /** The day the month's accrual starts on (1 = the whole month). */
+  startDay?: number
+  /** Days typed in by hand; wins over `startDay`. */
+  days?: number
+}
+
+/** The start day as a whole day of the month: 1-31, never past its last day. */
+export const clampStartDay = (
+  value: number | undefined,
+  calendarDays: number
+): number => Math.min(Math.max(Math.round(Number(value) || 1), 1), calendarDays)
+
+/**
+ * The days of a month a debt accrues for, before any excluded period: those
+ * typed in, else from the start day to the month's end. A month's charge and
+ * its interest both follow it.
+ */
+export const accrualDays = (
+  year: number,
+  month: number,
+  { startDay, days }: IAccrual = {}
+): number => {
+  const calendar = daysInMonth(year, month)
+  if (days != null && days !== ('' as unknown) && Number.isFinite(+days)) {
+    return Math.min(Math.max(Math.round(+days), 0), calendar)
+  }
+  return calendar - clampStartDay(startDay, calendar) + 1
+}
+
 const isValidMonth = (value?: IYearMonth): boolean =>
   !!value &&
   Number.isInteger(value.year) &&

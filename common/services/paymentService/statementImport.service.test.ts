@@ -274,7 +274,11 @@ describe('loadImportTarget', () => {
     )
     ;(CustomService.find as jest.Mock).mockReturnValue(
       lean([
-        { _id: HOUSING, name: 'Внесок', serviceType: ServiceType.HousingFee },
+        {
+          _id: HOUSING,
+          name: 'квартплата',
+          serviceType: ServiceType.HousingFee,
+        },
       ])
     )
 
@@ -284,6 +288,6 @@ describe('loadImportTarget', () => {
     })
 
     expect(Domain.exists).not.toHaveBeenCalled()
-    expect(loaded.housing).toEqual({ serviceId: HOUSING, name: 'Внесок' })
+    expect(loaded.housing).toEqual({ serviceId: HOUSING, name: 'квартплата' })
   })
 })

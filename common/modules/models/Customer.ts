@@ -1,8 +1,8 @@
 import { IUser } from './User'
-import mongoose, { ObjectId, Schema } from 'mongoose'
+import mongoose, { Schema, Types } from 'mongoose'
 
 export interface ICustomerModel {
-  customer: ObjectId | IUser
+  customer: Types.ObjectId | IUser
   locations?: string
   information?: string
   description?: string
@@ -15,7 +15,8 @@ export const CustomerSchema = new Schema<ICustomerModel>({
   description: { type: String, required: true },
 })
 
-const Customer =
-  mongoose.models.Customer || mongoose.model('Customer', CustomerSchema)
+const Customer: mongoose.Model<ICustomerModel> =
+  mongoose.models?.Customer ||
+  mongoose.model<ICustomerModel>('Customer', CustomerSchema)
 
 export default Customer

@@ -7,9 +7,13 @@ import { useGetInflationIndexesQuery } from '@common/api/inflationIndexApi/infla
 import { useGetAllPaymentsQuery } from '@common/api/paymentApi/payment.api'
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent, { PointerEventsCheckLevel } from '@testing-library/user-event'
+import { useRouter } from 'next/compat/router'
+import { defaultDebtPeriod } from '@utils/debt-calculation/company-debt'
 import DebtCalculationBlock from './'
+
+jest.mock('next/compat/router', () => ({ useRouter: jest.fn(() => null) }))
 
 jest.mock('@common/api/domainApi/domain.api', () => ({
   useGetDomainIdsByServiceTypeQuery: jest.fn(),
@@ -34,6 +38,12 @@ jest.mock('@common/api/serviceApi/service.api', () => ({
   useGetAllServicesQuery: jest.fn(),
 }))
 
+// Fixed, so the page opens on a period the КМУ №206 moratorium falls in.
+jest.mock('@utils/debt-calculation/company-debt', () => ({
+  ...jest.requireActual('@utils/debt-calculation/company-debt'),
+  defaultDebtPeriod: jest.fn(),
+}))
+
 jest.mock('@common/api/debtCalculationApi/debtCalculation.api', () => ({
   useGetDebtCalculationQuery: jest.fn(),
   useSaveDebtCalculationMutation: jest.fn(() => [
@@ -41,6 +51,11 @@ jest.mock('@common/api/debtCalculationApi/debtCalculation.api', () => ({
     { isLoading: false },
   ]),
 }))
+
+const OVERLAPPING_PERIOD = {
+  from: { year: 2022, month: 6 },
+  to: { year: 2023, month: 5 },
+}
 
 const DOMAIN = '507f1f77bcf86cd799439011'
 const FIRST = '507f1f77bcf86cd799439021'
@@ -91,14 +106,25 @@ const user = userEvent.setup({
 /** Picks an option out of an antd Select addressed by its aria-label. */
 const choose = async (select: string, option: string): Promise<void> => {
   await user.click(screen.getByRole('combobox', { name: select, hidden: true }))
-  await user.click(await screen.findByTitle(option))
+  const target = (await screen.findAllByTitle(option)).find((element) =>
+    element.classList.contains('ant-select-item-option')
+  )
+  await user.click(target)
 }
+
+const selected = (select: string): string =>
+  screen
+    .getByRole('combobox', { name: select, hidden: true })
+    .closest('.ant-select')
+    .querySelector('.ant-select-selection-item')
+    ?.getAttribute('title') ?? ''
 
 const openingDebt = (): HTMLInputElement =>
   screen.getByLabelText('Борг на початок періоду') as HTMLInputElement
 
 beforeEach(() => {
   jest.clearAllMocks()
+  ;(defaultDebtPeriod as jest.Mock).mockReturnValue(OVERLAPPING_PERIOD)
   window.localStorage.clear()
   ;(useGetDomainIdsByServiceTypeQuery as jest.Mock).mockReturnValue({
     data: [DOMAIN],
@@ -108,7 +134,7 @@ beforeEach(() => {
     data: [{ _id: DOMAIN, name: 'ОСББ Тест' }],
   })
   ;(useGetAllRealEstateQuery as jest.Mock).mockReturnValue({
-    data: { data: COMPANIES },
+    currentData: { data: COMPANIES },
     isLoading: false,
   })
   ;(useGetInflationIndexesQuery as jest.Mock).mockReturnValue({
@@ -138,7 +164,6 @@ describe('switching the company filter', () => {
   it('loads the saved data of the company that was picked', async () => {
     render(<DebtCalculationBlock />)
 
-    await choose('Домен', 'ОСББ Тест')
     await choose('Компанія', 'Перша компанія')
 
     expect(openingDebt()).toHaveValue('1111')
@@ -147,7 +172,6 @@ describe('switching the company filter', () => {
   it('shows the other company its own data, not the previous one', async () => {
     render(<DebtCalculationBlock />)
 
-    await choose('Домен', 'ОСББ Тест')
     await choose('Компанія', 'Перша компанія')
     await choose('Компанія', 'Друга компанія')
 
@@ -157,7 +181,6 @@ describe('switching the company filter', () => {
   it('brings the data back when you return to the first company', async () => {
     render(<DebtCalculationBlock />)
 
-    await choose('Домен', 'ОСББ Тест')
     await choose('Компанія', 'Перша компанія')
     await choose('Компанія', 'Друга компанія')
     await choose('Компанія', 'Перша компанія')
@@ -174,7 +197,6 @@ describe('switching the company filter', () => {
     })
     render(<DebtCalculationBlock />)
 
-    await choose('Домен', 'ОСББ Тест')
     await choose('Компанія', 'Перша компанія')
 
     expect(openingDebt()).toHaveValue('')
@@ -187,7 +209,6 @@ describe('switching the company filter', () => {
     })
     render(<DebtCalculationBlock />)
 
-    await choose('Домен', 'ОСББ Тест')
     await choose('Компанія', 'Перша компанія')
     await user.type(openingDebt(), '999')
     expect(openingDebt()).toHaveValue('999')
@@ -195,6 +216,125 @@ describe('switching the company filter', () => {
     await choose('Компанія', 'Друга компанія')
 
     expect(openingDebt()).toHaveValue('')
+  })
+})
+
+describe('excluded periods follow their company', () => {
+  beforeEach(() => {
+    ;(defaultDebtPeriod as jest.Mock).mockReturnValue(OVERLAPPING_PERIOD)
+    ;(useGetDebtCalculationQuery as jest.Mock).mockReturnValue({
+      data: null,
+      isFetching: false,
+    })
+  })
+
+  // Plain DOM queries: role queries crawl on a page with this many inputs.
+  const settingsButton = (): HTMLElement =>
+    document.querySelector('button[aria-label="Виключені періоди"]')
+
+  const cmuSwitch = (): HTMLElement | null =>
+    document.querySelector('button[role="switch"]')
+
+  /** The badge on the settings button: how many periods apply here. */
+  const periodCount = (): string =>
+    settingsButton().closest('.ant-badge')?.querySelector('sup')?.textContent ??
+    '0'
+
+  const isOn = (): boolean =>
+    cmuSwitch()?.getAttribute('aria-checked') === 'true'
+
+  it('a new calculation starts with the КМУ №206 moratorium on', async () => {
+    render(<DebtCalculationBlock />)
+    await choose('Домен', 'ОСББ Тест')
+    await choose('Компанія', 'Перша компанія')
+
+    expect(isOn()).toBe(true)
+    expect(periodCount()).toBe('1')
+  })
+
+  it('a calculation saved without it keeps none', async () => {
+    ;(useGetDebtCalculationQuery as jest.Mock).mockReturnValue({
+      data: SAVED[FIRST],
+      isFetching: false,
+    })
+    render(<DebtCalculationBlock />)
+    await choose('Домен', 'ОСББ Тест')
+    await choose('Компанія', 'Перша компанія')
+
+    expect(isOn()).toBe(false)
+    expect(periodCount()).toBe('0')
+  })
+
+  it('a calculation saved with it has it', async () => {
+    ;(useGetDebtCalculationQuery as jest.Mock).mockReturnValue({
+      data: {
+        ...(SAVED[FIRST] as object),
+        overrides: {
+          [FIRST]: {
+            excludedPeriods: [
+              {
+                id: 'p1',
+                type: 'cmu_206',
+                startDate: '2022-02-24',
+                endDate: '2023-12-29',
+              },
+            ],
+          },
+        },
+      },
+      isFetching: false,
+    })
+    render(<DebtCalculationBlock />)
+    await choose('Домен', 'ОСББ Тест')
+    await choose('Компанія', 'Перша компанія')
+
+    expect(isOn()).toBe(true)
+  })
+
+  it('switching it off stays off when you come back to the company', async () => {
+    render(<DebtCalculationBlock />)
+    await choose('Домен', 'ОСББ Тест')
+    await choose('Компанія', 'Перша компанія')
+    await user.click(cmuSwitch())
+    expect(isOn()).toBe(false)
+
+    // The other company is new too: it starts with the moratorium on.
+    await choose('Компанія', 'Друга компанія')
+    expect(isOn()).toBe(true)
+
+    await choose('Компанія', 'Перша компанія')
+    expect(isOn()).toBe(false)
+    expect(periodCount()).toBe('0')
+  })
+
+  it('an added period is still there when you come back', async () => {
+    render(<DebtCalculationBlock />)
+    await choose('Домен', 'ОСББ Тест')
+    await choose('Компанія', 'Перша компанія')
+    await user.click(settingsButton())
+    await user.click(await screen.findByText('Додати період'))
+    await user.click(settingsButton())
+    await choose('Компанія', 'Друга компанія')
+    await choose('Компанія', 'Перша компанія')
+
+    await user.click(settingsButton())
+    // Two rows - the default КМУ №206 and the added one - of two date fields.
+    expect((await screen.findAllByLabelText('Виключений період')).length).toBe(
+      4
+    )
+  })
+
+  it('has no switch when the moratorium is outside the period', async () => {
+    ;(defaultDebtPeriod as jest.Mock).mockReturnValue({
+      from: { year: 2025, month: 10 },
+      to: { year: 2026, month: 9 },
+    })
+    render(<DebtCalculationBlock />)
+    await choose('Домен', 'ОСББ Тест')
+    await choose('Компанія', 'Перша компанія')
+
+    expect(cmuSwitch()).toBeNull()
+    expect(periodCount()).toBe('0')
   })
 })
 
@@ -219,7 +359,6 @@ describe('page defaults', () => {
     )
     render(<DebtCalculationBlock />)
 
-    await choose('Домен', 'ОСББ Тест')
     await choose('Компанія', 'Перша компанія')
 
     const method = screen.getByRole('combobox', { name: 'Метод інфляційних' })
@@ -233,9 +372,124 @@ describe('page defaults', () => {
 
     await userEvent.click(screen.getByLabelText('Період з'))
 
-    expect(
-      await screen.findByRole('button', { name: 'Обрати рік' })
-    ).toBeInTheDocument()
+    // Plain DOM query: a role query with a name crawls on a page this big.
+    await waitFor(() =>
+      expect(
+        document.querySelector('button[aria-label="Обрати рік"]')
+      ).not.toBeNull()
+    )
     expect(screen.getByText('Січ')).toBeInTheDocument()
+  })
+})
+
+describe('auto-picking the domain on open', () => {
+  const OTHER_DOMAIN = '507f1f77bcf86cd799439012'
+  const OTHER_COMPANY = '507f1f77bcf86cd799439023'
+  const OTHER_COMPANIES = [
+    {
+      _id: OTHER_COMPANY,
+      companyName: 'Компанія другого домену',
+      totalArea: 30,
+      pricePerMeter: 3,
+    },
+  ]
+
+  beforeEach(() => {
+    ;(useRouter as jest.Mock).mockReturnValue(null)
+  })
+
+  const withTwoDomains = (): { resolve: () => void } => {
+    let isOtherLoaded = false
+    ;(useGetDomainIdsByServiceTypeQuery as jest.Mock).mockReturnValue({
+      data: [DOMAIN, OTHER_DOMAIN],
+      isLoading: false,
+    })
+    ;(useGetDomainsQuery as jest.Mock).mockReturnValue({
+      data: [
+        { _id: DOMAIN, name: 'ОСББ Тест' },
+        { _id: OTHER_DOMAIN, name: 'ОСББ Друге' },
+      ],
+    })
+
+    ;(useGetAllRealEstateQuery as jest.Mock).mockImplementation(
+      ({ domainId }: { domainId?: string }) =>
+        domainId === OTHER_DOMAIN && !isOtherLoaded
+          ? { data: { data: COMPANIES }, currentData: undefined }
+          : {
+              data: {
+                data: domainId === OTHER_DOMAIN ? OTHER_COMPANIES : COMPANIES,
+              },
+              currentData: {
+                data: domainId === OTHER_DOMAIN ? OTHER_COMPANIES : COMPANIES,
+              },
+            }
+    )
+    return {
+      resolve: () => {
+        isOtherLoaded = true
+      },
+    }
+  }
+
+  it('opens on the first domain and its first company', async () => {
+    render(<DebtCalculationBlock />)
+
+    expect(selected('Домен')).toBe('ОСББ Тест')
+    expect(selected('Компанія')).toBe('Перша компанія')
+  })
+
+  it('loads the dependent data of the auto-picked company', async () => {
+    render(<DebtCalculationBlock />)
+
+    await waitFor(() => expect(openingDebt()).toHaveValue('1111'))
+    expect(useGetAllPaymentsQuery).toHaveBeenLastCalledWith(
+      expect.objectContaining({ domainIds: [DOMAIN], companyIds: [FIRST] }),
+      { skip: false }
+    )
+    expect(useGetAllServicesQuery).toHaveBeenLastCalledWith(
+      expect.objectContaining({ domainId: DOMAIN }),
+      { skip: false }
+    )
+  })
+
+  it('keeps a domain and company that are already chosen', async () => {
+    withTwoDomains().resolve()
+    ;(useRouter as jest.Mock).mockReturnValue({
+      query: { domainId: OTHER_DOMAIN, companyId: OTHER_COMPANY },
+    })
+    render(<DebtCalculationBlock />)
+
+    expect(selected('Домен')).toBe('ОСББ Друге')
+    expect(selected('Компанія')).toBe('Компанія другого домену')
+  })
+
+  it('leaves the selector empty when there is no domain to pick', () => {
+    ;(useGetDomainIdsByServiceTypeQuery as jest.Mock).mockReturnValue({
+      data: [DOMAIN],
+      isLoading: false,
+    })
+    ;(useGetDomainsQuery as jest.Mock).mockReturnValue({ data: [] })
+    render(<DebtCalculationBlock />)
+
+    expect(selected('Домен')).toBe('')
+    expect(useGetAllRealEstateQuery).toHaveBeenLastCalledWith(
+      expect.objectContaining({ domainId: undefined }),
+      { skip: true }
+    )
+  })
+
+  it('a manual switch picks the new domain’s company, not the old one’s', async () => {
+    const { resolve } = withTwoDomains()
+    const { rerender } = render(<DebtCalculationBlock />)
+    expect(selected('Компанія')).toBe('Перша компанія')
+
+    await choose('Домен', 'ОСББ Друге')
+    expect(selected('Домен')).toBe('ОСББ Друге')
+    expect(selected('Компанія')).toBe('')
+
+    resolve()
+    rerender(<DebtCalculationBlock />)
+
+    expect(selected('Компанія')).toBe('Компанія другого домену')
   })
 })

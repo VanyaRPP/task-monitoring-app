@@ -105,13 +105,37 @@ describe('address filter', () => {
     ])
   })
 
+  it('starts on the first address and its first company', async () => {
+    render(<Harness />)
+
+    expect(await optionsOf('Компанія')).toEqual(['Квартира №3'])
+    expect(screen.getByTestId('company')).toHaveTextContent('c-3')
+  })
+
+  it('starts on the address of a company that is already chosen', async () => {
+    render(<Harness initialCompanyId="c-4" />)
+
+    expect(await optionsOf('Компанія')).toEqual(['Комора'])
+    expect(screen.getByTestId('company')).toHaveTextContent('c-4')
+  })
+
   it('narrows the companies to the chosen address', async () => {
     render(<Harness />)
-    expect(await optionsOf('Компанія')).toHaveLength(4)
 
     await choose('Адреса', /^вул\. Шевченка 8/)
 
     expect(await optionsOf('Компанія')).toEqual(['Квартира №1', 'Квартира №2'])
+  })
+
+  it('does not pick an address again once it is cleared by hand', async () => {
+    render(<Harness />)
+
+    await userEvent.hover(screen.getByRole('combobox', { name: 'Адреса' }))
+    await userEvent.click(
+      document.querySelector<HTMLElement>('.ant-select-clear')
+    )
+
+    expect(await optionsOf('Компанія')).toHaveLength(4)
   })
 
   it('drops a company that is not at the chosen address, keeps one that is', async () => {

@@ -1,4 +1,4 @@
-import mongoose, { ObjectId, Schema } from 'mongoose'
+import mongoose, { Schema, Types } from 'mongoose'
 import { IApartmentOverrides } from '@utils/debt-calculation/build-input'
 import { IYearMonth } from '@utils/debt-calculation/months'
 import { InflationMethod } from '@utils/debt-calculation/types'
@@ -17,16 +17,16 @@ import { InflationMethod } from '@utils/debt-calculation/types'
 export interface IDebtCalculationModel {
   _id?: string
   name?: string
-  domain: ObjectId | string
+  domain: Types.ObjectId | string
   /** The company the calculation belongs to - the autosave key. */
-  company: ObjectId | string
+  company: Types.ObjectId | string
   periodFrom?: IYearMonth
   periodTo?: IYearMonth
   annualRatePercent?: number
   inflationMethod: InflationMethod
   /** `{ companyId: { ...company edits, months: { 'YYYY-MM': {...} } } }` */
   overrides: Record<string, IApartmentOverrides>
-  createdBy?: ObjectId | string
+  createdBy?: Types.ObjectId | string
   createdAt?: Date
   updatedAt?: Date
 }
@@ -69,8 +69,8 @@ const DebtCalculationSchema = new Schema<IDebtCalculationModel>(
 // and an upsert on this pair makes saving seamless - no names, no buttons.
 DebtCalculationSchema.index({ domain: 1, company: 1 }, { unique: true })
 
-const DebtCalculation =
-  (mongoose.models?.DebtCalculation as mongoose.Model<IDebtCalculationModel>) ||
+const DebtCalculation: mongoose.Model<IDebtCalculationModel> =
+  mongoose.models?.DebtCalculation ||
   mongoose.model<IDebtCalculationModel>(
     'DebtCalculation',
     DebtCalculationSchema

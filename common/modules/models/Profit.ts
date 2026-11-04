@@ -170,8 +170,8 @@ const ProfitSchema = new Schema<ProfitDocument>(
   }
 )
 
-const Profit =
-  (mongoose.models?.Profit as Model<ProfitDocument>) ||
+const Profit: mongoose.Model<ProfitDocument> =
+  mongoose.models?.Profit ||
   mongoose.model<ProfitDocument>('Profit', ProfitSchema)
 
 export default Profit

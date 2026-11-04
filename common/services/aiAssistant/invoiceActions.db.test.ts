@@ -140,7 +140,7 @@ describe('buildInvoiceDraft lines', () => {
     })
 
   const addDebit = (
-    monthService: unknown,
+    monthService: mongoose.Types.ObjectId | string,
     issued: Date,
     electricityReading: number
   ) =>

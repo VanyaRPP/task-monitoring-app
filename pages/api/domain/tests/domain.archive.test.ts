@@ -56,7 +56,7 @@ describe('Domain API - ARCHIVE', () => {
     const companyDomainIds = await RealEstate.distinct('domain')
     const domainWithoutCompanies = await Domain.findOne({
       _id: {
-        $nin: companyDomainIds,
+        $nin: companyDomainIds.map(String),
       },
     })
     expect(domainWithoutCompanies).toBeTruthy()
@@ -205,7 +205,7 @@ describe('Domain API - ARCHIVE', () => {
     const domain = await Domain.findOneAndUpdate(
       {},
       { archived: true },
-      { new: true }
+      { returnDocument: 'after' }
     )
     expect(domain).toBeTruthy()
 

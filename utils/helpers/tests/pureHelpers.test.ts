@@ -134,10 +134,20 @@ describe('getPaymentProviderAndReciever', () => {
       provider: { description: 'domain desc' },
       reciever: {
         companyName: 'Acme',
-        adminEmails: ['a@b.c'],
         description: 'desc',
       },
     })
+  })
+
+  it('does not copy the company admin emails onto the reciever', () => {
+    const { reciever } = getPaymentProviderAndReciever({
+      companyName: 'Acme',
+      adminEmails: ['a@b.c'],
+      description: 'Line 1\nLine 2',
+    })
+
+    expect(reciever).not.toHaveProperty('adminEmails')
+    expect(reciever.description).toBe('Line 1\nLine 2')
   })
 
   it('snapshots the company contract number onto the reciever', () => {

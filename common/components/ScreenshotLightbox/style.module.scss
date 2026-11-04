@@ -1,0 +1,99 @@
+.Lightbox {
+  :global(.ant-modal-content) {
+    background: transparent;
+    box-shadow: none;
+    padding: 0;
+  }
+}
+
+.Content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ImageWrap {
+  position: relative;
+  display: inline-block;
+  line-height: 0;
+}
+
+.Image {
+  display: block;
+  max-width: 100%;
+  max-height: 80vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.HelpButton,
+.CloseButton {
+  position: absolute;
+  top: -40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.25);
+  }
+}
+
+.HelpButton {
+  left: 0;
+}
+
+.CloseButton {
+  right: 0;
+}
+
+.Arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  font-size: 18px;
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.75);
+  }
+}
+
+.ArrowLeft {
+  left: 12px;
+}
+
+.ArrowRight {
+  right: 12px;
+}
+
+@media (max-width: 600px) {
+  .Arrow {
+    width: 36px;
+    height: 36px;
+    font-size: 14px;
+  }
+}

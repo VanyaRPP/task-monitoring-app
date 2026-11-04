@@ -64,16 +64,18 @@ export default async function handler(
       return res.status(403).json({ success: false, message: 'not allowed' })
     }
 
-    // Mirror createPayment: when the stored receiver has no recipients (e.g.
-    // legacy payments saved before receiver was populated), fall back to the
-    // payment's domain admins instead of silently sending to nobody.
+    // The stored receiver no longer carries recipients, so send to the
+    // company's admins; fall back to the domain's admins
+    // instead of silently sending to nobody.
     const currentReceiver = payment.reciever || {}
     const reciever = {
       companyName:
         currentReceiver.companyName || payment.domain?.name || 'invoice',
       adminEmails: currentReceiver.adminEmails?.length
         ? currentReceiver.adminEmails
-        : payment.domain?.adminEmails || [],
+        : payment.company?.adminEmails?.length
+          ? payment.company.adminEmails
+          : payment.domain?.adminEmails || [],
       description:
         currentReceiver.description || payment.domain?.description || '',
     }

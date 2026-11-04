@@ -9,9 +9,10 @@ import {
   Tooltip,
   Typography,
 } from 'antd'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useDebtCalculationContext } from './'
 import CreatePayments from './CreatePayments'
+import ExcludedPeriods from './ExcludedPeriods'
 import PrintPreview from './PrintPreview'
 import { useExportExcel } from './useExportExcel'
 import s from './style.module.scss'
@@ -65,6 +66,12 @@ const DebtCalculationHeader: React.FC = () => {
       .map(({ _id, name }) => ({ value: String(_id), label: name }))
   }, [domains, allowedDomainIds])
 
+  useEffect(() => {
+    if (!domainId && domainOptions.length > 0) {
+      setDomainId(domainOptions[0].value)
+    }
+  }, [domainId, domainOptions, setDomainId])
+
   const streetOptions = useMemo(() => {
     const byStreet = new Map<string, { label: string; count: number }>()
     for (const { street } of companies) {
@@ -94,6 +101,24 @@ const DebtCalculationHeader: React.FC = () => {
       )
       .map(({ value, label }) => ({ value, label }))
   }, [companies])
+
+  const autoPickedDomainId = useRef<string>()
+  useEffect(() => {
+    if (!domainId || companies.length === 0) return
+    if (autoPickedDomainId.current === domainId) return
+    autoPickedDomainId.current = domainId
+
+    const current = companies.find(({ _id }) => _id === companyId)
+    if (current) {
+      setStreetId(streetKey(current.street))
+      return
+    }
+    const firstStreetId = streetOptions[0]?.value
+    setStreetId(firstStreetId)
+    setCompanyId(
+      companies.find(({ street }) => streetKey(street) === firstStreetId)?._id
+    )
+  }, [domainId, companies, companyId, streetOptions, setCompanyId])
 
   const companyOptions = useMemo(
     () =>
@@ -237,6 +262,11 @@ const DebtCalculationHeader: React.FC = () => {
             step={0.5}
           />
         </label>
+
+        <div className={s.Field}>
+          <span className={s.Label}>Виключення</span>
+          <ExcludedPeriods />
+        </div>
       </Space>
     </div>
   )

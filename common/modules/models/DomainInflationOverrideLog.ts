@@ -1,17 +1,17 @@
-import mongoose, { ObjectId, Schema } from 'mongoose'
+import mongoose, { Schema, Types } from 'mongoose'
 
 export type DomainInflationOverrideAction = 'set' | 'reset'
 
 export interface IDomainInflationOverrideLog {
   _id?: string
-  domain: ObjectId | string
+  domain: Types.ObjectId | string
   year: number
   month: number
   action: DomainInflationOverrideAction
   before: number | null
   after: number | null
   actorEmail?: string
-  actorId?: ObjectId | string
+  actorId?: Types.ObjectId | string
   date: Date
 }
 
@@ -35,9 +35,11 @@ DomainInflationOverrideLogSchema.index({
   date: -1,
 })
 
-const DomainInflationOverrideLog =
-  (mongoose.models
-    ?.DomainInflationOverrideLog as mongoose.Model<IDomainInflationOverrideLog>) ||
-  mongoose.model('DomainInflationOverrideLog', DomainInflationOverrideLogSchema)
+const DomainInflationOverrideLog: mongoose.Model<IDomainInflationOverrideLog> =
+  mongoose.models?.DomainInflationOverrideLog ||
+  mongoose.model<IDomainInflationOverrideLog>(
+    'DomainInflationOverrideLog',
+    DomainInflationOverrideLogSchema
+  )
 
 export default DomainInflationOverrideLog

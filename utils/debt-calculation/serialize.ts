@@ -1,5 +1,12 @@
 import { IApartmentOverrides, IMonthOverride } from './build-input'
+import {
+  CHANGE_FIELDS,
+  IValueChange,
+  IValueChanges,
+  normalizeChanges,
+} from './changes'
 import { IYearMonth } from './months'
+import { dayNumber, IExcludedPeriod } from './exclusions'
 import { DEFAULT_INFLATION_METHOD, InflationMethod } from './types'
 
 /** What gets persisted: INPUTS only, never the computed result. */
@@ -21,11 +28,16 @@ const MONTH_FIELDS = [
   'correction',
   'paid',
   'inflationIndex',
+  'days',
 ] as const
 
 const APARTMENT_FIELDS = [
   'area',
   'tariff',
+  'charged',
+  'paid',
+  'correction',
+  'startDay',
   'openingDebt',
   'legalFees',
   'courtFee',
@@ -62,6 +74,83 @@ const pickNumbers = <K extends string>(
   return out
 }
 
+/** A whole number in `[min, max]`, else dropped: a day is never 2.5 or 40. */
+const keepWhole = <T extends object>(
+  target: T,
+  field: keyof T,
+  min: number,
+  max: number
+): void => {
+  const value = target[field] as unknown as number | undefined
+  if (value === undefined) return
+  if (!Number.isInteger(value) || value < min || value > max) {
+    delete target[field]
+  }
+}
+
+const MAX_EXCLUDED_PERIODS = 50
+const MAX_ID_LENGTH = 64
+
+/**
+ * Excluded periods as they may be stored: a known type, real dates in order,
+ * an id. Anything else is dropped - a period that cannot be read would
+ * otherwise be written back on every save.
+ */
+const sanitizeExcludedPeriods = (
+  source: unknown
+): IExcludedPeriod[] | undefined => {
+  if (!Array.isArray(source)) return undefined
+
+  const out: IExcludedPeriod[] = []
+  for (const raw of source.slice(0, MAX_EXCLUDED_PERIODS)) {
+    const { id, type, startDate, endDate } = (raw ?? {}) as Record<
+      string,
+      unknown
+    >
+    const start = typeof startDate === 'string' ? dayNumber(startDate) : null
+    const end = typeof endDate === 'string' ? dayNumber(endDate) : null
+    if (start === null || end === null || start > end) continue
+
+    out.push({
+      id:
+        typeof id === 'string' && id
+          ? id.slice(0, MAX_ID_LENGTH)
+          : `excluded-${out.length + 1}`,
+      type: type === 'cmu_206' ? 'cmu_206' : 'custom',
+      startDate: startDate as string,
+      endDate: endDate as string,
+    })
+  }
+
+  return out.length > 0 ? out : undefined
+}
+
+/** A tariff that changed monthly for a century is still under this. */
+const MAX_CHANGES_PER_FIELD = 240
+
+/** Changes by month as they may be stored: a `YYYY-MM` and a number each. */
+const sanitizeChanges = (source: unknown): IValueChanges | undefined => {
+  if (!source || typeof source !== 'object') return undefined
+
+  const out: IValueChanges = {}
+  for (const field of CHANGE_FIELDS) {
+    const list = (source as Record<string, unknown>)[field]
+    if (!Array.isArray(list)) continue
+
+    const valid: IValueChange[] = []
+    for (const raw of list.slice(0, MAX_CHANGES_PER_FIELD)) {
+      const from = (raw as IValueChange)?.from
+      const value = finite((raw as IValueChange)?.value)
+      if (typeof from !== 'string' || !PERIOD.test(from)) continue
+      if (value === undefined) continue
+      valid.push({ from, value })
+    }
+    if (valid.length > 0) out[field] = normalizeChanges(valid)
+  }
+
+  return Object.keys(out).length > 0 ? out : undefined
+}
+
 /** Accepts only a parseable ISO date, normalized to canonical form. */
 const sanitizeTimestamp = (value: unknown): string | undefined => {
   if (typeof value !== 'string' || value.length > MAX_TIMESTAMP_LENGTH) {
@@ -85,6 +174,11 @@ const sanitizeMonths = (
     if (!PERIOD.test(period) || count >= MAX_MONTHS) continue
 
     const month: IMonthOverride = pickNumbers(raw, MONTH_FIELDS)
+    keepWhole(month, 'days', 0, 31)
+    // A zero index is no index; stored, it would read as one in the table.
+    if (month.inflationIndex !== undefined && month.inflationIndex <= 0) {
+      delete month.inflationIndex
+    }
     const updatedAt = sanitizeTimestamp((raw as IMonthOverride)?.updatedAt)
     // A timestamp on its own, with no value beside it, is an empty row.
     if (Object.keys(month).length === 0) continue
@@ -130,6 +224,13 @@ export const sanitizeOverrides = (
     if (!OBJECT_ID.test(companyId) || count >= MAX_APARTMENTS) continue
 
     const apartment: IApartmentOverrides = pickNumbers(raw, APARTMENT_FIELDS)
+    keepWhole(apartment, 'startDay', 1, 31)
+    const excludedPeriods = sanitizeExcludedPeriods(
+      (raw as IApartmentOverrides)?.excludedPeriods
+    )
+    if (excludedPeriods) apartment.excludedPeriods = excludedPeriods
+    const changes = sanitizeChanges((raw as IApartmentOverrides)?.changes)
+    if (changes) apartment.changes = changes
     const months = sanitizeMonths((raw as IApartmentOverrides)?.months)
     if (months) apartment.months = months
 

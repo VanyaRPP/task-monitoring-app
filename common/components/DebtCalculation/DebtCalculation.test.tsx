@@ -115,7 +115,7 @@ beforeEach(() => {
     isLoading: false,
   })
   ;(useGetAllRealEstateQuery as jest.Mock).mockReturnValue({
-    data: { data: [] },
+    currentData: { data: [] },
     isLoading: false,
   })
   ;(useGetInflationIndexesQuery as jest.Mock).mockReturnValue({
@@ -226,10 +226,10 @@ describe('ActSummary — підсумок у стилі Акта', () => {
     expect(screen.getByText(result.total.toFixed(2))).toBeInTheDocument()
   })
 
-  it('розбиває на внесок, річні та інфляційні', () => {
+  it('розбиває на квартплата, річні та інфляційні', () => {
     renderWithContext(<DebtActSummary result={result} />)
 
-    expect(screen.getByText('внесок')).toBeInTheDocument()
+    expect(screen.getByText('квартплата')).toBeInTheDocument()
     expect(screen.getByText('3% річних')).toBeInTheDocument()
     expect(screen.getByText('Інфляційні витрати')).toBeInTheDocument()
     expect(screen.getByText(result.body.toFixed(2))).toBeInTheDocument()
@@ -264,7 +264,9 @@ describe('ActSummary — підсумок у стилі Акта', () => {
   it('має місце для підпису голови правління', () => {
     renderWithContext(<DebtActSummary result={result} />)
 
-    expect(screen.getByText('Голова правління')).toBeInTheDocument()
+    expect(
+      screen.getByText('Директор ПП «Нова Крошня - ВЖРЕП 4»')
+    ).toBeInTheDocument()
   })
 })
 

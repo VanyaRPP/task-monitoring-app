@@ -65,7 +65,10 @@ export const FeatureFlagsTable: React.FC = () => {
               <Switch
                 checked={isEnabled}
                 onChange={(checked) =>
-                  updateFlag({ id: record._id, data: { isEnabled: checked } })
+                  updateFlag({
+                    id: String(record._id),
+                    data: { isEnabled: checked },
+                  })
                 }
               />
             ),
@@ -83,7 +86,7 @@ export const FeatureFlagsTable: React.FC = () => {
                   type="text"
                   icon={<DeleteOutlined />}
                   danger
-                  onClick={() => onDelete(record._id)}
+                  onClick={() => onDelete(String(record._id))}
                 />
               </Space>
             ),

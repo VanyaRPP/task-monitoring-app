@@ -36,7 +36,7 @@ export interface IProvider {
 
 export interface IReciever {
   companyName: string
-  adminEmails: string[]
+  adminEmails?: string[]
   description: string
   contractNumber?: string
   contractDate?: string | Date

@@ -1,7 +1,7 @@
-import mongoose, { ObjectId, Schema } from 'mongoose'
+import mongoose, { Schema, Types } from 'mongoose'
 
 export interface ICreditModel {
-  domain: ObjectId
+  domain: Types.ObjectId
   date: Date
   sum: number
   description: string
@@ -14,8 +14,8 @@ export const CreditSchema = new Schema<ICreditModel>({
   description: { type: String, required: false, default: '' },
 })
 
-const Credit =
-  (mongoose.models.Credit as mongoose.Model<ICreditModel>) ||
-  mongoose.model('Credit', CreditSchema)
+const Credit: mongoose.Model<ICreditModel> =
+  mongoose.models?.Credit ||
+  mongoose.model<ICreditModel>('Credit', CreditSchema)
 
 export default Credit
