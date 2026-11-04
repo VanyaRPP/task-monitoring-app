@@ -6,6 +6,20 @@ import type { ActiveScope } from '@components/AddCostModal'
 import { Profit } from '@common/api/profitsApi/profits.type'
 import { useMemo, useState } from 'react'
 import cn from 'classnames'
+import {
+  DndContext,
+  DragOverlay,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  BucketDropZone,
+  DraggableItemRow,
+  ROW_DRAG_ACTIVATION,
+  RowPointerSensor,
+  bucketFromDropId,
+} from './itemsDnd'
 import { getCurrencySymbol, inputNumberParser } from '@utils/helpers'
 import {
   Alert,
@@ -22,6 +36,7 @@ import {
   Select,
   Space,
   Typography,
+  theme,
 } from 'antd'
 import ukUA from 'antd/lib/locale/uk_UA'
 import dayjs from 'dayjs'
@@ -69,6 +84,16 @@ const formatTotal = (value: number) =>
 // Below this a receipt reads fine as one flat list; grouping is for the long ones.
 const GROUP_MIN_ITEMS = 6
 const NEW_BUCKET = '__new'
+// Lines run edge to edge of a block, as wide as the «Позиції» row above.
+const BUCKET_STYLES = { body: { padding: '4px 0' } }
+
+interface BucketDef {
+  key: string
+  label: string
+  /** The «Без категорії» block: a line dropped here loses its category. */
+  uncategorized: boolean
+  total: number
+}
 
 const headerStyle: React.CSSProperties = {
   display: 'flex',
@@ -118,9 +143,8 @@ interface ItemsFieldProps {
  * shown here and recomputed by the API on save.
  *
  * A long saved receipt is grouped into collapsible category blocks (the same
- * grouping the ledger table shows). The grouping is a snapshot of the saved
- * lines - re-grouping live would make a row jump away while its category is
- * being typed.
+ * grouping the ledger table shows). A line moves to another block by being
+ * pressed and dragged onto it, which also sets its category.
  */
 const ItemsField: React.FC<ItemsFieldProps> = ({
   disabled,
@@ -134,26 +158,41 @@ const ItemsField: React.FC<ItemsFieldProps> = ({
   const watched: Partial<IProfitItem>[] = Form.useWatch('items', form) ?? []
   const currency: string | undefined = Form.useWatch('currency', form)
   const uncategorized = t('profitPage:dashboard.uncategorized')
+  const { token } = theme.useToken()
 
   // Form.List hands out field keys 0..n-1, in order, when the saved lines
   // load and never reuses one - so a key still identifies its saved line
   // after others are removed. Keys beyond n are lines added in this session.
-  const buckets = useMemo(() => {
-    if (!grouped || !initialItems) return null
-    const byKey = new Map<
-      string,
-      { key: string; label: string; keys: number[]; total: number }
-    >()
-    initialItems.forEach((item, index) => {
-      const label = item.category?.trim() || uncategorized
+  const bucketDefs = useMemo(() => {
+    if (!initialItems) return []
+    const byKey = new Map<string, BucketDef>()
+    initialItems.forEach((item) => {
+      const name = item.category?.trim()
+      const label = name || uncategorized
       const key = normalizeCategoryKey(label)
-      const bucket = byKey.get(key) ?? { key, label, keys: [], total: 0 }
-      bucket.keys.push(index)
+      const bucket = byKey.get(key) ?? {
+        key,
+        label,
+        uncategorized: !name,
+        total: 0,
+      }
       bucket.total += Number(item.amount) || 0
       byKey.set(key, bucket)
     })
     return Array.from(byKey.values()).sort((a, b) => b.total - a.total)
-  }, [grouped, initialItems, uncategorized])
+  }, [initialItems, uncategorized])
+
+  // Which block each line sits in. Starts from the saved categories and then
+  // changes only by dragging - never by typing, which would make a row jump
+  // away mid-word.
+  const [bucketOf, setBucketOf] = useState<Record<number, string>>(() =>
+    Object.fromEntries(
+      (initialItems ?? []).map((item, index) => [
+        index,
+        normalizeCategoryKey(item.category?.trim() || uncategorized),
+      ])
+    )
+  )
 
   const [openKeys, setOpenKeys] = useState<string[]>(() => {
     const focused = initialItems?.[focusIndex]
@@ -161,21 +200,26 @@ const ItemsField: React.FC<ItemsFieldProps> = ({
       ? [normalizeCategoryKey(focused.category?.trim() || uncategorized)]
       : []
   })
+  const openBucket = (bucket: string) =>
+    setOpenKeys((keys) => (keys.includes(bucket) ? keys : [...keys, bucket]))
+
+  const [dragKey, setDragKey] = useState<number | null>(null)
+  const sensors = useSensors(
+    useSensor(RowPointerSensor, { activationConstraint: ROW_DRAG_ACTIVATION })
+  )
 
   // A line that fails validation inside a folded block would leave the error
   // out of sight, so the block holding it is opened.
   const reveal = (fieldKey: number) => {
-    if (!buckets) return
-    const bucket =
-      buckets.find((b) => b.keys.includes(fieldKey))?.key ?? NEW_BUCKET
-    setOpenKeys((keys) => (keys.includes(bucket) ? keys : [...keys, bucket]))
+    if (grouped) openBucket(bucketOf[fieldKey] ?? NEW_BUCKET)
   }
 
   const renderRow = (
     { key, name }: { key: number; name: number },
-    remove: (index: number) => void
+    remove: (index: number) => void,
+    draggable: boolean
   ) => (
-    <div key={key} className={s.itemRow}>
+    <DraggableItemRow key={key} id={key} enabled={draggable}>
       <Form.Item name={[name, 'category']} className={s.itemCategory}>
         <AutoComplete
           options={CATEGORY_OPTIONS}
@@ -224,7 +268,7 @@ const ItemsField: React.FC<ItemsFieldProps> = ({
           onClick={() => remove(name)}
         />
       )}
-    </div>
+    </DraggableItemRow>
   )
 
   return (
@@ -248,53 +292,128 @@ const ItemsField: React.FC<ItemsFieldProps> = ({
                 amount: Number(watched[name]?.amount) || 0,
               }))
             )
-          const savedKeys = new Set(buckets?.flatMap((b) => b.keys))
-          const added = fields.filter(({ key }) => !savedKeys.has(key))
 
-          const panels = buckets
+          const panels = grouped
             ? [
-                ...buckets.map((bucket) => ({
-                  key: bucket.key,
-                  label: bucket.label,
-                  fields: fields.filter(({ key }) => bucket.keys.includes(key)),
+                ...bucketDefs.map((def) => ({
+                  ...def,
+                  droppable: true,
+                  fields: fields.filter(({ key }) => bucketOf[key] === def.key),
                 })),
                 {
                   key: NEW_BUCKET,
                   label: t('profitPage:form.newItems'),
-                  fields: added,
+                  droppable: false,
+                  fields: fields.filter(({ key }) => !bucketOf[key]),
                 },
               ].filter((panel) => panel.fields.length > 0)
             : null
 
+          // Dropping a line on a block gives it that block's category; the
+          // record is saved with it on «Зберегти», like any other edit.
+          const handleDragEnd = ({ active, over }: DragEndEvent) => {
+            setDragKey(null)
+            if (!over) return
+            const target = bucketFromDropId(over.id)
+            const fieldKey = Number(active.id)
+            const def = bucketDefs.find((d) => d.key === target)
+            const field = fields.find(({ key }) => key === fieldKey)
+            if (!def || !field || bucketOf[fieldKey] === target) return
+            form.setFieldValue(
+              ['items', field.name, 'category'],
+              def.uncategorized ? undefined : def.label
+            )
+            setBucketOf((prev) => ({ ...prev, [fieldKey]: target }))
+            openBucket(target)
+          }
+
+          const dragged = fields.find(({ key }) => key === dragKey)
+          const draggedLine = dragged ? watched[dragged.name] : undefined
+          const canDrag = !disabled && !!panels
+
           return (
             <div className={s.items}>
               {panels ? (
-                <Collapse
-                  size="small"
-                  activeKey={openKeys}
-                  onChange={(keys) => setOpenKeys([].concat(keys))}
-                  items={panels.map((panel) => ({
-                    key: panel.key,
-                    // Keeps collapsed rows registered, so saving still
-                    // validates a line the user edited and then folded away.
-                    forceRender: true,
-                    label: (
-                      <BucketHeader
-                        label={panel.label}
-                        count={panel.fields.length}
-                        total={sumOf(panel.fields)}
-                        currency={currency}
-                      />
-                    ),
-                    children: (
-                      <div className={s.items}>
-                        {panel.fields.map((field) => renderRow(field, remove))}
+                <DndContext
+                  sensors={sensors}
+                  onDragStart={({ active }) => setDragKey(Number(active.id))}
+                  onDragEnd={handleDragEnd}
+                  onDragCancel={() => setDragKey(null)}
+                >
+                  {canDrag && (
+                    <Typography.Text type="secondary" className={s.dragHint}>
+                      {t('profitPage:form.dragHint')}
+                    </Typography.Text>
+                  )}
+                  <Collapse
+                    size="small"
+                    activeKey={openKeys}
+                    onChange={(keys) => setOpenKeys([].concat(keys))}
+                    items={panels.map((panel) => {
+                      const header = (
+                        <BucketHeader
+                          label={panel.label}
+                          count={panel.fields.length}
+                          total={sumOf(panel.fields)}
+                          currency={currency}
+                        />
+                      )
+                      const body = (
+                        <div className={s.items}>
+                          {panel.fields.map((field) =>
+                            renderRow(field, remove, canDrag)
+                          )}
+                        </div>
+                      )
+                      return {
+                        key: panel.key,
+                        styles: BUCKET_STYLES,
+                        // Keeps collapsed rows registered, so saving still
+                        // validates a line the user edited and then folded.
+                        forceRender: true,
+                        // A folded block still takes a drop on its header.
+                        label: panel.droppable ? (
+                          <BucketDropZone id={panel.key}>
+                            {header}
+                          </BucketDropZone>
+                        ) : (
+                          header
+                        ),
+                        children: panel.droppable ? (
+                          <BucketDropZone id={`${panel.key}#body`}>
+                            {body}
+                          </BucketDropZone>
+                        ) : (
+                          body
+                        ),
+                      }
+                    })}
+                  />
+                  <DragOverlay>
+                    {draggedLine && (
+                      <div
+                        className={s.dragOverlay}
+                        style={{
+                          background: token.colorBgElevated,
+                          boxShadow: token.boxShadowSecondary,
+                        }}
+                      >
+                        <Typography.Text strong ellipsis>
+                          {draggedLine.category || uncategorized}
+                        </Typography.Text>
+                        <Typography.Text type="secondary" ellipsis>
+                          {draggedLine.description || '—'}
+                        </Typography.Text>
+                        <Typography.Text strong>
+                          {getCurrencySymbol(currency)}{' '}
+                          {formatTotal(Number(draggedLine.amount) || 0)}
+                        </Typography.Text>
                       </div>
-                    ),
-                  }))}
-                />
+                    )}
+                  </DragOverlay>
+                </DndContext>
               ) : (
-                fields.map((field) => renderRow(field, remove))
+                fields.map((field) => renderRow(field, remove, false))
               )}
               {!disabled && (
                 <Button
@@ -303,11 +422,7 @@ const ItemsField: React.FC<ItemsFieldProps> = ({
                   icon={<PlusOutlined />}
                   onClick={() => {
                     add({})
-                    if (panels) {
-                      setOpenKeys((keys) =>
-                        keys.includes(NEW_BUCKET) ? keys : [...keys, NEW_BUCKET]
-                      )
-                    }
+                    if (panels) openBucket(NEW_BUCKET)
                   }}
                 >
                   {t('profitPage:form.addItem')}
@@ -397,6 +512,7 @@ const ItemsPreview: React.FC<ItemsPreviewProps> = ({
           defaultActiveKey={focusedGroup ? [focusedGroup.key] : []}
           items={groups.map((group) => ({
             key: group.key,
+            styles: BUCKET_STYLES,
             label: (
               <BucketHeader
                 label={group.category}

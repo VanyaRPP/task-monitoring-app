@@ -110,3 +110,50 @@
   justify-content: space-between;
   gap: 8px;
 }
+
+// A line in a category block: press and hold outside its inputs to move it.
+// The faint grip on the left is a hint, not the only place to grab.
+.draggableRow {
+  position: relative;
+  padding: 4px 4px 4px 16px;
+  border-radius: 6px;
+  cursor: grab;
+  touch-action: manipulation;
+  user-select: none;
+
+  &::before {
+    content: '⋮⋮';
+    position: absolute;
+    top: 9px;
+    left: 2px;
+    font-size: 11px;
+    letter-spacing: -2px;
+    opacity: 0.35;
+  }
+
+  &:hover {
+    background: rgba(127, 127, 127, 0.08);
+  }
+}
+
+.dragging {
+  opacity: 0.35;
+}
+
+.dropZone {
+  border-radius: 6px;
+}
+
+.dragHint {
+  font-size: 12px;
+}
+
+.dragOverlay {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) auto;
+  gap: 12px;
+  align-items: baseline;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: grabbing;
+}
