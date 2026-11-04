@@ -133,7 +133,7 @@
     "puppeteer": "^22.15.0",
     "ts-jest": "^29.4.14",
     "ts-node": "^10.9.2",
-    "typescript": "^5.8.3",
+    "typescript": "^6.0.3",
     "util": "^0.12.5",
     "whatwg-fetch": "^3.6.20"
   },
