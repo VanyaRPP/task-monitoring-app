@@ -280,7 +280,7 @@ export const getPaymentProviderAndReciever = (company) => {
   }
   const reciever: IReciever = company && {
     companyName: company?.companyName,
-    description: company?.description,
+    description: company?.description || '',
     contractNumber: company?.contractNumber,
     contractDate: company?.contractDate,
   }

@@ -179,6 +179,13 @@ describe('OLIMP template', () => {
     renderOlimp({ invoice: [] })
     expect(screen.getByText(/РАХУНОК №/i)).toBeInTheDocument()
   })
+
+  test('компанія без опису: рахунок рендериться з даними отримувача', () => {
+    renderOlimp({ reciever: { ...mockPayment.reciever, description: '' } })
+    expect(screen.getByText(/РАХУНОК №/i)).toBeInTheDocument()
+    expect(screen.getByText('test@gmail.com')).toBeInTheDocument()
+    expect(screen.queryByText(/Kyiv\s*Ukraine/)).not.toBeInTheDocument()
+  })
 })
 
 describe('Classic template', () => {
@@ -223,6 +230,14 @@ describe('Classic template', () => {
   test('generalSum = 0 відображає 0.00', () => {
     renderClassic({ generalSum: 0 })
     expect(screen.getByText(/0\.00/)).toBeInTheDocument()
+  })
+
+  test('компанія без опису: рахунок рендериться без помилок', () => {
+    renderClassic({
+      reciever: { ...mockPayment.reciever, description: undefined },
+    })
+    expect(screen.getByText(/Постачальник/i)).toBeInTheDocument()
+    expect(screen.getByText(/Одержувач/i)).toBeInTheDocument()
   })
 })
 
