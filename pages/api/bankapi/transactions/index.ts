@@ -1,12 +1,9 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
-import type { NextApiRequest, NextApiResponse } from 'next'
-import start, { Data } from '@pages/api/api.config'
+import { withDomainBankToken } from '@common/services/bankTokenService/withDomainBankToken'
 import { getTransactionsForDateInterval } from './utils/getTransactions/index'
 import Payment from '@modules/models/Payment'
-import Domain from '@modules/models/Domain'
 import RealEstate from '@modules/models/RealEstate'
-import { getCurrentUser } from '@utils/getCurrentUser'
 import {
   buildCounterpartyNameRegexSource,
   buildFinalTechnicalTransactionId,
@@ -134,121 +131,47 @@ export async function checkTransaction({
   }
 }
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse<Data>
-) {
-  await start()
+// `?domainId=` picks the domain; its token is decrypted on the server, and the
+// wrapper has already checked the caller administers that domain.
+export default withDomainBankToken(async (req, res, { token, domainId }) => {
+  const { startDate, limit, followId, acc } = req.query
 
-  const { isGlobalAdmin, isDomainAdmin, user } = await getCurrentUser(req, res)
+  try {
+    const transactions = await getTransactionsForDateInterval(
+      token,
+      acc,
+      startDate,
+      limit,
+      followId
+    )
 
-  if (!user) {
-    return res.status(401).json({
-      success: false,
-      message: 'Unauthorized',
-    })
-  }
+    // Fetch the domain's companies once, then reuse for every transaction's
+    // on-air identity match (avoids a DB query per transaction).
+    const companies = await RealEstate.find({ domain: domainId })
+      .select('_id companyName account rnokpp description')
+      .lean()
 
-  if (!isGlobalAdmin && !isDomainAdmin) {
-    return res.status(403).json({
-      success: false,
-      message: 'Forbidden',
-    })
-  }
-  const {
-    token: tokenQuery,
-    startDate,
-    limit,
-    followId,
-    acc,
-    domainId,
-  } = req.query
-
-  const { token: tokenHeader } = req.headers
-
-  if (!tokenQuery && !tokenHeader) {
-    return res
-      .status(404)
-      .json({ success: false, message: 'Error! No bank token!' })
-  }
-
-  const domainIdStr =
-    typeof domainId === 'string' && domainId.length > 0 ? domainId : null
-
-  if (domainIdStr && isDomainAdmin && !isGlobalAdmin) {
-    const allowed = await Domain.findOne({
-      _id: domainIdStr,
-      adminEmails: user.email,
-    })
-    if (!allowed) {
-      return res.status(403).json({
-        success: false,
-        message: 'Forbidden: domain',
-      })
-    }
-  }
-
-  switch (req.method) {
-    case 'GET':
-      try {
-        const transactions = await getTransactionsForDateInterval(
-          tokenHeader ?? tokenQuery,
-          acc,
-          startDate,
-          limit,
-          followId
-        )
-
-        const resolvedDomainId =
-          domainIdStr && (isGlobalAdmin || isDomainAdmin) ? domainIdStr : null
-
-        // Fetch the domain's companies once, then reuse for every transaction's
-        // on-air identity match (avoids a DB query per transaction).
-        const companies = resolvedDomainId
-          ? await RealEstate.find({ domain: resolvedDomainId })
-              .select('_id companyName account rnokpp description')
-              .lean()
-          : []
-
-        const checkedTransactions = await Promise.all(
-          transactions.map(async (transaction) => {
-            try {
-              const matchResult = await checkTransaction({
-                transaction,
-                domainId: resolvedDomainId,
-                companies,
-              })
-              return { ...transaction, ...matchResult }
-            } catch (error) {
-              return {
-                ...transaction,
-                isMatchingPayment: false,
-                previousCompanyId: null,
-              }
-            }
+    const checkedTransactions = await Promise.all(
+      transactions.map(async (transaction) => {
+        try {
+          const matchResult = await checkTransaction({
+            transaction,
+            domainId,
+            companies,
           })
-        )
+          return { ...transaction, ...matchResult }
+        } catch (error) {
+          return {
+            ...transaction,
+            isMatchingPayment: false,
+            previousCompanyId: null,
+          }
+        }
+      })
+    )
 
-        return res
-          .status(200)
-          .json({ success: true, data: checkedTransactions })
-      } catch (error) {
-        return res.status(400).json({ success: false, message: error.message })
-      }
-
-    case 'POST':
-      return res
-        .status(501)
-        .json({ success: false, message: 'not implemented' })
-
-    case 'PATCH':
-      return res
-        .status(501)
-        .json({ success: false, message: 'not implemented' })
-
-    case 'DELETE':
-      return res
-        .status(501)
-        .json({ success: false, message: 'not implemented' })
+    return res.status(200).json({ success: true, data: checkedTransactions })
+  } catch (error) {
+    return res.status(400).json({ success: false, message: error.message })
   }
-}
+})
