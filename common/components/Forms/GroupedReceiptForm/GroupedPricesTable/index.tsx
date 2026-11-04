@@ -266,7 +266,7 @@ const GroupedPricesTable: React.FC<PaymentPricesTableProps> = ({
       : (domainId as { _id?: string } | undefined)?._id
 
   const { data: customDomainServices } = useGetCustomServicesByDomainQuery(
-    { domainId: resolvedDomainId as any },
+    { domainId: resolvedDomainId as any, includeDisabled: true },
     { skip: !resolvedDomainId || !usePreviewQuantityToggle }
   )
 

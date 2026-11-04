@@ -3,6 +3,7 @@
  */
 
 import { MongoMemoryServer } from 'mongodb-memory-server'
+import { testConnectOptions } from '@utils/setupTestEnvironment'
 import mongoose, { Types } from 'mongoose'
 
 import CustomService from '@modules/models/CustomService'
@@ -23,7 +24,7 @@ let mongo: MongoMemoryServer
 
 beforeAll(async () => {
   mongo = await MongoMemoryServer.create({ instance: { launchTimeout: 60000 } })
-  await mongoose.connect(mongo.getUri())
+  await mongoose.connect(mongo.getUri(), testConnectOptions)
 }, 120000)
 
 afterAll(async () => {
@@ -200,14 +201,14 @@ describe('calculateDebtorsInflation', () => {
     const expected = await viaPage(fixture, {
       from: { year: 2024, month: 4 },
       to: { year: 2025, month: 3 },
-      inflationMethod: 'balance',
+      inflationMethod: 'monthly',
     })
 
     expect(result[String(fixture.company)]).toEqual({
       loss: expected,
       from: '2024-04',
       to: '2025-03',
-      method: 'balance',
+      method: 'monthly',
     })
   })
 

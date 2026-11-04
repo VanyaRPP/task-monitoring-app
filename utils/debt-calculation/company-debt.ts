@@ -6,9 +6,11 @@ import {
 import { calculateDebt } from './calculate'
 import { IYearMonth, periodKey, yearMonthOf } from './months'
 import { buildMonthPrefill, IPrefillPayment, IPrefillService } from './prefill'
+import { resolveExcludedPeriods } from './excludedPeriodPresets'
 import { IDebtCalculationSnapshot } from './serialize'
 import {
   DEFAULT_ANNUAL_RATE_PERCENT,
+  DEFAULT_INFLATION_METHOD,
   IDebtCalculationResult,
   InflationMethod,
 } from './types'
@@ -50,7 +52,7 @@ export const resolveSnapshotSettings = (
 ): IDebtSettings => ({
   overrides: snapshot?.overrides?.[companyId] ?? {},
   annualRatePercent: snapshot?.annualRatePercent ?? DEFAULT_ANNUAL_RATE_PERCENT,
-  inflationMethod: snapshot?.inflationMethod ?? 'balance',
+  inflationMethod: snapshot?.inflationMethod ?? DEFAULT_INFLATION_METHOD,
   periodFrom: snapshot?.periodFrom,
   periodTo: snapshot?.periodTo,
 })
@@ -103,6 +105,10 @@ export const calculateCompanyDebt = ({
       }),
       annualRatePercent: settings.annualRatePercent,
       inflationMethod: settings.inflationMethod,
+      excludedPeriods: resolveExcludedPeriods(
+        settings.overrides.excludedPeriods,
+        !!saved
+      ),
     })
   )
 

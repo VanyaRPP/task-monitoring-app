@@ -45,6 +45,10 @@ const DomainsServices: FC<Props> = ({
   const { data: templates = [] } = useGetDomainTypeTemplatesQuery(undefined)
   const watchedTemplateId = Form.useWatch('domainTypeTemplateId', form) as
     string | null | undefined
+  const disabledServiceIds = Form.useWatch('disabledServiceIds', {
+    form,
+    preserve: true,
+  }) as string[] | undefined
   const currentCategory = templates.find(
     (t) => String(t._id) === String(watchedTemplateId)
   )?.category
@@ -121,6 +125,7 @@ const DomainsServices: FC<Props> = ({
             previousTemplateId: previousId,
             templates,
             currentGroups,
+            currentDisabledServiceIds: form.getFieldValue('disabledServiceIds'),
           })
           try {
             await createSnapshot({
@@ -142,13 +147,15 @@ const DomainsServices: FC<Props> = ({
   }
 
   const handleSaveServices = (
-    orderedGroups: IDomainServiceGroupSavePayload[]
+    orderedGroups: IDomainServiceGroupSavePayload[],
+    nextDisabledServiceIds: string[]
   ) => {
     form.setFieldsValue({
       customServices: orderedGroups.map((g) => ({
         groupName: g.groupName,
         services: [...g.services],
       })),
+      disabledServiceIds: nextDisabledServiceIds,
     })
     setIsModalOpen(false)
     message.success('Зміни збережено')
@@ -184,6 +191,7 @@ const DomainsServices: FC<Props> = ({
   const handleRestored = (snap: {
     groups: { groupName: string; services: string[] }[]
     templateId?: string | null
+    disabledServiceIds?: string[]
   }) => {
     const restoredGroups = snap.groups.map((g) => ({
       groupName: g.groupName,
@@ -192,6 +200,7 @@ const DomainsServices: FC<Props> = ({
     form.setFieldsValue({
       customServices: restoredGroups,
       domainTypeTemplateId: snap.templateId ?? null,
+      disabledServiceIds: (snap.disabledServiceIds ?? []).map(String),
     })
     lastAppliedTemplateIdRef.current = snap.templateId ?? null
   }
@@ -224,6 +233,7 @@ const DomainsServices: FC<Props> = ({
         onClose={() => setIsModalOpen(false)}
         data={getServicesData()}
         serviceGroups={getServiceGroups()}
+        disabledServiceIds={disabledServiceIds}
         onSave={handleSaveServices}
         onCreateCustomService={handleCreateCustomService}
         domainId={domainId}

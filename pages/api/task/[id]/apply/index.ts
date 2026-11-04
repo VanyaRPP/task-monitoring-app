@@ -28,7 +28,7 @@ export default async function handler(
       }
     case 'DELETE':
       try {
-        await Task.findByIdAndRemove(req.query.id).then((user) => {
+        await Task.findByIdAndDelete(req.query.id).then((user) => {
           if (!user) {
             return res
               .status(400)

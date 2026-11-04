@@ -191,7 +191,6 @@ export function useReceiptTemplateProps({
       ? [companyDisplayName]
       : []),
     ...paymentInfoBodyLines,
-    ...(data?.reciever?.adminEmails || []),
   ].filter(Boolean)
 
   const companyLabel =

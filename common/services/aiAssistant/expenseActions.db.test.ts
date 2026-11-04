@@ -124,6 +124,58 @@ describe('buildExpenseDraft', () => {
     expect(draft.scope).toBeNull()
   })
 
+  it('finds the company named in words, without a find step', async () => {
+    const { draft } = await buildExpenseDraft({
+      type: 'debit',
+      // company_2: domainAdmin is its own admin, so may file under it.
+      companyName: 'COMPANY_2',
+      items: [{ category: 'Віск', amount: 500 }],
+      ctx: domainAdmin,
+    })
+
+    expect(draft.scope).toEqual({
+      type: 'company',
+      id: realEstates[2]._id,
+      label: 'company_2',
+    })
+  })
+
+  it('finds the provider named in words', async () => {
+    const { draft } = await buildExpenseDraft({
+      type: 'debit',
+      domainName: 'domain 0',
+      items: [{ category: 'Віск', amount: 500 }],
+      ctx: domainAdmin,
+    })
+
+    expect(draft.scope).toMatchObject({ type: 'domain', id: domains[0]._id })
+  })
+
+  it('asks back for a company name that matches nothing of the user', async () => {
+    await expect(
+      buildExpenseDraft({
+        type: 'debit',
+        // Exists, but belongs to someone else's provider.
+        companyName: 'company_1',
+        items: [{ category: 'Віск', amount: 500 }],
+        ctx: domainAdmin,
+      })
+    ).rejects.toThrow('no companies named «company_1»')
+  })
+
+  it('asks which one when a name fits several companies', async () => {
+    await expect(
+      buildExpenseDraft({
+        type: 'debit',
+        companyName: 'company',
+        items: [{ category: 'Віск', amount: 500 }],
+        ctx: domainAdmin,
+      })
+    ).rejects.toThrow(
+      /several companies match «company» \(company_0, company_2/
+    )
+  })
+
   it('refuses a domain the user does not administer', async () => {
     await expect(
       buildExpenseDraft({

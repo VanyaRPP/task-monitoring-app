@@ -74,3 +74,18 @@ export interface IPageReadResult extends IDocumentSurvey {
 
 export const readPage = (image: string) =>
   read<IPageReadResult>({ step: 'page', image })
+
+/** A statement PDF, read on the server from its own text (no model). */
+export interface IPdfReadResult extends Pick<
+  IDocumentSurvey,
+  'documentType' | 'header' | 'candidates' | 'suggestedCompanyId'
+> {
+  /** False for a scanned PDF: pictures of pages, no text in it. */
+  hasText: boolean
+  columns: string[]
+  /** Rows per page, as `cell|cell|…` lines. */
+  pages: string[][]
+}
+
+export const readPdf = (file: string) =>
+  read<IPdfReadResult>({ step: 'pdf', file })

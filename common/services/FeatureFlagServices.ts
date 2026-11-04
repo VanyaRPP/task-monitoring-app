@@ -25,7 +25,7 @@ class FeatureFlagService {
       isEnabled: boolean
     }>
   ) {
-    return FeatureFlag.findByIdAndUpdate(id, data, { new: true })
+    return FeatureFlag.findByIdAndUpdate(id, data, { returnDocument: 'after' })
   }
   static async delete(id: string) {
     return FeatureFlag.findByIdAndDelete(id)

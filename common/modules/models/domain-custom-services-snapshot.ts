@@ -18,6 +18,7 @@ export interface IDomainCustomServicesSnapshot {
   templateId?: Types.ObjectId | null
   templateName?: string | null
   groups: IDomainSnapshotGroup[]
+  disabledServiceIds?: string[]
   reason: DomainSnapshotReason
   createdBy?: Types.ObjectId | null
   createdAt: Date
@@ -47,6 +48,7 @@ const DomainCustomServicesSnapshotSchema =
       },
       templateName: { type: String, default: null },
       groups: { type: [SnapshotGroupSchema], default: [] },
+      disabledServiceIds: { type: [String], default: [] },
       reason: {
         type: String,
         enum: DOMAIN_SNAPSHOT_REASONS,
@@ -64,9 +66,8 @@ const DomainCustomServicesSnapshotSchema =
 
 DomainCustomServicesSnapshotSchema.index({ domainId: 1, createdAt: -1 })
 
-const DomainCustomServicesSnapshot =
-  (mongoose.models
-    ?.DomainCustomServicesSnapshot as mongoose.Model<IDomainCustomServicesSnapshot>) ||
+const DomainCustomServicesSnapshot: mongoose.Model<IDomainCustomServicesSnapshot> =
+  mongoose.models?.DomainCustomServicesSnapshot ||
   mongoose.model<IDomainCustomServicesSnapshot>(
     'DomainCustomServicesSnapshot',
     DomainCustomServicesSnapshotSchema

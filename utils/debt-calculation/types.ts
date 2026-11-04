@@ -1,3 +1,4 @@
+import type { IExcludedPeriod } from './exclusions'
 import { IYearMonth } from './months'
 
 /**
@@ -16,6 +17,12 @@ export type InflationMethod = 'balance' | 'monthly'
 /** Annual rate under art. 625 of the Civil Code, absent a contractual one. */
 export const DEFAULT_ANNUAL_RATE_PERCENT = 3
 
+/**
+ * The method a new calculation starts with: the one art. 625 requires. A saved
+ * calculation keeps the method it was saved with.
+ */
+export const DEFAULT_INFLATION_METHOD: InflationMethod = 'monthly'
+
 /** One month of the period - typed in by hand or prefilled from the DB. */
 export interface IDebtMonthInput extends IYearMonth {
   /** Total area, m². */
@@ -33,6 +40,16 @@ export interface IDebtMonthInput extends IYearMonth {
   paid?: number
   /** Monthly consumer price index, %: `100.8` means +0.8%. */
   inflationIndex?: number
+  /**
+   * The day of the month interest starts accruing on (1 = the whole month).
+   * For the first month of a debt that began mid-month.
+   */
+  startDay?: number
+  /**
+   * Days interest accrues for, typed in. Wins over the calendar and over
+   * `startDay`; days of an excluded period are still taken off.
+   */
+  days?: number
 }
 
 export interface IDebtCalculationInput {
@@ -56,6 +73,11 @@ export interface IDebtCalculationInput {
   legalFees?: number
   /** Court fee, UAH - its own line in the summary. */
   courtFee?: number
+  /**
+   * Spans with no inflation losses and no annual interest (a moratorium).
+   * The debt itself moves as usual through them.
+   */
+  excludedPeriods?: IExcludedPeriod[]
 }
 
 /** A calculated month - one row of the monthly breakdown. */
@@ -72,8 +94,15 @@ export interface IDebtMonthRow extends IYearMonth {
   paid: number
   /** Debt at month end, UAH (column I). */
   debt: number
-  /** Calendar days in the month (column J). */
+  /**
+   * Days interest accrued for (column J): the calendar days, less any that
+   * fall in an excluded period.
+   */
   days: number
+  /** Days of the month inside an excluded period. */
+  excludedDays: number
+  /** Whether this month's index went into the coefficient. */
+  indexApplied: boolean
   /** Monthly inflation index, % (column K). */
   inflationIndex: number
   /** Cumulative indexation coefficient since the period start (column L). */

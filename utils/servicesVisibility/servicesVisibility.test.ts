@@ -1,7 +1,9 @@
 import { Roles } from '@utils/constants'
 import {
   canEditDomainServiceSelection,
+  excludeDisabledServices,
   extractDomainsFromRealEstates,
+  getDisabledServiceIds,
   getSelectedServiceIds,
   getVisibleServices,
   isDomainAdmin,
@@ -296,5 +298,53 @@ describe('servicesVisibility — integration: Companies page scenarios', () => {
     expect(
       getVisibleServices([Roles.GLOBAL_ADMIN], visibleDomains, all)
     ).toEqual(all)
+  })
+})
+
+describe('servicesVisibility — services disabled in a domain', () => {
+  const all = [svc('s1'), svc('s2'), svc('s3')]
+  const withDisabled = (
+    _id: string,
+    services: string[],
+    disabledServiceIds: string[]
+  ): IDomainForVisibility => ({
+    _id,
+    customServices: [{ groupName: 'G', services }],
+    disabledServiceIds,
+  })
+
+  it('getSelectedServiceIds skips ids the domain disabled', () => {
+    const d = withDisabled('d1', ['s1', 's2'], ['s2'])
+    expect(getSelectedServiceIds(d)).toEqual(['s1'])
+  })
+
+  it('hides disabled services from a non-global admin', () => {
+    const d = withDisabled('d1', ['s1', 's2'], ['s2'])
+    expect(getVisibleServices([Roles.DOMAIN_ADMIN], d, all)).toEqual([
+      svc('s1'),
+    ])
+  })
+
+  it('hides disabled services from a GlobalAdmin too', () => {
+    const d = withDisabled('d1', ['s1', 's2'], ['s2'])
+    expect(getVisibleServices([Roles.GLOBAL_ADMIN], d, all)).toEqual([
+      svc('s1'),
+      svc('s3'),
+    ])
+  })
+
+  it('keeps a service disabled in one domain but enabled in another', () => {
+    const a = withDisabled('a', ['s1', 's2'], ['s2'])
+    const b = withDisabled('b', ['s2'], [])
+    expect(getDisabledServiceIds([a, b])).toEqual([])
+    expect(getVisibleServices([Roles.USER], [a, b], all)).toEqual([
+      svc('s1'),
+      svc('s2'),
+    ])
+  })
+
+  it('excludeDisabledServices returns the input untouched when nothing is disabled', () => {
+    const d = domain('d1', [{ groupName: 'G', services: ['s1'] }])
+    expect(excludeDisabledServices(all, d)).toBe(all)
   })
 })

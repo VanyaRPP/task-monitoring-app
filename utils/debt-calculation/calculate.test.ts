@@ -158,7 +158,9 @@ describe('calculateDebt — метод monthly', () => {
       inflationMethod: 'monthly',
     })
 
-    expect(result.inflation).toBeCloseTo(744.9697244172174, 6)
+    // Was 744.97 before: a payment dropped the losses its debt had already
+    // run up. Checked against an independent per-charge ledger.
+    expect(result.inflation).toBeCloseTo(2118.29385059493, 6)
   })
 
   it('не змінює ні тіло боргу, ні річні', () => {

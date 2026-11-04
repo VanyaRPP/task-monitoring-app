@@ -45,27 +45,48 @@ const findRow = (rows: Row[], text: string): Row =>
 const textOf = (rows: Row[]): string =>
   rows.flatMap((line) => line.map((cell) => String(cell?.v ?? ''))).join('|')
 
+describe('buildDebtCalculationDocument — обʼєднані клітинки', () => {
+  it('нічого не лежить під чужим обʼєднанням, де Excel би це сховав', () => {
+    const { rows, columns } = buildDebtCalculationDocument(input())
+
+    rows.forEach((line, r) => {
+      let coveredUntil = -1
+      line.forEach((cell, c) => {
+        if (!cell) return
+        if (c <= coveredUntil) {
+          throw new Error(
+            `рядок ${r}: «${cell.v}» у колонці ${c} схований обʼєднанням`
+          )
+        }
+        coveredUntil = c + (cell.span ?? 1) - 1
+        expect(coveredUntil).toBeLessThan(columns.length)
+      })
+    })
+  })
+})
+
 describe('buildDebtCalculationDocument — шапка', () => {
   const { rows } = buildDebtCalculationDocument(input())
 
   it('несе всі параметри, що видно на сторінці', () => {
-    expect(findRow(rows, 'Надавач послуг')[1].v).toBe('ОСББ Крошенська 8')
-    expect(findRow(rows, 'Компанія')[1].v).toBe(
+    expect(findRow(rows, 'Надавач послуг')[3].v).toBe('ОСББ Крошенська 8')
+    expect(findRow(rows, 'Власник')[3].v).toBe(
       'Квартира №18, вул. Крошенська 8'
     )
-    expect(findRow(rows, 'Опис')[1].v).toBe('о/р 123456')
-    expect(findRow(rows, 'Період')[1].v).toBe('2026-01 — 2026-03')
-    expect(findRow(rows, 'Загальна площа')[1].v).toBe(67.08)
-    expect(findRow(rows, 'Тариф')[1].v).toBe(5.25)
-    expect(findRow(rows, 'Борг на початок')[1].v).toBe(8371.52)
-    expect(findRow(rows, 'Ставка річних')[1].v).toBe(3)
-    expect(findRow(rows, 'Метод інфляційних')[1].v).toMatch(/За залишком/)
+    expect(findRow(rows, 'Адреса')[3].v).toBe('о/р 123456')
+    // Whole dates: the first day of the first month to the last of the last.
+    expect(findRow(rows, 'Період')[3].v).toBe('01.01.2026 — 31.03.2026')
+    expect(findRow(rows, 'Загальна площа')[3].v).toBe(67.08)
+    expect(findRow(rows, 'Тариф')[3].v).toBe(5.25)
+    expect(findRow(rows, 'Борг на початок')[3].v).toBe(8371.52)
+    expect(findRow(rows, 'Ставка річних')[3].v).toBe(3)
+    expect(findRow(rows, 'Метод інфляційних')[3].v).toMatch(/За залишком/)
   })
 
   it('пропускає рядок опису, коли його немає', () => {
     const bare = buildDebtCalculationDocument(input({ description: undefined }))
 
-    expect(findRow(bare.rows, 'Опис')).toBeUndefined()
+    expect(findRow(bare.rows, 'Адреса')).toBeUndefined()
   })
 
   it('називає помісячний метод, коли обрано його', () => {
@@ -73,19 +94,58 @@ describe('buildDebtCalculationDocument — шапка', () => {
       input({ inflationMethod: 'monthly' })
     )
 
-    expect(findRow(monthly.rows, 'Метод інфляційних')[1].v).toMatch(
+    expect(findRow(monthly.rows, 'Метод інфляційних')[3].v).toMatch(
       /ст. 625 ЦК/
     )
   })
 })
 
+describe('buildDebtCalculationDocument — тариф, що змінювався', () => {
+  const changed = calculateDebt(
+    buildDebtCalculationInput({
+      company: { totalArea: 67.08, pricePerMeter: 5.25 },
+      from: { year: 2018, month: 8 },
+      to: { year: 2024, month: 2 },
+      overrides: {
+        startDay: 10,
+        changes: {
+          tariff: [
+            { from: '2019-02', value: 5.89 },
+            { from: '2024-01', value: 9.91 },
+          ],
+        },
+      },
+    })
+  )
+  const { rows } = buildDebtCalculationDocument(
+    input({ result: changed, startDay: 10 })
+  )
+
+  it('пише кожен тариф з датами, коли він діяв', () => {
+    const at = rows.findIndex((line) =>
+      String(line[0]?.v ?? '').startsWith('Тариф')
+    )
+
+    expect(rows.slice(at, at + 3).map((line) => line[3].v)).toEqual([
+      '5.25 — з 10.08.2018 по 31.01.2019',
+      '5.89 — з 01.02.2019 по 31.12.2023',
+      '9.91 — з 01.01.2024 по 29.02.2024',
+    ])
+    expect(rows[at + 1][0].v).toBe('')
+  })
+
+  it('лишає площу одним числом, бо вона не змінювалась', () => {
+    expect(findRow(rows, 'Загальна площа')[3].v).toBe(67.08)
+  })
+})
+
 describe('buildDebtCalculationDocument — таблиця', () => {
   const { rows, columns } = buildDebtCalculationDocument(input())
-  const header = findRow(rows, 'Місяць')
+  const header = findRow(rows, 'Місяць / Рік')
 
   it('має всі колонки, що рендеряться на сторінці', () => {
     expect(header.map((cell) => cell.v)).toEqual([
-      'Місяць',
+      'Місяць / Рік',
       'Вхідне сальдо',
       'Сплачено',
       'Нараховано',
@@ -147,8 +207,8 @@ describe('buildDebtCalculationDocument — блок Акта', () => {
     expect(total[0].bold).toBe(true)
   })
 
-  it('розбиває на складові, включно з юр. послугами й держмитом', () => {
-    expect(findRow(rows, 'внесок')[5].v).toBeCloseTo(result.body, 2)
+  it('розбиває на складові: за послуги, річні, інфляційні та введені збори', () => {
+    expect(findRow(rows, 'за послуги')[5].v).toBeCloseTo(result.body, 2)
     expect(findRow(rows, '3% річних')[5].v).toBeCloseTo(result.interest, 2)
     expect(findRow(rows, 'Інфляційні витрати')[5].v).toBeCloseTo(
       result.inflation,
@@ -165,12 +225,42 @@ describe('buildDebtCalculationDocument — блок Акта', () => {
     expect(findRow(custom.rows, '3% річних')).toBeUndefined()
   })
 
-  it('має місце для підпису голови правління', () => {
-    expect(textOf(rows)).toContain('Голова правління')
+  it('має місце для підпису директора', () => {
+    expect(textOf(rows)).toContain('Директор')
+    expect(textOf(rows)).not.toContain('Голова правління')
   })
 
-  it('попереджає, що інфляційні — не сума колонки', () => {
-    expect(textOf(rows)).toContain('не сума по колонці')
+  it('без юридичних послуг і держмита, поки їх не введено', () => {
+    const plain = buildDebtCalculationDocument(
+      input({
+        result: calculateDebt(
+          buildDebtCalculationInput({
+            company: { totalArea: 67.08, pricePerMeter: 5.25 },
+            from: FROM,
+            to: TO,
+            indexByPeriod: { '2026-01': 100.7 },
+          })
+        ),
+      })
+    )
+
+    expect(findRow(plain.rows, 'Юридичні послуги')).toBeUndefined()
+    expect(findRow(plain.rows, 'Держмито')).toBeUndefined()
+  })
+
+  it('не пояснює, що інфляційні — не сума колонки', () => {
+    expect(textOf(rows)).not.toContain('не сума по колонці')
+  })
+
+  it('називає документ повною назвою', () => {
+    expect(rows[0][0].v).toBe(
+      'Розрахунок заборгованості за послуги з управління багатоквартирним будинком'
+    )
+  })
+
+  it('починає період з числа, з якого йде борг', () => {
+    const mid = buildDebtCalculationDocument(input({ startDay: 10 }))
+    expect(findRow(mid.rows, 'Період')[3].v).toBe('10.01.2026 — 31.03.2026')
   })
 
   it('фіксує час формування', () => {
@@ -237,7 +327,7 @@ describe('наскрізь: документ → справжній .xlsx → н
     const text = XLSX.utils.sheet_to_csv(reopened.Sheets['Розрахунок'])
     expect(text).toContain('Квартира №18, вул. Крошенська 8')
     expect(text).toContain('Заборгованість станом на 01.04.2026 року')
-    expect(text).toContain('Голова правління')
+    expect(text).toContain('Директор')
   })
 
   it('рамки й заливка справді потрапляють у файл', () => {
@@ -268,5 +358,61 @@ describe('наскрізь: документ → справжній .xlsx → н
       .filter((key) => sheet[key]?.t === 'n')
 
     expect(numeric.length).toBeGreaterThan(20)
+  })
+})
+
+describe('buildDebtCalculationDocument — виключені періоди', () => {
+  const excludedPeriods = [
+    {
+      id: 'p1',
+      type: 'cmu_206' as const,
+      startDate: '2026-01-01',
+      endDate: '2026-01-31',
+    },
+    {
+      id: 'p2',
+      type: 'custom' as const,
+      startDate: '2026-03-10',
+      endDate: '2026-03-31',
+    },
+  ]
+  const excluded = calculateDebt(
+    buildDebtCalculationInput({
+      company: { totalArea: 67.08, pricePerMeter: 5.25 },
+      from: FROM,
+      to: TO,
+      indexByPeriod: { '2026-01': 100.7, '2026-02': 101, '2026-03': 101.7 },
+      overrides: { openingDebt: 8371.52 },
+      inflationMethod: 'monthly',
+      excludedPeriods,
+    })
+  )
+  const { rows } = buildDebtCalculationDocument(
+    input({ result: excluded, excludedPeriods, inflationMethod: 'monthly' })
+  )
+
+  it('пише кожен період тегом і примітку під ними', () => {
+    expect(findRow(rows, 'Виключені періоди')[3].v).toBe(
+      'КМУ №206: 01.01.2026—31.01.2026'
+    )
+    expect(textOf(rows)).toContain('Довільний: 10.03.2026—31.03.2026')
+    expect(textOf(rows)).toContain(
+      'Інфляційні втрати та річні за зазначені періоди не нараховувалися.'
+    )
+  })
+
+  it('підсумки документа — ті самі, що в розрахунку на сторінці', () => {
+    const totals = findRow(rows, 'Всього')
+    expect(totals[7].v).toBeCloseTo(excluded.interest, 2)
+    expect(totals[9].v).toBe(excluded.totals.days)
+    expect(textOf(rows)).toContain(String(+excluded.inflation.toFixed(2)))
+    // January wholly out, 9 of 31 March days left: 0 + 28 + 9.
+    expect(excluded.totals.days).toBe(37)
+  })
+
+  it('без виключень — жодного рядка про них', () => {
+    const plain = buildDebtCalculationDocument(input())
+    expect(findRow(plain.rows, 'Виключені періоди')).toBeUndefined()
+    expect(textOf(plain.rows)).not.toContain('не нараховувалися')
   })
 })

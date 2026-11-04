@@ -68,3 +68,92 @@
 .itemsAlert {
   margin-bottom: 8px;
 }
+
+.previewLines {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.previewLine {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px 12px;
+  align-items: baseline;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+// With a category column (flat list of a short receipt).
+.previewLine:has(> :nth-child(3)) {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) auto;
+}
+
+.previewFocus {
+  background: rgba(22, 119, 255, 0.14);
+}
+
+.previewAmount {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+// The «Позиції» label spans the row so the view switch can sit on its right.
+.itemsLabel :global(.ant-form-item-label > label) {
+  width: 100%;
+}
+
+.itemsLabelRow {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+// A line in a category block: press and hold outside its inputs to move it.
+// The faint grip on the left is a hint, not the only place to grab.
+.draggableRow {
+  position: relative;
+  padding: 4px 4px 4px 16px;
+  border-radius: 6px;
+  cursor: grab;
+  touch-action: manipulation;
+  user-select: none;
+
+  &::before {
+    content: '⋮⋮';
+    position: absolute;
+    top: 9px;
+    left: 2px;
+    font-size: 11px;
+    letter-spacing: -2px;
+    opacity: 0.35;
+  }
+
+  &:hover {
+    background: rgba(127, 127, 127, 0.08);
+  }
+}
+
+.dragging {
+  opacity: 0.35;
+}
+
+.dropZone {
+  border-radius: 6px;
+}
+
+.dragHint {
+  font-size: 12px;
+}
+
+.dragOverlay {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) auto;
+  gap: 12px;
+  align-items: baseline;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: grabbing;
+}

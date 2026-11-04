@@ -1,6 +1,7 @@
 import { IMonthOverride } from './build-input'
 import { formatPeriod, IYearMonth, periodKey } from './months'
 import { IDebtCalculationSnapshot } from './serialize'
+import { DEFAULT_INFLATION_METHOD } from './types'
 
 /** One month read off a statement photo. */
 export interface IDebtImportRow extends IYearMonth {
@@ -83,7 +84,7 @@ export const mergeDebtImport = (
     ...(existing?.annualRatePercent !== undefined
       ? { annualRatePercent: existing.annualRatePercent }
       : {}),
-    inflationMethod: existing?.inflationMethod ?? 'balance',
+    inflationMethod: existing?.inflationMethod ?? DEFAULT_INFLATION_METHOD,
     overrides: {
       ...existing?.overrides,
       [company]: {

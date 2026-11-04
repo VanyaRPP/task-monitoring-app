@@ -400,3 +400,110 @@ describe('POST /api/domain-snapshots/[id]/restore', () => {
     expect(domainDoc.save).toHaveBeenCalled()
   })
 })
+
+describe('domain-snapshots — disabledServiceIds', () => {
+  const S1 = '64d68421d9ba2fc8fea79e01'
+  const S2 = '64d68421d9ba2fc8fea79e02'
+
+  const mockDomain = (domain: Record<string, unknown>) => {
+    ;(Domain.findById as jest.Mock).mockReturnValue({
+      lean: jest.fn().mockResolvedValue({
+        _id: VALID_ID,
+        customServices: [{ groupName: 'G', services: [S1, S2] }],
+        ...domain,
+      }),
+    })
+    ;(DomainCustomServicesSnapshot.create as jest.Mock).mockResolvedValue({
+      _id: 'new-snap',
+    })
+  }
+
+  const createSnapshot = async (body: Record<string, unknown>) => {
+    const res = makeRes()
+    await indexHandler(
+      {
+        method: 'POST',
+        query: {},
+        body: { domainId: VALID_ID, templateName: 'T', ...body },
+      } as any,
+      res
+    )
+    expect(res.status).toHaveBeenCalledWith(201)
+    return (DomainCustomServicesSnapshot.create as jest.Mock).mock.calls[0][0]
+  }
+
+  it('snapshots the persisted list when the body does not carry one', async () => {
+    asAdmin()
+    mockDomain({ disabledServiceIds: [S2] })
+
+    const arg = await createSnapshot({})
+
+    expect(arg.disabledServiceIds).toEqual([S2])
+  })
+
+  it('stores [] for a domain that never had the field', async () => {
+    asAdmin()
+    mockDomain({})
+
+    const arg = await createSnapshot({})
+
+    expect(arg.disabledServiceIds).toEqual([])
+  })
+
+  it('prefers the in-flight list from the body and sanitises it', async () => {
+    asAdmin()
+    mockDomain({ disabledServiceIds: [S2] })
+
+    const arg = await createSnapshot({
+      disabledServiceIds: [S1, S1, 'not-an-id'],
+    })
+
+    expect(arg.disabledServiceIds).toEqual([S1])
+  })
+
+  const restore = async (snapshot: Record<string, unknown>) => {
+    ;(DomainCustomServicesSnapshot.findById as jest.Mock).mockReturnValue({
+      lean: jest.fn().mockResolvedValue({
+        _id: VALID_ID,
+        domainId: OTHER_ID,
+        templateId: null,
+        groups: [{ groupName: 'G', services: [S1, S2] }],
+        ...snapshot,
+      }),
+    })
+    const domainDoc: any = {
+      customServices: [],
+      disabledServiceIds: [S1],
+      save: jest.fn(async function () {
+        return this
+      }),
+    }
+    ;(Domain.findById as jest.Mock).mockResolvedValue(domainDoc)
+
+    const res = makeRes()
+    await restoreHandler(
+      { method: 'POST', query: { id: VALID_ID }, body: {} } as any,
+      res
+    )
+    expect(res.status).toHaveBeenCalledWith(200)
+    return { domainDoc, data: res.json.mock.calls[0][0].data }
+  }
+
+  it('restores the snapshot list onto the domain', async () => {
+    asAdmin()
+
+    const { domainDoc, data } = await restore({ disabledServiceIds: [S2] })
+
+    expect(domainDoc.disabledServiceIds).toEqual([S2])
+    expect(domainDoc.save).toHaveBeenCalled()
+    expect(data.disabledServiceIds).toEqual([S2])
+  })
+
+  it('re-enables everything when restoring a snapshot taken before the field existed', async () => {
+    asAdmin()
+
+    const { domainDoc } = await restore({})
+
+    expect(domainDoc.disabledServiceIds).toEqual([])
+  })
+})

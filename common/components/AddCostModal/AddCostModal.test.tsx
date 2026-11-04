@@ -1,5 +1,5 @@
 import React from 'react'
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { act, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import AddCostModal, { type IProfitDraft } from './index'
 
@@ -9,6 +9,20 @@ jest.mock('next-i18next', () => ({
       params?.amount ? `${key} ${params.amount}` : key,
   }),
 }))
+
+// Captures onDragEnd so a drop can be simulated: jsdom has no layout, so
+// dnd-kit cannot work out a drop target from real pointer events.
+const dnd: { onDragEnd?: (event: unknown) => void } = {}
+jest.mock('@dnd-kit/core', () => {
+  const actual = jest.requireActual('@dnd-kit/core')
+  return {
+    ...actual,
+    DndContext: (props: { onDragEnd: (event: unknown) => void }) => {
+      dnd.onDragEnd = props.onDragEnd
+      return <actual.DndContext {...props} />
+    },
+  }
+})
 
 const createProfit = jest.fn()
 const updateProfit = jest.fn()
@@ -172,6 +186,262 @@ describe('AddCostModal with line items', () => {
         .getAllByPlaceholderText('profitPage:form.amountPlaceholder')
         .map((input) => (input as HTMLInputElement).value)
     ).toEqual(['', ''])
+  })
+
+  describe('a long receipt', () => {
+    const longReceipt = {
+      _id: 'p-long',
+      amount: 5870,
+      type: 'debit' as const,
+      date: '2026-09-10',
+      currency: 'UAH',
+      items: [
+        ...Array.from({ length: 5 }, (_, i) => ({
+          category: 'Зарплати',
+          amount: 1000,
+          description: `Зарплата ${i + 1}`,
+        })),
+        { category: 'Вода', amount: 600, description: 'Лічильник' },
+        { category: 'вода ', amount: 220, description: 'Бутлі' },
+        { category: 'Кава', amount: 50, description: 'Зерно' },
+      ],
+    }
+
+    // Role queries crawl on a form with dozens of inputs; the panel header
+    // is found by its category text instead.
+    const isOpen = (category: string) =>
+      screen
+        .getByText(category, { selector: '.ant-collapse-header-text *' })
+        .closest('[role="button"]')
+        .getAttribute('aria-expanded')
+
+    it('previews as text, with only the opened line category unfolded', async () => {
+      render(
+        <AddCostModal
+          closeModal={jest.fn()}
+          activeScope={scope}
+          profitActions={{ preview: true }}
+          currentProfit={longReceipt}
+          focusItemIndex={6}
+        />
+      )
+
+      // water (both spellings) is one block, open on the line we came from
+      expect(await screen.findByText('Бутлі')).toBeInTheDocument()
+      expect(screen.getByText('Лічильник')).toBeInTheDocument()
+      expect(isOpen('Вода')).toBe('true')
+      expect(isOpen('Зарплати')).toBe('false')
+      expect(screen.queryByText('Зарплата 1')).not.toBeInTheDocument()
+      // no disabled inputs: it is a read-only view
+      expect(screen.queryByDisplayValue('Бутлі')).not.toBeInTheDocument()
+    })
+
+    it('groups lines by category when editing, and saves all of them', async () => {
+      render(
+        <AddCostModal
+          closeModal={jest.fn()}
+          activeScope={scope}
+          profitActions={{ edit: true }}
+          currentProfit={longReceipt}
+          focusItemIndex={7}
+        />
+      )
+
+      await screen.findByText('Кава', {
+        selector: '.ant-collapse-header-text *',
+      })
+      expect(isOpen('Кава')).toBe('true')
+      expect(isOpen('Зарплати')).toBe('false')
+      expect(isOpen('Вода')).toBe('false')
+
+      await userEvent.click(
+        screen.getByRole('button', { name: 'profitPage:modal.editOkText' })
+      )
+
+      await waitFor(() => expect(updateProfit).toHaveBeenCalled())
+      const { id, body } = updateProfit.mock.calls[0][0]
+      expect(id).toBe('p-long')
+      expect(body.items).toHaveLength(8)
+    }, 30000)
+  })
+
+  describe('a long receipt: switcher and validation', () => {
+    const receipt = {
+      _id: 'p-long',
+      amount: 5870,
+      type: 'debit' as const,
+      date: '2026-09-10',
+      currency: 'UAH',
+      items: [
+        ...Array.from({ length: 5 }, (_, i) => ({
+          category: 'Зарплати',
+          amount: 1000,
+          description: `Зарплата ${i + 1}`,
+        })),
+        { category: 'Вода', amount: 600, description: 'Лічильник' },
+        { category: 'Кава', amount: 50, description: 'Зерно' },
+      ],
+    }
+    const header = (category: string) =>
+      screen
+        .getByText(category, { selector: '.ant-collapse-header-text *' })
+        .closest('[role="button"]')
+
+    it('opens the folded block whose line fails validation on save', async () => {
+      render(
+        <AddCostModal
+          closeModal={jest.fn()}
+          activeScope={scope}
+          profitActions={{ edit: true }}
+          currentProfit={receipt}
+          focusItemIndex={6}
+        />
+      )
+      await screen.findByText('Кава', {
+        selector: '.ant-collapse-header-text *',
+      })
+      expect(header('Зарплати').getAttribute('aria-expanded')).toBe('false')
+
+      // first salary line, folded away
+      const amounts = screen.getAllByPlaceholderText(
+        'profitPage:form.amountPlaceholder'
+      )
+      await userEvent.clear(amounts[0])
+      await userEvent.click(
+        screen.getByRole('button', { name: 'profitPage:modal.editOkText' })
+      )
+
+      await waitFor(() =>
+        expect(header('Зарплати').getAttribute('aria-expanded')).toBe('true')
+      )
+      expect(updateProfit).not.toHaveBeenCalled()
+    }, 30000)
+
+    it('switches between category blocks and every line', async () => {
+      render(
+        <AddCostModal
+          closeModal={jest.fn()}
+          activeScope={scope}
+          profitActions={{ preview: true }}
+          currentProfit={receipt}
+        />
+      )
+      await screen.findByText('profitPage:form.itemsViewFlat')
+      expect(screen.queryByText('Зарплата 1')).not.toBeInTheDocument()
+
+      await userEvent.click(screen.getByText('profitPage:form.itemsViewFlat'))
+
+      expect(screen.getByText('Зарплата 1')).toBeInTheDocument()
+      expect(screen.getByText('Зерно')).toBeInTheDocument()
+      expect(document.querySelector('.ant-collapse')).toBeNull()
+    })
+
+    it('has no switcher for a short receipt', async () => {
+      render(
+        <AddCostModal
+          closeModal={jest.fn()}
+          activeScope={scope}
+          profitActions={{ preview: true }}
+          currentProfit={{ ...receipt, items: receipt.items.slice(0, 3) }}
+        />
+      )
+      await screen.findByText('Зарплата 1')
+      expect(
+        screen.queryByText('profitPage:form.itemsViewFlat')
+      ).not.toBeInTheDocument()
+    })
+  })
+
+  describe('moving a line between categories by dragging', () => {
+    const receipt = {
+      _id: 'p-drag',
+      amount: 6000,
+      type: 'debit' as const,
+      date: '2026-09-10',
+      currency: 'UAH',
+      items: [
+        ...Array.from({ length: 4 }, (_, i) => ({
+          category: 'Зарплати',
+          amount: 1000,
+          description: `Зарплата ${i + 1}`,
+        })),
+        { category: 'Аванси', amount: 1500, description: 'Аванс Петро' },
+        { amount: 500, description: 'Без нічого' },
+      ],
+    }
+    const header = (category: string) =>
+      screen
+        .getByText(category, { selector: '.ant-collapse-header-text *' })
+        .closest('[role="button"]')
+
+    it('gives the dropped line the target category and saves it', async () => {
+      render(
+        <AddCostModal
+          closeModal={jest.fn()}
+          activeScope={scope}
+          profitActions={{ edit: true }}
+          currentProfit={receipt}
+        />
+      )
+      await screen.findByText('Аванси', {
+        selector: '.ant-collapse-header-text *',
+      })
+
+      // line 4 («Аванс Петро») onto the salaries block's folded header
+      act(() => dnd.onDragEnd({ active: { id: 4 }, over: { id: 'зарплати' } }))
+
+      // the advances block is gone, the salaries block opened with 5 lines
+      await waitFor(() =>
+        expect(
+          screen.queryByText('Аванси', {
+            selector: '.ant-collapse-header-text *',
+          })
+        ).not.toBeInTheDocument()
+      )
+      expect(header('Зарплати').getAttribute('aria-expanded')).toBe('true')
+      expect(
+        within(header('Зарплати') as HTMLElement).getByText('5')
+      ).toBeInTheDocument()
+
+      await userEvent.click(
+        screen.getByRole('button', { name: 'profitPage:modal.editOkText' })
+      )
+      await waitFor(() => expect(updateProfit).toHaveBeenCalled())
+      const { body } = updateProfit.mock.calls[0][0]
+      expect(body.items[4]).toMatchObject({
+        category: 'Зарплати',
+        description: 'Аванс Петро',
+      })
+    }, 30000)
+
+    it('clears the category of a line dropped on «Без категорії»', async () => {
+      render(
+        <AddCostModal
+          closeModal={jest.fn()}
+          activeScope={scope}
+          profitActions={{ edit: true }}
+          currentProfit={receipt}
+        />
+      )
+      await screen.findByText('Аванси', {
+        selector: '.ant-collapse-header-text *',
+      })
+
+      act(() =>
+        dnd.onDragEnd({
+          active: { id: 0 },
+          over: { id: 'profitpage:dashboard.uncategorized#body' },
+        })
+      )
+      await userEvent.click(
+        screen.getByRole('button', { name: 'profitPage:modal.editOkText' })
+      )
+
+      await waitFor(() => expect(updateProfit).toHaveBeenCalled())
+      expect(updateProfit.mock.calls[0][0].body.items[0].category).toBe(
+        undefined
+      )
+    }, 30000)
   })
 
   describe('a draft from the assistant picks its target', () => {

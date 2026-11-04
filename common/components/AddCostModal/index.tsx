@@ -55,6 +55,8 @@ export interface IProfitDraft {
 interface Props {
   closeModal: VoidFunction
   currentProfit?: Profit
+  /** Opened from one line of a receipt: show that line first. */
+  focusItemIndex?: number
   draft?: IProfitDraft
   activeScope?: ActiveScope
   profitActions?: {
@@ -83,6 +85,7 @@ enum CostType {
 const AddCostModal: FC<Props> = ({
   closeModal,
   currentProfit,
+  focusItemIndex,
   draft,
   activeScope,
   profitActions,
@@ -170,6 +173,7 @@ const AddCostModal: FC<Props> = ({
           type="debit"
           disabled={isPreview}
           currentProfit={currentProfit}
+          focusItemIndex={focusItemIndex}
           activeScope={activeScope}
           pickScope={picksScope}
         />
@@ -184,6 +188,7 @@ const AddCostModal: FC<Props> = ({
           type="credit"
           disabled={isPreview}
           currentProfit={currentProfit}
+          focusItemIndex={focusItemIndex}
           activeScope={activeScope}
           pickScope={picksScope}
         />
@@ -272,6 +277,7 @@ const AddCostModal: FC<Props> = ({
           type={type}
           disabled={isPreview}
           currentProfit={currentProfit}
+          focusItemIndex={focusItemIndex}
           activeScope={activeScope}
           pickScope={picksScope}
         />

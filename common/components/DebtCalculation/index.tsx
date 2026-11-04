@@ -33,10 +33,14 @@ import {
 import { IDebtCalculationSnapshot } from '@utils/debt-calculation/serialize'
 import {
   DEFAULT_ANNUAL_RATE_PERCENT,
+  DEFAULT_INFLATION_METHOD,
   IDebtCalculationResult,
   InflationMethod,
 } from '@utils/debt-calculation/types'
-import { Alert } from 'antd'
+import type { IExcludedPeriod } from '@utils/debt-calculation/exclusions'
+import { resolveExcludedPeriods } from '@utils/debt-calculation/excludedPeriodPresets'
+import { Alert, ConfigProvider } from 'antd'
+import ukUA from 'antd/lib/locale/uk_UA'
 import dayjs, { Dayjs } from 'dayjs'
 import { useRouter } from 'next/compat/router'
 import {
@@ -79,6 +83,12 @@ export interface IDebtCalculationContext {
   setAnnualRatePercent: (value: number) => void
   inflationMethod: InflationMethod
   setInflationMethod: (value: InflationMethod) => void
+  /**
+   * No inflation losses or interest during these. Kept with the company like
+   * its other edits; a calculation that has none is not changed.
+   */
+  excludedPeriods: IExcludedPeriod[]
+  setExcludedPeriods: (value: IExcludedPeriod[]) => void
   /** The selected company's calculation. */
   result?: IDebtCalculationResult
   overrides: IApartmentOverrides
@@ -116,6 +126,8 @@ export const useDebtCalculationContext = (): IDebtCalculationContext =>
  * an editable month × field matrix in a Form.List would cost more than any
  * validation it might buy.
  */
+const NO_PERIODS: IExcludedPeriod[] = []
+
 const DebtCalculationBlock: React.FC = () => {
   const { domainIds: allowedDomainIds, isLoading: isAccessLoading } =
     useDebtCalculationAccess()
@@ -131,9 +143,16 @@ const DebtCalculationBlock: React.FC = () => {
   const [annualRatePercent, setAnnualRatePercent] = useState(
     DEFAULT_ANNUAL_RATE_PERCENT
   )
-  const [inflationMethod, setInflationMethod] =
-    useState<InflationMethod>('balance')
+  const [inflationMethod, setInflationMethod] = useState<InflationMethod>(
+    DEFAULT_INFLATION_METHOD
+  )
   const [overrides, setOverrides] = useState<IApartmentOverrides>({})
+  const excludedPeriods = overrides.excludedPeriods ?? NO_PERIODS
+  const setExcludedPeriods = (value: IExcludedPeriod[]) =>
+    setOverrides((prev) => ({
+      ...prev,
+      excludedPeriods: value.length > 0 ? value : undefined,
+    }))
 
   // Deep link, e.g. from the assistant's photo import:
   // /debt-calculation?domainId=…&companyId=…
@@ -145,8 +164,13 @@ const DebtCalculationBlock: React.FC = () => {
     if (typeof queryCompanyId === 'string') setCompanyId(queryCompanyId)
   }, [queryDomainId, queryCompanyId])
 
-  const { data: { data: companies } = { data: [] }, isLoading: isCompanies } =
-    useGetAllRealEstateQuery({ domainId, archived: false }, { skip: !domainId })
+  const {
+    currentData: { data: companies } = { data: [] },
+    isLoading: isCompanies,
+  } = useGetAllRealEstateQuery(
+    { domainId, archived: false },
+    { skip: !domainId }
+  )
 
   const company = useMemo(
     () => (companies ?? []).find(({ _id }) => _id === companyId),
@@ -242,7 +266,17 @@ const DebtCalculationBlock: React.FC = () => {
       : (saved as IDebtCalculationSnapshot | undefined)
 
     const settings = resolveSnapshotSettings(snapshot, companyId)
-    setOverrides(settings.overrides)
+    // A calculation never saved starts with the default exclusions; one that
+    // exists keeps its own. Written into the state so it holds whatever the
+    // saved copy later looks like.
+    const excluded = resolveExcludedPeriods(
+      settings.overrides.excludedPeriods,
+      !!snapshot
+    )
+    setOverrides({
+      ...settings.overrides,
+      excludedPeriods: excluded.length > 0 ? excluded : undefined,
+    })
     setAnnualRatePercent(settings.annualRatePercent)
     setInflationMethod(settings.inflationMethod)
     if (settings.periodFrom) setFrom(toDayjs(settings.periodFrom))
@@ -371,6 +405,8 @@ const DebtCalculationBlock: React.FC = () => {
     setAnnualRatePercent,
     inflationMethod,
     setInflationMethod,
+    excludedPeriods,
+    setExcludedPeriods,
     result,
     overrides,
     prefillMonths,
@@ -399,11 +435,14 @@ const DebtCalculationBlock: React.FC = () => {
   }
 
   return (
-    <DebtCalculationContext.Provider value={value}>
-      <TableCard title={<DebtCalculationHeader />}>
-        <DebtCalculationBody />
-      </TableCard>
-    </DebtCalculationContext.Provider>
+    // The month pickers' panels (month names, «Цей місяць») in Ukrainian.
+    <ConfigProvider locale={ukUA}>
+      <DebtCalculationContext.Provider value={value}>
+        <TableCard title={<DebtCalculationHeader />}>
+          <DebtCalculationBody />
+        </TableCard>
+      </DebtCalculationContext.Provider>
+    </ConfigProvider>
   )
 }
 

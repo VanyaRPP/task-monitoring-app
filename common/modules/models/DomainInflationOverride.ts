@@ -1,8 +1,8 @@
-import mongoose, { ObjectId, Schema } from 'mongoose'
+import mongoose, { Schema, Types } from 'mongoose'
 
 export interface IDomainInflationOverride {
   _id?: string
-  domain: ObjectId | string
+  domain: Types.ObjectId | string
   year: number
   month: number
   value: number
@@ -24,9 +24,11 @@ DomainInflationOverrideSchema.index(
   { unique: true }
 )
 
-const DomainInflationOverride =
-  (mongoose.models
-    ?.DomainInflationOverride as mongoose.Model<IDomainInflationOverride>) ||
-  mongoose.model('DomainInflationOverride', DomainInflationOverrideSchema)
+const DomainInflationOverride: mongoose.Model<IDomainInflationOverride> =
+  mongoose.models?.DomainInflationOverride ||
+  mongoose.model<IDomainInflationOverride>(
+    'DomainInflationOverride',
+    DomainInflationOverrideSchema
+  )
 
 export default DomainInflationOverride

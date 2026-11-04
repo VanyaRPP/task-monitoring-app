@@ -556,7 +556,7 @@ describe('Payments API - POST', () => {
     expect(response.status).toHaveBeenLastCalledWith(200)
   })
 
-  it('POST debit payment sends invoice email to domain admins', async () => {
+  it('POST debit payment does not send an invoice email', async () => {
     await mockLoginAs(users.globalAdmin)
     const { _id, ...data } = payments[0]
 
@@ -583,17 +583,8 @@ describe('Payments API - POST', () => {
     await handler(mockReq, mockRes)
 
     expect(mockRes.status).toHaveBeenLastCalledWith(200)
-    // The email carries the number the server gave the invoice on save.
-    const saved = mockRes.json.mock.lastCall[0].data
-    expect(sendInvoiceEmailMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        invoiceNumber: saved.invoiceNumber,
-        type: 'debit',
-        reciever: expect.objectContaining({
-          adminEmails: [users.domainAdmin.email],
-        }),
-      })
-    )
+    // Sending is the Send button's job (POST .../[id]/send-email).
+    expect(sendInvoiceEmailMock).not.toHaveBeenCalled()
   })
 
   describe('invoice numbers', () => {

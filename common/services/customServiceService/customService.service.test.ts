@@ -1,12 +1,14 @@
 import mongoose from 'mongoose'
 import { ServiceType, defaultServices } from '@utils/constants'
 import {
+  applyDomainServiceAvailability,
   assembleDomainServiceCatalog,
   collectReferencedServiceIds,
   createCustomService,
   deleteCustomService,
   isServiceErr,
   listCustomServicesForDomain,
+  normalizeDisabledServiceIds,
   updateCustomService,
   UserContext,
 } from './customService.service'
@@ -1184,5 +1186,77 @@ describe('assembleDomainServiceCatalog', () => {
     )
 
     expect(result[0].services).toEqual([nameless1, nameless2])
+  })
+})
+
+describe('applyDomainServiceAvailability', () => {
+  const rent = { _id: 'rent', name: 'Розміщення' }
+  const parking = { _id: 'parking', name: 'Паркінг' }
+  const catalog = [
+    { groupName: 'Загальні', services: [rent, parking] },
+    { groupName: null, services: [{ _id: 'loose', name: 'Окрема' }] },
+  ]
+
+  it('marks every service enabled when nothing is disabled', () => {
+    const result = applyDomainServiceAvailability(catalog, {})
+
+    expect(
+      result.flatMap((g) => g.services).every((s) => s.isEnabled === true)
+    ).toBe(true)
+  })
+
+  it('drops disabled services from the available list', () => {
+    const result = applyDomainServiceAvailability(catalog, {
+      disabledServiceIds: ['parking'],
+    })
+
+    expect(result[0].services).toEqual([{ ...rent, isEnabled: true }])
+  })
+
+  it('keeps disabled services flagged when includeDisabled is set', () => {
+    const result = applyDomainServiceAvailability(catalog, {
+      disabledServiceIds: ['parking'],
+      includeDisabled: true,
+    })
+
+    expect(result[0].services).toEqual([
+      { ...rent, isEnabled: true },
+      { ...parking, isEnabled: false },
+    ])
+  })
+
+  it('keeps an emptied named group but drops an emptied ungrouped bucket', () => {
+    const result = applyDomainServiceAvailability(catalog, {
+      disabledServiceIds: ['rent', 'parking', 'loose'],
+    })
+
+    expect(result).toEqual([{ groupName: 'Загальні', services: [] }])
+  })
+
+  it('matches ObjectId-like ids by string value', () => {
+    const id = new mongoose.Types.ObjectId()
+    const result = applyDomainServiceAvailability(
+      [{ groupName: 'G', services: [{ _id: id, name: 'X' }] }],
+      { disabledServiceIds: [String(id)] }
+    )
+
+    expect(result[0].services).toEqual([])
+  })
+})
+
+describe('normalizeDisabledServiceIds', () => {
+  const id = new mongoose.Types.ObjectId().toString()
+
+  it('returns undefined when the field was not sent', () => {
+    expect(normalizeDisabledServiceIds(undefined)).toBeUndefined()
+  })
+
+  it('treats a non-array as an empty list', () => {
+    expect(normalizeDisabledServiceIds(null)).toEqual([])
+    expect(normalizeDisabledServiceIds(id)).toEqual([])
+  })
+
+  it('keeps unique valid ids only', () => {
+    expect(normalizeDisabledServiceIds([id, id, 'nope', 42])).toEqual([id])
   })
 })

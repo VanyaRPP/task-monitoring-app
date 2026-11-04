@@ -7,6 +7,8 @@ const config: Config = {
   testMatch: ['**/*.test.ts', '**/*.test.tsx'],
   testPathIgnorePatterns: ['/node_modules/', '/.next/'],
   testEnvironment: 'jsdom',
+  // Sends just bson to its node build - see the file for why.
+  resolver: '<rootDir>/jest.resolver.js',
 
   testTimeout: 15000,
 

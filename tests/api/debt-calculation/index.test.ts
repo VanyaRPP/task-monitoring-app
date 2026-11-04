@@ -229,7 +229,8 @@ describe('POST /api/debt-calculation', () => {
 
     const { $set } = (DebtCalculation.findOneAndUpdate as jest.Mock).mock
       .calls[0][1]
-    expect($set.inflationMethod).toBe('balance')
+    // An unknown method falls back to the default one (art. 625).
+    expect($set.inflationMethod).toBe('monthly')
     expect($set.overrides).toEqual({ [COMPANY]: { openingDebt: 100 } })
   })
 

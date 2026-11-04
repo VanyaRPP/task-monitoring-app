@@ -30,6 +30,10 @@ jest.mock('@common/api/userApi/user.api', () => ({
   useGetCurrentUserQuery: jest.fn(),
 }))
 
+jest.mock('@common/api/domainApi/domain.api', () => ({
+  useGetDomainsQuery: jest.fn(() => ({ data: [] })),
+}))
+
 jest.mock('@common/api/customServicesApi/customServices.api', () => ({
   useGetCustomServicesQuery: jest.fn(() => ({ data: { data: [] } })),
 }))

@@ -61,7 +61,7 @@ export async function seedHousingFeeService(
     log(`[seed] послуга «${HOUSING_FEE_SERVICE_NAME}» вже є — пропущено`)
   } else {
     await CustomService.create({
-      _id: new mongoose.Types.ObjectId(HOUSING_FEE_SERVICE_ID),
+      _id: HOUSING_FEE_SERVICE_ID,
       name: HOUSING_FEE_SERVICE_NAME,
       fieldName: ServiceType.HousingFee,
       serviceType: ServiceType.HousingFee,

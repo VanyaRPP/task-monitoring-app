@@ -36,8 +36,8 @@ const InflationIndexSchema = new Schema<IInflationIndex>({
 
 InflationIndexSchema.index({ year: 1, month: 1 }, { unique: true })
 
-const InflationIndex =
-  (mongoose.models?.InflationIndex as mongoose.Model<IInflationIndex>) ||
-  mongoose.model('InflationIndex', InflationIndexSchema)
+const InflationIndex: mongoose.Model<IInflationIndex> =
+  mongoose.models?.InflationIndex ||
+  mongoose.model<IInflationIndex>('InflationIndex', InflationIndexSchema)
 
 export default InflationIndex
