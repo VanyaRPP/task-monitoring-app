@@ -38,7 +38,7 @@
     ]
   },
   "dependencies": {
-    "@ai-sdk/google": "^3.0.67",
+    "@ai-sdk/google": "^4.0.93",
     "@ai-sdk/groq": "3.0.52",
     "@ai-sdk/react": "^3.0.177",
     "@ant-design/compatible": "^5.1.3",
