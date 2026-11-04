@@ -8,7 +8,7 @@ import {
 import { getLabel, resolveTemplateChrome } from '../applyTemplateOverrides'
 import EditableText from '../../EditableText'
 import s from './olimp.module.scss'
-
+import { resolveServiceMonth } from '../official/resolveServiceMonth'
 const OlimpTemplate: FC<TemplateProps> = ({
   data,
   componentRef,
@@ -104,7 +104,12 @@ const OlimpTemplate: FC<TemplateProps> = ({
           <div className={s.brandText}>
             <span className={s.dateOlimp}>
               {isEnglish ? 'Note:' : 'Примітка:'}{' '}
-              {dayjs(data?.monthService?.date)
+              {dayjs(
+                resolveServiceMonth(
+                  data?.monthService,
+                  data?.invoiceCreationDate
+                )
+              )
                 ?.locale?.(isEnglish ? 'en' : 'uk')
                 ?.format?.('MMMM YYYY')}
             </span>
