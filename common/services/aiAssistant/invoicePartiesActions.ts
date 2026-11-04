@@ -109,7 +109,7 @@ async function findOwnCompanies(
 /** An address of the provider by words, or null. */
 async function findStreet(streetIds: unknown[], said: string) {
   const key = normalize(said)
-  const streets = await Street.find({ _id: { $in: streetIds } })
+  const streets = await Street.find({ _id: { $in: streetIds.map(String) } })
     .select('address city')
     .lean()
   return (

@@ -1,6 +1,6 @@
-import Domain from '@modules/models/Domain'
+import Domain, { IDomain } from '@modules/models/Domain'
 import Payment from '@modules/models/Payment'
-import RealEstate from '@modules/models/RealEstate'
+import RealEstate, { IRealEstateModel } from '@modules/models/RealEstate'
 import Service from '@modules/models/Service'
 import { getInvoices } from '@utils/getInvoices'
 import {
@@ -13,7 +13,7 @@ import { getDomainServiceCatalog } from '@common/services/customServiceService/c
 import serviceFilter from '@components/AddPaymentModal/serviceFilter'
 import { keepInvoiceRow } from '@components/AddPaymentModal/invoiceRowFilter'
 import { type UserContext } from '@common/services/paymentService/payment.service'
-import type { FilterQuery } from 'mongoose'
+import type { QueryFilter } from 'mongoose'
 import { escapeRegexForMongo } from '@utils/escape-regex/escape-regex'
 
 /**
@@ -35,7 +35,7 @@ import { escapeRegexForMongo } from '@utils/escape-regex/escape-regex'
  */
 async function domainOwnershipFilter(
   ctx: UserContext
-): Promise<FilterQuery<typeof Domain>> {
+): Promise<QueryFilter<IDomain>> {
   if (ctx.isGlobalAdmin) return {}
   return { adminEmails: ctx.user.email }
 }
@@ -77,7 +77,7 @@ export interface CompanyMatch {
  */
 export async function companyOwnershipFilter(
   ctx: UserContext
-): Promise<FilterQuery<typeof RealEstate>> {
+): Promise<QueryFilter<IRealEstateModel>> {
   if (ctx.isGlobalAdmin) return {}
 
   if (ctx.isDomainAdmin) {

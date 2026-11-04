@@ -3,6 +3,7 @@
  */
 
 import { MongoMemoryServer } from 'mongodb-memory-server'
+import { testConnectOptions } from '@utils/setupTestEnvironment'
 import mongoose, { Types } from 'mongoose'
 
 import CustomService from '@modules/models/CustomService'
@@ -17,7 +18,7 @@ let mongo: MongoMemoryServer
 
 beforeAll(async () => {
   mongo = await MongoMemoryServer.create({ instance: { launchTimeout: 60000 } })
-  await mongoose.connect(mongo.getUri())
+  await mongoose.connect(mongo.getUri(), testConnectOptions)
 }, 120000)
 
 afterAll(async () => {

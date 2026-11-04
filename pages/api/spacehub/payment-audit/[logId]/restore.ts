@@ -112,7 +112,9 @@ export default async function handler(
     const current: any = await Payment.findById(before._id)
 
     const reverted: any = current
-      ? await Payment.findByIdAndUpdate(before._id, beforeFields, { new: true })
+      ? await Payment.findByIdAndUpdate(before._id, beforeFields, {
+          returnDocument: 'after',
+        })
       : await Payment.create({ ...beforeFields, _id: before._id } as any)
 
     await logPaymentMutation({

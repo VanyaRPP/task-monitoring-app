@@ -5,8 +5,10 @@ import RealEstate from '@modules/models/RealEstate'
 import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import EncryptionService from '@utils/encryptionService'
-import { hidePercentCharacters } from '@utils/hidePercentCharacters/hidePercentCharacters'
+import {
+  prepareDomainBankTokens,
+  withoutBankTokenSecrets,
+} from '@common/services/bankTokenService/bankToken.service'
 import { DOMAIN_GENERAL_PROJECTION } from '@utils/domain/domain-view-access'
 import { normalizeDisabledServiceIds } from '@common/services/customServiceService/customService.service'
 
@@ -21,21 +23,15 @@ export default async function handler(
     res
   )
 
-  const SECURE_TOKEN = process.env.NEXT_PUBLIC_MONGODB_SECRET_TOKEN
-
-  function encryptDomainBankTokens(obj: any, secretKey: string) {
-    if (!obj.domainBankToken || !Array.isArray(obj.domainBankToken)) {
-      return obj
+  // A new domain has no stored tokens, so every entry is a token typed into
+  // the form; any `token` the client sends is ignored.
+  function encryptDomainBankTokens(obj: any) {
+    const prepared = prepareDomainBankTokens(obj.domainBankToken, [])
+    if (prepared === undefined) {
+      delete obj.domainBankToken
+    } else {
+      obj.domainBankToken = prepared
     }
-
-    const encryptionService = new EncryptionService(secretKey)
-
-    obj.domainBankToken = obj.domainBankToken.map((item) => ({
-      ...item,
-      token: item.token || encryptionService.encrypt(item.shortToken),
-      shortToken: hidePercentCharacters(item.shortToken),
-    }))
-
     return obj
   }
 
@@ -136,7 +132,7 @@ export default async function handler(
             .json({ success: false, error: 'Домен з такими даними вже існує' })
         }
 
-        const updatedObj = encryptDomainBankTokens(req.body, SECURE_TOKEN)
+        const updatedObj = encryptDomainBankTokens(req.body)
         delete updatedObj.archived
         updatedObj.disabledServiceIds =
           normalizeDisabledServiceIds(updatedObj.disabledServiceIds) ?? []
@@ -154,7 +150,16 @@ export default async function handler(
 
         await Domain.create(updatedObj)
           .then((domain) => {
-            return res.status(201).json({ success: true, data: domain })
+            // `create` hands back the document as written, encrypted token
+            // included - select: false only applies to queries.
+            return res.status(201).json({
+              success: true,
+              data: withoutBankTokenSecrets(
+                typeof domain?.toObject === 'function'
+                  ? domain.toObject()
+                  : domain
+              ),
+            })
           })
           .catch((error) => {
             throw error

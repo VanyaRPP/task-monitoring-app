@@ -8,11 +8,10 @@ import {
   ITransaction,
 } from '@components/Pages/BankTransactions/components/TransactionsTable/components/transactionTypes'
 
-interface IGetQuery {
-  token: string
-  startDate?: string
-  limit?: number
-  followId?: string
+// The token never reaches the browser: every route picks the domain by
+// `domainId` and uses that domain's token on the server.
+interface IDomainQuery {
+  domainId: string
 }
 
 export const bankApi = createApi({
@@ -24,40 +23,27 @@ export const bankApi = createApi({
   endpoints: (builder) => ({
     getTransactions: builder.query<
       ITransaction[],
-      { token: string; acc: string; domainId?: string }
+      IDomainQuery & { acc: string }
     >({
-      query: ({ token, acc, domainId }) => {
-        const params = new URLSearchParams({ acc })
-        if (domainId) params.set('domainId', domainId)
-        return {
-          url: `transactions?${params.toString()}`,
-          method: 'GET',
-          headers: {
-            token,
-            'Content-type': 'application/json;charset=utf-8',
-          },
-        }
-      },
+      query: ({ domainId, acc }) => ({
+        url: 'transactions',
+        method: 'GET',
+        params: { domainId, acc },
+      }),
       transformResponse: (response: IBankRes<ITransaction[]>) => response.data,
     }),
-    getDate: builder.query<string, { token: string }>({
-      query: ({ token }) => ({
+    getDate: builder.query<string, IDomainQuery>({
+      query: ({ domainId }) => ({
         url: 'date',
         method: 'GET',
-        headers: {
-          token: token,
-          'Content-type': 'application/json;charset=utf-8',
-        },
+        params: { domainId },
       }),
     }),
-    getBalances: builder.query<IBalance[], IGetQuery>({
-      query: ({ token }) => ({
+    getBalances: builder.query<IBalance[], IDomainQuery>({
+      query: ({ domainId }) => ({
         url: 'balances',
         method: 'GET',
-        headers: {
-          token: token,
-          'Content-type': 'application/json;charset=utf-8',
-        },
+        params: { domainId },
       }),
       transformResponse: (response: IBankRes<IBalancesData>) =>
         response.data.balances,

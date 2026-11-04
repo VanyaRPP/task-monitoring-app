@@ -251,7 +251,9 @@ describe('Domains API - GET', () => {
     }
   })
 
-  it('keeps the full document for a DomainAdmin', async () => {
+  // A DomainAdmin still gets the whole document - except the encrypted bank
+  // token, which only the server uses (by domainId, in /api/bankapi).
+  it('keeps the full document for a DomainAdmin, without the encrypted token', async () => {
     await Domain.updateOne(
       { _id: domains[0]._id },
       {
@@ -286,12 +288,14 @@ describe('Domains API - GET', () => {
 
     expect(seeded.domainBankToken).toEqual([
       {
-        token: 'encrypted-privatbank-secret',
         shortToken: '****1234',
         tokenName: 'main',
         confidant: [],
       },
     ])
+    expect(JSON.stringify(received)).not.toContain(
+      'encrypted-privatbank-secret'
+    )
   })
 
   it('load domain as DomainAdmin by domainId - restricted access', async () => {

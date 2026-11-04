@@ -13,6 +13,8 @@ const CallBackSchema = new Schema<ICallback>({
   message: { type: String },
 })
 
-const CallBack =
-  mongoose.models.Category || mongoose.model('CallBack', CallBackSchema)
+const CallBack: mongoose.Model<ICallback> =
+  mongoose.models?.CallBack ||
+  mongoose.model<ICallback>('CallBack', CallBackSchema)
+
 export default CallBack

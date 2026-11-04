@@ -13,7 +13,10 @@ const globalAdmin = {
   user: { email: 'ga@example.com' },
 }
 
-const addDebit = (invoiceNumber: number, monthService: unknown) =>
+const addDebit = (
+  invoiceNumber: number,
+  monthService: mongoose.Types.ObjectId | string
+) =>
   Payment.create({
     invoiceNumber,
     type: 'debit',

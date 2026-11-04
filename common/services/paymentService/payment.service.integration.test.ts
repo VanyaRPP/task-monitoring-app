@@ -10,6 +10,7 @@ import RealEstate from '@modules/models/RealEstate'
 import Domain from '@modules/models/Domain'
 import Street from '@modules/models/Street'
 import { getPayments } from './payment.service'
+import { testConnectOptions } from '@utils/setupTestEnvironment'
 
 jest.mock('@common/services/profitService/profit.service', () => ({
   __esModule: true,
@@ -26,7 +27,7 @@ let mongo: MongoMemoryServer
 
 beforeAll(async () => {
   mongo = await MongoMemoryServer.create()
-  await mongoose.connect(mongo.getUri())
+  await mongoose.connect(mongo.getUri(), testConnectOptions)
 }, 120000)
 
 afterAll(async () => {
@@ -78,9 +79,9 @@ async function seedPayment({
   date = new Date('2026-03-01'),
   type = 'debit',
 }: {
-  domain: unknown
-  street: unknown
-  company: unknown
+  domain: Types.ObjectId | string
+  street: Types.ObjectId | string
+  company: Types.ObjectId | string
   invoiceNumber: number
   date?: Date
   type?: 'debit' | 'credit'
@@ -577,5 +578,116 @@ describe('getPayments — scoped filters reach the aggregation stages', () => {
 
     expect(result.data).toHaveLength(1)
     expect(result.totalPayments).toMatchObject({ debit: 100 })
+  })
+})
+
+// The payments table sends several ids as one comma-joined value: RTK Query
+// serializes `streetIds: [a, b]` through URLSearchParams as `streetIds=a,b`.
+// getPayments once passed that raw string into `$in` (`streetIds` instead of
+// the parsed `streetsIds`), so filtering by two or more streets failed the
+// cast; the user branch did the same with `domainIds`. A single id hid the
+// bug, so every case here uses at least two.
+describe('getPayments — several ids from the query string', () => {
+  const ownerEmail = 'owner@test.com'
+
+  const contexts = {
+    'global admin': {
+      isGlobalAdmin: true,
+      isDomainAdmin: false,
+      isUser: false,
+      user: { email: 'globalAdmin@test.com' },
+    },
+    'domain admin': {
+      isGlobalAdmin: false,
+      isDomainAdmin: true,
+      isUser: false,
+      user: { email: ownerEmail },
+    },
+    user: {
+      isGlobalAdmin: false,
+      isDomainAdmin: false,
+      isUser: true,
+      user: { email: ownerEmail },
+    },
+  }
+
+  /** One domain, three streets, a company and a payment on each street. */
+  async function seedThreeStreets() {
+    const streets = await Street.create(
+      ['вул. Перша, 1', 'вул. Друга, 2', 'вул. Третя, 3'].map((address) => ({
+        address,
+        city: 'Київ',
+      }))
+    )
+    const domain = await Domain.create({
+      name: 'Domain with three streets',
+      adminEmails: [ownerEmail],
+      streets: streets.map((s) => s._id),
+      description: 'd',
+    })
+    for (const [i, street] of streets.entries()) {
+      const company = await RealEstate.create({
+        domain: domain._id,
+        street: street._id,
+        companyName: `Company ${i}`,
+        description: 'c',
+        adminEmails: [ownerEmail],
+      })
+      await seedPayment({
+        domain: domain._id,
+        street: street._id,
+        company: company._id,
+        invoiceNumber: i + 1,
+      })
+    }
+    return streets.map((s) => s._id.toString())
+  }
+
+  const invoiceNumbers = (result: { data: { invoiceNumber: number }[] }) =>
+    result.data.map((p) => p.invoiceNumber).sort()
+
+  describe.each(Object.entries(contexts))('%s', (_role, context) => {
+    it('filters by streets sent as one comma-joined value', async () => {
+      const [first, second] = await seedThreeStreets()
+
+      const result = await getPayments(
+        { limit: '10', skip: '0', streetIds: `${first},${second}` },
+        context
+      )
+
+      expect(invoiceNumbers(result)).toEqual([1, 2])
+    })
+
+    it('filters by streets sent as repeated params', async () => {
+      const [first, , third] = await seedThreeStreets()
+
+      const result = await getPayments(
+        { limit: '10', skip: '0', streetIds: [first, third] },
+        context
+      )
+
+      expect(invoiceNumbers(result)).toEqual([1, 3])
+    })
+  })
+
+  it('narrows a user to several domains sent as one comma-joined value', async () => {
+    const seeded = []
+    for (const i of [1, 2, 3]) {
+      const scope = await seedScope({ companyAdminEmail: ownerEmail })
+      await seedPayment({
+        domain: scope.domain._id,
+        street: scope.street._id,
+        company: scope.company._id,
+        invoiceNumber: i,
+      })
+      seeded.push(scope.domain._id.toString())
+    }
+
+    const result = await getPayments(
+      { limit: '10', skip: '0', domainIds: `${seeded[0]},${seeded[2]}` },
+      contexts.user
+    )
+
+    expect(invoiceNumbers(result)).toEqual([1, 3])
   })
 })

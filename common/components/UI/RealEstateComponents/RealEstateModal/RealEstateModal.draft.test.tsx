@@ -108,4 +108,21 @@ describe('RealEstateModal with a draft', () => {
     await waitFor(() => expect(addRealEstateMock).toHaveBeenCalledTimes(1))
     expect(editRealEstateMock).not.toHaveBeenCalled()
   })
+
+  it('creates a company without description, sending an empty string', async () => {
+    const { description, ...draftWithoutDescription } = draft
+    render(
+      <RealEstateModal
+        chosenRealEstate={{ domain: 'd1', street: 'streetA' }}
+        draft={draftWithoutDescription}
+        closeModal={jest.fn()}
+        editable
+      />
+    )
+
+    fireEvent.click(screen.getByText('Зберегти'))
+
+    await waitFor(() => expect(addRealEstateMock).toHaveBeenCalledTimes(1))
+    expect(addRealEstateMock.mock.calls[0][0]).toHaveProperty('description', '')
+  })
 })

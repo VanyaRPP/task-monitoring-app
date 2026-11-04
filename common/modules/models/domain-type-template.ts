@@ -54,9 +54,8 @@ const DomainTypeTemplateSchema = new Schema<IDomainTypeTemplate>(
   { timestamps: true }
 )
 
-const DomainTypeTemplate =
-  (mongoose.models
-    ?.DomainTypeTemplate as mongoose.Model<IDomainTypeTemplate>) ||
+const DomainTypeTemplate: mongoose.Model<IDomainTypeTemplate> =
+  mongoose.models?.DomainTypeTemplate ||
   mongoose.model<IDomainTypeTemplate>(
     'DomainTypeTemplate',
     DomainTypeTemplateSchema

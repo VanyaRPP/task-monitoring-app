@@ -17,7 +17,7 @@ export default async function handler(
     case 'DELETE':
       try {
         if (isGlobalAdmin) {
-          const realEstate = await RealEstate.findByIdAndRemove(req.query.id)
+          const realEstate = await RealEstate.findByIdAndDelete(req.query.id)
           if (realEstate) {
             return res.status(200).json({
               success: true,
@@ -55,7 +55,7 @@ export default async function handler(
             })
           }
 
-          await RealEstate.findByIdAndRemove(req.query.id)
+          await RealEstate.findByIdAndDelete(req.query.id)
           return res.status(200).json({
             success: true,
             data: 'realestate ' + req.query.id + ' was deleted',
@@ -74,7 +74,7 @@ export default async function handler(
             const response = await RealEstate.findOneAndUpdate(
               { _id: req.query.id },
               req.body,
-              { new: true }
+              { returnDocument: 'after' }
             )
             return res.status(200).json({ success: true, data: response })
           } else {
@@ -117,7 +117,7 @@ export default async function handler(
               const response = await RealEstate.findOneAndUpdate(
                 { _id: req.query.id },
                 { ...req.body, domain: newDomainId },
-                { new: true }
+                { returnDocument: 'after' }
               )
               return res.status(200).json({ success: true, data: response })
             }
@@ -126,7 +126,7 @@ export default async function handler(
             const response = await RealEstate.findOneAndUpdate(
               { _id: req.query.id },
               bodyWithoutDomain,
-              { new: true }
+              { returnDocument: 'after' }
             )
             return res.status(200).json({ success: true, data: response })
           }

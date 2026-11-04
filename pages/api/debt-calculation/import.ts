@@ -112,7 +112,7 @@ async function debtCalculationImportHandler(
   const saved = await DebtCalculation.findOneAndUpdate(
     { domain, company },
     { $set: snapshot, $setOnInsert: { createdBy: user?._id } },
-    { new: true, upsert: true, setDefaultsOnInsert: true }
+    { returnDocument: 'after', upsert: true, setDefaultsOnInsert: true }
   ).lean()
 
   return res.status(200).json({ success: true, data: saved })
