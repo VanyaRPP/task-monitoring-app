@@ -364,6 +364,7 @@ describe('checkTransaction', () => {
 
     expect(mockedFind).not.toHaveBeenCalled()
     expect(mockedFindOne).toHaveBeenCalledWith({
+      domain: 'domain-xyz',
       'transaction.OSND': 'Some payment description',
     })
     expect(result).toEqual({
@@ -394,11 +395,13 @@ describe('checkTransaction', () => {
     })
 
     expect(mockedFind).toHaveBeenCalledWith({
+      domain: 'domain-xyz',
       'transaction.TECHNICAL_TRANSACTION_ID': {
         $in: ['D3K4Q3QAS2IGJEP26032026204100'],
       },
     })
     expect(mockedFindOne).toHaveBeenCalledWith({
+      domain: 'domain-xyz',
       'transaction.OSND':
         'Сплата за послуги знідно рахунку, Чорна Марина Євгеніївна',
     })
@@ -408,8 +411,9 @@ describe('checkTransaction', () => {
     })
   })
 
-  it('OSND fallback for транзитний рахунок does not include domain filter', async () => {
-    // Transit accounts are shared across domains — lookup must be domain-agnostic
+  it('OSND fallback for транзитний рахунок is limited to the domain', async () => {
+    // The transit account is shared by every domain, but a payment found in
+    // another domain would point the row at that domain's company.
     mockedFind.mockResolvedValue([])
     mockedFindOne.mockReturnValue({
       sort: jest.fn().mockReturnValue({
@@ -427,9 +431,10 @@ describe('checkTransaction', () => {
       domainId: 'domain-xyz',
     })
 
-    const findOneArg = mockedFindOne.mock.calls[0][0]
-    expect(findOneArg).not.toHaveProperty('domain')
-    expect(findOneArg).toEqual({ 'transaction.OSND': 'Transit payment' })
+    expect(mockedFindOne.mock.calls[0][0]).toEqual({
+      domain: 'domain-xyz',
+      'transaction.OSND': 'Transit payment',
+    })
   })
 
   it('returns false when TECHNICAL_TRANSACTION_ID is empty string — tries account fallback only with domainId', async () => {
