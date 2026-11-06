@@ -152,6 +152,9 @@ async function loadCompanyPayments(
     { domain: domainId, company: companyId },
     'type invoice generalSum invoiceCreationDate paidAt monthService'
   )
+    // Plan warnings follow this order; `_id` keeps the creation order a
+    // collection scan returned before the company index served this filter.
+    .sort({ _id: 1 })
     .populate('monthService', 'date')
     .lean()
 

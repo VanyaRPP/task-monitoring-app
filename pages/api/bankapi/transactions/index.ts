@@ -48,10 +48,13 @@ export async function checkTransaction({
     if (candidates.length > 0) {
       // A bank transaction is paid into one domain only: a payment saved in
       // another domain neither marks this row as sent nor names its company.
+      // When several payments carry the transaction, the first one saved
+      // names the company - the order a collection scan returned before the
+      // domain index could serve this lookup.
       const allPayments = await Payment.find({
         ...(domainId ? { domain: domainId } : {}),
         'transaction.TECHNICAL_TRANSACTION_ID': { $in: candidates },
-      })
+      }).sort({ _id: 1 })
 
       if (allPayments.length > 0) {
         const company = allPayments[0].company

@@ -204,8 +204,12 @@ export function createScenarioPaymentStore(initial: ScenarioPayment[] = []) {
       payments.push(payment)
       return payment
     },
-    find: async (query: Query) =>
-      payments.filter((payment) => matchesQuery(payment, query)),
+    // checkTransaction sorts by `_id` - creation order, which is the order
+    // payments were added here.
+    find: (query: Query) => ({
+      sort: async () =>
+        payments.filter((payment) => matchesQuery(payment, query)),
+    }),
     findOne: (query: Query) => ({
       sort: () => ({
         lean: async () =>

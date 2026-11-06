@@ -224,3 +224,51 @@ describe('checkTransaction — transit account payments', () => {
     expect(result.previousCompanyId).toBeNull()
   })
 })
+
+describe('checkTransaction — a transaction saved on more than one payment', () => {
+  beforeEach(async () => {
+    await Payment.deleteMany({})
+    // setupTestEnvironment drops the database after every test, indexes
+    // included: rebuild the schema's ones so the lookup can take the domain
+    // index, as it does in production.
+    await Payment.createIndexes()
+  })
+
+  const insertSentOn = (
+    company: mongoose.Types.ObjectId,
+    invoiceCreationDate: Date,
+    transaction: Record<string, unknown>
+  ) =>
+    Payment.collection.insertOne({
+      invoiceNumber: 90000 + seq,
+      type: Operations.Credit,
+      domain: domainId,
+      company,
+      invoiceCreationDate,
+      transaction,
+    })
+
+  it('names the company of the payment saved first, as the collection scan did', async () => {
+    const names = (await Payment.collection.indexes()).map(({ name }) => name)
+    expect(names).toContain('domain_1_invoiceCreationDate_-1')
+
+    const tx = invoiceRow(1500, '01-10-2026')
+    // Saved first, but with the older invoice date: the domain index alone
+    // would hand back the other one first.
+    await insertSentOn(companyId, new Date('2026-10-01'), tx)
+    await insertSentOn(otherCompanyId, new Date('2026-10-30'), tx)
+
+    const naturalOrder = await Payment.find({
+      domain: domainId,
+      'transaction.TECHNICAL_TRANSACTION_ID': tx.TECHNICAL_TRANSACTION_ID,
+    })
+      .sort({ $natural: 1 })
+      .lean()
+    expect(String(naturalOrder[0].company)).toBe(String(companyId))
+
+    expect(await check(tx)).toEqual({
+      isMatchingPayment: true,
+      previousCompanyId: String(companyId),
+    })
+  })
+})

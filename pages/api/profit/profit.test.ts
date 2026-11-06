@@ -58,6 +58,16 @@ jest.mock('@next-auth/mongodb-adapter', () => ({
   })),
 }))
 
+// The route reads Payment.find(...).sort(...)
+const mockPaymentFind = (rows: unknown[]) =>
+  (Payment.find as jest.Mock).mockReturnValue({
+    sort: jest.fn().mockResolvedValue(rows),
+  })
+const mockPaymentFindError = (error: Error) =>
+  (Payment.find as jest.Mock).mockReturnValue({
+    sort: jest.fn().mockRejectedValue(error),
+  })
+
 describe('Profit Payment API - GET', () => {
   beforeEach(() => {
     jest.clearAllMocks()
@@ -72,7 +82,7 @@ describe('Profit Payment API - GET', () => {
     ;(Domain.find as jest.Mock).mockResolvedValue([
       { _id: '66fff715e02a727351b1f403' },
     ])
-    ;(Payment.find as jest.Mock).mockResolvedValue([
+    mockPaymentFind([
       {
         invoiceCreationDate: new Date('2024-03-15'),
         generalSum: 787006.49,
@@ -173,7 +183,7 @@ describe('Profit Payment API - GET', () => {
       isAdmin: true,
       user: { email: 'globaladmin@example.com' },
     })
-    ;(Payment.find as jest.Mock).mockResolvedValue([
+    mockPaymentFind([
       {
         invoiceCreationDate: new Date('2024-01-10'),
         generalSum: 100000,
@@ -208,7 +218,7 @@ describe('Profit Payment API - GET', () => {
       isAdmin: false,
       user: { email: 'admin@example.com' },
     })
-    ;(Payment.find as jest.Mock).mockRejectedValue(new Error('Database error'))
+    mockPaymentFindError(new Error('Database error'))
 
     const req = { method: 'GET', query: {} } as NextApiRequest
     const res = {

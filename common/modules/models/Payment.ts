@@ -68,6 +68,12 @@ export const PaymentSchema = new Schema<IPaymentModel>({
   },
 })
 
+// getPayments filters by company and/or domain (role scope for non-global
+// users, table filters, hook lookups), sometimes with an invoiceCreationDate
+// range - see tests/perf/payments-get.bench.test.ts for the measured plans.
+PaymentSchema.index({ company: 1, invoiceCreationDate: -1 })
+PaymentSchema.index({ domain: 1, invoiceCreationDate: -1 })
+
 const Payment: mongoose.Model<IPaymentModel> =
   mongoose.models?.Payment ||
   mongoose.model<IPaymentModel>('Payment', PaymentSchema)

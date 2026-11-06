@@ -1,0 +1,1876 @@
+{
+  "createdAt": "2026-11-06T09:41:32.245Z",
+  "mongodVersion": "6.0.14",
+  "dataset": {
+    "domains": 10,
+    "companies": 300,
+    "services": 360,
+    "payments": 19359,
+    "months": 36,
+    "runsPerScenario": 5
+  },
+  "paymentIndexes": [
+    "{\"_id\":1}",
+    "{\"company\":1,\"invoiceCreationDate\":-1}",
+    "{\"domain\":1,\"invoiceCreationDate\":-1}"
+  ],
+  "paymentStorage": {
+    "dataSize": 12364088,
+    "avgObjSize": 638,
+    "totalIndexSize": 3811670,
+    "indexSizes": {
+      "_id_": 1103795,
+      "company_1_invoiceCreationDate_-1": 1351628,
+      "domain_1_invoiceCreationDate_-1": 1356247
+    }
+  },
+  "whatIfIndexes": null,
+  "scenarios": [
+    {
+      "name": "table, GlobalAdmin, page 1, no filters",
+      "source": "DashboardPage/blocks/payments.tsx",
+      "role": "globalAdmin",
+      "query": {
+        "limit": "10",
+        "skip": "0",
+        "dateField": "invoiceCreationDate"
+      },
+      "status": 200,
+      "rows": 10,
+      "total": 19359,
+      "responseBytes": 16987,
+      "fingerprint": "1c63662052a44b18",
+      "wallMs": {
+        "median": 263.7,
+        "min": 260.3,
+        "max": 268,
+        "runs": [265.4, 260.7, 268, 263.7, 260.3]
+      },
+      "ops": {
+        "total": 13,
+        "byCollection": {
+          "users": 1,
+          "payments": 8,
+          "realestates": 1,
+          "streets": 1,
+          "domains": 1,
+          "services": 1
+        },
+        "byCommand": {
+          "find": 6,
+          "aggregate": 5,
+          "distinct": 2
+        }
+      },
+      "payments": {
+        "ops": 8,
+        "docsExamined": 96805,
+        "keysExamined": 326,
+        "collscans": 5,
+        "ixscans": 1
+      },
+      "commands": [
+        {
+          "collection": "users",
+          "name": "find",
+          "durationMs": 1,
+          "stages": ["FETCH", "IXSCAN", "LIMIT"],
+          "indexes": ["email_1"],
+          "docsExamined": 1,
+          "keysExamined": 1,
+          "nReturned": 1
+        },
+        {
+          "collection": "payments",
+          "name": "aggregate",
+          "durationMs": 156,
+          "stages": ["COLLSCAN", "PROJECTION_SIMPLE"],
+          "indexes": [],
+          "docsExamined": 19359,
+          "keysExamined": 0,
+          "nReturned": 19359
+        },
+        {
+          "collection": "payments",
+          "name": "find",
+          "durationMs": 1,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["_id_"],
+          "docsExamined": 10,
+          "keysExamined": 16,
+          "nReturned": 10
+        },
+        {
+          "collection": "realestates",
+          "name": "find",
+          "durationMs": 0,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["_id_"],
+          "docsExamined": 6,
+          "keysExamined": 12,
+          "nReturned": 6
+        },
+        {
+          "collection": "streets",
+          "name": "find",
+          "durationMs": 1,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["_id_"],
+          "docsExamined": 4,
+          "keysExamined": 7,
+          "nReturned": 4
+        },
+        {
+          "collection": "domains",
+          "name": "find",
+          "durationMs": 2,
+          "stages": ["FETCH", "IXSCAN", "PROJECTION_DEFAULT"],
+          "indexes": ["_id_"],
+          "docsExamined": 4,
+          "keysExamined": 6,
+          "nReturned": 4
+        },
+        {
+          "collection": "services",
+          "name": "find",
+          "durationMs": 1,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["_id_"],
+          "docsExamined": 3,
+          "keysExamined": 5,
+          "nReturned": 3
+        },
+        {
+          "collection": "payments",
+          "name": "aggregate",
+          "durationMs": 11,
+          "stages": ["COLLSCAN"],
+          "indexes": [],
+          "docsExamined": 19359,
+          "keysExamined": 0,
+          "nReturned": 19359
+        },
+        {
+          "collection": "payments",
+          "name": "distinct",
+          "durationMs": 0,
+          "stages": ["DISTINCT_SCAN", "PROJECTION_COVERED"],
+          "indexes": ["domain_1_invoiceCreationDate_-1"],
+          "docsExamined": 0,
+          "keysExamined": 10,
+          "nReturned": 10
+        },
+        {
+          "collection": "payments",
+          "name": "distinct",
+          "durationMs": 1,
+          "stages": ["DISTINCT_SCAN", "PROJECTION_COVERED"],
+          "indexes": ["company_1_invoiceCreationDate_-1"],
+          "docsExamined": 0,
+          "keysExamined": 300,
+          "nReturned": 300
+        },
+        {
+          "collection": "payments",
+          "name": "aggregate",
+          "durationMs": 16,
+          "stages": ["COLLSCAN", "GROUP"],
+          "indexes": [],
+          "docsExamined": 19359,
+          "keysExamined": 0,
+          "nReturned": 2
+        },
+        {
+          "collection": "payments",
+          "name": "aggregate",
+          "durationMs": 13,
+          "stages": ["COLLSCAN", "GROUP"],
+          "indexes": [],
+          "docsExamined": 19359,
+          "keysExamined": 0,
+          "nReturned": 1
+        },
+        {
+          "collection": "payments",
+          "name": "aggregate",
+          "durationMs": 58,
+          "stages": ["COLLSCAN", "PROJECTION_SIMPLE"],
+          "indexes": [],
+          "docsExamined": 19359,
+          "keysExamined": 0,
+          "nReturned": 10800
+        }
+      ]
+    },
+    {
+      "name": "table, GlobalAdmin, filter: 1 domain",
+      "source": "DashboardPage/blocks/payments.tsx",
+      "role": "globalAdmin",
+      "query": {
+        "limit": "10",
+        "skip": "0",
+        "dateField": "invoiceCreationDate",
+        "domainIds": "010000000000000000000000"
+      },
+      "status": 200,
+      "rows": 10,
+      "total": 1935,
+      "responseBytes": 17965,
+      "fingerprint": "cf6db6f131b66e84",
+      "wallMs": {
+        "median": 51,
+        "min": 50.3,
+        "max": 52,
+        "runs": [51.8, 50.3, 52, 51, 51]
+      },
+      "ops": {
+        "total": 13,
+        "byCollection": {
+          "users": 1,
+          "payments": 8,
+          "realestates": 1,
+          "streets": 1,
+          "domains": 1,
+          "services": 1
+        },
+        "byCommand": {
+          "find": 6,
+          "aggregate": 5,
+          "distinct": 2
+        }
+      },
+      "payments": {
+        "ops": 8,
+        "docsExamined": 9685,
+        "keysExamined": 11629,
+        "collscans": 0,
+        "ixscans": 6
+      },
+      "commands": [
+        {
+          "collection": "users",
+          "name": "find",
+          "durationMs": 1,
+          "stages": ["FETCH", "IXSCAN", "LIMIT"],
+          "indexes": ["email_1"],
+          "docsExamined": 1,
+          "keysExamined": 1,
+          "nReturned": 1
+        },
+        {
+          "collection": "payments",
+          "name": "aggregate",
+          "durationMs": 18,
+          "stages": ["FETCH", "IXSCAN", "PROJECTION_SIMPLE"],
+          "indexes": ["domain_1_invoiceCreationDate_-1"],
+          "docsExamined": 1935,
+          "keysExamined": 1935,
+          "nReturned": 1935
+        },
+        {
+          "collection": "payments",
+          "name": "find",
+          "durationMs": 1,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["_id_"],
+          "docsExamined": 10,
+          "keysExamined": 16,
+          "nReturned": 10
+        },
+        {
+          "collection": "realestates",
+          "name": "find",
+          "durationMs": 1,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["_id_"],
+          "docsExamined": 6,
+          "keysExamined": 11,
+          "nReturned": 6
+        },
+        {
+          "collection": "streets",
+          "name": "find",
+          "durationMs": 2,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["_id_"],
+          "docsExamined": 2,
+          "keysExamined": 3,
+          "nReturned": 2
+        },
+        {
+          "collection": "domains",
+          "name": "find",
+          "durationMs": 1,
+          "stages": ["FETCH", "IXSCAN", "PROJECTION_DEFAULT"],
+          "indexes": ["_id_"],
+          "docsExamined": 1,
+          "keysExamined": 1,
+          "nReturned": 1
+        },
+        {
+          "collection": "services",
+          "name": "find",
+          "durationMs": 1,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["_id_"],
+          "docsExamined": 1,
+          "keysExamined": 1,
+          "nReturned": 1
+        },
+        {
+          "collection": "payments",
+          "name": "aggregate",
+          "durationMs": 3,
+          "stages": ["COUNT_SCAN"],
+          "indexes": ["domain_1_invoiceCreationDate_-1"],
+          "docsExamined": 0,
+          "keysExamined": 1936,
+          "nReturned": 1935
+        },
+        {
+          "collection": "payments",
+          "name": "distinct",
+          "durationMs": 0,
+          "stages": ["DISTINCT_SCAN", "PROJECTION_COVERED"],
+          "indexes": ["domain_1_invoiceCreationDate_-1"],
+          "docsExamined": 0,
+          "keysExamined": 2,
+          "nReturned": 1
+        },
+        {
+          "collection": "payments",
+          "name": "distinct",
+          "durationMs": 4,
+          "stages": ["FETCH", "IXSCAN", "PROJECTION_SIMPLE"],
+          "indexes": ["domain_1_invoiceCreationDate_-1"],
+          "docsExamined": 1935,
+          "keysExamined": 1935,
+          "nReturned": 1935
+        },
+        {
+          "collection": "payments",
+          "name": "aggregate",
+          "durationMs": 5,
+          "stages": ["FETCH", "GROUP", "IXSCAN"],
+          "indexes": ["domain_1_invoiceCreationDate_-1"],
+          "docsExamined": 1935,
+          "keysExamined": 1935,
+          "nReturned": 2
+        },
+        {
+          "collection": "payments",
+          "name": "aggregate",
+          "durationMs": 4,
+          "stages": ["FETCH", "GROUP", "IXSCAN"],
+          "indexes": ["domain_1_invoiceCreationDate_-1"],
+          "docsExamined": 1935,
+          "keysExamined": 1935,
+          "nReturned": 1
+        },
+        {
+          "collection": "payments",
+          "name": "aggregate",
+          "durationMs": 10,
+          "stages": ["FETCH", "IXSCAN", "PROJECTION_SIMPLE"],
+          "indexes": ["domain_1_invoiceCreationDate_-1"],
+          "docsExamined": 1935,
+          "keysExamined": 1935,
+          "nReturned": 1080
+        }
+      ]
+    },
+    {
+      "name": "table, GlobalAdmin, 1 domain + date range",
+      "source": "DashboardPage/blocks/payments.tsx (За проміжок)",
+      "role": "globalAdmin",
+      "query": {
+        "limit": "10",
+        "skip": "0",
+        "dateField": "invoiceCreationDate",
+        "domainIds": "010000000000000000000000",
+        "dateFrom": "2025-10-01T00:00:00.000Z",
+        "dateTo": "2025-12-31T23:59:59.999Z"
+      },
+      "status": 200,
+      "rows": 10,
+      "total": 158,
+      "responseBytes": 17953,
+      "fingerprint": "be59d35286c4b125",
+      "wallMs": {
+        "median": 11.9,
+        "min": 11.2,
+        "max": 12.9,
+        "runs": [12.9, 12, 11.2, 11.9, 11.3]
+      },
+      "ops": {
+        "total": 13,
+        "byCollection": {
+          "users": 1,
+          "payments": 8,
+          "realestates": 1,
+          "streets": 1,
+          "domains": 1,
+          "services": 1
+        },
+        "byCommand": {
+          "find": 6,
+          "aggregate": 5,
+          "distinct": 2
+        }
+      },
+      "payments": {
+        "ops": 8,
+        "docsExamined": 800,
+        "keysExamined": 967,
+        "collscans": 0,
+        "ixscans": 6
+      },
+      "commands": [
+        {
+          "collection": "users",
+          "name": "find",
+          "durationMs": 1,
+          "stages": ["FETCH", "IXSCAN", "LIMIT"],
+          "indexes": ["email_1"],
+          "docsExamined": 1,
+          "keysExamined": 1,
+          "nReturned": 1
+        },
+        {
+          "collection": "payments",
+          "name": "aggregate",
+          "durationMs": 2,
+          "stages": ["FETCH", "IXSCAN", "PROJECTION_SIMPLE"],
+          "indexes": ["domain_1_invoiceCreationDate_-1"],
+          "docsExamined": 158,
+          "keysExamined": 158,
+          "nReturned": 158
+        },
+        {
+          "collection": "payments",
+          "name": "find",
+          "durationMs": 1,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["_id_"],
+          "docsExamined": 10,
+          "keysExamined": 16,
+          "nReturned": 10
+        },
+        {
+          "collection": "realestates",
+          "name": "find",
+          "durationMs": 1,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["_id_"],
+          "docsExamined": 6,
+          "keysExamined": 11,
+          "nReturned": 6
+        },
+        {
+          "collection": "streets",
+          "name": "find",
+          "durationMs": 1,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["_id_"],
+          "docsExamined": 2,
+          "keysExamined": 3,
+          "nReturned": 2
+        },
+        {
+          "collection": "domains",
+          "name": "find",
+          "durationMs": 2,
+          "stages": ["FETCH", "IXSCAN", "PROJECTION_DEFAULT"],
+          "indexes": ["_id_"],
+          "docsExamined": 1,
+          "keysExamined": 1,
+          "nReturned": 1
+        },
+        {
+          "collection": "services",
+          "name": "find",
+          "durationMs": 1,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["_id_"],
+          "docsExamined": 1,
+          "keysExamined": 1,
+          "nReturned": 1
+        },
+        {
+          "collection": "payments",
+          "name": "aggregate",
+          "durationMs": 1,
+          "stages": ["COUNT_SCAN"],
+          "indexes": ["domain_1_invoiceCreationDate_-1"],
+          "docsExamined": 0,
+          "keysExamined": 159,
+          "nReturned": 158
+        },
+        {
+          "collection": "payments",
+          "name": "distinct",
+          "durationMs": 1,
+          "stages": ["DISTINCT_SCAN", "PROJECTION_COVERED"],
+          "indexes": ["domain_1_invoiceCreationDate_-1"],
+          "docsExamined": 0,
+          "keysExamined": 2,
+          "nReturned": 1
+        },
+        {
+          "collection": "payments",
+          "name": "distinct",
+          "durationMs": 1,
+          "stages": ["FETCH", "IXSCAN", "PROJECTION_SIMPLE"],
+          "indexes": ["domain_1_invoiceCreationDate_-1"],
+          "docsExamined": 158,
+          "keysExamined": 158,
+          "nReturned": 158
+        },
+        {
+          "collection": "payments",
+          "name": "aggregate",
+          "durationMs": 1,
+          "stages": ["FETCH", "GROUP", "IXSCAN"],
+          "indexes": ["domain_1_invoiceCreationDate_-1"],
+          "docsExamined": 158,
+          "keysExamined": 158,
+          "nReturned": 2
+        },
+        {
+          "collection": "payments",
+          "name": "aggregate",
+          "durationMs": 1,
+          "stages": ["FETCH", "GROUP", "IXSCAN"],
+          "indexes": ["domain_1_invoiceCreationDate_-1"],
+          "docsExamined": 158,
+          "keysExamined": 158,
+          "nReturned": 1
+        },
+        {
+          "collection": "payments",
+          "name": "aggregate",
+          "durationMs": 1,
+          "stages": ["FETCH", "IXSCAN", "PROJECTION_SIMPLE"],
+          "indexes": ["domain_1_invoiceCreationDate_-1"],
+          "docsExamined": 158,
+          "keysExamined": 158,
+          "nReturned": 90
+        }
+      ]
+    },
+    {
+      "name": "table, GlobalAdmin, 1 company + date range",
+      "source": "DashboardPage/blocks/payments.tsx (За проміжок)",
+      "role": "globalAdmin",
+      "query": {
+        "limit": "10",
+        "skip": "0",
+        "dateField": "invoiceCreationDate",
+        "companyIds": "030000000000000000000061",
+        "dateFrom": "2025-10-01T00:00:00.000Z",
+        "dateTo": "2025-12-31T23:59:59.999Z"
+      },
+      "status": 200,
+      "rows": 6,
+      "total": 6,
+      "responseBytes": 10591,
+      "fingerprint": "915eea6f54065913",
+      "wallMs": {
+        "median": 6.9,
+        "min": 6.2,
+        "max": 7.6,
+        "runs": [7.6, 6.9, 6.9, 7.6, 6.2]
+      },
+      "ops": {
+        "total": 13,
+        "byCollection": {
+          "users": 1,
+          "payments": 8,
+          "realestates": 1,
+          "streets": 1,
+          "domains": 1,
+          "services": 1
+        },
+        "byCommand": {
+          "find": 6,
+          "aggregate": 5,
+          "distinct": 2
+        }
+      },
+      "payments": {
+        "ops": 8,
+        "docsExamined": 36,
+        "keysExamined": 46,
+        "collscans": 0,
+        "ixscans": 6
+      },
+      "commands": [
+        {
+          "collection": "users",
+          "name": "find",
+          "durationMs": 1,
+          "stages": ["FETCH", "IXSCAN", "LIMIT"],
+          "indexes": ["email_1"],
+          "docsExamined": 1,
+          "keysExamined": 1,
+          "nReturned": 1
+        },
+        {
+          "collection": "payments",
+          "name": "aggregate",
+          "durationMs": 0,
+          "stages": ["FETCH", "IXSCAN", "PROJECTION_SIMPLE"],
+          "indexes": ["company_1_invoiceCreationDate_-1"],
+          "docsExamined": 6,
+          "keysExamined": 6,
+          "nReturned": 6
+        },
+        {
+          "collection": "payments",
+          "name": "find",
+          "durationMs": 0,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["_id_"],
+          "docsExamined": 6,
+          "keysExamined": 7,
+          "nReturned": 6
+        },
+        {
+          "collection": "realestates",
+          "name": "find",
+          "durationMs": 0,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["_id_"],
+          "docsExamined": 1,
+          "keysExamined": 1,
+          "nReturned": 1
+        },
+        {
+          "collection": "streets",
+          "name": "find",
+          "durationMs": 1,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["_id_"],
+          "docsExamined": 1,
+          "keysExamined": 1,
+          "nReturned": 1
+        },
+        {
+          "collection": "domains",
+          "name": "find",
+          "durationMs": 0,
+          "stages": ["FETCH", "IXSCAN", "PROJECTION_DEFAULT"],
+          "indexes": ["_id_"],
+          "docsExamined": 1,
+          "keysExamined": 1,
+          "nReturned": 1
+        },
+        {
+          "collection": "services",
+          "name": "find",
+          "durationMs": 1,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["_id_"],
+          "docsExamined": 3,
+          "keysExamined": 4,
+          "nReturned": 3
+        },
+        {
+          "collection": "payments",
+          "name": "aggregate",
+          "durationMs": 1,
+          "stages": ["COUNT_SCAN"],
+          "indexes": ["company_1_invoiceCreationDate_-1"],
+          "docsExamined": 0,
+          "keysExamined": 7,
+          "nReturned": 6
+        },
+        {
+          "collection": "payments",
+          "name": "distinct",
+          "durationMs": 0,
+          "stages": ["FETCH", "IXSCAN", "PROJECTION_SIMPLE"],
+          "indexes": ["company_1_invoiceCreationDate_-1"],
+          "docsExamined": 6,
+          "keysExamined": 6,
+          "nReturned": 6
+        },
+        {
+          "collection": "payments",
+          "name": "distinct",
+          "durationMs": 0,
+          "stages": ["DISTINCT_SCAN", "PROJECTION_COVERED"],
+          "indexes": ["company_1_invoiceCreationDate_-1"],
+          "docsExamined": 0,
+          "keysExamined": 2,
+          "nReturned": 1
+        },
+        {
+          "collection": "payments",
+          "name": "aggregate",
+          "durationMs": 0,
+          "stages": ["FETCH", "GROUP", "IXSCAN"],
+          "indexes": ["company_1_invoiceCreationDate_-1"],
+          "docsExamined": 6,
+          "keysExamined": 6,
+          "nReturned": 2
+        },
+        {
+          "collection": "payments",
+          "name": "aggregate",
+          "durationMs": 1,
+          "stages": ["FETCH", "GROUP", "IXSCAN"],
+          "indexes": ["company_1_invoiceCreationDate_-1"],
+          "docsExamined": 6,
+          "keysExamined": 6,
+          "nReturned": 1
+        },
+        {
+          "collection": "payments",
+          "name": "aggregate",
+          "durationMs": 0,
+          "stages": ["FETCH", "IXSCAN", "PROJECTION_SIMPLE"],
+          "indexes": ["company_1_invoiceCreationDate_-1"],
+          "docsExamined": 6,
+          "keysExamined": 6,
+          "nReturned": 3
+        }
+      ]
+    },
+    {
+      "name": "table, DomainAdmin, page 1",
+      "source": "DashboardPage/blocks/payments.tsx",
+      "role": "domainAdmin",
+      "query": {
+        "limit": "10",
+        "skip": "0",
+        "dateField": "invoiceCreationDate"
+      },
+      "status": 200,
+      "rows": 10,
+      "total": 1935,
+      "responseBytes": 17965,
+      "fingerprint": "cf6db6f131b66e84",
+      "wallMs": {
+        "median": 56.5,
+        "min": 55.1,
+        "max": 61,
+        "runs": [61, 57.6, 56.5, 55.1, 55.2]
+      },
+      "ops": {
+        "total": 17,
+        "byCollection": {
+          "users": 1,
+          "domains": 4,
+          "realestates": 2,
+          "payments": 8,
+          "streets": 1,
+          "services": 1
+        },
+        "byCommand": {
+          "find": 10,
+          "aggregate": 5,
+          "distinct": 2
+        }
+      },
+      "payments": {
+        "ops": 8,
+        "docsExamined": 13555,
+        "keysExamined": 13565,
+        "collscans": 0,
+        "ixscans": 8
+      },
+      "commands": [
+        {
+          "collection": "users",
+          "name": "find",
+          "durationMs": 0,
+          "stages": ["FETCH", "IXSCAN", "LIMIT"],
+          "indexes": ["email_1"],
+          "docsExamined": 1,
+          "keysExamined": 1,
+          "nReturned": 1
+        },
+        {
+          "collection": "domains",
+          "name": "find",
+          "durationMs": 1,
+          "stages": ["COLLSCAN", "LIMIT", "PROJECTION_SIMPLE"],
+          "indexes": [],
+          "docsExamined": 1,
+          "keysExamined": 0,
+          "nReturned": 1
+        },
+        {
+          "collection": "domains",
+          "name": "find",
+          "durationMs": 0,
+          "stages": ["COLLSCAN", "PROJECTION_DEFAULT"],
+          "indexes": [],
+          "docsExamined": 10,
+          "keysExamined": 0,
+          "nReturned": 1
+        },
+        {
+          "collection": "realestates",
+          "name": "find",
+          "durationMs": 1,
+          "stages": ["COLLSCAN", "SUBPLAN"],
+          "indexes": [],
+          "docsExamined": 300,
+          "keysExamined": 0,
+          "nReturned": 30
+        },
+        {
+          "collection": "domains",
+          "name": "find",
+          "durationMs": 0,
+          "stages": ["COLLSCAN", "PROJECTION_DEFAULT"],
+          "indexes": [],
+          "docsExamined": 10,
+          "keysExamined": 0,
+          "nReturned": 1
+        },
+        {
+          "collection": "payments",
+          "name": "aggregate",
+          "durationMs": 19,
+          "stages": ["FETCH", "IXSCAN", "PROJECTION_SIMPLE"],
+          "indexes": ["company_1_invoiceCreationDate_-1"],
+          "docsExamined": 1935,
+          "keysExamined": 1936,
+          "nReturned": 1935
+        },
+        {
+          "collection": "payments",
+          "name": "find",
+          "durationMs": 1,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["_id_"],
+          "docsExamined": 10,
+          "keysExamined": 16,
+          "nReturned": 10
+        },
+        {
+          "collection": "realestates",
+          "name": "find",
+          "durationMs": 1,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["_id_"],
+          "docsExamined": 6,
+          "keysExamined": 11,
+          "nReturned": 6
+        },
+        {
+          "collection": "streets",
+          "name": "find",
+          "durationMs": 1,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["_id_"],
+          "docsExamined": 2,
+          "keysExamined": 3,
+          "nReturned": 2
+        },
+        {
+          "collection": "domains",
+          "name": "find",
+          "durationMs": 1,
+          "stages": ["FETCH", "IXSCAN", "PROJECTION_DEFAULT"],
+          "indexes": ["_id_"],
+          "docsExamined": 1,
+          "keysExamined": 1,
+          "nReturned": 1
+        },
+        {
+          "collection": "services",
+          "name": "find",
+          "durationMs": 1,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["_id_"],
+          "docsExamined": 1,
+          "keysExamined": 1,
+          "nReturned": 1
+        },
+        {
+          "collection": "payments",
+          "name": "aggregate",
+          "durationMs": 4,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["company_1_invoiceCreationDate_-1"],
+          "docsExamined": 1935,
+          "keysExamined": 1936,
+          "nReturned": 1935
+        },
+        {
+          "collection": "payments",
+          "name": "distinct",
+          "durationMs": 5,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["company_1_invoiceCreationDate_-1"],
+          "docsExamined": 1935,
+          "keysExamined": 1936,
+          "nReturned": 1935
+        },
+        {
+          "collection": "payments",
+          "name": "distinct",
+          "durationMs": 5,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["company_1_invoiceCreationDate_-1"],
+          "docsExamined": 1935,
+          "keysExamined": 1936,
+          "nReturned": 1935
+        },
+        {
+          "collection": "payments",
+          "name": "aggregate",
+          "durationMs": 6,
+          "stages": ["FETCH", "GROUP", "IXSCAN"],
+          "indexes": ["domain_1_invoiceCreationDate_-1"],
+          "docsExamined": 1935,
+          "keysExamined": 1935,
+          "nReturned": 2
+        },
+        {
+          "collection": "payments",
+          "name": "aggregate",
+          "durationMs": 5,
+          "stages": ["FETCH", "GROUP", "IXSCAN"],
+          "indexes": ["domain_1_invoiceCreationDate_-1"],
+          "docsExamined": 1935,
+          "keysExamined": 1935,
+          "nReturned": 1
+        },
+        {
+          "collection": "payments",
+          "name": "aggregate",
+          "durationMs": 10,
+          "stages": ["FETCH", "IXSCAN", "PROJECTION_SIMPLE"],
+          "indexes": ["domain_1_invoiceCreationDate_-1"],
+          "docsExamined": 1935,
+          "keysExamined": 1935,
+          "nReturned": 1080
+        }
+      ]
+    },
+    {
+      "name": "table, User (company admin), page 1",
+      "source": "DashboardPage/blocks/payments.tsx",
+      "role": "user",
+      "query": {
+        "limit": "10",
+        "skip": "0",
+        "dateField": "invoiceCreationDate"
+      },
+      "status": 200,
+      "rows": 10,
+      "total": 66,
+      "responseBytes": 17933,
+      "fingerprint": "32afdd3289fec4d8",
+      "wallMs": {
+        "median": 10.9,
+        "min": 10.6,
+        "max": 11.2,
+        "runs": [11, 10.6, 10.9, 10.6, 11.2]
+      },
+      "ops": {
+        "total": 15,
+        "byCollection": {
+          "users": 1,
+          "domains": 2,
+          "realestates": 2,
+          "payments": 8,
+          "streets": 1,
+          "services": 1
+        },
+        "byCommand": {
+          "find": 8,
+          "aggregate": 5,
+          "distinct": 2
+        }
+      },
+      "payments": {
+        "ops": 8,
+        "docsExamined": 472,
+        "keysExamined": 473,
+        "collscans": 0,
+        "ixscans": 8
+      },
+      "commands": [
+        {
+          "collection": "users",
+          "name": "find",
+          "durationMs": 0,
+          "stages": ["FETCH", "IXSCAN", "LIMIT"],
+          "indexes": ["email_1"],
+          "docsExamined": 1,
+          "keysExamined": 1,
+          "nReturned": 1
+        },
+        {
+          "collection": "domains",
+          "name": "find",
+          "durationMs": 0,
+          "stages": ["COLLSCAN", "LIMIT", "PROJECTION_SIMPLE"],
+          "indexes": [],
+          "docsExamined": 10,
+          "keysExamined": 0,
+          "nReturned": 0
+        },
+        {
+          "collection": "realestates",
+          "name": "find",
+          "durationMs": 0,
+          "stages": ["COLLSCAN"],
+          "indexes": [],
+          "docsExamined": 300,
+          "keysExamined": 0,
+          "nReturned": 1
+        },
+        {
+          "collection": "payments",
+          "name": "aggregate",
+          "durationMs": 1,
+          "stages": ["FETCH", "IXSCAN", "PROJECTION_SIMPLE"],
+          "indexes": ["company_1_invoiceCreationDate_-1"],
+          "docsExamined": 66,
+          "keysExamined": 66,
+          "nReturned": 66
+        },
+        {
+          "collection": "payments",
+          "name": "find",
+          "durationMs": 0,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["_id_"],
+          "docsExamined": 10,
+          "keysExamined": 11,
+          "nReturned": 10
+        },
+        {
+          "collection": "realestates",
+          "name": "find",
+          "durationMs": 1,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["_id_"],
+          "docsExamined": 1,
+          "keysExamined": 1,
+          "nReturned": 1
+        },
+        {
+          "collection": "streets",
+          "name": "find",
+          "durationMs": 0,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["_id_"],
+          "docsExamined": 1,
+          "keysExamined": 1,
+          "nReturned": 1
+        },
+        {
+          "collection": "domains",
+          "name": "find",
+          "durationMs": 0,
+          "stages": ["FETCH", "IXSCAN", "PROJECTION_DEFAULT"],
+          "indexes": ["_id_"],
+          "docsExamined": 1,
+          "keysExamined": 1,
+          "nReturned": 1
+        },
+        {
+          "collection": "services",
+          "name": "find",
+          "durationMs": 0,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["_id_"],
+          "docsExamined": 6,
+          "keysExamined": 7,
+          "nReturned": 6
+        },
+        {
+          "collection": "payments",
+          "name": "aggregate",
+          "durationMs": 0,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["company_1_invoiceCreationDate_-1"],
+          "docsExamined": 66,
+          "keysExamined": 66,
+          "nReturned": 66
+        },
+        {
+          "collection": "payments",
+          "name": "distinct",
+          "durationMs": 1,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["company_1_invoiceCreationDate_-1"],
+          "docsExamined": 66,
+          "keysExamined": 66,
+          "nReturned": 66
+        },
+        {
+          "collection": "payments",
+          "name": "distinct",
+          "durationMs": 0,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["company_1_invoiceCreationDate_-1"],
+          "docsExamined": 66,
+          "keysExamined": 66,
+          "nReturned": 66
+        },
+        {
+          "collection": "payments",
+          "name": "aggregate",
+          "durationMs": 1,
+          "stages": ["FETCH", "GROUP", "IXSCAN"],
+          "indexes": ["company_1_invoiceCreationDate_-1"],
+          "docsExamined": 66,
+          "keysExamined": 66,
+          "nReturned": 2
+        },
+        {
+          "collection": "payments",
+          "name": "aggregate",
+          "durationMs": 1,
+          "stages": ["FETCH", "GROUP", "IXSCAN"],
+          "indexes": ["company_1_invoiceCreationDate_-1"],
+          "docsExamined": 66,
+          "keysExamined": 66,
+          "nReturned": 1
+        },
+        {
+          "collection": "payments",
+          "name": "aggregate",
+          "durationMs": 1,
+          "stages": ["FETCH", "IXSCAN", "PROJECTION_SIMPLE"],
+          "indexes": ["company_1_invoiceCreationDate_-1"],
+          "docsExamined": 66,
+          "keysExamined": 66,
+          "nReturned": 36
+        }
+      ]
+    },
+    {
+      "name": "last invoice of a month (limit 1, year/month $expr)",
+      "source": "modules/hooks/usePayment.ts",
+      "role": "globalAdmin",
+      "query": {
+        "companyIds": "030000000000000000000061",
+        "month": "12",
+        "year": "2025",
+        "limit": "1",
+        "type": "debit"
+      },
+      "status": 200,
+      "rows": 1,
+      "total": 1,
+      "responseBytes": 2006,
+      "fingerprint": "66e71442879b90b5",
+      "wallMs": {
+        "median": 6.8,
+        "min": 6.6,
+        "max": 7.5,
+        "runs": [7.1, 6.8, 6.6, 7.5, 6.8]
+      },
+      "ops": {
+        "total": 13,
+        "byCollection": {
+          "users": 1,
+          "payments": 8,
+          "realestates": 1,
+          "streets": 1,
+          "domains": 1,
+          "services": 1
+        },
+        "byCommand": {
+          "find": 6,
+          "aggregate": 5,
+          "distinct": 2
+        }
+      },
+      "payments": {
+        "ops": 8,
+        "docsExamined": 428,
+        "keysExamined": 428,
+        "collscans": 0,
+        "ixscans": 8
+      },
+      "commands": [
+        {
+          "collection": "users",
+          "name": "find",
+          "durationMs": 1,
+          "stages": ["FETCH", "IXSCAN", "LIMIT"],
+          "indexes": ["email_1"],
+          "docsExamined": 1,
+          "keysExamined": 1,
+          "nReturned": 1
+        },
+        {
+          "collection": "payments",
+          "name": "aggregate",
+          "durationMs": 1,
+          "stages": ["FETCH", "IXSCAN", "PROJECTION_SIMPLE"],
+          "indexes": ["company_1_invoiceCreationDate_-1"],
+          "docsExamined": 61,
+          "keysExamined": 61,
+          "nReturned": 1
+        },
+        {
+          "collection": "payments",
+          "name": "find",
+          "durationMs": 0,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["_id_"],
+          "docsExamined": 1,
+          "keysExamined": 1,
+          "nReturned": 1
+        },
+        {
+          "collection": "realestates",
+          "name": "find",
+          "durationMs": 0,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["_id_"],
+          "docsExamined": 1,
+          "keysExamined": 1,
+          "nReturned": 1
+        },
+        {
+          "collection": "streets",
+          "name": "find",
+          "durationMs": 0,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["_id_"],
+          "docsExamined": 1,
+          "keysExamined": 1,
+          "nReturned": 1
+        },
+        {
+          "collection": "domains",
+          "name": "find",
+          "durationMs": 0,
+          "stages": ["FETCH", "IXSCAN", "PROJECTION_DEFAULT"],
+          "indexes": ["_id_"],
+          "docsExamined": 1,
+          "keysExamined": 1,
+          "nReturned": 1
+        },
+        {
+          "collection": "services",
+          "name": "find",
+          "durationMs": 0,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["_id_"],
+          "docsExamined": 1,
+          "keysExamined": 1,
+          "nReturned": 1
+        },
+        {
+          "collection": "payments",
+          "name": "aggregate",
+          "durationMs": 0,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["company_1_invoiceCreationDate_-1"],
+          "docsExamined": 61,
+          "keysExamined": 61,
+          "nReturned": 1
+        },
+        {
+          "collection": "payments",
+          "name": "distinct",
+          "durationMs": 0,
+          "stages": ["FETCH", "IXSCAN", "PROJECTION_SIMPLE"],
+          "indexes": ["company_1_invoiceCreationDate_-1"],
+          "docsExamined": 61,
+          "keysExamined": 61,
+          "nReturned": 1
+        },
+        {
+          "collection": "payments",
+          "name": "distinct",
+          "durationMs": 0,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["company_1_invoiceCreationDate_-1"],
+          "docsExamined": 61,
+          "keysExamined": 61,
+          "nReturned": 1
+        },
+        {
+          "collection": "payments",
+          "name": "aggregate",
+          "durationMs": 1,
+          "stages": ["FETCH", "IXSCAN", "PROJECTION_SIMPLE"],
+          "indexes": ["company_1_invoiceCreationDate_-1"],
+          "docsExamined": 61,
+          "keysExamined": 61,
+          "nReturned": 1
+        },
+        {
+          "collection": "payments",
+          "name": "aggregate",
+          "durationMs": 0,
+          "stages": ["FETCH", "IXSCAN", "PROJECTION_SIMPLE"],
+          "indexes": ["company_1_invoiceCreationDate_-1"],
+          "docsExamined": 61,
+          "keysExamined": 61,
+          "nReturned": 1
+        },
+        {
+          "collection": "payments",
+          "name": "aggregate",
+          "durationMs": 0,
+          "stages": ["FETCH", "IXSCAN", "PROJECTION_SIMPLE"],
+          "indexes": ["company_1_invoiceCreationDate_-1"],
+          "docsExamined": 61,
+          "keysExamined": 61,
+          "nReturned": 1
+        }
+      ]
+    },
+    {
+      "name": "previous payment by month service (limit 1)",
+      "source": "modules/hooks/usePaymentData.ts",
+      "role": "globalAdmin",
+      "query": {
+        "companyIds": "030000000000000000000061",
+        "domainIds": "010000000000000000000003",
+        "serviceIds": "04000000000000000000008e",
+        "type": "debit",
+        "limit": "1"
+      },
+      "status": 200,
+      "rows": 1,
+      "total": 1,
+      "responseBytes": 2008,
+      "fingerprint": "99f3c593e6043762",
+      "wallMs": {
+        "median": 6.4,
+        "min": 6.4,
+        "max": 7.9,
+        "runs": [7.9, 6.5, 6.4, 6.4, 6.4]
+      },
+      "ops": {
+        "total": 13,
+        "byCollection": {
+          "users": 1,
+          "payments": 8,
+          "realestates": 1,
+          "streets": 1,
+          "domains": 1,
+          "services": 1
+        },
+        "byCommand": {
+          "find": 6,
+          "aggregate": 5,
+          "distinct": 2
+        }
+      },
+      "payments": {
+        "ops": 8,
+        "docsExamined": 428,
+        "keysExamined": 428,
+        "collscans": 0,
+        "ixscans": 8
+      },
+      "commands": [
+        {
+          "collection": "users",
+          "name": "find",
+          "durationMs": 0,
+          "stages": ["FETCH", "IXSCAN", "LIMIT"],
+          "indexes": ["email_1"],
+          "docsExamined": 1,
+          "keysExamined": 1,
+          "nReturned": 1
+        },
+        {
+          "collection": "payments",
+          "name": "aggregate",
+          "durationMs": 1,
+          "stages": ["FETCH", "IXSCAN", "PROJECTION_SIMPLE"],
+          "indexes": ["company_1_invoiceCreationDate_-1"],
+          "docsExamined": 61,
+          "keysExamined": 61,
+          "nReturned": 1
+        },
+        {
+          "collection": "payments",
+          "name": "find",
+          "durationMs": 0,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["_id_"],
+          "docsExamined": 1,
+          "keysExamined": 1,
+          "nReturned": 1
+        },
+        {
+          "collection": "realestates",
+          "name": "find",
+          "durationMs": 0,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["_id_"],
+          "docsExamined": 1,
+          "keysExamined": 1,
+          "nReturned": 1
+        },
+        {
+          "collection": "streets",
+          "name": "find",
+          "durationMs": 0,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["_id_"],
+          "docsExamined": 1,
+          "keysExamined": 1,
+          "nReturned": 1
+        },
+        {
+          "collection": "domains",
+          "name": "find",
+          "durationMs": 0,
+          "stages": ["FETCH", "IXSCAN", "PROJECTION_DEFAULT"],
+          "indexes": ["_id_"],
+          "docsExamined": 1,
+          "keysExamined": 1,
+          "nReturned": 1
+        },
+        {
+          "collection": "services",
+          "name": "find",
+          "durationMs": 0,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["_id_"],
+          "docsExamined": 1,
+          "keysExamined": 1,
+          "nReturned": 1
+        },
+        {
+          "collection": "payments",
+          "name": "aggregate",
+          "durationMs": 0,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["company_1_invoiceCreationDate_-1"],
+          "docsExamined": 61,
+          "keysExamined": 61,
+          "nReturned": 1
+        },
+        {
+          "collection": "payments",
+          "name": "distinct",
+          "durationMs": 1,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["company_1_invoiceCreationDate_-1"],
+          "docsExamined": 61,
+          "keysExamined": 61,
+          "nReturned": 1
+        },
+        {
+          "collection": "payments",
+          "name": "distinct",
+          "durationMs": 1,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["company_1_invoiceCreationDate_-1"],
+          "docsExamined": 61,
+          "keysExamined": 61,
+          "nReturned": 1
+        },
+        {
+          "collection": "payments",
+          "name": "aggregate",
+          "durationMs": 1,
+          "stages": ["FETCH", "GROUP", "IXSCAN"],
+          "indexes": ["company_1_invoiceCreationDate_-1"],
+          "docsExamined": 61,
+          "keysExamined": 61,
+          "nReturned": 1
+        },
+        {
+          "collection": "payments",
+          "name": "aggregate",
+          "durationMs": 1,
+          "stages": ["FETCH", "GROUP", "IXSCAN"],
+          "indexes": ["company_1_invoiceCreationDate_-1"],
+          "docsExamined": 61,
+          "keysExamined": 61,
+          "nReturned": 1
+        },
+        {
+          "collection": "payments",
+          "name": "aggregate",
+          "durationMs": 1,
+          "stages": ["FETCH", "IXSCAN", "PROJECTION_SIMPLE"],
+          "indexes": ["company_1_invoiceCreationDate_-1"],
+          "docsExamined": 61,
+          "keysExamined": 61,
+          "nReturned": 1
+        }
+      ]
+    },
+    {
+      "name": "bulk prefill: domain companies by month service",
+      "source": "DashboardPage/blocks/paymentsBulk.tsx",
+      "role": "globalAdmin",
+      "query": {
+        "domainIds": "010000000000000000000000",
+        "companyIds": "030000000000000000000000,030000000000000000000001,030000000000000000000002,030000000000000000000003,030000000000000000000004,030000000000000000000005,030000000000000000000006,030000000000000000000007,030000000000000000000008,030000000000000000000009,03000000000000000000000a,03000000000000000000000b,03000000000000000000000c,03000000000000000000000d,03000000000000000000000e,03000000000000000000000f,030000000000000000000010,030000000000000000000011,030000000000000000000012,030000000000000000000013,030000000000000000000014,030000000000000000000015,030000000000000000000016,030000000000000000000017,030000000000000000000018,030000000000000000000019,03000000000000000000001a,03000000000000000000001b,03000000000000000000001c,03000000000000000000001d",
+        "serviceIds": "040000000000000000000023",
+        "type": "debit",
+        "limit": "31"
+      },
+      "status": 200,
+      "rows": 29,
+      "total": 29,
+      "responseBytes": 53731,
+      "fingerprint": "1f45ecd8c603d1ad",
+      "wallMs": {
+        "median": 40,
+        "min": 37.2,
+        "max": 60.6,
+        "runs": [60.6, 40, 40.8, 38.6, 37.2]
+      },
+      "ops": {
+        "total": 13,
+        "byCollection": {
+          "users": 1,
+          "payments": 8,
+          "realestates": 1,
+          "streets": 1,
+          "domains": 1,
+          "services": 1
+        },
+        "byCommand": {
+          "find": 6,
+          "aggregate": 5,
+          "distinct": 2
+        }
+      },
+      "payments": {
+        "ops": 8,
+        "docsExamined": 13574,
+        "keysExamined": 13608,
+        "collscans": 0,
+        "ixscans": 8
+      },
+      "commands": [
+        {
+          "collection": "users",
+          "name": "find",
+          "durationMs": 0,
+          "stages": ["FETCH", "IXSCAN", "LIMIT"],
+          "indexes": ["email_1"],
+          "docsExamined": 1,
+          "keysExamined": 1,
+          "nReturned": 1
+        },
+        {
+          "collection": "payments",
+          "name": "aggregate",
+          "durationMs": 9,
+          "stages": ["FETCH", "IXSCAN", "PROJECTION_SIMPLE"],
+          "indexes": ["company_1_invoiceCreationDate_-1"],
+          "docsExamined": 1935,
+          "keysExamined": 1936,
+          "nReturned": 29
+        },
+        {
+          "collection": "payments",
+          "name": "find",
+          "durationMs": 1,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["_id_"],
+          "docsExamined": 29,
+          "keysExamined": 58,
+          "nReturned": 29
+        },
+        {
+          "collection": "realestates",
+          "name": "find",
+          "durationMs": 2,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["_id_"],
+          "docsExamined": 29,
+          "keysExamined": 31,
+          "nReturned": 29
+        },
+        {
+          "collection": "streets",
+          "name": "find",
+          "durationMs": 1,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["_id_"],
+          "docsExamined": 2,
+          "keysExamined": 3,
+          "nReturned": 2
+        },
+        {
+          "collection": "domains",
+          "name": "find",
+          "durationMs": 1,
+          "stages": ["FETCH", "IXSCAN", "PROJECTION_DEFAULT"],
+          "indexes": ["_id_"],
+          "docsExamined": 1,
+          "keysExamined": 1,
+          "nReturned": 1
+        },
+        {
+          "collection": "services",
+          "name": "find",
+          "durationMs": 1,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["_id_"],
+          "docsExamined": 1,
+          "keysExamined": 1,
+          "nReturned": 1
+        },
+        {
+          "collection": "payments",
+          "name": "aggregate",
+          "durationMs": 5,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["company_1_invoiceCreationDate_-1"],
+          "docsExamined": 1935,
+          "keysExamined": 1936,
+          "nReturned": 29
+        },
+        {
+          "collection": "payments",
+          "name": "distinct",
+          "durationMs": 7,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["company_1_invoiceCreationDate_-1"],
+          "docsExamined": 1935,
+          "keysExamined": 1936,
+          "nReturned": 29
+        },
+        {
+          "collection": "payments",
+          "name": "distinct",
+          "durationMs": 7,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["company_1_invoiceCreationDate_-1"],
+          "docsExamined": 1935,
+          "keysExamined": 1936,
+          "nReturned": 29
+        },
+        {
+          "collection": "payments",
+          "name": "aggregate",
+          "durationMs": 12,
+          "stages": ["FETCH", "GROUP", "IXSCAN"],
+          "indexes": ["domain_1_invoiceCreationDate_-1"],
+          "docsExamined": 1935,
+          "keysExamined": 1935,
+          "nReturned": 1
+        },
+        {
+          "collection": "payments",
+          "name": "aggregate",
+          "durationMs": 11,
+          "stages": ["FETCH", "GROUP", "IXSCAN"],
+          "indexes": ["domain_1_invoiceCreationDate_-1"],
+          "docsExamined": 1935,
+          "keysExamined": 1935,
+          "nReturned": 1
+        },
+        {
+          "collection": "payments",
+          "name": "aggregate",
+          "durationMs": 8,
+          "stages": ["FETCH", "IXSCAN", "PROJECTION_SIMPLE"],
+          "indexes": ["company_1_invoiceCreationDate_-1"],
+          "docsExamined": 1935,
+          "keysExamined": 1936,
+          "nReturned": 29
+        }
+      ]
+    },
+    {
+      "name": "profit drilldown: domain, month by month service",
+      "source": "ProfiitPage/components/PaymentsDrilldown",
+      "role": "globalAdmin",
+      "query": {
+        "limit": "100",
+        "type": "credit",
+        "domainIds": "010000000000000000000000",
+        "year": "2025",
+        "month": "12",
+        "dateField": "date"
+      },
+      "status": 200,
+      "rows": 22,
+      "total": 22,
+      "responseBytes": 36750,
+      "fingerprint": "47c717487deddf1a",
+      "wallMs": {
+        "median": 39.1,
+        "min": 37.6,
+        "max": 43.5,
+        "runs": [40.4, 38.8, 39.1, 43.5, 37.6]
+      },
+      "ops": {
+        "total": 14,
+        "byCollection": {
+          "users": 1,
+          "services": 2,
+          "payments": 8,
+          "realestates": 1,
+          "streets": 1,
+          "domains": 1
+        },
+        "byCommand": {
+          "find": 7,
+          "aggregate": 5,
+          "distinct": 2
+        }
+      },
+      "payments": {
+        "ops": 8,
+        "docsExamined": 13567,
+        "keysExamined": 13589,
+        "collscans": 0,
+        "ixscans": 8
+      },
+      "commands": [
+        {
+          "collection": "users",
+          "name": "find",
+          "durationMs": 0,
+          "stages": ["FETCH", "IXSCAN", "LIMIT"],
+          "indexes": ["email_1"],
+          "docsExamined": 1,
+          "keysExamined": 1,
+          "nReturned": 1
+        },
+        {
+          "collection": "services",
+          "name": "find",
+          "durationMs": 0,
+          "stages": ["COLLSCAN", "PROJECTION_SIMPLE"],
+          "indexes": [],
+          "docsExamined": 360,
+          "keysExamined": 0,
+          "nReturned": 10
+        },
+        {
+          "collection": "payments",
+          "name": "aggregate",
+          "durationMs": 4,
+          "stages": ["FETCH", "IXSCAN", "PROJECTION_SIMPLE"],
+          "indexes": ["domain_1_invoiceCreationDate_-1"],
+          "docsExamined": 1935,
+          "keysExamined": 1935,
+          "nReturned": 22
+        },
+        {
+          "collection": "payments",
+          "name": "find",
+          "durationMs": 1,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["_id_"],
+          "docsExamined": 22,
+          "keysExamined": 44,
+          "nReturned": 22
+        },
+        {
+          "collection": "realestates",
+          "name": "find",
+          "durationMs": 1,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["_id_"],
+          "docsExamined": 22,
+          "keysExamined": 31,
+          "nReturned": 22
+        },
+        {
+          "collection": "streets",
+          "name": "find",
+          "durationMs": 0,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["_id_"],
+          "docsExamined": 2,
+          "keysExamined": 3,
+          "nReturned": 2
+        },
+        {
+          "collection": "domains",
+          "name": "find",
+          "durationMs": 0,
+          "stages": ["FETCH", "IXSCAN", "PROJECTION_DEFAULT"],
+          "indexes": ["_id_"],
+          "docsExamined": 1,
+          "keysExamined": 1,
+          "nReturned": 1
+        },
+        {
+          "collection": "services",
+          "name": "find",
+          "durationMs": 1,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["_id_"],
+          "docsExamined": 1,
+          "keysExamined": 1,
+          "nReturned": 1
+        },
+        {
+          "collection": "payments",
+          "name": "aggregate",
+          "durationMs": 5,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["domain_1_invoiceCreationDate_-1"],
+          "docsExamined": 1935,
+          "keysExamined": 1935,
+          "nReturned": 22
+        },
+        {
+          "collection": "payments",
+          "name": "distinct",
+          "durationMs": 7,
+          "stages": ["FETCH", "IXSCAN"],
+          "indexes": ["domain_1_invoiceCreationDate_-1"],
+          "docsExamined": 1935,
+          "keysExamined": 1935,
+          "nReturned": 22
+        },
+        {
+          "collection": "payments",
+          "name": "distinct",
+          "durationMs": 7,
+          "stages": ["FETCH", "IXSCAN", "PROJECTION_SIMPLE"],
+          "indexes": ["domain_1_invoiceCreationDate_-1"],
+          "docsExamined": 1935,
+          "keysExamined": 1935,
+          "nReturned": 22
+        },
+        {
+          "collection": "payments",
+          "name": "aggregate",
+          "durationMs": 5,
+          "stages": ["FETCH", "IXSCAN", "PROJECTION_SIMPLE"],
+          "indexes": ["domain_1_invoiceCreationDate_-1"],
+          "docsExamined": 1935,
+          "keysExamined": 1935,
+          "nReturned": 22
+        },
+        {
+          "collection": "payments",
+          "name": "aggregate",
+          "durationMs": 4,
+          "stages": ["FETCH", "IXSCAN", "PROJECTION_SIMPLE"],
+          "indexes": ["domain_1_invoiceCreationDate_-1"],
+          "docsExamined": 1935,
+          "keysExamined": 1935,
+          "nReturned": 22
+        },
+        {
+          "collection": "payments",
+          "name": "aggregate",
+          "durationMs": 5,
+          "stages": ["FETCH", "IXSCAN", "PROJECTION_SIMPLE"],
+          "indexes": ["domain_1_invoiceCreationDate_-1"],
+          "docsExamined": 1935,
+          "keysExamined": 1935,
+          "nReturned": 30
+        }
+      ]
+    }
+  ]
+}
