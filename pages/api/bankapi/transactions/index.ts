@@ -4,9 +4,13 @@ import { withDomainBankToken } from '@common/services/bankTokenService/withDomai
 import { getTransactionsForDateInterval } from './utils/getTransactions/index'
 import Payment from '@modules/models/Payment'
 import RealEstate from '@modules/models/RealEstate'
+import { Operations } from '@utils/constants'
 import {
   buildCounterpartyNameRegexSource,
   buildFinalTechnicalTransactionId,
+  buildTransitPayerOsndRegexSource,
+  extractInvoiceNumberFromOsnd,
+  extractTransitPayerName,
   isSelfTransaction,
   matchByName,
   matchByRnokpp,
@@ -42,9 +46,15 @@ export async function checkTransaction({
     const candidates = technicalTransactionIdMatchCandidates(transaction)
 
     if (candidates.length > 0) {
+      // A bank transaction is paid into one domain only: a payment saved in
+      // another domain neither marks this row as sent nor names its company.
+      // When several payments carry the transaction, the first one saved
+      // names the company - the order a collection scan returned before the
+      // domain index could serve this lookup.
       const allPayments = await Payment.find({
+        ...(domainId ? { domain: domainId } : {}),
         'transaction.TECHNICAL_TRANSACTION_ID': { $in: candidates },
-      })
+      }).sort({ _id: 1 })
 
       if (allPayments.length > 0) {
         const company = allPayments[0].company
@@ -58,17 +68,42 @@ export async function checkTransaction({
     const isTransit = transaction.AUT_CNTR_NAM?.includes('Транз')
 
     if (isTransit && transaction.OSND) {
-      const payment = await Payment.findOne({
-        'transaction.OSND': transaction.OSND,
-      })
-        .sort({ invoiceCreationDate: -1 })
-        .lean()
+      // The transit account is the bank's and shared by every domain, but the
+      // payments we look up are not: a match in another domain would point the
+      // row at that domain's company.
+      const inDomain = domainId ? { domain: domainId } : {}
+      const companyOf = async (filter) => {
+        const payment = await Payment.findOne({ ...inDomain, ...filter })
+          .sort({ invoiceCreationDate: -1 })
+          .lean()
+        return payment?.company ? String(payment.company) : null
+      }
 
-      if (payment?.company) {
-        return {
-          isMatchingPayment: false,
-          previousCompanyId: String(payment.company),
-        }
+      // 1. The same purpose was already sent (e.g. a re-payment).
+      // 2. The invoice the payer quoted - we issued it, so it names the company
+      //    even for the payer's first payment. Only with a domain: invoice
+      //    numbers are per domain.
+      // 3. An earlier transit payment from the same payer: the purpose changes
+      //    with every invoice, the payer's name at its end does not.
+      const invoiceNumber = extractInvoiceNumberFromOsnd(transaction.OSND)
+      const payerName = extractTransitPayerName(transaction.OSND)
+      const previousCompanyId =
+        (await companyOf({ 'transaction.OSND': transaction.OSND })) ??
+        (domainId && invoiceNumber
+          ? await companyOf({ invoiceNumber, type: Operations.Debit })
+          : null) ??
+        (domainId && payerName
+          ? await companyOf({
+              'transaction.AUT_CNTR_NAM': { $regex: 'Транз' },
+              'transaction.OSND': {
+                $regex: buildTransitPayerOsndRegexSource(payerName),
+                $options: 'i',
+              },
+            })
+          : null)
+
+      if (previousCompanyId) {
+        return { isMatchingPayment: false, previousCompanyId }
       }
     }
 

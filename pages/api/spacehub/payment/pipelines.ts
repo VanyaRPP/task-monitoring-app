@@ -53,18 +53,6 @@ export function getPaymentsOrderPipeline(
   return pipeline
 }
 
-export function getCreditDebitPipeline(options) {
-  return [
-    { $match: options }, // Apply the matching based on options
-    {
-      $group: {
-        _id: '$type', // Group by type
-        totalSum: { $sum: '$generalSum' }, // Calculate the total sum for each type
-      },
-    },
-  ]
-}
-
 export function getMaxInvoiceNumber() {
   return [
     {
@@ -81,59 +69,106 @@ export function getMaxInvoiceNumber() {
   ]
 }
 
-export function getTotalGeneralSumPipeline(options) {
+interface IPaymentStatsCount {
+  count: number
+}
+
+interface IPaymentStatsSum {
+  _id: string | null
+  totalSum: number
+}
+
+/** The single document getPaymentStatsPipeline returns. */
+export interface IPaymentStats {
+  total: IPaymentStatsCount[]
+  domains: IPaymentStatsCount[]
+  companies: IPaymentStatsCount[]
+  creditDebit: IPaymentStatsSum[]
+  generalSum: IPaymentStatsSum[]
+  serviceTotals: IPaymentStatsSum[]
+}
+
+/**
+ * Every figure the payments table shows beside the page, in one pass over the
+ * filtered payments. `type` stays out of the shared $match: the service
+ * totals count debit lines whatever type the table is filtered by.
+ */
+export function getPaymentStatsPipeline(
+  options: Record<string, unknown>
+): PipelineStage[] {
+  const { type, ...shared } = options
+  const ofType: PipelineStage.FacetPipelineStage[] =
+    type === undefined ? [] : [{ $match: { type } }]
+  // What `distinct` counted when it read documents: an explicit null is a
+  // value, a missing field is not ($group alone would merge the two).
+  const distinctCount = (field: string): PipelineStage.FacetPipelineStage[] => [
+    ...ofType,
+    { $match: { [field]: { $exists: true } } },
+    { $group: { _id: `$${field}` } },
+    { $count: 'count' },
+  ]
+
   return [
-    { $match: options },
+    { $match: shared },
     {
-      $group: {
-        _id: 'generalSum',
-        totalSum: { $sum: '$generalSum' },
+      $facet: {
+        total: [...ofType, { $count: 'count' }],
+        domains: distinctCount('domain'),
+        companies: distinctCount('company'),
+        creditDebit: [
+          ...ofType,
+          { $group: { _id: '$type', totalSum: { $sum: '$generalSum' } } },
+        ],
+        generalSum: [
+          ...ofType,
+          {
+            $group: { _id: 'generalSum', totalSum: { $sum: '$generalSum' } },
+          },
+        ],
+        serviceTotals: [{ $match: { type: 'debit' } }, ...serviceTotalsStages],
       },
     },
   ]
 }
 
-export function getServiceTotalsPipeline(options: Record<string, unknown>) {
-  return [
-    { $match: { ...options, type: 'debit' } },
-    { $unwind: '$invoice' },
-    {
-      $addFields: {
-        // mirror the column render (`item.sum || item.price`): prefer sum,
-        // fall back to price. No value filter — negative lines (e.g. discounts)
-        // must stay so the summary equals the visible column sum.
-        invoiceSum: {
-          $cond: {
-            if: { $isNumber: '$invoice.sum' },
-            then: { $toDouble: '$invoice.sum' },
-            else: {
-              $cond: {
-                if: { $isNumber: '$invoice.price' },
-                then: { $toDouble: '$invoice.price' },
-                else: 0,
-              },
+const serviceTotalsStages: PipelineStage.FacetPipelineStage[] = [
+  { $unwind: '$invoice' },
+  {
+    $addFields: {
+      // mirror the column render (`item.sum || item.price`): prefer sum,
+      // fall back to price. No value filter — negative lines (e.g. discounts)
+      // must stay so the summary equals the visible column sum.
+      invoiceSum: {
+        $cond: {
+          if: { $isNumber: '$invoice.sum' },
+          then: { $toDouble: '$invoice.sum' },
+          else: {
+            $cond: {
+              if: { $isNumber: '$invoice.price' },
+              then: { $toDouble: '$invoice.price' },
+              else: 0,
             },
           },
         },
-        invoiceKey: {
-          $cond: {
-            if: { $eq: ['$invoice.type', 'custom'] },
-            then: { $concat: ['custom-name:', '$invoice.name'] },
-            else: '$invoice.type',
-          },
+      },
+      invoiceKey: {
+        $cond: {
+          if: { $eq: ['$invoice.type', 'custom'] },
+          then: { $concat: ['custom-name:', '$invoice.name'] },
+          else: '$invoice.type',
         },
       },
     },
-    {
-      $match: {
-        invoiceKey: { $exists: true, $ne: null },
-      },
+  },
+  {
+    $match: {
+      invoiceKey: { $exists: true, $ne: null },
     },
-    {
-      $group: {
-        _id: '$invoiceKey',
-        totalSum: { $sum: '$invoiceSum' },
-      },
+  },
+  {
+    $group: {
+      _id: '$invoiceKey',
+      totalSum: { $sum: '$invoiceSum' },
     },
-  ]
-}
+  },
+]

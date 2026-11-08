@@ -85,12 +85,10 @@ jest.mock('@modules/models/Service', () => ({
 
 jest.mock('@pages/api/spacehub/payment/pipelines', () => ({
   getPaymentsOrderPipeline: jest.fn(() => [{ $match: 'ordered' }]),
-  getCreditDebitPipeline: jest.fn(),
   getMaxInvoiceNumber: jest.fn(() => [
     { $group: { _id: null, maxNumber: { $max: '$invoiceNumber' } } },
   ]),
-  getTotalGeneralSumPipeline: jest.fn(),
-  getServiceTotalsPipeline: jest.fn(),
+  getPaymentStatsPipeline: jest.fn(),
 }))
 
 jest.mock('@utils/helpers', () => ({

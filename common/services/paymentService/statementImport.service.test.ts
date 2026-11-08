@@ -51,6 +51,7 @@ const HOUSING = '507f1f77bcf86cd799439013'
 const lean = (value: unknown) => ({ lean: jest.fn().mockResolvedValue(value) })
 const populated = (value: unknown) => {
   const query: any = {
+    sort: jest.fn(() => query),
     populate: jest.fn(() => query),
     lean: jest.fn().mockResolvedValue(value),
   }

@@ -4,11 +4,10 @@ import Payment, { IPaymentModel } from '@modules/models/Payment'
 import RealEstate from '@modules/models/RealEstate'
 import Service from '@modules/models/Service'
 import {
-  getCreditDebitPipeline,
   getMaxInvoiceNumber,
+  getPaymentStatsPipeline,
   getPaymentsOrderPipeline,
-  getServiceTotalsPipeline,
-  getTotalGeneralSumPipeline,
+  IPaymentStats,
 } from '@pages/api/spacehub/payment/pipelines'
 import { quarters } from '@utils/constants'
 import { PaymentStatus } from '@common/api/paymentApi/payment.api.types'
@@ -242,6 +241,34 @@ export async function getPayments(
 
   const filter = Payment.find(options).cast(Payment)
 
+  const [payments, [stats]] = await Promise.all([
+    getPaymentsPage(filter, { skip, limit }),
+    Payment.aggregate<IPaymentStats>(getPaymentStatsPipeline(filter)),
+  ])
+
+  const totalPaymentsData = [
+    ...(stats?.creditDebit ?? []),
+    ...(stats?.generalSum ?? []),
+    ...(stats?.serviceTotals ?? []),
+  ]
+  return {
+    currentCompaniesCount: stats?.companies[0]?.count ?? 0,
+    currentDomainsCount: stats?.domains[0]?.count ?? 0,
+    data: payments,
+    totalPayments: totalPaymentsData.reduce((acc, item) => {
+      acc[item._id] = item.totalSum
+      return acc
+    }, {}),
+    success: true,
+    total: stats?.total[0]?.count ?? 0,
+  }
+}
+
+/** One page of the filtered payments, in table order, populated. */
+async function getPaymentsPage(
+  filter: QueryFilter<IPaymentModel>,
+  { skip, limit }: { skip?: string; limit?: string }
+) {
   const orderedIds = (
     await Payment.aggregate(getPaymentsOrderPipeline(filter, { skip, limit }))
   ).map(({ _id }) => _id)
@@ -256,42 +283,7 @@ export async function getPayments(
   const paymentById = new Map(
     unorderedPayments.map((payment) => [payment._id.toString(), payment])
   )
-  const payments = orderedIds
-    .map((id) => paymentById.get(id.toString()))
-    .filter(Boolean)
-
-  const total = await Payment.countDocuments(filter)
-
-  const [distinctDomainIds, distinctCompanyIds] = await Promise.all([
-    Payment.distinct('domain', filter),
-    Payment.distinct('company', filter),
-  ])
-
-  const creditDebitPipeline = getCreditDebitPipeline(filter)
-  const totalPayments = await Payment.aggregate(creditDebitPipeline)
-
-  const genralSumPipeline = getTotalGeneralSumPipeline(filter)
-  const totalGeneralSum = await Payment.aggregate(genralSumPipeline)
-
-  const serviceTotalsPipeline = getServiceTotalsPipeline(filter)
-  const serviceTotals = await Payment.aggregate(serviceTotalsPipeline)
-
-  const totalPaymentsData = [
-    ...totalPayments,
-    ...totalGeneralSum,
-    ...serviceTotals,
-  ]
-  return {
-    currentCompaniesCount: distinctCompanyIds.length,
-    currentDomainsCount: distinctDomainIds.length,
-    data: payments,
-    totalPayments: totalPaymentsData.reduce((acc, item) => {
-      acc[item._id] = item.totalSum
-      return acc
-    }, {}),
-    success: true,
-    total,
-  }
+  return orderedIds.map((id) => paymentById.get(id.toString())).filter(Boolean)
 }
 
 const INVOICE_COUNTER_ID = 'invoiceNumber'

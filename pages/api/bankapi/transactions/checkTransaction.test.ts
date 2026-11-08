@@ -66,6 +66,11 @@ describe('normalizeBankAccount', () => {
 describe('checkTransaction', () => {
   const mockedFind = (Payment as unknown as { find: jest.Mock }).find
   const mockedFindOne = (Payment as unknown as { findOne: jest.Mock }).findOne
+  // checkTransaction reads Payment.find(...).sort(...)
+  const mockFindResult = (rows: unknown[]) =>
+    mockedFind.mockReturnValue({ sort: jest.fn().mockResolvedValue(rows) })
+  const mockFindError = (error: Error) =>
+    mockedFind.mockReturnValue({ sort: jest.fn().mockRejectedValue(error) })
 
   const transaction = {
     TECHNICAL_TRANSACTION_ID: 'tx_001_online',
@@ -87,7 +92,7 @@ describe('checkTransaction', () => {
   })
 
   it('calls Payment.find with normalized TECHNICAL_TRANSACTION_ID (strips _online suffix)', async () => {
-    mockedFind.mockResolvedValue([{ company: 'company-1' }])
+    mockFindResult([{ company: 'company-1' }])
 
     await checkTransaction({ transaction, domainId: null })
 
@@ -100,7 +105,7 @@ describe('checkTransaction', () => {
   })
 
   it('reconstructs final TECHNICAL_TRANSACTION_ID from REF+REFN+date+time and matches Payments stored in final form', async () => {
-    mockedFind.mockResolvedValue([{ company: 'company-reconstructed' }])
+    mockFindResult([{ company: 'company-reconstructed' }])
 
     const result = await checkTransaction({
       transaction: {
@@ -129,7 +134,7 @@ describe('checkTransaction', () => {
   })
 
   it('does NOT use MFO or generalSum in the query', async () => {
-    mockedFind.mockResolvedValue([])
+    mockFindResult([])
 
     await checkTransaction({ transaction, domainId: null })
 
@@ -141,7 +146,7 @@ describe('checkTransaction', () => {
   })
 
   it('returns isMatchingPayment=true and previousCompanyId when payment found', async () => {
-    mockedFind.mockResolvedValue([{ company: 'company-123' }])
+    mockFindResult([{ company: 'company-123' }])
 
     const result = await checkTransaction({ transaction, domainId: null })
 
@@ -152,7 +157,7 @@ describe('checkTransaction', () => {
   })
 
   it('returns isMatchingPayment=false and previousCompanyId=null when no payments found', async () => {
-    mockedFind.mockResolvedValue([])
+    mockFindResult([])
 
     const result = await checkTransaction({ transaction, domainId: null })
 
@@ -163,7 +168,7 @@ describe('checkTransaction', () => {
   })
 
   it('returns first match when multiple payments found', async () => {
-    mockedFind.mockResolvedValue([
+    mockFindResult([
       { company: 'company-first' },
       { company: 'company-second' },
     ])
@@ -211,7 +216,7 @@ describe('checkTransaction', () => {
   it('fallback query matches a prior payment by BOTH account and payer name', async () => {
     // A new account for a known payer: the query must also try the name so the
     // older payment (stored under a different account) can be found.
-    mockedFind.mockResolvedValue([]) // brand-new tx, never invoiced
+    mockFindResult([]) // brand-new tx, never invoiced
     mockedFindOne.mockReturnValue({
       sort: jest.fn().mockReturnValue({
         lean: jest.fn().mockResolvedValue(null),
@@ -243,7 +248,7 @@ describe('checkTransaction', () => {
   })
 
   it('fallback query matches a prior payment by tax code (AUT_CNTR_CRF) too', async () => {
-    mockedFind.mockResolvedValue([]) // no txid match
+    mockFindResult([]) // no txid match
     mockedFindOne.mockReturnValue({
       sort: jest.fn().mockReturnValue({
         lean: jest.fn().mockResolvedValue(null),
@@ -277,7 +282,7 @@ describe('checkTransaction', () => {
   })
 
   it('ON-AIR by name history: resolves company from a prior payment of the same payer on a NEW account', async () => {
-    mockedFind.mockResolvedValue([]) // no txid match
+    mockFindResult([]) // no txid match
     mockedFindOne.mockReturnValue({
       sort: jest.fn().mockReturnValue({
         lean: jest
@@ -305,7 +310,7 @@ describe('checkTransaction', () => {
   it('does NOT run the account fallback for a self-transaction (AUT_CNTR_CRF === AUT_MY_CRF)', async () => {
     // Owner pays themselves — must not match the owner's own company via the
     // account fallback.
-    mockedFind.mockResolvedValue([]) // brand-new tx, never invoiced
+    mockFindResult([]) // brand-new tx, never invoiced
 
     const result = await checkTransaction({
       transaction: {
@@ -364,6 +369,7 @@ describe('checkTransaction', () => {
 
     expect(mockedFind).not.toHaveBeenCalled()
     expect(mockedFindOne).toHaveBeenCalledWith({
+      domain: 'domain-xyz',
       'transaction.OSND': 'Some payment description',
     })
     expect(result).toEqual({
@@ -376,7 +382,7 @@ describe('checkTransaction', () => {
     // Real-world scenario: transaction D3K4Q3Q... has a valid txId but was never invoiced,
     // while a sibling transaction D3P3Q41... with the same OSND WAS invoiced.
     // The OSND lookup should find the company from the sibling payment.
-    mockedFind.mockResolvedValue([]) // txId search finds nothing
+    mockFindResult([]) // txId search finds nothing
     mockedFindOne.mockReturnValue({
       sort: jest.fn().mockReturnValue({
         lean: jest.fn().mockResolvedValue({ company: 'company-from-osnd' }),
@@ -394,11 +400,13 @@ describe('checkTransaction', () => {
     })
 
     expect(mockedFind).toHaveBeenCalledWith({
+      domain: 'domain-xyz',
       'transaction.TECHNICAL_TRANSACTION_ID': {
         $in: ['D3K4Q3QAS2IGJEP26032026204100'],
       },
     })
     expect(mockedFindOne).toHaveBeenCalledWith({
+      domain: 'domain-xyz',
       'transaction.OSND':
         'Сплата за послуги знідно рахунку, Чорна Марина Євгеніївна',
     })
@@ -408,9 +416,10 @@ describe('checkTransaction', () => {
     })
   })
 
-  it('OSND fallback for транзитний рахунок does not include domain filter', async () => {
-    // Transit accounts are shared across domains — lookup must be domain-agnostic
-    mockedFind.mockResolvedValue([])
+  it('OSND fallback for транзитний рахунок is limited to the domain', async () => {
+    // The transit account is shared by every domain, but a payment found in
+    // another domain would point the row at that domain's company.
+    mockFindResult([])
     mockedFindOne.mockReturnValue({
       sort: jest.fn().mockReturnValue({
         lean: jest.fn().mockResolvedValue({ company: 'company-from-osnd' }),
@@ -427,9 +436,10 @@ describe('checkTransaction', () => {
       domainId: 'domain-xyz',
     })
 
-    const findOneArg = mockedFindOne.mock.calls[0][0]
-    expect(findOneArg).not.toHaveProperty('domain')
-    expect(findOneArg).toEqual({ 'transaction.OSND': 'Transit payment' })
+    expect(mockedFindOne.mock.calls[0][0]).toEqual({
+      domain: 'domain-xyz',
+      'transaction.OSND': 'Transit payment',
+    })
   })
 
   it('returns false when TECHNICAL_TRANSACTION_ID is empty string — tries account fallback only with domainId', async () => {
@@ -447,7 +457,7 @@ describe('checkTransaction', () => {
   })
 
   it('ANTI-FALSE-POSITIVE: same MFO and sum from different transaction never causes match', async () => {
-    mockedFind.mockResolvedValue([])
+    mockFindResult([])
     const result = await checkTransaction({
       transaction: {
         ...transaction,
@@ -466,7 +476,7 @@ describe('checkTransaction', () => {
   })
 
   it('throws Error with original message when Payment.find throws', async () => {
-    mockedFind.mockRejectedValue(new Error('DB down'))
+    mockFindError(new Error('DB down'))
 
     await expect(
       checkTransaction({ transaction, domainId: null })
@@ -476,7 +486,7 @@ describe('checkTransaction', () => {
   it('ON-AIR: resolves company from the domain company list by tax code when no saved payment exists', async () => {
     // First-ever payment from a new account: no txid/account history, but the
     // company carries the payer tax code → identity match sets previousCompanyId.
-    mockedFind.mockResolvedValue([]) // no txid match
+    mockFindResult([]) // no txid match
 
     const result = await checkTransaction({
       transaction: {
@@ -503,7 +513,7 @@ describe('checkTransaction', () => {
   })
 
   it('ON-AIR: does not identity-match a self-transaction', async () => {
-    mockedFind.mockResolvedValue([])
+    mockFindResult([])
 
     const result = await checkTransaction({
       transaction: {

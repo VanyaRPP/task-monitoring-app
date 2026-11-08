@@ -68,7 +68,10 @@ export default async function handler(
           creditOptions.domain = { $in: domainIds }
         }
 
-        const payments = await Payment.find(paymentsOptions)
+        // Month rows follow the order payments come back in. That used to be a
+        // collection scan - creation order - until the domain index could
+        // serve this filter; `_id` pins creation order explicitly.
+        const payments = await Payment.find(paymentsOptions).sort({ _id: 1 })
         const credits = await Credit.find(creditOptions)
 
         const paymentsGroupedByMonth = _groupBy(payments, (payment) =>
