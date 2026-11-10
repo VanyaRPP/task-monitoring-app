@@ -212,6 +212,14 @@ export function layoutStatement(pages: IPdfTextItem[][]): IPdfStatement {
   }
 }
 
+const PDF_DATA_URL = /^data:application\/pdf;base64,(.+)$/
+
+/** A PDF as the browser sends it (a `data:` URL), as bytes. */
+export function parsePdfDataUrl(url: unknown): Uint8Array | null {
+  const match = typeof url === 'string' ? PDF_DATA_URL.exec(url) : null
+  return match ? new Uint8Array(Buffer.from(match[1], 'base64')) : null
+}
+
 /** The text runs of every page of a PDF file. */
 export async function readPdfText(data: Uint8Array): Promise<IPdfTextItem[][]> {
   const { getDocumentProxy } = await import('unpdf')

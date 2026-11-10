@@ -146,6 +146,51 @@ const dateOf = (day: number, { year, month }: IYearMonth): string =>
 
 const decimal = (value: number): string => money(value).toFixed(2)
 
+/** A stretch of one value, to the day. */
+interface IDayRun {
+  value: number
+  from: IYearMonth
+  fromDay: number
+  to: IYearMonth
+  toDay: number
+}
+
+const wholeMonths = (runs: IValueRun[]): IDayRun[] =>
+  runs.map(({ value, from, to }) => ({
+    value,
+    from,
+    fromDay: 1,
+    to,
+    toDay: daysInMonth(to.year, to.month),
+  }))
+
+/**
+ * The tariff's stretches to the day: a month the building's tariff changed in
+ * («з 11.06.2019») is split where it changed, so the printout names the dates
+ * of the document, not a month's average.
+ */
+const tariffRuns = (rows: IDebtCalculationResult['rows']): IDayRun[] =>
+  rows.reduce<IDayRun[]>((runs, row) => {
+    const at = { year: row.year, month: row.month }
+    const parts = row.tariffParts ?? [
+      {
+        fromDay: 1,
+        toDay: daysInMonth(row.year, row.month),
+        value: row.tariff,
+      },
+    ]
+    for (const { fromDay, toDay, value } of parts) {
+      const last = runs[runs.length - 1]
+      if (last && last.value === value) {
+        last.to = at
+        last.toDay = toDay
+      } else {
+        runs.push({ value, from: at, fromDay, to: at, toDay })
+      }
+    }
+    return runs
+  }, [])
+
 /**
  * A value that changed within the period, one line per stretch with its
  * dates: «5.25 — з 01.08.2018 по 31.01.2019». The first stretch starts on the
@@ -153,21 +198,21 @@ const decimal = (value: number): string => money(value).toFixed(2)
  */
 const runLines = (
   text: string,
-  runs: IValueRun[],
+  runs: IDayRun[],
   startDay?: number
 ): (IExcelCell | null)[][] =>
   runs.map((run, index) => {
     const firstDay =
       index === 0
         ? Math.min(
-            Math.max(Math.round(Number(startDay) || 1), 1),
+            Math.max(Math.round(Number(startDay) || 1), run.fromDay),
             daysInMonth(run.from.year, run.from.month)
           )
-        : 1
+        : run.fromDay
     return param(
       index === 0 ? text : '',
       `${decimal(run.value)} — з ${dateOf(firstDay, run.from)} по ${dateOf(
-        daysInMonth(run.to.year, run.to.month),
+        run.toDay,
         run.to
       )}`,
       COLUMN_COUNT - 3
@@ -177,7 +222,7 @@ const runLines = (
 /** One number when it held all period, else its stretches with dates. */
 const valueParam = (
   text: string,
-  runs: IValueRun[],
+  runs: IDayRun[],
   fallback: number | undefined,
   startDay?: number
 ): (IExcelCell | null)[][] =>
@@ -273,13 +318,13 @@ export const buildDebtCalculationDocument = ({
     param('Період', periodLabel(from, to, startDay)),
     ...valueParam(
       'Загальна площа, м²',
-      valueRuns(result.rows, (month) => month.area),
+      wholeMonths(valueRuns(result.rows, (month) => month.area)),
       area,
       startDay
     ),
     ...valueParam(
       'Тариф, грн за 1 м²',
-      valueRuns(result.rows, (month) => month.tariff),
+      tariffRuns(result.rows),
       tariff,
       startDay
     ),

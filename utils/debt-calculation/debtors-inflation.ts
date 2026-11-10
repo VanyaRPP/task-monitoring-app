@@ -1,4 +1,5 @@
 import DebtCalculation from '@modules/models/DebtCalculation'
+import Domain from '@modules/models/Domain'
 import DomainInflationOverride from '@modules/models/DomainInflationOverride'
 import InflationIndex from '@modules/models/InflationIndex'
 import Payment from '@modules/models/Payment'
@@ -9,6 +10,7 @@ import { findDomainIdsByServiceType } from '@utils/domain/domains-by-service-typ
 import { mergeDomainIndexes } from '@utils/inflation-index/domain-overrides'
 import { SERVICE_TIMEZONE } from '@utils/inflation-index/fill-services'
 import { indexesByPeriod } from './build-input'
+import { IBuildingTariffs, sanitizeBuildingTariffs } from './building-tariffs'
 import {
   calculateCompanyDebt,
   defaultDebtPeriod,
@@ -47,7 +49,7 @@ export async function calculateDebtorsInflation(
   const companies = (
     await RealEstate.find(
       { _id: { $in: companyIds } },
-      'domain totalArea pricePerMeter'
+      'domain street companyName description totalArea pricePerMeter'
     ).lean()
   ).filter(({ domain }) => housingFeeDomains.has(String(domain)))
   if (companies.length === 0) return {}
@@ -55,29 +57,42 @@ export async function calculateDebtorsInflation(
   const ids = companies.map(({ _id }) => _id)
   const domainIds = [...new Set(companies.map(({ domain }) => String(domain)))]
 
-  const [payments, services, indexes, saved, overrides] = await Promise.all([
-    Payment.find(
-      { company: { $in: ids } },
-      'domain company type generalSum invoiceCreationDate paidAt monthService invoice'
-    )
-      .populate('monthService', 'date')
-      .lean(),
-    Service.find({ domain: { $in: domainIds } }, 'domain date rentPrice')
-      .sort({ date: -1 })
-      .lean(),
-    InflationIndex.find({}, 'year month value').lean(),
-    DebtCalculation.find({ company: { $in: ids } }).lean(),
-    DomainInflationOverride.find(
-      { domain: { $in: domainIds } },
-      'domain year month value'
-    ).lean(),
-  ])
+  const [payments, services, indexes, saved, overrides, domains] =
+    await Promise.all([
+      Payment.find(
+        { company: { $in: ids } },
+        'domain company type generalSum invoiceCreationDate paidAt monthService invoice'
+      )
+        .populate('monthService', 'date')
+        .lean(),
+      Service.find({ domain: { $in: domainIds } }, 'domain date rentPrice')
+        .sort({ date: -1 })
+        .lean(),
+      InflationIndex.find({}, 'year month value').lean(),
+      DebtCalculation.find({ company: { $in: ids } }).lean(),
+      DomainInflationOverride.find(
+        { domain: { $in: domainIds } },
+        'domain year month value'
+      ).lean(),
+      Domain.find({ _id: { $in: domainIds } })
+        .select('+debtTariffs')
+        .lean(),
+    ])
 
   const reference = indexesByPeriod(indexes)
   const overridesByDomain = groupBy(overrides, ({ domain }) => String(domain))
   const defaultPeriod = defaultDebtPeriod(now, SERVICE_TIMEZONE)
   const paymentsByCompany = groupBy(payments, ({ company }) => String(company))
   const servicesByDomain = groupBy(services, ({ domain }) => String(domain))
+  const tariffsByDomain = new Map<string, IBuildingTariffs[]>(
+    domains.map(({ _id, debtTariffs }) => [
+      String(_id),
+      (debtTariffs ?? []).flatMap((entry) => {
+        const clean = sanitizeBuildingTariffs(entry)
+        return clean ? [clean] : []
+      }),
+    ])
+  )
 
   const inflation: Record<string, IDebtorInflation> = {}
 
@@ -87,7 +102,14 @@ export async function calculateDebtorsInflation(
 
     const { result, period, inflationMethod } = calculateCompanyDebt({
       companyId,
-      company,
+      company: {
+        totalArea: company.totalArea,
+        pricePerMeter: company.pricePerMeter,
+        companyName: company.companyName,
+        description: company.description,
+        street: company.street ? String(company.street) : undefined,
+      },
+      buildingTariffs: tariffsByDomain.get(domainId),
       payments: (paymentsByCompany.get(companyId) ?? []).filter(
         ({ domain }) => String(domain) === domainId
       ) as unknown as IPrefillPayment[],

@@ -20,13 +20,9 @@ export function parsePhotoDataUrl(url: unknown): IPhoto | null {
   return { mediaType: match[1], data: match[2] }
 }
 
-const PDF_DATA_URL = /^data:application\/pdf;base64,(.+)$/
-
-/** A PDF as the browser sends it (a `data:` URL), as bytes. */
-export function parsePdfDataUrl(url: unknown): Uint8Array | null {
-  const match = typeof url === 'string' ? PDF_DATA_URL.exec(url) : null
-  return match ? new Uint8Array(Buffer.from(match[1], 'base64')) : null
-}
+// Lives with the PDF reader, which needs no model: routes that only read a
+// PDF import it from there.
+export { parsePdfDataUrl } from './pdf'
 
 /**
  * Reads a statement PDF - its own text, no model - and, when it is a debt

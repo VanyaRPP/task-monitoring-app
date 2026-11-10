@@ -11,6 +11,7 @@ import {
 } from 'antd'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useDebtCalculationContext } from './'
+import BuildingTariffs from './BuildingTariffs'
 import CreatePayments from './CreatePayments'
 import ExcludedPeriods from './ExcludedPeriods'
 import PrintPreview from './PrintPreview'
@@ -147,6 +148,7 @@ const DebtCalculationHeader: React.FC = () => {
         </Typography.Title>
 
         <Space>
+          <BuildingTariffs />
           <CreatePayments />
           <Button
             icon={<FileExcelOutlined />}

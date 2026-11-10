@@ -1,4 +1,5 @@
 import { buildDebtCalculationInput } from '@utils/debt-calculation/build-input'
+import { tariffsByMonth } from '@utils/debt-calculation/building-tariffs'
 import { calculateDebt } from '@utils/debt-calculation/calculate'
 import {
   asOfLabel,
@@ -136,6 +137,44 @@ describe('buildDebtCalculationDocument — тариф, що змінювався
 
   it('лишає площу одним числом, бо вона не змінювалась', () => {
     expect(findRow(rows, 'Загальна площа')[3].v).toBe(67.08)
+  })
+})
+
+describe('buildDebtCalculationDocument — тарифи будинку', () => {
+  const from = { year: 2019, month: 4 }
+  const to = { year: 2019, month: 8 }
+  const building = calculateDebt(
+    buildDebtCalculationInput({
+      company: { totalArea: 50, pricePerMeter: 0 },
+      from,
+      to,
+      buildingTariffs: tariffsByMonth(
+        {
+          groups: [{ label: 'Усі', apartments: '' }],
+          periods: [
+            { from: '2018-06-10', to: '2019-06-10', tariffs: [5.2] },
+            { from: '2019-06-11', tariffs: [6] },
+          ],
+        },
+        0,
+        from,
+        to
+      ),
+    })
+  )
+  const { rows } = buildDebtCalculationDocument(
+    input({ result: building, from, to })
+  )
+
+  it('пише зміну посеред місяця тими датами, що в документі', () => {
+    const at = rows.findIndex((line) =>
+      String(line[0]?.v ?? '').startsWith('Тариф')
+    )
+
+    expect(rows.slice(at, at + 2).map((line) => line[3].v)).toEqual([
+      '5.20 — з 01.04.2019 по 10.06.2019',
+      '6.00 — з 11.06.2019 по 31.08.2019',
+    ])
   })
 })
 

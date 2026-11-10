@@ -38,6 +38,7 @@ const APARTMENT_FIELDS = [
   'paid',
   'correction',
   'startDay',
+  'tariffGroup',
   'openingDebt',
   'legalFees',
   'courtFee',
@@ -225,6 +226,7 @@ export const sanitizeOverrides = (
 
     const apartment: IApartmentOverrides = pickNumbers(raw, APARTMENT_FIELDS)
     keepWhole(apartment, 'startDay', 1, 31)
+    keepWhole(apartment, 'tariffGroup', 0, 19)
     const excludedPeriods = sanitizeExcludedPeriods(
       (raw as IApartmentOverrides)?.excludedPeriods
     )

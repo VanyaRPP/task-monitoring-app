@@ -1,4 +1,5 @@
 import { IInflationIndex } from '@modules/models/InflationIndex'
+import type { ITariffMonth } from './building-tariffs'
 import { IValueChanges, valueInMonth } from './changes'
 import type { IExcludedPeriod } from './exclusions'
 import {
@@ -50,6 +51,11 @@ export interface IApartmentOverrides {
    * month on, the field above stands until the first one (see `changes.ts`).
    */
   changes?: IValueChanges
+  /**
+   * The column of the building's tariffs this company pays by, when its
+   * apartment number does not tell (see `groupOfApartment`).
+   */
+  tariffGroup?: number
   /** Day of the first month the debt starts accruing on (1-31). */
   startDay?: number
   /**
@@ -90,6 +96,11 @@ export interface IBuildDebtInputArgs {
   inflationMethod?: InflationMethod
   /** Overrides the company's own `overrides.excludedPeriods`, when given. */
   excludedPeriods?: IExcludedPeriod[]
+  /**
+   * The building's tariffs for this company, by `YYYY-MM` (see
+   * `tariffsByMonth`). Rank below the company's own tariff and above the DB.
+   */
+  buildingTariffs?: Record<string, ITariffMonth>
 }
 
 /** Collapses the reference-table response into a map keyed by period. */
@@ -105,8 +116,8 @@ export const indexesByPeriod = (
  * Assembles the input for {@link calculateDebt} out of what the page holds.
  *
  * Precedence runs from most to least specific:
- * month edit → company edit (with its changes by month) → DB prefill →
- * company record.
+ * month edit → company edit (with its changes by month) → the building's
+ * tariffs (tariff only) → DB prefill → company record.
  *
  * `charged` deliberately has no default: until it is typed in, the engine
  * derives `area × tariff` itself, so editing either shows up in the total at
@@ -123,6 +134,7 @@ export const buildDebtCalculationInput = ({
   annualRatePercent = DEFAULT_ANNUAL_RATE_PERCENT,
   inflationMethod = 'balance',
   excludedPeriods = overrides.excludedPeriods ?? [],
+  buildingTariffs = {},
 }: IBuildDebtInputArgs): IDebtCalculationInput => {
   const months: IDebtMonthInput[] = buildMonthRange(from, to).map(
     (yearMonth, index) => {
@@ -139,6 +151,10 @@ export const buildDebtCalculationInput = ({
       const general = (field: keyof IValueChanges) =>
         valueInMonth(overrides.changes?.[field], overrides[field], period)
       const generalCharged = general('charged')
+      const building = buildingTariffs[period]
+      const own = month.tariff ?? general('tariff')
+      const tariff =
+        own ?? building?.value ?? prefill.tariff ?? company?.pricePerMeter ?? 0
       const prefillCharged =
         brought !== 0 ? (prefill.charged ?? 0) + brought : prefill.charged
 
@@ -150,12 +166,11 @@ export const buildDebtCalculationInput = ({
           prefill.area ??
           company?.totalArea ??
           0,
-        tariff:
-          month.tariff ??
-          general('tariff') ??
-          prefill.tariff ??
-          company?.pricePerMeter ??
-          0,
+        tariff,
+        // The stretches only when the building's tariff is the one in force.
+        ...(own === undefined && building?.parts
+          ? { tariffParts: building.parts }
+          : {}),
         // A general figure stands in only where nothing else is known; the
         // opening balance brought into the month still comes on top of it.
         charged:

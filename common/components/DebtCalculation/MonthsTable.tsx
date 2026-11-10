@@ -98,6 +98,8 @@ const MonthsTable: React.FC<Props> = ({ result }) => {
     excludedPeriods = [],
     company,
     openingDebtPrefill,
+    companyTariffs,
+    tariffGroup,
   } = useDebtCalculationContext()
   const hasExclusions = excludedPeriods.length > 0
 
@@ -237,7 +239,15 @@ const MonthsTable: React.FC<Props> = ({ result }) => {
           size="small"
           min={0}
           value={valueOf(row, 'tariff')}
-          placeholder={String(row.tariff)}
+          // A month's average of two tariffs runs to many decimals.
+          placeholder={String(+row.tariff.toFixed(4))}
+          // A month the building's tariff changed in: its parts, by day.
+          title={row.tariffParts
+            ?.map(
+              ({ fromDay, toDay, value }) =>
+                `${value} грн/м² — ${fromDay}–${toDay} число`
+            )
+            .join('; ')}
           onChange={(value) => patch(row, 'tariff', value as number)}
         />
       ),
@@ -372,7 +382,12 @@ const MonthsTable: React.FC<Props> = ({ result }) => {
       <GeneralInput
         field="tariff"
         label="Тариф, грн/м²"
-        placeholder={String(company?.pricePerMeter ?? 0)}
+        // The building's tariffs fill the months below when it has them.
+        placeholder={
+          companyTariffs && tariffGroup !== undefined
+            ? 'будинок'
+            : String(company?.pricePerMeter ?? 0)
+        }
       />
     ),
     9: <StartDaySelect />,

@@ -49,7 +49,10 @@ jest.mock('@common/api/serviceApi/service.api', () => ({
 jest.mock('@common/api/debtCalculationApi/debtCalculation.api', () => ({
   useGetDebtCalculationQuery: jest.fn(),
   useSaveDebtCalculationMutation: jest.fn(),
+  useGetBuildingTariffsQuery: jest.fn(() => ({ data: [], isLoading: false })),
 }))
+// Not under test here.
+jest.mock('./BuildingTariffs', () => () => null)
 
 const COMPANY: IExtendedRealestate = {
   _id: 'apt-1',

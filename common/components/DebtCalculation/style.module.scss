@@ -360,3 +360,42 @@ $hairline: rgba(140, 140, 140, 0.4);
   cursor: pointer;
   white-space: nowrap;
 }
+
+.Tariffs {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+
+  :global(.ant-table-wrapper) {
+    width: 100%;
+  }
+}
+
+.TariffsBuilding {
+  min-width: 260px;
+}
+
+.TariffsGroups {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.TariffsLabel {
+  width: 180px;
+}
+
+.TariffsApartments {
+  width: 320px;
+}
+
+.TariffsWarnings {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.TariffsCompany {
+  margin-top: 4px;
+}

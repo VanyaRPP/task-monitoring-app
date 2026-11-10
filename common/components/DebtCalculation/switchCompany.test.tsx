@@ -50,7 +50,10 @@ jest.mock('@common/api/debtCalculationApi/debtCalculation.api', () => ({
     jest.fn(),
     { isLoading: false },
   ]),
+  useGetBuildingTariffsQuery: jest.fn(() => ({ data: [], isLoading: false })),
 }))
+// Not under test here.
+jest.mock('./BuildingTariffs', () => () => null)
 
 const OVERLAPPING_PERIOD = {
   from: { year: 2022, month: 6 },
