@@ -84,7 +84,10 @@
     "delete": "Delete"
   },
   "dashboard": {
-    "uncategorized": "Uncategorized"
+    "uncategorized": "Uncategorized",
+    "allCategoriesHidden": "All categories are hidden. Click a category in the legend to show it.",
+    "legendPrevPage": "Previous page of categories",
+    "legendNextPage": "Next page of categories"
   },
   "scope": {
     "placeholder": "Choose a domain or company",

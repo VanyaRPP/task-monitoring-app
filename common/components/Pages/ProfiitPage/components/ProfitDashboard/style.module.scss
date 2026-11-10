@@ -23,47 +23,93 @@
   gap: 16px 48px;
 }
 
+// Shrinks with a narrow card instead of pushing it into a horizontal scroll.
 .pieChart {
-  flex: 0 0 220px;
+  flex: 0 1 220px;
+  min-width: 160px;
   height: 220px;
   margin: 0 auto;
 }
 
-// Never more than two columns: a busy month grows downwards instead of
-// squeezing names into a third column or paging them away.
-.pieLegend {
+.pieLegendWrap {
   flex: 1 1 240px;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+// One column, so names are not cut to a few letters beside the trend chart;
+// past a page's worth of rows the pager takes over.
+.pieLegend {
+  flex: 1;
   min-width: 0;
   margin: 0;
   padding: 0;
   list-style: none;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 6px 32px;
+  align-content: start;
+  gap: 6px;
 }
 
-// Capped so the percentage stays next to its name on a wide screen.
-.pieLegendTwoColumns {
-  flex-basis: 480px;
-  max-width: 640px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+// A short last page keeps the full height (PIE_LEGEND_PAGE_SIZE rows), so
+// the pager and the card below it do not jump.
+.pieLegendPaged {
+  min-height: calc(8 * 20px + 7 * 6px);
 }
 
-// The full-width card has room for a ring that matches its legend's height.
-.pieLayoutWide .pieChart {
-  flex-basis: 280px;
-  height: 280px;
-  margin: 0;
+.pieLegendPager {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.pieLegendPageInfo {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.pieEmpty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
 }
 
 .pieLegendItem {
   display: flex;
   align-items: center;
   gap: 8px;
+  width: 100%;
   min-width: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
   font-size: 13px;
   line-height: 20px;
-  cursor: default;
+  text-align: left;
+  cursor: pointer;
+  transition: opacity 0.2s;
+
+  &:focus-visible {
+    outline: 1px solid currentColor;
+    outline-offset: 2px;
+  }
+}
+
+// Still listed so it can be switched back on, but clearly off the ring.
+.pieLegendItemHidden {
+  opacity: 0.35;
+
+  .pieLegendName {
+    text-decoration: line-through;
+  }
 }
 
 .pieLegendSwatch {
