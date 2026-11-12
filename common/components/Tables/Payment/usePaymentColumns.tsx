@@ -1,5 +1,5 @@
 import React, { useMemo, useEffect, useState } from 'react'
-import { Badge, Button, List, Tooltip, Typography, theme } from 'antd'
+import { Button, List, Tooltip, Typography, theme } from 'antd'
 import { ColumnType, ColumnsType } from 'antd/es/table'
 import { IPaymentFilterResponse } from '@common/api/filterApi/filter.api.types'
 import {
@@ -14,20 +14,15 @@ import {
   dateToMonthYear,
 } from '@assets/features/formatDate'
 import { Operations, ServiceName, ServiceType } from '@utils/constants'
-import {
-  formatSignedDebt,
-  getDebtorTooltipColor,
-  isEmpty,
-  renderCurrency,
-  toFirstUpperCase,
-} from '@utils/helpers'
+import { isEmpty, renderCurrency, toFirstUpperCase } from '@utils/helpers'
 import TableFilterLink from '@components/UI/Reusable/TableFilterLink'
+import DebtBadge from '@components/UI/Reusable/DebtBadge'
 import { TruncatedText } from '@components/UI/TruncatedText'
 import { widenFilterDropdown } from '../tableFilterHelpers'
 import DateFilterDropdown from './DateFilter/DateFilterDropdown'
 import PaymentDropdown from '@components/PaymentDropDown'
 import s from './style.module.scss'
-
+import type { IDebtorInflation } from '@common/api/debtorsApi/debtors.api.types'
 export type DebtPerMonth = {
   monthService: string
   totalDue: number
@@ -40,6 +35,7 @@ export type CompanyWithPayments = {
   companyName: string
   debtPerMonth: DebtPerMonth[]
   totalDebt: number
+  inflation?: IDebtorInflation | null
 }
 
 interface Params {
@@ -317,13 +313,10 @@ export function usePaymentColumns({
                     zIndex: 1,
                   }}
                 >
-                  <Badge
-                    count={formatSignedDebt(debtor.totalDebt)}
-                    title=""
-                    color={debtor ? getDebtorTooltipColor(debtor) : '#d9d9d9'}
-                    overflowCount={Infinity}
-                    style={{ cursor: 'pointer' }}
-                    size="small"
+                  <DebtBadge
+                    companyName={companyName}
+                    totalDebt={debtor.totalDebt}
+                    inflation={debtor.inflation}
                   />
                 </div>
               )}
