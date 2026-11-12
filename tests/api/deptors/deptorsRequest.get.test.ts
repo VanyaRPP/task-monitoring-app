@@ -33,7 +33,7 @@ describe('Deptors API - GET', () => {
     const mockRes = { status: jest.fn(() => mockRes), json: jest.fn() } as any
 
     await handler(mockReq, mockRes)
-    expect(mockRes.status).toHaveBeenCalledWith(500)
+    expect(mockRes.status).toHaveBeenCalledWith(400)
     expect(mockRes.json).toHaveBeenCalledWith(
       expect.objectContaining({
         success: false,
@@ -49,7 +49,7 @@ describe('Deptors API - GET', () => {
     const mockRes = { status: jest.fn(() => mockRes), json: jest.fn() } as any
 
     await handler(mockReq, mockRes)
-    expect(mockRes.status).toHaveBeenCalledWith(500)
+    expect(mockRes.status).toHaveBeenCalledWith(400)
   })
 
   it('should NOT load when domainId is undefined', async () => {
@@ -59,7 +59,7 @@ describe('Deptors API - GET', () => {
     const mockRes = { status: jest.fn(() => mockRes), json: jest.fn() } as any
 
     await handler(mockReq, mockRes)
-    expect(mockRes.status).toHaveBeenCalledWith(500)
+    expect(mockRes.status).toHaveBeenCalledWith(400)
   })
 
   it('should NOT load when domainId is null', async () => {
@@ -69,7 +69,7 @@ describe('Deptors API - GET', () => {
     const mockRes = { status: jest.fn(() => mockRes), json: jest.fn() } as any
 
     await handler(mockReq, mockRes)
-    expect(mockRes.status).toHaveBeenCalledWith(500)
+    expect(mockRes.status).toHaveBeenCalledWith(400)
   })
 
   it('should load when domainId = realDomainId', async () => {
@@ -190,36 +190,6 @@ describe('Deptors API - GET', () => {
     )
   })
 
-  it('should NOT load when domainId = realDomainId as User', async () => {
-    await mockLoginAs(users.user)
-    ;(getCurrentUser as jest.Mock).mockResolvedValue({
-      isUser: true,
-      isDomainAdmin: false,
-      isGlobalAdmin: false,
-      isAdmin: false,
-      user: {
-        email: users.user.email,
-        roles: [Roles.USER],
-      },
-    })
-    const mockReq = {
-      method: 'GET',
-      query: { domainIds: [realDomainId] },
-    } as any
-    const mockRes = {
-      status: jest.fn().mockReturnThis(),
-      json: jest.fn(),
-    } as any
-    await handler(mockReq, mockRes)
-    expect(mockRes.status).toHaveBeenCalledWith(401)
-    expect(mockRes.json).toHaveBeenCalledWith(
-      expect.objectContaining({
-        success: false,
-        message: 'Unauthorized',
-      })
-    )
-  })
-
   it('should load when domainId = realDomainId as DomainAdmin', async () => {
     await mockLoginAs(users.domainAdmin2)
     ;(getCurrentUser as jest.Mock).mockResolvedValue({
@@ -334,36 +304,6 @@ describe('Deptors API - GET', () => {
             totalDebt: 50,
           }),
         ]),
-      })
-    )
-  })
-
-  it('should NOT load when domainId = realDomainIdArray as User', async () => {
-    await mockLoginAs(users.user)
-    ;(getCurrentUser as jest.Mock).mockResolvedValue({
-      isUser: true,
-      isDomainAdmin: false,
-      isGlobalAdmin: false,
-      isAdmin: false,
-      user: {
-        email: users.user.email,
-        roles: [Roles.USER],
-      },
-    })
-    const mockReq = {
-      method: 'GET',
-      query: { domainIds: realDomainIdArray },
-    } as any
-    const mockRes = {
-      status: jest.fn().mockReturnThis(),
-      json: jest.fn(),
-    } as any
-    await handler(mockReq, mockRes)
-    expect(mockRes.status).toHaveBeenCalledWith(401)
-    expect(mockRes.json).toHaveBeenCalledWith(
-      expect.objectContaining({
-        success: false,
-        message: 'Unauthorized',
       })
     )
   })

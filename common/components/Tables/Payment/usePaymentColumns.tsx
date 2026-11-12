@@ -190,7 +190,6 @@ export function usePaymentColumns({
   payments,
   isGlobalAdmin,
   isDomainAdmin,
-  isUser,
   onViewClick,
   onEditClick,
   onDelete,
@@ -289,8 +288,9 @@ export function usePaymentColumns({
             />
           )
 
+          // Visible to every role: /api/debtors only returns companies the
+          // caller may see, so a User gets badges for their own companies only.
           const hasDebt = Boolean(
-            !isUser &&
             debtor &&
             isFirstOccurrence &&
             Math.abs(debtor.totalDebt) > 1
@@ -580,7 +580,6 @@ export function usePaymentColumns({
       onUpdatePaymentStatus,
       isGlobalAdmin,
       isDomainAdmin,
-      isUser,
       isSingleCompanyByData,
       themeKey,
       token,
