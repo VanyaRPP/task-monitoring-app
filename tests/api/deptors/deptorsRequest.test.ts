@@ -58,7 +58,7 @@ describe('Deptors API - GET', () => {
 
     const mockReq = {
       method: 'GET',
-      query: { domainIds: 'mockDomainId' },
+      query: { domainIds: domains[0]._id },
     } as any
     const mockRes = {
       status: jest.fn(() => mockRes),
@@ -80,7 +80,7 @@ describe('Deptors API - GET', () => {
 
     const mockReq = {
       method: 'GET',
-      query: { domainIds: 'mockDomainId' },
+      query: { domainIds: domains[0]._id },
     } as any
     const mockRes = {
       status: jest.fn(() => mockRes),

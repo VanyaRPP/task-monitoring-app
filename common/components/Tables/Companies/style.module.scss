@@ -34,6 +34,23 @@
   margin-left: auto;
 }
 
+// Same layout as the payments company cell: the badge sits above the name in
+// the top-right corner instead of overlapping it.
+.debtorCell {
+  position: relative;
+  width: 100%;
+  padding-top: 20px;
+  cursor: pointer;
+}
+
+.debtorBadge {
+  position: absolute;
+  top: 0;
+  right: -14px;
+  white-space: nowrap;
+  z-index: 1;
+}
+
 @media (max-width: 992px) {
   .firstBlock {
     width: 100%;

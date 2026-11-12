@@ -4,6 +4,10 @@ import RealEstate from '@modules/models/RealEstate'
 import Payment from '@modules/models/Payment'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import {
+  getDebtorCompaniesFilter,
+  parseDomainIds,
+} from '@common/services/debtorsService/debtorsScope'
+import {
   calculateDebtorsInflation,
   IDebtorInflation,
 } from '@utils/debt-calculation/debtors-inflation'
@@ -41,34 +45,29 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
-        const { isUser, isDomainAdmin, isGlobalAdmin, isAdmin, user } =
-          await getCurrentUser(req, res)
-        if (isUser) {
-          return res.status(401).json({
-            success: false,
-            message: 'Unauthorized',
-          })
-        }
-        const { domainIds } = req.query
+        const access = await getCurrentUser(req, res)
+        const domainsIds = parseDomainIds(req.query.domainIds)
 
-        const domainsIds = Array.isArray(domainIds)
-          ? domainIds
-          : domainIds.split(',')
-
-        if (
-          !domainsIds ||
-          domainsIds[0] === '' ||
-          domainsIds[0] === 'undefined' ||
-          domainsIds[0] === 'null' ||
-          domainsIds.length === 0
-        ) {
+        if (!domainsIds.length) {
           return res.status(400).json({
             success: false,
             message: 'Domain ID is required',
           })
         }
-        const payments = await Payment.find({ domain: { $in: domainsIds } })
-        const companies = await RealEstate.find({ domain: { $in: domainsIds } })
+
+        const companiesFilter = await getDebtorCompaniesFilter(
+          access,
+          domainsIds
+        )
+        const companies = companiesFilter
+          ? await RealEstate.find(companiesFilter)
+          : []
+        const payments = companies.length
+          ? await Payment.find({
+              domain: { $in: domainsIds },
+              company: { $in: companies.map(({ _id }) => _id) },
+            })
+          : []
 
         const companyWithPayments = companies
           .map((company) => {
