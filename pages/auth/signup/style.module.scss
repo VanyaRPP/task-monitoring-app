@@ -19,14 +19,13 @@
     flex-direction: column;
     gap: 40px;
   }
-  :global {
-    .ant-form-item label {
-      color: var(--textColor);
-    }
-    .ant-input {
-      background-color: var(--backgroundColorElements);
-      color: #858f96;
-    }
+  :global(.ant-form-item) label {
+    color: var(--textColor);
+  }
+
+  :global(.ant-input) {
+    background-color: var(--backgroundColorElements);
+    color: #858f96;
   }
 }
 

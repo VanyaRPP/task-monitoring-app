@@ -3,11 +3,9 @@
   align-items: center;
   justify-content: center;
   margin-bottom: 1rem;
-  :global {
-    .ant-radio-button-wrapper {
-      background-color: var(--backgroundColorElements);
-      color: var(--textColor);
-    }
+  :global(.ant-radio-button-wrapper) {
+    background-color: var(--backgroundColorElements);
+    color: var(--textColor);
   }
 }
 .Opportunities {

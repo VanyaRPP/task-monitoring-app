@@ -9,27 +9,30 @@
   li a {
     color: var(--primaryColor);
   }
-  :global {
-    .ant-table-thead > tr > th {
-      text-align: center;
-      background-color: var(--backgroundColorElements);
-      word-break: break-word;
-    }
-    .ant-table-column-title- {
-      color: var(--textColor);
-    }
-    td.ant-table-column-sort {
-      background-color: var(--backgroundColor);
-    }
-    .ant-table-tbody > tr.ant-table-row:hover > td {
-      background: var(--backgroundColorElements) !important;
-    }
-    .ant-pagination-item-active {
-      background-color: var(--primaryColorHover);
-    }
-    .ant-pagination-item-active a {
-      color: white;
-    }
+  :global(.ant-table-thead) > tr > th {
+    text-align: center;
+    background-color: var(--backgroundColorElements);
+    word-break: break-word;
+  }
+
+  :global(.ant-table-column-title-) {
+    color: var(--textColor);
+  }
+
+  td:global(.ant-table-column-sort) {
+    background-color: var(--backgroundColor);
+  }
+
+  :global(.ant-table-tbody) > tr:global(.ant-table-row:hover) > td {
+    background: var(--backgroundColorElements) !important;
+  }
+
+  :global(.ant-pagination-item-active) {
+    background-color: var(--primaryColorHover);
+  }
+
+  :global(.ant-pagination-item-active) a {
+    color: white;
   }
   tr {
     text-align: center;
@@ -55,9 +58,7 @@
   .Icon {
     padding-left: 10px;
   }
-  :global {
-    .ant-select-selector {
-      display: none;
-    }
+  :global(.ant-select-selector) {
+    display: none;
   }
 }

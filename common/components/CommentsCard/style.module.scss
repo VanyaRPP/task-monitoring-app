@@ -209,10 +209,8 @@
 }
 
 .Card {
-  :global {
-    .ant-empty-normal {
-      color: var(--textColor);
-    }
+  :global(.ant-card-head-title) {
+    color: var(--textColor);
   }
 }
 

@@ -64,10 +64,8 @@
     padding-left: 10px;
   }
   border: 1px solid blue;
-  :global {
-    .ant-card-head-title {
-      white-space: initial;
-      padding: 9px 0;
-    }
+  :global(.ant-card-head-title) {
+    white-space: initial;
+    padding: 9px 0;
   }
 }
