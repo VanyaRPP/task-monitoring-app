@@ -127,7 +127,12 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
   isRefreshing,
 }) => {
   const router = useRouter()
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  // What the create modal is opened for: an invoice (debit) or a payment
+  // (credit). Null while it is closed.
+  const [createOperation, setCreateOperation] = useState<Operations | null>(
+    null
+  )
+  const isModalOpen = createOperation !== null
   const [drawerVisible, setDrawerVisible] = useState(false)
   const [isImportModalOpen, setIsImportModalOpen] = useState(false)
   const screens = useBreakpoint()
@@ -136,7 +141,7 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
   const { pathname } = router
 
   const closeModal = () => {
-    setIsModalOpen(false)
+    setCreateOperation(null)
     closeEditModal()
   }
 
@@ -253,7 +258,8 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
     export: handleExportExcel,
     import: () => setIsImportModalOpen(true),
     invoices: () => router.push(AppRoutes.PAYMENT_BULK),
-    add: () => setIsModalOpen(true),
+    add: () => setCreateOperation(Operations.Debit),
+    addCredit: () => setCreateOperation(Operations.Credit),
     download: handleGeneratePdf,
     delete: onDeleteClick,
     bulkMarkPaid: () =>
@@ -380,7 +386,7 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
       ? [{ key: 'invoices', label: 'Інвойси', icon: <SelectOutlined /> }]
       : []),
     ...(isAdmin
-      ? [{ key: 'add', label: 'Додати', icon: <PlusOutlined /> }]
+      ? [{ key: 'addCredit', label: 'Додати оплату', icon: <PlusOutlined /> }]
       : []),
     ...(isAdmin && pathname === AppRoutes.PAYMENT && selectedPayments.length > 0
       ? [
@@ -429,7 +435,8 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
     },
     { key: 'import', label: 'Імпорт', icon: <ImportOutlined /> },
     { key: 'invoices', label: 'Інвойси', icon: <SelectOutlined /> },
-    { key: 'add', label: 'Додати', icon: <PlusOutlined /> },
+    { key: 'add', label: 'Створити рахунок', icon: <PlusOutlined /> },
+    { key: 'addCredit', label: 'Додати оплату', icon: <CheckOutlined /> },
   ]
 
   if (isDashboard) {
@@ -453,6 +460,7 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
             <Tooltip title="Додаткові дії">
               <Button
                 type="text"
+                aria-label="Додаткові дії"
                 icon={
                   <MoreOutlined
                     style={{ color: token.colorText, fontSize: 18 }}
@@ -477,6 +485,7 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
             paymentData={currentPayment}
             preselectedCompany={selectedCompany}
             preselectedDomain={selectedDomain}
+            initialOperation={createOperation ?? undefined}
             closeModal={closeModal}
           />
         )}
@@ -510,7 +519,20 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
             customServices={customServiceOptions}
           />
         </div>
-        <div style={{ marginLeft: 12 }}>
+        <Flex gap={8} align="center" style={{ marginLeft: 12 }}>
+          {isAdmin && (
+            // Creating an invoice is what this page is for, so it is not one
+            // of the menu's items. On a phone the label gives way to the icon.
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              aria-label="Створити рахунок"
+              style={{ minHeight: 40 }}
+              onClick={() => setCreateOperation(Operations.Debit)}
+            >
+              {screens.md ? 'Створити рахунок' : null}
+            </Button>
+          )}
           <Dropdown
             menu={{ items, onClick: handleMenuClick }}
             trigger={['click']}
@@ -520,6 +542,7 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
             <Tooltip title="Додаткові дії">
               <Button
                 type="text"
+                aria-label="Додаткові дії"
                 icon={
                   <MoreOutlined
                     style={{ color: token.colorText, fontSize: 18 }}
@@ -535,7 +558,7 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
               />
             </Tooltip>
           </Dropdown>
-        </div>
+        </Flex>
       </Flex>
       {shouldOpenModal(isModalOpen, currentPayment, paymentActions) && (
         <AddPaymentModal
@@ -545,6 +568,7 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
           paymentData={currentPayment}
           preselectedCompany={selectedCompany}
           preselectedDomain={selectedDomain}
+          initialOperation={createOperation ?? undefined}
           closeModal={closeModal}
         />
       )}

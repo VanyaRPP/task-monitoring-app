@@ -63,6 +63,17 @@ const typeOnly = (name: string) => {
 describe('CompanySelect — поле вибору компанії', () => {
   afterEach(() => jest.clearAllMocks())
 
+  it('за замовчуванням показує компанії лише обраної адреси', () => {
+    mockedQuery.mockReturnValue({ data: { data: [] }, isLoading: false })
+
+    render(<Wrapper initialValues={{ domain: 'd1', street: 's1' }} />)
+
+    expect(mockedQuery.mock.calls.map(([args]) => args)).toContainEqual({
+      domainId: 'd1',
+      streetId: 's1',
+    })
+  })
+
   it('показує заглушку, коли надавача послуг ще не обрано', () => {
     mockedQuery.mockReturnValue({ data: { data: [] }, isLoading: false })
 

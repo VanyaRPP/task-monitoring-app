@@ -24,6 +24,9 @@ interface Props {
   // name + email input mode. The value becomes a `new::` sentinel that
   // AddPaymentModal materializes into a real company on submit.
   allowCreate?: boolean
+  // When false the list holds every company of the provider, whatever address
+  // is selected - for a form where the address follows the company.
+  filterByStreet?: boolean
 }
 
 export default function CompanySelect({
@@ -31,6 +34,7 @@ export default function CompanySelect({
   edit,
   company,
   allowCreate,
+  filterByStreet = true,
 }: Props) {
   const domainId = Form.useWatch('domain', form)
 
@@ -49,6 +53,7 @@ export default function CompanySelect({
       edit={edit}
       company={company}
       allowCreate={allowCreate}
+      filterByStreet={filterByStreet}
     />
   )
 }
@@ -59,6 +64,7 @@ interface CompanyPickerProps {
   edit?: boolean
   company?: string | Partial<IRealestate>
   allowCreate?: boolean
+  filterByStreet: boolean
 }
 
 function CompanyPicker({
@@ -67,8 +73,10 @@ function CompanyPicker({
   edit,
   company,
   allowCreate,
+  filterByStreet,
 }: CompanyPickerProps) {
-  const streetId = Form.useWatch('street', form)
+  const selectedStreetId = Form.useWatch('street', form)
+  const streetId = filterByStreet ? selectedStreetId : undefined
   const companyValue = Form.useWatch('company', form)
   const [search, setSearch] = useState('')
   const focusNameOnCreate = useRef(false)

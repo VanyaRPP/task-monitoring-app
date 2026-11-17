@@ -1,9 +1,26 @@
 .Modal {
-  min-width: 450px;
-  @media (min-width: 768px) {
-    min-width: calc(100% - 2rem);
+  // Never wider than the screen: a fixed minimum used to push the modal off
+  // a phone's viewport.
+  width: calc(100vw - 16px) !important;
+  max-width: 1000px;
+
+  @media (min-width: 1360px) {
+    max-width: 1440px;
   }
-  @media (min-width: 1024px) {
-    min-width: 1000px;
-  }
+}
+
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 24px;
+}
+
+// Form and live invoice side by side. The form keeps the width its lines
+// table needs; the invoice takes what is left and scales itself to it.
+.splitWide {
+  grid-template-columns: minmax(760px, 3fr) minmax(0, 2fr);
+}
+
+.formPane {
+  min-width: 0;
 }

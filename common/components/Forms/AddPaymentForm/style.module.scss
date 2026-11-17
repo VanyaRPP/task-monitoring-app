@@ -38,3 +38,16 @@
 .currencySelect {
   width: 90px;
 }
+
+// The block sits flush with the fields above it, not indented like a card.
+.details {
+  :global {
+    .ant-collapse-header {
+      padding-inline: 0 !important;
+    }
+
+    .ant-collapse-content-box {
+      padding-inline: 0 !important;
+    }
+  }
+}

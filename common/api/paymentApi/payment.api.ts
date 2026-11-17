@@ -272,6 +272,8 @@ export const paymentApi = createApi({
         method: 'POST',
         body: { html },
       }),
+      // The server marks the invoice as sent.
+      invalidatesTags: (response) => (response?.success ? ['Payment'] : []),
     }),
     markPaymentsPaid: builder.mutation<
       {

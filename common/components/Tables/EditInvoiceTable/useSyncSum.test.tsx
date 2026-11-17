@@ -15,6 +15,13 @@ describe('useSyncSum', () => {
     expect(form.setFieldValue).toHaveBeenCalledWith(['invoice', 0, 'sum'], 250)
   })
 
+  it('stores the sum rounded to 2 decimals, without float noise', () => {
+    const form = makeForm()
+    renderHook(() => useSyncSum(form as any, [0], 0.1 * 3))
+
+    expect(form.setFieldValue).toHaveBeenCalledWith(['invoice', 0, 'sum'], 0.3)
+  })
+
   it('rewrites only when the computed sum changes', () => {
     const form = makeForm()
     const { rerender } = renderHook(

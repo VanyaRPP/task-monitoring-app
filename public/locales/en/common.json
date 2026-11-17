@@ -13,6 +13,15 @@
     "messages": {
       "sendFailed": "Failed to send the payment email",
       "sendSuccess": "Payment email sent"
+    },
+    "actions": {
+      "send": "Send by email"
+    },
+    "confirm": {
+      "sendTitle": "Send invoice No. {{number}}?",
+      "recipients": "Recipients: {{emails}}",
+      "noRecipients": "The invoice has no recipient email — it will go to the company or to the provider admins.",
+      "cancel": "Cancel"
     }
   },
   "modal": {

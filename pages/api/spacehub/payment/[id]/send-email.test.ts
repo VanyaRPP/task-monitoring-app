@@ -7,7 +7,7 @@ import { sendInvoiceEmail } from '@utils/email/sendInvoiceEmail'
 jest.mock('@pages/api/api.config', () => jest.fn())
 jest.mock('@common/modules/models/Payment', () => ({
   __esModule: true,
-  default: { findById: jest.fn() },
+  default: { findById: jest.fn(), updateOne: jest.fn() },
 }))
 jest.mock('@utils/getCurrentUser', () => ({ getCurrentUser: jest.fn() }))
 jest.mock('@utils/email/sendInvoiceEmail', () => ({
@@ -15,6 +15,7 @@ jest.mock('@utils/email/sendInvoiceEmail', () => ({
 }))
 
 const findByIdMock = Payment.findById as jest.Mock
+const updateOneMock = Payment.updateOne as jest.Mock
 const getCurrentUserMock = getCurrentUser as jest.Mock
 const sendInvoiceEmailMock = sendInvoiceEmail as jest.Mock
 
@@ -214,5 +215,73 @@ describe('POST /spacehub/payment/[id]/send-email', () => {
 
     expect(res.status).toHaveBeenCalledWith(403)
     expect(sendInvoiceEmailMock).not.toHaveBeenCalled()
+  })
+
+  describe('status', () => {
+    const draft = {
+      _id: 'p1',
+      invoiceNumber: 5,
+      status: 'draft',
+      reciever: { companyName: 'Acme', adminEmails: ['client@real.com'] },
+      company: { adminEmails: ['owner@real.com'] },
+      domain: { name: 'D', adminEmails: ['domain@real.com'] },
+    }
+
+    it('marks the invoice as sent once the email has gone out', async () => {
+      const res = await performRequest('POST', { id: 'p1' }, draft)
+
+      expect(res.status).toHaveBeenCalledWith(200)
+      expect(updateOneMock).toHaveBeenCalledWith(
+        { _id: 'p1' },
+        { $set: { status: 'sent' } }
+      )
+    })
+
+    it('leaves the invoice a draft when the email was not sent', async () => {
+      sendInvoiceEmailMock.mockResolvedValue(false)
+
+      const res = await performRequest('POST', { id: 'p1' }, draft)
+
+      expect(res.status).toHaveBeenCalledWith(400)
+      expect(updateOneMock).not.toHaveBeenCalled()
+    })
+
+    it('leaves the invoice a draft when sending throws', async () => {
+      sendInvoiceEmailMock.mockRejectedValue(new Error('smtp down'))
+
+      const res = await performRequest('POST', { id: 'p1' }, draft)
+
+      expect(res.status).toHaveBeenCalledWith(400)
+      expect(updateOneMock).not.toHaveBeenCalled()
+    })
+
+    it('a company owner emailing their own invoice does not change its status', async () => {
+      getCurrentUserMock.mockResolvedValue({
+        isGlobalAdmin: false,
+        isDomainAdmin: false,
+        isUser: true,
+        user: { email: 'owner@real.com' },
+      })
+
+      const res = await performRequest('POST', { id: 'p1' }, draft)
+
+      expect(res.status).toHaveBeenCalledWith(200)
+      expect(sendInvoiceEmailMock).toHaveBeenCalled()
+      expect(updateOneMock).not.toHaveBeenCalled()
+    })
+
+    it('an admin of the invoice domain marks it as sent too', async () => {
+      getCurrentUserMock.mockResolvedValue({
+        isGlobalAdmin: false,
+        isDomainAdmin: true,
+        isUser: false,
+        user: { email: 'domain@real.com' },
+      })
+
+      const res = await performRequest('POST', { id: 'p1' }, draft)
+
+      expect(res.status).toHaveBeenCalledWith(200)
+      expect(updateOneMock).toHaveBeenCalledTimes(1)
+    })
   })
 })

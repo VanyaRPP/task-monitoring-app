@@ -6,13 +6,17 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import { applyTemplateScope } from '@common/services/paymentService/templateScope.service'
 import { logPaymentMutation } from '@common/modules/services/paymentAudit'
 import { canWritePayment } from '@common/services/paymentService/paymentAccess'
+import { withRoundedGeneralSum } from '@common/services/paymentService/payment.service'
 
 const PROTECTED_PATCH_FIELDS = ['_id', 'domain', 'company', '_templateScope']
 
-const sanitizePatchBody = (body: Record<string, any>) => {
-  const sanitized: Record<string, any> = { ...body }
-  for (const f of PROTECTED_PATCH_FIELDS) {
-    delete sanitized[f]
+const sanitizePatchBody = (body: Record<string, unknown>) => {
+  const sanitized: Record<string, unknown> = {}
+  for (const [key, value] of Object.entries(body ?? {})) {
+    // An operator key ($set, $unset...) would be applied as-is and skip the
+    // protected-field list.
+    if (key.startsWith('$') || PROTECTED_PATCH_FIELDS.includes(key)) continue
+    sanitized[key] = value
   }
   return sanitized
 }
@@ -187,12 +191,12 @@ export default async function handler(
           }
         }
 
-        const update = sanitizePatchBody(req.body)
+        const update = withRoundedGeneralSum(sanitizePatchBody(req.body))
 
         const response: any = await Payment.findOneAndUpdate(
           { _id: req.query.id },
-          update,
-          { returnDocument: 'after' }
+          { $set: update },
+          { returnDocument: 'after', runValidators: true }
         )
 
         await logPaymentMutation({

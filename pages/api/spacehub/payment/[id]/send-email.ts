@@ -3,6 +3,7 @@ import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { sendInvoiceEmail } from '@utils/email/sendInvoiceEmail'
+import { PaymentStatus } from '@common/api/paymentApi/payment.api.types'
 
 export const config = {
   maxDuration: 60,
@@ -51,16 +52,17 @@ export default async function handler(
         .json({ success: false, message: 'Payment not found' })
     }
 
-    if (isGlobalAdmin) {
-      //* allowed
-    } else if (
-      isDomainAdmin &&
-      payment.domain?.adminEmails?.includes(user.email)
+    // Who issued the invoice: the same rule as editing it. A company owner
+    // may email their own invoice to themselves, but that is not the provider
+    // sending it, so it does not change the status.
+    const isIssuer =
+      isGlobalAdmin ||
+      (isDomainAdmin && !!payment.domain?.adminEmails?.includes(user.email))
+
+    if (
+      !isIssuer &&
+      !(isUser && payment.company?.adminEmails?.includes(user.email))
     ) {
-      //* allowed
-    } else if (isUser && payment.company?.adminEmails?.includes(user.email)) {
-      //* allowed
-    } else {
       return res.status(403).json({ success: false, message: 'not allowed' })
     }
 
@@ -105,6 +107,16 @@ export default async function handler(
       return res
         .status(400)
         .json({ success: false, message: 'failed to send email' })
+
+    // Marked here, together with the send, not by a second request from the
+    // client: when that request failed, the user saw "not sent" for an email
+    // that had gone out, and sent it again.
+    if (isIssuer && payment.status !== PaymentStatus.Sent) {
+      await Payment.updateOne(
+        { _id: payment._id },
+        { $set: { status: PaymentStatus.Sent } }
+      )
+    }
 
     return res.status(200).json({ success: true, data: { sent: true } })
   } catch (error: any) {

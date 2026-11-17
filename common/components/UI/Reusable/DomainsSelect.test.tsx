@@ -157,6 +157,35 @@ describe('DomainsSelect — поле надавача послуг', () => {
     expect(screen.queryByText(/Створити/)).toBeNull()
   })
 
+  it('єдиний надавач підставляється сам і там, де можна створити нового', async () => {
+    mockDomains.mockReturnValue({
+      data: [{ _id: 'd1', name: 'Alpha' }],
+      isLoading: false,
+      isError: false,
+    })
+
+    render(<Wrapper allowCreate />)
+
+    await waitFor(() => expect(domainValue()).toBe('d1'))
+    expect(screen.queryByPlaceholderText('Назва надавача')).toBeNull()
+  })
+
+  it('кілька надавачів — нічого не підставляється', async () => {
+    mockDomains.mockReturnValue({
+      data: [
+        { _id: 'd1', name: 'Alpha' },
+        { _id: 'd2', name: 'Beta' },
+      ],
+      isLoading: false,
+      isError: false,
+    })
+
+    render(<Wrapper allowCreate />)
+
+    await waitFor(() => expect(getDomainInput()).toBeInTheDocument())
+    expect(domainValue()).toBe('')
+  })
+
   it('коли у користувача ще немає надавачів — одразу показує поля створення', async () => {
     mockDomains.mockReturnValue({ data: [], isLoading: false, isError: false })
 

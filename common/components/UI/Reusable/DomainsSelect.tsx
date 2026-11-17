@@ -73,10 +73,12 @@ const DomainsSelect: React.FC<DomainsSelectProps> = ({
   }, [typeTemplates])
 
   useEffect(() => {
-    // Auto-pick the only existing provider, but never while quick-creating.
-    if (!edit && !allowCreate && options.length === 1) {
-      form.setFieldsValue({ domain: options[0].value })
-    }
+    // Auto-pick the only existing provider. Where a new one can be typed in,
+    // only fill an empty field: a name being typed, or a preselected provider,
+    // must not be replaced.
+    if (edit || options.length !== 1) return
+    if (allowCreate && form.getFieldValue('domain')) return
+    form.setFieldsValue({ domain: options[0].value })
   }, [form, options, edit, allowCreate])
 
   // With no providers of their own, the user can only create one — drop straight

@@ -62,7 +62,6 @@ const renderCompanyCell = ({
       onMarkPaid: jest.fn(),
       onDuplicate: jest.fn(),
       onSendPaymentEmail: jest.fn(),
-      onUpdatePaymentStatus: jest.fn(),
       deleteLoading: false,
     })
   )

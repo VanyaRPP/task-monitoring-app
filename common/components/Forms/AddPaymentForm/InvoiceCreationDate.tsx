@@ -10,7 +10,7 @@ export default function InvoiceCreationDate({ edit }) {
     <ConfigProvider locale={ukUA}>
       <Form.Item
         name="invoiceCreationDate"
-        label="Оплата від"
+        label="Дата рахунку"
         tooltip="Дата виставлення рахунку."
       >
         <DatePicker format="DD.MM.YYYY" disabled={edit} />

@@ -86,6 +86,20 @@ describe('Payment access', () => {
       expect(status).toBe(200)
     })
 
+    it('stores the total rounded to 2 decimals, negative ones included', async () => {
+      const created = await call(paymentsHandler, users.domainAdmin, {
+        method: 'POST',
+        body: { ...invoiceIn(ownDomain, ownCompany), generalSum: 0.1 + 0.2 },
+      })
+      const refund = await call(paymentsHandler, users.domainAdmin, {
+        method: 'POST',
+        body: { ...invoiceIn(ownDomain, ownCompany), generalSum: -1.15 * 3.3 },
+      })
+
+      expect(created.body.data.generalSum).toBe(0.3)
+      expect(refund.body.data.generalSum).toBe(-3.8)
+    })
+
     it('403 into a foreign domain, and nothing is written', async () => {
       const before = await Payment.countDocuments()
 
@@ -142,6 +156,39 @@ describe('Payment access', () => {
 
       expect(status).toBe(200)
       expect((await Payment.findById(own._id).lean()).template).toBe('olimp')
+    })
+
+    it('PATCH cannot move a payment to another domain through $set', async () => {
+      const own = await addPayment(ownDomain, ownCompany)
+
+      const { status } = await call(paymentHandler, users.domainAdmin, {
+        method: 'PATCH',
+        query: { id: own._id.toString() },
+        body: {
+          invoice: [],
+          description: 'edited',
+          $set: { domain: foreignDomain, company: foreignCompany },
+        },
+      })
+
+      const after = await Payment.findById(own._id).lean()
+      expect(status).toBe(200)
+      expect(after.description).toBe('edited')
+      expect(after.domain.toString()).toBe(ownDomain)
+      expect(after.company.toString()).toBe(ownCompany)
+    })
+
+    it('PATCH stores the total rounded to 2 decimals', async () => {
+      const own = await addPayment(ownDomain, ownCompany)
+
+      const { status } = await call(paymentHandler, users.domainAdmin, {
+        method: 'PATCH',
+        query: { id: own._id.toString() },
+        body: { invoice: [], generalSum: 0.1 + 0.2 },
+      })
+
+      expect(status).toBe(200)
+      expect((await Payment.findById(own._id).lean()).generalSum).toBe(0.3)
     })
 
     it('DELETE writes one audit entry, not two', async () => {

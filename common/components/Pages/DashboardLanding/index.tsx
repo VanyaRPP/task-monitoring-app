@@ -12,6 +12,7 @@ import DashboardTour from '@components/DashboardPage/DashboardTour'
 import { addButton, removeButton } from '@modules/store/floatButtonSlice'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { useRouter } from 'next/router'
+import { AppRoutes } from '@utils/constants'
 import s from './DashboardLanding.module.scss'
 
 const DashboardLanding = () => {
@@ -43,15 +44,13 @@ const DashboardLanding = () => {
     setPaymentModalOpen(true)
   }
 
-  const handlePaymentModalClose = (success?: boolean) => {
+  const handlePaymentModalClose = async (success?: boolean) => {
     setPaymentModalOpen(false)
-    if (success) {
-      router.push('/payment')
-    } else {
-      router.reload()
-    }
+    if (!success) return
     // The first invoice creates a provider+company on the fly, which promotes
-    // the user to DomainAdmin. Reload so the new role and data take effect.
+    // the user to DomainAdmin. Reload once on the payments page, so the new
+    // role and data take effect where the invoice is listed.
+    await router.push(AppRoutes.PAYMENT)
     router.reload()
   }
   return (

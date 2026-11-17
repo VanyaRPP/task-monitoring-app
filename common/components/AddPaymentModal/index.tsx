@@ -15,6 +15,7 @@ import { resolveTemplate, TemplateKey } from './resolveTemplate'
 import {
   useAddPaymentMutation,
   useEditPaymentMutation,
+  useSendPaymentEmailMutation,
 } from '@common/api/paymentApi/payment.api'
 import {
   useGetPaymentChangeLogsQuery,
@@ -23,6 +24,7 @@ import {
 import {
   IExtendedPayment,
   IPayment,
+  PaymentStatus,
   TemplateScopeTarget,
 } from '@common/api/paymentApi/payment.api.types'
 import { useAddStreetMutation } from '@common/api/streetApi/street.api'
@@ -39,7 +41,7 @@ import {
   getPaymentProviderAndReciever,
   normalizeCurrency,
 } from '@utils/helpers'
-import { Button, Form, Tabs, TabsProps, message } from 'antd'
+import { Button, Form, Popconfirm, Tabs, TabsProps, message } from 'antd'
 import { QuestionCircleOutlined } from '@ant-design/icons'
 import InvoiceTour from './InvoiceTour'
 import { FormInstance } from 'antd/es/form/Form'
@@ -58,11 +60,20 @@ import {
 import AddPaymentForm from '../Forms/AddPaymentForm'
 import InvoiceTemplateTab from './InvoiceTemplateTab'
 import GroupedReceiptForm from '../Forms/GroupedReceiptForm'
+import HeadlessReceiptRenderer from '../Forms/GroupedReceiptForm/HeadlessReceiptRenderer'
 import { getPreviewQtyStorageKey } from '../Forms/GroupedReceiptForm/previewQtyStorage'
 import { resolveInvoiceLang } from '../Forms/GroupedReceiptForm/resolveInvoiceLang'
 import PaymentReceiptForm from '../Forms/PaymentReceiptForm'
 import ReceiptForm from '../Forms/ReceiptForm'
 import serviceFilter from './serviceFilter'
+import {
+  LiveInvoice,
+  LivePriceList,
+  LiveReceipt,
+  SideInvoicePreview,
+} from './LiveDocuments'
+import { useMediaQuery } from '@modules/hooks/useMediaQuery'
+import cn from 'classnames'
 import { normalizeTechnicalTransactionId } from '../Pages/BankTransactions/components/TransactionsTable/components/bankHelper'
 import s from './style.module.scss'
 
@@ -72,6 +83,12 @@ interface Props {
   paymentActions?: { edit: boolean; preview: boolean; create?: boolean }
   preselectedCompany?: string
   preselectedDomain?: string
+  /**
+   * What a new record is: an invoice (debit, the default) or a payment
+   * (credit). The form has no switch for it - the two are opened from
+   * different buttons.
+   */
+  initialOperation?: Operations
   /**
    * Lines to keep on top of the generated ones (an AI draft's "оренда 5000").
    * The form re-seeds `invoice` from the tariffs whenever its inputs load or
@@ -130,12 +147,25 @@ const getId = (obj?: string | Partial<{ _id: string }>) => {
   return obj._id
 }
 
+// From this width the form and a readable invoice fit side by side.
+const SIDE_PREVIEW_QUERY = '(min-width: 1360px)'
+
+// Changing one of these is the user asking for a different invoice, so its
+// lines are generated again (see the seeding effect).
+const SEED_SOURCE_FIELDS = ['domain', 'street', 'company', 'monthService']
+
+interface SendJob {
+  payment: Partial<IExtendedPayment> & { _id: string }
+  company: IRealestate | null
+}
+
 const AddPaymentModal: FC<Props> = ({
   closeModal,
   paymentData,
   paymentActions,
   preselectedCompany,
   preselectedDomain,
+  initialOperation,
   extraInvoiceLines,
   invoiceLines,
 }) => {
@@ -148,10 +178,13 @@ const AddPaymentModal: FC<Props> = ({
   const autoSelectedChangelogRef = useRef(false)
   const lastLoadedCompanyId = useRef<string | null>(null)
   const [changed, setChanged] = useState(false)
-  const [saved, setSaved] = useState(false)
+  // Set once the invoice is saved and is being emailed (see handleSubmit).
+  const [sendJob, setSendJob] = useState<SendJob | null>(null)
+  const sendJobRef = useRef<SendJob | null>(null)
+  // While true the invoice lines are not regenerated from the tariffs.
+  const seedLockedRef = useRef(false)
   // Bumping this re-opens the guided invoice tour from the "?" button.
   const [tourSignal, setTourSignal] = useState(0)
-  const [currPayment, setCurrPayment] = useState<IExtendedPayment>()
   const companyDefaultTemplate =
     typeof paymentData?.company === 'object'
       ? (paymentData.company as any)?.defaultTemplate
@@ -327,6 +360,7 @@ const AddPaymentModal: FC<Props> = ({
   const [addPayment, { isLoading: isAddingLoading }] = useAddPaymentMutation()
   const [editPayment, { isLoading: isEditingLoading }] =
     useEditPaymentMutation()
+  const [sendPaymentEmail] = useSendPaymentEmailMutation()
   const [createCustomService] = useCreateCustomServiceMutation()
   const [addDomain] = useAddDomainMutation()
   const [addRealEstate] = useAddRealEstateMutation()
@@ -402,25 +436,37 @@ const AddPaymentModal: FC<Props> = ({
   }, [selectedChangelogId, changelogRes, form])
 
   const operation = Form.useWatch('operation', form)
+  const isCredit = operation === Operations.Credit
+  const isWideScreen = useMediaQuery(SIDE_PREVIEW_QUERY)
+  const showSidePreview = isWideScreen && !preview && !isCredit
+  // The documents are drawn from the form as it is being filled in; they need
+  // a company for the two parties they name.
+  const documentsReady = Boolean(company)
 
   const items: TabsProps['items'] = []
-  const shouldTabsEnabled = (edit && !changed) || preview || saved
 
   if (!preview) {
     items.push({
       key: '1',
-      label: 'Рахунок',
+      label: isCredit ? 'Оплата' : 'Рахунок',
       children: (
-        <AddPaymentForm
-          paymentActions={paymentActions}
-          changelogOptions={changelogOptions}
-          changelogLoading={changelogLoading}
-        />
+        <div className={cn(s.split, { [s.splitWide]: showSidePreview })}>
+          <div className={s.formPane}>
+            <AddPaymentForm
+              paymentActions={paymentActions}
+              changelogOptions={changelogOptions}
+              changelogLoading={changelogLoading}
+            />
+          </div>
+          {showSidePreview && (
+            <SideInvoicePreview paymentActions={{ preview, edit }} />
+          )}
+        </div>
       ),
     })
   }
 
-  if (!preview && operation !== Operations.Credit) {
+  if (!preview && !isCredit) {
     items.push({
       key: 'template',
       label: 'Шаблон',
@@ -428,29 +474,49 @@ const AddPaymentModal: FC<Props> = ({
     })
   }
 
-  if (
-    !preview ||
-    paymentData?.type === Operations.Debit ||
-    paymentData?.type === Operations.Credit
-  ) {
+  if (preview) {
+    if (
+      paymentData?.type === Operations.Debit ||
+      paymentData?.type === Operations.Credit
+    ) {
+      items.push({
+        key: '2',
+        label: 'Перегляд',
+        children:
+          paymentData?.type === Operations.Credit ? (
+            <PaymentReceiptForm
+              currPayment={undefined}
+              paymentData={paymentData}
+              paymentActions={paymentActions}
+            />
+          ) : (
+            <GroupedReceiptForm
+              paymentData={paymentData}
+              paymentActions={paymentActions}
+            />
+          ),
+      })
+    }
+  } else if (!isCredit) {
     items.push({
       key: '2',
       label: 'Перегляд',
-      disabled: !shouldTabsEnabled,
-      children:
-        paymentData?.type === Operations.Credit ? (
-          <PaymentReceiptForm
-            currPayment={currPayment}
-            paymentData={paymentData}
-            paymentActions={paymentActions}
-          />
-        ) : (
-          <GroupedReceiptForm
-            currPayment={currPayment}
-            paymentData={paymentData}
-            paymentActions={paymentActions}
-          />
-        ),
+      disabled: !documentsReady,
+      children: <LiveInvoice paymentActions={{ preview, edit }} />,
+    })
+  } else if (edit && paymentData?.type === Operations.Credit) {
+    items.push({
+      key: '2',
+      label: 'Перегляд',
+      // The receipt shows the saved payment, not the edits in progress.
+      disabled: changed,
+      children: (
+        <PaymentReceiptForm
+          currPayment={undefined}
+          paymentData={paymentData}
+          paymentActions={paymentActions}
+        />
+      ),
     })
   }
 
@@ -462,8 +528,8 @@ const AddPaymentModal: FC<Props> = ({
     items.push({
       key: '3',
       label: 'Акт',
-      disabled: !shouldTabsEnabled,
-      children: <PriceList data={currPayment ?? paymentData} />,
+      disabled: !preview && !documentsReady,
+      children: preview ? <PriceList data={paymentData} /> : <LivePriceList />,
     })
   }
 
@@ -473,21 +539,25 @@ const AddPaymentModal: FC<Props> = ({
     items.push({
       key: '4',
       label: 'Довідка',
-      disabled: !shouldTabsEnabled,
-      children: (
+      disabled: !preview && !documentsReady,
+      children: preview ? (
         <ReceiptForm
-          currPayment={currPayment}
+          currPayment={undefined}
           paymentData={paymentData}
           paymentActions={paymentActions}
         />
+      ) : (
+        <LiveReceipt paymentActions={{ preview, edit }} />
       ),
     })
   }
 
-  const handleChange = () => {
+  const handleChange = (changedValues: Record<string, unknown>) => {
     if (restoringRef.current) return
-    setSaved(false)
     setChanged(true)
+    if (SEED_SOURCE_FIELDS.some((field) => field in (changedValues ?? {}))) {
+      seedLockedRef.current = false
+    }
   }
 
   /**
@@ -544,39 +614,6 @@ const AddPaymentModal: FC<Props> = ({
     },
     [createCustomService]
   )
-
-  const handleOk = async () => {
-    setChanged(false)
-    setSaved(true)
-
-    const values = await form.validateFields()
-
-    if (values.operation === Operations.Credit) {
-      await handleSubmit()
-      return
-    }
-
-    // A brand-new provider isn't created until final submit, so its month
-    // service can't be resolved yet — keep the placeholder for the preview and
-    // let handleSubmit materialize the provider and resolve it for real.
-    let monthServiceId = values.monthService
-    if (!isNewEntityValue(values.domain)) {
-      monthServiceId = await prepareMonthService(values)
-      if (monthServiceId === null) {
-        setSaved(false)
-        setChanged(true)
-        return
-      }
-    }
-
-    setCurrPayment({
-      ...values,
-      monthService: monthServiceId,
-      provider,
-      reciever,
-    })
-    setActiveTabKey('2')
-  }
 
   // Materialize any inline-created provider/company (held as `new::` sentinels)
   // into real records before building the payment. Order matters: creating the
@@ -644,8 +681,91 @@ const AddPaymentModal: FC<Props> = ({
     [addDomain, addRealEstate, form, typeTemplates]
   )
 
-  const handleSubmit = async () => {
-    const formData = await form.validateFields()
+  // Called once the record is saved (and, if asked, the email is dealt with).
+  const finish = (outcome: 'saved' | 'sent' | 'not-sent') => {
+    form.resetFields()
+    if (outcome === 'sent') {
+      message.success('Рахунок збережено й надіслано на пошту')
+    } else if (outcome === 'not-sent') {
+      message.warning(
+        'Рахунок збережено, але надіслати його не вдалося. Спробуйте ще раз із меню рахунку.'
+      )
+    } else {
+      message.success(edit ? 'Збережено' : 'Додано')
+    }
+
+    const channel = new BroadcastChannel('payments_sync_channel')
+    channel.postMessage('PAYMENT_CREATED')
+    setTimeout(() => channel.close(), 100)
+
+    closeModal(true)
+  }
+  // The email is sent from callbacks that must keep their identity (see
+  // completeSend), so they reach the current `finish` through a ref.
+  const finishRef = useRef(finish)
+  finishRef.current = finish
+
+  /**
+   * Second half of "save and send": HeadlessReceiptRenderer has drawn the
+   * saved invoice and hands over its html (or failed to, and passes nothing).
+   * Stable on purpose - the renderer restarts its capture timer whenever a
+   * callback changes.
+   */
+  const completeSend = useCallback(
+    async (html?: string) => {
+      const job = sendJobRef.current
+      if (!job) return
+      sendJobRef.current = null
+
+      let sent = false
+      if (html) {
+        try {
+          const response = await sendPaymentEmail({
+            id: job.payment._id,
+            html,
+          }).unwrap()
+          sent = Boolean(response?.success)
+        } catch (e) {
+          console.error('send after save failed', e)
+        }
+      }
+      setSendJob(null)
+      finishRef.current(sent ? 'sent' : 'not-sent')
+    },
+    [sendPaymentEmail]
+  )
+  const handleSendCapture = useCallback(
+    (html: string) => {
+      void completeSend(html)
+    },
+    [completeSend]
+  )
+  const handleSendCaptureError = useCallback(
+    (error: Error) => {
+      console.error('invoice render for email failed', error)
+      void completeSend()
+    },
+    [completeSend]
+  )
+
+  const handleSubmit = async ({ send = false }: { send?: boolean } = {}) => {
+    let formData: any
+    try {
+      formData = await form.validateFields()
+    } catch {
+      // The fields that failed are on the first tab.
+      setActiveTabKey('1')
+      return
+    }
+
+    // Saving swaps placeholders for real ids (a new provider/company/address,
+    // the month's service), and each swap reloads the data the lines are
+    // generated from. Without the lock that would regenerate them over what
+    // the user has typed - while the save is still running, or after it failed.
+    seedLockedRef.current = true
+    // The company as the form shows it now: a company created by this save is
+    // refetched under its new id, and that may not be back before the email.
+    const companyAtSubmit = company ?? null
 
     let materialized: { domain: string; company: string; street: string }
     try {
@@ -692,38 +812,56 @@ const AddPaymentModal: FC<Props> = ({
       ? { ...payment, _templateScope: templateScope }
       : payment
 
-    const response = edit
-      ? await editPayment({
-          _id: paymentData?._id,
-          ...finalPayload,
-        })
-      : await addPayment(finalPayload)
-
-    if ('data' in response) {
-      const currentDomainId = String(
-        formData.domain || domainId || paymentDomainId || ''
-      )
-      if (currentDomainId && formData.invoice?.length) {
-        await saveAdHocCustomServices(formData.invoice, currentDomainId)
+    let savedPayment: SendJob['payment'] | null = null
+    if (edit) {
+      const response = await editPayment({
+        _id: paymentData?._id,
+        ...finalPayload,
+      })
+      if ('data' in response) {
+        savedPayment = { ...finalPayload, _id: paymentData?._id }
       }
-
-      const action = edit ? 'Збережено' : 'Додано'
-      form.resetFields()
-      message.success(action)
-
-      const channel = new BroadcastChannel('payments_sync_channel')
-      channel.postMessage('PAYMENT_CREATED')
-      setTimeout(() => channel.close(), 100)
-
-      closeModal(true)
     } else {
+      const response = await addPayment(finalPayload)
+      if ('data' in response) {
+        // The server's copy: it carries the number the invoice was given.
+        savedPayment = response.data.data
+      }
+    }
+
+    if (!savedPayment) {
       const action = edit ? 'збереженні' : 'додаванні'
       message.error(`Помилка при ${action} рахунку`)
+      return
     }
+
+    const currentDomainId = String(
+      formData.domain || domainId || paymentDomainId || ''
+    )
+    if (currentDomainId && formData.invoice?.length) {
+      await saveAdHocCustomServices(formData.invoice, currentDomainId)
+    }
+
+    if (!send || !savedPayment._id) {
+      finish('saved')
+      return
+    }
+
+    // The emailed PDF follows the "show quantity" choice made in the preview,
+    // which is remembered per payment id - and this payment just got its id.
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem(
+        getPreviewQtyStorageKey(savedPayment._id),
+        showQuantityInPreview ? '1' : '0'
+      )
+    }
+    const job: SendJob = { payment: savedPayment, company: companyAtSubmit }
+    sendJobRef.current = job
+    setSendJob(job)
   }
 
   useEffect(() => {
-    if (activeTabKey !== '1' || saved || !company || !company._id) return
+    if (seedLockedRef.current || !company || !company._id) return
 
     const isEditing = !!paymentId || edit
     if (isEditing) {
@@ -746,7 +884,8 @@ const AddPaymentModal: FC<Props> = ({
     // `filteredInvoices` gets a new reference. Editing existing payments is
     // already short-circuited above, so user input on a CREATE form is reset
     // only when the user changes domain/street/company/month, which is the
-    // intended behavior.
+    // intended behavior. Switching tabs is not such a change, and neither is
+    // a save in progress (see seedLockedRef in handleSubmit).
     form.setFieldsValue({
       invoice:
         draftLines ??
@@ -774,10 +913,20 @@ const AddPaymentModal: FC<Props> = ({
     paymentData?.currency,
     paymentId,
     edit,
-    activeTabKey,
-    saved,
     form,
   ])
+
+  const isSaving = isAddingLoading || isEditingLoading || Boolean(sendJob)
+  // An invoice goes out by email; a payment (credit) is only recorded.
+  const canSend =
+    !preview && !isCredit && paymentData?.status !== PaymentStatus.Sent
+  // The same order the send-email route resolves recipients in.
+  const recipients: string[] = isNewCompany
+    ? companyEmail
+      ? [companyEmail]
+      : []
+    : (company?.adminEmails ?? [])
+  const saveLabel = edit ? 'Зберегти' : 'Додати'
 
   return (
     <PaymentContext.Provider
@@ -805,7 +954,7 @@ const AddPaymentModal: FC<Props> = ({
             'Редагування рахунку'
           ) : !preview ? (
             <span>
-              Додавання рахунку{' '}
+              {isCredit ? 'Додавання оплати' : 'Додавання рахунку'}{' '}
               <Button
                 type="text"
                 size="small"
@@ -819,18 +968,49 @@ const AddPaymentModal: FC<Props> = ({
             false
           )
         }
-        onOk={activeTabKey === '1' ? handleOk : handleSubmit}
+        onOk={() => handleSubmit()}
         okButtonProps={
-          preview ? { style: { display: 'none' } } : edit ? {} : null
+          preview
+            ? { style: { display: 'none' } }
+            : { disabled: Boolean(sendJob) }
         }
         changed={() => changed}
         onCancel={() => {
           form.resetFields()
           closeModal()
         }}
-        okText={edit ? 'Зберегти' : !preview && 'Додати'}
+        okText={!preview && saveLabel}
         cancelText={preview ? 'Закрити' : 'Відміна'}
         confirmLoading={isAddingLoading || isEditingLoading}
+        footer={
+          canSend
+            ? (_, { OkBtn, CancelBtn }) => (
+                <>
+                  <CancelBtn />
+                  <Popconfirm
+                    title="Надіслати рахунок на пошту?"
+                    description={
+                      recipients.length
+                        ? `Отримувачі: ${recipients.join(', ')}`
+                        : 'У компанії не вказано пошти — лист піде адміністраторам надавача послуг.'
+                    }
+                    okText="Надіслати"
+                    cancelText="Скасувати"
+                    disabled={isSaving}
+                    onConfirm={() => handleSubmit({ send: true })}
+                  >
+                    <Button
+                      loading={Boolean(sendJob)}
+                      disabled={isSaving && !sendJob}
+                    >
+                      {saveLabel} й надіслати
+                    </Button>
+                  </Popconfirm>
+                  <OkBtn />
+                </>
+              )
+            : undefined
+        }
         className={s.Modal}
         style={{ top: 20 }}
       >
@@ -856,12 +1036,13 @@ const AddPaymentModal: FC<Props> = ({
               : Currency.UAH,
             invoiceNumber: paymentData?.invoiceNumber,
             invoiceCreationDate: dayjs(paymentData?.invoiceCreationDate),
-            operation: paymentData?.type || Operations.Debit,
+            operation:
+              paymentData?.type || initialOperation || Operations.Debit,
           }}
           form={form}
           layout="vertical"
           className={s.Form}
-          onChange={handleChange}
+          onValuesChange={handleChange}
         >
           <Tabs
             activeKey={activeTabKey}
@@ -870,6 +1051,14 @@ const AddPaymentModal: FC<Props> = ({
           />
         </Form>
         {!edit && !preview && <InvoiceTour startSignal={tourSignal} />}
+        {sendJob && (
+          <HeadlessReceiptRenderer
+            payment={sendJob.payment}
+            contextCompany={sendJob.company}
+            onCapture={handleSendCapture}
+            onError={handleSendCaptureError}
+          />
+        )}
       </Modal>
     </PaymentContext.Provider>
   )

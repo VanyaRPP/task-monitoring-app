@@ -11,6 +11,7 @@ import {
   getTotalGeneralSumPipeline,
 } from '@pages/api/spacehub/payment/pipelines'
 import { quarters } from '@utils/constants'
+import { roundMoney } from '@utils/helpers'
 import { PaymentStatus } from '@common/api/paymentApi/payment.api.types'
 import mongoose, { QueryFilter } from 'mongoose'
 
@@ -352,13 +353,30 @@ export async function reserveInvoiceNumbers(count = 1): Promise<number> {
   return counter.seq - count + 1
 }
 
+/**
+ * The total arrives from the client as the result of float arithmetic, so it
+ * can carry binary noise (0.1 + 0.2 = 0.30000000000000004). Money is stored
+ * with 2 decimals; anything that is not a number is left for the schema to
+ * reject.
+ */
+export function withRoundedGeneralSum<T extends { generalSum?: unknown }>(
+  body: T
+): T {
+  const { generalSum } = body
+  if (generalSum === undefined || generalSum === null || generalSum === '') {
+    return body
+  }
+  if (!Number.isFinite(Number(generalSum))) return body
+  return { ...body, generalSum: roundMoney(generalSum) }
+}
+
 export async function createPayment(body: any, isAdmin: boolean) {
   if (!isAdmin) throw new Error('not allowed')
 
   // The number is the server's to give, at save time - whatever the client
   // showed in the form was only a preview.
   const payment = await Payment.create({
-    ...body,
+    ...withRoundedGeneralSum(body),
     invoiceNumber: await reserveInvoiceNumbers(),
   })
 

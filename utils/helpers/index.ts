@@ -366,6 +366,20 @@ export const getCurrencyNames = (
   }[normalizedCurrency]
 }
 
+/**
+ * Rounds a money value to 2 decimals, half up.
+ *
+ * Sums come out of plain float arithmetic (price * amount, a + b), which
+ * leaves binary noise: 0.1 + 0.2 = 0.30000000000000004 and 1.15 * 3.3 =
+ * 3.7949999999999995. `toPrecision(15)` drops that noise first, so the half
+ * rounds the way it does on paper (3.795 -> 3.8). Not-a-number gives 0.
+ */
+export function roundMoney(value: unknown): number {
+  const num = Number(value)
+  if (!Number.isFinite(num)) return 0
+  return Big(num.toPrecision(15)).round(2, Big.roundHalfUp).toNumber()
+}
+
 export function multiplyFloat(a, b) {
   const bigA = Big(toRoundFixed(`${a}`))
   const bigB = Big(toRoundFixed(`${b}`))

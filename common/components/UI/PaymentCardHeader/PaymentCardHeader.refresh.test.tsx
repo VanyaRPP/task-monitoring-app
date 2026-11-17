@@ -106,7 +106,8 @@ const setAdmin = (isAdmin: boolean) =>
     data: { roles: isAdmin ? [Roles.GLOBAL_ADMIN] : [] },
   })
 
-const openDropdown = () => fireEvent.click(screen.getByRole('button'))
+const openDropdown = () =>
+  fireEvent.click(screen.getByRole('button', { name: 'Додаткові дії' }))
 
 beforeEach(() => {
   jest.clearAllMocks()

@@ -1,4 +1,4 @@
-import { Modal as AntModal, ButtonProps } from 'antd'
+import { Modal as AntModal, ButtonProps, ModalProps } from 'antd'
 import s from './style.module.scss'
 
 interface Props {
@@ -14,6 +14,7 @@ interface Props {
   style?: React.CSSProperties
   open?: boolean
   okButtonProps?: ButtonProps
+  footer?: ModalProps['footer']
   title: React.ReactNode
   preview?: boolean
   destroyOnHidden?: boolean

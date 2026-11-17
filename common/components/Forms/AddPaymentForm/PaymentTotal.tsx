@@ -1,5 +1,5 @@
 import { Operations } from '@utils/constants'
-import { getCurrencyShortLabel } from '@utils/helpers'
+import { getCurrencyShortLabel, roundMoney } from '@utils/helpers'
 import { Form, FormInstance } from 'antd'
 import { FC, useEffect } from 'react'
 import s from './style.module.scss'
@@ -19,7 +19,7 @@ const PaymentTotal: FC<Props> = ({ form }) => {
       (totalSum: number, invoice) => totalSum + (invoice[1].sum || 0),
       0
     )
-    form.setFieldValue(Operations.Debit, newTotal)
+    form.setFieldValue(Operations.Debit, roundMoney(newTotal))
   }, [invoices, form])
 
   return (

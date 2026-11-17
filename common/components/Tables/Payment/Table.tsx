@@ -44,10 +44,6 @@ interface ActionProps {
     paymentId: string,
     html?: string
   ) => Promise<{ success: boolean }>
-  onUpdatePaymentStatus: (args: {
-    _id: string
-    status: 'draft' | 'sent'
-  }) => Promise<unknown>
   deleteLoading: boolean
 }
 
@@ -133,7 +129,6 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
     onMarkPaid,
     onDuplicate,
     onSendPaymentEmail,
-    onUpdatePaymentStatus,
     deleteLoading,
   } = actionProps
   const { debtorCompanies } = debtProps
@@ -163,7 +158,6 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
     onMarkPaid,
     onDuplicate,
     onSendPaymentEmail,
-    onUpdatePaymentStatus,
     deleteLoading,
   })
 

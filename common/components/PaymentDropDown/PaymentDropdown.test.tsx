@@ -3,7 +3,7 @@ import {
   IExtendedPayment,
   PaymentStatus,
 } from '@common/api/paymentApi/payment.api.types'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { act, render, screen, fireEvent, waitFor } from '@testing-library/react'
 import PaymentDropdown from '@components/PaymentDropDown'
 
 const modalConfirmMock = jest.fn()
@@ -25,7 +25,10 @@ jest.mock('@assets/features/formatDate', () => ({
 }))
 
 jest.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
+  useTranslation: () => ({
+    t: (key: string, options?: Record<string, unknown>) =>
+      options ? `${key} ${JSON.stringify(options)}` : key,
+  }),
 }))
 
 jest.mock('@common/api/paymentApi/payment.api', () => ({
@@ -71,7 +74,6 @@ const setup = (paymentOverride = {}, isAdmin = true) => {
   const onMarkPaid = jest.fn()
   const onDuplicate = jest.fn()
   const onSendPaymentEmail = jest.fn().mockResolvedValue({ success: true })
-  const onUpdatePaymentStatus = jest.fn().mockResolvedValue(undefined)
 
   render(
     <PaymentDropdown
@@ -83,7 +85,6 @@ const setup = (paymentOverride = {}, isAdmin = true) => {
       onMarkPaid={onMarkPaid}
       onDuplicate={onDuplicate}
       onSendPaymentEmail={onSendPaymentEmail}
-      onUpdatePaymentStatus={onUpdatePaymentStatus}
       deleteLoading={false}
     />
   )
@@ -95,7 +96,6 @@ const setup = (paymentOverride = {}, isAdmin = true) => {
     onMarkPaid,
     onDuplicate,
     onSendPaymentEmail,
-    onUpdatePaymentStatus,
   }
 }
 
@@ -163,10 +163,58 @@ describe('PaymentDropdown', () => {
     expect(screen.queryByText('Видалити платіж')).not.toBeInTheDocument()
   })
 
-  it('sends the rendered invoice html so the email can attach a PDF', async () => {
-    const { onSendPaymentEmail, onUpdatePaymentStatus } = setup()
+  // The send item used to be labelled with the status ("Драфт") and emailed
+  // the invoice the moment it was clicked.
+  it('names the send item after the action, not the status', () => {
+    setup()
     openDropdown()
-    fireEvent.click(screen.getByText('payments.statuses.draft'))
+
+    expect(screen.getByText('payments.actions.send')).toBeInTheDocument()
+    expect(screen.queryByText('payments.statuses.draft')).toBeNull()
+  })
+
+  it('asks before sending and shows who the invoice goes to', () => {
+    const { onSendPaymentEmail } = setup({
+      invoiceNumber: 42,
+      reciever: { adminEmails: ['client@real.com', 'boss@real.com'] },
+    })
+    openDropdown()
+    fireEvent.click(screen.getByText('payments.actions.send'))
+
+    expect(onSendPaymentEmail).not.toHaveBeenCalled()
+    const confirm = modalConfirmMock.mock.calls[0][0]
+    expect(confirm.title).toContain('"number":42')
+    expect(confirm.content).toContain('client@real.com, boss@real.com')
+  })
+
+  it('falls back to the company emails when the invoice stores none', () => {
+    setup({
+      reciever: {},
+      company: { adminEmails: ['owner@real.com'] },
+    })
+    openDropdown()
+    fireEvent.click(screen.getByText('payments.actions.send'))
+
+    expect(modalConfirmMock.mock.calls[0][0].content).toContain(
+      'owner@real.com'
+    )
+  })
+
+  it('says so when no recipient is known', () => {
+    setup()
+    openDropdown()
+    fireEvent.click(screen.getByText('payments.actions.send'))
+
+    expect(modalConfirmMock.mock.calls[0][0].content).toBe(
+      'payments.confirm.noRecipients'
+    )
+  })
+
+  it('sends the rendered invoice html once confirmed, so the email can attach a PDF', async () => {
+    const { onSendPaymentEmail } = setup()
+    openDropdown()
+    fireEvent.click(screen.getByText('payments.actions.send'))
+    act(() => modalConfirmMock.mock.calls[0][0].onOk())
 
     await waitFor(() =>
       expect(onSendPaymentEmail).toHaveBeenCalledWith(
@@ -174,12 +222,9 @@ describe('PaymentDropdown', () => {
         '<html>captured invoice</html>'
       )
     )
-    await waitFor(() =>
-      expect(onUpdatePaymentStatus).toHaveBeenCalledWith({
-        _id: '1',
-        status: PaymentStatus.Sent,
-      })
-    )
+    expect(
+      await screen.findByText('payments.messages.sendSuccess')
+    ).toBeInTheDocument()
   })
 
   it('does not resend an already-sent payment', () => {
@@ -187,17 +232,21 @@ describe('PaymentDropdown', () => {
     openDropdown()
     fireEvent.click(screen.getByText('payments.statuses.sent'))
 
+    expect(modalConfirmMock).not.toHaveBeenCalled()
     expect(onSendPaymentEmail).not.toHaveBeenCalled()
   })
 
-  it('leaves the status untouched when sending fails', async () => {
-    const { onSendPaymentEmail, onUpdatePaymentStatus } = setup()
+  it('reports a failed send', async () => {
+    const { onSendPaymentEmail } = setup()
     onSendPaymentEmail.mockResolvedValue({ success: false })
     openDropdown()
-    fireEvent.click(screen.getByText('payments.statuses.draft'))
+    fireEvent.click(screen.getByText('payments.actions.send'))
+    act(() => modalConfirmMock.mock.calls[0][0].onOk())
 
     await waitFor(() => expect(onSendPaymentEmail).toHaveBeenCalled())
-    expect(onUpdatePaymentStatus).not.toHaveBeenCalled()
+    expect(
+      await screen.findByText('payments.messages.sendFailed')
+    ).toBeInTheDocument()
   })
 
   it('calls onDelete via Modal.confirm', () => {

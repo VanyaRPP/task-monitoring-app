@@ -1,0 +1,16 @@
+.pane {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  min-width: 0;
+  max-height: calc(100vh - 260px);
+  overflow: hidden auto;
+  border: 1px solid var(--ant-color-border-secondary, rgba(5, 5, 5, 0.06));
+  border-radius: 8px;
+}
+
+.page {
+  // The page is wider than the pane before it is scaled; it must not push
+  // the pane (and the form beside it) wider while the scale is measured.
+  max-width: none;
+}

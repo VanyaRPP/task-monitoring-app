@@ -316,6 +316,7 @@ describe('Payment API Endpoint - [id]', () => {
       })
 
       const updateArg = (Payment.findOneAndUpdate as jest.Mock).mock.calls[0][1]
+        .$set
       expect(updateArg).not.toHaveProperty('_id')
       expect(updateArg).not.toHaveProperty('domain')
       expect(updateArg).not.toHaveProperty('company')

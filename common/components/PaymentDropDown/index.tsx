@@ -36,10 +36,6 @@ interface Props {
     paymentId: string,
     html?: string
   ) => Promise<{ success: boolean }>
-  onUpdatePaymentStatus: (args: {
-    _id: string
-    status: PaymentStatus
-  }) => Promise<unknown>
   deleteLoading: boolean
 }
 
@@ -54,6 +50,17 @@ function buildPaymentFileName(payment: IExtendedPayment): string {
   return `${companyName} inv ${slug}`.trim()
 }
 
+// Mirrors the order the send-email route resolves recipients in. The domain
+// admins it falls back to are not part of a listed payment, hence "known".
+function getKnownRecipients(payment: IExtendedPayment): string[] {
+  const stored = payment.reciever?.adminEmails
+  if (stored?.length) return stored
+  const company = payment.company
+  return typeof company === 'object' && company?.adminEmails?.length
+    ? company.adminEmails
+    : []
+}
+
 const PaymentDropdown: React.FC<Props> = ({
   payment,
   isAdmin,
@@ -63,7 +70,6 @@ const PaymentDropdown: React.FC<Props> = ({
   onMarkPaid,
   onDuplicate,
   onSendPaymentEmail,
-  onUpdatePaymentStatus,
   deleteLoading,
 }) => {
   const { t } = useTranslation()
@@ -129,10 +135,7 @@ const PaymentDropdown: React.FC<Props> = ({
         return
       }
 
-      await onUpdatePaymentStatus({
-        _id: payment._id,
-        status: PaymentStatus.Sent,
-      })
+      // The server marks the invoice as sent together with the send.
       message.success(t('payments.messages.sendSuccess'))
     } catch {
       message.error(t('payments.messages.sendFailed'))
@@ -209,9 +212,7 @@ const PaymentDropdown: React.FC<Props> = ({
     },
     {
       key: 'send',
-      label: isSent
-        ? t('payments.statuses.sent')
-        : t('payments.statuses.draft'),
+      label: isSent ? t('payments.statuses.sent') : t('payments.actions.send'),
       icon: <MailOutlined />,
       disabled: isSent || isSending || isCapturing,
     },
@@ -226,7 +227,21 @@ const PaymentDropdown: React.FC<Props> = ({
     if (key === 'mark') onMarkPaid(payment)
     if (key === 'duplicate') onDuplicate(payment)
     if (key === 'download') handleDownloadPdf()
-    if (key === 'send') handleSend()
+    if (key === 'send' && !isSent && !isSending && !isCapturing) {
+      const recipients = getKnownRecipients(payment)
+      modal.confirm({
+        title: t('payments.confirm.sendTitle', {
+          number: payment.invoiceNumber,
+        }),
+        content: recipients.length
+          ? t('payments.confirm.recipients', { emails: recipients.join(', ') })
+          : t('payments.confirm.noRecipients'),
+        okText: t('payments.actions.send'),
+        cancelText: t('payments.confirm.cancel'),
+        onOk: handleSend,
+        width: 440,
+      })
+    }
     if (key === 'delete') {
       modal.confirm({
         title: `Видалити оплату від ${dateToDefaultFormat(

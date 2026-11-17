@@ -94,6 +94,7 @@ jest.mock('@pages/api/spacehub/payment/pipelines', () => ({
 }))
 
 jest.mock('@utils/helpers', () => ({
+  ...jest.requireActual('@utils/helpers'),
   getDistinctCompanyAndDomain: jest
     .fn()
     .mockResolvedValue({ distinctDomains: [], distinctCompanies: [] }),
