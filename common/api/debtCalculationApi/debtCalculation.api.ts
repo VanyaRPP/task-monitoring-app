@@ -1,8 +1,12 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import type { IBuildingTariffs } from '@utils/debt-calculation/building-tariffs'
 import {
   IDebtCalculationKey,
   IDebtCalculationResponse,
   IImportDebtCalculationRequest,
+  IReadTariffsPdfRequest,
+  IReadTariffsPdfResult,
+  ISaveBuildingTariffsRequest,
   ISaveDebtCalculationRequest,
   ISavedDebtCalculation,
 } from './debtCalculation.api.types'
@@ -10,7 +14,7 @@ import {
 export const debtCalculationApi = createApi({
   reducerPath: 'debtCalculationApi',
   baseQuery: fetchBaseQuery({ baseUrl: '/api/' }),
-  tagTypes: ['DebtCalculation'],
+  tagTypes: ['DebtCalculation', 'BuildingTariffs'],
   endpoints: (builder) => ({
     getDebtCalculation: builder.query<
       ISavedDebtCalculation | null,
@@ -49,6 +53,43 @@ export const debtCalculationApi = createApi({
       // page has to pick it up.
       invalidatesTags: ['DebtCalculation'],
     }),
+
+    getBuildingTariffs: builder.query<IBuildingTariffs[], string>({
+      query: (domainId) => ({
+        url: 'debt-calculation/tariffs',
+        params: { domainId },
+      }),
+      transformResponse: (response: { data: IBuildingTariffs[] }) =>
+        response.data ?? [],
+      providesTags: ['BuildingTariffs'],
+    }),
+
+    saveBuildingTariffs: builder.mutation<
+      IBuildingTariffs[],
+      ISaveBuildingTariffsRequest
+    >({
+      query: (body) => ({
+        url: 'debt-calculation/tariffs',
+        method: 'PUT',
+        body,
+      }),
+      transformResponse: (response: { data: IBuildingTariffs[] }) =>
+        response.data ?? [],
+      invalidatesTags: ['BuildingTariffs'],
+    }),
+
+    readTariffsPdf: builder.mutation<
+      IReadTariffsPdfResult,
+      IReadTariffsPdfRequest
+    >({
+      query: (body) => ({
+        url: 'debt-calculation/tariffs/read',
+        method: 'POST',
+        body,
+      }),
+      transformResponse: (response: { data: IReadTariffsPdfResult }) =>
+        response.data,
+    }),
   }),
 })
 
@@ -56,4 +97,7 @@ export const {
   useGetDebtCalculationQuery,
   useSaveDebtCalculationMutation,
   useImportDebtCalculationMutation,
+  useGetBuildingTariffsQuery,
+  useSaveBuildingTariffsMutation,
+  useReadTariffsPdfMutation,
 } = debtCalculationApi

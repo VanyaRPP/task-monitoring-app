@@ -1,4 +1,7 @@
-import { useGetDebtCalculationQuery } from '@common/api/debtCalculationApi/debtCalculation.api'
+import {
+  useGetBuildingTariffsQuery,
+  useGetDebtCalculationQuery,
+} from '@common/api/debtCalculationApi/debtCalculation.api'
 import { useGetInflationIndexesQuery } from '@common/api/inflationIndexApi/inflationIndex.api'
 import { useGetAllPaymentsQuery } from '@common/api/paymentApi/payment.api'
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
@@ -13,6 +16,13 @@ import {
   indexesByPeriod,
   withoutTypedFigures,
 } from '@utils/debt-calculation/build-input'
+import {
+  apartmentOf,
+  groupOfApartment,
+  IBuildingTariffs,
+  tariffsByMonth,
+  tariffsOfStreet,
+} from '@utils/debt-calculation/building-tariffs'
 import { calculateDebt } from '@utils/debt-calculation/calculate'
 import {
   defaultDebtPeriod,
@@ -108,6 +118,12 @@ export interface IDebtCalculationContext {
   clearTypedFigures: (periods: string[], openingDebt: boolean) => void
   /** CPI reference values by period, `{ 'YYYY-MM': 100.8 }`. */
   indexByPeriod: Record<string, number>
+  /** Every building's tariffs of the domain, one entry per address. */
+  buildingTariffs: IBuildingTariffs[]
+  /** The tariffs of the selected company's building, if it has any. */
+  companyTariffs?: IBuildingTariffs
+  /** The column of `companyTariffs` the company pays by, if it can be told. */
+  tariffGroup?: number
   setApartmentOverride: (patch: Partial<IApartmentOverrides>) => void
   setMonthOverride: (period: string, patch: IMonthOverride) => void
   isLoading: boolean
@@ -127,6 +143,7 @@ export const useDebtCalculationContext = (): IDebtCalculationContext =>
  * validation it might buy.
  */
 const NO_PERIODS: IExcludedPeriod[] = []
+const NO_TARIFFS: IBuildingTariffs[] = []
 
 const DebtCalculationBlock: React.FC = () => {
   const { domainIds: allowedDomainIds, isLoading: isAccessLoading } =
@@ -210,6 +227,9 @@ const DebtCalculationBlock: React.FC = () => {
       { domainId, limit: PREFILL_SERVICES_LIMIT },
       { skip: !domainId }
     )
+
+  const { data: buildingTariffs = NO_TARIFFS, isLoading: isTariffs } =
+    useGetBuildingTariffsQuery(domainId, { skip: !domainId })
 
   const prefillMonths = useMemo(
     () =>
@@ -310,6 +330,28 @@ const DebtCalculationBlock: React.FC = () => {
     [prefillMonths, fromYearMonth]
   )
 
+  // The company's building and its column: by the apartment number in the
+  // company's name, unless one was picked for it on the page.
+  const companyTariffs = useMemo(
+    () => tariffsOfStreet(buildingTariffs, company?.street?._id),
+    [buildingTariffs, company?.street]
+  )
+  const tariffGroup = groupOfApartment(
+    companyTariffs,
+    apartmentOf(company?.companyName, company?.description),
+    overrides.tariffGroup
+  )
+  const tariffMonths = useMemo(
+    () =>
+      tariffsByMonth(
+        companyTariffs,
+        tariffGroup,
+        fromYearMonth,
+        toYearMonthValue
+      ),
+    [companyTariffs, tariffGroup, fromYearMonth, toYearMonthValue]
+  )
+
   const result = useMemo(
     () =>
       companyId
@@ -324,6 +366,7 @@ const DebtCalculationBlock: React.FC = () => {
               prefillOpeningDebt: openingDebtPrefill,
               annualRatePercent,
               inflationMethod,
+              buildingTariffs: tariffMonths,
             })
           )
         : undefined,
@@ -338,6 +381,7 @@ const DebtCalculationBlock: React.FC = () => {
       openingDebtPrefill,
       annualRatePercent,
       inflationMethod,
+      tariffMonths,
     ]
   )
 
@@ -417,10 +461,18 @@ const DebtCalculationBlock: React.FC = () => {
     },
     clearTypedFigures,
     indexByPeriod,
+    buildingTariffs,
+    companyTariffs,
+    tariffGroup,
     setApartmentOverride,
     setMonthOverride,
     isLoading:
-      isAccessLoading || isCompanies || isIndexes || isPayments || isServices,
+      isAccessLoading ||
+      isCompanies ||
+      isIndexes ||
+      isPayments ||
+      isServices ||
+      isTariffs,
   }
 
   if (!isAccessLoading && allowedDomainIds.length === 0) {

@@ -1,4 +1,5 @@
 import mongoose, { Schema, Types } from 'mongoose'
+import type { IBuildingTariffs } from '@utils/debt-calculation/building-tariffs'
 
 export interface IDomain {
   _id: string
@@ -17,6 +18,8 @@ export interface IDomain {
   domainTypeTemplateId?: Types.ObjectId
   defaultTemplate?: string
   archived?: boolean
+  /** Tariffs of the provider's buildings for the debt calculation, one per address. */
+  debtTariffs?: IBuildingTariffs[]
 }
 
 export interface ICustomService {
@@ -96,6 +99,10 @@ const DomainSchema = new Schema<IDomain>({
     ref: 'DomainTypeTemplate',
     required: false,
   },
+  // Read and written only by /api/debt-calculation/tariffs, which checks its
+  // shape (`sanitizeBuildingTariffs`): kept out of every other domain query,
+  // so a domain form can neither carry it nor write a stale copy back.
+  debtTariffs: { type: [Object], select: false, default: undefined },
 })
 
 const Domain: mongoose.Model<IDomain> =
