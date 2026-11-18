@@ -7,6 +7,13 @@ import {
 } from './months'
 
 /**
+ * Whether the tariff is shown: its column on the page and in the printout,
+ * and the «Тарифи» button. Hidden for now; the tariffs still take part in
+ * the calculation.
+ */
+export const SHOW_TARIFFS = false
+
+/**
  * The tariffs of one building over the years, as the management company
  * prints them: periods down the side, a tariff per group of apartments
  * («І поверх» - №№ 1-4; 37-40, «вище І поверху» - the rest) across.

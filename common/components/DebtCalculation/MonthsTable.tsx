@@ -12,6 +12,7 @@ import {
 import { ChangeField, changesInMonth } from '@utils/debt-calculation/changes'
 import { describeExcludedPeriod } from '@utils/debt-calculation/excludedPeriodPresets'
 import { periodsInMonth } from '@utils/debt-calculation/exclusions'
+import { SHOW_TARIFFS } from '@utils/debt-calculation/building-tariffs'
 import { daysInMonth } from '@utils/debt-calculation/months'
 import { InputNumber, Table, Tooltip, Typography } from 'antd'
 import type { ColumnsType, ColumnType } from 'antd/es/table'
@@ -233,6 +234,7 @@ const MonthsTable: React.FC<Props> = ({ result }) => {
       ),
     },
     {
+      key: 'tariff',
       title: 'Тариф, грн/м²',
       render: (_, row) => (
         <InputNumber
@@ -396,18 +398,24 @@ const MonthsTable: React.FC<Props> = ({ result }) => {
   // The first row of the table holds them, in the very cells the months
   // below use - not the header: a column's title is also copied into a
   // hidden measuring row, which would render every input twice.
-  const columns: ColumnsType<TableRow> = leaves.map((leaf, index) => {
-    const column = leaf as ColumnType<TableRow>
-    return {
-      ...column,
-      // A 1px width in an auto-sized table means "as narrow as the content":
-      // the spare width then goes to the month column alone instead of
-      // padding every figure. Long titles wrap onto two lines.
-      width: index === 0 ? undefined : (column.width ?? 1),
-      render: (value, row, at) =>
-        row.general ? (general[index] ?? null) : column.render(value, row, at),
-    }
-  })
+  const columns: ColumnsType<TableRow> = leaves
+    .map((leaf, index) => {
+      const column = leaf as ColumnType<TableRow>
+      return {
+        ...column,
+        // A 1px width in an auto-sized table means "as narrow as the content":
+        // the spare width then goes to the month column alone instead of
+        // padding every figure. Long titles wrap onto two lines.
+        width: index === 0 ? undefined : (column.width ?? 1),
+        render: (value, row, at) =>
+          row.general
+            ? (general[index] ?? null)
+            : column.render(value, row, at),
+      }
+    })
+    .filter((column) => SHOW_TARIFFS || column.key !== 'tariff')
+  // The summary cells after the area and tariff stand one column left.
+  const shift = SHOW_TARIFFS ? 0 : 1
 
   return (
     <div className={s.MonthsWrap}>
@@ -437,23 +445,23 @@ const MonthsTable: React.FC<Props> = ({ result }) => {
               <Table.Summary.Cell index={4}>
                 {formatMoney(result.totals.correction)}
               </Table.Summary.Cell>
-              <Table.Summary.Cell index={5} colSpan={2} />
-              <Table.Summary.Cell index={7} align="right">
+              <Table.Summary.Cell index={5} colSpan={2 - shift} />
+              <Table.Summary.Cell index={7 - shift} align="right">
                 <strong>{formatMoney(result.interest)}</strong>
               </Table.Summary.Cell>
-              <Table.Summary.Cell index={8} align="right">
+              <Table.Summary.Cell index={8 - shift} align="right">
                 <strong>{formatMoney(result.body)}</strong>
               </Table.Summary.Cell>
-              <Table.Summary.Cell index={9} align="right">
+              <Table.Summary.Cell index={9 - shift} align="right">
                 {result.totals.days}
               </Table.Summary.Cell>
-              <Table.Summary.Cell index={10} colSpan={2} align="right">
+              <Table.Summary.Cell index={10 - shift} colSpan={2} align="right">
                 {formatCoefficient(result.coefficient)}
               </Table.Summary.Cell>
-              <Table.Summary.Cell index={12} align="right">
+              <Table.Summary.Cell index={12 - shift} align="right">
                 <strong>{formatMoney(result.inflation)}</strong>
               </Table.Summary.Cell>
-              {hasExclusions && <Table.Summary.Cell index={13} />}
+              {hasExclusions && <Table.Summary.Cell index={13 - shift} />}
             </Table.Summary.Row>
           </Table.Summary>
         )}

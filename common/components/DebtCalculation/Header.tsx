@@ -12,6 +12,7 @@ import {
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useDebtCalculationContext } from './'
 import BuildingTariffs from './BuildingTariffs'
+import { SHOW_TARIFFS } from '@utils/debt-calculation/building-tariffs'
 import CreatePayments from './CreatePayments'
 import ExcludedPeriods from './ExcludedPeriods'
 import PrintPreview from './PrintPreview'
@@ -148,7 +149,7 @@ const DebtCalculationHeader: React.FC = () => {
         </Typography.Title>
 
         <Space>
-          <BuildingTariffs />
+          {SHOW_TARIFFS && <BuildingTariffs />}
           <CreatePayments />
           <Button
             icon={<FileExcelOutlined />}

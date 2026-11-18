@@ -9,6 +9,7 @@ import {
   describeExcludedPeriod,
   EXCLUSION_NOTE,
 } from '@utils/debt-calculation/excludedPeriodPresets'
+import { SHOW_TARIFFS } from '@utils/debt-calculation/building-tariffs'
 import type { IExcludedPeriod } from '@utils/debt-calculation/exclusions'
 import {
   IDebtCalculationResult,
@@ -87,8 +88,14 @@ export const toXlsxStyle = (cell: IExcelCell): Record<string, unknown> => ({
   ...(cell.fill ? { fill: { fgColor: { rgb: FILL[cell.fill] } } } : {}),
 })
 
+/** Where the tariff stands in the table, and is left out while hidden. */
+const TARIFF_COLUMN = 6
+
+const shown = <T>(cells: T[]): T[] =>
+  SHOW_TARIFFS ? cells : cells.filter((_, at) => at !== TARIFF_COLUMN)
+
 /** Column widths: the first fits month names, the rest fit numbers. */
-const COLUMN_WIDTHS = [18, 14, 13, 13, 12, 11, 14, 12, 14, 8, 13, 12, 14]
+const COLUMN_WIDTHS = shown([18, 14, 13, 13, 12, 11, 14, 12, 14, 8, 13, 12, 14])
 const COLUMN_COUNT = COLUMN_WIDTHS.length
 
 const MONEY = '0.00'
@@ -322,12 +329,14 @@ export const buildDebtCalculationDocument = ({
       area,
       startDay
     ),
-    ...valueParam(
-      'Тариф, грн за 1 м²',
-      tariffRuns(result.rows),
-      tariff,
-      startDay
-    ),
+    ...(SHOW_TARIFFS
+      ? valueParam(
+          'Тариф, грн за 1 м²',
+          tariffRuns(result.rows),
+          tariff,
+          startDay
+        )
+      : []),
     param('Борг на початок періоду', money(openingDebt)),
     param('Ставка річних, %', annualRatePercent),
     param('Метод інфляційних', METHOD_LABEL[inflationMethod]),
@@ -543,7 +552,7 @@ export const buildDebtCalculationDocument = ({
   ]
 
   return {
-    rows: [...head, ...table, ...act],
+    rows: [...head, ...table.map(shown), ...act],
     columns: COLUMN_WIDTHS.map((wch) => ({ wch })),
     sheetName: SHEET_NAME,
   }

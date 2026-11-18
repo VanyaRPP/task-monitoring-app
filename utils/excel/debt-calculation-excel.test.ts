@@ -9,6 +9,21 @@ import {
   toXlsxStyle,
 } from './debt-calculation-excel'
 
+type ExcelModule = typeof import('./debt-calculation-excel')
+
+/** The document as it is printed while the tariff is shown. */
+const withTariffs = (): ExcelModule['buildDebtCalculationDocument'] => {
+  let loaded: ExcelModule
+  jest.isolateModules(() => {
+    jest.doMock('@utils/debt-calculation/building-tariffs', () => ({
+      ...jest.requireActual('@utils/debt-calculation/building-tariffs'),
+      SHOW_TARIFFS: true,
+    }))
+    loaded = require('./debt-calculation-excel') as ExcelModule
+  })
+  return loaded.buildDebtCalculationDocument
+}
+
 const FROM = { year: 2026, month: 1 }
 const TO = { year: 2026, month: 3 }
 
@@ -78,7 +93,8 @@ describe('buildDebtCalculationDocument — шапка', () => {
     // Whole dates: the first day of the first month to the last of the last.
     expect(findRow(rows, 'Період')[3].v).toBe('01.01.2026 — 31.03.2026')
     expect(findRow(rows, 'Загальна площа')[3].v).toBe(67.08)
-    expect(findRow(rows, 'Тариф')[3].v).toBe(5.25)
+    // The tariff is hidden for now.
+    expect(findRow(rows, 'Тариф')).toBeUndefined()
     expect(findRow(rows, 'Борг на початок')[3].v).toBe(8371.52)
     expect(findRow(rows, 'Ставка річних')[3].v).toBe(3)
     expect(findRow(rows, 'Метод інфляційних')[3].v).toMatch(/За залишком/)
@@ -118,9 +134,7 @@ describe('buildDebtCalculationDocument — тариф, що змінювався
       },
     })
   )
-  const { rows } = buildDebtCalculationDocument(
-    input({ result: changed, startDay: 10 })
-  )
+  const { rows } = withTariffs()(input({ result: changed, startDay: 10 }))
 
   it('пише кожен тариф з датами, коли він діяв', () => {
     const at = rows.findIndex((line) =>
@@ -162,9 +176,7 @@ describe('buildDebtCalculationDocument — тарифи будинку', () => {
       ),
     })
   )
-  const { rows } = buildDebtCalculationDocument(
-    input({ result: building, from, to })
-  )
+  const { rows } = withTariffs()(input({ result: building, from, to }))
 
   it('пише зміну посеред місяця тими датами, що в документі', () => {
     const at = rows.findIndex((line) =>
@@ -190,7 +202,7 @@ describe('buildDebtCalculationDocument — таблиця', () => {
       'Нараховано',
       'Коректура',
       'Площа, м²',
-      'Тариф, грн/м²',
+      // The tariff column is hidden for now.
       'Річних',
       'Вихідне сальдо',
       'Днів',
@@ -198,7 +210,7 @@ describe('buildDebtCalculationDocument — таблиця', () => {
       'Коефіцієнт',
       'Інфляційні',
     ])
-    expect(columns).toHaveLength(13)
+    expect(columns).toHaveLength(12)
   })
 
   it('шапка таблиці в рамці та із заливкою', () => {
@@ -210,12 +222,12 @@ describe('buildDebtCalculationDocument — таблиця', () => {
   it('рядок на кожен місяць, усі клітинки в рамці', () => {
     const january = findRow(rows, 'Січень 2026')
 
-    expect(january).toHaveLength(13)
+    expect(january).toHaveLength(12)
     expect(january.every((cell) => cell.border)).toBe(true)
     expect(january[1].v).toBeCloseTo(result.rows[0].opening, 2)
     expect(january[4].v).toBeCloseTo(result.rows[0].correction, 2)
-    expect(january[8].v).toBeCloseTo(result.rows[0].debt, 2)
-    expect(january[9].v).toBe(31)
+    expect(january[7].v).toBeCloseTo(result.rows[0].debt, 2)
+    expect(january[8].v).toBe(31)
   })
 
   it('підсумковий рядок таблиці з виділенням', () => {
@@ -224,8 +236,8 @@ describe('buildDebtCalculationDocument — таблиця', () => {
     expect(totals[2].v).toBeCloseTo(result.totals.paid, 2)
     expect(totals[3].v).toBeCloseTo(result.totals.charged, 2)
     expect(totals[4].v).toBeCloseTo(result.totals.correction, 2)
-    expect(totals[8].v).toBeCloseTo(result.body, 2)
-    expect(totals[9].v).toBe(result.totals.days)
+    expect(totals[7].v).toBeCloseTo(result.body, 2)
+    expect(totals[8].v).toBe(result.totals.days)
     expect(totals.every((cell) => cell.fill === 'total')).toBe(true)
   })
 })
@@ -442,8 +454,8 @@ describe('buildDebtCalculationDocument — виключені періоди', (
 
   it('підсумки документа — ті самі, що в розрахунку на сторінці', () => {
     const totals = findRow(rows, 'Всього')
-    expect(totals[7].v).toBeCloseTo(excluded.interest, 2)
-    expect(totals[9].v).toBe(excluded.totals.days)
+    expect(totals[6].v).toBeCloseTo(excluded.interest, 2)
+    expect(totals[8].v).toBe(excluded.totals.days)
     expect(textOf(rows)).toContain(String(+excluded.inflation.toFixed(2)))
     // January wholly out, 9 of 31 March days left: 0 + 28 + 9.
     expect(excluded.totals.days).toBe(37)
