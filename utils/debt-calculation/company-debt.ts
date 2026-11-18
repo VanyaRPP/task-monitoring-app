@@ -3,6 +3,13 @@ import {
   IApartmentDefaults,
   IApartmentOverrides,
 } from './build-input'
+import {
+  apartmentOf,
+  groupOfApartment,
+  IBuildingTariffs,
+  tariffsByMonth,
+  tariffsOfStreet,
+} from './building-tariffs'
 import { calculateDebt } from './calculate'
 import { IYearMonth, periodKey, yearMonthOf } from './months'
 import { buildMonthPrefill, IPrefillPayment, IPrefillService } from './prefill'
@@ -59,7 +66,16 @@ export const resolveSnapshotSettings = (
 
 export interface ICompanyDebtArgs {
   companyId: string
-  company?: IApartmentDefaults | null
+  company?:
+    | (IApartmentDefaults & {
+        companyName?: string
+        description?: string
+        /** Street `_id`: picks the building's tariffs. */
+        street?: string
+      })
+    | null
+  /** The domain's building tariffs, one entry per address. */
+  buildingTariffs?: IBuildingTariffs[]
   payments?: IPrefillPayment[]
   services?: IPrefillService[]
   indexByPeriod?: Record<string, number>
@@ -83,12 +99,20 @@ export const calculateCompanyDebt = ({
   saved,
   defaultPeriod,
   timeZone,
+  buildingTariffs,
 }: ICompanyDebtArgs): ICompanyDebt => {
   const settings = resolveSnapshotSettings(saved, companyId)
   const period = {
     from: settings.periodFrom ?? defaultPeriod.from,
     to: settings.periodTo ?? defaultPeriod.to,
   }
+  // The same building tariffs the page applies, by the same apartment rule.
+  const tariffs = tariffsOfStreet(buildingTariffs, company?.street)
+  const group = groupOfApartment(
+    tariffs,
+    apartmentOf(company?.companyName, company?.description),
+    settings.overrides.tariffGroup
+  )
 
   const result = calculateDebt(
     buildDebtCalculationInput({
@@ -109,6 +133,7 @@ export const calculateCompanyDebt = ({
         settings.overrides.excludedPeriods,
         !!saved
       ),
+      buildingTariffs: tariffsByMonth(tariffs, group, period.from, period.to),
     })
   )
 
