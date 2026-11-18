@@ -4,7 +4,6 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { Button } from 'antd'
 import { QuestionCircleOutlined } from '@ant-design/icons'
 import { useDispatch } from 'react-redux'
-import AddPaymentModal from '@components/AddPaymentModal'
 import ScrollFactoryAnimation from '@components/ScrollFactoryAnimation'
 import { Header } from '@components/Layouts/Header'
 import { Footer } from '@components/Layouts/Footer'
@@ -12,7 +11,12 @@ import DashboardTour from '@components/DashboardPage/DashboardTour'
 import { addButton, removeButton } from '@modules/store/floatButtonSlice'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { useRouter } from 'next/router'
+import dynamic from 'next/dynamic'
 import s from './DashboardLanding.module.scss'
+
+const AddPaymentModal = dynamic(() => import('@components/AddPaymentModal'), {
+  ssr: false,
+})
 
 const DashboardLanding = () => {
   const router = useRouter()
