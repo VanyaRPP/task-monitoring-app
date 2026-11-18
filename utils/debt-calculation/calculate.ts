@@ -186,6 +186,7 @@ export const calculateDebt = ({
       opening,
       area,
       tariff,
+      ...(month.tariffParts ? { tariffParts: month.tariffParts } : {}),
       charged,
       correction,
       paid,

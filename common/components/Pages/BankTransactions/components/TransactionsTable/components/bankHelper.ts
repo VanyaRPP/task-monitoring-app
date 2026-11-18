@@ -86,6 +86,64 @@ export const buildCounterpartyNameRegexSource = (
     .join('\\s+')
 }
 
+// "рахунку 1301", "рахунку № 939", "рахунку #1208", "РАХУНОК № 1302", "рах. 77".
+// The trailing (?!\d) with the 9-digit cap keeps account/IBAN digits out.
+const INVOICE_NUMBER_IN_OSND =
+  /рах(?:ун[a-zа-яіїєґ'’ʼ]*|\.)\s*(?:№|#|N\b)?\s*(\d{1,9})(?!\d)/iu
+
+/**
+ * Invoice number the payer quoted in the payment purpose, or null.
+ * Transit-account rows carry the bank's details instead of the payer's, so the
+ * invoice we issued is the most reliable link back to the company.
+ */
+export const extractInvoiceNumberFromOsnd = (
+  osnd: string | undefined | null
+): number | null => {
+  if (!osnd || typeof osnd !== 'string') return null
+  const m = osnd.match(INVOICE_NUMBER_IN_OSND)
+  if (!m) return null
+  const n = Number(m[1])
+  return Number.isSafeInteger(n) && n > 0 ? n : null
+}
+
+// Capitalised words only: names are written that way, free text is not.
+const PAYER_NAME_TOKEN = /^[A-ZА-ЯІЇЄҐ][a-zA-Zа-яА-ЯіІїЇєЄґҐ'’ʼ-]*$/u
+
+/**
+ * Payer's full name from a transit payment purpose: the text after the last
+ * comma ("…від 13-07-2026, Іщук Василь Сергійович" → "Іщук Василь Сергійович").
+ * Only 2–4 capitalised letter-only words count as a name, so dates, sums and
+ * free text never do.
+ */
+export const extractTransitPayerName = (
+  osnd: string | undefined | null
+): string | null => {
+  if (!osnd || typeof osnd !== 'string') return null
+  const comma = osnd.lastIndexOf(',')
+  if (comma === -1) return null
+  const tokens = osnd
+    .slice(comma + 1)
+    .trim()
+    .replace(/[.;]+$/, '')
+    .split(/\s+/)
+    .filter(Boolean)
+  if (tokens.length < 2 || tokens.length > 4) return null
+  if (!tokens.every((t) => PAYER_NAME_TOKEN.test(t))) return null
+  return tokens.join(' ')
+}
+
+/**
+ * Regex source matching a purpose that ends with this payer name (any case and
+ * spacing), for looking up earlier transit payments of the same payer.
+ */
+export const buildTransitPayerOsndRegexSource = (name: string): string =>
+  ',\\s*' +
+  name
+    .split(/\s+/)
+    .map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+    .join('\\s+') +
+  '\\s*[.;]*\\s*$'
+
 /**
  * A self-transaction is money the domain owner moves to/from themselves
  * (returns, own card top-ups, own transfers). The counterparty tax code then

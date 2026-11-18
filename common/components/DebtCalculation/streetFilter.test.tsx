@@ -11,6 +11,7 @@ jest.mock('@common/api/domainApi/domain.api', () => ({
 // Not under test here.
 jest.mock('./CreatePayments', () => () => null)
 jest.mock('./PrintPreview', () => () => null)
+jest.mock('./BuildingTariffs', () => () => null)
 jest.mock('./useExportExcel', () => ({
   useExportExcel: () => ({ exportExcel: jest.fn(), isExporting: false }),
 }))
