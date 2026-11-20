@@ -7,6 +7,8 @@ import { Form, FormInstance, Input, Space, Typography } from 'antd'
 import { ReactNode, useEffect, useMemo } from 'react'
 import { LabelInput } from './LabelInput'
 import UpdateInvoiceButton from './UpdateInvoiceButton'
+import ServiceNoteHint from '@components/UI/ServiceNoteHint'
+import { findServiceNote } from '@utils/serviceNotes'
 
 export interface InvoiceRowNameProps {
   form?: FormInstance
@@ -31,7 +33,13 @@ const InvoiceRowName: React.FC<InvoiceRowNameProps> = ({
   middle,
   subtitle,
 }) => {
-  const { service } = usePaymentContext()
+  const { service, company } = usePaymentContext()
+  const serviceNote = editable
+    ? findServiceNote(company, {
+        serviceId: record?.serviceId,
+        fieldName: record?.fieldName,
+      })
+    : undefined
   const defaultSubtitle = toFirstUpperCase(dateToMonthYear(service?.date))
   const subtitleText = subtitle ?? defaultSubtitle
   const nameArr = useMemo(
@@ -87,6 +95,7 @@ const InvoiceRowName: React.FC<InvoiceRowNameProps> = ({
           </Typography.Text>
         )}
       </Space>
+      {editable && <ServiceNoteHint note={serviceNote} />}
       {editable && (
         <UpdateInvoiceButton
           form={form}

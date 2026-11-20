@@ -33,6 +33,7 @@ interface ICustomService {
   fieldName: string
   label: string
   price: number
+  note?: string
 }
 
 export const RealEstateSchema = new Schema<IRealEstateModel>({
@@ -66,6 +67,7 @@ export const RealEstateSchema = new Schema<IRealEstateModel>({
         label: { type: String, required: true },
         fieldName: { type: String, required: true },
         price: { type: Number, required: true },
+        note: { type: String, required: false, default: '', maxlength: 2000 },
       },
     ],
     required: false,
