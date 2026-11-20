@@ -1,5 +1,5 @@
 import { FC, useEffect, useMemo, useRef, useState } from 'react'
-import { InputNumber, Space, Button, Form, Select, Tooltip } from 'antd'
+import { Input, InputNumber, Space, Button, Form, Select, Tooltip } from 'antd'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { inputNumberParser, isAdminCheck } from '@utils/helpers'
 import { ServiceType } from '@utils/constants'
@@ -34,6 +34,7 @@ const CustomServicesCard: FC<CustomServicesCardProps> = ({
     label: service?.label,
     fieldName: service?.fieldName,
     price: null,
+    ...(isServiceForm ? {} : { note: '' }),
   })
 
   // Persist the company's services together with the "all services" flag. The
@@ -193,52 +194,77 @@ const CustomServicesCard: FC<CustomServicesCardProps> = ({
             {fields.map((field, index) => {
               const service = customServices[index]
               return (
-                <Space
-                  key={field.key}
-                  style={{
-                    width: '100%',
-                    display: 'grid',
-                    gridTemplateColumns: disabled ? '1fr' : '1fr auto',
-                    columnGap: 8,
-                    marginBottom: 6,
-                    marginTop: 6,
-                  }}
-                  align="start"
-                >
-                  <Form.Item
-                    name={[field.name, 'price']}
-                    label={service?.label}
-                    rules={
-                      isServiceForm &&
-                      service?.fieldName === ServiceType.Inflicion
-                        ? []
-                        : [{ required: true, message: 'Введіть значення' }]
-                    }
-                    style={{ width: '100%' }}
-                    getValueProps={(v) =>
-                      disabled ? { value: dashIfEmpty(v) } : { value: v }
-                    }
+                <div key={field.key}>
+                  <Space
+                    style={{
+                      width: '100%',
+                      display: 'grid',
+                      gridTemplateColumns: disabled ? '1fr' : '1fr auto',
+                      columnGap: 8,
+                      marginBottom: 6,
+                      marginTop: 6,
+                    }}
+                    align="start"
                   >
-                    <InputNumber
-                      parser={inputNumberParser}
-                      placeholder="Введіть значення"
-                      style={{
-                        width: disabled ? '100%' : !isServiceForm ? 440 : 470,
-                      }}
-                      disabled={disabled}
-                    />
-                  </Form.Item>
-                  {!disabled && isAdmin && !isServiceForm && (
-                    <Button
-                      type="text"
-                      icon={<CloseOutlined />}
-                      aria-label={`remove-${service?.label}`}
-                      data-testid={`remove-${service?.label}`}
-                      onClick={() => handleRemoveService(index)}
-                      style={{ marginTop: 6 }}
-                    />
+                    <Form.Item
+                      name={[field.name, 'price']}
+                      label={service?.label}
+                      rules={
+                        isServiceForm &&
+                        service?.fieldName === ServiceType.Inflicion
+                          ? []
+                          : [
+                              {
+                                required: !(
+                                  !isServiceForm && service?.note?.trim()
+                                ),
+                                message: 'Введіть значення',
+                              },
+                            ]
+                      }
+                      style={{ width: '100%' }}
+                      getValueProps={(v) =>
+                        disabled ? { value: dashIfEmpty(v) } : { value: v }
+                      }
+                    >
+                      <InputNumber
+                        parser={inputNumberParser}
+                        placeholder="Введіть значення"
+                        style={{
+                          width: disabled ? '100%' : !isServiceForm ? 440 : 470,
+                        }}
+                        disabled={disabled}
+                      />
+                    </Form.Item>
+                    {!disabled && isAdmin && !isServiceForm && (
+                      <Button
+                        type="text"
+                        icon={<CloseOutlined />}
+                        aria-label={`remove-${service?.label}`}
+                        data-testid={`remove-${service?.label}`}
+                        onClick={() => handleRemoveService(index)}
+                        style={{ marginTop: 6 }}
+                      />
+                    )}
+                  </Space>
+                  {!isServiceForm && (disabled ? service?.note : true) && (
+                    <Form.Item
+                      name={[field.name, 'note']}
+                      label={`Примітка (внутрішня): ${service?.label ?? ''}`}
+                      tooltip="Показується лише користувачам системи під час створення інвойсу. Не потрапляє до інвойсу, PDF чи друку."
+                      style={{ marginBottom: 8 }}
+                    >
+                      <Input.TextArea
+                        autoSize={{ minRows: 1, maxRows: 6 }}
+                        maxLength={2000}
+                        allowClear
+                        placeholder="Інструкція, домовленості, підказка (необов'язково)"
+                        disabled={disabled}
+                        data-testid={`note-${service?.label}`}
+                      />
+                    </Form.Item>
                   )}
-                </Space>
+                </div>
               )
             })}
           </>

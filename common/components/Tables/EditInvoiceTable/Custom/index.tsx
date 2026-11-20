@@ -16,6 +16,8 @@ import React, { useMemo } from 'react'
 import useSyncSum from '../useSyncSum'
 import { LabelInput } from '../LabelInput'
 import { UpdateInvoiceButton } from './UpdateInvoiceButton'
+import ServiceNoteHint from '@components/UI/ServiceNoteHint'
+import { findServiceNote } from '@utils/serviceNotes'
 
 const SaveIconToggle: React.FC<{
   checked?: boolean
@@ -55,6 +57,8 @@ export const Name: React.FC<InvoiceComponentProps> = ({
   )
 
   const { service, company, prevPayment } = usePaymentContext()
+  const serviceId = Form.useWatch(['invoice', ...name, 'serviceId'], form)
+  const serviceNote = findServiceNote(company, { serviceId, fieldName })
   const currentPrice = Form.useWatch(['invoice', ...name, 'price'], form)
   const defaultLabel = value && value !== 'custom' ? value : ''
 
@@ -133,6 +137,7 @@ export const Name: React.FC<InvoiceComponentProps> = ({
       </div>
 
       <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+        <ServiceNoteHint note={serviceNote} />
         {!isCustomService && hasName && (
           <Form.Item
             name={[...name, 'saveToDomain']}
