@@ -1,6 +1,7 @@
 import { buildDebtCalculationInput } from '@utils/debt-calculation/build-input'
 import { tariffsByMonth } from '@utils/debt-calculation/building-tariffs'
 import { calculateDebt } from '@utils/debt-calculation/calculate'
+import { EXCLUSION_NOTE } from '@utils/debt-calculation/excludedPeriodPresets'
 import {
   asOfLabel,
   buildDebtCalculationDocument,
@@ -447,9 +448,22 @@ describe('buildDebtCalculationDocument — виключені періоди', (
       'КМУ №206: 01.01.2026—31.01.2026'
     )
     expect(textOf(rows)).toContain('Довільний: 10.03.2026—31.03.2026')
-    expect(textOf(rows)).toContain(
-      'Інфляційні втрати та річні за зазначені періоди не нараховувалися.'
-    )
+    expect(textOf(rows)).toContain(EXCLUSION_NOTE)
+  })
+
+  it('ставить «—» у річних, днях та інфляційних виключених місяців', () => {
+    const header = findRow(rows, 'Місяць / Рік').map((cell) => cell.v)
+    const cells = (label: string) => {
+      const line = findRow(rows, label)
+      return ['Річних', 'Днів', 'Інфляційні'].map(
+        (title) => line[header.indexOf(title)].v
+      )
+    }
+
+    expect(cells('Січень 2026')).toEqual(['—', '—', '—'])
+    // March is touched from the 10th: out whole.
+    expect(cells('Березень 2026')).toEqual(['—', '—', '—'])
+    expect(cells('Лютий 2026')).not.toContain('—')
   })
 
   it('підсумки документа — ті самі, що в розрахунку на сторінці', () => {
@@ -457,8 +471,8 @@ describe('buildDebtCalculationDocument — виключені періоди', (
     expect(totals[6].v).toBeCloseTo(excluded.interest, 2)
     expect(totals[8].v).toBe(excluded.totals.days)
     expect(textOf(rows)).toContain(String(+excluded.inflation.toFixed(2)))
-    // January wholly out, 9 of 31 March days left: 0 + 28 + 9.
-    expect(excluded.totals.days).toBe(37)
+    // January and March out whole: February's 28 days only.
+    expect(excluded.totals.days).toBe(28)
   })
 
   it('без виключень — жодного рядка про них', () => {

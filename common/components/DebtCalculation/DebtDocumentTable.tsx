@@ -72,7 +72,14 @@ const DebtDocumentTable = forwardRef<HTMLDivElement, Props>(
                 )
                 c += span
               }
-              return <tr key={r}>{cells}</tr>
+              return (
+                <tr
+                  key={r}
+                  className={line.some(Boolean) ? undefined : s.PrintBlank}
+                >
+                  {cells}
+                </tr>
+              )
             })}
           </tbody>
         </table>

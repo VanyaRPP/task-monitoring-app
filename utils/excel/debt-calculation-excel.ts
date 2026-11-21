@@ -101,6 +101,9 @@ const COLUMN_COUNT = COLUMN_WIDTHS.length
 const MONEY = '0.00'
 const COEFFICIENT = '0.000000'
 
+/** Interest, days and losses of an excluded month: none accrue. */
+const NONE = '—'
+
 const METHOD_LABEL: Record<InflationMethod, string> = {
   balance: 'За залишком боргу (як у паперовому Акті)',
   monthly: 'Помісячний (ст. 625 ЦК)',
@@ -389,7 +392,7 @@ export const buildDebtCalculationDocument = ({
         { v: money(month.area), border: true, numFmt: MONEY, align: 'right' },
         { v: money(month.tariff), border: true, numFmt: MONEY, align: 'right' },
         {
-          v: money(month.interest),
+          v: month.excluded ? NONE : money(month.interest),
           border: true,
           numFmt: MONEY,
           align: 'right',
@@ -401,7 +404,7 @@ export const buildDebtCalculationDocument = ({
           align: 'right',
           bold: true,
         },
-        { v: month.days, border: true, align: 'right' },
+        { v: month.excluded ? NONE : month.days, border: true, align: 'right' },
         {
           v: money(month.inflationIndex),
           border: true,
@@ -415,7 +418,7 @@ export const buildDebtCalculationDocument = ({
           align: 'right',
         },
         {
-          v: money(month.inflationLoss),
+          v: month.excluded ? NONE : money(month.inflationLoss),
           border: true,
           numFmt: MONEY,
           align: 'right',
@@ -533,8 +536,12 @@ export const buildDebtCalculationDocument = ({
     ...(result.legalFees ? [actRow('Юридичні послуги', result.legalFees)] : []),
     ...(result.courtFee ? [actRow('Держмито', result.courtFee)] : []),
     blank(),
+    // One line for both, so the document ends a line sooner on paper.
     row(
-      null,
+      {
+        v: `Сформовано ${timestampLabel(generatedAt.toISOString())}`,
+        span: 6,
+      },
       null,
       null,
       null,
@@ -544,11 +551,6 @@ export const buildDebtCalculationDocument = ({
       null,
       { v: '______________________', span: 3 }
     ),
-    blank(),
-    row({
-      v: `Сформовано ${timestampLabel(generatedAt.toISOString())}`,
-      span: COLUMN_COUNT,
-    }),
   ]
 
   return {

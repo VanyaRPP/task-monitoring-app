@@ -81,9 +81,11 @@ const lotsInflation = (lots: IDebtLot[], coefficient: number): number =>
  * - monthly method: what a paid lot had run up stays in the losses - a
  *   payment is applied at the start of its month, so that month's index does
  *   not reach the paid part;
- * - an excluded period (moratorium) takes its days out of the interest and
- *   its months out of the coefficient (see `exclusions.ts`); the debt moves
- *   as usual.
+ * - a month an excluded period (moratorium) touches is out whole: no
+ *   interest, no index (see `exclusions.ts`); the debt moves as usual;
+ * - balance method: the losses stand still through such months and then go
+ *   on from that sum - the debt run up meanwhile is indexed from the end of
+ *   the period, not by the inflation from before it.
  */
 export const calculateDebt = ({
   months = [],
@@ -104,6 +106,11 @@ export const calculateDebt = ({
   const rows: IDebtMonthRow[] = []
   let debt = openingDebt
   let coefficient = 1
+  // Balance method: the losses as they stood when an excluded period began,
+  // and the coefficient then - after it, only the rise since counts.
+  let frozenLoss = 0
+  let frozenCoefficient = 1
+  let wasExcluded = false
   // Monthly method: losses of the debt already paid off, kept as they were.
   let settledLoss = 0
   // Paid beyond what was owed: it settles the next charges, as it lowers the debt.
@@ -139,7 +146,7 @@ export const calculateDebt = ({
       // day, or - for days typed in - anywhere in the month.
       month.days == null ? clampStartDay(month.startDay, calendarDays) : 1
     )
-    const excludedDays = exclusion.excludedDays
+    const { excluded, excludedDays } = exclusion
     // The first month's index never applies (see above).
     const indexApplied = index > 0 && exclusion.indexApplies
     const previousCoefficient = coefficient
@@ -172,13 +179,22 @@ export const calculateDebt = ({
     settledLoss += settled.settledLoss
     credit += settled.overpaid
 
-    // Interest days: those accruing, less any in an excluded period.
-    const days = Math.max(accrual - excludedDays, 0)
+    // Interest days: those accruing, none in an excluded month.
+    const days = excluded ? 0 : Math.max(accrual - excludedDays, 0)
     const interestBase = interestOnCurrentCharge ? debt : debtBeforeCharge
     const interest =
       ((Math.max(interestBase, 0) * (annualRatePercent / 100)) /
         daysInYear(month.year)) *
       days
+
+    if (excluded && !wasExcluded) {
+      frozenLoss = rows[rows.length - 1]?.inflationLoss ?? 0
+      frozenCoefficient = coefficient
+    }
+    wasExcluded = excluded
+    const balanceLoss = excluded
+      ? frozenLoss
+      : frozenLoss + Math.max(debt * (coefficient - frozenCoefficient), 0)
 
     rows.push({
       year: month.year,
@@ -192,6 +208,7 @@ export const calculateDebt = ({
       paid,
       debt,
       days,
+      excluded,
       excludedDays,
       indexApplied,
       inflationIndex,
@@ -199,7 +216,7 @@ export const calculateDebt = ({
       inflationLoss:
         inflationMethod === 'monthly'
           ? settledLoss + lotsInflation(lots, coefficient)
-          : Math.max(debt * coefficient - debt, 0),
+          : balanceLoss,
       interest,
     })
 
