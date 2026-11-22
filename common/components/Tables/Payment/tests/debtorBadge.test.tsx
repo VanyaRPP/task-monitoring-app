@@ -127,13 +127,15 @@ describe('payments company column debtor badge', () => {
   it.each([
     ['positive', 1500],
     ['negative', -1500],
-  ])('hides a %s debt from regular users', (_name, totalDebt) => {
+  ])('shows a %s debt to regular users', (_name, totalDebt) => {
     renderCompanyCell({
       debtorCompanies: [makeDebtor(totalDebt as number)],
       isUser: true,
     })
 
-    expect(document.querySelector('.ant-badge-count')).toBeNull()
+    expect(badgeCount()).toBe(
+      `${(totalDebt as number) < 0 ? '-' : ''}1500.00`
+    )
   })
 
   it('renders no badge when the company has no debt record', () => {

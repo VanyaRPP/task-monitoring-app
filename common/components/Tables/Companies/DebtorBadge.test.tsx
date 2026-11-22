@@ -146,6 +146,54 @@ describe('CompaniesTable debtor badge', () => {
     expect(badgeColor()).toBe('gray')
   })
 
+  test('renders the debt badge for a regular user', () => {
+    ;(useGetCurrentUserQuery as jest.Mock).mockReturnValue({
+      data: { roles: ['User'] },
+    })
+    mockDebtors(1500)
+    render(<CompaniesTable {...mockProps} />)
+
+    expect(badgeCount()).toBe('1500.00')
+  })
+
+  describe('with a single company', () => {
+    beforeEach(() => {
+      ;(useGetRealEstateFiltersQuery as jest.Mock).mockReturnValue({
+        data: {
+          ...mockFilterData,
+          realEstatesFilter: [{ value: '1', text: 'Company A' }],
+        },
+      })
+    })
+
+    test('a regular user still sees the company column with its debt badge', () => {
+      ;(useGetCurrentUserQuery as jest.Mock).mockReturnValue({
+        data: { roles: ['User'] },
+      })
+      mockDebtors(1500)
+      render(<CompaniesTable {...mockProps} />)
+
+      expect(
+        screen.getByRole('columnheader', { name: /Компанія/ })
+      ).toBeInTheDocument()
+      expect(screen.getByText('Company A')).toBeInTheDocument()
+      expect(badgeCount()).toBe('1500.00')
+    })
+
+    test('an admin keeps the company column hidden', () => {
+      ;(useGetCurrentUserQuery as jest.Mock).mockReturnValue({
+        data: { roles: ['DomainAdmin'] },
+      })
+      mockDebtors(1500)
+      render(<CompaniesTable {...mockProps} />)
+
+      expect(
+        screen.queryByRole('columnheader', { name: /Компанія/ })
+      ).not.toBeInTheDocument()
+      expect(badgeCount()).toBeUndefined()
+    })
+  })
+
   test('renders a signed amount when the domain owes the company', () => {
     mockDebtors(-1500)
     render(<CompaniesTable {...mockProps} />)

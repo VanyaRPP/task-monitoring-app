@@ -730,7 +730,8 @@ const getDefaultColumns = ({
       const canFilter =
         isOnPage && setFilters && companyId && !isSingleCompanyByData
 
-      if (!isUser && debtorCompanies) {
+      // /api/debtors scopes companies by access, so no role gate is needed here.
+      if (debtorCompanies) {
         const debtor = debtorCompanies?.find(
           (companie) => companie?.companyName === i
         )
@@ -778,17 +779,18 @@ const getDefaultColumns = ({
 
           return (
             <Tooltip title={tooltipDebtor} placement="top">
-              <Badge
-                count={formatSignedDebt(debtor.totalDebt)}
-                title=""
-                color={getDebtorTooltipColor(debtor)}
-                overflowCount={Infinity}
-                style={{ cursor: 'pointer' }}
-                size="small"
-                offset={[10, 0]}
-              >
+              <div className={s.debtorCell}>
+                <div className={s.debtorBadge}>
+                  <Badge
+                    count={formatSignedDebt(debtor.totalDebt)}
+                    title=""
+                    color={getDebtorTooltipColor(debtor)}
+                    overflowCount={Infinity}
+                    size="small"
+                  />
+                </div>
                 {companyLabel}
-              </Badge>
+              </div>
             </Tooltip>
           )
         }
@@ -874,7 +876,9 @@ const getDefaultColumns = ({
 
   columns.unshift(streetColumn)
 
-  if (!isSingleCompanyByData) {
+  // A User has no other place on this page showing the company name or its
+  // debt badge, so keep the column for them even with a single company.
+  if (!isSingleCompanyByData || isUser) {
     columns.unshift(domainColumn)
   }
 
