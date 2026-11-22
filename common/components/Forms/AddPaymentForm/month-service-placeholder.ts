@@ -21,3 +21,35 @@ export function parseMonthServicePlaceholder(value: string): Dayjs {
     'month'
   )
 }
+export type PreviewMonthService = {
+  _id: string
+  date: string | Date
+}
+
+/**
+ * Builds monthService for the invoice preview (currPayment).
+ * The preview needs { _id, date }, not just an id, because templates
+ * read monthService.date to show the service month.
+ */
+export function buildPreviewMonthService({
+  monthServiceId,
+  service,
+  placeholder,
+}: {
+  monthServiceId?: string
+  service?: { date?: string | Date } | null
+  placeholder?: string
+}): PreviewMonthService | undefined {
+  if (monthServiceId && service?.date) {
+    return { _id: monthServiceId, date: service.date }
+  }
+
+  if (isMonthServicePlaceholder(placeholder)) {
+    return {
+      _id: monthServiceId ?? placeholder,
+      date: parseMonthServicePlaceholder(placeholder).toISOString(),
+    }
+  }
+
+  return undefined
+}
