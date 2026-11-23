@@ -35,6 +35,7 @@ const ClassicTemplate: FC<TemplateProps> = ({
   normalizedBankDetailsLines: _normalizedBankDetailsLines,
   overrides,
   showQuantityInPreview,
+  hideQuantityAndPrice,
 }) => {
   const providerDomainHeading = getDomainHeading(data, domainName)
   const recipientCompanyHeading = getRecipientCompanyHeading(data, companyLabel)
@@ -86,12 +87,7 @@ const ClassicTemplate: FC<TemplateProps> = ({
           defaultValue={data?.reciever?.description?.trim() ?? ''}
         >
           <pre className={cs.preLabel}>
-            {data?.reciever?.description?.trim()} <br />
-            {data?.reciever?.adminEmails?.map((email: string) => (
-              <div key={email}>
-                {email} <br />
-              </div>
-            ))}
+            {data?.reciever?.description?.trim()}
           </pre>
         </EditableText>
       </div>
@@ -124,6 +120,7 @@ const ClassicTemplate: FC<TemplateProps> = ({
           preview
           usePreviewQuantityToggle
           showQuantityInPreview={showQuantityInPreview}
+          hideQuantityAndPrice={hideQuantityAndPrice}
           domainId={data?.domain?._id ?? data?.domain}
           currency={currency}
           invoices={data?.invoice ?? []}

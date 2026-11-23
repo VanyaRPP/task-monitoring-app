@@ -4,12 +4,12 @@ import Task from '@modules/models/Task'
 import start, { Data } from '@pages/api/api.config'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
-start()
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
+  await start()
+
   switch (req.method) {
     case 'PATCH':
       try {

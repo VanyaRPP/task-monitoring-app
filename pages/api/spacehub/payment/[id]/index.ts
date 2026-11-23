@@ -3,11 +3,9 @@ import Domain from '@modules/models/Domain'
 import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import ProfitService from '@common/services/profitService/profit.service'
 import { applyTemplateScope } from '@common/services/paymentService/templateScope.service'
 import { logPaymentMutation } from '@common/modules/services/paymentAudit'
-
-start()
+import { canWritePayment } from '@common/services/paymentService/paymentAccess'
 
 const PROTECTED_PATCH_FIELDS = ['_id', 'domain', 'company', '_templateScope']
 
@@ -23,6 +21,8 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
+  await start()
+
   let perms: Awaited<ReturnType<typeof getCurrentUser>>
   try {
     perms = await getCurrentUser(req, res)
@@ -43,7 +43,8 @@ export default async function handler(
         }
 
         const payment: any = await Payment.findById(req.query.id)
-          .populate('domain')
+          // bank tokens are admin-only: never ship them inside an embedded domain
+          .populate('domain', '-domainBankToken')
           .populate('company')
           .populate('street')
           .populate('monthService')
@@ -100,15 +101,11 @@ export default async function handler(
           }
         }
 
-        const deleted = await Payment.findByIdAndRemove(req.query.id)
+        const deleted = await Payment.findByIdAndDelete(req.query.id)
         if (!deleted) {
           return res
             .status(500)
             .json({ success: false, message: 'failed to delete' })
-        }
-
-        if (isGlobalAdmin) {
-          await ProfitService.deleteByIdPayment(req.query.id as string)
         }
 
         await logPaymentMutation({
@@ -156,7 +153,8 @@ export default async function handler(
           req.body.invoice === undefined
 
         if (isTemplateUpdate) {
-          if (!isGlobalAdmin && !isDomainAdmin) {
+          // Same ownership rule as a full edit: the payment's own domain.
+          if (!(await canWritePayment(current, { isGlobalAdmin, user }))) {
             return res
               .status(403)
               .json({ success: false, message: 'not allowed' })
@@ -165,7 +163,7 @@ export default async function handler(
           const response = await Payment.findOneAndUpdate(
             { _id: req.query.id },
             { $set: { template: templateKey } },
-            { new: true }
+            { returnDocument: 'after' }
           )
 
           return res.status(200).json({ success: true, data: response })
@@ -194,7 +192,7 @@ export default async function handler(
         const response: any = await Payment.findOneAndUpdate(
           { _id: req.query.id },
           update,
-          { new: true }
+          { returnDocument: 'after' }
         )
 
         await logPaymentMutation({
@@ -205,21 +203,6 @@ export default async function handler(
           before: current,
           after: response,
         })
-
-        if (isGlobalAdmin) {
-          const description =
-            response.type === 'debit'
-              ? `Інвойс №${response.invoiceNumber}`
-              : response.description
-
-          await ProfitService.updatePayment(req.query.id as string, {
-            type: response.type as 'debit' | 'credit',
-            date: response.invoiceCreationDate,
-            amount: response.generalSum,
-            description,
-            invoiceNumber: String(response.invoiceNumber),
-          })
-        }
 
         return res.status(200).json({ success: true, data: response })
       } catch (error: any) {

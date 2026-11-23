@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import GroupedReceiptForm from './index'
 
 jest.mock('./style.module.scss', () => ({}))
@@ -32,12 +32,22 @@ jest.mock('@components/Forms/GroupedReceiptForm/GroupedPricesTable', () => ({
 
 jest.mock('@common/api/paymentApi/payment.api', () => ({
   useEditPaymentMutation: () => [jest.fn().mockResolvedValue({ data: {} })],
+  useSendPaymentEmailMutation: () => [
+    jest.fn().mockResolvedValue({ success: true }),
+  ],
+  useUpdatePaymentStatusMutation: () => [
+    jest.fn().mockResolvedValue({ data: {} }),
+  ],
 }))
 
 jest.mock('@common/api/invoiceTemplateApi/invoiceTemplate.api', () => ({
   useGetInvoiceTemplatesQuery: () => ({ data: { data: [] } }),
   useCreateInvoiceTemplateMutation: () => [jest.fn()],
   useUpdateInvoiceTemplateMutation: () => [jest.fn()],
+}))
+
+jest.mock('@common/api/domainApi/domain.api', () => ({
+  useGetDomainsQuery: () => ({ data: [] }),
 }))
 
 jest.mock('next/dynamic', () => (importFn: () => Promise<any>) => {
@@ -150,9 +160,9 @@ describe('OLIMP template', () => {
   // once OLIMP template starts rendering provider info explicitly.
   test.todo('OLIMP template: displays provider data when implemented')
 
-  test('відображає email Отримувача', () => {
+  test('не відображає email Отримувача (лише опис компанії)', () => {
     renderOlimp()
-    expect(screen.getByText('test@gmail.com')).toBeInTheDocument()
+    expect(screen.queryByText('test@gmail.com')).not.toBeInTheDocument()
   })
 
   test('повертає null якщо paymentData відсутній', () => {
@@ -172,6 +182,13 @@ describe('OLIMP template', () => {
   test('порожній invoice не ламає рендер', () => {
     renderOlimp({ invoice: [] })
     expect(screen.getByText(/РАХУНОК №/i)).toBeInTheDocument()
+  })
+
+  test('компанія без опису: рахунок рендериться з даними отримувача', () => {
+    renderOlimp({ reciever: { ...mockPayment.reciever, description: '' } })
+    expect(screen.getByText(/РАХУНОК №/i)).toBeInTheDocument()
+    expect(screen.getByText('test@gmail.com')).toBeInTheDocument()
+    expect(screen.queryByText(/Kyiv\s*Ukraine/)).not.toBeInTheDocument()
   })
 })
 
@@ -217,5 +234,71 @@ describe('Classic template', () => {
   test('generalSum = 0 відображає 0.00', () => {
     renderClassic({ generalSum: 0 })
     expect(screen.getByText(/0\.00/)).toBeInTheDocument()
+  })
+
+  test('компанія без опису: рахунок рендериться без помилок', () => {
+    renderClassic({
+      reciever: { ...mockPayment.reciever, description: undefined },
+    })
+    expect(screen.getByText(/Постачальник/i)).toBeInTheDocument()
+    expect(screen.getByText(/Одержувач/i)).toBeInTheDocument()
+  })
+})
+
+describe('GroupedReceiptForm - Send Email Button', () => {
+  beforeEach(() => {
+    template = 'olimp'
+    companyCurrency = 'UAH'
+  })
+
+  const renderWithMail = (overrides = {}) =>
+    render(
+      <GroupedReceiptForm
+        paymentData={
+          {
+            ...mockPayment,
+            _id: 'test-id',
+            status: 'Draft',
+            ...overrides,
+          } as any
+        }
+        paymentActions={{ preview: true, edit: true }}
+      />
+    )
+
+  test('renders toolbar with multiple icons', () => {
+    const { container } = renderWithMail()
+    // Printer/template/table icons live inside the "..." dropdown menu, which
+    // antd renders into a body-level portal once opened.
+    fireEvent.click(container.querySelector('button'))
+    const icons = document.querySelectorAll('svg')
+    expect(icons.length).toBeGreaterThanOrEqual(3)
+  })
+
+  test('renders invoice template when payment data provided', () => {
+    renderWithMail()
+    expect(screen.getAllByText(/РАХУНОК|INVOICE/i).length).toBeGreaterThan(0)
+  })
+
+  test('displays invoice header and data', () => {
+    renderWithMail()
+    expect(screen.getAllByText('Test Domain').length).toBeGreaterThan(0)
+  })
+
+  test('renders all expected toolbar icons (printer, template, table, language selector)', () => {
+    const { container } = renderWithMail()
+    fireEvent.click(container.querySelector('button'))
+    const svgs = document.querySelectorAll('svg')
+    expect(svgs.length).toBeGreaterThanOrEqual(4)
+  })
+
+  test('null paymentData renders null', () => {
+    const { container } = render(
+      <GroupedReceiptForm
+        paymentData={null}
+        paymentActions={{ preview: true, edit: true }}
+      />
+    )
+    expect(container).toBeEmptyDOMElement()
   })
 })

@@ -3,13 +3,35 @@ import handler from '../index'
 
 import { mockLoginAs } from '@utils/mockLoginAs'
 import { setupTestEnvironment } from '@utils/setupTestEnvironment'
-import { domains, users, streets } from '@utils/testData'
+import { domains, realEstates, users, streets } from '@utils/testData'
 
 jest.mock('next-auth', () => ({ getServerSession: jest.fn() }))
 jest.mock('@pages/api/auth/[...nextauth]', () => ({ authOptions: {} }))
 jest.mock('@pages/api/api.config', () => jest.fn())
 
 setupTestEnvironment()
+
+// Providers of the companies `users.user` administers. A plain User is scoped
+// to these and reads them view-only, so the response carries only the fields
+// the «Загальне» tab needs — never a bank token.
+const userDomainIds = [
+  ...new Set(
+    realEstates
+      .filter((re) => re.adminEmails.includes(users.user.email))
+      .map((re) => re.domain.toString())
+  ),
+].sort()
+
+const expectViewOnlyDomains = (data: any[]) => {
+  expect(data.length).toBeGreaterThan(0)
+  for (const domain of data) {
+    expect(userDomainIds).toContain(domain._id.toString())
+    expect(domain.domainBankToken).toBeUndefined()
+    expect(domain.customServices).toBeUndefined()
+    expect(domain.domainServices).toBeUndefined()
+    expect(domain.archived).toBeUndefined()
+  }
+}
 
 describe('Domain API - GET', () => {
   it('should load Domain as GlobalAdmin', async () => {
@@ -180,7 +202,7 @@ describe('Domain API - GET', () => {
     expect(received).toEqual(domain)
   })
 
-  it('should not load Domain as User', async () => {
+  it('should load only view-only Domain data as User', async () => {
     await mockLoginAs(users.user)
 
     const mockReq = {
@@ -201,11 +223,10 @@ describe('Domain API - GET', () => {
 
     expect(response.status).toHaveBeenCalledWith(200)
 
-    const received = parseReceived(response.data)
-    expect(received).toEqual([])
+    expectViewOnlyDomains(response.data)
   })
 
-  it('should not load Domain as User with limit', async () => {
+  it('should load only view-only Domain data as User with limit', async () => {
     await mockLoginAs(users.user)
 
     const mockReq = {
@@ -226,11 +247,11 @@ describe('Domain API - GET', () => {
 
     expect(response.status).toHaveBeenCalledWith(200)
 
-    const received = parseReceived(response.data)
-    expect(received).toEqual([])
+    expect(response.data).toHaveLength(2)
+    expectViewOnlyDomains(response.data)
   })
 
-  it('should not load Domain as User with domainId', async () => {
+  it('should load only view-only Domain data as User with domainId', async () => {
     await mockLoginAs(users.user)
 
     const mockReq = {
@@ -251,8 +272,7 @@ describe('Domain API - GET', () => {
 
     expect(response.status).toHaveBeenCalledWith(200)
 
-    const received = parseReceived(response.data)
-    expect(received).toEqual([])
+    expectViewOnlyDomains(response.data)
   })
 
   it('should load Domain as GlobalAdmin with street', async () => {
@@ -313,7 +333,7 @@ describe('Domain API - GET', () => {
     expect(received).toEqual(domain)
   })
 
-  it('should not load Domain as User with street', async () => {
+  it('should load only view-only Domain data as User with street', async () => {
     await mockLoginAs(users.user)
 
     const mockReq = {
@@ -334,8 +354,7 @@ describe('Domain API - GET', () => {
 
     expect(response.status).toHaveBeenCalledWith(200)
 
-    const received = parseReceived(response.data)
-    expect(received).toEqual([])
+    expectViewOnlyDomains(response.data)
   })
 })
 

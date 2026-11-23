@@ -14,8 +14,8 @@ jest.mock('@pages/api/api.config', () => jest.fn())
 setupTestEnvironment()
 
 const dOwn = domains[0]._id
-const dOther = domains[6]._id 
-const dOrphan = domains[1]._id 
+const dOther = domains[6]._id
+const dOrphan = domains[1]._id
 
 const invoiceData = {
   invoiceNumber: 1,

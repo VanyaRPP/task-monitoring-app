@@ -1,12 +1,12 @@
-import mongoose, { ObjectId, Schema } from 'mongoose'
+import mongoose, { Schema, Types } from 'mongoose'
 import { Currency } from '@utils/constants'
 import { IDomainService } from './Domain'
 
 export interface IRealEstateModel {
-  domain: ObjectId
-  street: ObjectId
+  domain: Types.ObjectId
+  street: Types.ObjectId
   companyName: string
-  description: string
+  description?: string
   adminEmails: string[]
   pricePerMeter: number
   servicePricePerMeter?: number
@@ -29,7 +29,7 @@ export interface IRealEstateModel {
   allServices?: boolean
 }
 interface ICustomService {
-  _id: ObjectId
+  _id: Types.ObjectId
   fieldName: string
   label: string
   price: number
@@ -39,7 +39,7 @@ export const RealEstateSchema = new Schema<IRealEstateModel>({
   domain: { type: Schema.Types.ObjectId, ref: 'Domain' },
   street: { type: Schema.Types.ObjectId, ref: 'Street' },
   companyName: { type: String, required: true },
-  description: { type: String, required: true },
+  description: { type: String, required: false, default: '' },
   adminEmails: { type: [String], required: true },
   pricePerMeter: { type: Number, required: true, default: 0 },
   servicePricePerMeter: { type: Number, required: false },
@@ -73,8 +73,8 @@ export const RealEstateSchema = new Schema<IRealEstateModel>({
   },
 })
 
-const RealEstate =
-  (mongoose.models?.RealEstate as mongoose.Model<IRealEstateModel>) ||
-  mongoose.model('RealEstate', RealEstateSchema)
+const RealEstate: mongoose.Model<IRealEstateModel> =
+  mongoose.models?.RealEstate ||
+  mongoose.model<IRealEstateModel>('RealEstate', RealEstateSchema)
 
 export default RealEstate

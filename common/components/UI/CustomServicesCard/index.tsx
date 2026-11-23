@@ -2,6 +2,7 @@ import { FC, useEffect, useMemo, useRef, useState } from 'react'
 import { InputNumber, Space, Button, Form, Select, Tooltip } from 'antd'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { inputNumberParser, isAdminCheck } from '@utils/helpers'
+import { ServiceType } from '@utils/constants'
 import { CloseOutlined, CheckOutlined } from '@ant-design/icons'
 
 type CustomServicesCardProps = {
@@ -207,7 +208,12 @@ const CustomServicesCard: FC<CustomServicesCardProps> = ({
                   <Form.Item
                     name={[field.name, 'price']}
                     label={service?.label}
-                    rules={[{ required: true, message: 'Введіть значення' }]}
+                    rules={
+                      isServiceForm &&
+                      service?.fieldName === ServiceType.Inflicion
+                        ? []
+                        : [{ required: true, message: 'Введіть значення' }]
+                    }
                     style={{ width: '100%' }}
                     getValueProps={(v) =>
                       disabled ? { value: dashIfEmpty(v) } : { value: v }

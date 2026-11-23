@@ -5,19 +5,19 @@ import RealEstate from '@modules/models/RealEstate'
 import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
-start()
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
+  await start()
+
   const { user, isGlobalAdmin, isAdmin } = await getCurrentUser(req, res)
 
   switch (req.method) {
     case 'DELETE':
       try {
         if (isGlobalAdmin) {
-          const realEstate = await RealEstate.findByIdAndRemove(req.query.id)
+          const realEstate = await RealEstate.findByIdAndDelete(req.query.id)
           if (realEstate) {
             return res.status(200).json({
               success: true,
@@ -55,7 +55,7 @@ export default async function handler(
             })
           }
 
-          await RealEstate.findByIdAndRemove(req.query.id)
+          await RealEstate.findByIdAndDelete(req.query.id)
           return res.status(200).json({
             success: true,
             data: 'realestate ' + req.query.id + ' was deleted',
@@ -74,7 +74,7 @@ export default async function handler(
             const response = await RealEstate.findOneAndUpdate(
               { _id: req.query.id },
               req.body,
-              { new: true }
+              { returnDocument: 'after' }
             )
             return res.status(200).json({ success: true, data: response })
           } else {
@@ -100,20 +100,33 @@ export default async function handler(
             }
 
             const rawNewDomain = req.body.domain
-            const newDomainId =
-              typeof rawNewDomain === 'string'
-                ? rawNewDomain
-                : rawNewDomain?._id?.toString?.()
-            if (!newDomainId || !adminDomainIds.includes(newDomainId)) {
-              return res
-                .status(400)
-                .json({ success: false, message: 'not allowed' })
+            const isRelocation =
+              rawNewDomain !== undefined && rawNewDomain !== null
+
+            if (isRelocation) {
+              const newDomainId =
+                typeof rawNewDomain === 'string'
+                  ? rawNewDomain
+                  : rawNewDomain?._id?.toString?.()
+              if (!newDomainId || !adminDomainIds.includes(newDomainId)) {
+                return res
+                  .status(400)
+                  .json({ success: false, message: 'not allowed' })
+              }
+
+              const response = await RealEstate.findOneAndUpdate(
+                { _id: req.query.id },
+                { ...req.body, domain: newDomainId },
+                { returnDocument: 'after' }
+              )
+              return res.status(200).json({ success: true, data: response })
             }
 
+            const { domain, ...bodyWithoutDomain } = req.body
             const response = await RealEstate.findOneAndUpdate(
               { _id: req.query.id },
-              { ...req.body, domain: newDomainId },
-              { new: true }
+              bodyWithoutDomain,
+              { returnDocument: 'after' }
             )
             return res.status(200).json({ success: true, data: response })
           }

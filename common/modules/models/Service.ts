@@ -1,8 +1,8 @@
-import mongoose, { ObjectId, Schema } from 'mongoose'
+import mongoose, { Schema, Types } from 'mongoose'
 
 export interface IServiceModel {
-  domain: ObjectId
-  street: ObjectId
+  domain: Types.ObjectId
+  street: Types.ObjectId
   rentPrice: number
   date: Date
   electricityPrice: number
@@ -12,7 +12,7 @@ export interface IServiceModel {
   inflicionPrice: number
   description: string
   customServices: {
-    _id: ObjectId
+    _id: Types.ObjectId
     label: string
     fieldName: string
     price: number
@@ -52,8 +52,8 @@ export const ServiceSchema = new Schema<IServiceModel>({
   isVAT: { type: Boolean, required: false, default: true },
 })
 
-const Service =
-  (mongoose.models.Service as mongoose.Model<IServiceModel>) ||
-  mongoose.model('Service', ServiceSchema)
+const Service: mongoose.Model<IServiceModel> =
+  mongoose.models?.Service ||
+  mongoose.model<IServiceModel>('Service', ServiceSchema)
 
 export default Service

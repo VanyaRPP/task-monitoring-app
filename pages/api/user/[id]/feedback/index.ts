@@ -3,8 +3,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import start, { Data } from '@pages/api/api.config'
 
-start()
-
 // function averageNum(arr, keyName) {
 //   return (
 //     arr.reduce((sum, a) => sum + (keyName === undefined ? a : +a[keyName]), 0) /
@@ -16,6 +14,8 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
+  await start()
+
   switch (req.method) {
     case 'PATCH':
       return res

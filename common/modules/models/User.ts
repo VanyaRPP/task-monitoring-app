@@ -2,12 +2,12 @@ import { ICustomer } from '@common/api/customerApi/customer.api.types'
 import { IPayment } from '@common/api/paymentApi/payment.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
 import { IAddress } from '@modules/models/Task'
-import mongoose, { ObjectId, Schema } from 'mongoose'
+import mongoose, { Schema, Types } from 'mongoose'
 import { ITask } from './Task'
 import { normalizeRoles } from '@utils/roles'
 
 export interface IUser {
-  _id?: ObjectId | string
+  _id?: Types.ObjectId | string
   name: string
   email: string
   image?: string
@@ -84,23 +84,23 @@ export interface IPermissions {
  *           type: array
  *           items:
  *             type: string
- *             description: ObjectId string referencing Task
+ *             description: Types.ObjectId string referencing Task
  *           example: ["64c2ab3d4f2e4c7b1f8a9999"]
  *         payments:
  *           type: array
  *           items:
  *             type: string
- *             description: ObjectId string referencing Payment
+ *             description: Types.ObjectId string referencing Payment
  *         services:
  *           type: array
  *           items:
  *             type: string
- *             description: ObjectId string referencing Service
+ *             description: Types.ObjectId string referencing Service
  *         customers:
  *           type: array
  *           items:
  *             type: string
- *             description: ObjectId string referencing Customer
+ *             description: Types.ObjectId string referencing Customer
  *         rating:
  *           type: number
  *           example: 4.5
@@ -140,37 +140,30 @@ const UserSchema = new mongoose.Schema<IUser>({
   address: { type: Object },
   password: { type: String },
 })
-UserSchema.pre('validate', function (next) {
+UserSchema.pre('validate', function () {
   this.roles = normalizeRoles(this.roles)
-  next()
 })
 
-UserSchema.pre(
-  ['findOneAndUpdate', 'updateOne', 'updateMany'],
-  function (next) {
-    const update: any = this.getUpdate() || {}
+UserSchema.pre(['findOneAndUpdate', 'updateOne', 'updateMany'], function () {
+  const update: any = this.getUpdate() || {}
 
-    const incoming = update?.roles ?? update?.$set?.roles ?? update?.$set?.role
+  const incoming = update?.roles ?? update?.$set?.roles ?? update?.$set?.role
 
-    if (incoming !== undefined) {
-      const normalized = normalizeRoles(incoming)
+  if (incoming !== undefined) {
+    const normalized = normalizeRoles(incoming)
 
-      if (update.roles !== undefined) update.roles = normalized
-      if (update.$set?.roles !== undefined) update.$set.roles = normalized
-      if (update.$set?.role !== undefined) {
-        update.$set.roles = normalized
-        delete update.$set.role
-      }
-
-      this.setUpdate(update)
+    if (update.roles !== undefined) update.roles = normalized
+    if (update.$set?.roles !== undefined) update.$set.roles = normalized
+    if (update.$set?.role !== undefined) {
+      update.$set.roles = normalized
+      delete update.$set.role
     }
 
-    next()
+    this.setUpdate(update)
   }
-)
+})
 
-const User =
-  (mongoose?.models?.User as mongoose.Model<IUser>) ||
-  mongoose?.model('User', UserSchema)
+const User: mongoose.Model<IUser> =
+  mongoose.models?.User || mongoose.model<IUser>('User', UserSchema)
 
 export default User

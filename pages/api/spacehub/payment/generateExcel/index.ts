@@ -1,3 +1,5 @@
+import start from '@pages/api/api.config'
+import { getCurrentUser } from '@utils/getCurrentUser'
 import {
   IGeneratePaymentExcelResponce,
   IExtendedPayment,
@@ -14,6 +16,14 @@ export default async function handler(
   res: NextApiResponse
 ) {
   if (req.method !== 'POST') return res.status(405).end()
+  // Signed-in users only: an open endpoint let anyone on the internet make
+  // the server build files for them.
+  try {
+    await start()
+    await getCurrentUser(req, res)
+  } catch {
+    return res.status(401).json({ error: 'Unauthorized' })
+  }
   try {
     const payments: IExtendedPayment[] = req.body.payments
     if (!Array.isArray(payments) || payments.length === 0) {

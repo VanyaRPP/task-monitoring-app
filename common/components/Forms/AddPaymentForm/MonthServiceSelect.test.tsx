@@ -13,8 +13,10 @@ const mockedQuery = useGetAllServicesQuery as jest.Mock
 
 const Wrapper = ({
   initialValues = {},
+  edit,
 }: {
   initialValues?: { domain?: string; street?: string; monthService?: string }
+  edit?: boolean
 }) => {
   const [form] = Form.useForm()
   return (
@@ -25,7 +27,7 @@ const Wrapper = ({
       <Form.Item name="street" hidden>
         <Input />
       </Form.Item>
-      <MonthServiceSelect form={form} />
+      <MonthServiceSelect form={form} edit={edit} />
     </Form>
   )
 }
@@ -82,5 +84,74 @@ describe('MonthServiceSelect — поле вибору місяця', () => {
     const listbox = screen.getByRole('listbox')
     const currentMonthLabel = dayjs().format('MMMM YYYY')
     expect(within(listbox).getByText(currentMonthLabel)).toBeInTheDocument()
+  })
+
+  it('обраний місяць залишається на правильній позиції, а не переміщується в кінець списку', () => {
+    const futureDate = dayjs().add(2, 'month').startOf('month')
+    const missingService = {
+      _id: 'svc-future',
+      date: futureDate.toISOString(),
+    }
+
+    mockedQuery.mockImplementation((params: { serviceId?: string }) => {
+      if (params?.serviceId) {
+        return { data: { data: [missingService] }, isLoading: false }
+      }
+      return { data: { data: [] }, isLoading: false }
+    })
+
+    render(
+      <Wrapper
+        edit
+        initialValues={{
+          domain: 'd1',
+          street: 's1',
+          monthService: 'svc-future',
+        }}
+      />
+    )
+    fireEvent.mouseDown(getMonthInput())
+
+    const listbox = screen.getByRole('listbox')
+    const options = within(listbox).getAllByText(/\d{4}$/)
+    const futureLabel = futureDate.format('MMMM YYYY')
+
+    // The selected (future) month must sort to the top by date,
+    // not fall to the bottom because its date lookup failed.
+    expect(options[0].textContent).toContain(futureLabel)
+  })
+
+  it('тримає місяць-плейсхолдер, старший за 12 останніх, а не скидає на поточний', () => {
+    mockedQuery.mockReturnValue({ data: { data: [] }, isLoading: false })
+    const old = dayjs().subtract(20, 'month')
+    const placeholder = buildMonthServicePlaceholder(old)
+
+    render(
+      <Wrapper initialValues={{ domain: 'd1', monthService: placeholder }} />
+    )
+
+    expect(
+      within(getMonthInput().closest('.ant-select') as HTMLElement).getByText(
+        old.format('MMMM YYYY')
+      )
+    ).toBeInTheDocument()
+  })
+
+  it('тримає місяць-плейсхолдер з початкових значень форми, а не скидає на найновіший', () => {
+    mockedQuery.mockReturnValue({ data: { data: [] }, isLoading: false })
+    const m = dayjs().subtract(3, 'month')
+    render(
+      <Wrapper
+        initialValues={{
+          domain: 'd1',
+          monthService: buildMonthServicePlaceholder(m),
+        }}
+      />
+    )
+    expect(
+      within(getMonthInput().closest('.ant-select') as HTMLElement).getByText(
+        m.format('MMMM YYYY')
+      )
+    ).toBeInTheDocument()
   })
 })

@@ -57,6 +57,7 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
               м<sup>3</sup>
             </span>
           }
+          style={{ width: 140 }}
         />
       </Form.Item>
       <Form.Item
@@ -73,6 +74,7 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
               м<sup>3</sup>
             </span>
           }
+          style={{ width: 140 }}
         />
       </Form.Item>
     </Space>

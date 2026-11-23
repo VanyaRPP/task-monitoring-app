@@ -1,0 +1,134 @@
+.chartCard {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  :global(.ant-card-body) {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+.trendChart {
+  flex: 1;
+  min-height: 280px;
+}
+
+.pieLayout {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 16px 48px;
+}
+
+// Shrinks with a narrow card instead of pushing it into a horizontal scroll.
+.pieChart {
+  flex: 0 1 220px;
+  min-width: 160px;
+  height: 220px;
+  margin: 0 auto;
+}
+
+.pieLegendWrap {
+  flex: 1 1 240px;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+// One column, so names are not cut to a few letters beside the trend chart;
+// past a page's worth of rows the pager takes over.
+.pieLegend {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  gap: 6px;
+}
+
+// A short last page keeps the full height (PIE_LEGEND_PAGE_SIZE rows), so
+// the pager and the card below it do not jump.
+.pieLegendPaged {
+  min-height: calc(8 * 20px + 7 * 6px);
+}
+
+.pieLegendPager {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.pieLegendPageInfo {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.pieEmpty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+}
+
+.pieLegendItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  line-height: 20px;
+  text-align: left;
+  cursor: pointer;
+  transition: opacity 0.2s;
+
+  &:focus-visible {
+    outline: 1px solid currentColor;
+    outline-offset: 2px;
+  }
+}
+
+// Still listed so it can be switched back on, but clearly off the ring.
+.pieLegendItemHidden {
+  opacity: 0.35;
+
+  .pieLegendName {
+    text-decoration: line-through;
+  }
+}
+
+.pieLegendSwatch {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+.pieLegendName {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pieLegendPercent {
+  flex: none;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}

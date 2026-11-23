@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import { Form } from 'antd'
+import { Roles } from '@utils/constants'
 import DomainForm from '.'
 
 // Replace each tab with a marker so we can verify routing without bringing in
@@ -25,6 +26,18 @@ jest.mock('./tabs/BankTab', () => ({
   default: () => <div data-testid="tab-bank">bank-content</div>,
 }))
 
+const mockCurrentUser = jest.fn()
+jest.mock('@common/api/userApi/user.api', () => ({
+  useGetCurrentUserQuery: () => mockCurrentUser(),
+}))
+
+const ADMIN_ONLY_TABS = [
+  'Шаблон',
+  'Мої послуги',
+  'Історія налаштувань',
+  'Банк API',
+]
+
 const renderForm = () => {
   const Wrapper = () => {
     const [form] = Form.useForm()
@@ -40,16 +53,18 @@ const renderForm = () => {
   return render(<Wrapper />)
 }
 
+beforeEach(() => {
+  mockCurrentUser.mockReturnValue({ data: { roles: [Roles.DOMAIN_ADMIN] } })
+})
+
+afterEach(() => {
+  jest.clearAllMocks()
+})
+
 describe('DomainForm — tabs orchestration', () => {
   it('renders all five tab labels in correct order, including "Банк API"', () => {
     renderForm()
-    const labels = [
-      'Загальне',
-      'Шаблон',
-      'Мої послуги',
-      'Історія налаштувань',
-      'Банк API',
-    ]
+    const labels = ['Загальне', ...ADMIN_ONLY_TABS]
     for (const label of labels) {
       expect(screen.getByRole('tab', { name: label })).toBeInTheDocument()
     }
@@ -82,5 +97,58 @@ describe('DomainForm — tabs orchestration', () => {
     renderForm()
     fireEvent.click(screen.getByRole('tab', { name: 'Банк API' }))
     expect(screen.getByTestId('tab-bank')).toBeInTheDocument()
+  })
+
+  it('keeps every tab for a GlobalAdmin', () => {
+    mockCurrentUser.mockReturnValue({ data: { roles: [Roles.GLOBAL_ADMIN] } })
+    renderForm()
+    for (const label of ADMIN_ONLY_TABS) {
+      expect(screen.getByRole('tab', { name: label })).toBeInTheDocument()
+    }
+  })
+})
+
+describe('DomainForm — view-only access', () => {
+  it('renders only "Загальне" for a plain User', () => {
+    mockCurrentUser.mockReturnValue({ data: { roles: [Roles.USER] } })
+    renderForm()
+
+    expect(screen.getByRole('tab', { name: 'Загальне' })).toBeInTheDocument()
+    expect(screen.getByTestId('tab-general')).toBeInTheDocument()
+    for (const label of ADMIN_ONLY_TABS) {
+      expect(screen.queryByRole('tab', { name: label })).not.toBeInTheDocument()
+    }
+  })
+
+  it('never mounts the admin-only tab content for a plain User', () => {
+    mockCurrentUser.mockReturnValue({ data: { roles: [Roles.USER] } })
+    renderForm()
+
+    // Nothing to reach even by activating a tab key directly: the panes are
+    // not part of the tree at all, so the bank token form never exists.
+    for (const testId of [
+      'tab-template',
+      'tab-services',
+      'tab-history',
+      'tab-bank',
+    ]) {
+      expect(screen.queryByTestId(testId)).not.toBeInTheDocument()
+    }
+  })
+
+  it('hides admin-only tabs from an account with no roles', () => {
+    mockCurrentUser.mockReturnValue({ data: { roles: [] } })
+    renderForm()
+
+    expect(screen.getByRole('tab', { name: 'Загальне' })).toBeInTheDocument()
+    expect(screen.queryByRole('tab', { name: 'Банк API' })).toBeNull()
+  })
+
+  it('hides admin-only tabs while the current user is still loading', () => {
+    mockCurrentUser.mockReturnValue({ data: undefined })
+    renderForm()
+
+    expect(screen.getByRole('tab', { name: 'Загальне' })).toBeInTheDocument()
+    expect(screen.queryByRole('tab', { name: 'Банк API' })).toBeNull()
   })
 })

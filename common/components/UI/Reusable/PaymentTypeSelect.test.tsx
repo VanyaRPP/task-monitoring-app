@@ -39,12 +39,12 @@ describe('PaymentTypeSelect', () => {
     expect(screen.getByText('Дебет (Реалізація)')).toBeInTheDocument()
   })
 
-  it('falls back to Credit segment when form has no operation value (antd selects first option)', () => {
-    // Both antd Segmented and AddPaymentModal default to Credit when no
-    // payment.type is provided — keeps the visible state and the form state
-    // consistent.
+  it('falls back to Debit segment when form has no operation value (antd selects first option)', () => {
+    // AddPaymentModal defaults `operation` to Operations.Debit when no
+    // payment.type is provided (see AddPaymentModal initialValues), which
+    // matches Debit being the first Segmented option here.
     renderInForm({})
     const selected = getSelectedSegment()
-    expect(selected?.textContent).toContain('Кредит')
+    expect(selected?.textContent).toContain('Дебет')
   })
 })

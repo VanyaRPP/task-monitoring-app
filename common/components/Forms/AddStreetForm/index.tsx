@@ -18,6 +18,8 @@ const AddStreetForm: FC<Props> = ({ form, editable, setIsValueChanged }) => {
   const [city, setCity] = useState('')
   const [address, setAddress] = useState('')
   const [addressOptions, setAddressOptions] = useState<{ value: string }[]>([])
+  // The city may come from setFieldsValue (edit, AI draft), not from typing.
+  const formCity: string = Form.useWatch('city', form)
 
   const debouncedCity = useDebounce(city, 300)
   const debouncedAddress = useDebounce(address, 300)
@@ -88,7 +90,7 @@ const AddStreetForm: FC<Props> = ({ form, editable, setIsValueChanged }) => {
             form.setFieldsValue({ address: val })
             setIsValueChanged(true)
           }}
-          disabled={!editable || !city}
+          disabled={!editable || !(city || formCity)}
         />
       </Form.Item>
     </Form>

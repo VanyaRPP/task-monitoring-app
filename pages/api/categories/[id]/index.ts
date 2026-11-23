@@ -4,12 +4,12 @@ import Category from '@modules/models/Category'
 import start, { Data } from '@pages/api/api.config'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
-start()
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
+  await start()
+
   switch (req.method) {
     case 'GET':
       try {
@@ -20,7 +20,7 @@ export default async function handler(
       }
     case 'DELETE':
       try {
-        await Category.findByIdAndRemove(req.query.id).then((category) => {
+        await Category.findByIdAndDelete(req.query.id).then((category) => {
           if (!category) {
             return res.status(400).json({
               success: false,

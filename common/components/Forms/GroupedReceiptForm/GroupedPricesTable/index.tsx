@@ -18,6 +18,8 @@ export interface PaymentPricesTableProps {
   invoices?: any[]
   invoiceLang?: 'en' | 'uk'
   showQuantityInPreview?: boolean
+  /** Domain setting: drops quantity and price even in the detailed layout. */
+  hideQuantityAndPrice?: boolean
 }
 
 interface IPriceTableRow {
@@ -130,6 +132,7 @@ const assignInvoicesToGroupsFirstWin = (
 }
 
 function resolveInvoiceLabel(inv: any, t: TFunction<'groupedReceipt'>): string {
+  if (inv?.alias) return inv.alias
   if (inv?.type === 'custom') {
     const displayName =
       inv?.name && inv.name !== 'custom'
@@ -249,6 +252,7 @@ const GroupedPricesTable: React.FC<PaymentPricesTableProps> = ({
   domainId,
   invoiceLang,
   showQuantityInPreview: showQuantityInPreviewProp,
+  hideQuantityAndPrice,
 }) => {
   const {
     form,
@@ -266,7 +270,7 @@ const GroupedPricesTable: React.FC<PaymentPricesTableProps> = ({
       : (domainId as { _id?: string } | undefined)?._id
 
   const { data: customDomainServices } = useGetCustomServicesByDomainQuery(
-    { domainId: resolvedDomainId as any },
+    { domainId: resolvedDomainId as any, includeDisabled: true },
     { skip: !resolvedDomainId || !usePreviewQuantityToggle }
   )
 
@@ -278,11 +282,13 @@ const GroupedPricesTable: React.FC<PaymentPricesTableProps> = ({
     [i18n, invoiceLng]
   )
 
-  const includeQuantityAndPrice = shouldShowInvoiceQuantityAndPriceColumns(
-    preview,
-    usePreviewQuantityToggle,
-    showQuantityInPreview
-  )
+  const includeQuantityAndPrice =
+    !hideQuantityAndPrice &&
+    shouldShowInvoiceQuantityAndPriceColumns(
+      preview,
+      usePreviewQuantityToggle,
+      showQuantityInPreview
+    )
 
   const useGroupedByDomainLayout = shouldUseGroupedByDomainPreviewLayout(
     preview,
@@ -313,10 +319,15 @@ const GroupedPricesTable: React.FC<PaymentPricesTableProps> = ({
 
     const groups = customDomainServices?.data ?? []
     const nonDiscount = filtered.filter((inv) => inv?.type !== 'discount')
-    const { groupRows, unmatchedInvoices } = assignInvoicesToGroupsFirstWin(
-      nonDiscount,
-      groups
-    )
+    // A line with an alias stays its own row: rolled into a group it would
+    // lose the name the domain chose to show the client.
+    const aliased = nonDiscount.filter((inv) => inv?.alias)
+    const { groupRows, unmatchedInvoices: ungrouped } =
+      assignInvoicesToGroupsFirstWin(
+        nonDiscount.filter((inv) => !inv?.alias),
+        groups
+      )
+    const unmatchedInvoices = [...ungrouped, ...aliased]
 
     const rows: IPriceTableRow[] = groupRows.map((group, index) => ({
       key: index + 1,

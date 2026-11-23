@@ -26,6 +26,12 @@ interface Props {
   chosenRealEstate: { domain: string; street?: string } | null
   closeModal: VoidFunction
   currentRealEstate?: IExtendedRealestate
+  /**
+   * A NEW company filled in ahead of time (an AI draft): prefills the form
+   * like `currentRealEstate` but saving creates it. Domain and address come
+   * through `chosenRealEstate`, as when adding from a domain's page.
+   */
+  draft?: Partial<IRealestate>
   editable?: boolean
 }
 
@@ -33,11 +39,19 @@ const RealEstateModal: FC<Props> = ({
   chosenRealEstate,
   closeModal,
   currentRealEstate,
+  draft,
   editable,
 }) => {
   const [form] = Form.useForm()
+  // What the fields start from: the company being edited, or a draft.
+  const source = (currentRealEstate ?? draft) as
+    Partial<IExtendedRealestate> | undefined
   const [isValueChanged, setIsValueChanged] = useState(false)
-  const initializedRef = useRef(false)
+  // Tracks which entity the form was last populated for, so the form
+  // re-syncs whenever the edited/added entity actually changes instead of
+  // only once per mount (a stale one-shot guard was the source of a bug
+  // where switching entities without unmounting kept showing old values).
+  const initializedForRef = useRef<string | null | undefined>(undefined)
   const [addRealEstate, { isLoading: isAdding }] = useAddRealEstateMutation()
   const [editRealEstate, { isLoading: isEditing }] = useEditRealEstateMutation()
   const domainId = Form.useWatch('domain', form)
@@ -46,73 +60,92 @@ const RealEstateModal: FC<Props> = ({
     domainId ||
     chosenRealEstate?.domain
   const { data: customDomainServices } = useGetCustomServicesByDomainQuery(
-    { domainId: currentDomainId },
+    { domainId: currentDomainId, includeDisabled: true },
     { skip: !currentDomainId }
+  )
+
+  const disabledDomainServiceIds = useMemo(
+    () =>
+      new Set(
+        (customDomainServices?.data ?? [])
+          .flatMap((group) => group?.services ?? [])
+          .filter((s) => s.isEnabled === false)
+          .map((s) => String(s._id))
+      ),
+    [customDomainServices]
   )
 
   const domainCustomServices = useMemo(() => {
     return (
       customDomainServices?.data?.flatMap((group) =>
         Array.isArray(group?.services)
-          ? group.services.map((s) => ({
-              _id: s._id,
-              label: s.name,
-              fieldName: s.fieldName,
-              price: undefined,
-            }))
+          ? group.services
+              .filter((s) => s.isEnabled !== false)
+              .map((s) => ({
+                _id: s._id,
+                label: s.name,
+                fieldName: s.fieldName,
+                // Тег типу потрібен формі, щоб зрозуміти, чи є в домені послуга
+                // «за площею» (див. isMeterBasedServiceExist). У БД не потрапляє:
+                // схема RealEstate.customServices його не містить.
+                serviceType: (s as { serviceType?: string }).serviceType,
+                price: undefined,
+              }))
           : []
       ) || []
     )
   }, [customDomainServices])
 
   const mergedCustomServices = useMemo(() => {
-    const saved = currentRealEstate?.customServices || []
+    const saved = source?.customServices || []
     return saved.filter((s) =>
       domainCustomServices.some((d) => d._id === s._id)
     )
-  }, [currentRealEstate, domainCustomServices])
+  }, [source, domainCustomServices])
 
   useEffect(() => {
-    if (initializedRef.current) return
     if (!currentDomainId) return
     if (customDomainServices === undefined) return
 
+    const targetId = currentRealEstate?._id ?? null
+    if (initializedForRef.current === targetId) return
+
     form.setFieldsValue({
-      domain:
-        chosenRealEstate?.domain ||
-        getEntityId(currentRealEstate?.domain) ||
-        currentDomainId,
-      street: getEntityId(currentRealEstate?.street),
-      companyName: currentRealEstate?.companyName || '',
-      description: currentRealEstate?.description || '',
-      adminEmails: currentRealEstate?.adminEmails || [],
-      pricePerMeter: currentRealEstate?.pricePerMeter || 0,
-      servicePricePerMeter: currentRealEstate?.servicePricePerMeter || 0,
-      totalArea: currentRealEstate?.totalArea || 0,
-      currency: currentRealEstate?.currency || 'UAH',
-      garbageCollector: currentRealEstate?.garbageCollector || false,
-      archived: currentRealEstate?.archived || false,
-      account: currentRealEstate?.account || '',
-      contractNumber: currentRealEstate?.contractNumber || '',
+      domain: currentRealEstate
+        ? getEntityId(currentRealEstate?.domain)
+        : chosenRealEstate?.domain || currentDomainId,
+      street: getEntityId(source?.street),
+      companyName: source?.companyName || '',
+      description: source?.description || '',
+      adminEmails: source?.adminEmails || [],
+      pricePerMeter: source?.pricePerMeter || 0,
+      servicePricePerMeter: source?.servicePricePerMeter || 0,
+      totalArea: source?.totalArea || 0,
+      currency: source?.currency || 'UAH',
+      garbageCollector: source?.garbageCollector || false,
+      archived: source?.archived || false,
+      account: source?.account || '',
+      contractNumber: source?.contractNumber || '',
       // DatePicker expects a dayjs instance, not the raw ISO string from the API.
-      contractDate: currentRealEstate?.contractDate
-        ? dayjs(currentRealEstate.contractDate)
+      contractDate: source?.contractDate
+        ? dayjs(source.contractDate)
         : undefined,
-      rentPart: currentRealEstate?.rentPart || 0,
-      inflicion: currentRealEstate?.inflicion || false,
-      waterPart: currentRealEstate?.waterPart || 0,
-      discount: currentRealEstate?.discount || 0,
-      cleaning: currentRealEstate?.cleaning || 0,
-      services: currentRealEstate?.services || [],
-      customServices: currentRealEstate ? mergedCustomServices : [],
-      allServices: currentRealEstate?.allServices ?? false,
+      rentPart: source?.rentPart || 0,
+      inflicion: source?.inflicion || false,
+      waterPart: source?.waterPart || 0,
+      discount: source?.discount || 0,
+      cleaning: source?.cleaning || 0,
+      services: source?.services || [],
+      customServices: source ? mergedCustomServices : [],
+      allServices: source?.allServices ?? false,
     })
 
-    initializedRef.current = true
+    initializedForRef.current = targetId
   }, [
     currentDomainId,
     chosenRealEstate?.domain,
     currentRealEstate,
+    source,
     form,
     customDomainServices,
     mergedCustomServices,
@@ -121,10 +154,15 @@ const RealEstateModal: FC<Props> = ({
   const handleSubmit = async () => {
     const formData: IRealestate = await form.validateFields()
 
-    const filteredCustomServices =
-      formData.customServices?.filter(
+    const keptDisabledServices = (
+      currentRealEstate?.customServices ?? []
+    ).filter((s) => disabledDomainServiceIds.has(String(s._id)))
+    const filteredCustomServices = [
+      ...(formData.customServices?.filter(
         (s) => typeof s.price === 'number' && s.price >= 0
-      ) || []
+      ) || []),
+      ...keptDisabledServices,
+    ]
 
     const realEstateData = {
       domain: getEntityId(formData.domain),
@@ -133,7 +171,8 @@ const RealEstateModal: FC<Props> = ({
         getEntityId(currentRealEstate?.street) ||
         undefined,
       companyName: formData.companyName,
-      description: formData.description,
+      // Always send the key: an omitted field would keep the old value on PATCH.
+      description: formData.description ?? '',
       adminEmails: formData.adminEmails,
       pricePerMeter: formData.pricePerMeter,
       totalArea: formData.totalArea,
@@ -177,6 +216,7 @@ const RealEstateModal: FC<Props> = ({
 
     if ('data' in response) {
       form.resetFields()
+      initializedForRef.current = undefined
       closeModal()
       const action = currentRealEstate ? 'Збережено' : 'Додано'
       message.success(action)
@@ -201,13 +241,22 @@ const RealEstateModal: FC<Props> = ({
     }
   }
 
+  const handleCancel = () => {
+    // Defensive reset so the form never carries stale values into a future
+    // open, even if this modal is ever mounted without being fully
+    // unmounted/remounted by its parent between opens.
+    form.resetFields()
+    initializedForRef.current = undefined
+    closeModal()
+  }
+
   return (
     <Modal
       style={{ top: 20 }}
       title={'Компанії'}
       onOk={handleSubmit}
       changed={() => isValueChanged}
-      onCancel={closeModal}
+      onCancel={handleCancel}
       okText={currentRealEstate ? 'Зберегти' : 'Додати'}
       cancelText={'Відміна'}
       okButtonProps={{ style: { ...(!editable && { display: 'none' }) } }}

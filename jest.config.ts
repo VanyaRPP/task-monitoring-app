@@ -7,6 +7,8 @@ const config: Config = {
   testMatch: ['**/*.test.ts', '**/*.test.tsx'],
   testPathIgnorePatterns: ['/node_modules/', '/.next/'],
   testEnvironment: 'jsdom',
+  // Sends just bson to its node build - see the file for why.
+  resolver: '<rootDir>/jest.resolver.js',
 
   testTimeout: 15000,
 
@@ -47,6 +49,11 @@ const config: Config = {
       prefix: '<rootDir>/',
     }),
     '\\.(css|scss|sass)$': 'identity-obj-proxy',
+    // @ant-design/icons ships CJS that hard-requires the ESM build
+    // (`require('@ant-design/colors/es/generate')`). Bundlers cope; Jest's CJS
+    // runtime throws "Cannot use import statement outside a module". Point the
+    // `es/` subpath at the CJS `lib/` twin — same code, same package version.
+    '^@ant-design/colors/es/(.*)$': '@ant-design/colors/lib/$1',
   },
 
   moduleFileExtensions: ['ts', 'tsx', 'js'],

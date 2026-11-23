@@ -1,16 +1,14 @@
 'use client'
 
 import { LoginOutlined, LogoutOutlined, UserOutlined } from '@ant-design/icons'
-import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
+import { useGetMyCompaniesQuery } from '@common/api/realestateApi/realestate.api'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { RolesSelector } from '@components/UI/RolesSelector'
 import { Tags } from '@components/UI/Tags'
+import { TruncatedText } from '@components/UI/TruncatedText'
 import { AppRoutes, Roles } from '@utils/constants'
 import { isDev } from '@utils/env'
-import {
-  useGetDomainFiltersQuery,
-  useGetRealEstateFiltersQuery,
-} from '@common/api/filterApi/filter.api'
+import { useGetDomainFiltersQuery } from '@common/api/filterApi/filter.api'
 
 import {
   Avatar,
@@ -33,7 +31,7 @@ export const Profile: React.FC = () => {
   const { data: user } = useGetCurrentUserQuery()
 
   const { data: domains } = useGetDomainFiltersQuery({})
-  const { data: companies } = useGetRealEstateFiltersQuery({})
+  const { data: myCompanies } = useGetMyCompaniesQuery()
 
   const isDomainAdmin = useMemo(() => {
     return user?.roles?.includes(Roles.DOMAIN_ADMIN)
@@ -73,10 +71,22 @@ export const Profile: React.FC = () => {
       <Space direction="vertical" size="large" style={{ width: '100%' }}>
         {!!session?.user && (
           <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-            <Flex justify="center" align="center" gap={8} wrap>
-              <Typography.Text strong style={{ fontSize: '1.25rem' }}>
-                {session?.user?.name}
-              </Typography.Text>
+            <Flex
+              justify="center"
+              align="center"
+              gap={8}
+              wrap
+              style={{ minWidth: 0, width: '100%' }}
+            >
+              <TruncatedText
+                text={session?.user?.name}
+                maxWidth={220}
+                style={{
+                  fontSize: '1.25rem',
+                  fontWeight: 600,
+                  flex: '0 1 auto',
+                }}
+              />
 
               {isDev ? (
                 <RolesSelector style={{ minWidth: 100 }} />
@@ -119,7 +129,7 @@ export const Profile: React.FC = () => {
                       color="purple"
                       style={{ margin: 0 }}
                     >
-                      {domain}
+                      <TruncatedText text={domain} maxWidth={160} />
                     </Tag>
                   )}
                 />
@@ -135,8 +145,8 @@ export const Profile: React.FC = () => {
                   }
                   wrap
                   align="center"
-                  items={companies?.realEstatesFilter.map(
-                    ({ text }) => text as string
+                  items={myCompanies?.data?.map(
+                    ({ companyName }) => companyName
                   )}
                 />
               </Space>

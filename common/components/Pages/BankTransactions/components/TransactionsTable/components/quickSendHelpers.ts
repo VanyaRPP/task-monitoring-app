@@ -11,6 +11,7 @@ export interface TransactionPayload {
   AUT_CNTR_ACC: string
   AUT_CNTR_NAM: string
   AUT_CNTR_MFO: string
+  AUT_CNTR_CRF: string
   OSND: string
   Description: string
   TECHNICAL_TRANSACTION_ID: string
@@ -71,6 +72,7 @@ export function buildTransactionPayload(
     AUT_CNTR_ACC: transaction.AUT_CNTR_ACC,
     AUT_CNTR_NAM: transaction.AUT_CNTR_NAM,
     AUT_CNTR_MFO: transaction.AUT_CNTR_MFO,
+    AUT_CNTR_CRF: transaction.AUT_CNTR_CRF,
     OSND: transaction.OSND,
     Description: getResolvedDescription(transaction, companies),
     TECHNICAL_TRANSACTION_ID:

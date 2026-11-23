@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "ask": [
+      "Bash(git push *)",
+      "Bash(git reset --hard *)",
+      "Bash(git clean *)",
+      "Bash(rm -rf *)",
+      "Bash(rm -fr *)",
+      "Bash(rm -r *)",
+      "Bash(aws *)",
+      "Bash(yarn lint)",
+      "Bash(npm run lint)",
+      "Bash(yarn prettier)",
+      "Bash(npm run prettier)"
+    ]
+  }
+}

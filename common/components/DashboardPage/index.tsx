@@ -13,13 +13,8 @@ import ServicesBlock from '@components/DashboardPage/blocks/services'
 import StreetsBlock from '@components/DashboardPage/blocks/streets'
 import CompaniesAreaChart from '@components/DashboardPage/blocks/сompaniesAreaChart'
 import { Roles } from '@utils/constants'
-import { Col, Row, Space, Button, Flex, message, Tooltip, Dropdown } from 'antd'
-import {
-  CloseOutlined,
-  SaveOutlined,
-  EyeOutlined,
-  QuestionCircleOutlined,
-} from '@ant-design/icons'
+import { Col, Row, Space, Button, Flex, message } from 'antd'
+import { QuestionCircleOutlined } from '@ant-design/icons'
 import PaymentsChart from '@components/DashboardPage/blocks/paymentChart'
 import ProfitPage from '@components/Pages/ProfiitPage'
 import { addButton, removeButton } from '@modules/store/floatButtonSlice'
@@ -29,8 +24,7 @@ import {
 } from '@modules/hooks/useFloatButton'
 import { useDispatch } from 'react-redux'
 import s from './style.module.scss'
-import useTheme from '@modules/hooks/useTheme'
-import WidgetVisibilityMenu from '@components/UI/WidgetVisibilityMenu'
+import LayoutEditToolbar from '@components/UI/LayoutEditToolbar'
 import { WidgetWrapper } from '@components/UI/WidgetWrapper'
 import DashboardTour from '@components/DashboardPage/DashboardTour'
 import {
@@ -54,34 +48,34 @@ const MARGIN_Y = 12
 const ALL_WIDGETS = [
   'payments',
   'paymentsChart',
-  'services',
+  'profits',
   'streets',
   'domain',
   'realEstate',
-  'profits',
-  'companies',
+  'services',
+  // 'companies',
 ] as const
 export type WidgetKey = (typeof ALL_WIDGETS)[number]
 const widgetLabels: Record<WidgetKey, string> = {
   payments: 'Платежі',
   paymentsChart: 'Графік платежів',
-  services: 'Послуги',
+  profits: 'Прибутки',
   streets: 'Адреси',
   domain: 'Надавачі послуг',
   realEstate: 'Компанії',
-  profits: 'Прибутки',
-  companies: 'Займані площі',
+  services: 'Послуги',
+  // companies: 'Займані площі',
 }
 
 const widgetMap: Record<WidgetKey, React.ReactNode> = {
   payments: <PaymentsBlock />,
   paymentsChart: <PaymentsChart />,
-  services: <ServicesBlock />,
+  profits: <ProfitPage />,
   streets: <StreetsBlock />,
   domain: <DomainsBlock />,
   realEstate: <RealEstateBlock />,
-  profits: <ProfitPage />,
-  companies: <CompaniesAreaChart />,
+  services: <ServicesBlock />,
+  // companies: <CompaniesAreaChart />,
 }
 
 interface SortableWidgetProps {
@@ -105,9 +99,10 @@ const SortableWidget: React.FC<SortableWidgetProps> = ({
   } = useSortable({ id, disabled: !isEditMode })
 
   const style: React.CSSProperties = {
-    transform: CSS.Transform.toString(transform),
-    transition,
+    transform: CSS.Translate.toString(transform),
+    transition: isDragging ? 'none' : transition,
     opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 999 : 'auto',
     marginBottom: MARGIN_Y,
     cursor: isEditMode ? (isDragging ? 'grabbing' : 'grab') : 'default',
     userSelect: 'none',
@@ -115,6 +110,7 @@ const SortableWidget: React.FC<SortableWidgetProps> = ({
     maxWidth: '100%',
     boxSizing: 'border-box',
     overflow: 'hidden',
+    willChange: 'transform',
   }
   return (
     <div
@@ -139,21 +135,6 @@ const Dashboard: React.FC = () => {
     useEditModelFloatButton('dashboard')
   const [isPanelVisible, togglePanelVisible, panelFloatButton] =
     useDragDropPanelFloatButton('dashboard')
-
-  const [theme] = useTheme()
-  const isDark = theme === 'dark'
-
-  const [hiddenWidget, setHiddenWidget] = useState<WidgetKey[]>([])
-  const menu = (
-    <div style={{ padding: 8 }}>
-      <WidgetVisibilityMenu
-        hidden={hiddenWidget}
-        onChange={setHiddenWidget}
-        available={[...ALL_WIDGETS]}
-        labels={widgetLabels}
-      />
-    </div>
-  )
 
   useEffect(() => {
     if (isPanelVisible && !isEditMode) {
@@ -191,6 +172,7 @@ const Dashboard: React.FC = () => {
       : ALL_WIDGETS.filter((w) => w !== 'profits')
   }, [isGlobalAdmin])
 
+  const [hiddenWidget, setHiddenWidget] = useState<WidgetKey[]>([])
   const [orderedWidgets, setOrderedWidgets] =
     useState<WidgetKey[]>(visibleWidgets)
   const [isLayoutReady, setIsLayoutReady] = useState(false)
@@ -235,18 +217,28 @@ const Dashboard: React.FC = () => {
     document.body.style.cursor = 'grabbing'
   }, [])
 
-  const handleDragEnd = useCallback((event: DragEndEvent) => {
-    setIsDraggingActive(false)
-    document.body.style.cursor = ''
+  const moveWidget = useCallback((activeKey: WidgetKey, overKey: WidgetKey) => {
+    setOrderedWidgets((prev) =>
+      arrayMove(prev, prev.indexOf(activeKey), prev.indexOf(overKey))
+    )
+  }, [])
 
-    const { active, over } = event
-    if (!over || active.id === over.id) return
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      setIsDraggingActive(false)
+      document.body.style.cursor = ''
 
-    setOrderedWidgets((prev) => {
-      const oldIndex = prev.indexOf(active.id as WidgetKey)
-      const newIndex = prev.indexOf(over.id as WidgetKey)
-      return arrayMove(prev, oldIndex, newIndex)
-    })
+      const { active, over } = event
+      if (!over || active.id === over.id) return
+      moveWidget(active.id as WidgetKey, over.id as WidgetKey)
+    },
+    [moveWidget]
+  )
+
+  const scrollToWidget = useCallback((key: WidgetKey) => {
+    document
+      .getElementById(key)
+      ?.scrollIntoView({ behavior: 'smooth', block: 'center' })
   }, [])
 
   const handleDragCancel = useCallback(() => {
@@ -254,59 +246,44 @@ const Dashboard: React.FC = () => {
     document.body.style.cursor = ''
   }, [])
 
-  const handleSave = useCallback(() => {
-    const userId = userResponse?._id?.toString()
-    if (!userId) return
-    localStorage.setItem(
-      getLayoutStorageKey(userId),
-      JSON.stringify({ layout: orderedWidgets, hidden: hiddenWidget })
-    )
-    message.success('Збережено!')
-    togglePanelVisible()
-  }, [userResponse?._id, orderedWidgets, hiddenWidget, togglePanelVisible])
+  const handleLayoutAction = useCallback(
+    (mode: 'save' | 'revert') => {
+      const userId = userResponse?._id?.toString()
+      if (!userId) return
+
+      if (mode === 'save') {
+        localStorage.setItem(
+          getLayoutStorageKey(userId),
+          JSON.stringify({ layout: orderedWidgets, hidden: hiddenWidget })
+        )
+        message.success('Збережено!')
+      } else {
+        localStorage.removeItem(getLayoutStorageKey(userId))
+        setOrderedWidgets(visibleWidgets)
+        setHiddenWidget([])
+        message.success('Відновлено!')
+      }
+      togglePanelVisible()
+    },
+    [userResponse?._id, orderedWidgets, hiddenWidget, togglePanelVisible]
+  )
 
   return (
     <div className={s.wrapper}>
       {isPanelVisible && (
-        <div className={`${s.toolbar} ${isDark ? s.dark : s.light}`}>
-          <div className={s.buttonsBlock}>
-            {orderedWidgets.map((key) => (
-              <Button
-                key={key}
-                type="link"
-                onClick={() => {
-                  const element = document.getElementById(key)
-                  if (element) {
-                    element.scrollIntoView({
-                      behavior: 'smooth',
-                      block: 'center',
-                    })
-                  }
-                }}
-              >
-                {widgetLabels[key]}
-              </Button>
-            ))}
-          </div>
-          <div className={s.actions}>
-            <div
-              className={s.divider}
-              style={{ backgroundColor: isDark ? '#555' : '#ccc' }}
-            />
-            <Dropdown overlay={menu} trigger={['click']}>
-              <Tooltip title="Приховати віджети">
-                <Button icon={<EyeOutlined />} />
-              </Tooltip>
-            </Dropdown>
-
-            <Tooltip title="Зберегти">
-              <Button icon={<SaveOutlined />} onClick={handleSave} />
-            </Tooltip>
-            <Tooltip title="Вийти з режиму редагування">
-              <Button icon={<CloseOutlined />} onClick={togglePanelVisible} />
-            </Tooltip>
-          </div>
-        </div>
+        <LayoutEditToolbar
+          hideTitle="Приховати віджети"
+          hidden={hiddenWidget}
+          onHiddenChange={setHiddenWidget}
+          available={orderedWidgets}
+          labels={widgetLabels}
+          onReset={() => handleLayoutAction('revert')}
+          onSave={() => handleLayoutAction('save')}
+          onClose={togglePanelVisible}
+          items={renderedWidgets}
+          onMove={moveWidget}
+          onItemClick={scrollToWidget}
+        />
       )}
       {isLayoutReady && (
         <DndContext

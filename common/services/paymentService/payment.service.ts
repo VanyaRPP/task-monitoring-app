@@ -1,57 +1,25 @@
 import Domain from '@modules/models/Domain'
-import Payment from '@modules/models/Payment'
+import Counter from '@modules/models/Counter'
+import Payment, { IPaymentModel } from '@modules/models/Payment'
 import RealEstate from '@modules/models/RealEstate'
 import Service from '@modules/models/Service'
 import {
   getCreditDebitPipeline,
   getMaxInvoiceNumber,
+  getPaymentsOrderPipeline,
   getServiceTotalsPipeline,
   getTotalGeneralSumPipeline,
 } from '@pages/api/spacehub/payment/pipelines'
-import { quarters, SortOrder } from '@utils/constants'
-import {
-  sendInvoiceEmail,
-  type InvoiceEmailPayment,
-} from '@utils/email/sendInvoiceEmail'
-import { FilterQuery } from 'mongoose'
-import ProfitService from '@common/services/profitService/profit.service'
-import { isDev } from '@utils/env'
-
-function isEmailDebugEnabled() {
-  return process.env.EMAIL_DEBUG === 'true' || isDev
-}
-
-function maskEmail(email?: string) {
-  if (!email) {
-    return 'missing'
-  }
-
-  const [localPart = '', domainPart = ''] = email.split('@')
-
-  if (!domainPart) {
-    return `${localPart.slice(0, 2)}***`
-  }
-
-  return `${localPart.slice(0, 2)}***@${domainPart}`
-}
-
-function maskEmails(emails: string[] = []) {
-  return emails.map((email) => maskEmail(email))
-}
-
-function logPaymentEmailDebug(stage: string, details: Record<string, unknown>) {
-  if (!isEmailDebugEnabled()) {
-    return
-  }
-  // eslint-disable-next-line no-console
-  console.info(`[payment-email] ${stage}`, details)
-}
+import { quarters } from '@utils/constants'
+import { PaymentStatus } from '@common/api/paymentApi/payment.api.types'
+import mongoose, { QueryFilter } from 'mongoose'
 
 export interface PaymentQueryParams {
   streetIds?: string | string[]
   companyIds?: string | string[]
   domainIds?: string | string[]
   serviceIds?: string | string[]
+  status?: PaymentStatus | string | string[]
   limit?: string
   skip?: string
   type?: 'debit' | 'credit'
@@ -59,7 +27,9 @@ export interface PaymentQueryParams {
   month?: string | number | (string | number)[]
   quarter?: string | number
   day?: string | number
-  dateField?: 'invoiceCreationDate' | 'date'
+  dateField?: 'invoiceCreationDate' | 'date' | 'paidAt'
+  dateFrom?: string
+  dateTo?: string
 }
 
 export interface UserContext {
@@ -68,6 +38,21 @@ export interface UserContext {
   isGlobalAdmin: boolean
   user: {
     email: string
+  }
+}
+
+/**
+ * `monthService` is a Mixed field: saved through the API it holds the id as a
+ * string, but older or server-written payments may hold an ObjectId - and a
+ * Mixed field is never cast, so a string filter alone skips those. Match both.
+ */
+function anyMonthServiceId(ids: string[]) {
+  return {
+    $in: ids.flatMap((id) =>
+      mongoose.isValidObjectId(id)
+        ? [id, new mongoose.Types.ObjectId(id)]
+        : [id]
+    ),
   }
 }
 
@@ -99,14 +84,14 @@ export async function getPayments(
       ? serviceIds.split(',').map((id) => decodeURIComponent(id))
       : serviceIds.map((id) => decodeURIComponent(id))
     : null
-  const options: FilterQuery<typeof Payment> = {}
+  const options: QueryFilter<IPaymentModel> = {}
 
   if (isGlobalAdmin) {
     if (companiesIds) {
       options.company = { $in: companiesIds }
     }
     if (streetsIds) {
-      options.street = { $in: streetIds }
+      options.street = { $in: streetsIds }
     }
     if (domainsIds) {
       options.domain = { $in: domainsIds }
@@ -131,7 +116,7 @@ export async function getPayments(
     }
 
     if (streetsIds) {
-      options.street = { $in: streetIds }
+      options.street = { $in: streetsIds }
     }
 
     const domains = await Domain.find({
@@ -146,7 +131,7 @@ export async function getPayments(
     const companies = await RealEstate.find({
       ...(companiesIds ? { _id: { $in: companiesIds } } : {}),
       adminEmails: user.email,
-      ...(domainIds ? { domain: { $in: domainIds } } : {}),
+      ...(domainsIds ? { domain: { $in: domainsIds } } : {}),
     })
 
     options.company = {
@@ -157,16 +142,64 @@ export async function getPayments(
     }
 
     if (streetsIds) {
-      options.street = { $in: streetIds }
+      options.street = { $in: streetsIds }
     }
   }
 
   if (type) {
     options.type = type
   }
+  if (reqQuery.status) {
+    const statuses = Array.isArray(reqQuery.status)
+      ? reqQuery.status
+      : String(reqQuery.status)
+          .split(',')
+          .map((value) => value.trim())
+          .filter(Boolean)
+
+    const normalizedStatuses = Array.from(
+      new Set(
+        statuses.filter(
+          (value): value is PaymentStatus =>
+            value === PaymentStatus.Draft || value === PaymentStatus.Sent
+        )
+      )
+    )
+
+    if (
+      normalizedStatuses.length === 1 &&
+      normalizedStatuses[0] === PaymentStatus.Draft
+    ) {
+      options.$or = [
+        { status: { $in: [PaymentStatus.Draft, null] } },
+        { status: { $exists: false } },
+      ]
+    } else if (normalizedStatuses.length > 0) {
+      const statusFilters: Record<string, any>[] = []
+
+      if (normalizedStatuses.includes(PaymentStatus.Sent))
+        statusFilters.push({ status: PaymentStatus.Sent })
+
+      if (normalizedStatuses.includes(PaymentStatus.Draft))
+        statusFilters.push(
+          { status: { $in: [PaymentStatus.Draft, null] } },
+          { status: { $exists: false } }
+        )
+
+      options.$or = statusFilters
+    }
+  }
   // TODO: add security
   if (servicesIds) {
-    options.monthService = { $in: servicesIds }
+    options.monthService = anyMonthServiceId(servicesIds)
+  }
+
+  const invoiceDateRange = invoiceDateRangeCondition(
+    reqQuery.dateFrom,
+    reqQuery.dateTo
+  )
+  if (invoiceDateRange) {
+    options.invoiceCreationDate = invoiceDateRange
   }
 
   const expr = filterPeriodOptions(reqQuery)
@@ -178,35 +211,69 @@ export async function getPayments(
       }).select('_id')
 
       const serviceIds = services.map((service) => service._id.toString())
-      options.monthService = { $in: serviceIds }
+
+      // Payments with no month service would otherwise vanish from a period
+      // filter entirely. The profit ledger files them by their own date, so
+      // match that here too - a drill-down must list exactly the payments its
+      // figure was built from.
+      const invoiceExpr = filterPeriodOptions({
+        ...reqQuery,
+        dateField: 'invoiceCreationDate',
+      })
+
+      options.$or = [
+        { monthService: anyMonthServiceId(serviceIds) },
+        {
+          $and: [
+            {
+              $or: [
+                { monthService: { $exists: false } },
+                { monthService: null },
+              ],
+            },
+            { $expr: { $and: invoiceExpr } },
+          ],
+        },
+      ]
     } else {
       options.$expr = { $and: expr }
     }
   }
 
-  const payments = await Payment.find(options)
-    .sort({ invoiceCreationDate: SortOrder.DESC, type: SortOrder.ASC })
-    .skip(+skip)
-    .limit(+limit)
+  const filter = Payment.find(options).cast(Payment)
+
+  const orderedIds = (
+    await Payment.aggregate(getPaymentsOrderPipeline(filter, { skip, limit }))
+  ).map(({ _id }) => _id)
+
+  const unorderedPayments = await Payment.find({ _id: { $in: orderedIds } })
     .populate('company')
     .populate('street')
-    .populate('domain')
+    // bank tokens are admin-only: never ship them inside an embedded domain
+    .populate('domain', '-domainBankToken')
     .populate('monthService')
 
-  const total = await Payment.countDocuments(options)
+  const paymentById = new Map(
+    unorderedPayments.map((payment) => [payment._id.toString(), payment])
+  )
+  const payments = orderedIds
+    .map((id) => paymentById.get(id.toString()))
+    .filter(Boolean)
+
+  const total = await Payment.countDocuments(filter)
 
   const [distinctDomainIds, distinctCompanyIds] = await Promise.all([
-    Payment.distinct('domain', options),
-    Payment.distinct('company', options),
+    Payment.distinct('domain', filter),
+    Payment.distinct('company', filter),
   ])
 
-  const creditDebitPipeline = getCreditDebitPipeline(options)
+  const creditDebitPipeline = getCreditDebitPipeline(filter)
   const totalPayments = await Payment.aggregate(creditDebitPipeline)
 
-  const genralSumPipeline = getTotalGeneralSumPipeline(options)
+  const genralSumPipeline = getTotalGeneralSumPipeline(filter)
   const totalGeneralSum = await Payment.aggregate(genralSumPipeline)
 
-  const serviceTotalsPipeline = getServiceTotalsPipeline(options)
+  const serviceTotalsPipeline = getServiceTotalsPipeline(filter)
   const serviceTotals = await Payment.aggregate(serviceTotalsPipeline)
 
   const totalPaymentsData = [
@@ -227,98 +294,73 @@ export async function getPayments(
   }
 }
 
-export async function getNextInvoiceNumber(): Promise<number> {
+const INVOICE_COUNTER_ID = 'invoiceNumber'
+
+async function getMaxUsedInvoiceNumber(): Promise<number> {
   const result = (await Payment.aggregate(getMaxInvoiceNumber())) as Array<{
     maxNumber?: number
   }>
-  return (result[0]?.maxNumber ?? 0) + 1
+  return Number(result[0]?.maxNumber) || 0
 }
 
-export async function createPayment(
-  body: any,
-  isAdmin: boolean,
-  options: { sendInvoiceEmail?: boolean } = {}
-) {
+/**
+ * The number the next invoice will most likely get - for showing in a form
+ * before it is saved. Not reserved: the real one is given out on save by
+ * reserveInvoiceNumbers, and may differ if someone else saves first.
+ */
+export async function getNextInvoiceNumber(): Promise<number> {
+  const [maxUsed, counter] = await Promise.all([
+    getMaxUsedInvoiceNumber(),
+    Counter.findById(INVOICE_COUNTER_ID).lean(),
+  ])
+  return Math.max(maxUsed, counter?.seq ?? 0) + 1
+}
+
+/**
+ * Reserves `count` consecutive invoice numbers and returns the first.
+ *
+ * Numbers used to be "max + 1" read by the browser when a form opened, so two
+ * invoices saved close together got the same number. Now they are handed out
+ * only here, on the server, at save time, by an atomic `$inc` on a counter.
+ * The counter is first raised to the highest number already in use, so it
+ * starts after existing data and skips past numbers edited in by hand.
+ */
+export async function reserveInvoiceNumbers(count = 1): Promise<number> {
+  const maxUsed = await getMaxUsedInvoiceNumber()
+
+  try {
+    await Counter.updateOne(
+      { _id: INVOICE_COUNTER_ID },
+      { $max: { seq: maxUsed } },
+      { upsert: true }
+    )
+  } catch (error: any) {
+    // Two first-ever reservations racing to create the counter: one upsert
+    // loses with a duplicate key, and the document now exists - raise it.
+    if (error?.code !== 11000) throw error
+    await Counter.updateOne(
+      { _id: INVOICE_COUNTER_ID },
+      { $max: { seq: maxUsed } }
+    )
+  }
+
+  const counter = await Counter.findOneAndUpdate(
+    { _id: INVOICE_COUNTER_ID },
+    { $inc: { seq: count } },
+    { returnDocument: 'after' }
+  ).lean()
+  return counter.seq - count + 1
+}
+
+export async function createPayment(body: any, isAdmin: boolean) {
   if (!isAdmin) throw new Error('not allowed')
 
-  // Renamed locally to avoid shadowing the imported `sendInvoiceEmail` function.
-  const { sendInvoiceEmail: shouldSendInvoiceEmail = true } = options
-
-  const payment = await Payment.create(body)
-
-  const description =
-    payment.type === 'debit'
-      ? `Інвойс №${payment.invoiceNumber}`
-      : payment.description
-
-  const profitObject = {
-    domain: payment.domain.toString(),
-    payment: payment.id.toString(),
-    amount: payment.generalSum,
-    type: payment.type as 'debit' | 'credit',
-    date: payment.invoiceCreationDate,
-    description,
-    invoiceNumber: payment.invoiceNumber.toString(),
-  }
-
-  await ProfitService.create(profitObject)
-
-  if (shouldSendInvoiceEmail && payment.type === 'debit') {
-    try {
-      logPaymentEmailDebug('prepare_started', {
-        paymentId: payment.id?.toString?.() || 'unknown',
-        invoiceNumber: payment.invoiceNumber,
-        domainId: payment.domain?.toString?.() || 'unknown',
-      })
-
-      const paymentSnapshot = (
-        typeof payment.toObject === 'function' ? payment.toObject() : payment
-      ) as InvoiceEmailPayment
-      const currentReceiver = paymentSnapshot.reciever || {}
-      const shouldLoadDomainData =
-        !currentReceiver.companyName ||
-        !currentReceiver.description ||
-        !currentReceiver.adminEmails?.length
-      const domain =
-        shouldLoadDomainData && payment.domain
-          ? await Domain.findById(payment.domain).select(
-              'adminEmails name description'
-            )
-          : null
-
-      paymentSnapshot.reciever = {
-        companyName: currentReceiver.companyName || domain?.name || 'invoice',
-        adminEmails: currentReceiver.adminEmails?.length
-          ? currentReceiver.adminEmails
-          : domain?.adminEmails || [],
-        description: currentReceiver.description || domain?.description || '',
-      }
-
-      logPaymentEmailDebug('receiver_resolved', {
-        paymentId: payment.id?.toString?.() || 'unknown',
-        invoiceNumber: payment.invoiceNumber,
-        usedDomainFallback: Boolean(domain),
-        recipients: maskEmails(paymentSnapshot.reciever.adminEmails),
-        sender: maskEmail(
-          process.env.EMAIL_FROM || process.env.EMAIL_SERVER_USER || 'missing'
-        ),
-      })
-
-      const emailSent = await sendInvoiceEmail(paymentSnapshot)
-
-      logPaymentEmailDebug('send_finished', {
-        paymentId: payment.id?.toString?.() || 'unknown',
-        invoiceNumber: payment.invoiceNumber,
-        emailSent,
-      })
-    } catch (error) {
-      console.error('[payment-email] send_failed', {
-        paymentId: payment.id?.toString?.() || 'unknown',
-        invoiceNumber: payment.invoiceNumber,
-        message: error?.message,
-      })
-    }
-  }
+  // The number is the server's to give, at save time - whatever the client
+  // showed in the form was only a preview.
+  const payment = await Payment.create({
+    ...body,
+    invoiceNumber: await reserveInvoiceNumbers(),
+  })
 
   return payment
 }
@@ -367,8 +409,6 @@ export async function duplicatePayments(
 
   // Resolve the next invoice number once and increment locally, instead of
   // running a `$max` aggregation per payment inside the loop.
-  let nextInvoiceNumber = await getNextInvoiceNumber()
-
   for (const source of sources) {
     const domainId = source.domain ? source.domain.toString() : null
     if (allowedDomainIds && (!domainId || !allowedDomainIds.has(domainId))) {
@@ -376,21 +416,16 @@ export async function duplicatePayments(
       continue
     }
 
-    const body = source.toObject() as Record<string, unknown>
+    const body: Record<string, unknown> = { ...source.toObject() }
     for (const field of NON_COPYABLE_PAYMENT_FIELDS) {
       delete body[field]
     }
-    body.invoiceNumber = nextInvoiceNumber
+    // createPayment gives the copy its own number.
     body.invoiceCreationDate = new Date()
 
     try {
-      const created = await createPayment(body, true, {
-        sendInvoiceEmail: false,
-      })
+      const created = await createPayment(body, true)
       createdIds.push(created.id.toString())
-      // Only advance the counter once the payment actually persisted, so a
-      // failed create leaves the number free for the next duplicate.
-      nextInvoiceNumber += 1
     } catch (error) {
       console.error('[payment-duplicate] create_failed', {
         sourceId: source._id.toString(),
@@ -411,17 +446,53 @@ export async function duplicatePayments(
   }
 }
 
-function filterPeriodOptions(args) {
-  const { year, quarter, day, dateField = 'invoiceCreationDate' } = args
-  let { month } = args
-  const field = `$${dateField}`
-
-  if (typeof month === 'string') {
-    month = month
-      .split(',')
-      .map(Number)
-      .filter((m) => !isNaN(m))
+/**
+ * `dateFrom`/`dateTo` are ISO instants (the client already turned calendar
+ * days into the viewer's day boundaries). Invalid bounds are ignored.
+ */
+export function invoiceDateRangeCondition(
+  dateFrom?: string,
+  dateTo?: string
+): { $gte?: Date; $lte?: Date } | null {
+  const toDate = (value?: string) => {
+    if (!value || typeof value !== 'string') return null
+    const date = new Date(value)
+    return isNaN(date.getTime()) ? null : date
   }
+  const from = toDate(dateFrom)
+  const to = toDate(dateTo)
+  if (!from && !to) return null
+  return {
+    ...(from ? { $gte: from } : {}),
+    ...(to ? { $lte: to } : {}),
+  }
+}
+
+function filterPeriodOptions(args) {
+  const { year, quarter, day, month, dateField = 'invoiceCreationDate' } = args
+  // `paidAt` only exists on credits created after it was introduced, so period
+  // filtering has to use the same fallback the profit ledger aggregates on -
+  // otherwise a drill-down would list a different set than the total it came
+  // from. $year/$month/$dayOfMonth accept any expression, not just a path.
+  const field =
+    dateField === 'paidAt'
+      ? { $ifNull: ['$paidAt', '$invoiceCreationDate'] }
+      : `$${dateField}`
+
+  // `month` arrives as a number, a string, a comma-joined string or an array
+  // depending on the caller. Normalise all four to number[]; a bare number
+  // used to fall through both branches below and be silently dropped.
+  const months: number[] = (
+    Array.isArray(month)
+      ? month
+      : typeof month === 'string'
+        ? month.split(',')
+        : month == null
+          ? []
+          : [month]
+  )
+    .map(Number)
+    .filter((m) => !isNaN(m))
 
   const filterByDateOptions = []
 
@@ -431,9 +502,9 @@ function filterPeriodOptions(args) {
     })
   }
 
-  if (Array.isArray(month) && month.length > 0) {
+  if (months.length > 0) {
     filterByDateOptions.push({
-      $in: [{ $month: field }, month],
+      $in: [{ $month: field }, months],
     })
   }
 

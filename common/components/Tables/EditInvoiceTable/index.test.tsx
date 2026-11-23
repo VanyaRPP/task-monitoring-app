@@ -396,3 +396,44 @@ describe('<EditInvoicesTable_unstable> domainId wiring', () => {
     expect(screen.queryByText(NO_DOMAIN_PLACEHOLDER)).not.toBeNull()
   })
 })
+
+describe('EditInvoicesTable_unstable — view mode with domain display settings', () => {
+  const renderView = (props: Record<string, unknown>) => {
+    const Wrapper = () => {
+      const [form] = Form.useForm()
+      return (
+        <Form
+          form={form}
+          initialValues={{
+            invoice: [{ type: ServiceType.Maintenance, name: 'Утримання' }],
+          }}
+        >
+          <EditInvoicesTable_unstable form={form} {...props} />
+        </Form>
+      )
+    }
+    return render(<Wrapper />)
+  }
+
+  it('drops quantity and price columns when the domain hides them', () => {
+    renderView({ hideQuantityAndPrice: true })
+    const headers = screen
+      .getAllByRole('columnheader')
+      .map((h) => h.textContent)
+    expect(headers).not.toContain('Кількість')
+    expect(headers.some((h) => h?.startsWith('Ціна'))).toBe(false)
+    expect(headers).toContain('Сума')
+  })
+
+  it('keeps the columns for the editable table even if the domain hides them', () => {
+    renderView({ hideQuantityAndPrice: true, editable: true })
+    expect(
+      screen.getAllByRole('columnheader').map((h) => h.textContent)
+    ).toContain('Кількість')
+  })
+
+  it('shows the alias in view mode', () => {
+    renderView({ getAlias: () => 'Освітня послуга' })
+    expect(screen.getByText('Освітня послуга')).toBeInTheDocument()
+  })
+})

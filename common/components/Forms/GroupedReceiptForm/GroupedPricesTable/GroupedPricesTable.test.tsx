@@ -424,6 +424,44 @@ describe('GroupedPricesTable', () => {
     expect(headers.length).toBe(3)
   })
 
+  test('grouped preview: a line with a domain alias is shown by the alias, not rolled into its group', () => {
+    mockUseGetCustomServicesByDomainQuery.mockReturnValue({
+      data: {
+        data: [
+          {
+            groupName: 'Група тест',
+            services: [
+              { name: 'x', fieldName: ServiceType.Maintenance, _id: 's1' },
+            ],
+          },
+        ],
+      },
+      isLoading: false,
+    })
+
+    renderTable({
+      usePreviewQuantityToggle: true,
+      invoices: [{ ...baseInvoice, alias: 'Освітня послуга' }],
+    })
+
+    expect(screen.getByText('Освітня послуга')).toBeInTheDocument()
+    expect(screen.queryByText('Група тест')).not.toBeInTheDocument()
+  })
+
+  test('hideQuantityAndPrice drops quantity and price even in the detailed layout', () => {
+    mockUsePaymentContext.mockReturnValue({
+      form: { getFieldsValue: () => ({ domain: { currency: 'UAH' } }) },
+      company: { currency: 'UAH' },
+      showQuantityInPreview: true,
+    })
+    renderTable({ usePreviewQuantityToggle: true, hideQuantityAndPrice: true })
+
+    expect(screen.getAllByRole('columnheader').length).toBe(3)
+    expect(
+      screen.queryByRole('columnheader', { name: /К-сть/i })
+    ).not.toBeInTheDocument()
+  })
+
   test('grouped preview: standard service that is NOT in any group renders standalone', () => {
     // Same Maintenance invoice, but the domain has no groups containing it
     // (only an unrelated group with a different service). The Maintenance row

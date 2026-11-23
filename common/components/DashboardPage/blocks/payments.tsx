@@ -16,13 +16,19 @@ import {
   paymentApi,
   useMarkPaymentsPaidMutation,
   useDuplicatePaymentsMutation,
+  useSendPaymentEmailMutation,
+  useUpdatePaymentStatusMutation,
 } from '@common/api/paymentApi/payment.api'
 import {
   debtorsApi,
   useGetDebtorsQuery,
 } from '@common/api/debtorsApi/debtors.api'
+import { applyDebtDeltas } from '@common/api/debtorsApi/debtorsCache'
 
-import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
+import {
+  IExtendedPayment,
+  PaymentStatus,
+} from '@common/api/paymentApi/payment.api.types'
 
 import TableCard from '@components/UI/TableCard'
 import PaymentsHeader from '@components/Tables/Payment/Header'
@@ -56,11 +62,13 @@ import {
   setSelectedColumns,
   setPaymentsDeleteItems,
   setSelectedPayments,
-  setSelectedDateField,
 } from '@modules/store/paymentsSlice'
 import { RootState } from '@modules/store/store'
-import { formatDateFilterForQuery, getTypeOperation } from '@utils/helpers'
+import { resolvePaymentDateFilterQuery, getTypeOperation } from '@utils/helpers'
 import { PaymentDeleteItem } from '@components/Tables/Payment/Header'
+import { applyDateRangeToFilters } from '@utils/paymentDateRange'
+import { getDateRangeHistoryScope } from '@utils/dateRangeHistory'
+import { usePaymentsFilterUrlSync } from './usePaymentsFilterUrlSync'
 
 export interface PaymentsBlockProps {
   sepDomainID?: string
@@ -90,7 +98,6 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     selectedColumns,
     paymentsDeleteItems,
     selectedPayments,
-    selectedDateField,
     currentPage: rawCurrentPage,
     pageSize: rawPageSize,
   } = useSelector((s: RootState) => s.payments)
@@ -98,6 +105,10 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
   const handleView = (p: IExtendedPayment) => dispatch(setOpenView(p))
   const handleEdit = (p: IExtendedPayment) => dispatch(setOpenEdit(p))
   const handleClose = () => dispatch(setCloseModal())
+
+  const { isUrlApplied } = usePaymentsFilterUrlSync({
+    enabled: Boolean(sepDomainID) || router.pathname === AppRoutes.PAYMENT,
+  })
 
   const currentPage = rawCurrentPage || 1
   const pageSize =
@@ -153,15 +164,15 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     {
       skip: (currentPage - 1) * pageSize,
       limit: pageSize,
-      ...formatDateFilterForQuery(filters?.invoiceCreationDate),
+      ...resolvePaymentDateFilterQuery(filters),
       ...getTypeOperation(filters?.type?.[0]),
-      dateField: selectedDateField,
       companyIds: filters?.company || undefined,
       domainIds: sepDomainID || filters?.domain || undefined,
       streetIds: filters?.street || undefined,
       type: filters?.type || undefined,
+      status: filters?.status || undefined,
     },
-    { skip: currUserLoading || !currUser }
+    { skip: currUserLoading || !currUser || !isUrlApplied }
   )
 
   useEffect(() => {
@@ -183,6 +194,8 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
   const [deleteMultiplePayments] = useDeleteMultiplePaymentsMutation()
   const [markPaymentsPaid] = useMarkPaymentsPaidMutation()
   const [duplicatePayments] = useDuplicatePaymentsMutation()
+  const [sendPaymentEmail] = useSendPaymentEmailMutation()
+  const [updatePaymentStatus] = useUpdatePaymentStatusMutation()
   const patchDebtorsCache = useCallback(
     (changes: Array<{ companyId: string; debtDelta: number }>) => {
       if (!changes.length || !domainIds.length) return
@@ -192,15 +205,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
           { domainIds },
           (draft) => {
             if (!draft.companies) return
-            for (const { companyId, debtDelta } of changes) {
-              const company = draft.companies.find(
-                (c) => c.companyId === companyId
-              )
-              if (company) {
-                company.totalDebt += debtDelta
-              }
-            }
-            draft.companies = draft.companies.filter((c) => c.totalDebt > 0)
+            draft.companies = applyDebtDeltas(draft.companies, changes)
           }
         )
       )
@@ -458,15 +463,26 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     }
 
     if (extra.action === 'filter') {
-      const raw = (allFilters as any)?.invoiceCreationDate
-      const invoiceVals = Array.isArray(raw)
-        ? (raw.filter((x) => typeof x === 'string') as string[])
+      const rawInvoice = (allFilters as any)?.invoiceCreationDate
+      const invoiceVals = Array.isArray(rawInvoice)
+        ? (rawInvoice.filter((x) => typeof x === 'string') as string[])
         : []
+
+      const rawMonth = (allFilters as any)?.monthService
+      const monthVals = Array.isArray(rawMonth)
+        ? (rawMonth.filter((x) => typeof x === 'string') as string[])
+        : []
+
+      // The table only reports its own column filters; the header range
+      // picker lives outside it and must survive a column filter change.
       dispatch(
         setFilters({
           ...allFilters,
           invoiceCreationDate: invoiceVals,
+          monthService: monthVals,
           street: filters?.street,
+          dateFrom: filters?.dateFrom,
+          dateTo: filters?.dateTo,
         })
       )
     }
@@ -505,6 +521,15 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     deleteLoading,
     onMarkPaid: handleMarkPaid,
     onDuplicate: handleDuplicate,
+    onSendPaymentEmail: async (paymentId: string, html?: string) =>
+      sendPaymentEmail({ id: paymentId, html }).unwrap(),
+    onUpdatePaymentStatus: async ({
+      _id,
+      status,
+    }: {
+      _id: string
+      status: PaymentStatus
+    }) => updatePaymentStatus({ _id, status }).unwrap(),
   }
   const debtProps = {
     debtorCompanies,
@@ -518,15 +543,17 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
   const headerProps: React.ComponentProps<typeof PaymentsHeader> = {
     paymentsDeleteItems,
     closeEditModal: handleClose,
-    setCurrentDateFilter: (vals) => {
-      dispatch(
-        setFilters({
-          ...filters,
-          invoiceCreationDate: vals,
-        })
-      )
+    onDateRangeChange: (range) => {
+      dispatch(setFilters(applyDateRangeToFilters(filters, range)))
     },
-    currentPayment,
+    showDateRangeFilter: Boolean(sepDomainID),
+    // Same ids the payments query is narrowed by, so a single-domain page
+    // shares its history with that domain picked on /payment.
+    dateHistoryScope: getDateRangeHistoryScope({
+      company: filters?.company,
+      domain: sepDomainID ? [sepDomainID] : filters?.domain,
+    }),
+    currentPayment: currentPayment as Partial<IExtendedPayment>,
     paymentActions: { edit, preview },
     streets: filterProps.streetsFilter,
     payments: payments,

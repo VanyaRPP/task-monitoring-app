@@ -5,7 +5,9 @@ import { mockLoginAs } from '@utils/mockLoginAs'
 import { setupTestEnvironment } from '@utils/setupTestEnvironment'
 import { domains, realEstates, users } from '@utils/testData'
 import handler from '.'
-import PaymentChangeLog from '@common/modules/models/PaymentChangeLog'
+import PaymentChangeLog, {
+  IPaymentChangeLogModel,
+} from '@common/modules/models/PaymentChangeLog'
 import Payment from '@common/modules/models/Payment'
 
 jest.mock('next-auth', () => ({ getServerSession: jest.fn() }))
@@ -29,15 +31,16 @@ const baseInvoiceData = {
   type: 'debit',
 }
 
-const makeLog = (overrides: Record<string, any> = {}) => ({
-  paymentId: new mongoose.Types.ObjectId(),
-  date: new Date('2024-01-01'),
-  actionType: 'CREATE',
-  source: 'single',
-  actorEmail: 'someone@example.com',
-  invoiceData: { ...baseInvoiceData },
-  ...overrides,
-})
+const makeLog = (overrides: Record<string, any> = {}) =>
+  ({
+    paymentId: new mongoose.Types.ObjectId(),
+    date: new Date('2024-01-01'),
+    actionType: 'CREATE',
+    source: 'single',
+    actorEmail: 'someone@example.com',
+    invoiceData: { ...baseInvoiceData },
+    ...overrides,
+  }) as unknown as IPaymentChangeLogModel
 
 const seedLogs = [
   makeLog({

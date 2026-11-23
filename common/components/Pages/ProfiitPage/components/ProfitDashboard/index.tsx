@@ -2,20 +2,36 @@
 
 import React, { useMemo, useState, useEffect } from 'react'
 import {
+  Button,
   Card,
   Col,
   Row,
   Select,
   Space,
   Statistic,
+  Tooltip,
   Typography,
   theme,
 } from 'antd'
-import { ArrowDownOutlined, ArrowUpOutlined } from '@ant-design/icons'
 import { Column, Pie } from '@ant-design/plots'
+import { CaretDownOutlined, CaretUpOutlined } from '@ant-design/icons'
 import { useTranslation } from 'next-i18next'
-import dayjs from 'dayjs'
+import dayjs, { Dayjs } from 'dayjs'
+import type { ProfitMonthRow } from '@common/api/profitsApi/profits.type'
+import useTheme from '@modules/hooks/useTheme'
+import { Currency, CURRENCY_SELECT_OPTIONS } from '@utils/constants'
+import {
+  getCurrencySymbol,
+  getCurrencyShortLabel,
+  normalizeCurrency,
+  plusFloat,
+  toRoundFixed,
+} from '@utils/helpers'
+import { money } from '../ProfitTable/tableConfig'
+import { splitProfitByCategory } from '@utils/profit-items'
 import 'dayjs/locale/uk'
+import cn from 'classnames'
+import s from './style.module.scss'
 
 dayjs.locale('uk')
 
@@ -23,20 +39,156 @@ const { Text } = Typography
 const { useToken } = theme
 
 interface ProfitDashboardProps {
-  dataSource: any[]
+  dataSource: ProfitMonthRow[]
+  /**
+   * Domain and company are symmetric scopes - both get all four cards, the
+   * expense pie, and the full trend chart. The only thing this picks is
+   * which side of the invoice figure the labels describe:
+   *   domain:  an invoice is income  - "we billed them, they owe us".
+   *   company: the SAME invoice is an expense, from the company's own
+   *            self-service view - "we were billed, we owe".
+   */
+  perspective?: 'domain' | 'company'
 }
 
-const ProfitDashboard: React.FC<ProfitDashboardProps> = ({ dataSource }) => {
+type PeriodTotals = ReturnType<typeof sumPeriod>
+
+/**
+ * Axis labels get one line and a lot of ticks, so full precision would not
+ * fit: 150000 reads as "₴ 150 тис".
+ */
+const compactMoney = (value: number, currency: string) => {
+  const symbol = getCurrencySymbol(currency)
+  const abs = Math.abs(value)
+  if (abs >= 1_000_000) return `${symbol} ${(value / 1_000_000).toFixed(1)} млн`
+  if (abs >= 1_000) return `${symbol} ${Math.round(value / 1_000)} тис`
+  return `${symbol} ${value}`
+}
+
+// Below this share a slice is too thin to hold its percentage label.
+const PIE_LABEL_MIN_PERCENT = 5
+
+// G2 v5 "classic" categorical palette - the colours the pie already used.
+const PIE_PALETTE = [
+  '#1783FF',
+  '#00C9C9',
+  '#F0884D',
+  '#D580FF',
+  '#7863FF',
+  '#60C42D',
+  '#BD8F24',
+  '#FF80CA',
+  '#2491B3',
+  '#17C76F',
+]
+
+// One column under the ring: past this many rows the legend is paged, so the
+// pie card stays beside the trend chart however many categories there are.
+const PIE_LEGEND_PAGE_SIZE = 8
+
+// Past the palette, repeating it would give two legend rows the same colour;
+// golden-angle hues stay apart however many categories a month has.
+const pieColorAt = (i: number) =>
+  i < PIE_PALETTE.length
+    ? PIE_PALETTE[i]
+    : `hsl(${Math.round((i * 137.508) % 360)}, 62%, 58%)`
+
+const periodKeyOf = (d: Dayjs, periodType: string) => {
+  if (periodType === 'Month') return d.format('YYYY-MM')
+  if (periodType === 'Quarter')
+    return `${d.year()}-Q${Math.ceil((d.month() + 1) / 3)}`
+  return `${d.year()}`
+}
+
+// Scoped to one currency: adding UAH to USD would produce a number that means
+// nothing. The picker above the cards chooses which one is on screen.
+const sumPeriod = (rows: ProfitMonthRow[], currency: string) => {
+  let expected = 0
+  let actual = 0
+  let income = 0
+  let expenses = 0
+  // Summed, never recomputed: `net` points opposite ways for a domain and a
+  // company (see ProfitService.getLedgerFor), and re-deriving it here as
+  // `actual - expenses` made the card contradict the table column right
+  // beside it - a company's outflow showed up as a green profit.
+  let net = 0
+
+  rows.forEach((item) => {
+    const totals = item.byCurrency?.[currency]
+    if (!totals) return
+    expected += totals.expected || 0
+    actual += totals.actual || 0
+    income += totals.income || 0
+    expenses += totals.expenses || 0
+    net += totals.net || 0
+  })
+
+  return {
+    expected,
+    actual,
+    income,
+    expenses,
+    net,
+    // How much of what we invoiced actually came in.
+    collectionRate: expected ? (actual / expected) * 100 : 0,
+    outstanding: expected - actual,
+  }
+}
+
+/**
+ * Percentage change against the same figure one period back. `higherIsBetter`
+ * flips the colour for expenses, where growth is not good news.
+ */
+const PeriodDelta: React.FC<{
+  current: number
+  previous?: number
+  higherIsBetter?: boolean
+}> = ({ current, previous, higherIsBetter = true }) => {
+  const { t } = useTranslation()
+  if (previous == null) return null
+
+  // Going from nothing to something has no meaningful percentage.
+  if (!previous) {
+    return current ? (
+      <Text type="secondary" style={{ fontSize: 12 }}>
+        {t('profitPage:dashboard.noPrevious')}
+      </Text>
+    ) : null
+  }
+
+  const change = ((current - previous) / Math.abs(previous)) * 100
+  if (Math.abs(change) < 0.1) {
+    return (
+      <Text type="secondary" style={{ fontSize: 12 }}>
+        {t('profitPage:dashboard.unchanged')}
+      </Text>
+    )
+  }
+
+  const isGood = change > 0 === higherIsBetter
+  return (
+    <Text type={isGood ? 'success' : 'danger'} style={{ fontSize: 12 }}>
+      {change > 0 ? '▲' : '▼'} {Math.abs(change).toFixed(1)}%{' '}
+      {t('profitPage:dashboard.vsPrevious')}
+    </Text>
+  )
+}
+
+const ProfitDashboard: React.FC<ProfitDashboardProps> = ({
+  dataSource,
+  perspective = 'domain',
+}) => {
+  const isDomain = perspective === 'domain'
   const { t } = useTranslation()
   const [periodType, setPeriodType] = useState('Quarter')
   const [selectedPeriod, setSelectedPeriod] = useState<string | null>(null)
 
   const { token } = useToken()
 
-  const isDarkMode =
-    token.colorBgBase === '#000' ||
-    token.colorBgLayout === '#141414' ||
-    String(token.colorText).includes('255')
+  // The app already tracks the active theme; guessing it by string-matching
+  // token colours broke as soon as a token value changed.
+  const [appTheme] = useTheme()
+  const isDarkMode = appTheme === 'dark'
 
   const periodOptions = useMemo(() => {
     const options = new Set<string>()
@@ -93,34 +245,123 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({ dataSource }) => {
     })
   }, [dataSource, periodType, selectedPeriod])
 
-  const aggregatedData = useMemo(() => {
-    let actualProfit = 0
-    let actualExpense = 0
-
-    filteredData.forEach((item) => {
-      actualProfit += item.credit || 0
-      actualExpense += item.debit || 0
+  // Currencies present anywhere on the page, busiest first.
+  const availableCurrencies = useMemo(() => {
+    const volume: Record<string, number> = {}
+    dataSource.forEach((row) => {
+      row.currencies?.forEach((c) => {
+        const t = row.byCurrency[c]
+        volume[c] =
+          (volume[c] ?? 0) +
+          Math.abs(t.expected) +
+          Math.abs(t.actual) +
+          Math.abs(t.income) +
+          Math.abs(t.expenses)
+      })
     })
+    return Object.keys(volume).sort((a, b) => volume[b] - volume[a])
+  }, [dataSource])
 
-    const plannedProfit = actualProfit > 0 ? actualProfit * 1.05 : 39064.52
-    const plannedExpense = actualExpense > 0 ? actualExpense * 1.1 : 91149.45
+  const [currency, setCurrency] = useState<string>(Currency.UAH)
 
-    const profitDiff = plannedProfit
-      ? ((actualProfit - plannedProfit) / plannedProfit) * 100
-      : 0
-    const expenseDiff = plannedExpense
-      ? ((actualExpense - plannedExpense) / plannedExpense) * 100
-      : 0
-
-    return {
-      actualProfit,
-      actualExpense,
-      plannedProfit,
-      plannedExpense,
-      profitDiff,
-      expenseDiff,
+  useEffect(() => {
+    if (availableCurrencies.length && !availableCurrencies.includes(currency)) {
+      setCurrency(availableCurrencies[0])
     }
-  }, [filteredData])
+  }, [availableCurrencies, currency])
+
+  const aggregatedData = useMemo(
+    () => sumPeriod(filteredData, currency),
+    [filteredData, currency]
+  )
+
+  // Same period, one step back. Without it every figure on this page is a
+  // number with nothing to compare against - the old cards faked that with an
+  // invented "forecast"; this is the honest version.
+  const previousData = useMemo(() => {
+    if (!filteredData.length) return null
+
+    const ref = dayjs(filteredData[0].month)
+    const prevRef =
+      periodType === 'Month'
+        ? ref.subtract(1, 'month')
+        : periodType === 'Quarter'
+          ? ref.subtract(3, 'month')
+          : ref.subtract(1, 'year')
+
+    const prevKey = periodKeyOf(prevRef, periodType)
+    const rows = dataSource.filter(
+      (item) =>
+        dayjs(item.month).isValid() &&
+        periodKeyOf(dayjs(item.month), periodType) === prevKey
+    )
+
+    // The previous period may simply be off the current page. Showing nothing
+    // beats showing a delta against a period we only partly loaded.
+    return rows.length ? sumPeriod(rows, currency) : null
+  }, [dataSource, filteredData, periodType, currency])
+
+  // A fifth card only once there is something to put in it - an always-on
+  // "Прибуток 0,00" card would be noise on the many domains that never record
+  // a manual credit.
+  const hasIncome = !!aggregatedData.income || !!previousData?.income
+
+  /**
+   * One descriptor per bar series, in the order they are plotted. The colour
+   * lives here rather than in a loose `range` array so a series can never
+   * drift onto the wrong colour: nothing expense-flavoured is allowed to be
+   * green, and green is reserved for money coming in.
+   */
+  const series = useMemo(() => {
+    const list = [
+      {
+        // "Invoice" means income for a domain, expense for a company - same
+        // number, opposite side of the same transaction. Neutral blue works
+        // for both, because either way it is a figure that is only forecast.
+        label: t(
+          isDomain
+            ? 'profitPage:dashboard.expected'
+            : 'profitPage:dashboard.expectedCompany'
+        ),
+        pick: (c: any) => c?.expected || 0,
+        color: token.colorInfo,
+      },
+      {
+        label: t(
+          isDomain
+            ? 'profitPage:dashboard.actual'
+            : 'profitPage:dashboard.actualCompany'
+        ),
+        pick: (c: any) => c?.actual || 0,
+        // Collected income for a domain; an invoice the company PAID for a
+        // company - an outflow, and an outflow is never green.
+        color: isDomain ? token.colorSuccess : token.colorWarning,
+      },
+      {
+        // Not invoice-derived, so this label does not flip with perspective.
+        label: t('profitPage:dashboard.expenses'),
+        pick: (c: any) => c?.expenses || 0,
+        color: token.colorError,
+      },
+    ]
+
+    // Hand-entered credits. Only worth a fourth bar once something is in it,
+    // but on a company it is the only inflow there is, so it is what puts a
+    // profit on a page called "Прибутки" at all.
+    if (filteredData.some((item) => item.byCurrency?.[currency]?.income)) {
+      list.push({
+        label: t(
+          isDomain
+            ? 'profitPage:dashboard.income'
+            : 'profitPage:dashboard.incomeCompany'
+        ),
+        pick: (c: any) => c?.income || 0,
+        color: isDomain ? token.colorSuccessActive : token.colorSuccess,
+      })
+    }
+
+    return list
+  }, [t, isDomain, token, filteredData, currency])
 
   const columnData = useMemo(() => {
     const data: any[] = []
@@ -131,68 +372,121 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({ dataSource }) => {
     chartData.forEach((item) => {
       const d = dayjs(item.month)
       const monthName = d.isValid() ? d.format('MMM') : item.month
-      const actProfit = item.credit || 0
-      const actExpense = item.debit || 0
+      const totals = item.byCurrency?.[currency]
 
-      data.push({
-        period: monthName,
-        type: t('profitPage:dashboard.plannedProfit'),
-        value: actProfit * 1.05,
-      })
-      data.push({
-        period: monthName,
-        type: t('profitPage:dashboard.actualProfit'),
-        value: actProfit,
-      })
-      data.push({
-        period: monthName,
-        type: t('profitPage:dashboard.plannedExpense'),
-        value: actExpense * 0.95,
-      })
-      data.push({
-        period: monthName,
-        type: t('profitPage:dashboard.actualExpense'),
-        value: actExpense,
+      series.forEach((s) => {
+        data.push({ period: monthName, type: s.label, value: s.pick(totals) })
       })
     })
     return data
-  }, [filteredData, t])
+  }, [filteredData, currency, series])
 
+  // Expense breakdown, driven by the `categories` field the add-cost form
+  // already writes - no guessing the category from the description text.
   const pieData = useMemo(() => {
     const categoriesMap: Record<string, number> = {}
 
     filteredData.forEach((month) => {
-      month.transactions?.forEach((tr: any) => {
-        if (tr.type === 'credit') {
-          let cat = tr.categories?.[0]
-
-          if (!cat) {
-            const desc = (tr.description || '').toLowerCase()
-            if (desc.includes('коворкінг')) cat = 'Коворкінг'
-            else if (desc.includes('оренд')) cat = 'Оренда'
-            else if (desc.includes('іт') || desc.includes('it'))
-              cat = 'ІТ-послуги'
-            else cat = 'Інше'
-          }
-
-          categoriesMap[cat] = (categoriesMap[cat] || 0) + tr.amount
+      month.transactions?.forEach((tr) => {
+        if (tr.type !== 'debit') return
+        // Each expense carries its own currency; without this filter 100 USD
+        // and 100 UAH would both add 100 to the same slice, and the pie would
+        // silently disagree with the (currency-scoped) expenses card.
+        if (normalizeCurrency(tr.currency) !== normalizeCurrency(currency)) {
+          return
         }
+        // Lines carry their own amounts; older multi-category records are
+        // split evenly so the pie still sums to the month's expenses.
+        splitProfitByCategory(
+          tr,
+          t('profitPage:dashboard.uncategorized')
+        ).forEach(({ category, amount }) => {
+          categoriesMap[category] = (categoriesMap[category] || 0) + amount
+        })
       })
     })
 
-    return Object.entries(categoriesMap).map(([type, value]) => ({
-      type,
-      value,
-    }))
-  }, [filteredData])
+    // A zero or negative slice has no angle and only produces a stray label.
+    // Biggest first, so the legend reads in the same order as the ring.
+    return Object.entries(categoriesMap)
+      .map(([type, value]) => ({ type, value: Number(toRoundFixed(value)) }))
+      .filter((item) => item.value > 0)
+      .sort((a, b) => b.value - a.value)
+  }, [filteredData, t, currency])
+
+  // Categories switched off in the legend. Only the ring is affected: the
+  // legend keeps every row so a hidden category can be switched back on.
+  const [hiddenCategories, setHiddenCategories] = useState<string[]>([])
+
+  const toggleCategory = (category: string) =>
+    setHiddenCategories((prev) =>
+      prev.includes(category)
+        ? prev.filter((c) => c !== category)
+        : [...prev, category]
+    )
+
+  const visiblePieData = useMemo(
+    () => pieData.filter((item) => !hiddenCategories.includes(item.type)),
+    [pieData, hiddenCategories]
+  )
+
+  // A long legend is paged rather than grown, so the card keeps the ring's
+  // height however many categories a period has.
+  const [legendPage, setLegendPage] = useState(0)
+  const legendPageCount = Math.max(
+    1,
+    Math.ceil(pieData.length / PIE_LEGEND_PAGE_SIZE)
+  )
+
+  // A new period or currency brings a different set of rows. Keyed on the
+  // names, not the array: pieData is rebuilt whenever `t` changes identity.
+  const legendKey = pieData.map((item) => item.type).join('\u0000')
+  useEffect(() => {
+    setLegendPage(0)
+  }, [legendKey])
+
+  const legendOffset = legendPage * PIE_LEGEND_PAGE_SIZE
+  const legendPageItems = pieData.slice(
+    legendOffset,
+    legendOffset + PIE_LEGEND_PAGE_SIZE
+  )
+
+  // Shares are of what is on the ring, so they still add up to 100%.
+  const pieTotal = useMemo(
+    () => visiblePieData.reduce((sum, item) => plusFloat(sum, item.value), 0),
+    [visiblePieData]
+  )
+
+  const piePercent = (value: number) =>
+    pieTotal ? (value / pieTotal) * 100 : 0
+
+  // Explicit category -> colour pairs. Left to G2, the ordinal scale indexes
+  // colours by data order, and after a data update the legend and the ring
+  // ended up indexing differently - slices swapped colours with each other.
+  const pieColorScale = useMemo(
+    () => ({
+      domain: pieData.map((item) => item.type),
+      range: pieData.map((_, i) => pieColorAt(i)),
+    }),
+    [pieData]
+  )
 
   const columnConfig = {
     data: columnData,
     xField: 'period',
     yField: 'value',
     colorField: 'type',
-    isGroup: true,
-    color: ['#1890ff', '#13c2c2', '#fa8c16', '#b37feb'],
+    // G2 v5 groups bars via the dodgeX transform; the v1 `isGroup` flag is
+    // ignored, which would stack these three unrelated series into one bar.
+    transform: [{ type: 'dodgeX' }],
+    scale: {
+      // `range` maps onto the colour domain in the order the series appear in
+      // `columnData`, so it is derived from the same descriptors rather than
+      // hand-listed - that is what used to put green on a company's expenses.
+      color: {
+        range: series.map((s) => s.color),
+      },
+    },
     theme: isDarkMode ? 'dark' : 'light',
     axis: {
       x: {
@@ -202,38 +496,67 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({ dataSource }) => {
       y: {
         labelFill: token.colorTextSecondary,
         gridStroke: token.colorSplit,
+        // Bare numbers stopped being self-explanatory the moment a domain
+        // could bill in more than one currency.
+        labelFormatter: (value: number) => compactMoney(value, currency),
       },
     },
+    tooltip: {
+      items: [
+        {
+          channel: 'y',
+          valueFormatter: (value: number) =>
+            `${getCurrencySymbol(currency)} ${money(value)}`,
+        },
+      ],
+    },
     legend: {
-      color: {
-        position: 'bottom',
-        itemLabelFill: token.colorText,
-      },
+      color: { position: 'bottom', itemLabelFill: token.colorText },
     },
   }
 
   const pieConfig = {
-    data: pieData,
+    data: visiblePieData,
+    autoFit: true,
     angleField: 'value',
     colorField: 'type',
     radius: 1,
     innerRadius: 0.6,
     theme: isDarkMode ? 'dark' : 'light',
+    // Built from all categories, hidden ones included, so switching one off
+    // does not shift the colours of the rest.
+    scale: { color: pieColorScale },
+    // Category names live in the legend: outside name labels collided on
+    // small neighbouring slices and got clipped by the card. The ring only
+    // carries a percentage, and only where the slice is wide enough for it.
     label: {
-      text: 'value',
-      style: {
-        fill: '#fff',
-        textAlign: 'center',
-        fontWeight: 'bold',
+      text: (d: { value: number }) => {
+        const percent = piePercent(d.value)
+        return percent >= PIE_LABEL_MIN_PERCENT ? `${percent.toFixed(0)}%` : ''
       },
+      position: 'inside',
+      style: { fill: '#fff', fontWeight: 600, fontSize: 12 },
+      transform: [{ type: 'overlapHide' }],
     },
-    legend: {
-      color: {
-        position: 'left',
-        itemLabelFill: token.colorText,
-      },
+    tooltip: {
+      items: [
+        // A `channel: 'y'` item is named after the field ("value"), so the
+        // category name has to be passed in explicitly.
+        (d: { type: string; value: number }) => ({
+          name: d.type,
+          value: `${getCurrencySymbol(currency)} ${money(d.value)} (${piePercent(
+            d.value
+          ).toFixed(1)}%)`,
+        }),
+      ],
     },
+    // Rendered as our own list below: G2's legend paginated a busy month and
+    // clipped the first column's names against the card edge.
+    legend: false,
   }
+
+  const currencySuffix =
+    availableCurrencies.length > 1 ? `, ${getCurrencyShortLabel(currency)}` : ''
 
   return (
     <div
@@ -244,151 +567,303 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({ dataSource }) => {
         gap: '16px',
       }}
     >
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}
-      >
-        <Space>
+      <Space>
+        <Select
+          value={periodType}
+          onChange={setPeriodType}
+          options={[
+            { value: 'Month', label: t('profitPage:dashboard.periodMonth') },
+            {
+              value: 'Quarter',
+              label: t('profitPage:dashboard.periodQuarter'),
+            },
+            { value: 'Year', label: t('profitPage:dashboard.periodYear') },
+          ]}
+          style={{ width: 120 }}
+        />
+        <Select
+          value={selectedPeriod}
+          onChange={setSelectedPeriod}
+          options={periodOptions}
+          style={{ width: 150 }}
+          disabled={periodOptions.length === 0}
+        />
+        {/* Pointless when the domain only ever bills in one currency. */}
+        {availableCurrencies.length > 1 && (
           <Select
-            value={periodType}
-            onChange={setPeriodType}
-            options={[
-              { value: 'Month', label: t('profitPage:dashboard.periodMonth') },
-              {
-                value: 'Quarter',
-                label: t('profitPage:dashboard.periodQuarter'),
-              },
-              { value: 'Year', label: t('profitPage:dashboard.periodYear') },
-            ]}
-            style={{ width: 120 }}
+            value={currency}
+            onChange={setCurrency}
+            options={CURRENCY_SELECT_OPTIONS.filter((o) =>
+              availableCurrencies.includes(o.value)
+            )}
+            style={{ width: 130 }}
           />
-          <Select
-            value={selectedPeriod}
-            onChange={setSelectedPeriod}
-            options={periodOptions}
-            style={{ width: 150 }}
-            disabled={periodOptions.length === 0}
-          />
-        </Space>
-      </div>
+        )}
+      </Space>
 
       <Row gutter={[16, 16]}>
-        <Col span={6}>
+        <Col flex="1 1 200px">
           <Card size="small">
             <Text type="secondary">
-              {t('profitPage:dashboard.plannedProfit')}
+              {t(
+                isDomain
+                  ? 'profitPage:dashboard.expected'
+                  : 'profitPage:dashboard.expectedCompany'
+              )}
             </Text>
             <Statistic
-              value={aggregatedData.plannedProfit}
+              value={aggregatedData.expected}
               precision={2}
-              suffix="грн"
+              suffix={getCurrencyShortLabel(currency)}
             />
-            <Text type="secondary" style={{ fontSize: '12px' }}>
-              {t('profitPage:dashboard.details')} ↗
-            </Text>
+            <PeriodDelta
+              current={aggregatedData.expected}
+              previous={previousData?.expected}
+            />
           </Card>
         </Col>
-        <Col span={6}>
+        <Col flex="1 1 200px">
           <Card size="small">
             <Text type="secondary">
-              {t('profitPage:dashboard.actualProfit')}
+              {t(
+                isDomain
+                  ? 'profitPage:dashboard.actual'
+                  : 'profitPage:dashboard.actualCompany'
+              )}
             </Text>
             <Statistic
-              value={aggregatedData.actualProfit}
+              value={aggregatedData.actual}
               precision={2}
-              suffix="грн"
-              valueStyle={{
-                color: aggregatedData.profitDiff >= 0 ? '#3f8600' : '#cf1322',
-              }}
-              prefix={
-                aggregatedData.profitDiff >= 0 ? (
-                  <ArrowUpOutlined />
-                ) : (
-                  <ArrowDownOutlined />
-                )
+              suffix={getCurrencyShortLabel(currency)}
+              // Domain: fully collected is good news. Company: the same
+              // number is money it paid out, which has no good/bad direction
+              // of its own - and must never come out green.
+              valueStyle={
+                isDomain
+                  ? {
+                      color:
+                        aggregatedData.outstanding <= 0
+                          ? token.colorSuccess
+                          : token.colorError,
+                    }
+                  : undefined
               }
             />
-            <Text type="secondary" style={{ fontSize: '12px' }}>
-              {aggregatedData.profitDiff.toFixed(1)}%{' '}
-              {t('profitPage:dashboard.vsForecast')}
-            </Text>
+            <Space direction="vertical" size={0}>
+              <Tooltip
+                title={t(
+                  isDomain
+                    ? 'profitPage:dashboard.collectedHint'
+                    : 'profitPage:dashboard.collectedHintCompany'
+                )}
+              >
+                <Text type="secondary" style={{ fontSize: 12 }}>
+                  {aggregatedData.collectionRate.toFixed(1)}%{' '}
+                  {t(
+                    isDomain
+                      ? 'profitPage:dashboard.collected'
+                      : 'profitPage:dashboard.collectedCompany'
+                  )}
+                </Text>
+              </Tooltip>
+              <PeriodDelta
+                current={aggregatedData.actual}
+                previous={previousData?.actual}
+              />
+            </Space>
           </Card>
         </Col>
-        <Col span={6}>
+        <Col flex="1 1 200px">
           <Card size="small">
-            <Text type="secondary">
-              {t('profitPage:dashboard.plannedExpense')}
-            </Text>
+            <Text type="secondary">{t('profitPage:dashboard.expenses')}</Text>
             <Statistic
-              value={aggregatedData.plannedExpense}
+              value={aggregatedData.expenses}
               precision={2}
-              suffix="грн"
+              suffix={getCurrencyShortLabel(currency)}
+              valueStyle={{ color: token.colorError }}
             />
-            <Text type="secondary" style={{ fontSize: '12px' }}>
-              {t('profitPage:dashboard.details')} ↗
-            </Text>
+            <PeriodDelta
+              current={aggregatedData.expenses}
+              previous={previousData?.expenses}
+              higherIsBetter={false}
+            />
           </Card>
         </Col>
-        <Col span={6}>
+        {hasIncome && (
+          <Col flex="1 1 200px">
+            <Card size="small">
+              <Tooltip title={t('profitPage:dashboard.incomeHint')}>
+                <Text type="secondary">
+                  {t(
+                    isDomain
+                      ? 'profitPage:dashboard.income'
+                      : 'profitPage:dashboard.incomeCompany'
+                  )}
+                </Text>
+              </Tooltip>
+              <Statistic
+                value={aggregatedData.income}
+                precision={2}
+                suffix={getCurrencyShortLabel(currency)}
+                valueStyle={{ color: token.colorSuccess }}
+              />
+              <PeriodDelta
+                current={aggregatedData.income}
+                previous={previousData?.income}
+              />
+            </Card>
+          </Col>
+        )}
+        <Col flex="1 1 200px">
           <Card size="small">
-            <Text type="secondary">
-              {t('profitPage:dashboard.actualExpense')}
-            </Text>
+            <Tooltip
+              title={t(
+                isDomain
+                  ? 'profitPage:dashboard.netHint'
+                  : 'profitPage:dashboard.netHintCompany'
+              )}
+            >
+              <Text type="secondary">
+                {t(
+                  isDomain
+                    ? 'profitPage:dashboard.net'
+                    : 'profitPage:dashboard.netCompany'
+                )}
+              </Text>
+            </Tooltip>
             <Statistic
-              value={aggregatedData.actualExpense}
+              value={aggregatedData.net}
               precision={2}
-              suffix="грн"
+              suffix={getCurrencyShortLabel(currency)}
               valueStyle={{
-                color: aggregatedData.expenseDiff <= 0 ? '#3f8600' : '#cf1322',
+                color:
+                  aggregatedData.net >= 0
+                    ? token.colorSuccess
+                    : token.colorError,
               }}
-              prefix={
-                aggregatedData.expenseDiff <= 0 ? (
-                  <ArrowDownOutlined />
-                ) : (
-                  <ArrowUpOutlined />
-                )
-              }
             />
-            <Text type="secondary" style={{ fontSize: '12px' }}>
-              {Math.abs(aggregatedData.expenseDiff).toFixed(1)}%{' '}
-              {t('profitPage:dashboard.vsForecast')}
-            </Text>
+            <PeriodDelta
+              current={aggregatedData.net}
+              previous={previousData?.net}
+            />
           </Card>
         </Col>
       </Row>
 
       <Row gutter={[16, 16]}>
-        <Col span={14}>
+        <Col xs={24} xl={14}>
           <Card
-            title={t('profitPage:dashboard.trendTitle')}
+            title={`${t('profitPage:dashboard.trendTitle')}${currencySuffix}`}
             size="small"
-            style={{ height: '100%' }}
+            className={s.chartCard}
           >
-            <div style={{ height: 280 }}>
+            {/* Grows with the pie card beside it, so a long legend there does
+                not leave a gap under the bars. */}
+            <div className={s.trendChart}>
               {columnData.length > 0 ? (
                 <Column {...columnConfig} />
               ) : (
-                <Text type="secondary">Недостатньо даних</Text>
+                <Text type="secondary">
+                  {t('profitPage:dashboard.notEnoughData')}
+                </Text>
               )}
             </div>
           </Card>
         </Col>
-        <Col span={10}>
+        <Col xs={24} xl={10}>
           <Card
-            title={t('profitPage:dashboard.structureTitle')}
+            title={`${t('profitPage:dashboard.structureTitle')}${currencySuffix}`}
             size="small"
-            style={{ height: '100%' }}
+            className={s.chartCard}
           >
-            <div style={{ height: 280, display: 'flex', alignItems: 'center' }}>
-              {pieData.length > 0 ? (
-                <Pie {...pieConfig} />
-              ) : (
-                <Text type="secondary">Недостатньо даних</Text>
-              )}
-            </div>
+            {pieData.length > 0 ? (
+              <div className={s.pieLayout}>
+                <div className={s.pieChart}>
+                  {visiblePieData.length > 0 ? (
+                    <Pie {...pieConfig} />
+                  ) : (
+                    <Text type="secondary" className={s.pieEmpty}>
+                      {t('profitPage:dashboard.allCategoriesHidden')}
+                    </Text>
+                  )}
+                </div>
+                <div className={s.pieLegendWrap}>
+                  <ul
+                    className={cn(s.pieLegend, {
+                      [s.pieLegendPaged]: legendPageCount > 1,
+                    })}
+                  >
+                    {legendPageItems.map((item, pageIndex) => {
+                      const i = legendOffset + pageIndex
+                      const isHidden = hiddenCategories.includes(item.type)
+                      return (
+                        <Tooltip
+                          key={item.type}
+                          // Long names are cut with an ellipsis; this is where
+                          // the full one (and the amount) can still be read.
+                          title={`${item.type}: ${getCurrencySymbol(currency)} ${money(item.value)}`}
+                          placement="left"
+                        >
+                          <li>
+                            <button
+                              type="button"
+                              className={cn(s.pieLegendItem, {
+                                [s.pieLegendItemHidden]: isHidden,
+                              })}
+                              aria-pressed={!isHidden}
+                              onClick={() => toggleCategory(item.type)}
+                            >
+                              <span
+                                className={s.pieLegendSwatch}
+                                style={{ background: pieColorAt(i) }}
+                              />
+                              <span className={s.pieLegendName}>
+                                {item.type}
+                              </span>
+                              <Text
+                                type="secondary"
+                                className={s.pieLegendPercent}
+                              >
+                                {isHidden
+                                  ? '—'
+                                  : `${piePercent(item.value).toFixed(1)}%`}
+                              </Text>
+                            </button>
+                          </li>
+                        </Tooltip>
+                      )
+                    })}
+                  </ul>
+                  {legendPageCount > 1 && (
+                    <div className={s.pieLegendPager}>
+                      <Button
+                        type="text"
+                        size="small"
+                        icon={<CaretUpOutlined />}
+                        aria-label={t('profitPage:dashboard.legendPrevPage')}
+                        disabled={legendPage === 0}
+                        onClick={() => setLegendPage((p) => p - 1)}
+                      />
+                      <Text type="secondary" className={s.pieLegendPageInfo}>
+                        {legendPage + 1}/{legendPageCount}
+                      </Text>
+                      <Button
+                        type="text"
+                        size="small"
+                        icon={<CaretDownOutlined />}
+                        aria-label={t('profitPage:dashboard.legendNextPage')}
+                        disabled={legendPage >= legendPageCount - 1}
+                        onClick={() => setLegendPage((p) => p + 1)}
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <Text type="secondary">
+                {t('profitPage:dashboard.notEnoughData')}
+              </Text>
+            )}
           </Card>
         </Col>
       </Row>

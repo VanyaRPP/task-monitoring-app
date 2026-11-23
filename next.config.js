@@ -1,23 +1,37 @@
 const { i18n } = require('./next-i18next.config')
-const withPWA = require('next-pwa')({
+// next-pwa has been unmaintained since 2022; @ducanh2912/next-pwa is the
+// maintained fork with the same plugin shape. `skipWaiting` moved under
+// `workboxOptions`, and the CJS entry point exposes the plugin as `.default`.
+const withPWA = require('@ducanh2912/next-pwa').default({
   dest: 'public',
   disable: process.env.NODE_ENV === 'development',
   register: true,
-  skipWaiting: true,
+  workboxOptions: {
+    skipWaiting: true,
+  },
 })
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
   i18n,
-  experimental: {
-    // Chromium itself is fetched at runtime from a remote pack via
-    // @sparticuz/chromium-min (see utils/pdf/bufferGenerators.ts), so we only
-    // need to keep these out of the webpack bundle — no asset tracing required.
-    serverComponentsExternalPackages: [
-      '@sparticuz/chromium-min',
-      'puppeteer-core',
-    ],
+  // Chromium itself is fetched at runtime from a remote pack via
+  // @sparticuz/chromium-min (see utils/pdf/bufferGenerators.ts), so we only
+  // need to keep these out of the webpack bundle — no asset tracing required.
+  // Promoted out of `experimental` in Next 15.
+  // unpdf (statement PDFs in the AI chat) loads its pdf.js build with a
+  // runtime `import('unpdf/pdfjs')`, which only works left to Node.
+  serverExternalPackages: [
+    '@sparticuz/chromium-min',
+    'puppeteer-core',
+    'unpdf',
+  ],
+  // utils/pdf/bufferGenerators.ts serves the invoice fonts to puppeteer from
+  // public/ on disk; serverless functions don't ship public/ unless traced.
+  outputFileTracingIncludes: {
+    '/api/spacehub/payment/htmlToPdf': ['./public/fonts/invoice/*.woff2'],
+    '/api/spacehub/payment/htmlToPdfZip': ['./public/fonts/invoice/*.woff2'],
+    '/api/spacehub/payment/[id]/send-email': ['./public/fonts/invoice/*.woff2'],
   },
   transpilePackages: [
     'antd',
@@ -70,6 +84,18 @@ const nextConfig = {
         pathname: '/a/**',
       },
     ],
+  },
+  // Invoice PDFs are rendered by puppeteer from html on about:blank (origin
+  // "null"), and @font-face fetches are CORS requests — without this header
+  // the download silently falls back to Chromium's system fonts.
+  async headers() {
+    return [
+      {
+        source: '/fonts/invoice/:file*',
+        locale: false,
+        headers: [{ key: 'Access-Control-Allow-Origin', value: '*' }],
+      },
+    ]
   },
 }
 

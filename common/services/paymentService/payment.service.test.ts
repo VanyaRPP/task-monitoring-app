@@ -3,31 +3,61 @@ const skipMock = jest.fn().mockReturnThis()
 const limitMock = jest.fn().mockReturnThis()
 const populateMock = jest.fn().mockReturnThis()
 const leanMock = jest.fn().mockResolvedValue([])
-const findMock = jest.fn(() => ({
+const findChain: any = {
   sort: sortMock,
   skip: skipMock,
   limit: limitMock,
   populate: populateMock,
   lean: leanMock,
-}))
+  then: (onFulfilled: any, onRejected: any) =>
+    Promise.resolve([]).then(onFulfilled, onRejected),
+}
+let lastFindFilter: any
+const findMock = jest.fn((conditions?: any) => {
+  lastFindFilter = conditions
+  return findChain
+})
+findChain.cast = jest.fn(() => lastFindFilter)
+const aggregateMock = jest.fn().mockResolvedValue([])
 
 jest.mock('@modules/models/Payment', () => ({
   __esModule: true,
   default: {
     create: jest.fn(),
     find: findMock,
-    aggregate: jest.fn().mockResolvedValue([]),
+    aggregate: aggregateMock,
     countDocuments: jest.fn().mockResolvedValue(0),
     distinct: jest.fn().mockResolvedValue([]),
   },
 }))
 
-jest.mock('@common/services/profitService/profit.service', () => ({
+// The invoice-number counter, kept in memory: $max raises it, $inc hands out
+// the next values - the same contract the Mongo counter has.
+let mockCounterSeq: number | null = null
+jest.mock('@modules/models/Counter', () => ({
   __esModule: true,
   default: {
-    create: jest.fn(),
+    findById: jest.fn(() => ({
+      lean: () =>
+        Promise.resolve(
+          mockCounterSeq === null ? null : { seq: mockCounterSeq }
+        ),
+    })),
+    updateOne: jest.fn((_filter: unknown, update: any) => {
+      mockCounterSeq = Math.max(mockCounterSeq ?? 0, update.$max?.seq ?? 0)
+      return Promise.resolve()
+    }),
+    findOneAndUpdate: jest.fn((_filter: unknown, update: any) => {
+      mockCounterSeq = (mockCounterSeq ?? 0) + update.$inc.seq
+      const seq = mockCounterSeq
+      return { lean: () => Promise.resolve({ seq }) }
+    }),
   },
 }))
+
+beforeEach(() => {
+  mockCounterSeq = null
+})
 
 jest.mock('@utils/email/sendInvoiceEmail', () => ({
   sendInvoiceEmail: jest.fn(),
@@ -43,15 +73,18 @@ jest.mock('@modules/models/Domain', () => ({
 
 jest.mock('@modules/models/RealEstate', () => ({
   __esModule: true,
-  default: {},
+  default: { findById: jest.fn() },
 }))
+
+import Service from '@modules/models/Service'
 
 jest.mock('@modules/models/Service', () => ({
   __esModule: true,
-  default: {},
+  default: { find: jest.fn() },
 }))
 
 jest.mock('@pages/api/spacehub/payment/pipelines', () => ({
+  getPaymentsOrderPipeline: jest.fn(() => [{ $match: 'ordered' }]),
   getCreditDebitPipeline: jest.fn(),
   getMaxInvoiceNumber: jest.fn(() => [
     { $group: { _id: null, maxNumber: { $max: '$invoiceNumber' } } },
@@ -73,7 +106,6 @@ jest.mock('@utils/pipelines', () => ({
 
 import Domain from '@modules/models/Domain'
 import Payment from '@modules/models/Payment'
-import ProfitService from '@common/services/profitService/profit.service'
 import { sendInvoiceEmail } from '@utils/email/sendInvoiceEmail'
 import {
   createPayment,
@@ -81,11 +113,12 @@ import {
   getNextInvoiceNumber,
   getPayments,
 } from './payment.service'
+import { getPaymentsOrderPipeline } from '@pages/api/spacehub/payment/pipelines'
 import { SortOrder, Operations } from '@utils/constants'
+import { PaymentStatus } from '@common/api/paymentApi/payment.api.types'
 
 const domainFindByIdMock = Domain.findById as jest.Mock
 const paymentCreateMock = Payment.create as jest.Mock
-const createProfitMock = ProfitService.create as jest.Mock
 const sendInvoiceEmailMock = sendInvoiceEmail as jest.Mock
 
 const globalAdminContext = {
@@ -98,12 +131,51 @@ const globalAdminContext = {
 describe('getPayments — sorting', () => {
   beforeEach(() => jest.clearAllMocks())
 
-  it('passes correct sort params to MongoDB', async () => {
-    await getPayments({}, globalAdminContext)
-    expect(sortMock).toHaveBeenCalledWith({
-      invoiceCreationDate: SortOrder.DESC,
-      type: SortOrder.ASC,
+  it('orders the page through the aggregation, not find().sort()', async () => {
+    await getPayments({ skip: '20', limit: '10' }, globalAdminContext)
+
+    // find() no longer carries the ordering - a calendar-day bucket cannot be
+    // expressed as a plain sort spec.
+    expect(sortMock).not.toHaveBeenCalled()
+    expect(skipMock).not.toHaveBeenCalled()
+    expect(limitMock).not.toHaveBeenCalled()
+
+    expect(getPaymentsOrderPipeline).toHaveBeenCalledWith(expect.any(Object), {
+      skip: '20',
+      limit: '10',
     })
+    expect(aggregateMock).toHaveBeenCalledWith([{ $match: 'ordered' }])
+  })
+
+  it('hydrates exactly the ids the ordering pipeline returned', async () => {
+    const ids = ['aaa', 'bbb']
+    aggregateMock.mockResolvedValueOnce(ids.map((_id) => ({ _id })))
+
+    await getPayments({}, globalAdminContext)
+
+    expect(findMock).toHaveBeenCalledWith({ _id: { $in: ids } })
+  })
+
+  it('restores the pipeline order that find({ $in }) does not preserve', async () => {
+    const credit = { _id: 'credit-id', type: Operations.Credit }
+    const debit = { _id: 'debit-id', type: Operations.Debit }
+
+    aggregateMock.mockResolvedValueOnce([
+      { _id: credit._id },
+      { _id: debit._id },
+    ])
+    findChain.then = (onFulfilled: any, onRejected: any) =>
+      Promise.resolve([debit, credit]).then(onFulfilled, onRejected)
+
+    const result = await getPayments({}, globalAdminContext)
+
+    expect(result.data.map((payment: any) => payment.type)).toEqual([
+      Operations.Credit,
+      Operations.Debit,
+    ])
+
+    findChain.then = (onFulfilled: any, onRejected: any) =>
+      Promise.resolve([]).then(onFulfilled, onRejected)
   })
 
   it('SortOrder.ASC on type puts credit before debit (alphabetical invariant)', () => {
@@ -114,174 +186,230 @@ describe('getPayments — sorting', () => {
   })
 })
 
+describe('getPayments — period filtering by dateField', () => {
+  beforeEach(() => jest.clearAllMocks())
+
+  const filterOf = () =>
+    (getPaymentsOrderPipeline as jest.Mock).mock.calls[0][0]
+
+  it('filters on invoiceCreationDate by default', async () => {
+    await getPayments({ year: 2026, month: 6 }, globalAdminContext)
+
+    expect(filterOf().$expr).toEqual({
+      $and: [
+        { $eq: [{ $year: '$invoiceCreationDate' }, 2026] },
+        { $in: [{ $month: '$invoiceCreationDate' }, [6]] },
+      ],
+    })
+  })
+
+  it('falls back to the invoice date when filtering on paidAt', async () => {
+    // Credits created before paidAt existed have no such field. The profit
+    // ledger aggregates them with the same $ifNull fallback, so a drill-down
+    // filtered here must resolve to the same set of payments.
+    await getPayments(
+      { year: 2026, month: 6, dateField: 'paidAt' },
+      globalAdminContext
+    )
+
+    const paidAtField = { $ifNull: ['$paidAt', '$invoiceCreationDate'] }
+    expect(filterOf().$expr).toEqual({
+      $and: [
+        { $eq: [{ $year: paidAtField }, 2026] },
+        { $in: [{ $month: paidAtField }, [6]] },
+      ],
+    })
+  })
+
+  it.each([
+    ['a number', 6],
+    ['a string', '6'],
+    ['an array', [6]],
+  ])('accepts month as %s', async (_label, month) => {
+    await getPayments({ year: 2026, month } as any, globalAdminContext)
+
+    expect(filterOf().$expr.$and).toContainEqual({
+      $in: [{ $month: '$invoiceCreationDate' }, [6]],
+    })
+  })
+
+  it('keeps payments without a month service inside a service-month filter', async () => {
+    // They have no service to match, so without the fallback branch they would
+    // drop out of the period entirely - and a drill-down would then list fewer
+    // payments than the figure it was opened from.
+    ;(Service.find as jest.Mock).mockReturnValue({
+      select: jest.fn().mockResolvedValue([{ _id: 'service-1' }]),
+    })
+
+    await getPayments(
+      { year: 2026, month: 6, dateField: 'date' },
+      globalAdminContext
+    )
+
+    const filter = filterOf()
+    expect(filter.$or).toEqual([
+      { monthService: { $in: ['service-1'] } },
+      {
+        $and: [
+          {
+            $or: [{ monthService: { $exists: false } }, { monthService: null }],
+          },
+          {
+            $expr: {
+              $and: [
+                { $eq: [{ $year: '$invoiceCreationDate' }, 2026] },
+                { $in: [{ $month: '$invoiceCreationDate' }, [6]] },
+              ],
+            },
+          },
+        ],
+      },
+    ])
+  })
+
+  it('applies no period expression when no period is given', async () => {
+    await getPayments({ dateField: 'paidAt' }, globalAdminContext)
+    expect(filterOf().$expr).toBeUndefined()
+  })
+})
+
+describe('getPayments — status filtering', () => {
+  beforeEach(() => jest.clearAllMocks())
+
+  const filterOf = () =>
+    (getPaymentsOrderPipeline as jest.Mock).mock.calls[0][0]
+
+  it('applies no $or when status is omitted', async () => {
+    await getPayments({}, globalAdminContext)
+    expect(filterOf().$or).toBeUndefined()
+  })
+
+  it('"draft" alone also matches payments with a missing/null status (pre-status data)', async () => {
+    await getPayments({ status: PaymentStatus.Draft }, globalAdminContext)
+    expect(filterOf().$or).toEqual([
+      { status: { $in: [PaymentStatus.Draft, null] } },
+      { status: { $exists: false } },
+    ])
+  })
+
+  it('"sent" alone matches only an explicit sent status', async () => {
+    await getPayments({ status: PaymentStatus.Sent }, globalAdminContext)
+    expect(filterOf().$or).toEqual([{ status: PaymentStatus.Sent }])
+  })
+
+  it('"draft,sent" matches sent explicitly plus draft/missing/null', async () => {
+    await getPayments(
+      { status: `${PaymentStatus.Draft},${PaymentStatus.Sent}` },
+      globalAdminContext
+    )
+    expect(filterOf().$or).toEqual([
+      { status: PaymentStatus.Sent },
+      { status: { $in: [PaymentStatus.Draft, null] } },
+      { status: { $exists: false } },
+    ])
+  })
+
+  it('accepts status as an array, same result as the comma-separated string', async () => {
+    await getPayments(
+      { status: [PaymentStatus.Draft, PaymentStatus.Sent] },
+      globalAdminContext
+    )
+    expect(filterOf().$or).toEqual([
+      { status: PaymentStatus.Sent },
+      { status: { $in: [PaymentStatus.Draft, null] } },
+      { status: { $exists: false } },
+    ])
+  })
+
+  it('trims whitespace and drops empty segments from a comma-separated status', async () => {
+    await getPayments({ status: ' draft , , sent ' }, globalAdminContext)
+    expect(filterOf().$or).toEqual([
+      { status: PaymentStatus.Sent },
+      { status: { $in: [PaymentStatus.Draft, null] } },
+      { status: { $exists: false } },
+    ])
+  })
+
+  it('dedupes a repeated status back down to the single-status case', async () => {
+    await getPayments({ status: 'draft,draft' }, globalAdminContext)
+    expect(filterOf().$or).toEqual([
+      { status: { $in: [PaymentStatus.Draft, null] } },
+      { status: { $exists: false } },
+    ])
+  })
+
+  it('ignores a status value outside the known enum, applying no $or', async () => {
+    await getPayments({ status: 'archived' as any }, globalAdminContext)
+    expect(filterOf().$or).toBeUndefined()
+  })
+})
+
 describe('createPayment', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    createProfitMock.mockResolvedValue({})
     sendInvoiceEmailMock.mockResolvedValue(true)
-    domainFindByIdMock.mockReturnValue({
-      select: jest.fn().mockResolvedValue(null),
-    })
   })
 
-  it('sends invoice email after creating a debit payment', async () => {
-    const paymentObject = {
-      _id: 'payment-id',
-      id: 'payment-id',
-      domain: 'domain-id',
-      type: 'debit',
-      generalSum: 1250,
-      invoiceCreationDate: new Date('2026-03-16T00:00:00.000Z'),
-      invoiceNumber: 77,
-      description: '',
-      reciever: {
-        companyName: 'Domain Admin',
-        adminEmails: ['admin@example.com'],
-        description: 'Receiver',
-      },
-      provider: {
-        description: 'Provider',
-      },
-      toObject: jest.fn(),
-    }
-
-    paymentObject.toObject.mockReturnValue({
-      ...paymentObject,
-      toObject: undefined,
-    })
-
-    paymentCreateMock.mockResolvedValue(paymentObject)
-
-    const result = await createPayment({ invoiceNumber: 77 }, true)
-
-    expect(result).toBe(paymentObject)
-    expect(createProfitMock).toHaveBeenCalledWith(
-      expect.objectContaining({
+  it.each(['debit', 'credit'])(
+    'creates a %s payment without emailing it - sending is the Send button',
+    async (type) => {
+      const paymentObject = {
+        _id: 'payment-id',
+        id: 'payment-id',
         domain: 'domain-id',
-        payment: 'payment-id',
-        amount: 1250,
-        type: 'debit',
-        invoiceNumber: '77',
-      })
-    )
-    expect(sendInvoiceEmailMock).toHaveBeenCalledWith(
-      expect.objectContaining({
+        type,
+        generalSum: 1250,
         invoiceNumber: 77,
-        reciever: expect.objectContaining({
+        reciever: {
+          companyName: 'Domain Admin',
           adminEmails: ['admin@example.com'],
-        }),
-      })
-    )
+          description: 'Receiver',
+        },
+      }
+      paymentCreateMock.mockResolvedValue(paymentObject)
+
+      const result = await createPayment({ type }, true)
+
+      expect(result).toBe(paymentObject)
+      expect(sendInvoiceEmailMock).not.toHaveBeenCalled()
+    }
+  )
+})
+
+describe('createPayment numbering', () => {
+  const aggregateMock = Payment.aggregate as jest.Mock
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    paymentCreateMock.mockImplementation((data: any) => Promise.resolve(data))
   })
 
-  it('does not send invoice email for credit payments', async () => {
-    const paymentObject = {
-      _id: 'payment-id',
-      id: 'payment-id',
-      domain: 'domain-id',
-      type: 'credit',
-      generalSum: 300,
-      invoiceCreationDate: new Date('2026-03-16T00:00:00.000Z'),
-      invoiceNumber: 78,
-      description: 'Credit payment',
-      reciever: {
-        companyName: 'Domain Admin',
-        adminEmails: ['admin@example.com'],
-        description: 'Receiver',
-      },
-      provider: {
-        description: 'Provider',
-      },
-      toObject: jest.fn(() => ({})),
-    }
-
-    paymentCreateMock.mockResolvedValue(paymentObject)
-
-    await createPayment({ invoiceNumber: 78 }, true)
-
-    expect(sendInvoiceEmailMock).not.toHaveBeenCalled()
+  // clearAllMocks keeps implementations; put the shared default back.
+  afterEach(() => {
+    aggregateMock.mockResolvedValue([])
   })
 
-  it('keeps payment creation successful when email sending fails', async () => {
-    const paymentObject = {
-      _id: 'payment-id',
-      id: 'payment-id',
-      domain: 'domain-id',
-      type: 'debit',
-      generalSum: 1250,
-      invoiceCreationDate: new Date('2026-03-16T00:00:00.000Z'),
-      invoiceNumber: 79,
-      description: '',
-      reciever: {
-        companyName: 'Domain Admin',
-        adminEmails: ['admin@example.com'],
-        description: 'Receiver',
-      },
-      provider: {
-        description: 'Provider',
-      },
-      toObject: jest.fn(),
-    }
+  it('ignores the number the client sent and gives the next free one', async () => {
+    aggregateMock.mockResolvedValue([{ maxNumber: 40 }])
 
-    paymentObject.toObject.mockReturnValue({
-      ...paymentObject,
-      toObject: undefined,
-    })
+    await createPayment({ type: 'credit', invoiceNumber: 5 }, true)
+    await createPayment({ type: 'credit', invoiceNumber: 5 }, true)
 
-    paymentCreateMock.mockResolvedValue(paymentObject)
-    sendInvoiceEmailMock.mockRejectedValue(new Error('smtp unavailable'))
-    const consoleErrorSpy = jest
-      .spyOn(console, 'error')
-      .mockImplementation(() => undefined)
-
-    await expect(createPayment({ invoiceNumber: 79 }, true)).resolves.toBe(
-      paymentObject
-    )
-    expect(createProfitMock).toHaveBeenCalled()
-    expect(sendInvoiceEmailMock).toHaveBeenCalled()
-
-    consoleErrorSpy.mockRestore()
+    expect(
+      paymentCreateMock.mock.calls.map(([data]) => data.invoiceNumber)
+    ).toEqual([41, 42])
   })
 
-  it('falls back to domain admin emails when payment snapshot has no recipients', async () => {
-    const paymentObject = {
-      _id: 'payment-id',
-      id: 'payment-id',
-      domain: 'domain-id',
-      type: 'debit',
-      generalSum: 1250,
-      invoiceCreationDate: new Date('2026-03-16T00:00:00.000Z'),
-      invoiceNumber: 80,
-      description: '',
-      provider: {
-        description: 'Provider',
-      },
-      toObject: jest.fn(),
-    }
+  it('starts above a number set by hand on an existing invoice', async () => {
+    aggregateMock.mockResolvedValueOnce([{ maxNumber: 40 }])
+    await createPayment({ type: 'credit' }, true)
+    // Someone edited an invoice to 900 in the meantime.
+    aggregateMock.mockResolvedValueOnce([{ maxNumber: 900 }])
+    await createPayment({ type: 'credit' }, true)
 
-    paymentObject.toObject.mockReturnValue({
-      ...paymentObject,
-      toObject: undefined,
-    })
-
-    paymentCreateMock.mockResolvedValue(paymentObject)
-    domainFindByIdMock.mockReturnValue({
-      select: jest.fn().mockResolvedValue({
-        name: 'Fallback Domain',
-        adminEmails: ['domain-admin@example.com'],
-      }),
-    })
-
-    await createPayment({ invoiceNumber: 80 }, true)
-
-    expect(sendInvoiceEmailMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        reciever: expect.objectContaining({
-          companyName: 'Fallback Domain',
-          adminEmails: ['domain-admin@example.com'],
-        }),
-      })
-    )
+    expect(
+      paymentCreateMock.mock.calls.map(([data]) => data.invoiceNumber)
+    ).toEqual([41, 901])
   })
 })
 
@@ -352,7 +480,6 @@ describe('duplicatePayments', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    createProfitMock.mockResolvedValue({})
     sendInvoiceEmailMock.mockResolvedValue(true)
     paymentCreateMock.mockImplementation((data: any) =>
       Promise.resolve({
@@ -363,7 +490,7 @@ describe('duplicatePayments', () => {
     )
   })
 
-  it('clones each source, assigns sequential invoice numbers from one base, and never emails', async () => {
+  it('clones each source, gives each copy its own next number, and never emails', async () => {
     aggregateMock.mockResolvedValueOnce([{ maxNumber: 100 }])
     paymentFindMock.mockResolvedValue([
       makeSource('src-1', 'domain-1'),
@@ -392,9 +519,6 @@ describe('duplicatePayments', () => {
     expect(firstBody.generalSum).toBe(500)
     expect(firstBody.description).toBe('original')
 
-    // base invoice number resolved once, not once per payment
-    expect(aggregateMock).toHaveBeenCalledTimes(1)
-    expect(createProfitMock).toHaveBeenCalledTimes(2)
     expect(sendInvoiceEmailMock).not.toHaveBeenCalled()
   })
 
@@ -414,10 +538,9 @@ describe('duplicatePayments', () => {
       makeSource('src-1', 'domain-1'),
       makeSource('src-2', 'domain-1'),
     ])
-    // First duplicate: profit creation fails -> createPayment throws -> skipped.
-    createProfitMock
-      .mockRejectedValueOnce(new Error('profit down'))
-      .mockResolvedValue({})
+    // First duplicate: the payment write itself fails -> createPayment throws
+    // -> that source is skipped while the rest still go through.
+    paymentCreateMock.mockRejectedValueOnce(new Error('write failed'))
     const consoleErrorSpy = jest
       .spyOn(console, 'error')
       .mockImplementation(() => undefined)
@@ -425,9 +548,10 @@ describe('duplicatePayments', () => {
     const result = await duplicatePayments(['src-1', 'src-2'], globalPerms)
 
     expect(result.skippedIds).toContain('src-1')
-    expect(result.createdIds).toEqual(['new-201'])
-    // the failed number is reused (not burned): the second duplicate also gets 201
-    expect(paymentCreateMock.mock.calls[1][0].invoiceNumber).toBe(201)
+    // Numbers are handed out atomically before the write, so a failed copy
+    // leaves a gap (201) rather than risking two invoices sharing a number.
+    expect(result.createdIds).toEqual(['new-202'])
+    expect(paymentCreateMock.mock.calls[1][0].invoiceNumber).toBe(202)
 
     consoleErrorSpy.mockRestore()
   })

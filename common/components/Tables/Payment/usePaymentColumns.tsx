@@ -1,11 +1,12 @@
 import React, { useMemo, useEffect, useState } from 'react'
-import { Badge, Button, List, Tooltip, Typography, theme } from 'antd'
+import { Button, List, Tooltip, Typography, theme } from 'antd'
 import { ColumnType, ColumnsType } from 'antd/es/table'
 import { IPaymentFilterResponse } from '@common/api/filterApi/filter.api.types'
 import {
   IExtendedPayment,
   IFilter,
   IGetPaymentResponse,
+  PaymentStatus,
 } from '@common/api/paymentApi/payment.api.types'
 import {
   dateToDefaultFormat,
@@ -13,18 +14,15 @@ import {
   dateToMonthYear,
 } from '@assets/features/formatDate'
 import { Operations, ServiceName, ServiceType } from '@utils/constants'
-import {
-  formatDebt,
-  getDebtorTooltipColor,
-  isEmpty,
-  renderCurrency,
-  toFirstUpperCase,
-} from '@utils/helpers'
+import { isEmpty, renderCurrency, toFirstUpperCase } from '@utils/helpers'
 import TableFilterLink from '@components/UI/Reusable/TableFilterLink'
+import DebtBadge from '@components/UI/Reusable/DebtBadge'
+import { TruncatedText } from '@components/UI/TruncatedText'
+import { widenFilterDropdown } from '../tableFilterHelpers'
 import DateFilterDropdown from './DateFilter/DateFilterDropdown'
 import PaymentDropdown from '@components/PaymentDropDown'
 import s from './style.module.scss'
-
+import type { IDebtorInflation } from '@common/api/debtorsApi/debtors.api.types'
 export type DebtPerMonth = {
   monthService: string
   totalDue: number
@@ -37,6 +35,7 @@ export type CompanyWithPayments = {
   companyName: string
   debtPerMonth: DebtPerMonth[]
   totalDebt: number
+  inflation?: IDebtorInflation | null
 }
 
 interface Params {
@@ -57,40 +56,23 @@ interface Params {
   onDelete: (id: string) => void
   onMarkPaid: (p: IExtendedPayment) => void
   onDuplicate: (p: IExtendedPayment) => void
+  onSendPaymentEmail: (
+    paymentId: string,
+    html?: string
+  ) => Promise<{ success: boolean }>
+  onUpdatePaymentStatus: (args: {
+    _id: string
+    status: PaymentStatus
+  }) => Promise<unknown>
   deleteLoading: boolean
-}
-
-function widenFilterDropdown(w = 240) {
-  return (open: boolean) => {
-    if (!open) return
-    requestAnimationFrame(() => {
-      document
-        .querySelectorAll<HTMLElement>('.ant-table-filter-dropdown')
-        .forEach((el) => {
-          el.style.width = `${w}px`
-          el.style.maxWidth = '90vw'
-          el.querySelectorAll<HTMLElement>('.ant-checkbox + span').forEach(
-            (span) => {
-              span.style.whiteSpace = 'normal'
-              span.style.wordBreak = 'break-word'
-              span.style.lineHeight = '1.2'
-              span.style.display = 'inline-block'
-              span.style.maxWidth = '100%'
-            }
-          )
-        })
-    })
-  }
 }
 
 const CustomName = 'custom-name:'
 
-// Custom services are identified by their invoice `name` — the same key the
-// payments filter (ColumnSelect) uses — so the table columns and the filter
-// options are always derived from the same source and stay in sync. Only names
-// with a non-zero sum are surfaced (a 0-sum line renders no column). The
-// payments are already domain-narrowed server-side, so this list is implicitly
-// scoped to the selected domain(s).
+const hasOwnColumn = (
+  field: Pick<IExtendedPayment['invoice'][number], 'type' | 'serviceId'>
+): boolean => field.type === ServiceType.Custom || !!field.serviceId
+
 export function getInvoiceCustomServiceNames({
   payments,
 }: {
@@ -103,11 +85,11 @@ export function getInvoiceCustomServiceNames({
 
   payments.data.forEach((payment) => {
     payment.invoice?.forEach((field) => {
-      if (field.type !== ServiceType.Custom) return
+      if (!hasOwnColumn(field)) return
       const sum = Number(field.sum ?? field.price ?? 0)
 
       if (sum === 0) return
-      const label = field.name?.trim()
+      const label = (field.name || field.customName)?.trim()
       if (!label || seenNames.has(label)) return
       seenNames.add(label)
       order.push(label)
@@ -133,7 +115,7 @@ export function buildAutoCustomColumns({
 
   return visible.map((label) => {
     const matches = (field: IExtendedPayment['invoice'][number]) =>
-      field.type === ServiceType.Custom && field.name === label
+      hasOwnColumn(field) && (field.name || field.customName) === label
     const sumFor = (payment: IExtendedPayment) =>
       payment.invoice?.reduce(
         (acc, field) =>
@@ -156,6 +138,42 @@ export function buildAutoCustomColumns({
   })
 }
 
+export function buildDateFilters(dateFilters?: IPaymentFilterResponse) {
+  if (!dateFilters) return []
+
+  const monthItems = (dateFilters.monthFilter ?? [])
+    .filter((f) => f.value != null)
+    .map((f) => ({
+      num: Number(f.value),
+      label: toFirstUpperCase(dateToMonth(new Date(2000, Number(f.value) - 1))),
+    }))
+
+  const MIN_YEAR = 2025
+  const currentYear = new Date().getFullYear()
+  const backendYears: number[] = (dateFilters.yearFilter ?? [])
+    .filter((y) => y?.value != null)
+    .map((y) => Number(y.value))
+
+  const years = Array.from(
+    new Set([
+      ...backendYears,
+      ...Array.from(
+        { length: currentYear - MIN_YEAR + 1 },
+        (_, i) => currentYear - i
+      ),
+    ])
+  ).sort((a, b) => b - a)
+
+  return years.map((y) => ({
+    text: String(y),
+    value: String(y),
+    children: monthItems.map((m) => ({
+      text: m.label,
+      value: `${y}-month-${m.num}`,
+    })),
+  }))
+}
+
 export function usePaymentColumns({
   sepDomainID,
   filters,
@@ -174,6 +192,8 @@ export function usePaymentColumns({
   onDelete,
   onMarkPaid,
   onDuplicate,
+  onSendPaymentEmail,
+  onUpdatePaymentStatus,
   deleteLoading,
 }: Params): ColumnsType<IExtendedPayment> {
   const { token } = theme.useToken()
@@ -210,9 +230,10 @@ export function usePaymentColumns({
         filters: sepDomainID ? undefined : domainsFilter,
         filteredValue: filters?.domain || null,
         filterSearch: true,
+        onFilterDropdownOpenChange: widenFilterDropdown(240),
         render: (domain: { _id: string; name: string }) =>
           sepDomainID ? (
-            domain.name
+            <TruncatedText text={domain?.name} />
           ) : (
             <TableFilterLink
               label={domain?.name}
@@ -260,24 +281,57 @@ export function usePaymentColumns({
               filterId={companyId}
               filters={filters}
               setFilters={setFilters}
+              maxWidth={sepDomainID ? 100 : 140}
             />
           )
 
           const hasDebt = Boolean(
-            !isUser && debtor && isFirstOccurrence && debtor.totalDebt > 1
+            !isUser &&
+            debtor &&
+            isFirstOccurrence &&
+            Math.abs(debtor.totalDebt) > 1
           )
 
           return (
-            <Badge
-              count={hasDebt && debtor ? formatDebt(debtor.totalDebt) : 0}
-              title=""
-              color={debtor ? getDebtorTooltipColor(debtor) : '#d9d9d9'}
-              overflowCount={Infinity}
-              style={{ cursor: 'pointer' }}
-              size="small"
+            <div
+              style={{
+                position: 'relative',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '4px',
+                width: '100%',
+                paddingTop: '20px',
+              }}
             >
-              {companyLabel}
-            </Badge>
+              {hasDebt && debtor && Math.abs(debtor.totalDebt) > 1 && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '0px',
+                    right: '-14px', // Зміщено ще трішки правіше, ближче до самого кордону стовпця
+                    whiteSpace: 'nowrap',
+                    zIndex: 1,
+                  }}
+                >
+                  <DebtBadge
+                    companyName={companyName}
+                    totalDebt={debtor.totalDebt}
+                    inflation={debtor.inflation}
+                  />
+                </div>
+              )}
+
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'flex-start',
+                  wordBreak: 'break-word',
+                  width: '100%',
+                }}
+              >
+                {companyLabel}
+              </div>
+            </div>
           )
         },
         hidden: isDomainAdmin
@@ -289,44 +343,7 @@ export function usePaymentColumns({
         dataIndex: 'invoiceCreationDate',
         render: (date: string) => dateToDefaultFormat(date),
         width: sepDomainID ? 70 : 170,
-        filters:
-          !sepDomainID && dateFilters
-            ? (() => {
-                const monthItems = (dateFilters.monthFilter ?? [])
-                  .filter((f) => f.value != null)
-                  .map((f) => ({
-                    num: Number(f.value),
-                    label: toFirstUpperCase(
-                      dateToMonth(new Date(2000, Number(f.value) - 1))
-                    ),
-                  }))
-
-                const MIN_YEAR = 2025
-                const currentYear = new Date().getFullYear()
-                const backendYears: number[] = (dateFilters.yearFilter ?? [])
-                  .filter((y) => y?.value != null)
-                  .map((y) => Number(y.value))
-
-                const years = Array.from(
-                  new Set([
-                    ...backendYears,
-                    ...Array.from(
-                      { length: currentYear - MIN_YEAR + 1 },
-                      (_, i) => currentYear - i
-                    ),
-                  ])
-                ).sort((a, b) => b - a)
-
-                return years.map((y) => ({
-                  text: String(y),
-                  value: String(y),
-                  children: monthItems.map((m) => ({
-                    text: m.label,
-                    value: `${y}-month-${m.num}`,
-                  })),
-                }))
-              })()
-            : [],
+        filters: !sepDomainID ? buildDateFilters(dateFilters) : [],
         filteredValue: filters?.invoiceCreationDate || null,
         filterDropdown: (ddProps) => (
           <DateFilterDropdown
@@ -387,6 +404,14 @@ export function usePaymentColumns({
         dataIndex: 'monthService',
         align: 'center',
         width: sepDomainID ? 75 : 164,
+        filters: !sepDomainID ? buildDateFilters(dateFilters) : [],
+        filteredValue: filters?.monthService || null,
+        filterDropdown: (ddProps) => (
+          <DateFilterDropdown
+            data={(ddProps.filters as any) ?? []}
+            {...ddProps}
+          />
+        ),
         render: (
           monthService: Partial<IExtendedPayment> | string | null,
           payment: IExtendedPayment
@@ -486,7 +511,7 @@ export function usePaymentColumns({
         .filter((value) => value !== ServiceType.Custom && value in ServiceName)
         .map((value) => {
           const findItem = (payment: IExtendedPayment) =>
-            payment.invoice.find((i) => i.type === value)
+            payment.invoice.find((i) => i.type === value && !i.serviceId)
           return {
             title: ServiceName[value],
             dataIndex: value,
@@ -521,6 +546,8 @@ export function usePaymentColumns({
             onDelete={onDelete}
             onMarkPaid={onMarkPaid}
             onDuplicate={onDuplicate}
+            onSendPaymentEmail={onSendPaymentEmail}
+            onUpdatePaymentStatus={onUpdatePaymentStatus}
             deleteLoading={deleteLoading}
           />
         ),
@@ -542,6 +569,8 @@ export function usePaymentColumns({
       onDelete,
       onMarkPaid,
       onDuplicate,
+      onSendPaymentEmail,
+      onUpdatePaymentStatus,
       isGlobalAdmin,
       isDomainAdmin,
       isUser,

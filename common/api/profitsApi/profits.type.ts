@@ -1,13 +1,24 @@
 import { ObjectId } from 'mongoose'
+import type { IProfitItem } from '@utils/profit-items'
 
 export interface Profit {
   _id?: string
-  domain: string | ObjectId
+  domain?: string | ObjectId
+  company?: string | ObjectId
   amount: number
   type: 'debit' | 'credit'
   categories?: string[]
+  /** One receipt's lines; when set, `amount` is their sum. */
+  items?: IProfitItem[]
   description?: string
+  /** Set when the record was generated from a Payment rather than by hand. */
+  payment?: string
+  invoiceNumber?: string
   date: string
+  /** `YYYY-MM` the expense belongs to; falls back to the month of `date`. */
+  periodMonth?: string
+  /** ISO code; defaults to UAH on records created before multi-currency. */
+  currency?: string
   createdAt?: string
   updatedAt?: string
   createdBy?: {
@@ -24,7 +35,46 @@ export interface Meta {
   totalPages: number
 }
 
+export interface CurrencyTotals {
+  /** Invoiced this month. */
+  expected: number
+  /** Invoiced money that actually moved this month. */
+  actual: number
+  /** Hand-entered `credit` records - income that no invoice produced. */
+  income: number
+  /** Hand-entered `debit` records. */
+  expenses: number
+  /** expected - actual: invoiced but not yet settled. */
+  outstanding: number
+  /**
+   * domain:  actual + income - expenses
+   * company: income - actual - expenses  (its invoices are outflows)
+   */
+  net: number
+}
+
+/**
+ * One month of a domain's ledger. Income comes from the Payment collection,
+ * expenses from manual Profit records - see ProfitService.
+ *
+ * Every figure is per-currency: sums in different currencies are never added
+ * together without an explicit rate, so there is no single "total".
+ */
+export interface ProfitMonthLedger {
+  /** `YYYY-MM` */
+  month: string
+  /** Present in this month, busiest first. */
+  currencies: string[]
+  byCurrency: Record<string, CurrencyTotals>
+  invoiceCount: number
+  paymentCount: number
+  transactions: Profit[]
+}
+
+/** A ledger month as the table renders it. */
+export type ProfitMonthRow = ProfitMonthLedger & { key: string }
+
 export interface GroupedProfitResponse {
-  data: Record<string, Profit[]>
+  data: Record<string, ProfitMonthLedger>
   meta: Meta
 }

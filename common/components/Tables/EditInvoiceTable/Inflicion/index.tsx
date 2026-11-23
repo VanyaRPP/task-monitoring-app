@@ -9,6 +9,7 @@ import {
   toFirstUpperCase,
   toRoundFixed,
 } from '@utils/helpers'
+import { resolvePlacingTariff } from '@utils/getInvoices/resolvePlacingTariff'
 import validator from '@utils/validator'
 import { Form, Input, Typography } from 'antd'
 import { useMemo } from 'react'
@@ -20,6 +21,7 @@ export const Name: React.FC<InvoiceComponentProps> = ({
   name: _name,
   editable,
   disabled,
+  record,
 }) => {
   const name = useMemo(() => toArray<string>(_name), [_name])
   const price = Form.useWatch(['invoice', ...name, 'price'], form)
@@ -29,6 +31,7 @@ export const Name: React.FC<InvoiceComponentProps> = ({
     <InvoiceRowName
       form={form}
       name={name}
+      record={record}
       serviceType={ServiceType.Inflicion}
       editable={editable}
       disabled={disabled}
@@ -60,7 +63,8 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
   const rentPrice = useMemo(() => {
     return (
       prevPlacingInvoice?.sum ||
-      company?.totalArea * (company?.pricePerMeter || prevService?.rentPrice)
+      company?.totalArea *
+        resolvePlacingTariff({ company, service: prevService })
     )
   }, [prevPlacingInvoice, company, prevService])
 

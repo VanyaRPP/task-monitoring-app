@@ -90,6 +90,52 @@ describe('buildAutoCustomColumns', () => {
     ).toEqual([])
   })
 
+  it('gives every per-domain meter of one type its own column', () => {
+    const cols = withData([
+      payment([
+        { type: 'electricityPrice', price: 10, sum: 300 },
+        {
+          type: 'electricityPrice',
+          serviceId: 'svc-1',
+          name: 'електрика(1)',
+          sum: 80,
+        },
+        {
+          type: 'electricityPrice',
+          serviceId: 'svc-4',
+          name: 'електропостача(4)',
+          sum: 60,
+        },
+      ]),
+    ])
+
+    expect(titlesOf(cols)).toEqual(['електрика(1)', 'електропостача(4)'])
+  })
+
+  it('sums only the meter of its own column, not its type-mates', () => {
+    const data = [
+      payment([
+        { type: 'electricityPrice', price: 10, sum: 300 },
+        {
+          type: 'electricityPrice',
+          serviceId: 'svc-1',
+          name: 'електрика(1)',
+          sum: 80,
+        },
+        {
+          type: 'electricityPrice',
+          serviceId: 'svc-4',
+          name: 'електропостача(4)',
+          sum: 60,
+        },
+      ]),
+    ]
+    const [first] = withData(data)
+    const empty = payment([])
+
+    expect((first as any).sorter(data[0], empty)).toBe(80)
+  })
+
   it('shows all custom columns when selectedColumns is omitted', () => {
     const data = [
       payment([{ type: ServiceType.Custom, name: 'Прибирання', sum: 100 }]),
@@ -119,6 +165,23 @@ describe('getInvoiceCustomServiceNames', () => {
     ]
     expect(getInvoiceCustomServiceNames({ payments: { data } as any })).toEqual(
       ['Ремонт даху']
+    )
+  })
+
+  it('includes per-domain typed services (own serviceId) by their own name', () => {
+    const data = [
+      payment([
+        { type: 'electricityPrice', price: 10, sum: 300 },
+        {
+          type: 'electricityPrice',
+          serviceId: 'svc-1',
+          name: 'електрика(1)',
+          sum: 80,
+        },
+      ]),
+    ]
+    expect(getInvoiceCustomServiceNames({ payments: { data } as any })).toEqual(
+      ['електрика(1)']
     )
   })
 

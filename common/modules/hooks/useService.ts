@@ -23,12 +23,15 @@ export function usePreviousMonthService({ domainId, streetId, date }) {
   const lastMonth = dayjs(date).subtract(1, 'month')
   const { data } = useGetAllServicesQuery(
     {
-      month: lastMonth.month(),
+      // The API filters on Mongo's $month (1-12); dayjs months are 0-based,
+      // so `.month()` alone asked for the month before last.
+      month: lastMonth.month() + 1,
       year: lastMonth.year(),
       domainId,
-      streetId,
+      streetId: streetId || undefined,
+      withoutStreet: streetId ? undefined : true,
     },
-    { skip: !domainId || !streetId || !date }
+    { skip: !domainId || !date }
   )
   return { previousMonth: data?.data?.[0] }
 }

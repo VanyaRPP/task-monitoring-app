@@ -1,67 +1,371 @@
-import { Profit } from '@common/api/profitsApi/profits.type'
+import {
+  Profit,
+  ProfitMonthRow,
+  CurrencyTotals,
+} from '@common/api/profitsApi/profits.type'
+import { getCurrencySymbol } from '@utils/helpers'
 import { ColumnsType } from 'antd/es/table'
 import { t } from 'i18next'
 import dayjs from 'dayjs'
-import { Button, Dropdown, Popconfirm } from 'antd'
-import {
-  EyeOutlined,
-  EditOutlined,
-  DeleteOutlined,
-  MoreOutlined,
-} from '@ant-design/icons'
-import type { MenuProps } from 'antd'
+import { Button, Popconfirm, Space, Tag, Tooltip, Typography } from 'antd'
+import { EyeOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
+import type { GlobalToken } from 'antd'
+import { Operations } from '@utils/constants'
+import type { IProfitItem } from '@utils/profit-items'
+import { useMemo, useState } from 'react'
+import s from './style.module.scss'
 
-interface ProfitMonthSummary {
-  key: string
-  month: string
-  debit: number
-  credit: number
-  profit: number
-  count: number
-  transactions: Profit[]
+const { Text } = Typography
+
+/** Financial figures line up only when the glyphs are the same width. */
+export const numericCell: React.CSSProperties = {
+  fontVariantNumeric: 'tabular-nums',
+  whiteSpace: 'nowrap',
 }
 
-export const parentColumns: ColumnsType<ProfitMonthSummary> = [
-  {
-    title: t('table.parent.month', { ns: 'profitPage' }),
-    dataIndex: 'month',
-    key: 'month',
-    width: 150,
-    render: (month: string) =>
-      dayjs(month).isValid() ? dayjs(month).format('MMMM YYYY') : month,
-  },
-  {
-    title: t('table.parent.debit', { ns: 'profitPage' }),
-    dataIndex: 'debit',
-    key: 'debit',
-    width: 100,
-    render: (value: number) => value.toFixed(2),
-  },
-  {
-    title: t('table.parent.credit', { ns: 'profitPage' }),
-    dataIndex: 'credit',
-    key: 'credit',
-    width: 100,
-    render: (value: number) => value.toFixed(2),
-  },
-  {
-    title: t('table.parent.profit', { ns: 'profitPage' }),
-    dataIndex: 'profit',
-    key: 'profit',
-    width: 140,
-    render: (value: number) => (
-      <span style={{ color: value >= 0 ? 'green' : 'red' }}>
-        {value.toFixed(2)}
-      </span>
-    ),
-  },
-  {
-    title: t('table.parent.totalRecords', { ns: 'profitPage' }),
-    dataIndex: 'count',
-    key: 'count',
-    width: 160,
-  },
-]
+export const money = (value: number) =>
+  (value ?? 0).toLocaleString('uk-UA', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })
+
+/**
+ * A domain can invoice in several currencies at once, and those sums must
+ * never be added together. So each cell lists one line per currency, symbol
+ * first, busiest currency on top. Single-currency domains - the common case -
+ * still see exactly one line.
+ */
+export const MoneyCell: React.FC<{
+  row: Pick<ProfitMonthRow, 'currencies' | 'byCurrency'>
+  pick: (t: CurrencyTotals) => number
+  /** Colour by sign; only figures with a good/bad direction pass this. */
+  signed?: boolean
+  token?: GlobalToken
+  onClick?: (currency: string) => void
+}> = ({ row, pick, signed, token, onClick }) => {
+  if (!row.currencies.length) {
+    return <Text type="secondary">—</Text>
+  }
+  return (
+    <Space direction="vertical" size={0} style={{ alignItems: 'flex-end' }}>
+      {row.currencies.map((currency) => {
+        const value = pick(row.byCurrency[currency])
+        const label = `${getCurrencySymbol(currency)} ${money(value)}`
+        const color =
+          signed && token
+            ? value >= 0
+              ? token.colorSuccess
+              : token.colorError
+            : undefined
+
+        if (onClick && value) {
+          return (
+            <Button
+              key={currency}
+              type="link"
+              style={{ ...numericCell, padding: 0, height: 'auto', color }}
+              onClick={() => onClick(currency)}
+            >
+              {label}
+            </Button>
+          )
+        }
+        return (
+          <Text
+            key={currency}
+            strong={signed}
+            style={{ ...numericCell, color }}
+          >
+            {label}
+          </Text>
+        )
+      })}
+    </Space>
+  )
+}
+
+// A receipt with dozens of lines made its row as tall as the screen.
+const ITEMS_COLLAPSED_LIMIT = 8
+
+/**
+ * One tag per line with its own amount - that split is the point of entering
+ * a receipt as lines. Biggest first, so the collapsed view shows what the
+ * money actually went on.
+ */
+export const ProfitItemsCell: React.FC<{
+  items: IProfitItem[]
+  currency?: string
+}> = ({ items, currency }) => {
+  const [expanded, setExpanded] = useState(false)
+  const sorted = useMemo(
+    () => [...items].sort((a, b) => b.amount - a.amount),
+    [items]
+  )
+  const hidden = sorted.length - ITEMS_COLLAPSED_LIMIT
+  const visible =
+    expanded || hidden <= 0 ? sorted : sorted.slice(0, ITEMS_COLLAPSED_LIMIT)
+
+  return (
+    <div className={s.items}>
+      {visible.map((item, index) => (
+        <Tooltip key={index} title={item.description}>
+          <Tag className={s.itemTag}>
+            <span className={s.itemCategory}>
+              {item.category ||
+                t('dashboard.uncategorized', { ns: 'profitPage' })}
+            </span>
+            <Text type="secondary" style={numericCell}>
+              {getCurrencySymbol(currency)} {money(item.amount)}
+            </Text>
+          </Tag>
+        </Tooltip>
+      ))}
+      {hidden > 0 && (
+        <Button
+          type="link"
+          size="small"
+          className={s.itemsToggle}
+          onClick={() => setExpanded((v) => !v)}
+        >
+          {expanded
+            ? t('table.child.showLess', { ns: 'profitPage' })
+            : t('table.child.showMore', { ns: 'profitPage', count: hidden })}
+        </Button>
+      )}
+    </div>
+  )
+}
+
+/**
+ * `onDrill` opens the list of payments behind a figure. Only the two income
+ * columns get it - expenses are already itemised in the expandable row.
+ */
+export type DrillTarget = Operations | 'outstanding'
+
+export type ProfitPerspective = 'domain' | 'company'
+
+export interface ParentColumnsOptions {
+  /**
+   * Domain and company are symmetric scopes - both get expected/actual/
+   * expenses/net, both can carry manual records. The only thing that
+   * differs is how an invoice reads:
+   *   domain:  an invoice is income  - "we billed them, they owe us".
+   *   company: the SAME invoice is an expense, from the company's own
+   *            self-service view - "we were billed, we owe".
+   * The underlying numbers (Payment debit/credit) never change, only which
+   * side is reading them - see ProfitService.getLedgerFor.
+   */
+  perspective?: ProfitPerspective
+  /**
+   * The debtor breakdown behind "Недоплата" answers "which company owes" -
+   * meaningless once the scope IS a single company. The figure still shows,
+   * it just is not clickable.
+   */
+  allowDebtorDrill?: boolean
+}
+
+/**
+ * Roll several months up per currency. Used for the page summary row, where
+ * folding currencies into one figure would be meaningless.
+ */
+export const sumRowsByCurrency = (rows: readonly ProfitMonthRow[]) => {
+  const byCurrency: Record<string, CurrencyTotals> = {}
+  const volume: Record<string, number> = {}
+
+  for (const row of rows) {
+    for (const currency of row.currencies) {
+      const src = row.byCurrency[currency]
+      const dst = (byCurrency[currency] ??= {
+        expected: 0,
+        actual: 0,
+        income: 0,
+        expenses: 0,
+        outstanding: 0,
+        net: 0,
+      })
+      dst.expected += src.expected
+      dst.actual += src.actual
+      dst.income += src.income
+      dst.expenses += src.expenses
+      dst.outstanding += src.outstanding
+      dst.net += src.net
+      volume[currency] =
+        (volume[currency] ?? 0) +
+        Math.abs(src.expected) +
+        Math.abs(src.actual) +
+        Math.abs(src.expenses)
+    }
+  }
+
+  return {
+    byCurrency,
+    currencies: Object.keys(byCurrency).sort((a, b) => volume[b] - volume[a]),
+  }
+}
+
+export const getParentColumns = (
+  token: GlobalToken,
+  onDrill?: (month: string, target: DrillTarget, currency: string) => void,
+  { perspective = 'domain', allowDebtorDrill = true }: ParentColumnsOptions = {}
+): ColumnsType<ProfitMonthRow> => {
+  const isDomain = perspective === 'domain'
+  return [
+    {
+      title: t('table.parent.month', { ns: 'profitPage' }),
+      dataIndex: 'month',
+      key: 'month',
+      width: 160,
+      render: (month: string) => {
+        const d = dayjs(month)
+        if (!d.isValid()) return month
+        const label = d.format('MMMM YYYY')
+        return (
+          <Text strong>{label.charAt(0).toUpperCase() + label.slice(1)}</Text>
+        )
+      },
+    },
+    {
+      // Invoiced. For a domain that is income not yet in hand; for a
+      // company's own view it is what they were billed, not yet paid.
+      title: t(
+        isDomain ? 'table.parent.expected' : 'table.parent.expectedCompany',
+        { ns: 'profitPage' }
+      ),
+      key: 'expected',
+      width: 180,
+      align: 'right',
+      render: (_, record) => (
+        <MoneyCell
+          row={record}
+          pick={(c) => c.expected}
+          onClick={
+            onDrill
+              ? (currency) => onDrill(record.month, Operations.Debit, currency)
+              : undefined
+          }
+        />
+      ),
+    },
+    {
+      // What actually moved: income received for a domain, expense paid
+      // out for a company - with how much of the invoiced total that covers.
+      title: t(
+        isDomain ? 'table.parent.actual' : 'table.parent.actualCompany',
+        { ns: 'profitPage' }
+      ),
+      key: 'actual',
+      width: 200,
+      align: 'right',
+      render: (_, record) => (
+        <Space direction="vertical" size={0} style={{ alignItems: 'flex-end' }}>
+          <MoneyCell
+            row={record}
+            pick={(c) => c.actual}
+            onClick={
+              onDrill
+                ? (currency) =>
+                    onDrill(record.month, Operations.Credit, currency)
+                : undefined
+            }
+          />
+          {record.currencies.length === 1 &&
+            record.byCurrency[record.currencies[0]].expected > 0 && (
+              <Tooltip
+                title={t(
+                  isDomain
+                    ? 'table.parent.collectedHint'
+                    : 'table.parent.collectedHintCompany',
+                  { ns: 'profitPage' }
+                )}
+              >
+                <Text type="secondary" style={{ fontSize: 12 }}>
+                  {Math.round(
+                    (record.byCurrency[record.currencies[0]].actual /
+                      record.byCurrency[record.currencies[0]].expected) *
+                      100
+                  )}
+                  %
+                </Text>
+              </Tooltip>
+            )}
+        </Space>
+      ),
+    },
+    {
+      // Invoiced but not collected. Clicking through answers "who owes", which
+      // is the one figure on this page you can actually act on.
+      title: t('table.parent.outstanding', { ns: 'profitPage' }),
+      key: 'outstanding',
+      width: 180,
+      align: 'right',
+      render: (_, record) => {
+        // Rounding noise across many invoices leaves a few kopiykas either way;
+        // below a unit there is nothing to chase.
+        const owed = record.currencies.filter(
+          (c) => Math.abs(record.byCurrency[c].outstanding) >= 1
+        )
+        if (!owed.length) return <Text type="secondary">—</Text>
+        return (
+          <MoneyCell
+            row={{ ...record, currencies: owed }}
+            pick={(c) => c.outstanding}
+            onClick={
+              onDrill && allowDebtorDrill
+                ? (currency) => onDrill(record.month, 'outstanding', currency)
+                : undefined
+            }
+          />
+        )
+      },
+    },
+    {
+      // Manual record, not derived from the invoice - so unlike
+      // expected/actual, this label does not flip with perspective.
+      title: t('table.parent.expenses', { ns: 'profitPage' }),
+      key: 'expenses',
+      width: 170,
+      align: 'right',
+      render: (_, record) => (
+        <MoneyCell row={record} pick={(c) => c.expenses} />
+      ),
+    },
+    {
+      // Hand-entered credits. For a company this is the ONLY inflow the
+      // billing model gives it, so it is the column that stops every figure
+      // on the page from being an outflow; it used to be folded into
+      // `actual`, i.e. filed under an expense heading.
+      title: (
+        <Tooltip title={t('table.parent.incomeHint', { ns: 'profitPage' })}>
+          <span>
+            {t(
+              isDomain ? 'table.parent.income' : 'table.parent.incomeCompany',
+              { ns: 'profitPage' }
+            )}
+          </span>
+        </Tooltip>
+      ),
+      key: 'income',
+      width: 170,
+      align: 'right',
+      render: (_, record) => <MoneyCell row={record} pick={(c) => c.income} />,
+    },
+    {
+      // The only figure with a good/bad direction, so the only one we colour.
+      // A company's invoices are outflows, so its net is
+      // income - actual - expenses (see ProfitService.getLedgerFor): it can
+      // go positive, but only on the back of real recorded income.
+      title: t(isDomain ? 'table.parent.net' : 'table.parent.netCompany', {
+        ns: 'profitPage',
+      }),
+      key: 'net',
+      width: 180,
+      align: 'right',
+      render: (_, record) => (
+        <MoneyCell row={record} pick={(c) => c.net} signed token={token} />
+      ),
+    },
+  ]
+}
 
 export const getChildColumns = (
   onPreview: (record: Profit) => void,
@@ -73,100 +377,158 @@ export const getChildColumns = (
     title: t('table.child.date', { ns: 'profitPage' }),
     dataIndex: 'date',
     key: 'date',
-    width: 185,
-    render: (date: string) => new Date(date).toLocaleDateString(),
+    width: 120,
+    render: (date: string) => (
+      <span style={numericCell}>{dayjs(date).format('DD.MM.YYYY')}</span>
+    ),
   },
   {
     title: t('table.child.type', { ns: 'profitPage' }),
     dataIndex: 'type',
     key: 'type',
-    width: 100,
-    render: (type: string) => {
-      if (type === 'debit') return t('table.child.debit', { ns: 'profitPage' })
-      if (type === 'credit')
-        return t('table.child.credit', { ns: 'profitPage' })
-      return type
-    },
+    width: 110,
+    render: (type: string) =>
+      type === 'debit' ? (
+        <Tag>{t('table.child.debit', { ns: 'profitPage' })}</Tag>
+      ) : (
+        <Tag color="green">{t('table.child.credit', { ns: 'profitPage' })}</Tag>
+      ),
   },
   {
     title: t('table.child.amount', { ns: 'profitPage' }),
     dataIndex: 'amount',
     key: 'amount',
-    width: 100,
+    width: 130,
+    align: 'right',
+    render: (value: number, record) => (
+      <span style={numericCell}>
+        {getCurrencySymbol(record.currency)} {money(value)}
+      </span>
+    ),
   },
   {
     title: t('table.child.description', { ns: 'profitPage' }),
     dataIndex: 'description',
     key: 'description',
-    width: 140,
+    // Usually one short line; the free width goes to the categories instead.
+    width: 220,
+    ellipsis: true,
+    render: (description: string) =>
+      description ? (
+        <Tooltip title={description} placement="topLeft">
+          <span>{description}</span>
+        </Tooltip>
+      ) : (
+        <Text type="secondary">—</Text>
+      ),
   },
   {
     title: t('table.child.categories', { ns: 'profitPage' }),
     dataIndex: 'categories',
     key: 'categories',
-    width: 90,
-    render: (cats: string[]) => cats?.join(', ') || '-',
+    // No width: takes whatever the fixed columns leave over.
+    render: (cats: string[], record) =>
+      record.items?.length ? (
+        <ProfitItemsCell items={record.items} currency={record.currency} />
+      ) : cats?.length ? (
+        <Space size={[4, 4]} wrap>
+          {cats.map((cat) => (
+            <Tag key={cat} style={{ marginInlineEnd: 0 }}>
+              {cat}
+            </Tag>
+          ))}
+        </Space>
+      ) : (
+        <Text type="secondary">—</Text>
+      ),
+  },
+  {
+    title: t('table.child.author', { ns: 'profitPage' }),
+    dataIndex: 'createdBy',
+    key: 'createdBy',
+    width: 160,
+    render: (createdBy: Profit['createdBy']) =>
+      createdBy?.name ? (
+        <Tooltip title={createdBy.email}>
+          <Text>{createdBy.name}</Text>
+        </Tooltip>
+      ) : (
+        <Text type="secondary">
+          {t('form.automatic', { ns: 'profitPage' })}
+        </Text>
+      ),
   },
   {
     title: '',
     key: 'action',
-    align: 'center',
-    width: 40,
-    fixed: 'right',
-    render: (_, record) => {
-      const menuItems: MenuProps['items'] = [
-        {
-          key: 'view',
-          label: (
-            <Button
-              icon={<EyeOutlined />}
-              type="link"
-              style={{ color: '#722ed1', padding: '0 10px' }}
-              onClick={() => onPreview(record)}
-            >
-              {t('actions.preview', { ns: 'profitPage' })}
-            </Button>
-          ),
-        },
-        {
-          key: 'edit',
-          label: (
-            <Button
-              icon={<EditOutlined />}
-              type="link"
-              style={{ color: '#722ed1', padding: '0 10px' }}
-              onClick={() => onEdit(record)}
-            >
-              {t('actions.edit', { ns: 'profitPage' })}
-            </Button>
-          ),
-        },
-        {
-          key: 'delete',
-          label: (
-            <Popconfirm
-              title={t('prompts.confirmDelete', { ns: 'profitPage' })}
-              onConfirm={() => onDelete(record._id)}
-              okText={t('actions.delete', { ns: 'profitPage' })}
-              cancelText={t('actions.cancel', { ns: 'profitPage' })}
-            >
-              <Button
-                icon={<DeleteOutlined />}
-                type="link"
-                style={{ color: '#ff4d4f', padding: '0 10px' }}
-              >
-                {t('actions.delete', { ns: 'profitPage' })}
-              </Button>
-            </Popconfirm>
-          ),
-        },
-      ]
-
-      return (
-        <Dropdown menu={{ items: menuItems }} placement="bottomRight">
-          <Button icon={<MoreOutlined />} />
-        </Dropdown>
-      )
-    },
+    align: 'right',
+    width: 120,
+    render: (_, record) => (
+      <RecordActions
+        record={record}
+        onPreview={onPreview}
+        onEdit={onEdit}
+        onDelete={onDelete}
+        isDeleting={isDeleting}
+      />
+    ),
   },
 ]
+
+/**
+ * Three actions do not need a dropdown - inline icons cost one click instead
+ * of two and stay visible. `canDelete` is off for a single line of a
+ * multi-line receipt: deleting it would silently remove the whole receipt.
+ */
+export const RecordActions: React.FC<{
+  record: Profit
+  onPreview: (record: Profit) => void
+  onEdit: (record: Profit) => void
+  onDelete: (id: string) => void
+  isDeleting: boolean
+  canDelete?: boolean
+}> = ({
+  record,
+  onPreview,
+  onEdit,
+  onDelete,
+  isDeleting,
+  canDelete = true,
+}) => (
+  <Space size={0}>
+    <Tooltip title={t('actions.preview', { ns: 'profitPage' })}>
+      <Button
+        type="text"
+        icon={<EyeOutlined />}
+        onClick={() => onPreview(record)}
+        aria-label={t('actions.preview', { ns: 'profitPage' })}
+      />
+    </Tooltip>
+    <Tooltip title={t('actions.edit', { ns: 'profitPage' })}>
+      <Button
+        type="text"
+        icon={<EditOutlined />}
+        onClick={() => onEdit(record)}
+        aria-label={t('actions.edit', { ns: 'profitPage' })}
+      />
+    </Tooltip>
+    {canDelete && (
+      <Popconfirm
+        title={t('prompts.confirmDelete', { ns: 'profitPage' })}
+        onConfirm={() => onDelete(record._id)}
+        okText={t('actions.delete', { ns: 'profitPage' })}
+        cancelText={t('actions.cancel', { ns: 'profitPage' })}
+        okButtonProps={{ danger: true, loading: isDeleting }}
+      >
+        <Tooltip title={t('actions.delete', { ns: 'profitPage' })}>
+          <Button
+            type="text"
+            danger
+            icon={<DeleteOutlined />}
+            aria-label={t('actions.delete', { ns: 'profitPage' })}
+          />
+        </Tooltip>
+      </Popconfirm>
+    )}
+  </Space>
+)

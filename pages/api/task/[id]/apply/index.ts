@@ -5,12 +5,12 @@ import start, { Data } from '@pages/api/api.config'
 import { TaskStatuses } from '@utils/constants'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
-start()
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
+  await start()
+
   switch (req.method) {
     case 'PATCH':
       try {
@@ -28,7 +28,7 @@ export default async function handler(
       }
     case 'DELETE':
       try {
-        await Task.findByIdAndRemove(req.query.id).then((user) => {
+        await Task.findByIdAndDelete(req.query.id).then((user) => {
           if (!user) {
             return res
               .status(400)

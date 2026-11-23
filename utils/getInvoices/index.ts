@@ -6,6 +6,8 @@ import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
 import { ServiceType } from '@utils/constants'
 import { isEmpty, toRoundFixed } from '@utils/helpers'
+import { resolvePlacingTariff } from './resolvePlacingTariff'
+import { resolveServiceType } from '@utils/domain/resolve-service-type'
 
 export type InvoicesCollection = {
   [key in ServiceType | string]?: IPaymentField
@@ -26,6 +28,34 @@ export interface IGetInvoiceByTypeProps {
   prevPayment?: Partial<IPayment>
   currInvoicesCollection: InvoicesCollection
   prevInvoicesCollection: InvoicesCollection
+}
+
+const SCOPED_KEY_PREFIX = 'sid:'
+
+export const EMPTY_MONTH_SERVICE: Partial<IService> = Object.freeze({
+  rentPrice: 0,
+  electricityPrice: 0,
+  waterPrice: 0,
+  waterPriceTotal: 0,
+  garbageCollectorPrice: 0,
+  inflicionPrice: 0,
+  customServices: [],
+})
+
+/**
+ * Ключ рядка в колекції поточного платежу.
+ *
+ * Рядок із `serviceId` — це per-domain копія типізованої послуги (власний
+ * лічильник електрики/води тощо). Таких рядків на інвойсі може бути кілька
+ * одного типу, тому вони НЕ можуть жити під ключем свого ServiceType: вони б
+ * перетирали один одного і нативний рядок. Даємо їм власний простір ключів, а
+ * назад у список їх повертає getScopedTypedInvoices — без перерахунку, як є.
+ */
+const invoiceCollectionKey = (invoice: IPaymentField): string => {
+  if (invoice?.serviceId && invoice?.type !== ServiceType.Custom) {
+    return `${SCOPED_KEY_PREFIX}${invoice.serviceId}`
+  }
+  return invoice.name || invoice.type
 }
 
 /**
@@ -50,7 +80,7 @@ export interface IGetInvoiceByTypeProps {
  */
 export const getInvoices = ({
   company,
-  service,
+  service: rawService,
   payment,
   prevService,
   prevPayment,
@@ -62,16 +92,19 @@ export const getInvoices = ({
     (inv) => inv?.type === ServiceType.Custom && !!inv?.fieldName
   )
   if (
-    (isEmpty(company) || isEmpty(service)) &&
+    isEmpty(company) &&
     (isEmpty(payment) || isEmpty(payment?.invoice)) &&
     !hasPrevCustomItems
   ) {
     return []
   }
 
+  const service =
+    isEmpty(rawService) && !isEmpty(company) ? EMPTY_MONTH_SERVICE : rawService
+
   const currInvoicesCollection =
     payment?.invoice?.reduce((acc, invoice) => {
-      acc[invoice.name || invoice.type] = invoice
+      acc[invoiceCollectionKey(invoice)] = invoice
       return acc
     }, {} as InvoicesCollection) || {}
 
@@ -103,6 +136,7 @@ export const getInvoices = ({
         prevInvoicesCollection,
       })
     ),
+    ...getScopedTypedInvoices({ currInvoicesCollection }),
     ...getCustomInvoices({
       company,
       service,
@@ -205,7 +239,7 @@ export const getPlacingInvoice = ({
     const prevPlacing = prevInvoicesCollection[ServiceType.Placing]
     const price =
       (prevPlacing?.sum ||
-        company.totalArea * (company.pricePerMeter || service?.rentPrice)) *
+        company.totalArea * resolvePlacingTariff({ company, service })) *
       ((prevService?.inflicionPrice || 100) / 100 < 1
         ? 1
         : (prevService?.inflicionPrice || 100) / 100)
@@ -217,13 +251,13 @@ export const getPlacingInvoice = ({
     }
   }
 
+  const tariff = resolvePlacingTariff({ company, service })
+
   return {
     type: ServiceType.Placing,
     amount: +toRoundFixed(company?.totalArea),
-    price: +toRoundFixed(company?.pricePerMeter || service?.rentPrice),
-    sum: +toRoundFixed(
-      company?.totalArea * (company?.pricePerMeter || service?.rentPrice)
-    ),
+    price: +toRoundFixed(tariff),
+    sum: +toRoundFixed(company?.totalArea * tariff),
   }
 }
 
@@ -259,7 +293,7 @@ export const getInflicionInvoice = ({
     const prevPlacing = prevInvoicesCollection[ServiceType.Placing]
     const price =
       (prevPlacing?.sum ||
-        company.totalArea * (company.pricePerMeter || service.rentPrice || 0)) *
+        company.totalArea * resolvePlacingTariff({ company, service })) *
       (Math.max(prevService?.inflicionPrice - 100, 0) / 100)
 
     return {
@@ -496,6 +530,24 @@ export const getDiscountInvoice = ({
   }
 }
 
+/**
+ * Рядки per-domain типізованих послуг (власний лічильник) із поточного платежу.
+ *
+ * Повертаються як є: у них уже лежить свій тариф, показники, втрати і
+ * `serviceId`, за яким рядок прив'язаний до послуги каталогу. Перерахунок за
+ * тарифом місячної послуги тут зіпсував би саме те, заради чого послуга й
+ * заведена окремо.
+ */
+export const getScopedTypedInvoices = ({
+  currInvoicesCollection,
+}: Pick<
+  IGetInvoiceByTypeProps,
+  'currInvoicesCollection'
+>): Array<IPaymentField> =>
+  Object.entries(currInvoicesCollection)
+    .filter(([key]) => key.startsWith(SCOPED_KEY_PREFIX))
+    .map(([, invoice]) => invoice)
+
 export const getCustomInvoices = ({
   company,
   service,
@@ -513,6 +565,26 @@ export const getCustomInvoices = ({
     }))
 }
 
+/**
+ * Рядок каталогу, який уже має власний нативний рядок інвойсу (Розміщення,
+ * Утримання, електрика тощо).
+ *
+ * Такі послуги не повинні ще раз з'являтися як `custom`: у булку вони або
+ * мовчки затирали нативний рядок (коли fieldName збігався з ServiceType), або
+ * пролазили в рахунок окремою фантомною позицією (коли fieldName був
+ * транслітерований). Per-domain копії зі своїм _id і своїм fieldName сюди не
+ * потрапляють — вони мають власну колонку-формулу і лишаються custom.
+ */
+const hasNativeInvoiceRow = (row: {
+  _id?: unknown
+  fieldName?: string | null
+  serviceId?: string | null
+}): boolean =>
+  resolveServiceType({
+    _id: (row?._id as string) ?? row?.serviceId ?? null,
+    fieldName: row?.fieldName ?? null,
+  }) !== null
+
 export const getCustomServiceInvoices = ({
   company,
   service,
@@ -525,14 +597,17 @@ export const getCustomServiceInvoices = ({
     return []
   }
 
-  const serviceCustoms = Array.isArray(service?.customServices)
-    ? service.customServices
-    : []
-  const companyCustoms = Array.isArray(company?.customServices)
-    ? company.customServices
-    : []
+  const serviceCustoms = (
+    Array.isArray(service?.customServices) ? service.customServices : []
+  ).filter((item) => !hasNativeInvoiceRow(item))
+  const companyCustoms = (
+    Array.isArray(company?.customServices) ? company.customServices : []
+  ).filter((item) => !hasNativeInvoiceRow(item))
   const prevCustomItems = (prevPayment?.invoice ?? []).filter(
-    (inv) => inv?.type === ServiceType.Custom && !!inv?.fieldName
+    (inv) =>
+      inv?.type === ServiceType.Custom &&
+      !!inv?.fieldName &&
+      !hasNativeInvoiceRow(inv)
   )
 
   if (

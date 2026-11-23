@@ -11,23 +11,22 @@
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
     "types": ["node", "jest"],
-    "baseUrl": ".",
     "paths": {
-      "@public/*": ["public/*"],
-      "@utils/*": ["utils/*"],
-      "@styles/*": ["styles/*"],
-      "@pages/*": ["pages/*"],
-      "@components/*": ["common/components/*"],
-      "@assets/*": ["common/assets/*"],
-      "@modules/*": ["common/modules/*"],
-      "@lib/*": ["common/lib/*"],
-      "@common/*": ["common/*"]
+      "@public/*": ["./public/*"],
+      "@utils/*": ["./utils/*"],
+      "@styles/*": ["./styles/*"],
+      "@pages/*": ["./pages/*"],
+      "@components/*": ["./common/components/*"],
+      "@assets/*": ["./common/assets/*"],
+      "@modules/*": ["./common/modules/*"],
+      "@lib/*": ["./common/lib/*"],
+      "@common/*": ["./common/*"]
     }
   },
   "include": [

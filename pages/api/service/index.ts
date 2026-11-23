@@ -3,10 +3,10 @@
 import { getFormattedDate } from '@common/assets/features/formatDate'
 import Domain from '@modules/models/Domain'
 import RealEstate from '@modules/models/RealEstate'
-import Service from '@modules/models/Service'
+import Service, { IServiceModel } from '@modules/models/Service'
 import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
-import { FilterQuery } from 'mongoose'
+import { QueryFilter } from 'mongoose'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import {
   getDistinctCompanyAndDomain,
@@ -16,20 +16,28 @@ import {
 } from '@utils/helpers'
 import Street from '@modules/models/Street'
 
-start()
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
+  await start()
+
   const { isGlobalAdmin, isDomainAdmin, isAdmin, isUser, user } =
     await getCurrentUser(req, res)
 
   switch (req.method) {
     case 'GET':
       try {
-        const { limit, skip, domainId, streetId, serviceId, year, month } =
-          req.query
+        const {
+          limit,
+          skip,
+          domainId,
+          streetId,
+          withoutStreet,
+          serviceId,
+          year,
+          month,
+        } = req.query
 
         if (!isUser && !isDomainAdmin && !isGlobalAdmin) {
           return res.status(200).json({ success: false, data: [] })
@@ -53,8 +61,8 @@ export default async function handler(
             : serviceId.map((id) => decodeURIComponent(id))
           : null
 
-        const options: FilterQuery<typeof Service> = {}
-        const filters: FilterQuery<typeof Service> = {}
+        const options: QueryFilter<IServiceModel> = {}
+        const filters: QueryFilter<IServiceModel> = {}
 
         if (domainsIds) {
           filters.domain = { $in: domainsIds }
@@ -62,6 +70,10 @@ export default async function handler(
 
         if (streetsIds) {
           filters.street = { $in: streetsIds }
+        } else if (withoutStreet === 'true') {
+          // Month services with no address (missing or null street). Leaving
+          // the street out entirely would match every street's service.
+          filters.street = null
         }
 
         if (servicesIds) {
@@ -128,7 +140,8 @@ export default async function handler(
           .sort({ date: -1 })
           .limit(+limit)
           .skip(+skip)
-          .populate('domain')
+          // bank tokens are admin-only: never ship them inside an embedded domain
+          .populate('domain', '-domainBankToken')
           .populate('street')
 
         const distinctStreets = await Service.distinct('street', options)
@@ -199,7 +212,12 @@ export default async function handler(
           }
 
           // TODO: body validation
-          const service = await Service.create(req.body)
+          const body = { ...req.body }
+          if (!body.street) {
+            delete body.street
+          }
+
+          const service = await Service.create(body)
           return res.status(200).json({ success: true, data: service })
         } else {
           return res
@@ -207,7 +225,9 @@ export default async function handler(
             .json({ success: false, message: 'not allowed' })
         }
       } catch (error) {
-        return res.status(400).json({ success: false, message: error })
+        return res
+          .status(400)
+          .json({ success: false, message: error?.message ?? error })
       }
   }
 }

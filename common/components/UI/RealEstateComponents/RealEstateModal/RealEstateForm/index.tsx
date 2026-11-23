@@ -14,15 +14,24 @@ import {
   Typography,
 } from 'antd'
 import type { TabsProps } from 'antd'
-import { FC, useEffect, useState } from 'react'
+import { FC, useEffect, useMemo, useState } from 'react'
 import AddressesSelect from '../../../Reusable/AddressesSelect'
 import DomainsSelect from '../../../Reusable/DomainsSelect'
 import s from './style.module.scss'
-import { useGetDomainByPkQuery } from '@common/api/domainApi/domain.api'
+import {
+  useGetDomainByPkQuery,
+  useGetDomainTypeTemplatesQuery,
+} from '@common/api/domainApi/domain.api'
 import { IDomain } from '@modules/models/Domain'
 import { inputNumberParser } from '@utils/helpers'
 import { CURRENCY_SELECT_OPTIONS, Currency } from '@utils/constants'
+import { resolveServiceType } from '@utils/domain/resolve-service-type'
+import { isAreaBasedServiceType } from '@utils/domain/service-type-categories'
 import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
+import {
+  shouldShowStandardServices,
+  STANDARD_COLUMN_SERVICE_IDS,
+} from '@utils/servicesVisibility'
 import CustomServicesCard from '../../../CustomServicesCard'
 
 interface Props {
@@ -44,7 +53,6 @@ const RealEstateForm: FC<Props> = ({
 }) => {
   const watchedDomainId = Form.useWatch('domain', form)
   const domainId = watchedDomainId || currentRealEstate?.domain?._id
-  const streetId = currentRealEstate?.street?._id
   const { data: domain = {} as IDomain } = useGetDomainByPkQuery(
     { domainId: domainId || currentRealEstate?.domain?._id },
     { skip: !domainId && !currentRealEstate?.domain?._id }
@@ -54,6 +62,16 @@ const RealEstateForm: FC<Props> = ({
     domainId: domain?._id || currentRealEstate?.domain?._id,
   })
   const services = servicesData?.data
+
+  const { data: domainTypeTemplates = [] } = useGetDomainTypeTemplatesQuery()
+
+  const showStandardServices = useMemo(
+    () =>
+      domain?._id
+        ? shouldShowStandardServices([domain], domainTypeTemplates)
+        : false,
+    [domain, domainTypeTemplates]
+  )
 
   useEffect(() => {
     if (services) {
@@ -65,26 +83,6 @@ const RealEstateForm: FC<Props> = ({
     }
   }, [services, currentRealEstate, form])
 
-  useEffect(() => {
-    if (!domainId) return
-
-    if (currentRealEstate?.street) {
-      let streetVal =
-        typeof currentRealEstate.street === 'object' &&
-        currentRealEstate.street !== null
-          ? currentRealEstate.street._id
-          : currentRealEstate.street
-
-      if (streetVal && !/^[0-9a-fA-F]{24}$/.test(String(streetVal))) {
-        streetVal = undefined
-      }
-
-      setTimeout(() => {
-        form.setFieldValue('street', streetVal)
-      }, 0)
-    }
-  }, [domainId, currentRealEstate, form])
-
   const isServiceExistById = (serviceId: string) => {
     if (!domain?.customServices?.length) return false
     return domain.customServices.some((group) =>
@@ -92,15 +90,27 @@ const RealEstateForm: FC<Props> = ({
     )
   }
 
+  const isStandardServiceDisabled = (columnKey: string) =>
+    !!domain?.disabledServiceIds
+      ?.map(String)
+      .includes(STANDARD_COLUMN_SERVICE_IDS[columnKey])
+
   const isServiceExist = (value: string) => {
     if (!domain?._id || !services || !services?.length) return false
     const existedValues = services.map((x) => !!x[value])
     return existedValues.includes(true)
   }
 
+  // Площа й ціна за м² потрібні будь-якій послузі «за площею»: сидованим
+  // Утриманню/Розміщенню (за закріпленим _id) і per-domain копії з тегом
+  // serviceType, яка рахується тією ж формулою в Payment Bulk. Без другої
+  // умови копія множила б тариф на незаповнену площу і давала 0.
   const isMeterBasedServiceExist =
     isServiceExistById('677d414283b6ef93c6b8ea2c') ||
-    isServiceExistById('682dd48d9665126611c81950')
+    isServiceExistById('682dd48d9665126611c81950') ||
+    customServices.some((svc) =>
+      isAreaBasedServiceType(resolveServiceType(svc))
+    )
 
   const getSafeStreetId = () => {
     const val =
@@ -144,11 +154,7 @@ const RealEstateForm: FC<Props> = ({
           disabled={!editable}
         />
       </Form.Item>
-      <Form.Item
-        name="description"
-        label="Опис"
-        rules={validateField('required')}
-      >
+      <Form.Item name="description" label="Опис">
         <Input.TextArea
           rows={4}
           placeholder="Опис"
@@ -201,15 +207,27 @@ const RealEstateForm: FC<Props> = ({
         </>
       )}
 
-      {isServiceExist('inflicionPrice') && (
-        <Form.Item
-          valuePropName="checked"
-          name="inflicion"
-          label="Індекс інфляції"
-        >
-          <Checkbox disabled={!editable} />
-        </Form.Item>
-      )}
+      {showStandardServices &&
+        !isStandardServiceDisabled('garbageCollector') && (
+          <Form.Item
+            valuePropName="checked"
+            name="garbageCollector"
+            label="Вивіз сміття"
+          >
+            <Checkbox disabled={!editable} />
+          </Form.Item>
+        )}
+
+      {isServiceExist('inflicionPrice') &&
+        !isStandardServiceDisabled('inflicion') && (
+          <Form.Item
+            valuePropName="checked"
+            name="inflicion"
+            label="Індекс інфляції"
+          >
+            <Checkbox disabled={!editable} />
+          </Form.Item>
+        )}
     </>
   )
 

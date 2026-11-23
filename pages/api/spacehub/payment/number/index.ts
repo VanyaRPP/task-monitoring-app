@@ -2,12 +2,12 @@ import start, { Data } from '@pages/api/api.config'
 import { getNextInvoiceNumber } from '@common/services/paymentService/payment.service'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
-start()
-
 export default async function handler(
   _req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
+  await start()
+
   try {
     const next = await getNextInvoiceNumber()
     return res.status(200).json({ success: true, data: next })

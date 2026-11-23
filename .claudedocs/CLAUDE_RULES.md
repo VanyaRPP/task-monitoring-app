@@ -1,6 +1,6 @@
 # Claude Rules — task-monitoring-app
 
-You are an expert developer assistant for the task-monitoring-app, a Next.js 13 Pages-Router application. This file defines **how you work**. For stack details see [TECH_STACK.md](./TECH_STACK.md); for code standards see [CODE_STYLE.md](./CODE_STYLE.md).
+You are an expert developer assistant for the task-monitoring-app, a Next.js 15 Pages-Router application. This file defines **how you work**. For stack details see [TECH_STACK.md](./TECH_STACK.md); for code standards see [CODE_STYLE.md](./CODE_STYLE.md).
 
 ## 1. Context Awareness — Read Before You Write
 
@@ -39,27 +39,54 @@ task-monitoring-app/
 ├── public/                      # @public/* — static files
 ├── scripts/                     # One-off Node scripts (seeders, backfills) + their tests
 ├── tests/                       # Integration tests crossing module boundaries
-├── types/                       # Global ambient types (typeRoots)
 └── docs/                        # Project documentation
 ```
 
 ### Where new things go
 
-| You are adding…                   | Put it in…                                                                                                                      |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| A new page (route)                | `pages/<route>/index.tsx` (+ `style.module.scss`)                                                                               |
-| A new API route                   | `pages/api/<resource>/index.ts` or `[id]/index.ts`. Use `NextApiHandler`.                                                       |
-| A new Mongoose model              | `common/modules/models/<Name>.ts`. Export default `mongoose.models.X \|\| mongoose.model(...)`.                                 |
-| Domain logic called by API routes | `common/services/<feature>/...` (NOT inside the API handler)                                                                    |
-| RTK Query endpoints               | `common/api/<resource>Api/` (mirror existing slices)                                                                            |
-| Redux slice                       | `common/modules/store/<feature>Slice.ts` + register in `store.ts`                                                               |
-| Reusable component                | `common/components/<Name>/index.tsx`                                                                                            |
-| UI primitive (button/modal/input) | `common/components/UI/<Name>/index.tsx`                                                                                         |
-| Custom hook                       | `common/modules/hooks/use<Name>.ts`                                                                                             |
-| Pure util / helper                | `utils/<name>.ts` (+ `<name>.test.ts` next to it)                                                                               |
-| Grammy bot logic                  | `common/lib/bot.ts` (singleton) — handlers in `common/lib/bot/` if it grows. **Never** import the bot inside a React component. |
-| Cron / scheduled handler          | `pages/api/sceduled/<frequency>.ts` (existing pattern — note legacy spelling)                                                   |
-| One-off seed / backfill           | `scripts/<name>.ts` (+ `<name>.test.ts`)                                                                                        |
+| You are adding…                   | Put it in…                                                                                                                                                                            |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A new page (route)                | `pages/<route>/index.tsx` (+ `style.module.scss`)                                                                                                                                     |
+| A new API route                   | `pages/api/<resource>/index.ts` or `[id]/index.ts`. Use `NextApiHandler`.                                                                                                             |
+| A new Mongoose model              | `common/modules/models/<Name>.ts`. Export default `mongoose.models.X \|\| mongoose.model(...)`.                                                                                       |
+| Domain logic called by API routes | `common/services/<feature>/...` (NOT inside the API handler)                                                                                                                          |
+| RTK Query endpoints               | `common/api/<resource>Api/` (mirror existing slices)                                                                                                                                  |
+| Redux slice                       | `common/modules/store/<feature>Slice.ts` + register in `store.ts`                                                                                                                     |
+| Reusable component                | `common/components/<Name>/index.tsx`                                                                                                                                                  |
+| UI primitive (button/modal/input) | `common/components/UI/<Name>/index.tsx`                                                                                                                                               |
+| Custom hook                       | `common/modules/hooks/use<Name>.ts`                                                                                                                                                   |
+| Pure util / helper                | `utils/<name>.ts` (+ `<name>.test.ts` next to it)                                                                                                                                     |
+| Grammy bot logic                  | `common/lib/bot.ts` (singleton) — handlers in `common/lib/bot/` if it grows. **Never** import the bot inside a React component.                                                       |
+| Cron / scheduled handler          | `pages/api/sceduled/<frequency>.ts` (legacy spelling). hourly/daily/threeTimesDaily are hit by `.github/workflows/scheduled*.yaml`; `quater.ts` is commented out (duplicate of daily) |
+| One-off seed / backfill           | `scripts/<name>.ts` (+ `<name>.test.ts`)                                                                                                                                              |
+
+### Feature map — where existing features live
+
+Start here before searching. API paths are under `pages/api/`; slices under `common/api/`.
+
+| Feature                              | API route(s)                                                 | Logic / utils                                                      | Client                                                   |
+| ------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------------ | -------------------------------------------------------- |
+| Payments / invoices (debit & credit) | `spacehub/payment/*` (bulk, PDF, Excel, mark-paid)           | `common/services/paymentService`, `utils/getInvoices`, `utils/pdf` | `paymentApi`, `pages/payment/*`, `Tables/Payment*`       |
+| Payment audit / change log           | `spacehub/payment-audit`, `spacehub/payment/[id]/change-log` | model `PaymentChangeLog`                                           | `paymentApi`, `changelogApi`, `Tables/PaymentAudit`      |
+| Profits ledger                       | `profits/*` (legacy: `profit/`)                              | `common/services/profitService`                                    | `profitsApi`, `pages/profit`, `Pages/ProfiitPage`        |
+| Domains (service providers)          | `domain/*`, `archived/[id]`                                  | `utils/domain/*` (access, snapshots, templates)                    | `domainApi`, `pages/domain`, `Tables/Domains`            |
+| Domain snapshots                     | `domain-snapshots/*`                                         | `utils/domain/build-snapshot-payload.ts`                           | `domainSnapshotsApi`                                     |
+| Domain type templates                | `domain-type-templates/*`                                    | `common/services/domainTypeTemplateService`                        | `Tables/DomainTypeTemplates`                             |
+| Companies (RealEstate)               | `real-estate/*`                                              | model `RealEstate`                                                 | `realestateApi`, `pages/real-estate`, `Tables/Companies` |
+| Services & tariffs                   | `service/*`                                                  | `utils/servicesVisibility`                                         | `serviceApi`, `pages/service`, `Tables/Services`         |
+| Custom services (formulas)           | `custom-services/*`                                          | `common/services/customServiceService`                             | `customServicesApi`, `Tables/CustomService`              |
+| Debt calculation (3% + inflation)    | `debt-calculation/*`, `inflation-index/*`                    | `utils/debt-calculation/*` (pure, well-tested)                     | `debtCalculationApi`, `components/DebtCalculation`       |
+| Debtors                              | `debtors/*`                                                  |                                                                    | `debtorsApi`                                             |
+| Bank transactions (PrivatBank)       | `bankapi/*`                                                  | `utils/bankUtils/PrivatBankApiAdapter.ts`                          | `bankApi`, `pages/bank`, `Pages/BankTransactions`        |
+| Streets / addresses                  | `streets/*`                                                  |                                                                    | `streetApi`, `Tables/Streets`                            |
+| Users & roles                        | `user/*`, `updateprofile`                                    | `utils/getCurrentUser.ts`, `utils/roles.ts`                        | `userApi`, `Tables/UsersTable`, `pages/admin-panel`      |
+| Tasks                                | `task/*`                                                     | model `Task`                                                       | `taskApi`                                                |
+| Feature flags                        | `feature-flags/*`                                            | `common/services/FeatureFlagServices.ts`                           | `useFeatureFlag(name)`, `FeatureFlagsTable`              |
+| AI assistant (admins only)           | `chat.ts`                                                    | `common/services/aiAssistant/*` (providers, prompt, zod tools)     | `components/AIChat` (in main layout)                     |
+| Notifications / Telegram             | `notify/*`, `telegram/send-pdf.ts`                           | `common/lib/bot.ts`                                                | `notificationApi`                                        |
+| Filters (table filter options)       | `filter/*`                                                   |                                                                    | `filterApi`                                              |
+| Cron jobs                            | `sceduled/*`                                                 |                                                                    | —                                                        |
+| One-off data migrations              | —                                                            | `scripts/seed-*`, `scripts/backfill-*` (each with a test)          | —                                                        |
 
 ### Imports — always use aliases
 
@@ -67,7 +94,7 @@ task-monitoring-app/
 // ❌ ../../../common/components/UI/Buttons/BackButton
 // ✅
 import BackButton from '@components/UI/Buttons/BackButton'
-import { connectToDatabase } from '@utils/dbConnect'
+import { getCurrentUser } from '@utils/getCurrentUser'
 import Task from '@modules/models/Task'
 import { useAppSelector } from '@modules/store/hooks'
 import { bot } from '@lib/bot'
@@ -91,4 +118,4 @@ import { bot } from '@lib/bot'
 4. Are imports using `@`-aliases?
 5. Is browser-only code SSR-guarded (`useEffect` or `dynamic(..., { ssr: false })`)?
 6. Is there an existing util / component / hook to reuse instead of adding a new one?
-7. Will Husky pre-commit (lint + types) pass?
+7. Will CI (lint:check, types:check, build, tests) pass? Pre-commit only runs lint-staged (eslint --fix + prettier on staged files).

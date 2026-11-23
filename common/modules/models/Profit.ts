@@ -1,15 +1,40 @@
 import mongoose, { Schema, Types, Document, Model } from 'mongoose'
+import { Currency } from '@utils/constants'
+import type { IProfitItem } from '@utils/profit-items'
 
 export interface ProfitDocument extends Document {
-  domain: Types.ObjectId
+  /**
+   * Exactly one of domain/company is set - which the record belongs to.
+   * Domain and company are symmetric scopes on the Прибутки page (each gets
+   * its own expected/actual/expenses/net); the only thing that differs
+   * between them is how an invoice reads (see ProfitService's docs on
+   * getByDomainWithMonthSeparation/getByCompanyWithMonthSeparation).
+   */
+  domain?: Types.ObjectId
+  company?: Types.ObjectId
   payment?: Types.ObjectId
   createdBy?: Types.ObjectId
   amount: number
   type: 'debit' | 'credit' // 'debit' = витрата (-), 'credit' = прибуток (+)
   categories?: string[]
+  /**
+   * One receipt split by category, each line with its own amount. When set,
+   * `amount` is their sum and `categories` their distinct categories (both
+   * derived server-side, see normalizeProfitItems). Absent on older records.
+   */
+  items?: IProfitItem[]
   description?: string
   invoiceNumber?: string
+  /** When the money actually moved. */
   date: Date
+  /**
+   * `YYYY-MM` - which month this expense BELONGS to, which is often not the
+   * month it was paid in (June utilities settled in July). Absent on older
+   * records; readers fall back to the month of `date`.
+   */
+  periodMonth?: string
+  /** ISO code; defaults to UAH for records created before multi-currency. */
+  currency?: string
   createdAt?: Date
   updatedAt?: Date
 }
@@ -46,6 +71,11 @@ export interface ProfitDocument extends Document {
  *           items:
  *             type: string
  *           example: ["salary", "bonus"]
+ *         items:
+ *           type: array
+ *           description: Lines of one receipt; amount is their sum
+ *           items:
+ *             $ref: '#/components/schemas/ProfitItem'
  *         description:
  *           type: string
  *           example: "Bonus for project delivery"
@@ -62,13 +92,42 @@ export interface ProfitDocument extends Document {
  *         updatedAt:
  *           type: string
  *           format: date-time
+ *     ProfitItem:
+ *       type: object
+ *       required:
+ *         - amount
+ *       properties:
+ *         category:
+ *           type: string
+ *           example: "Прибирання"
+ *         amount:
+ *           type: number
+ *           description: Positive; the record's type carries the sign
+ *           example: 2600
+ *         description:
+ *           type: string
+ *           example: "13 × 200"
  */
+const ProfitItemSchema = new Schema<IProfitItem>(
+  {
+    category: { type: String },
+    amount: { type: Number, required: true },
+    description: { type: String },
+  },
+  { _id: false }
+)
+
 const ProfitSchema = new Schema<ProfitDocument>(
   {
     domain: {
       type: Schema.Types.ObjectId,
       ref: 'Domain',
-      required: true,
+      required: false,
+    },
+    company: {
+      type: Schema.Types.ObjectId,
+      ref: 'RealEstate',
+      required: false,
     },
     payment: {
       type: Schema.Types.ObjectId,
@@ -92,17 +151,27 @@ const ProfitSchema = new Schema<ProfitDocument>(
       type: [String],
       default: [],
     },
+    items: {
+      type: [ProfitItemSchema],
+      default: undefined,
+    },
     description: { type: String },
     invoiceNumber: { type: String },
     date: { type: Date, required: true },
+    periodMonth: {
+      type: String,
+      required: false,
+      match: /^\d{4}-\d{2}$/,
+    },
+    currency: { type: String, required: false, default: Currency.UAH },
   },
   {
     timestamps: true,
   }
 )
 
-const Profit =
-  (mongoose.models?.Profit as Model<ProfitDocument>) ||
+const Profit: mongoose.Model<ProfitDocument> =
+  mongoose.models?.Profit ||
   mongoose.model<ProfitDocument>('Profit', ProfitSchema)
 
 export default Profit

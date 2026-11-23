@@ -3,18 +3,26 @@ import {
   IPaymentTransactions,
   IProvider,
   IReciever,
+  PaymentStatus,
 } from '@common/api/paymentApi/payment.api.types'
-import mongoose, { ObjectId, Schema } from 'mongoose'
+import mongoose, { Schema, Types } from 'mongoose'
 import { Currency } from '@utils/constants'
 
 export interface IPaymentModel {
   invoiceNumber: number
   type: string
+  status?: PaymentStatus
   invoiceCreationDate: Date
-  domain: ObjectId
-  street: ObjectId
-  company: ObjectId
-  monthService: ObjectId | string
+  /**
+   * When the money actually arrived. Set on `credit` payments created by
+   * mark-paid. Absent on older records and on `debit` invoices - readers must
+   * fall back to `invoiceCreationDate`.
+   */
+  paidAt?: Date
+  domain: Types.ObjectId
+  street: Types.ObjectId
+  company: Types.ObjectId
+  monthService: Types.ObjectId | string
   invoice: IPaymentField[]
   description?: string
   provider: IProvider
@@ -30,7 +38,13 @@ export interface IPaymentModel {
 export const PaymentSchema = new Schema<IPaymentModel>({
   invoiceNumber: { type: Number, required: true },
   type: { type: String },
+  status: {
+    type: String,
+    enum: [PaymentStatus.Draft, PaymentStatus.Sent],
+    default: PaymentStatus.Draft,
+  },
   invoiceCreationDate: { type: Date, required: true, default: Date.now },
+  paidAt: { type: Date, required: false },
   domain: { type: Schema.Types.ObjectId, ref: 'Domain' },
   street: { type: Schema.Types.ObjectId, ref: 'Street' },
   company: { type: Schema.Types.ObjectId, ref: 'RealEstate' },
@@ -54,8 +68,8 @@ export const PaymentSchema = new Schema<IPaymentModel>({
   },
 })
 
-const Payment =
-  (mongoose.models?.Payment as mongoose.Model<IPaymentModel>) ||
-  mongoose.model('Payment', PaymentSchema)
+const Payment: mongoose.Model<IPaymentModel> =
+  mongoose.models?.Payment ||
+  mongoose.model<IPaymentModel>('Payment', PaymentSchema)
 
 export default Payment

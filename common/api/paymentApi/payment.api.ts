@@ -13,6 +13,7 @@ import {
   IHtmlToPdfZipResponse,
   IGetPaymentNumberResponse,
   IGetPaymentResponse,
+  INewPayment,
   IPayment,
   IGetCostPaymentResponse,
   IGeneratePaymentExcel,
@@ -24,7 +25,21 @@ import {
   IPaymentChangeLog,
   AuditFilters,
   IPaymentAuditFacetsResponse,
+  PaymentStatus,
 } from './payment.api.types'
+import type {
+  IStatementImportPlan,
+  IStatementImportResult,
+  Resolution,
+} from '@utils/debt-calculation/statement-plan'
+import type { IStatementImport } from '@utils/debt-calculation/statement'
+
+/** Months read off photos, bound for one company's payments. */
+export interface IStatementImportRequest {
+  domainId: string
+  companyId: string
+  statement: IStatementImport
+}
 
 /**
  * Refresh data in sibling RTK Query slices that a payment write can affect.
@@ -68,7 +83,12 @@ export const paymentApi = createApi({
         companyIds?: string[]
         streetIds?: string[]
         serviceIds?: string[]
-        dateField?: 'invoiceCreationDate' | 'date'
+        status?: PaymentStatus | PaymentStatus[]
+        dateField?: 'invoiceCreationDate' | 'date' | 'paidAt'
+        /** ISO instant, inclusive lower bound on invoiceCreationDate. */
+        dateFrom?: string
+        /** ISO instant, inclusive upper bound on invoiceCreationDate. */
+        dateTo?: string
       }
     >({
       query: ({
@@ -84,10 +104,16 @@ export const paymentApi = createApi({
         companyIds,
         streetIds,
         serviceIds,
+        dateField,
+        dateFrom,
+        dateTo,
+        status,
       }) => {
         return {
           url: `spacehub/payment`,
           params: {
+            dateFrom,
+            dateTo,
             limit,
             type,
             skip,
@@ -100,6 +126,8 @@ export const paymentApi = createApi({
             companyIds,
             streetIds,
             serviceIds,
+            dateField,
+            status,
           },
         }
       },
@@ -118,7 +146,7 @@ export const paymentApi = createApi({
       }),
       providesTags: (result) => (result ? ['Profit'] : []),
     }),
-    addPayment: builder.mutation<IAddPaymentResponse, IPayment>({
+    addPayment: builder.mutation<IAddPaymentResponse, INewPayment>({
       query(body) {
         return {
           url: `spacehub/payment`,
@@ -172,6 +200,37 @@ export const paymentApi = createApi({
         response ? ['Payment', 'PaymentAudit'] : [],
       onQueryStarted: invalidatePaymentSideEffects,
     }),
+    planStatementImport: builder.mutation<
+      IStatementImportPlan,
+      IStatementImportRequest
+    >({
+      query: (body) => ({
+        url: 'spacehub/payment/import-statement',
+        method: 'POST',
+        body: { ...body, apply: false },
+      }),
+      transformResponse: (response: { data: { plan: IStatementImportPlan } }) =>
+        response.data.plan,
+    }),
+    importStatement: builder.mutation<
+      { plan: IStatementImportPlan; result: IStatementImportResult },
+      IStatementImportRequest & {
+        resolutions?: Record<string, Resolution>
+        source?: string
+      }
+    >({
+      query: (body) => ({
+        url: 'spacehub/payment/import-statement',
+        method: 'POST',
+        body: { ...body, apply: true },
+      }),
+      transformResponse: (response: {
+        data: { plan: IStatementImportPlan; result: IStatementImportResult }
+      }) => response.data,
+      invalidatesTags: (response) =>
+        response ? ['Payment', 'PaymentAudit'] : [],
+      onQueryStarted: invalidatePaymentSideEffects,
+    }),
     getPaymentNumber: builder.query<number, object>({
       query: () => `spacehub/payment/number`,
       transformResponse: (response: IGetPaymentNumberResponse) => response.data,
@@ -189,6 +248,30 @@ export const paymentApi = createApi({
       invalidatesTags: (response) =>
         response ? ['Payment', 'PaymentAudit'] : [],
       onQueryStarted: invalidatePaymentSideEffects,
+    }),
+    updatePaymentStatus: builder.mutation<
+      IExtendedPayment,
+      { _id: string; status: PaymentStatus }
+    >({
+      query({ _id, status }) {
+        return {
+          url: `spacehub/payment/${_id}`,
+          method: 'PATCH',
+          body: { status },
+        }
+      },
+      invalidatesTags: (response) => (response ? ['Payment'] : []),
+      onQueryStarted: invalidatePaymentSideEffects,
+    }),
+    sendPaymentEmail: builder.mutation<
+      { success: boolean },
+      { id: string; html?: string }
+    >({
+      query: ({ id, html }) => ({
+        url: `spacehub/payment/${id}/send-email`,
+        method: 'POST',
+        body: { html },
+      }),
     }),
     markPaymentsPaid: builder.mutation<
       {
@@ -327,4 +410,8 @@ export const {
   useGetPaymentAuditQuery,
   useGetPaymentAuditFacetsQuery,
   useRestorePaymentMutation,
+  useUpdatePaymentStatusMutation,
+  useSendPaymentEmailMutation,
+  usePlanStatementImportMutation,
+  useImportStatementMutation,
 } = paymentApi

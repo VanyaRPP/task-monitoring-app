@@ -1,16 +1,17 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 import Domain from '@modules/models/Domain'
+import RealEstate from '@modules/models/RealEstate'
 import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
-
-start()
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
+  await start()
+
   const { isGlobalAdmin, isDomainAdmin, isAdmin, user } = await getCurrentUser(
     req,
     res
@@ -41,13 +42,38 @@ export default async function handler(
       }
     }
 
+    const archived = !!req.body.archived
+
     const response = await Domain.findOneAndUpdate(
       { _id: req.query.id },
-      { archived: !!req.body.archived },
-      { new: true }
+      { archived: archived },
+      { returnDocument: 'after' }
     )
-    return res.status(200).json({ success: true, data: response })
+
+    if (!response) {
+      return res.status(404).json({
+        success: false,
+        message: 'domain not found',
+      })
+    }
+
+    if (archived) {
+      await RealEstate.updateMany({ domain: response._id }, { archived: true })
+    } else {
+      await RealEstate.updateMany(
+        { domain: response._id, archived: true },
+        { archived: false }
+      )
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: response,
+    })
   } catch (error) {
-    return res.status(400).json({ success: false, error: error.message })
+    return res.status(400).json({
+      success: false,
+      error: error.message,
+    })
   }
 }

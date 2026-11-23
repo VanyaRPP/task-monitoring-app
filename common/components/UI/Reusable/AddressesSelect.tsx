@@ -11,10 +11,21 @@ import {
   Tooltip,
 } from 'antd'
 import Link from 'next/link'
-import { CSSProperties, useEffect, useMemo, useState } from 'react'
+import { CSSProperties, useEffect, useMemo, useState, useRef } from 'react'
 import { useAddStreetMutation } from '@common/api/streetApi/street.api'
 import { PlusOutlined } from '@ant-design/icons'
-import { isNewEntityValue } from '@utils/inlineCreate'
+import {
+  getNewEntityName,
+  isNewEntityValue,
+  makeNewEntityValue,
+} from '@utils/inlineCreate'
+
+// A street created on save is held as `new::<address>::<city>` (see
+// materializeQuickEntities in AddPaymentModal).
+const newStreetLabel = (value: string) => {
+  const [address, city] = getNewEntityName(value).split('::')
+  return `${address}${city ? ` (м. ${city})` : ''} — нова`
+}
 
 export interface AddressesSelectProps {
   form: FormInstance
@@ -51,40 +62,102 @@ const AddressesSelect: React.FC<AddressesSelectProps> = ({
   const [newCity, setNewCity] = useState('')
   const [addStreet] = useAddStreetMutation()
   const options = useMemo(() => {
-    return streets.map((i) => ({
+    const existing = streets.map((i) => ({
       value: i._id,
       label: `${i.address} (м. ${i.city})`,
       hasService: i.hasService,
     }))
-  }, [streets])
+    return isNewEntityValue(streetId)
+      ? [
+          ...existing,
+          {
+            value: streetId,
+            label: newStreetLabel(streetId),
+            hasService: false,
+          },
+        ]
+      : existing
+  }, [streets, streetId])
+
+  const appliedPreselectRef = useRef<string | undefined>(undefined)
+
+  const autoPickedForDomainRef = useRef<string | undefined>(undefined)
 
   useEffect(() => {
-    if (domainId && options.length > 0) {
-      if (options.length === 1) {
-        form.setFieldsValue({ street: options[0].value })
-        onStreetHasServiceChange?.(options[0].hasService)
-      } else {
-        const firstStreetWithService = options.find(
-          (option) => option.hasService
-        )
+    // Form.useWatch reports `undefined` for a field's very first render
+    // (it only catches up to the real store value a tick later, via its
+    // own effect). Reading the store directly here — instead of trusting
+    // the `domainId` watch snapshot — avoids treating that transient
+    // "not caught up yet" state as "no domain/street selected" and wiping
+    // out a value the modal already populated for editing.
+    const liveDomainId = form.getFieldValue('domain')
 
-        if (firstStreetWithService) {
-          street
-            ? form.setFieldsValue({ street: street })
-            : form.setFieldsValue({ street: firstStreetWithService.value })
-          onStreetHasServiceChange?.(firstStreetWithService.hasService)
-        } else {
-          form.setFieldsValue({ street: undefined })
-          onStreetHasServiceChange?.(false)
-        }
-      }
-    } else {
+    if (!liveDomainId) {
       form.setFieldsValue({ street: undefined })
-      onStreetHasServiceChange?.(false)
+      appliedPreselectRef.current = undefined
+      autoPickedForDomainRef.current = undefined
+      return
     }
-  }, [domainId, options, form, street, onStreetHasServiceChange])
+
+    // A street to create on save is the user's (or the AI draft's) choice,
+    // not something to validate against the loaded list.
+    if (isNewEntityValue(form.getFieldValue('street'))) return
+
+    // The street list for this domain hasn't loaded yet. Don't touch the
+    // field while we don't know the valid options — clearing here would
+    // wipe out an edit-mode value before we ever get a chance to confirm
+    // it's still valid (see the edit-mode check below), letting the
+    // "auto-pick a street" branch silently replace it with the wrong
+    // address once the list finally arrives.
+    if (isStreetsLoading) return
+
+    if (options.length === 0) {
+      form.setFieldsValue({ street: undefined })
+      appliedPreselectRef.current = undefined
+      autoPickedForDomainRef.current = undefined
+      return
+    }
+
+    const liveStreetId = form.getFieldValue('street')
+    const currentStreet = options.find(
+      (option) => option.value === liveStreetId
+    )
+
+    if (edit && currentStreet) return
+
+    if (!street) {
+      appliedPreselectRef.current = undefined
+    } else if (street !== appliedPreselectRef.current) {
+      const preselected = options.find((option) => option.value === street)
+      if (preselected) {
+        appliedPreselectRef.current = street
+        form.setFieldsValue({ street: preselected.value })
+        return
+      }
+    }
+
+    if (currentStreet) return
+
+    if (autoPickedForDomainRef.current === liveDomainId) return
+    autoPickedForDomainRef.current = liveDomainId
+
+    if (options.length === 1) {
+      form.setFieldsValue({ street: options[0].value })
+      return
+    }
+
+    const firstStreetWithService = options.find((option) => option.hasService)
+
+    form.setFieldsValue({ street: firstStreetWithService?.value })
+  }, [domainId, options, form, street, edit, isStreetsLoading])
 
   const selectedStreet = options.find((option) => option.value === streetId)
+  const selectedStreetHasService = selectedStreet?.hasService ?? false
+
+  useEffect(() => {
+    onStreetHasServiceChange?.(selectedStreetHasService)
+  }, [selectedStreetHasService, onStreetHasServiceChange])
+
   const showNoServiceTooltip = !!selectedStreet && !selectedStreet.hasService
   const showNoAddressesTooltip =
     required && !!domainId && !isStreetsLoading && options.length === 0
@@ -139,6 +212,18 @@ const AddressesSelect: React.FC<AddressesSelectProps> = ({
               block
               onClick={async () => {
                 if (!newAddress.trim() || !newCity.trim()) return
+                // A provider created on save has no id to link a street to
+                // yet: the street is created on save too, after it.
+                if (isNewEntityValue(domainId)) {
+                  form.setFieldValue(
+                    'street',
+                    makeNewEntityValue(
+                      `${newAddress.trim()}::${newCity.trim()}`
+                    )
+                  )
+                  exitCreateMode()
+                  return
+                }
                 try {
                   const result = await addStreet({
                     address: newAddress.trim(),
@@ -191,9 +276,7 @@ const AddressesSelect: React.FC<AddressesSelectProps> = ({
           showSearch
           searchValue={search}
           onSearch={setSearch}
-          onChange={(value) => {
-            const selected = options.find((option) => option.value === value)
-            onStreetHasServiceChange?.(selected?.hasService || false)
+          onChange={() => {
             setSearch('')
           }}
           popupRender={(menu) => (

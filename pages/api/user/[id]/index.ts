@@ -7,12 +7,12 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import { Roles } from '@utils/constants'
 import { isDev } from '@utils/env'
 
-start()
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  await start()
+
   const {
     user: currentUser,
     isGlobalAdmin,
@@ -164,6 +164,13 @@ export default async function handler(
             return res
               .status(404)
               .json({ success: false, message: 'User not found' })
+          }
+
+          if (targetUser.roles.includes(Roles.DOMAIN_ADMIN)) {
+            return res.status(403).json({
+              success: false,
+              message: "You can't delete another domain admin",
+            })
           }
 
           const adminDomains = await Domain.find({

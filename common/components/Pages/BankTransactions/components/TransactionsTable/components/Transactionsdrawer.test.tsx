@@ -3,6 +3,12 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import TransactionDrawer from './TransactionsDrawer'
 import { Operations } from '@utils/constants'
+import {
+  SCENARIO_ACTIVE_COMPANY,
+  SCENARIO_ARCHIVED_COMPANY,
+  SCENARIO_ARCHIVED_TRANSACTION,
+  withMatchResult,
+} from '@common/api/bankApi/mocks/bankToPaymentScenario'
 
 let lastPaymentData: any = null
 
@@ -597,6 +603,97 @@ describe('saveAccountToCompany after successful payment creation', () => {
 
     await waitFor(() => {
       expect(mockEditRealEstate).not.toHaveBeenCalled()
+    })
+  })
+})
+
+describe('Archived / unavailable company in the selector', () => {
+  const ARCHIVED_ID = String(SCENARIO_ARCHIVED_COMPANY._id)
+
+  // Active list never contains archived companies (API default archived=false);
+  // the archived list is requested separately with archived=true.
+  const mockCompanyLists = ({
+    active = [SCENARIO_ACTIVE_COMPANY],
+    archived = [SCENARIO_ARCHIVED_COMPANY],
+  }: { active?: unknown[]; archived?: unknown[] } = {}) =>
+    mockUseGetAllRealEstateQuery.mockImplementation(
+      (args: { archived?: boolean }) => ({
+        data: { data: args?.archived ? archived : active },
+      })
+    )
+
+  const renderScenario = (previousCompanyId: string) =>
+    renderDrawer(
+      withMatchResult(SCENARIO_ARCHIVED_TRANSACTION, {
+        isMatchingPayment: true,
+        previousCompanyId,
+      }) as any
+    )
+
+  it('shows "Архівована" instead of the id for an archived company', async () => {
+    mockCompanyLists()
+    renderScenario(ARCHIVED_ID)
+
+    expect(await screen.findByText('Архівована')).toBeInTheDocument()
+    expect(document.body).not.toHaveTextContent(ARCHIVED_ID)
+    // no native title tooltip with the id either
+    expect(document.querySelector(`[title="${ARCHIVED_ID}"]`)).toBeNull()
+  })
+
+  it('requests archived companies of the same domain only when needed', async () => {
+    mockCompanyLists()
+    renderScenario(ARCHIVED_ID)
+    await screen.findByText('Архівована')
+
+    expect(mockUseGetAllRealEstateQuery).toHaveBeenCalledWith(
+      { domainId: 'domain_001', archived: true },
+      { skip: false }
+    )
+  })
+
+  it('shows the archived company name in a tooltip on hover', async () => {
+    mockCompanyLists()
+    renderScenario(ARCHIVED_ID)
+
+    await userEvent.hover(await screen.findByText('Архівована'))
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(
+      SCENARIO_ARCHIVED_COMPANY.companyName
+    )
+    expect(document.body).not.toHaveTextContent(ARCHIVED_ID)
+  })
+
+  it('keeps showing an available company by its name', async () => {
+    mockCompanyLists()
+    renderScenario(String(SCENARIO_ACTIVE_COMPANY._id))
+
+    await waitFor(() => {
+      expect(
+        document.querySelector('.ant-select-selection-item')
+      ).toHaveTextContent(SCENARIO_ACTIVE_COMPANY.companyName)
+    })
+    expect(screen.queryByText('Архівована')).toBeNull()
+    expect(mockUseGetAllRealEstateQuery).toHaveBeenCalledWith(
+      { domainId: 'domain_001', archived: true },
+      { skip: true }
+    )
+  })
+
+  it('shows "Недоступна" (not the id) for a company that is neither active nor archived', async () => {
+    mockCompanyLists({ archived: [] })
+    renderScenario(ARCHIVED_ID)
+
+    expect(await screen.findByText('Недоступна')).toBeInTheDocument()
+    expect(document.body).not.toHaveTextContent(ARCHIVED_ID)
+  })
+
+  it('keeps the "Платіж є" badge for a payment whose company was archived', async () => {
+    mockCompanyLists()
+    renderScenario(ARCHIVED_ID)
+
+    await screen.findByText('Архівована')
+    expect(document.querySelector('.ant-ribbon')).toHaveStyle({
+      visibility: 'visible',
     })
   })
 })

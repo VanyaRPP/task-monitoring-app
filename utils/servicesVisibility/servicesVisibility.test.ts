@@ -1,14 +1,18 @@
 import { Roles } from '@utils/constants'
 import {
   canEditDomainServiceSelection,
+  excludeDisabledServices,
   extractDomainsFromRealEstates,
+  getDisabledServiceIds,
   getSelectedServiceIds,
   getVisibleServices,
   isDomainAdmin,
   isGlobalAdmin,
+  shouldShowStandardServices,
   type IDomainForVisibility,
   type ICustomServiceItem,
 } from '.'
+import type { IDomainTypeTemplate } from '@common/api/domainApi/domain.api.types'
 
 const svc = (id: string, name = id): ICustomServiceItem => ({ _id: id, name })
 
@@ -159,6 +163,55 @@ describe('servicesVisibility — getVisibleServices', () => {
   })
 })
 
+describe('servicesVisibility — shouldShowStandardServices', () => {
+  const tpl = (
+    _id: string,
+    category: IDomainTypeTemplate['category']
+  ): IDomainTypeTemplate => ({
+    _id,
+    name: 'Template',
+    category,
+    isBuiltIn: true,
+    groups: [],
+  })
+
+  it('returns false when there are no domains or no templates', () => {
+    const d = { _id: 'd1', domainTypeTemplateId: 't1' } as any
+    expect(shouldShowStandardServices([], [tpl('t1', 'utility')])).toBe(false)
+    expect(shouldShowStandardServices([d], [])).toBe(false)
+  })
+
+  it('returns true when a domain points at a "utility" template', () => {
+    const d = { _id: 'd1', domainTypeTemplateId: 't1' } as any
+    expect(shouldShowStandardServices([d], [tpl('t1', 'utility')])).toBe(true)
+  })
+
+  it('returns true when a domain points at a "real-estate" template', () => {
+    const d = { _id: 'd1', domainTypeTemplateId: 't1' } as any
+    expect(shouldShowStandardServices([d], [tpl('t1', 'real-estate')])).toBe(
+      true
+    )
+  })
+
+  it('returns false when the matched template is not a standard-service category', () => {
+    const d = { _id: 'd1', domainTypeTemplateId: 't1' } as any
+    expect(shouldShowStandardServices([d], [tpl('t1', 'it')])).toBe(false)
+  })
+
+  it('returns false when the domain has no matching domainTypeTemplateId', () => {
+    const d = { _id: 'd1', domainTypeTemplateId: 'missing' } as any
+    expect(shouldShowStandardServices([d], [tpl('t1', 'utility')])).toBe(false)
+  })
+
+  it('returns true if any domain among several matches (mixed-domain admin)', () => {
+    const noMatch = { _id: 'd1', domainTypeTemplateId: 't-other' } as any
+    const match = { _id: 'd2', domainTypeTemplateId: 't1' } as any
+    expect(
+      shouldShowStandardServices([noMatch, match], [tpl('t1', 'utility')])
+    ).toBe(true)
+  })
+})
+
 describe('servicesVisibility — extractDomainsFromRealEstates', () => {
   it('returns [] for null/undefined/empty input', () => {
     expect(extractDomainsFromRealEstates(null)).toEqual([])
@@ -245,5 +298,53 @@ describe('servicesVisibility — integration: Companies page scenarios', () => {
     expect(
       getVisibleServices([Roles.GLOBAL_ADMIN], visibleDomains, all)
     ).toEqual(all)
+  })
+})
+
+describe('servicesVisibility — services disabled in a domain', () => {
+  const all = [svc('s1'), svc('s2'), svc('s3')]
+  const withDisabled = (
+    _id: string,
+    services: string[],
+    disabledServiceIds: string[]
+  ): IDomainForVisibility => ({
+    _id,
+    customServices: [{ groupName: 'G', services }],
+    disabledServiceIds,
+  })
+
+  it('getSelectedServiceIds skips ids the domain disabled', () => {
+    const d = withDisabled('d1', ['s1', 's2'], ['s2'])
+    expect(getSelectedServiceIds(d)).toEqual(['s1'])
+  })
+
+  it('hides disabled services from a non-global admin', () => {
+    const d = withDisabled('d1', ['s1', 's2'], ['s2'])
+    expect(getVisibleServices([Roles.DOMAIN_ADMIN], d, all)).toEqual([
+      svc('s1'),
+    ])
+  })
+
+  it('hides disabled services from a GlobalAdmin too', () => {
+    const d = withDisabled('d1', ['s1', 's2'], ['s2'])
+    expect(getVisibleServices([Roles.GLOBAL_ADMIN], d, all)).toEqual([
+      svc('s1'),
+      svc('s3'),
+    ])
+  })
+
+  it('keeps a service disabled in one domain but enabled in another', () => {
+    const a = withDisabled('a', ['s1', 's2'], ['s2'])
+    const b = withDisabled('b', ['s2'], [])
+    expect(getDisabledServiceIds([a, b])).toEqual([])
+    expect(getVisibleServices([Roles.USER], [a, b], all)).toEqual([
+      svc('s1'),
+      svc('s2'),
+    ])
+  })
+
+  it('excludeDisabledServices returns the input untouched when nothing is disabled', () => {
+    const d = domain('d1', [{ groupName: 'G', services: ['s1'] }])
+    expect(excludeDisabledServices(all, d)).toBe(all)
   })
 })

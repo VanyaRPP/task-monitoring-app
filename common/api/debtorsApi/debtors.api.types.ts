@@ -1,3 +1,7 @@
+import type { IDebtorInflation } from '@utils/debt-calculation/debtors-inflation'
+
+export type { IDebtorInflation }
+
 export interface IGetDebtorsResponse {
   companies?: {
     companyId: string
@@ -9,6 +13,7 @@ export interface IGetDebtorsResponse {
       remaining: number
     }[]
     totalDebt: number
+    inflation?: IDebtorInflation | null
   }[]
   message?: string
   succes: boolean

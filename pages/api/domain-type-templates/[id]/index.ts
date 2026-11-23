@@ -3,13 +3,11 @@ import DomainTypeTemplate, {
   DOMAIN_TYPE_TEMPLATE_CATEGORIES,
   DomainTypeTemplateCategory,
 } from '@modules/models/domain-type-template'
-import start, { Data } from '@pages/api/api.config'
+import { Data } from '@pages/api/api.config'
 import { withErrorHandler } from '@utils/api-handler'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import mongoose from 'mongoose'
 import type { NextApiRequest, NextApiResponse } from 'next'
-
-start()
 
 interface IGroupInput {
   groupName: unknown

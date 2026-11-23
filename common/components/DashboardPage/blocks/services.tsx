@@ -21,6 +21,9 @@ import {
   useGetDomainFiltersQuery,
 } from '@common/api/filterApi/filter.api'
 import ModalDelete from '@components/UI/ModalDelete'
+import InflationOverridePanel, {
+  IDomainOption,
+} from '@components/InflationOverridePanel'
 import type { ColumnsType } from 'antd/es/table'
 
 interface ServiceBlockProps {
@@ -55,9 +58,7 @@ const ServicesBlock: React.FC<ServiceBlockProps> = ({ sepDomainID }) => {
 
   const domainFilteredCustomServices = useMemo(() => {
     const explicitDomainIds = filter?.domain as unknown as
-      | string[]
-      | null
-      | undefined
+      string[] | null | undefined
     if (explicitDomainIds?.length) {
       return customServices.filter((cs) =>
         explicitDomainIds.some((id) => String(cs.domain) === String(id))
@@ -114,6 +115,19 @@ const ServicesBlock: React.FC<ServiceBlockProps> = ({ sepDomainID }) => {
     month: filter?.month,
   })
 
+  const domainOptions: IDomainOption[] = useMemo(
+    () =>
+      (domainsFilter?.domainsFilter ?? []).map(({ text, value }) => ({
+        text: String(text),
+        value: String(value),
+      })),
+    [domainsFilter]
+  )
+  const filteredDomains = filter?.domain as unknown as string[] | undefined
+  const preferredDomainId =
+    sepDomainID ??
+    (filteredDomains?.length === 1 ? String(filteredDomains[0]) : undefined)
+
   return (
     <>
       <TableCard
@@ -153,6 +167,12 @@ const ServicesBlock: React.FC<ServiceBlockProps> = ({ sepDomainID }) => {
           dateFilters={dateFilters}
         />
       </TableCard>
+      {isOnPage && domainOptions.length > 0 && (
+        <InflationOverridePanel
+          domains={domainOptions}
+          preferredDomainId={preferredDomainId}
+        />
+      )}
       <ModalDelete
         open={deleteModalOpen}
         onCancel={() => setDeleteModalOpen(false)}

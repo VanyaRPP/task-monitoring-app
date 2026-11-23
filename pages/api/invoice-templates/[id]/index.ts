@@ -1,11 +1,9 @@
 import InvoiceTemplate from '@common/modules/models/InvoiceTemplate'
-import start, { Data } from '@pages/api/api.config'
+import { Data } from '@pages/api/api.config'
 import { withErrorHandler } from '@utils/api-handler'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import mongoose from 'mongoose'
 import type { NextApiRequest, NextApiResponse } from 'next'
-
-start()
 
 async function invoiceTemplateByIdHandler(
   req: NextApiRequest,
@@ -41,7 +39,7 @@ async function invoiceTemplateByIdHandler(
       const updated = await InvoiceTemplate.findOneAndUpdate(
         { _id: id, isBuiltIn: false },
         { $set: update },
-        { new: true }
+        { returnDocument: 'after' }
       ).lean()
 
       if (!updated) {

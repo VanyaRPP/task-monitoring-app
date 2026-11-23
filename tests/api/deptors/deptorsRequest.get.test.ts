@@ -13,6 +13,9 @@ jest.mock('@pages/api/auth/[...nextauth]', () => ({ authOptions: {} }))
 jest.mock('@pages/api/api.config', () => jest.fn())
 jest.mock('@modules/models/Payment')
 jest.mock('@modules/models/RealEstate')
+jest.mock('@utils/debt-calculation/debtors-inflation', () => ({
+  calculateDebtorsInflation: jest.fn().mockResolvedValue({}),
+}))
 jest.mock('@utils/getCurrentUser', () => ({
   getCurrentUser: jest.fn(),
 }))

@@ -49,7 +49,9 @@ const mockCustomServiceFind = (opts: {
   ;(CustomService.find as jest.Mock).mockImplementation((filter: any) => ({
     lean: jest
       .fn()
-      .mockResolvedValue(filter?.domain ? (opts.existingDomain ?? []) : opts.originals),
+      .mockResolvedValue(
+        filter?.domain ? (opts.existingDomain ?? []) : opts.originals
+      ),
   }))
 }
 
@@ -171,7 +173,7 @@ describe('POST /api/domain-type-templates/[id]/clone-for-domain', () => {
           serviceType: 'waterPrice',
         },
       ],
-      existingDomain: []
+      existingDomain: [],
     })
     ;(CustomService.create as jest.Mock)
       .mockResolvedValueOnce({ _id: NEW_A })

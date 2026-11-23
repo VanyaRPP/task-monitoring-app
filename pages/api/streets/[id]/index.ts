@@ -5,12 +5,12 @@ import Domain from '@modules/models/Domain'
 import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
-start()
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
+  await start()
+
   const { isGlobalAdmin, isDomainAdmin, isAdmin, user } = await getCurrentUser(
     req,
     res
@@ -41,7 +41,7 @@ export default async function handler(
           }
         }
 
-        await Street.findByIdAndRemove(req.query.id).then((street) => {
+        await Street.findByIdAndDelete(req.query.id).then((street) => {
           if (street) {
             return res.status(200).json({
               success: true,
@@ -76,7 +76,7 @@ export default async function handler(
         }
 
         const street = await Street.findByIdAndUpdate(req.query.id, req.body, {
-          new: true,
+          returnDocument: 'after',
         })
         return res.status(200).json({ success: true, data: street })
       } catch (error) {

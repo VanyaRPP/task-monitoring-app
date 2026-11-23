@@ -9,6 +9,11 @@ import { IRealestate } from '../realestateApi/realestate.api.types'
 export type TemplateScope = 'company' | 'domain' | 'payment'
 export type TemplateScopeTarget = Exclude<TemplateScope, 'payment'>
 
+export enum PaymentStatus {
+  Draft = 'draft',
+  Sent = 'sent',
+}
+
 export interface IPaymentField {
   type: ServiceType | string
   name?: string
@@ -31,15 +36,24 @@ export interface IProvider {
 
 export interface IReciever {
   companyName: string
-  adminEmails: string[]
+  adminEmails?: string[]
   description: string
   contractNumber?: string
   contractDate?: string | Date
 }
 
+/**
+ * A payment as sent to POST spacehub/payment. The server gives it its
+ * invoice number on save, so any number sent here is ignored.
+ */
+export type INewPayment = Omit<IPayment, 'invoiceNumber'> & {
+  invoiceNumber?: number
+}
+
 export interface IPayment {
   invoiceNumber: number
   type: string
+  status?: PaymentStatus
   invoiceCreationDate: Date
   domain: Partial<IDomain> | any
   // optional: street-less companies omit it (sending '' fails the ObjectId cast)
@@ -190,6 +204,7 @@ export interface IPaymentTransactions {
   AUT_CNTR_ACC: string
   AUT_CNTR_NAM: string
   AUT_CNTR_MFO: string
+  AUT_CNTR_CRF?: string
   Description: string
 }
 
@@ -202,6 +217,7 @@ export interface IPaymentInvoiceSnapshot {
   generalSum: number
   description?: string
   type: string
+  status?: PaymentStatus
   currency?: string
 }
 
@@ -215,10 +231,7 @@ export type PaymentActionType =
   | 'RESTORE'
 
 export type PaymentMutationSource =
-  | 'single'
-  | 'bulk'
-  | 'quick-pay'
-  | 'admin-restore'
+  'single' | 'bulk' | 'quick-pay' | 'admin-restore' | 'debt-import'
 
 export type IPaymentSnapshot = Omit<IPayment, '_id'> & { _id: string }
 

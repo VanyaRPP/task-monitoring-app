@@ -1,14 +1,128 @@
+// Sizes are mirrored in legendLayout.ts — change both together.
+$chart-size: 320px;
+$layout-gap: 24px;
+$legend-row-height: 28px;
+$legend-toggle-height: 40px;
+
+.chartLayout {
+  display: flex;
+  align-items: flex-start;
+  gap: $layout-gap;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  padding: 16px;
+  box-sizing: border-box;
+
+  &.stacked {
+    flex-direction: column;
+    align-items: stretch;
+
+    .chartContainer {
+      width: 100%;
+      max-width: $chart-size;
+      height: auto;
+      aspect-ratio: 1 / 1;
+      margin: 0 auto;
+    }
+  }
+}
+
 .chartContainer {
-  max-width: 99%;
   position: relative;
-  width: 400px;
-  height: 400px;
-  margin: 20px auto;
+  flex: 0 0 auto;
+  width: $chart-size;
+  height: $chart-size;
+  max-width: 100%;
 
   .chart {
     width: 100%;
     height: 100%;
   }
+}
+
+.legend {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.legendColumns {
+  display: grid;
+  column-gap: 16px;
+  width: 100%;
+  min-width: 0;
+}
+
+.legendColumn {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: $legend-row-height;
+  padding: 0 4px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    background: rgba(128, 128, 128, 0.12);
+    outline: none;
+  }
+}
+
+.legendItemHidden {
+  .legendSwatch {
+    opacity: 0.35;
+  }
+
+  .legendLabel {
+    text-decoration: line-through;
+    opacity: 0.55;
+  }
+}
+
+.legendSwatch {
+  flex: 0 0 auto;
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+}
+
+.legendLabel {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.legendToggle {
+  align-self: flex-start;
+  height: $legend-toggle-height;
+  padding-inline: 4px;
+}
+
+.emptyContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 150px;
 }
 
 .loading {

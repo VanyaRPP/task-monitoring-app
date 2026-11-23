@@ -1,13 +1,11 @@
 import CustomService from '@modules/models/CustomService'
 import Domain from '@modules/models/Domain'
 import DomainTypeTemplate from '@modules/models/domain-type-template'
-import start, { Data } from '@pages/api/api.config'
+import { Data } from '@pages/api/api.config'
 import { withErrorHandler } from '@utils/api-handler'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import mongoose from 'mongoose'
 import type { NextApiRequest, NextApiResponse } from 'next'
-
-start()
 
 async function cloneForDomainHandler(
   req: NextApiRequest,
@@ -104,7 +102,7 @@ async function cloneForDomainHandler(
       ...(orig.serviceType ? { serviceType: orig.serviceType } : {}),
       domain: domainObjectId,
     })
-    oldToNew.set(oldId, created._id as mongoose.Types.ObjectId)
+    oldToNew.set(oldId, created._id as unknown as mongoose.Types.ObjectId)
     if (key) existingByKey.set(key, created)
     clonedCount++
   }

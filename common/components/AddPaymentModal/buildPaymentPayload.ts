@@ -1,7 +1,7 @@
 import { combineDayWithCurrentTime } from '@common/assets/features/formatDate'
 import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
 import { Currency } from '@utils/constants'
-import type { Dayjs } from 'dayjs'
+import dayjs, { type Dayjs } from 'dayjs'
 import type { TemplateKey } from './resolveTemplate'
 
 export interface BuildPaymentFormData {
@@ -26,6 +26,25 @@ export interface BuildPaymentPayloadParams {
   transaction: any
   template: TemplateKey
   invoiceLang?: 'en' | 'uk'
+  originalInvoiceCreationDate?: Date | string | null
+}
+
+export const resolveInvoiceCreationDate = (
+  selectedDay: Dayjs | null | undefined,
+  originalInvoiceCreationDate?: Date | string | null
+): Date => {
+  const original = originalInvoiceCreationDate
+    ? dayjs(originalInvoiceCreationDate)
+    : null
+
+  if (
+    original?.isValid() &&
+    (!selectedDay || selectedDay.isSame(original, 'day'))
+  ) {
+    return original.toDate()
+  }
+
+  return combineDayWithCurrentTime(selectedDay)
 }
 
 /**
@@ -40,6 +59,7 @@ export const buildPaymentPayload = ({
   transaction,
   template,
   invoiceLang,
+  originalInvoiceCreationDate,
 }: BuildPaymentPayloadParams) => ({
   invoiceNumber: formData.invoiceNumber,
   type: formData.operation,
@@ -47,7 +67,10 @@ export const buildPaymentPayload = ({
   street: formData.street,
   company: formData.company,
   monthService: monthServiceId,
-  invoiceCreationDate: combineDayWithCurrentTime(formData.invoiceCreationDate),
+  invoiceCreationDate: resolveInvoiceCreationDate(
+    formData.invoiceCreationDate,
+    originalInvoiceCreationDate
+  ),
   description: formData.description || '',
   generalSum: formData.generalSum || formData.debit,
   currency: formData.currency || Currency.UAH,

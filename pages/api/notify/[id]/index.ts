@@ -4,12 +4,12 @@ import Notification from '@modules/models/Notification'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import start, { Data } from '../../api.config'
 
-start()
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
+  await start()
+
   const { id } = req.query
   switch (req.method) {
     case 'DELETE':

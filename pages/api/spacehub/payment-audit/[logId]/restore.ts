@@ -7,8 +7,6 @@ import Payment from '@common/modules/models/Payment'
 import Domain from '@modules/models/Domain'
 import { logPaymentMutation } from '@common/modules/services/paymentAudit'
 
-start()
-
 const DELETE_ACTIONS = ['DELETE', 'BULK_DELETE']
 const RESTORABLE_ACTIONS = ['DELETE', 'BULK_DELETE', 'UPDATE']
 
@@ -25,6 +23,8 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  await start()
+
   if (req.method !== 'POST') {
     return res
       .status(405)
@@ -112,7 +112,9 @@ export default async function handler(
     const current: any = await Payment.findById(before._id)
 
     const reverted: any = current
-      ? await Payment.findByIdAndUpdate(before._id, beforeFields, { new: true })
+      ? await Payment.findByIdAndUpdate(before._id, beforeFields, {
+          returnDocument: 'after',
+        })
       : await Payment.create({ ...beforeFields, _id: before._id } as any)
 
     await logPaymentMutation({

@@ -1,4 +1,5 @@
 import { expect } from '@jest/globals'
+import RealEstate from '@modules/models/RealEstate'
 import { parseReceived } from '@utils/helpers'
 import { mockLoginAs } from '@utils/mockLoginAs'
 import { setupTestEnvironment } from '@utils/setupTestEnvironment'
@@ -552,5 +553,95 @@ describe('RealEstate API - GET', () => {
       expect(received).toHaveLength(expected.length)
       expect(received).toMatchObject(expected)
     })
+  })
+})
+
+describe('RealEstate API - POST (optional description)', () => {
+  const baseBody = {
+    domain: domains[0]._id,
+    street: streets[0]._id,
+    companyName: 'ТОВ Без опису',
+    adminEmails: ['owner@example.com'],
+    currency: 'UAH',
+    totalArea: 42,
+    pricePerMeter: 10,
+    contractNumber: '15',
+  }
+
+  const post = async (body: Record<string, unknown>) => {
+    const mockReq = { method: 'POST', query: {}, body } as any
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+    await handler(mockReq, mockRes)
+    return mockRes
+  }
+
+  it.each([
+    ['omitted', {}],
+    ['empty string', { description: '' }],
+  ])(
+    'creates a company when description is %s and stores ""',
+    async (_, extra) => {
+      await mockLoginAs(users.globalAdmin)
+
+      const res = await post({ ...baseBody, ...extra })
+
+      expect(res.status).toHaveBeenCalledWith(200)
+      const created = res.json.mock.lastCall[0].data
+      const stored = await RealEstate.findById(created._id).lean()
+      expect(stored?.description).toBe('')
+    }
+  )
+
+  it('keeps the other fields when description is not filled', async () => {
+    await mockLoginAs(users.globalAdmin)
+
+    const res = await post(baseBody)
+
+    expect(res.status).toHaveBeenCalledWith(200)
+    const stored = await RealEstate.findById(
+      res.json.mock.lastCall[0].data._id
+    ).lean()
+    expect(stored).toMatchObject({
+      companyName: 'ТОВ Без опису',
+      adminEmails: ['owner@example.com'],
+      currency: 'UAH',
+      totalArea: 42,
+      pricePerMeter: 10,
+      contractNumber: '15',
+    })
+    expect(stored?.domain.toString()).toBe(domains[0]._id.toString())
+  })
+
+  it('creates a company with a filled description', async () => {
+    await mockLoginAs(users.globalAdmin)
+
+    const res = await post({ ...baseBody, description: 'ЄДРПОУ 12345678' })
+
+    expect(res.status).toHaveBeenCalledWith(200)
+    const stored = await RealEstate.findById(
+      res.json.mock.lastCall[0].data._id
+    ).lean()
+    expect(stored?.description).toBe('ЄДРПОУ 12345678')
+  })
+
+  it('DomainAdmin creates a company without description in own domain', async () => {
+    await mockLoginAs(users.domainAdmin)
+
+    const res = await post(baseBody)
+
+    expect(res.status).toHaveBeenCalledWith(200)
+    expect(res.json.mock.lastCall[0].data.description).toBe('')
+  })
+
+  it('still rejects a company without the required name', async () => {
+    await mockLoginAs(users.globalAdmin)
+
+    const { companyName, ...withoutName } = baseBody
+    const res = await post(withoutName)
+
+    expect(res.status).toHaveBeenCalledWith(400)
   })
 })

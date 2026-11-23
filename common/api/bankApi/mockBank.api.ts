@@ -3,6 +3,12 @@ import { ITransaction } from '@components/Pages/BankTransactions/components/Tran
 import { IBalance } from '@components/Pages/BankTransactions/components/DomainbankBalance/DomainBankBalance'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
+import {
+  SCENARIO_ACTIVE_TRANSACTION,
+  SCENARIO_ARCHIVED_COMPANY,
+  SCENARIO_ARCHIVED_TRANSACTION,
+  withMatchResult,
+} from './mocks/bankToPaymentScenario'
 
 interface IBalancesData {
   exist_next_page: boolean
@@ -321,6 +327,16 @@ export const MOCK_TRANSACTIONS: ITransaction[] = [
     isMatchingPayment: false,
     previousCompanyId: null,
   },
+  // --- bank → payment → «Платіж є» scenario (see mocks/bankToPaymentScenario)
+  // Already sent to payments for a company that was archived afterwards: the
+  // row shows «Платіж є» and the selector shows «Архівована» (or «Недоступна»
+  // when the selected domain has no such company), never the company id.
+  withMatchResult(SCENARIO_ARCHIVED_TRANSACTION, {
+    isMatchingPayment: true,
+    previousCompanyId: String(SCENARIO_ARCHIVED_COMPANY._id),
+  }),
+  // Not sent yet: no badge until a payment with its transaction id exists.
+  SCENARIO_ACTIVE_TRANSACTION,
 ]
 
 // Companies to pair with MOCK_TRANSACTIONS when verifying auto-select by hand.

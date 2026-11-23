@@ -3,8 +3,6 @@ import { duplicatePayments } from '@common/services/paymentService/payment.servi
 import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
-start()
-
 const isNonEmptyStringArray = (value: unknown): value is string[] =>
   Array.isArray(value) &&
   value.length > 0 &&
@@ -14,6 +12,8 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
+  await start()
+
   if (req.method !== 'POST') {
     return res
       .status(405)

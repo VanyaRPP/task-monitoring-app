@@ -96,6 +96,23 @@ describe('domain-invoice-selector', () => {
     expect(p.customService).toBeUndefined()
   })
 
+  it('flattenDomainCatalogServices defaults a missing groupName to an empty string', () => {
+    const rows = flattenDomainCatalogServices([
+      {
+        groupName: undefined as any,
+        services: [{ _id: '1', name: 'One', fieldName: 'one' }],
+      },
+    ])
+    expect(rows[0].groupName).toBe('')
+  })
+
+  it('flattenDomainCatalogServices tolerates a group with no services array', () => {
+    const rows = flattenDomainCatalogServices([
+      { groupName: 'A', services: undefined as any },
+    ])
+    expect(rows).toEqual([])
+  })
+
   it('flattenDomainCatalogServices threads serviceType through', () => {
     const rows = flattenDomainCatalogServices([
       {
@@ -183,6 +200,10 @@ describe('domain-invoice-selector', () => {
         undefined,
       ])
       expect(set.size).toBe(0)
+    })
+
+    it('returns an empty set when invoices is undefined', () => {
+      expect(typedServiceTypesOnInvoice(undefined).size).toBe(0)
     })
   })
 

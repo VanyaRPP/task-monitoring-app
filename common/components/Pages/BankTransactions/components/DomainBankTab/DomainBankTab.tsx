@@ -6,7 +6,6 @@ import { useGetDomainByPkQuery } from '@common/api/domainApi/domain.api'
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 import TransactionsTable from '../TransactionsTable/TransactionsTable'
 import { useAppDispatch, useAppSelector } from '@modules/store/hooks'
-import EncryptionService from '@utils/encryptionService'
 import { FC, useEffect, useMemo } from 'react'
 import { Alert, Card, Spin } from 'antd'
 import { useTranslation } from 'next-i18next'
@@ -28,19 +27,14 @@ const DomainBankTab: FC<Props> = ({ domainId }) => {
     isError: isDomainError,
   } = useGetDomainByPkQuery({ domainId }, { skip: !domainId })
 
-  const SECURE_TOKEN = process.env.NEXT_PUBLIC_MONGODB_SECRET_TOKEN
-  const encryptionService = new EncryptionService(SECURE_TOKEN)
-
-  const decryptedToken = useMemo(() => {
-    const encrypted = domain?.domainBankToken?.[0]?.token
-    return encrypted ? encryptionService.decrypt(encrypted) : ''
-  }, [domain])
+  // The token itself stays on the server; the bank routes use it by domainId.
+  const hasBankToken = Boolean(domain?.domainBankToken?.length)
 
   const {
     data: balances,
     isLoading: isBalancesLoading,
     isError: isBalancesError,
-  } = useGetBalancesQuery({ token: decryptedToken }, { skip: !decryptedToken })
+  } = useGetBalancesQuery({ domainId }, { skip: !hasBankToken })
 
   useEffect(() => {
     if (balances?.length && domain?.iban) {
@@ -55,11 +49,10 @@ const DomainBankTab: FC<Props> = ({ domainId }) => {
     refetch: refetchTransactions,
   } = useGetTransactionsQuery(
     {
-      token: decryptedToken,
       acc: selectedAccount ?? undefined,
       domainId,
     },
-    { skip: !decryptedToken || !selectedAccount }
+    { skip: !hasBankToken || !selectedAccount }
   )
 
   const { data: realEstatesData } = useGetAllRealEstateQuery({
@@ -131,7 +124,7 @@ const DomainBankTab: FC<Props> = ({ domainId }) => {
       styles={{ body: { padding: '3px' } }}
       loading={isDomainLoading || isBalancesLoading}
     >
-      {decryptedToken ? (
+      {hasBankToken ? (
         <>
           <DomainBankBalance balancesData={balances} />
           <TransactionsTable

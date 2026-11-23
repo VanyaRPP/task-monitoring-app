@@ -2,10 +2,7 @@ import { createContext, useContext } from 'react'
 
 /** Override/description fields that map to a single editable region. */
 export type EditableValuePath =
-  | 'invoiceTitle'
-  | 'footerText'
-  | 'providerDescription'
-  | 'receiverDescription'
+  'invoiceTitle' | 'footerText' | 'providerDescription' | 'receiverDescription'
 
 export interface InvoiceEditContextValue {
   editMode: boolean

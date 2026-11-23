@@ -1,12 +1,10 @@
 import Domain from '@modules/models/Domain'
 import DomainCustomServicesSnapshot from '@modules/models/domain-custom-services-snapshot'
-import start, { Data } from '@pages/api/api.config'
+import { Data } from '@pages/api/api.config'
 import { withErrorHandler } from '@utils/api-handler'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import mongoose from 'mongoose'
 import type { NextApiRequest, NextApiResponse } from 'next'
-
-start()
 
 async function restoreSnapshotHandler(
   req: NextApiRequest,
@@ -45,6 +43,8 @@ async function restoreSnapshotHandler(
     services: g.services.map(String),
   })) as typeof domain.customServices
   domain.domainTypeTemplateId = snapshot.templateId ?? undefined
+  const disabledServiceIds = (snapshot.disabledServiceIds ?? []).map(String)
+  domain.disabledServiceIds = disabledServiceIds
   await domain.save()
 
   return res.status(200).json({
@@ -53,6 +53,7 @@ async function restoreSnapshotHandler(
       restored: true,
       domainId: String(snapshot.domainId),
       templateId: snapshot.templateId ? String(snapshot.templateId) : null,
+      disabledServiceIds,
     },
   })
 }

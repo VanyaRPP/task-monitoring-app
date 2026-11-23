@@ -19,6 +19,8 @@ export interface ReceiptTemplateProps {
   data: any
   isEnglish: boolean
   showQuantityInPreview: boolean
+  /** Domain setting: templates must drop quantity and unit price entirely. */
+  hideQuantityAndPrice: boolean
   currencyLabel: string
   currency?: string
   modernInvoiceNumber: string
@@ -61,6 +63,7 @@ export function useReceiptTemplateProps({
     contextCompany?.currency ||
     data?.domain?.currency
 
+  const hideQuantityAndPrice = data?.hideQuantityAndPrice === true
   const currencyLabel = getCurrencyShortLabel(currency)
   const isEnglish = lang
     ? lang === 'en'
@@ -81,11 +84,12 @@ export function useReceiptTemplateProps({
     .filter((item: any) => Number(item?.sum) !== 0)
     .map((item: any) => {
       const displayName =
-        item?.name && item.name !== 'custom'
+        item?.alias ||
+        (item?.name && item.name !== 'custom'
           ? item.name
           : item?.customName && item.customName !== 'custom'
             ? item.customName
-            : item?.description || ''
+            : item?.description || '')
       return { ...item, name: displayName }
     })
 
@@ -191,7 +195,6 @@ export function useReceiptTemplateProps({
       ? [companyDisplayName]
       : []),
     ...paymentInfoBodyLines,
-    ...(data?.reciever?.adminEmails || []),
   ].filter(Boolean)
 
   const companyLabel =
@@ -202,7 +205,8 @@ export function useReceiptTemplateProps({
   return {
     data,
     isEnglish,
-    showQuantityInPreview,
+    showQuantityInPreview: hideQuantityAndPrice ? false : showQuantityInPreview,
+    hideQuantityAndPrice,
     currencyLabel,
     currency,
     modernInvoiceNumber,

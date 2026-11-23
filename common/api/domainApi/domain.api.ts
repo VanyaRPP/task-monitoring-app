@@ -1,7 +1,9 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import { realestateApi } from '@common/api/realestateApi/realestate.api'
 import { customServicesApi } from '@common/api/customServicesApi/customServices.api'
 import {
   IDomainModel,
+  IDomainServiceAlias,
   IExtendedDomain,
   IExtendedArchivedDomain,
   IDeleteDomainResponse,
@@ -104,6 +106,30 @@ export const domainApi = createApi({
             ]
           : [],
     }),
+    setServiceAlias: builder.mutation<
+      { success: boolean; data: IDomainServiceAlias[] },
+      {
+        domainId: string
+        serviceId: string
+        serviceType?: string
+        fieldName?: string
+        serviceName?: string
+        alias: string
+      }
+    >({
+      query: ({ domainId, ...body }) => ({
+        url: `domain/${domainId}/service-alias`,
+        method: 'PUT',
+        body,
+      }),
+      invalidatesTags: (response, error, arg) =>
+        response
+          ? [
+              { type: 'Domain', id: arg.domainId },
+              { type: 'Domain', id: 'LIST' },
+            ]
+          : [],
+    }),
     editDomain: builder.mutation<IExtendedDomain, Partial<IExtendedDomain>>({
       query(data) {
         const { _id, ...body } = data
@@ -127,6 +153,8 @@ export const domainApi = createApi({
         try {
           await queryFulfilled
           dispatch(customServicesApi.util.invalidateTags(['CustomService']))
+          // Company lists embed the domain (incl. disabledServiceIds).
+          dispatch(realestateApi.util.invalidateTags(['RealEstate']))
         } catch {
           // mutation failed — nothing to invalidate
         }
@@ -168,6 +196,17 @@ export const domainApi = createApi({
         { type: 'Domain', id: domainId },
       ],
       transformResponse: (response: IGetDomainByPkResponse) => response.data,
+    }),
+    /** `_id` доменів, у каталозі яких є послуга заданого ServiceType. */
+    getDomainIdsByServiceType: builder.query<string[], string>({
+      query: (type) => ({
+        url: 'domain/by-service-type',
+        method: 'GET',
+        params: { type },
+      }),
+      providesTags: ['IDomain'],
+      transformResponse: (response: { success: boolean; data: string[] }) =>
+        response.data,
     }),
     getDomainTypeTemplates: builder.query<
       IDomainTypeTemplate[],
@@ -292,9 +331,11 @@ export const {
   useAddDomainMutation,
   useDeleteDomainMutation,
   useEditDomainMutation,
+  useSetServiceAliasMutation,
   useUpdateArchivedDomainMutation,
   useGetDomainByPkQuery,
   useGetDomainsByAdminQuery,
+  useGetDomainIdsByServiceTypeQuery,
   useGetDomainTypeTemplatesQuery,
   useGetDomainTypeTemplateByIdQuery,
   useAddDomainTypeTemplateMutation,

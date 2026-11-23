@@ -1,12 +1,13 @@
 import React from 'react'
 import { Button, Space, Grid } from 'antd'
-import PaymentCascader from '@components/UI/PaymentCascader'
+import PaymentDateRangeFilter from '@components/UI/PaymentDateRangeFilter'
 import StreetsSelector from '@components/StreetsSelector'
 import {
   CompanyFilterTags,
   DomainFilterTags,
 } from '@components/UI/Reusable/FilterTags'
 import { AppRoutes } from '@utils/constants'
+import { getDateRangeHistoryScope } from '@utils/dateRangeHistory'
 import { useRouter } from 'next/router'
 import { ColumnSelect } from '@components/UI/PaymentCardHeader'
 import styles from './styles.module.scss'
@@ -17,7 +18,9 @@ const { useBreakpoint } = Grid
 const PaymentCardLabel = ({
   enablePaymentsButton,
   onColumnsSelect,
-  setCurrentDateFilter,
+  onDateRangeChange,
+  showDateRangeFilter,
+  dateHistoryScope,
   setFilters,
   streets,
   filters,
@@ -25,12 +28,22 @@ const PaymentCardLabel = ({
   realEstatesFilter,
   isAdmin,
   allowedServices,
+  disabledBuiltInTypes,
   customServices,
 }: any) => {
   const router = useRouter()
   const { pathname } = router
   const screens = useBreakpoint()
   const isMobile = screens.xs
+
+  const dateRangeFilter = (
+    <PaymentDateRangeFilter
+      className={styles.select}
+      value={filters}
+      onChange={onDateRangeChange}
+      historyScope={dateHistoryScope ?? getDateRangeHistoryScope(filters)}
+    />
+  )
 
   return (
     <Space
@@ -63,12 +76,10 @@ const PaymentCardLabel = ({
               className={styles.select}
               onSelect={onColumnsSelect}
               allowedServices={allowedServices}
+              disabledBuiltInTypes={disabledBuiltInTypes}
               customServices={customServices}
             />
-            <PaymentCascader
-              className={styles.select}
-              onChange={setCurrentDateFilter}
-            />
+            {dateRangeFilter}
             <StreetsSelector
               className={styles.select}
               setFilters={setFilters}
@@ -94,6 +105,10 @@ const PaymentCardLabel = ({
             />
           </Space>
         </Space>
+      )}
+
+      {pathname !== AppRoutes.PAYMENT && showDateRangeFilter && (
+        <div className={styles.selectors}>{dateRangeFilter}</div>
       )}
     </Space>
   )

@@ -1,13 +1,10 @@
 import mongoose from 'mongoose'
 import Payment from '@common/modules/models/Payment'
 import Domain from '@modules/models/Domain'
-import ProfitService from '@common/services/profitService/profit.service'
 import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { logPaymentMutation } from '@common/modules/services/paymentAudit'
-
-start()
 
 const isNonEmptyStringArray = (value: unknown): value is string[] =>
   Array.isArray(value) &&
@@ -18,6 +15,8 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
+  await start()
+
   if (req.method !== 'DELETE') {
     return res
       .status(405)
@@ -77,21 +76,6 @@ export default async function handler(
         }).select('_id')) as Array<{ _id: { toString(): string } }>
         const stillThereIds = new Set(stillThere.map((p) => p._id.toString()))
         deletedIds = allowedIds.filter((id) => !stillThereIds.has(id))
-      }
-
-      if (isGlobalAdmin && deletedIds.length > 0) {
-        const settled = await Promise.allSettled(
-          deletedIds.map((id) => ProfitService.deleteByIdPayment(id))
-        )
-        for (const r of settled) {
-          if (r.status === 'rejected') {
-            // eslint-disable-next-line no-console
-            console.error(
-              '[bulk-delete] ProfitService.deleteByIdPayment failed:',
-              r.reason
-            )
-          }
-        }
       }
 
       if (deletedIds.length > 0) {

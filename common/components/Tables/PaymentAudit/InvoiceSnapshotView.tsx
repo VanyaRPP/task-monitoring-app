@@ -109,7 +109,9 @@ const InvoiceSnapshotView: React.FC<{ snapshot?: Snapshot | null }> = ({
 
       <div style={{ textAlign: 'right', marginTop: 12, fontWeight: 600 }}>
         Загалом:{' '}
-        {snapshot.generalSum != null ? renderCurrency(snapshot.generalSum) : '—'}{' '}
+        {snapshot.generalSum != null
+          ? renderCurrency(snapshot.generalSum)
+          : '—'}{' '}
         {symbol}
       </div>
     </div>

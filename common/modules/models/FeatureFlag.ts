@@ -42,8 +42,8 @@ const FeatureFlagSchema = new Schema<IFeatureFlag>({
   createdAt: { type: Date, default: Date.now },
 })
 
-const FeatureFlag =
-  (mongoose.models.FeatureFlag as mongoose.Model<IFeatureFlag>) ||
+const FeatureFlag: mongoose.Model<IFeatureFlag> =
+  mongoose.models?.FeatureFlag ||
   mongoose.model<IFeatureFlag>('FeatureFlag', FeatureFlagSchema)
 
 export default FeatureFlag

@@ -1,10 +1,10 @@
-import mongoose, { ObjectId, Schema } from 'mongoose'
+import mongoose, { Schema, Types } from 'mongoose'
 import { ServiceType } from '@utils/constants'
 
 export interface ICustomServiceModel {
   name: string
   fieldName: string
-  domain: ObjectId
+  domain: Types.ObjectId
   serviceType?: ServiceType | string
   _id?: string
   _v: number
@@ -22,8 +22,8 @@ export const CustomServiceSchema = new Schema<ICustomServiceModel>({
   },
 })
 
-const CustomService =
-  mongoose.models.CustomService ||
-  mongoose.model('CustomService', CustomServiceSchema)
+const CustomService: mongoose.Model<ICustomServiceModel> =
+  mongoose.models?.CustomService ||
+  mongoose.model<ICustomServiceModel>('CustomService', CustomServiceSchema)
 
 export default CustomService

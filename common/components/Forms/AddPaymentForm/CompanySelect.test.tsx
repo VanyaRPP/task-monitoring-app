@@ -15,7 +15,12 @@ const Wrapper = ({
   initialValues = { domain: 'd1', street: 's1' },
   allowCreate = false,
 }: {
-  initialValues?: { domain?: string; street?: string }
+  initialValues?: {
+    domain?: string
+    street?: string
+    company?: string
+    companyEmail?: string
+  }
   allowCreate?: boolean
 }) => {
   const [form] = Form.useForm()
@@ -244,6 +249,25 @@ describe('CompanySelect — поле вибору компанії', () => {
     expect(companyValue()).toBe('new::')
     // немає куди «повертатися» — наявних компаній нема
     expect(screen.queryByText('← обрати наявну')).toBeNull()
+  })
+
+  it('AI-чернетка з новими надавачем і компанією: назва й пошта лишаються як є', async () => {
+    mockedQuery.mockReturnValue({ data: { data: [] }, isLoading: false })
+
+    render(
+      <Wrapper
+        initialValues={{
+          domain: makeNewEntityValue('Олег'),
+          company: makeNewEntityValue('Гугл про'),
+          companyEmail: 'billing@google.pro',
+        }}
+        allowCreate
+      />
+    )
+
+    expect(await screen.findByDisplayValue('Гугл про')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('billing@google.pro')).toBeInTheDocument()
+    expect(companyValue()).toBe('new::Гугл про')
   })
 
   it('перемикання надавача в режим створення переводить компанію в режим створення (не лишає порожній селект)', async () => {

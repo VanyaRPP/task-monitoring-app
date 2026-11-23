@@ -7,6 +7,9 @@ import {
   getResolvedDescription,
   isSelfTransaction,
   normalizeCounterpartyName,
+  buildCounterpartyNameRegexSource,
+  extractInvoiceNumberFromOsnd,
+  extractTransitPayerName,
 } from './bankHelper'
 import { ITransaction } from './transactionTypes'
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
@@ -342,10 +345,10 @@ describe('isSelfTransaction', () => {
 describe('normalizeCounterpartyName', () => {
   it('strips ФОП and КАРТКОВИЙ, punctuation and case', () => {
     expect(
-      normalizeCounterpartyName('КАРТКОВИЙ - ФОП Шмакова Крістіна Василівна')
-    ).toBe('ШМАКОВА КРІСТІНА ВАСИЛІВНА')
-    expect(normalizeCounterpartyName('ФОП Шмакова Крістіна Василівна')).toBe(
-      'ШМАКОВА КРІСТІНА ВАСИЛІВНА'
+      normalizeCounterpartyName('КАРТКОВИЙ - ФОП Петренко Петро Петрович')
+    ).toBe('ПЕТРЕНКО ПЕТРО ПЕТРОВИЧ')
+    expect(normalizeCounterpartyName('ФОП Петренко Петро Петрович')).toBe(
+      'ПЕТРЕНКО ПЕТРО ПЕТРОВИЧ'
     )
   })
 
@@ -356,16 +359,41 @@ describe('normalizeCounterpartyName', () => {
   })
 })
 
+describe('buildCounterpartyNameRegexSource', () => {
+  it('builds a spacing-tolerant regex from the identifying tokens', () => {
+    const src = buildCounterpartyNameRegexSource(
+      'КАРТКОВИЙ - ФОП Петренко Петро Петрович'
+    )
+    expect(src).toBe('ПЕТРЕНКО\\s+ПЕТРО\\s+ПЕТРОВИЧ')
+  })
+
+  it('matches all name variants of the same payer (case-insensitive)', () => {
+    const src = buildCounterpartyNameRegexSource(
+      'КАРТКОВИЙ - ФОП Петренко Петро Петрович'
+    )
+    const re = new RegExp(src as string, 'i')
+    expect(re.test('Петренко Петро Петрович')).toBe(true)
+    expect(re.test('ФОП Петренко Петро Петрович')).toBe(true)
+    expect(re.test('Іваненко Іван Іванович')).toBe(false)
+  })
+
+  it('returns null when there are fewer than two tokens', () => {
+    expect(buildCounterpartyNameRegexSource('ФОП Петренко')).toBeNull()
+    expect(buildCounterpartyNameRegexSource('')).toBeNull()
+    expect(buildCounterpartyNameRegexSource(undefined)).toBeNull()
+  })
+})
+
 describe('matchByName', () => {
   const payer = {
     _id: 'payer-id',
-    companyName: 'Шмакова Крістіна Василівна',
+    companyName: 'Петренко Петро Петрович',
   } as IRealestate
 
   it('matches by full normalized name across ФОП/КАРТКОВИЙ prefixes', () => {
     expect(
       matchByName(
-        { AUT_CNTR_NAM: 'ФОП Шмакова Крістіна Василівна' } as ITransaction,
+        { AUT_CNTR_NAM: 'ФОП Петренко Петро Петрович' } as ITransaction,
         [payer]
       )
     ).toEqual({ companyId: 'payer-id', matchedBy: 'name' })
@@ -373,7 +401,7 @@ describe('matchByName', () => {
     expect(
       matchByName(
         {
-          AUT_CNTR_NAM: 'КАРТКОВИЙ - ФОП Шмакова Крістіна Василівна',
+          AUT_CNTR_NAM: 'КАРТКОВИЙ - ФОП Петренко Петро Петрович',
         } as ITransaction,
         [payer]
       )
@@ -391,8 +419,8 @@ describe('matchByName', () => {
 
   it('does not match on a single token (needs surname + name)', () => {
     expect(
-      matchByName({ AUT_CNTR_NAM: 'ФОП Шмакова' } as ITransaction, [
-        { _id: 'x', companyName: 'ФОП Шмакова' } as IRealestate,
+      matchByName({ AUT_CNTR_NAM: 'ФОП Петренко' } as ITransaction, [
+        { _id: 'x', companyName: 'ФОП Петренко' } as IRealestate,
       ])
     ).toBeNull()
   })
@@ -657,5 +685,51 @@ describe('payer uses multiple bank accounts', () => {
       companyId: 'payer-id',
       matchedBy: 'rnokpp',
     })
+  })
+})
+
+describe('extractInvoiceNumberFromOsnd', () => {
+  it.each([
+    [
+      'Оплата за послуги згідно рахунку 1301 від 13-07-2026, Іван Іваненко',
+      1301,
+    ],
+    ['Сплата за послуги згідно рахунку № 939 від 08.01.2026', 939],
+    ['оплата згідно рахунку #1208', 1208],
+    ['РАХУНОК № 1302', 1302],
+    ['Оплата по рах. 77', 77],
+  ])('%s → %s', (osnd, expected) => {
+    expect(extractInvoiceNumberFromOsnd(osnd)).toBe(expected)
+  })
+
+  it.each([
+    'Сплата за послуги знідно рахунку, Чорна Марина Євгеніївна',
+    'на рахунок 26004006407606123',
+    'Комiсiя за виконання платежiв у сумi 82686.07 грн',
+    '',
+    undefined,
+  ])('no invoice number in %p', (osnd) => {
+    expect(extractInvoiceNumberFromOsnd(osnd)).toBeNull()
+  })
+})
+
+describe('extractTransitPayerName', () => {
+  it('takes the full name after the last comma', () => {
+    expect(
+      extractTransitPayerName(
+        'Оплата за послуги згідно рахунку 1301 від 13-07-2026, Іщенко Марʼяна Сергіївна'
+      )
+    ).toBe('Іщенко Марʼяна Сергіївна')
+  })
+
+  it.each([
+    'Оплата за послуги без коми Петро Іванович',
+    'Оплата, Петро',
+    'Оплата, без ПДВ 1000.00 грн',
+    'Оплата, за послуги з утримання будинку за жовтень',
+    'Оплата, за послуги жовтень',
+    undefined,
+  ])('no payer name in %p', (osnd) => {
+    expect(extractTransitPayerName(osnd)).toBeNull()
   })
 })

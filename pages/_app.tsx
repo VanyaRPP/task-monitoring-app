@@ -3,6 +3,7 @@ import NextNProgress from 'nextjs-progressbar'
 import Head from 'next/head'
 import { appWithTranslation } from 'next-i18next'
 import ServiceWorkerUpdateNotifier from '@components/ServiceWorkerUpdateNotifier'
+import AppErrorBoundary from '@components/AppErrorBoundary'
 import dayjs from 'dayjs'
 import 'dayjs/locale/uk'
 import localizedFormat from 'dayjs/plugin/localizedFormat'
@@ -22,7 +23,9 @@ function MyApp({ Component, pageProps }) {
       </Head>
       <NextNProgress height={2} showOnShallow={false} />
       <ServiceWorkerUpdateNotifier />
-      <Component {...pageProps} />
+      <AppErrorBoundary>
+        <Component {...pageProps} />
+      </AppErrorBoundary>
     </Providers_pages>
   )
 }

@@ -81,7 +81,7 @@ describe('API Route - DELETE Method', () => {
       json: jest.fn(),
     } as any
 
-    jest.spyOn(Street, 'findByIdAndRemove').mockImplementationOnce(() => {
+    jest.spyOn(Street, 'findByIdAndDelete').mockImplementationOnce(() => {
       throw new Error('Deletion error')
     })
 
