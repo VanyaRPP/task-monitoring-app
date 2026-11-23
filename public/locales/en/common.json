@@ -3,7 +3,7 @@
   "payments": {
     "statusLabel": "Status",
     "statuses": {
-      "draft": "Draft",
+      "draft": "Notify",
       "sent": "Sent"
     },
     "tooltips": {

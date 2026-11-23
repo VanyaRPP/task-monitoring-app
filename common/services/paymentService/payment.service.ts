@@ -379,14 +379,17 @@ export interface DuplicatePaymentsResult {
 
 // Fields that must NOT be carried over to a duplicate: identity/versioning
 // (`_id`, `__v`), values we re-generate (`invoiceNumber`, `invoiceCreationDate`),
-// and payment-specific state that a fresh copy should not inherit (`transaction`).
-// A denylist keeps duplication resilient to new schema fields.
+// and payment-specific state that a fresh copy should not inherit
+// (`transaction`, and `status` - the copy has not been emailed yet, so the
+// schema default `draft` applies). A denylist keeps duplication resilient to
+// new schema fields.
 const NON_COPYABLE_PAYMENT_FIELDS = [
   '_id',
   '__v',
   'invoiceNumber',
   'invoiceCreationDate',
   'transaction',
+  'status',
 ] as const
 
 export async function duplicatePayments(
