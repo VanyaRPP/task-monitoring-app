@@ -75,18 +75,17 @@ describe('excluded periods on the page', () => {
     await userEvent.click(cmuSwitch())
 
     expect(cmuSwitch()).toBeChecked()
-    // November wholly out, December out until the 29th, 2024 counts again.
+    // November and December out whole (December though it ends on the
+    // 29th), 2024 counts again.
     expect(
-      screen.getByLabelText(
+      screen.getAllByLabelText(
         /^Не нараховується: КМУ №206: 24\.02\.2022—29\.12\.2023/
       )
-    ).toBeInTheDocument()
-    expect(
-      screen.getByLabelText(
-        /^Виключено 29 з 31 днів .*індекс місяця не враховано/
-      )
-    ).toBeInTheDocument()
+    ).toHaveLength(2)
     expect(screen.getAllByLabelText('Нараховується')).toHaveLength(2)
+    // Their interest, days and losses read «—»: none accrue.
+    const december = screen.getByText('Грудень 2023').closest('tr')
+    expect(december.textContent.match(/—/g)).toHaveLength(3)
     expect(screen.getByTestId('inflation').textContent).not.toBe(before)
 
     await openSettings()

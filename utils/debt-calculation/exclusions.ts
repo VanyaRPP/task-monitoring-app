@@ -20,15 +20,6 @@ export interface IExcludedPeriod {
   endDate: string
 }
 
-/**
- * A month's index is applied when at least this many of its days are not
- * excluded. By analogy with the rule for when a debt arises or is paid within
- * a month (letter of the Supreme Court 62-97р): a moratorium starting after the
- * 15th leaves the month indexed, one ending after the 15th does not. Pending
- * legal confirmation - the one place to change it.
- */
-export const MIN_INDEXED_DAYS = 16
-
 const DAY = 86_400_000
 const ISO_DAY = /^(\d{4})-(\d{2})-(\d{2})$/
 
@@ -78,9 +69,15 @@ export const excludedRanges = (periods: IExcludedPeriod[] = []): IRange[] => {
 }
 
 export interface IMonthExclusion {
-  /** Days inside an excluded period, from `fromDay` to the end of the month. */
+  /**
+   * Whether an excluded period takes any day of the month. Such a month is
+   * excluded whole: no interest, no index - a court reads the table by months,
+   * and a month half in, half out of a moratorium is the hardest to explain.
+   */
+  excluded: boolean
+  /** The month's accruing days, from `fromDay` on, when it is excluded. */
   excludedDays: number
-  /** Whether the month's inflation index counts (see {@link MIN_INDEXED_DAYS}). */
+  /** Whether the month's inflation index counts. */
   indexApplies: boolean
 }
 
@@ -134,10 +131,9 @@ export const periodsInMonth = (
 }
 
 /**
- * How much of a month the excluded ranges take. `fromDay` is the day the
- * month's accrual starts on (the first month of a period may start mid-month):
- * only excluded days from it on are counted. Whether the month's index applies
- * always looks at the whole month - the index belongs to the month.
+ * Whether the excluded ranges touch a month, which takes it out whole.
+ * `fromDay` is the day the month's accrual starts on (the first month of a
+ * period may start mid-month): the excluded days are counted from it.
  */
 export const monthExclusion = (
   ranges: IRange[],
@@ -148,15 +144,14 @@ export const monthExclusion = (
   const days = daysInMonth(year, month)
   const first = Date.UTC(year, month - 1, 1) / DAY
   const last = first + days - 1
-  const inMonth = (from: number) =>
-    ranges.reduce(
-      (sum, { start, end }) =>
-        sum + Math.max(0, Math.min(end, last) - Math.max(start, from) + 1),
-      0
-    )
+  const excluded = ranges.some(
+    ({ start, end }) => start <= last && end >= first
+  )
+  const startDay = Math.min(Math.max(fromDay, 1), days)
 
   return {
-    excludedDays: inMonth(first + Math.max(fromDay, 1) - 1),
-    indexApplies: days - inMonth(first) >= MIN_INDEXED_DAYS,
+    excluded,
+    excludedDays: excluded ? days - startDay + 1 : 0,
+    indexApplies: !excluded,
   }
 }

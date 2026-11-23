@@ -5,7 +5,6 @@ import {
   CameraOutlined,
   CheckOutlined,
   CloseOutlined,
-  MinusCircleOutlined,
   StopOutlined,
   SwapOutlined,
 } from '@ant-design/icons'
@@ -32,23 +31,25 @@ interface Props {
   result: IDebtCalculationResult
 }
 
+/** What an excluded month shows for interest, days and losses: none accrue. */
+const NONE = '—'
+
 /**
  * A narrow mark per month: whether inflation losses and interest accrued.
- * Shape and label, not only colour, tell the three states apart.
+ * Shape and label, not only colour, tell the two states apart.
  */
 const exclusionColumn = (
   periods: IExcludedPeriod[]
 ): ColumnsType<MonthRow>[number] => ({
   title: (
-    <Tooltip title="Нарахування інфляційних і річних: ✓ — так, ✕ — виключено, ◐ — частину місяця">
+    <Tooltip title="Нарахування інфляційних і річних: ✓ — так, ✕ — виключено">
       <StopOutlined aria-label="Виключені періоди" />
     </Tooltip>
   ),
   width: 36,
   align: 'center',
   render: (_, row) => {
-    const total = daysInMonth(row.year, row.month)
-    if (row.excludedDays === 0) {
+    if (!row.excluded) {
       return (
         <CheckOutlined
           aria-label="Нараховується"
@@ -59,23 +60,13 @@ const exclusionColumn = (
     const why = periodsInMonth(periods, row.year, row.month)
       .map(describeExcludedPeriod)
       .join('; ')
-    const whole = row.excludedDays >= total
-    const label = whole
-      ? `Не нараховується: ${why}`
-      : `Виключено ${row.excludedDays} з ${total} днів (${why}). Річні — за ${row.days} дн.; індекс місяця ${row.indexApplied ? 'враховано' : 'не враховано'}.`
+    const label = `Не нараховується: ${why}`
     return (
       <Tooltip title={label}>
-        {whole ? (
-          <CloseOutlined
-            aria-label={label}
-            className={`${s.ExclusionMark} ${s.ExclusionExcluded}`}
-          />
-        ) : (
-          <MinusCircleOutlined
-            aria-label={label}
-            className={`${s.ExclusionMark} ${s.ExclusionPartial}`}
-          />
-        )}
+        <CloseOutlined
+          aria-label={label}
+          className={`${s.ExclusionMark} ${s.ExclusionExcluded}`}
+        />
       </Tooltip>
     )
   },
@@ -257,7 +248,7 @@ const MonthsTable: React.FC<Props> = ({ result }) => {
     {
       title: `${'Річних'}`,
       align: 'right',
-      render: (_, row) => formatMoney(row.interest),
+      render: (_, row) => (row.excluded ? NONE : formatMoney(row.interest)),
     },
     {
       title: (
@@ -268,25 +259,27 @@ const MonthsTable: React.FC<Props> = ({ result }) => {
     },
     {
       title: (
-        <Tooltip title="Днів нарахування в місяці. Можна змінити: Нараховано (якщо не введене вручну) і 3% річних рахуються за цими днями. Дні виключених періодів віднімаються від річних окремо.">
+        <Tooltip title="Днів нарахування в місяці. Можна змінити: Нараховано (якщо не введене вручну) і 3% річних рахуються за цими днями. У місяцях виключених періодів річні не нараховуються.">
           Днів
         </Tooltip>
       ),
       align: 'right',
-      render: (_, row) => (
-        <InputNumber
-          size="small"
-          min={0}
-          max={daysInMonth(row.year, row.month)}
-          precision={0}
-          value={valueOf(row, 'days')}
-          placeholder={String(row.days)}
-          // Nothing to change in a month that is wholly excluded.
-          disabled={row.excludedDays >= daysInMonth(row.year, row.month)}
-          onChange={(value) => patch(row, 'days', value as number)}
-          aria-label={`Днів, ${formatMonthLabel(row.year, row.month)}`}
-        />
-      ),
+      render: (_, row) =>
+        // No interest accrues in an excluded month: no days to count.
+        row.excluded ? (
+          NONE
+        ) : (
+          <InputNumber
+            size="small"
+            min={0}
+            max={daysInMonth(row.year, row.month)}
+            precision={0}
+            value={valueOf(row, 'days')}
+            placeholder={String(row.days)}
+            onChange={(value) => patch(row, 'days', value as number)}
+            aria-label={`Днів, ${formatMonthLabel(row.year, row.month)}`}
+          />
+        ),
     },
     {
       title: 'Індекс, %',
@@ -334,7 +327,8 @@ const MonthsTable: React.FC<Props> = ({ result }) => {
     {
       title: 'Інфляційні',
       align: 'right',
-      render: (_, row) => formatMoney(row.inflationLoss),
+      render: (_, row) =>
+        row.excluded ? NONE : formatMoney(row.inflationLoss),
     },
     ...(hasExclusions ? [exclusionColumn(excludedPeriods)] : []),
   ]
