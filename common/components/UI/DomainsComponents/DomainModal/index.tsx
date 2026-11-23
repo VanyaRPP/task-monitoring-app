@@ -96,6 +96,7 @@ const DomainModal: FC<Props> = ({
       domainTypeTemplateId: templateId,
       customServices,
       disabledServiceIds: currentDomain?.disabledServiceIds ?? [],
+      hideQuantityAndPrice: currentDomain?.hideQuantityAndPrice ?? false,
     })
   }, [currentDomain, draft, form, user, templates, defaultTemplateId])
 
@@ -131,6 +132,7 @@ const DomainModal: FC<Props> = ({
       iban: formData.iban,
       customServices: formData.customServices,
       disabledServiceIds: formData.disabledServiceIds ?? [],
+      hideQuantityAndPrice: formData.hideQuantityAndPrice === true,
       domainTypeTemplateId: formData.domainTypeTemplateId || undefined,
     }
 

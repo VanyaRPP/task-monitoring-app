@@ -16,6 +16,7 @@ const EditorialTemplate: FC<TemplateProps> = ({
   domainName,
   rows,
   getQty,
+  hideQuantityAndPrice,
   subtotal,
   taxPercent,
   taxAmount,
@@ -138,8 +139,12 @@ const EditorialTemplate: FC<TemplateProps> = ({
         <thead>
           <tr>
             <th>{isEnglish ? 'Description' : 'Опис'}</th>
-            <th>{isEnglish ? 'Rate' : 'Ціна'}</th>
-            <th>{isEnglish ? 'Qty' : 'К-сть'}</th>
+            {!hideQuantityAndPrice && (
+              <>
+                <th>{isEnglish ? 'Rate' : 'Ціна'}</th>
+                <th>{isEnglish ? 'Qty' : 'К-сть'}</th>
+              </>
+            )}
             <th>{isEnglish ? 'Total' : 'Сума'}</th>
           </tr>
         </thead>
@@ -154,8 +159,12 @@ const EditorialTemplate: FC<TemplateProps> = ({
             return (
               <tr key={`${item?.type || item?.name}-${index}`}>
                 <td>{item?.name || item?.type || '—'}</td>
-                <td>{rate.toFixed(2)}</td>
-                <td>{qty}</td>
+                {!hideQuantityAndPrice && (
+                  <>
+                    <td>{rate.toFixed(2)}</td>
+                    <td>{qty}</td>
+                  </>
+                )}
                 <td>
                   {Number(item?.sum || 0).toFixed(2)}&nbsp;{currencyLabel}
                 </td>

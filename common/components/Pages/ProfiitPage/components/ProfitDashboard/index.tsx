@@ -2,6 +2,7 @@
 
 import React, { useMemo, useState, useEffect } from 'react'
 import {
+  Button,
   Card,
   Col,
   Row,
@@ -13,6 +14,7 @@ import {
   theme,
 } from 'antd'
 import { Column, Pie } from '@ant-design/plots'
+import { CaretDownOutlined, CaretUpOutlined } from '@ant-design/icons'
 import { useTranslation } from 'next-i18next'
 import dayjs, { Dayjs } from 'dayjs'
 import type { ProfitMonthRow } from '@common/api/profitsApi/profits.type'
@@ -80,8 +82,9 @@ const PIE_PALETTE = [
   '#17C76F',
 ]
 
-// Up to this many categories the legend fits one column beside the ring.
-const PIE_COMPACT_MAX_CATEGORIES = 6
+// One column under the ring: past this many rows the legend is paged, so the
+// pie card stays beside the trend chart however many categories there are.
+const PIE_LEGEND_PAGE_SIZE = 8
 
 // Past the palette, repeating it would give two legend rows the same colour;
 // golden-angle hues stay apart however many categories a month has.
@@ -411,14 +414,47 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({
       .sort((a, b) => b.value - a.value)
   }, [filteredData, t, currency])
 
-  // A busy month gets the pie its own full-width row: squeezed beside the
-  // trend chart its two legend columns cut every name to a few letters, and
-  // a legend stacked under the ring stretched the trend card to match.
-  const isPieWide = pieData.length > PIE_COMPACT_MAX_CATEGORIES
+  // Categories switched off in the legend. Only the ring is affected: the
+  // legend keeps every row so a hidden category can be switched back on.
+  const [hiddenCategories, setHiddenCategories] = useState<string[]>([])
 
+  const toggleCategory = (category: string) =>
+    setHiddenCategories((prev) =>
+      prev.includes(category)
+        ? prev.filter((c) => c !== category)
+        : [...prev, category]
+    )
+
+  const visiblePieData = useMemo(
+    () => pieData.filter((item) => !hiddenCategories.includes(item.type)),
+    [pieData, hiddenCategories]
+  )
+
+  // A long legend is paged rather than grown, so the card keeps the ring's
+  // height however many categories a period has.
+  const [legendPage, setLegendPage] = useState(0)
+  const legendPageCount = Math.max(
+    1,
+    Math.ceil(pieData.length / PIE_LEGEND_PAGE_SIZE)
+  )
+
+  // A new period or currency brings a different set of rows. Keyed on the
+  // names, not the array: pieData is rebuilt whenever `t` changes identity.
+  const legendKey = pieData.map((item) => item.type).join('\u0000')
+  useEffect(() => {
+    setLegendPage(0)
+  }, [legendKey])
+
+  const legendOffset = legendPage * PIE_LEGEND_PAGE_SIZE
+  const legendPageItems = pieData.slice(
+    legendOffset,
+    legendOffset + PIE_LEGEND_PAGE_SIZE
+  )
+
+  // Shares are of what is on the ring, so they still add up to 100%.
   const pieTotal = useMemo(
-    () => pieData.reduce((sum, item) => plusFloat(sum, item.value), 0),
-    [pieData]
+    () => visiblePieData.reduce((sum, item) => plusFloat(sum, item.value), 0),
+    [visiblePieData]
   )
 
   const piePercent = (value: number) =>
@@ -480,12 +516,15 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({
   }
 
   const pieConfig = {
-    data: pieData,
+    data: visiblePieData,
+    autoFit: true,
     angleField: 'value',
     colorField: 'type',
     radius: 1,
     innerRadius: 0.6,
     theme: isDarkMode ? 'dark' : 'light',
+    // Built from all categories, hidden ones included, so switching one off
+    // does not shift the colours of the rest.
     scale: { color: pieColorScale },
     // Category names live in the legend: outside name labels collided on
     // small neighbouring slices and got clipped by the card. The ring only
@@ -712,7 +751,7 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({
       </Row>
 
       <Row gutter={[16, 16]}>
-        <Col xs={24} xl={isPieWide ? 24 : 14}>
+        <Col xs={24} xl={14}>
           <Card
             title={`${t('profitPage:dashboard.trendTitle')}${currencySuffix}`}
             size="small"
@@ -731,45 +770,94 @@ const ProfitDashboard: React.FC<ProfitDashboardProps> = ({
             </div>
           </Card>
         </Col>
-        <Col xs={24} xl={isPieWide ? 24 : 10}>
+        <Col xs={24} xl={10}>
           <Card
             title={`${t('profitPage:dashboard.structureTitle')}${currencySuffix}`}
             size="small"
             className={s.chartCard}
           >
             {pieData.length > 0 ? (
-              <div
-                className={cn(s.pieLayout, { [s.pieLayoutWide]: isPieWide })}
-              >
+              <div className={s.pieLayout}>
                 <div className={s.pieChart}>
-                  <Pie {...pieConfig} />
+                  {visiblePieData.length > 0 ? (
+                    <Pie {...pieConfig} />
+                  ) : (
+                    <Text type="secondary" className={s.pieEmpty}>
+                      {t('profitPage:dashboard.allCategoriesHidden')}
+                    </Text>
+                  )}
                 </div>
-                <ul
-                  className={cn(s.pieLegend, {
-                    [s.pieLegendTwoColumns]: isPieWide,
-                  })}
-                >
-                  {pieData.map((item, i) => (
-                    <Tooltip
-                      key={item.type}
-                      // Long names are cut with an ellipsis; this is where
-                      // the full one (and the amount) can still be read.
-                      title={`${item.type}: ${getCurrencySymbol(currency)} ${money(item.value)}`}
-                      placement="left"
-                    >
-                      <li className={s.pieLegendItem}>
-                        <span
-                          className={s.pieLegendSwatch}
-                          style={{ background: pieColorAt(i) }}
-                        />
-                        <span className={s.pieLegendName}>{item.type}</span>
-                        <Text type="secondary" className={s.pieLegendPercent}>
-                          {piePercent(item.value).toFixed(1)}%
-                        </Text>
-                      </li>
-                    </Tooltip>
-                  ))}
-                </ul>
+                <div className={s.pieLegendWrap}>
+                  <ul
+                    className={cn(s.pieLegend, {
+                      [s.pieLegendPaged]: legendPageCount > 1,
+                    })}
+                  >
+                    {legendPageItems.map((item, pageIndex) => {
+                      const i = legendOffset + pageIndex
+                      const isHidden = hiddenCategories.includes(item.type)
+                      return (
+                        <Tooltip
+                          key={item.type}
+                          // Long names are cut with an ellipsis; this is where
+                          // the full one (and the amount) can still be read.
+                          title={`${item.type}: ${getCurrencySymbol(currency)} ${money(item.value)}`}
+                          placement="left"
+                        >
+                          <li>
+                            <button
+                              type="button"
+                              className={cn(s.pieLegendItem, {
+                                [s.pieLegendItemHidden]: isHidden,
+                              })}
+                              aria-pressed={!isHidden}
+                              onClick={() => toggleCategory(item.type)}
+                            >
+                              <span
+                                className={s.pieLegendSwatch}
+                                style={{ background: pieColorAt(i) }}
+                              />
+                              <span className={s.pieLegendName}>
+                                {item.type}
+                              </span>
+                              <Text
+                                type="secondary"
+                                className={s.pieLegendPercent}
+                              >
+                                {isHidden
+                                  ? '—'
+                                  : `${piePercent(item.value).toFixed(1)}%`}
+                              </Text>
+                            </button>
+                          </li>
+                        </Tooltip>
+                      )
+                    })}
+                  </ul>
+                  {legendPageCount > 1 && (
+                    <div className={s.pieLegendPager}>
+                      <Button
+                        type="text"
+                        size="small"
+                        icon={<CaretUpOutlined />}
+                        aria-label={t('profitPage:dashboard.legendPrevPage')}
+                        disabled={legendPage === 0}
+                        onClick={() => setLegendPage((p) => p - 1)}
+                      />
+                      <Text type="secondary" className={s.pieLegendPageInfo}>
+                        {legendPage + 1}/{legendPageCount}
+                      </Text>
+                      <Button
+                        type="text"
+                        size="small"
+                        icon={<CaretDownOutlined />}
+                        aria-label={t('profitPage:dashboard.legendNextPage')}
+                        disabled={legendPage >= legendPageCount - 1}
+                        onClick={() => setLegendPage((p) => p + 1)}
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
             ) : (
               <Text type="secondary">

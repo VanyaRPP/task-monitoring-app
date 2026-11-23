@@ -16,6 +16,7 @@ const TechstudioTemplate: FC<TemplateProps> = ({
   domainName,
   rows,
   getQty,
+  hideQuantityAndPrice,
   subtotal,
   taxPercent,
   taxAmount,
@@ -155,8 +156,12 @@ const TechstudioTemplate: FC<TemplateProps> = ({
           <thead>
             <tr>
               <th>{isEnglish ? 'description' : 'опис'}</th>
-              <th>{isEnglish ? 'rate' : 'ціна'}</th>
-              <th>{isEnglish ? 'qty' : 'к-сть'}</th>
+              {!hideQuantityAndPrice && (
+                <>
+                  <th>{isEnglish ? 'rate' : 'ціна'}</th>
+                  <th>{isEnglish ? 'qty' : 'к-сть'}</th>
+                </>
+              )}
               <th>{isEnglish ? 'total' : 'сума'}</th>
             </tr>
           </thead>
@@ -171,8 +176,12 @@ const TechstudioTemplate: FC<TemplateProps> = ({
               return (
                 <tr key={`${item?.type || item?.name}-${index}`}>
                   <td>{item?.name || item?.type || '—'}</td>
-                  <td>{rate.toFixed(2)}</td>
-                  <td>{qty}</td>
+                  {!hideQuantityAndPrice && (
+                    <>
+                      <td>{rate.toFixed(2)}</td>
+                      <td>{qty}</td>
+                    </>
+                  )}
                   <td>
                     {Number(item?.sum || 0).toFixed(2)}&nbsp;{currencyLabel}
                   </td>

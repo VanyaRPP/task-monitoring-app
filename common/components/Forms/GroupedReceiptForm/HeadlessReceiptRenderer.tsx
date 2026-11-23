@@ -2,6 +2,7 @@ import { FC, useEffect, useRef } from 'react'
 import { useGetInvoiceTemplatesQuery } from '@common/api/invoiceTemplateApi/invoiceTemplate.api'
 import { normalizeCurrency } from '@utils/helpers'
 import { resolveTemplateCandidate, templateMap } from './templateMap'
+import { useDomainDisplayData } from '@modules/hooks/useDomainDisplayData'
 import { useReceiptTemplateProps } from './useReceiptTemplateProps'
 import { applyDescriptionOverrides } from './applyDescriptionOverrides'
 import { readShowQuantityInPreview } from './previewQtyStorage'
@@ -55,9 +56,10 @@ const HeadlessReceiptRenderer: FC<Props> = ({
       contextCompany?.currency
   )
 
+  const displayPayment = useDomainDisplayData(payment)
   const receiptProps = useReceiptTemplateProps({
     data: applyDescriptionOverrides(
-      payment ? { ...payment, currency } : payment,
+      displayPayment ? { ...displayPayment, currency } : displayPayment,
       descriptionOverrides
     ),
     contextCompany,

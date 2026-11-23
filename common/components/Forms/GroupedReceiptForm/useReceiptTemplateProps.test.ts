@@ -93,3 +93,37 @@ describe('useReceiptTemplateProps — isEnglish / lang override', () => {
     })
   })
 })
+
+describe('useReceiptTemplateProps — domain display settings', () => {
+  const invoice = [{ type: 'placingPrice', name: 'Розміщення', sum: 100 }]
+
+  it('shows the alias instead of the service name', () => {
+    const { result } = renderHook(() =>
+      useReceiptTemplateProps({
+        data: { invoice: [{ ...invoice[0], alias: 'Освітня послуга' }] },
+      })
+    )
+    expect(result.current.rows[0].name).toBe('Освітня послуга')
+  })
+
+  it('forces quantity/price off when the domain hides them', () => {
+    const { result } = renderHook(() =>
+      useReceiptTemplateProps({
+        data: { invoice, hideQuantityAndPrice: true },
+        showQuantityInPreview: true,
+      })
+    )
+    expect(result.current.hideQuantityAndPrice).toBe(true)
+    expect(result.current.showQuantityInPreview).toBe(false)
+  })
+
+  it('keeps the preview toggle when the domain does not hide them', () => {
+    const { result } = renderHook(() =>
+      useReceiptTemplateProps({
+        data: { invoice },
+        showQuantityInPreview: true,
+      })
+    )
+    expect(result.current.showQuantityInPreview).toBe(true)
+  })
+})

@@ -18,15 +18,13 @@ import {
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import type { IDebtorInflation } from '@common/api/debtorsApi/debtors.api.types'
 import { AppRoutes, Roles } from '@utils/constants'
+import DebtBadge from '@components/UI/Reusable/DebtBadge'
 import {
-  formatDebtAmount,
-  formatSignedDebt,
   getDebtSide,
   isAdminCheck,
   renderCurrency,
   renderPrice,
 } from '@utils/helpers'
-import { getDebtorTooltipColor } from '@utils/helpers'
 import s from './style.module.scss'
 import {
   Alert,
@@ -38,7 +36,6 @@ import {
   Tooltip,
   Dropdown,
   Switch,
-  Badge,
 } from 'antd'
 import { ColumnType } from 'antd/lib/table'
 import { useRouter } from 'next/router'
@@ -78,11 +75,6 @@ type CompanyWithPayments = {
   totalDebt: number
   inflation?: IDebtorInflation | null
 }
-
-const INFLATION_METHOD_LABEL = {
-  balance: 'за залишком',
-  monthly: 'помісячно',
-} as const
 
 const STANDARD_SERVICE_NAMES = [
   'Опис',
@@ -736,32 +728,6 @@ const getDefaultColumns = ({
         )
 
         if (debtor) {
-          const isCompanyDebtor = getDebtSide(debtor.totalDebt) === 'company'
-          const tooltipDebtor = (
-            <div>
-              <p>
-                <b>
-                  {isCompanyDebtor ? 'Компанія боржник' : 'Переплата компанії'}
-                </b>
-              </p>
-              <p>Назва компанії: {i}</p>
-              <p>
-                {isCompanyDebtor ? 'Сума боргу' : 'Сума переплати'}:{' '}
-                {formatDebtAmount(debtor.totalDebt)}
-              </p>
-              {isCompanyDebtor && debtor.inflation && (
-                <p>
-                  Інфляційні втрати: {formatDebtAmount(debtor.inflation.loss)}
-                  <br />
-                  <small>
-                    {debtor.inflation.from} – {debtor.inflation.to},{' '}
-                    {INFLATION_METHOD_LABEL[debtor.inflation.method]}
-                  </small>
-                </p>
-              )}
-            </div>
-          )
-
           const companyLabel = canFilter ? (
             <TableFilterLink
               label={i}
@@ -777,19 +743,14 @@ const getDefaultColumns = ({
           )
 
           return (
-            <Tooltip title={tooltipDebtor} placement="top">
-              <Badge
-                count={formatSignedDebt(debtor.totalDebt)}
-                title=""
-                color={getDebtorTooltipColor(debtor)}
-                overflowCount={Infinity}
-                style={{ cursor: 'pointer' }}
-                size="small"
-                offset={[10, 0]}
-              >
-                {companyLabel}
-              </Badge>
-            </Tooltip>
+            <DebtBadge
+              companyName={i}
+              totalDebt={debtor.totalDebt}
+              inflation={debtor.inflation}
+              offset={[10, 0]}
+            >
+              {companyLabel}
+            </DebtBadge>
           )
         }
       }

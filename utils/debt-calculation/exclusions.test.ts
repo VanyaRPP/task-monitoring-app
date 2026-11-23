@@ -48,7 +48,8 @@ describe('excludedRanges / monthExclusion', () => {
     ])
     expect(ranges).toHaveLength(1)
     expect(monthExclusion(ranges, 2025, 3).excludedDays).toBe(31)
-    expect(monthExclusion(ranges, 2025, 4).excludedDays).toBe(10)
+    expect(monthExclusion(ranges, 2025, 4).excludedDays).toBe(30)
+    expect(monthExclusion(ranges, 2025, 5).excluded).toBe(false)
   })
 
   it('ignores a reversed or unreadable period', () => {
@@ -63,44 +64,40 @@ describe('excludedRanges / monthExclusion', () => {
     expect(dayNumber('2025-02-29')).toBeNull()
   })
 
-  it('КМУ №206: February 2022 keeps its index, December 2023 loses it', () => {
+  it('КМУ №206 takes February 2022 and December 2023 out whole', () => {
     const ranges = excludedRanges([CMU_206])
-    // 24-28 Feb excluded: 23 days remain.
-    expect(monthExclusion(ranges, 2022, 2)).toEqual({
-      excludedDays: 5,
+    // The moratorium starts on the 24th, yet the whole month is out.
+    expect(monthExclusion(ranges, 2022, 1)).toEqual({
+      excluded: false,
+      excludedDays: 0,
       indexApplies: true,
     })
-    expect(monthExclusion(ranges, 2022, 3)).toEqual({
+    expect(monthExclusion(ranges, 2022, 2)).toEqual({
+      excluded: true,
+      excludedDays: 28,
+      indexApplies: false,
+    })
+    // It ends on the 29th, yet the 30th and 31st are out too.
+    expect(monthExclusion(ranges, 2023, 12)).toEqual({
+      excluded: true,
       excludedDays: 31,
       indexApplies: false,
     })
-    // 1-29 Dec excluded: 2 days remain.
-    expect(monthExclusion(ranges, 2023, 12)).toEqual({
-      excludedDays: 29,
-      indexApplies: false,
-    })
     expect(monthExclusion(ranges, 2024, 1)).toEqual({
+      excluded: false,
       excludedDays: 0,
       indexApplies: true,
     })
   })
 
-  it('takes the 16-day line exactly: 16 days left keep the index, 15 do not', () => {
-    // April has 30 days.
+  it('a single day of a period takes its month out', () => {
     expect(
       monthExclusion(
-        excludedRanges([period('2025-04-01', '2025-04-14')]),
+        excludedRanges([period('2025-04-30', '2025-04-30')]),
         2025,
         4
-      ).indexApplies
-    ).toBe(true)
-    expect(
-      monthExclusion(
-        excludedRanges([period('2025-04-01', '2025-04-15')]),
-        2025,
-        4
-      ).indexApplies
-    ).toBe(false)
+      )
+    ).toEqual({ excluded: true, excludedDays: 30, indexApplies: false })
   })
 })
 
@@ -219,20 +216,21 @@ describe('calculateDebt - excluded periods', () => {
     )
   })
 
-  it('a partly excluded month loses only those days of interest', () => {
+  it('a partly excluded month is out whole: no interest, no index', () => {
     const result = calculateDebt({
       months: base,
       excludedPeriods: [period('2025-04-20', '2025-04-30')],
     })
-    const april = result.rows[3]
+    const [march, april] = result.rows.slice(2, 4)
 
-    // 19 of 30 days remain: the index still counts, interest for 19 days.
     expect(april).toMatchObject({
-      excludedDays: 11,
-      indexApplied: true,
-      days: 19,
+      excluded: true,
+      excludedDays: 30,
+      indexApplied: false,
+      days: 0,
+      interest: 0,
     })
-    expect(april.interest).toBeCloseTo((april.debt * 0.03 * 19) / 365, 9)
+    expect(april.coefficient).toBe(march.coefficient)
   })
 
   it('several and overlapping periods exclude each day once', () => {
@@ -291,10 +289,53 @@ describe('calculateDebt - excluded periods', () => {
       result.rows.find((row) => row.year === year && row.month === month)
         .inflationLoss
 
-    // February 2022 indexed (+2%), then nothing until January 2024.
-    expect(loss(2022, 2)).toBeCloseTo(20, 6)
-    expect(loss(2023, 12)).toBeCloseTo(20, 6)
-    expect(loss(2024, 1)).toBeCloseTo(1000 * (1.02 * 1.02 - 1), 6)
+    // February 2022 to December 2023 out whole, January 2024 adds its 2%.
+    expect(loss(2022, 1)).toBe(0)
+    expect(loss(2023, 12)).toBe(0)
+    expect(loss(2024, 1)).toBeCloseTo(20, 6)
+  })
+
+  it('balance method: the losses go on from where they stood, not anew', () => {
+    // 1000 owed from January 2022, +2% a month; 500 more is charged every
+    // month of the moratorium.
+    const result = calculateDebt({
+      months: months([2022, 1], 26, (index) => ({
+        charged: index === 0 ? 1000 : index < 24 ? 500 : 0,
+      })),
+      excludedPeriods: [period('2022-02-24', '2023-12-29', 'cmu_206')],
+    })
+    const at = (year: number, month: number) =>
+      result.rows.find((it) => it.year === year && it.month === month)
+
+    // January 2022 is the first month: nothing indexed yet.
+    expect(at(2022, 1).inflationLoss).toBe(0)
+    // The months out hold that sum.
+    expect(at(2023, 12).inflationLoss).toBe(0)
+    // January 2024: the whole debt (1000 + 23 × 500) indexed by its 2% only -
+    // not by any inflation from before the moratorium.
+    expect(at(2024, 1).inflationLoss).toBeCloseTo(12_500 * 0.02, 6)
+  })
+
+  it('balance method: what accrued before a moratorium is carried past it', () => {
+    // 1000 from December 2021: January 2022 adds 2%, then the moratorium.
+    const result = calculateDebt({
+      months: months([2021, 12], 27, (index) => ({
+        charged: index === 0 ? 1000 : index < 25 ? 500 : 0,
+      })),
+      excludedPeriods: [period('2022-02-24', '2023-12-29', 'cmu_206')],
+    })
+    const at = (year: number, month: number) =>
+      result.rows.find((it) => it.year === year && it.month === month)
+
+    const before = at(2022, 1).inflationLoss
+    expect(before).toBeCloseTo(1500 * 0.02, 6)
+    expect(at(2022, 2)).toMatchObject({ excluded: true, inflationLoss: before })
+    expect(at(2023, 12).inflationLoss).toBe(before)
+    // Then on from that sum: the debt of January 2024 by January's 2%.
+    expect(at(2024, 1).inflationLoss).toBeCloseTo(
+      before + at(2024, 1).debt * 1.02 * 0.02,
+      6
+    )
   })
 
   it('works for the balance method too', () => {
@@ -373,20 +414,13 @@ describe('calculateDebt - days of accrual', () => {
     expect(none.interest).toBe(0)
   })
 
-  it('takes excluded days off only from the days the debt accrues', () => {
-    // From the 10th (21 days); 20-30 April excluded: 11 of those 21 go.
+  it('takes out all the days the debt accrues in an excluded month', () => {
+    // From the 10th (21 days); 20-30 April excluded: the month goes whole.
     const [april] = calculateDebt({
       months: [{ ...base[0], startDay: 10 }],
       excludedPeriods: [period('2025-04-20', '2025-04-30')],
     }).rows
-    expect(april.days).toBe(10)
-
-    // An exclusion before the start day takes nothing off.
-    const [before] = calculateDebt({
-      months: [{ ...base[0], startDay: 10 }],
-      excludedPeriods: [period('2025-04-01', '2025-04-05')],
-    }).rows
-    expect(before.days).toBe(21)
+    expect(april).toMatchObject({ days: 0, excludedDays: 21 })
   })
 
   it('a start day beyond the month end is the last day', () => {

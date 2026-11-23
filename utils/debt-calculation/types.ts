@@ -103,11 +103,16 @@ export interface IDebtMonthRow extends IYearMonth {
   /** Debt at month end, UAH (column I). */
   debt: number
   /**
-   * Days interest accrued for (column J): the calendar days, less any that
-   * fall in an excluded period.
+   * Days interest accrued for (column J): the calendar days, none in an
+   * excluded month.
    */
   days: number
-  /** Days of the month inside an excluded period. */
+  /**
+   * Whether an excluded period takes the month: no interest, no index, and
+   * the losses stand still (shown as «—»).
+   */
+  excluded: boolean
+  /** The month's accruing days, when it is excluded. */
   excludedDays: number
   /** Whether this month's index went into the coefficient. */
   indexApplied: boolean

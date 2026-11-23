@@ -7,6 +7,10 @@ jest.mock('@components/AddPaymentModal', () => ({
   usePaymentContext: jest.fn(),
 }))
 
+jest.mock('@common/api/domainApi/domain.api', () => ({
+  useGetDomainsQuery: () => ({ data: [] }),
+}))
+
 jest.mock('@modules/hooks/useInvoiceCurrency', () => ({
   useInvoiceCurrency: jest.fn(),
 }))

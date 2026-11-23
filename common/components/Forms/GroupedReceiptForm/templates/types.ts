@@ -7,6 +7,7 @@ export interface TemplateProps {
   isEnglish: boolean
   invoiceLang?: 'en' | 'uk'
   showQuantityInPreview: boolean
+  hideQuantityAndPrice?: boolean
   currencyLabel: string
   currency?: string
   modernInvoiceNumber: string
