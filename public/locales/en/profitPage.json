@@ -69,6 +69,7 @@
     "removeItem": "Remove line",
     "itemsViewGroups": "By group",
     "itemsViewFlat": "Each",
+    "dragHint": "Press and hold a line outside its fields, then drag it to another category",
     "newItems": "New lines",
     "splitLegacy": "This record has one amount of {{amount}} for several categories. Split it across the lines.",
     "scope": "Domain or company"
@@ -84,7 +85,10 @@
     "delete": "Delete"
   },
   "dashboard": {
-    "uncategorized": "Uncategorized"
+    "uncategorized": "Uncategorized",
+    "allCategoriesHidden": "All categories are hidden. Click a category in the legend to show it.",
+    "legendPrevPage": "Previous page of categories",
+    "legendNextPage": "Next page of categories"
   },
   "scope": {
     "placeholder": "Choose a domain or company",

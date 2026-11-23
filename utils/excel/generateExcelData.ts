@@ -72,7 +72,9 @@ export function generatePaymentsData(data) {
     ),
     'Додаткові послуги': styled(
       formatNumber(
-        (payment.invoice || []).find((i) => i.type === 'custom')?.price
+        payment.domain?.hideQuantityAndPrice === true
+          ? (payment.invoice || []).find((i) => i.type === 'custom')?.sum
+          : (payment.invoice || []).find((i) => i.type === 'custom')?.price
       ),
       'Додаткові послуги'
     ),

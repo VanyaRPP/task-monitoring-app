@@ -29,6 +29,7 @@ jest.mock('@common/api/domainApi/domain.api', () => ({
   useGetDomainsByAdminQuery: jest.fn(),
   useGetDomainsQuery: jest.fn(),
   useGetDomainTypeTemplatesQuery: jest.fn(() => ({ data: [] })),
+  useSetServiceAliasMutation: jest.fn(() => [jest.fn(), { isLoading: false }]),
 }))
 
 const mockUseGetCurrentUserQuery =
@@ -139,10 +140,15 @@ describe('CustomServicesTable - Тип послуги (serviceType)', () => {
     expect(editButtonFor('Електропостачання (кастом)')).not.toBeDisabled()
   })
 
-  it('a built-in "always communal" system service stays locked (edit + delete)', () => {
+  it('a built-in system service stays undeletable, and its edit only opens the alias', async () => {
     renderAsGlobalAdmin([systemService])
-    expect(editButtonFor('Електропостачання (системна)')).toBeDisabled()
     expect(deleteButtonFor('Електропостачання (системна)')).toBeDisabled()
+    await userEvent.click(editButtonFor('Електропостачання (системна)'))
+    const dialog = await screen.findByRole('dialog')
+    expect(within(dialog).getByLabelText('Назва')).toBeDisabled()
+    expect(
+      within(dialog).getByText('Аліас (назва для клієнта)')
+    ).toBeInTheDocument()
   })
 
   it('edit modal shows "Тип послуги" preset to the service\'s current type', async () => {
@@ -166,9 +172,26 @@ describe('CustomServicesTable - Тип послуги (serviceType)', () => {
     await screen.findByText('Тип послуги')
 
     const dialog = screen.getByRole('dialog')
-    await userEvent.click(within(dialog).getByRole('combobox'))
+    await userEvent.click(within(dialog).getByLabelText('Тип послуги'))
 
     expect(await screen.findByText('Електропостачання')).toBeInTheDocument()
+  })
+
+  it('alias is a plain text input, enabled for a domain-owned service', async () => {
+    renderAsGlobalAdmin([
+      {
+        _id: 'auto-2',
+        name: 'Оренда',
+        domain: 'domain-auto',
+        category: 'auto',
+      },
+    ])
+    await userEvent.click(editButtonFor('Оренда'))
+    const dialog = await screen.findByRole('dialog')
+    const alias = within(dialog).getByLabelText('Аліас (назва для клієнта)')
+    expect(alias).toBeEnabled()
+    await userEvent.type(alias, 'Освітня послуга')
+    expect(alias).toHaveValue('Освітня послуга')
   })
 
   it('saving sends the assigned serviceType to the backend', async () => {

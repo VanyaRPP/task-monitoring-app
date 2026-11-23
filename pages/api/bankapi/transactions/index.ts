@@ -1,15 +1,16 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
-import type { NextApiRequest, NextApiResponse } from 'next'
-import start, { Data } from '@pages/api/api.config'
+import { withDomainBankToken } from '@common/services/bankTokenService/withDomainBankToken'
 import { getTransactionsForDateInterval } from './utils/getTransactions/index'
 import Payment from '@modules/models/Payment'
-import Domain from '@modules/models/Domain'
 import RealEstate from '@modules/models/RealEstate'
-import { getCurrentUser } from '@utils/getCurrentUser'
+import { Operations } from '@utils/constants'
 import {
   buildCounterpartyNameRegexSource,
   buildFinalTechnicalTransactionId,
+  buildTransitPayerOsndRegexSource,
+  extractInvoiceNumberFromOsnd,
+  extractTransitPayerName,
   isSelfTransaction,
   matchByName,
   matchByRnokpp,
@@ -45,7 +46,10 @@ export async function checkTransaction({
     const candidates = technicalTransactionIdMatchCandidates(transaction)
 
     if (candidates.length > 0) {
+      // A bank transaction is paid into one domain only: a payment saved in
+      // another domain neither marks this row as sent nor names its company.
       const allPayments = await Payment.find({
+        ...(domainId ? { domain: domainId } : {}),
         'transaction.TECHNICAL_TRANSACTION_ID': { $in: candidates },
       })
 
@@ -61,17 +65,42 @@ export async function checkTransaction({
     const isTransit = transaction.AUT_CNTR_NAM?.includes('Транз')
 
     if (isTransit && transaction.OSND) {
-      const payment = await Payment.findOne({
-        'transaction.OSND': transaction.OSND,
-      })
-        .sort({ invoiceCreationDate: -1 })
-        .lean()
+      // The transit account is the bank's and shared by every domain, but the
+      // payments we look up are not: a match in another domain would point the
+      // row at that domain's company.
+      const inDomain = domainId ? { domain: domainId } : {}
+      const companyOf = async (filter) => {
+        const payment = await Payment.findOne({ ...inDomain, ...filter })
+          .sort({ invoiceCreationDate: -1 })
+          .lean()
+        return payment?.company ? String(payment.company) : null
+      }
 
-      if (payment?.company) {
-        return {
-          isMatchingPayment: false,
-          previousCompanyId: String(payment.company),
-        }
+      // 1. The same purpose was already sent (e.g. a re-payment).
+      // 2. The invoice the payer quoted - we issued it, so it names the company
+      //    even for the payer's first payment. Only with a domain: invoice
+      //    numbers are per domain.
+      // 3. An earlier transit payment from the same payer: the purpose changes
+      //    with every invoice, the payer's name at its end does not.
+      const invoiceNumber = extractInvoiceNumberFromOsnd(transaction.OSND)
+      const payerName = extractTransitPayerName(transaction.OSND)
+      const previousCompanyId =
+        (await companyOf({ 'transaction.OSND': transaction.OSND })) ??
+        (domainId && invoiceNumber
+          ? await companyOf({ invoiceNumber, type: Operations.Debit })
+          : null) ??
+        (domainId && payerName
+          ? await companyOf({
+              'transaction.AUT_CNTR_NAM': { $regex: 'Транз' },
+              'transaction.OSND': {
+                $regex: buildTransitPayerOsndRegexSource(payerName),
+                $options: 'i',
+              },
+            })
+          : null)
+
+      if (previousCompanyId) {
+        return { isMatchingPayment: false, previousCompanyId }
       }
     }
 
@@ -134,121 +163,47 @@ export async function checkTransaction({
   }
 }
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse<Data>
-) {
-  await start()
+// `?domainId=` picks the domain; its token is decrypted on the server, and the
+// wrapper has already checked the caller administers that domain.
+export default withDomainBankToken(async (req, res, { token, domainId }) => {
+  const { startDate, limit, followId, acc } = req.query
 
-  const { isGlobalAdmin, isDomainAdmin, user } = await getCurrentUser(req, res)
+  try {
+    const transactions = await getTransactionsForDateInterval(
+      token,
+      acc,
+      startDate,
+      limit,
+      followId
+    )
 
-  if (!user) {
-    return res.status(401).json({
-      success: false,
-      message: 'Unauthorized',
-    })
-  }
+    // Fetch the domain's companies once, then reuse for every transaction's
+    // on-air identity match (avoids a DB query per transaction).
+    const companies = await RealEstate.find({ domain: domainId })
+      .select('_id companyName account rnokpp description')
+      .lean()
 
-  if (!isGlobalAdmin && !isDomainAdmin) {
-    return res.status(403).json({
-      success: false,
-      message: 'Forbidden',
-    })
-  }
-  const {
-    token: tokenQuery,
-    startDate,
-    limit,
-    followId,
-    acc,
-    domainId,
-  } = req.query
-
-  const { token: tokenHeader } = req.headers
-
-  if (!tokenQuery && !tokenHeader) {
-    return res
-      .status(404)
-      .json({ success: false, message: 'Error! No bank token!' })
-  }
-
-  const domainIdStr =
-    typeof domainId === 'string' && domainId.length > 0 ? domainId : null
-
-  if (domainIdStr && isDomainAdmin && !isGlobalAdmin) {
-    const allowed = await Domain.findOne({
-      _id: domainIdStr,
-      adminEmails: user.email,
-    })
-    if (!allowed) {
-      return res.status(403).json({
-        success: false,
-        message: 'Forbidden: domain',
-      })
-    }
-  }
-
-  switch (req.method) {
-    case 'GET':
-      try {
-        const transactions = await getTransactionsForDateInterval(
-          tokenHeader ?? tokenQuery,
-          acc,
-          startDate,
-          limit,
-          followId
-        )
-
-        const resolvedDomainId =
-          domainIdStr && (isGlobalAdmin || isDomainAdmin) ? domainIdStr : null
-
-        // Fetch the domain's companies once, then reuse for every transaction's
-        // on-air identity match (avoids a DB query per transaction).
-        const companies = resolvedDomainId
-          ? await RealEstate.find({ domain: resolvedDomainId })
-              .select('_id companyName account rnokpp description')
-              .lean()
-          : []
-
-        const checkedTransactions = await Promise.all(
-          transactions.map(async (transaction) => {
-            try {
-              const matchResult = await checkTransaction({
-                transaction,
-                domainId: resolvedDomainId,
-                companies,
-              })
-              return { ...transaction, ...matchResult }
-            } catch (error) {
-              return {
-                ...transaction,
-                isMatchingPayment: false,
-                previousCompanyId: null,
-              }
-            }
+    const checkedTransactions = await Promise.all(
+      transactions.map(async (transaction) => {
+        try {
+          const matchResult = await checkTransaction({
+            transaction,
+            domainId,
+            companies,
           })
-        )
+          return { ...transaction, ...matchResult }
+        } catch (error) {
+          return {
+            ...transaction,
+            isMatchingPayment: false,
+            previousCompanyId: null,
+          }
+        }
+      })
+    )
 
-        return res
-          .status(200)
-          .json({ success: true, data: checkedTransactions })
-      } catch (error) {
-        return res.status(400).json({ success: false, message: error.message })
-      }
-
-    case 'POST':
-      return res
-        .status(501)
-        .json({ success: false, message: 'not implemented' })
-
-    case 'PATCH':
-      return res
-        .status(501)
-        .json({ success: false, message: 'not implemented' })
-
-    case 'DELETE':
-      return res
-        .status(501)
-        .json({ success: false, message: 'not implemented' })
+    return res.status(200).json({ success: true, data: checkedTransactions })
+  } catch (error) {
+    return res.status(400).json({ success: false, message: error.message })
   }
-}
+})

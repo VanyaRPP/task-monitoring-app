@@ -49,7 +49,10 @@ jest.mock('@common/api/serviceApi/service.api', () => ({
 jest.mock('@common/api/debtCalculationApi/debtCalculation.api', () => ({
   useGetDebtCalculationQuery: jest.fn(),
   useSaveDebtCalculationMutation: jest.fn(),
+  useGetBuildingTariffsQuery: jest.fn(() => ({ data: [], isLoading: false })),
 }))
+// Not under test here.
+jest.mock('./BuildingTariffs', () => () => null)
 
 const COMPANY: IExtendedRealestate = {
   _id: 'apt-1',
@@ -194,7 +197,7 @@ describe('Body — обрана квартира', () => {
     expect(screen.getByText('о/р 123456')).toBeInTheDocument()
   })
 
-  it('підказує площу й тариф компанії плейсхолдерами', () => {
+  it('підказує площу компанії плейсхолдером, тариф поки приховано', () => {
     renderWithContext(<DebtCalculationBody />, { overrides: {} })
 
     // The company parameter fields, not the same-named monthly table columns.
@@ -202,10 +205,8 @@ describe('Body — обрана квартира', () => {
       'placeholder',
       '67.08'
     )
-    expect(screen.getByLabelText('Тариф, грн/м²')).toHaveAttribute(
-      'placeholder',
-      '5.25'
-    )
+    expect(screen.queryByLabelText('Тариф, грн/м²')).not.toBeInTheDocument()
+    expect(screen.queryByText('Тариф, грн/м²')).not.toBeInTheDocument()
     expect(screen.getByLabelText('Борг на початок періоду')).toBeInTheDocument()
   })
 })

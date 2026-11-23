@@ -5,13 +5,13 @@ import {
   CameraOutlined,
   CheckOutlined,
   CloseOutlined,
-  MinusCircleOutlined,
   StopOutlined,
   SwapOutlined,
 } from '@ant-design/icons'
 import { ChangeField, changesInMonth } from '@utils/debt-calculation/changes'
 import { describeExcludedPeriod } from '@utils/debt-calculation/excludedPeriodPresets'
 import { periodsInMonth } from '@utils/debt-calculation/exclusions'
+import { SHOW_TARIFFS } from '@utils/debt-calculation/building-tariffs'
 import { daysInMonth } from '@utils/debt-calculation/months'
 import { InputNumber, Table, Tooltip, Typography } from 'antd'
 import type { ColumnsType, ColumnType } from 'antd/es/table'
@@ -31,23 +31,25 @@ interface Props {
   result: IDebtCalculationResult
 }
 
+/** What an excluded month shows for interest, days and losses: none accrue. */
+const NONE = '—'
+
 /**
  * A narrow mark per month: whether inflation losses and interest accrued.
- * Shape and label, not only colour, tell the three states apart.
+ * Shape and label, not only colour, tell the two states apart.
  */
 const exclusionColumn = (
   periods: IExcludedPeriod[]
 ): ColumnsType<MonthRow>[number] => ({
   title: (
-    <Tooltip title="Нарахування інфляційних і річних: ✓ — так, ✕ — виключено, ◐ — частину місяця">
+    <Tooltip title="Нарахування інфляційних і річних: ✓ — так, ✕ — виключено">
       <StopOutlined aria-label="Виключені періоди" />
     </Tooltip>
   ),
   width: 36,
   align: 'center',
   render: (_, row) => {
-    const total = daysInMonth(row.year, row.month)
-    if (row.excludedDays === 0) {
+    if (!row.excluded) {
       return (
         <CheckOutlined
           aria-label="Нараховується"
@@ -58,23 +60,13 @@ const exclusionColumn = (
     const why = periodsInMonth(periods, row.year, row.month)
       .map(describeExcludedPeriod)
       .join('; ')
-    const whole = row.excludedDays >= total
-    const label = whole
-      ? `Не нараховується: ${why}`
-      : `Виключено ${row.excludedDays} з ${total} днів (${why}). Річні — за ${row.days} дн.; індекс місяця ${row.indexApplied ? 'враховано' : 'не враховано'}.`
+    const label = `Не нараховується: ${why}`
     return (
       <Tooltip title={label}>
-        {whole ? (
-          <CloseOutlined
-            aria-label={label}
-            className={`${s.ExclusionMark} ${s.ExclusionExcluded}`}
-          />
-        ) : (
-          <MinusCircleOutlined
-            aria-label={label}
-            className={`${s.ExclusionMark} ${s.ExclusionPartial}`}
-          />
-        )}
+        <CloseOutlined
+          aria-label={label}
+          className={`${s.ExclusionMark} ${s.ExclusionExcluded}`}
+        />
       </Tooltip>
     )
   },
@@ -98,6 +90,8 @@ const MonthsTable: React.FC<Props> = ({ result }) => {
     excludedPeriods = [],
     company,
     openingDebtPrefill,
+    companyTariffs,
+    tariffGroup,
   } = useDebtCalculationContext()
   const hasExclusions = excludedPeriods.length > 0
 
@@ -231,13 +225,22 @@ const MonthsTable: React.FC<Props> = ({ result }) => {
       ),
     },
     {
+      key: 'tariff',
       title: 'Тариф, грн/м²',
       render: (_, row) => (
         <InputNumber
           size="small"
           min={0}
           value={valueOf(row, 'tariff')}
-          placeholder={String(row.tariff)}
+          // A month's average of two tariffs runs to many decimals.
+          placeholder={String(+row.tariff.toFixed(4))}
+          // A month the building's tariff changed in: its parts, by day.
+          title={row.tariffParts
+            ?.map(
+              ({ fromDay, toDay, value }) =>
+                `${value} грн/м² — ${fromDay}–${toDay} число`
+            )
+            .join('; ')}
           onChange={(value) => patch(row, 'tariff', value as number)}
         />
       ),
@@ -245,7 +248,7 @@ const MonthsTable: React.FC<Props> = ({ result }) => {
     {
       title: `${'Річних'}`,
       align: 'right',
-      render: (_, row) => formatMoney(row.interest),
+      render: (_, row) => (row.excluded ? NONE : formatMoney(row.interest)),
     },
     {
       title: (
@@ -256,25 +259,27 @@ const MonthsTable: React.FC<Props> = ({ result }) => {
     },
     {
       title: (
-        <Tooltip title="Днів нарахування в місяці. Можна змінити: Нараховано (якщо не введене вручну) і 3% річних рахуються за цими днями. Дні виключених періодів віднімаються від річних окремо.">
+        <Tooltip title="Днів нарахування в місяці. Можна змінити: Нараховано (якщо не введене вручну) і 3% річних рахуються за цими днями. У місяцях виключених періодів річні не нараховуються.">
           Днів
         </Tooltip>
       ),
       align: 'right',
-      render: (_, row) => (
-        <InputNumber
-          size="small"
-          min={0}
-          max={daysInMonth(row.year, row.month)}
-          precision={0}
-          value={valueOf(row, 'days')}
-          placeholder={String(row.days)}
-          // Nothing to change in a month that is wholly excluded.
-          disabled={row.excludedDays >= daysInMonth(row.year, row.month)}
-          onChange={(value) => patch(row, 'days', value as number)}
-          aria-label={`Днів, ${formatMonthLabel(row.year, row.month)}`}
-        />
-      ),
+      render: (_, row) =>
+        // No interest accrues in an excluded month: no days to count.
+        row.excluded ? (
+          NONE
+        ) : (
+          <InputNumber
+            size="small"
+            min={0}
+            max={daysInMonth(row.year, row.month)}
+            precision={0}
+            value={valueOf(row, 'days')}
+            placeholder={String(row.days)}
+            onChange={(value) => patch(row, 'days', value as number)}
+            aria-label={`Днів, ${formatMonthLabel(row.year, row.month)}`}
+          />
+        ),
     },
     {
       title: 'Індекс, %',
@@ -322,7 +327,8 @@ const MonthsTable: React.FC<Props> = ({ result }) => {
     {
       title: 'Інфляційні',
       align: 'right',
-      render: (_, row) => formatMoney(row.inflationLoss),
+      render: (_, row) =>
+        row.excluded ? NONE : formatMoney(row.inflationLoss),
     },
     ...(hasExclusions ? [exclusionColumn(excludedPeriods)] : []),
   ]
@@ -372,7 +378,12 @@ const MonthsTable: React.FC<Props> = ({ result }) => {
       <GeneralInput
         field="tariff"
         label="Тариф, грн/м²"
-        placeholder={String(company?.pricePerMeter ?? 0)}
+        // The building's tariffs fill the months below when it has them.
+        placeholder={
+          companyTariffs && tariffGroup !== undefined
+            ? 'будинок'
+            : String(company?.pricePerMeter ?? 0)
+        }
       />
     ),
     9: <StartDaySelect />,
@@ -381,18 +392,24 @@ const MonthsTable: React.FC<Props> = ({ result }) => {
   // The first row of the table holds them, in the very cells the months
   // below use - not the header: a column's title is also copied into a
   // hidden measuring row, which would render every input twice.
-  const columns: ColumnsType<TableRow> = leaves.map((leaf, index) => {
-    const column = leaf as ColumnType<TableRow>
-    return {
-      ...column,
-      // A 1px width in an auto-sized table means "as narrow as the content":
-      // the spare width then goes to the month column alone instead of
-      // padding every figure. Long titles wrap onto two lines.
-      width: index === 0 ? undefined : (column.width ?? 1),
-      render: (value, row, at) =>
-        row.general ? (general[index] ?? null) : column.render(value, row, at),
-    }
-  })
+  const columns: ColumnsType<TableRow> = leaves
+    .map((leaf, index) => {
+      const column = leaf as ColumnType<TableRow>
+      return {
+        ...column,
+        // A 1px width in an auto-sized table means "as narrow as the content":
+        // the spare width then goes to the month column alone instead of
+        // padding every figure. Long titles wrap onto two lines.
+        width: index === 0 ? undefined : (column.width ?? 1),
+        render: (value, row, at) =>
+          row.general
+            ? (general[index] ?? null)
+            : column.render(value, row, at),
+      }
+    })
+    .filter((column) => SHOW_TARIFFS || column.key !== 'tariff')
+  // The summary cells after the area and tariff stand one column left.
+  const shift = SHOW_TARIFFS ? 0 : 1
 
   return (
     <div className={s.MonthsWrap}>
@@ -422,23 +439,23 @@ const MonthsTable: React.FC<Props> = ({ result }) => {
               <Table.Summary.Cell index={4}>
                 {formatMoney(result.totals.correction)}
               </Table.Summary.Cell>
-              <Table.Summary.Cell index={5} colSpan={2} />
-              <Table.Summary.Cell index={7} align="right">
+              <Table.Summary.Cell index={5} colSpan={2 - shift} />
+              <Table.Summary.Cell index={7 - shift} align="right">
                 <strong>{formatMoney(result.interest)}</strong>
               </Table.Summary.Cell>
-              <Table.Summary.Cell index={8} align="right">
+              <Table.Summary.Cell index={8 - shift} align="right">
                 <strong>{formatMoney(result.body)}</strong>
               </Table.Summary.Cell>
-              <Table.Summary.Cell index={9} align="right">
+              <Table.Summary.Cell index={9 - shift} align="right">
                 {result.totals.days}
               </Table.Summary.Cell>
-              <Table.Summary.Cell index={10} colSpan={2} align="right">
+              <Table.Summary.Cell index={10 - shift} colSpan={2} align="right">
                 {formatCoefficient(result.coefficient)}
               </Table.Summary.Cell>
-              <Table.Summary.Cell index={12} align="right">
+              <Table.Summary.Cell index={12 - shift} align="right">
                 <strong>{formatMoney(result.inflation)}</strong>
               </Table.Summary.Cell>
-              {hasExclusions && <Table.Summary.Cell index={13} />}
+              {hasExclusions && <Table.Summary.Cell index={13 - shift} />}
             </Table.Summary.Row>
           </Table.Summary>
         )}

@@ -196,8 +196,8 @@ describe('calculateCompanyDebt - the moratorium by default', () => {
     const without = run({ overrides: { c1: { openingDebt: 0 } } })
 
     expect(fresh.interest).toBeLessThan(without.interest)
-    // November and most of December are out: only 2 days of December remain.
-    expect(fresh.totals.days).toBe(2 + 31 + 29)
+    // November and December are out whole, the 30th and 31st too.
+    expect(fresh.totals.days).toBe(31 + 29)
   })
 
   it('a saved calculation without its own list keeps none', () => {

@@ -13,6 +13,13 @@ import { DebtCalculationContext, IDebtCalculationContext } from './'
 import DebtCalculationBody from './Body'
 import { formatMoney } from './format'
 
+// The tariff is hidden on the page for now but still counts: shown here so
+// its changes can be typed.
+jest.mock('@utils/debt-calculation/building-tariffs', () => ({
+  ...jest.requireActual('@utils/debt-calculation/building-tariffs'),
+  SHOW_TARIFFS: true,
+}))
+
 const COMPANY = {
   _id: 'apt-1',
   companyName: 'Квартира №23',

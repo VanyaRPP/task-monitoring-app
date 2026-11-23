@@ -36,6 +36,10 @@ export interface TableProps {
   prevPayment?: IPayment
   domainId?: string
   editable?: boolean
+  /** View mode only: domain setting that drops the quantity and price columns. */
+  hideQuantityAndPrice?: boolean
+  /** View mode only: client-facing name for a row (domain service alias). */
+  getAlias?: (record: any) => string | undefined
   disabled?: boolean
 
   extended?: boolean
@@ -70,6 +74,8 @@ export interface InvoiceComponentProps {
 export const EditInvoicesTable_unstable: React.FC<EditInvoicesTableProps> = ({
   form: _form,
   editable = false,
+  hideQuantityAndPrice = false,
+  getAlias,
   disabled = false,
   loading = false,
   service,
@@ -93,18 +99,25 @@ export const EditInvoicesTable_unstable: React.FC<EditInvoicesTableProps> = ({
           {
             title: 'Назва',
             width: 400,
-            render: (_: any, field: { name: number }) => (
-              <Name
-                form={form}
-                name={field.name}
-                record={form.getFieldValue(['invoice', field.name])}
-                editable={editable}
-                disabled={disabled}
-              />
-            ),
+            render: (_: any, field: { name: number }) => {
+              const record = form.getFieldValue(['invoice', field.name])
+              const alias = !editable ? getAlias?.(record) : undefined
+              return alias ? (
+                <span>{alias}</span>
+              ) : (
+                <Name
+                  form={form}
+                  name={field.name}
+                  record={record}
+                  editable={editable}
+                  disabled={disabled}
+                />
+              )
+            },
           },
           {
             title: 'Кількість',
+            hidden: !editable && hideQuantityAndPrice,
             width: 250,
             render: (_: any, field: { name: number }) => (
               <Amount
@@ -123,6 +136,7 @@ export const EditInvoicesTable_unstable: React.FC<EditInvoicesTableProps> = ({
                 : ''
             }`,
             width: 250,
+            hidden: !editable && hideQuantityAndPrice,
             render: (_: any, field: { name: number }) => (
               <Price
                 form={form}

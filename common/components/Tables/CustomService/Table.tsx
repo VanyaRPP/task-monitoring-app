@@ -26,9 +26,12 @@ import {
   useGetDomainsByAdminQuery,
   useGetDomainsQuery,
   useGetDomainTypeTemplatesQuery,
+  useSetServiceAliasMutation,
 } from '@common/api/domainApi/domain.api'
 import type { DomainTypeTemplateCategory } from '@common/api/domainApi/domain.api.types'
 import { defaultServices, Roles } from '@utils/constants'
+import { resolveServiceType } from '@utils/domain/resolve-service-type'
+import { MAX_SERVICE_ALIAS_LENGTH } from '@utils/domain/service-display'
 import {
   getDomainTypeTemplateCategoryLabel,
   DOMAIN_TYPE_TEMPLATE_CATEGORY_OPTIONS,
@@ -150,7 +153,36 @@ export const CustomServicesTable: React.FC<CustomServicesTableProps> = ({
   const [editingService, setEditingService] = useState<ICustomService | null>(
     null
   )
-  const [form] = Form.useForm<{ name: string; serviceType: string }>()
+  const [setAlias, { isLoading: isSettingAlias }] = useSetServiceAliasMutation()
+  const [form] = Form.useForm<{
+    name: string
+    serviceType: string
+    aliasDomainId?: string
+    alias?: string
+  }>()
+  const editingIsSystem =
+    !!editingService && defaultServiceIds.has(editingService._id)
+  const pickedAliasDomainId = Form.useWatch('aliasDomainId', form)
+  // A domain's own service has a fixed domain; the field is only rendered for shared ones.
+  const aliasDomainId = editingService?.domain ?? pickedAliasDomainId
+  const aliasDomainOptions = useMemo(
+    () =>
+      (domains as any[]).map((d) => ({ value: String(d._id), label: d.name })),
+    [domains]
+  )
+
+  const findAlias = useCallback(
+    (serviceId: string, domainId?: string): string | undefined =>
+      (domains as any[])
+        .find((d) => String(d._id) === domainId)
+        ?.serviceAliases?.find((a: any) => a.serviceId === serviceId)?.alias,
+    [domains]
+  )
+
+  const setAliasFormValue = (serviceId: string, domainId?: string) => {
+    const current = findAlias(serviceId, domainId)
+    form.setFieldsValue({ alias: current ?? '' })
+  }
 
   const serviceTypeOptions = useMemo(
     () => getAssignableServiceTypeOptions(),
@@ -159,20 +191,55 @@ export const CustomServicesTable: React.FC<CustomServicesTableProps> = ({
 
   const openEdit = (record: ICustomService) => {
     setEditingService(record)
+    // A domain's own service has a fixed domain; a shared catalog service
+    // needs one picked (preselected when the admin has just one).
+    // Otherwise preselect the domain that already has an alias for it.
+    const domainWithAlias = (domains as any[]).find((d) =>
+      d.serviceAliases?.some((a: any) => a.serviceId === record._id)
+    )
+    const domainId =
+      record.domain ??
+      (domainWithAlias ? String(domainWithAlias._id) : undefined) ??
+      (aliasDomainOptions.length === 1
+        ? aliasDomainOptions[0].value
+        : undefined)
     form.setFieldsValue({
       name: record.name,
       serviceType: record.serviceType ?? UNDEFINED_SERVICE_TYPE_VALUE,
+      aliasDomainId: domainId,
     })
+    setAliasFormValue(record._id, domainId)
   }
 
   const handleEdit = async () => {
     try {
-      const { name, serviceType } = await form.validateFields()
-      await editService({
-        _id: editingService._id,
-        name,
-        serviceType: serviceType ? serviceType : null,
-      }).unwrap()
+      const { name, serviceType, alias } = await form.validateFields()
+      if (!editingIsSystem) {
+        await editService({
+          _id: editingService._id,
+          name,
+          serviceType: serviceType ? serviceType : null,
+        }).unwrap()
+      }
+      const nextAlias = (alias ?? '').trim()
+      if (
+        aliasDomainId &&
+        nextAlias !== (findAlias(editingService._id, aliasDomainId) ?? '')
+      ) {
+        await setAlias({
+          domainId: aliasDomainId,
+          serviceId: editingService._id,
+          serviceType:
+            resolveServiceType({
+              _id: editingService._id,
+              serviceType: editingService.serviceType,
+              fieldName: editingService.fieldName,
+            }) ?? undefined,
+          fieldName: editingService.fieldName,
+          serviceName: editingService.name,
+          alias: nextAlias,
+        }).unwrap()
+      }
       message.success('Послугу оновлено')
       setEditingService(null)
     } catch {
@@ -229,7 +296,6 @@ export const CustomServicesTable: React.FC<CustomServicesTableProps> = ({
               type="text"
               icon={<EditOutlined />}
               onClick={() => openEdit(record)}
-              disabled={isSystem}
             />
             <Popconfirm
               title="Видалити послугу?"
@@ -296,7 +362,7 @@ export const CustomServicesTable: React.FC<CustomServicesTableProps> = ({
         onCancel={() => setEditingService(null)}
         okText="Зберегти"
         cancelText="Скасувати"
-        confirmLoading={isEditing}
+        confirmLoading={isEditing || isSettingAlias}
         destroyOnClose
       >
         <Form form={form} layout="vertical">
@@ -305,10 +371,40 @@ export const CustomServicesTable: React.FC<CustomServicesTableProps> = ({
             label="Назва"
             rules={[{ required: true, message: 'Введіть назву послуги' }]}
           >
-            <Input />
+            <Input disabled={editingIsSystem} />
           </Form.Item>
           <Form.Item name="serviceType" label="Тип послуги">
-            <Select options={serviceTypeOptions} />
+            <Select options={serviceTypeOptions} disabled={editingIsSystem} />
+          </Form.Item>
+          {!editingService?.domain && (
+            <Form.Item
+              name="aliasDomainId"
+              label="Домен для аліаса"
+              extra="Аліас діє лише в обраному домені"
+            >
+              <Select
+                allowClear
+                showSearch
+                placeholder="Оберіть домен"
+                options={aliasDomainOptions}
+                optionFilterProp="label"
+                onChange={(value) =>
+                  setAliasFormValue(editingService._id, value)
+                }
+              />
+            </Form.Item>
+          )}
+          <Form.Item
+            name="alias"
+            label="Аліас (назва для клієнта)"
+            extra="Показується замість назви в довідках і рахунках цього домену"
+          >
+            <Input
+              allowClear
+              disabled={!aliasDomainId}
+              maxLength={MAX_SERVICE_ALIAS_LENGTH}
+              placeholder="Напр. «Освітня послуга»"
+            />
           </Form.Item>
         </Form>
       </Modal>

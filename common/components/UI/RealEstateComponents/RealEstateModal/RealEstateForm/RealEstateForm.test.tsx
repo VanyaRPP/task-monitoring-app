@@ -160,6 +160,53 @@ describe('RealEstateForm — вкладки (Tabs)', () => {
   })
 })
 
+describe('RealEstateForm — необов’язковий «Опис»', () => {
+  const renderWithForm = () => {
+    const formRef: { current: FormInstance | null } = { current: null }
+    const CaptureWrapper = () => {
+      const [form] = Form.useForm()
+      formRef.current = form
+      return (
+        <RealEstateForm
+          form={form as FormInstance}
+          setIsValueChanged={() => undefined}
+        />
+      )
+    }
+    render(<CaptureWrapper />)
+    return formRef
+  }
+
+  it('не позначає поле «Опис» як обов’язкове', () => {
+    renderWithForm()
+
+    const label = screen.getByText('Опис', { selector: 'label' })
+    expect(label).not.toHaveClass('ant-form-item-required')
+    // sanity check: the required mark is still rendered for real required fields
+    expect(
+      screen.getByText('Назва компанії', { selector: 'label' })
+    ).toHaveClass('ant-form-item-required')
+  })
+
+  it('проходить валідацію з порожнім описом', async () => {
+    const formRef = renderWithForm()
+
+    const values = await formRef.current?.validateFields(['description'])
+    expect(values?.description).toBeUndefined()
+  })
+
+  it('дозволяє очистити раніше заповнений опис', async () => {
+    const formRef = renderWithForm()
+    const textarea = screen.getByLabelText('Опис')
+
+    fireEvent.change(textarea, { target: { value: 'старий опис' } })
+    fireEvent.change(textarea, { target: { value: '' } })
+
+    const values = await formRef.current?.validateFields(['description'])
+    expect(values).toMatchObject({ description: '' })
+  })
+})
+
 /**
  * Поля «Площа (м²)» і «Ціна (грн/м²)» живлять формулу Розміщення/Утримання в
  * Payment Bulk. Вони мають з'являтися не лише для сидованих послуг, а й для

@@ -1,3 +1,4 @@
+import type { ITariffPart } from './building-tariffs'
 import type { IExcludedPeriod } from './exclusions'
 import { IYearMonth } from './months'
 
@@ -29,6 +30,11 @@ export interface IDebtMonthInput extends IYearMonth {
   area?: number
   /** Tariff (membership fee), UAH per m². */
   tariff?: number
+  /**
+   * The tariff's stretches when it changed within the month; `tariff` is then
+   * their average by days. Carried through for the printout's dates.
+   */
+  tariffParts?: ITariffPart[]
   /** Charged, UAH. Computed as `area × tariff` when omitted. */
   charged?: number
   /**
@@ -86,6 +92,8 @@ export interface IDebtMonthRow extends IYearMonth {
   opening: number
   area: number
   tariff: number
+  /** See `IDebtMonthInput.tariffParts`. */
+  tariffParts?: ITariffPart[]
   /** Charged, UAH (column D of the Act). */
   charged: number
   /** Correction, UAH: the month's change to the debt, negative lowers it. */
@@ -95,11 +103,16 @@ export interface IDebtMonthRow extends IYearMonth {
   /** Debt at month end, UAH (column I). */
   debt: number
   /**
-   * Days interest accrued for (column J): the calendar days, less any that
-   * fall in an excluded period.
+   * Days interest accrued for (column J): the calendar days, none in an
+   * excluded month.
    */
   days: number
-  /** Days of the month inside an excluded period. */
+  /**
+   * Whether an excluded period takes the month: no interest, no index, and
+   * the losses stand still (shown as «—»).
+   */
+  excluded: boolean
+  /** The month's accruing days, when it is excluded. */
   excludedDays: number
   /** Whether this month's index went into the coefficient. */
   indexApplied: boolean
