@@ -20,6 +20,19 @@ export interface IDomain {
   archived?: boolean
   /** Tariffs of the provider's buildings for the debt calculation, one per address. */
   debtTariffs?: IBuildingTariffs[]
+  /** Client-facing names that replace a service's real name on invoices. */
+  serviceAliases?: IDomainServiceAlias[]
+  /** Hides quantity and unit price on every invoice of the domain. */
+  hideQuantityAndPrice?: boolean
+}
+
+export interface IDomainServiceAlias {
+  serviceId: string
+  /** ServiceType of the service at save time: matches lines that lack serviceId. */
+  serviceType?: string
+  fieldName?: string
+  serviceName?: string
+  alias: string
 }
 
 export interface ICustomService {
@@ -103,6 +116,10 @@ const DomainSchema = new Schema<IDomain>({
   // shape (`sanitizeBuildingTariffs`): kept out of every other domain query,
   // so a domain form can neither carry it nor write a stale copy back.
   debtTariffs: { type: [Object], select: false, default: undefined },
+  // Written only by /api/domain/[id]/service-alias (the domain PATCH drops it),
+  // so a stale domain form cannot overwrite aliases.
+  serviceAliases: { type: [Object], default: undefined },
+  hideQuantityAndPrice: { type: Boolean },
 })
 
 const Domain: mongoose.Model<IDomain> =

@@ -13,6 +13,16 @@ export interface IDomainModel {
   domainTypeTemplateId?: string
   defaultTemplate?: string
   archived?: boolean
+  serviceAliases?: IDomainServiceAlias[]
+  hideQuantityAndPrice?: boolean
+}
+
+export interface IDomainServiceAlias {
+  serviceId: string
+  serviceType?: string
+  fieldName?: string
+  serviceName?: string
+  alias: string
 }
 
 export type DomainTypeTemplateCategory =

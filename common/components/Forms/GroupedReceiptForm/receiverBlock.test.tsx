@@ -28,6 +28,10 @@ jest.mock('@components/Forms/GroupedReceiptForm/GroupedPricesTable', () => ({
   default: () => <div>GroupedPricesTable</div>,
 }))
 
+jest.mock('@common/api/domainApi/domain.api', () => ({
+  useGetDomainsQuery: () => ({ data: [] }),
+}))
+
 jest.mock('@common/api/paymentApi/payment.api', () => ({
   useEditPaymentMutation: () => [jest.fn().mockResolvedValue({ data: {} })],
   useSendPaymentEmailMutation: () => [

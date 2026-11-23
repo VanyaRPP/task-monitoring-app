@@ -93,6 +93,11 @@ export default async function handler(
         if ('archived' in req.body) {
           delete req.body.archived
         }
+        // Owned by /service-alias: a stale domain form must not overwrite it.
+        delete req.body.serviceAliases
+        if ('hideQuantityAndPrice' in req.body) {
+          req.body.hideQuantityAndPrice = req.body.hideQuantityAndPrice === true
+        }
 
         const disabledServiceIds = normalizeDisabledServiceIds(
           req.body?.disabledServiceIds
