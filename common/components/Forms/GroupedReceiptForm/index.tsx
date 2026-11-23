@@ -7,6 +7,7 @@ import { usePaymentContext } from '@components/AddPaymentModal'
 import { useInvoiceCurrency } from '@modules/hooks/useInvoiceCurrency'
 import { TemplateKey } from '@components/AddPaymentModal/resolveTemplate'
 import { FC, useRef } from 'react'
+import { useDomainDisplayData } from '@modules/hooks/useDomainDisplayData'
 import { useReceiptTemplateProps } from './useReceiptTemplateProps'
 import { useInvoiceTemplateDescriptions } from './useInvoiceTemplateDescriptions'
 import { applyDescriptionOverrides } from './applyDescriptionOverrides'
@@ -79,7 +80,11 @@ const GroupedReceiptForm: FC<Props> = ({
     overrides,
   } = useInvoiceTemplateDescriptions({ data })
 
-  const effectiveData = applyDescriptionOverrides(data, descriptionOverrides)
+  const displayData = useDomainDisplayData(data)
+  const effectiveData = applyDescriptionOverrides(
+    displayData,
+    descriptionOverrides
+  )
 
   const receiptProps = useReceiptTemplateProps({
     data: effectiveData,
@@ -106,6 +111,9 @@ const GroupedReceiptForm: FC<Props> = ({
     paymentInfoLines,
     issuedToLines,
     normalizedBankDetailsLines,
+    hideQuantityAndPrice,
+    // Forced off by the domain's hide setting, otherwise the local toggle.
+    showQuantityInPreview: effectiveShowQuantity,
   } = receiptProps
 
   const componentRef = useRef<HTMLDivElement | null>(null)
@@ -325,7 +333,8 @@ const GroupedReceiptForm: FC<Props> = ({
     data: effectiveData,
     componentRef,
     isEnglish,
-    showQuantityInPreview,
+    showQuantityInPreview: effectiveShowQuantity,
+    hideQuantityAndPrice,
     currencyLabel,
     currency,
     modernInvoiceNumber,

@@ -3,6 +3,7 @@ import { realestateApi } from '@common/api/realestateApi/realestate.api'
 import { customServicesApi } from '@common/api/customServicesApi/customServices.api'
 import {
   IDomainModel,
+  IDomainServiceAlias,
   IExtendedDomain,
   IExtendedArchivedDomain,
   IDeleteDomainResponse,
@@ -101,6 +102,30 @@ export const domainApi = createApi({
         response
           ? [
               { type: 'Domain', id },
+              { type: 'Domain', id: 'LIST' },
+            ]
+          : [],
+    }),
+    setServiceAlias: builder.mutation<
+      { success: boolean; data: IDomainServiceAlias[] },
+      {
+        domainId: string
+        serviceId: string
+        serviceType?: string
+        fieldName?: string
+        serviceName?: string
+        alias: string
+      }
+    >({
+      query: ({ domainId, ...body }) => ({
+        url: `domain/${domainId}/service-alias`,
+        method: 'PUT',
+        body,
+      }),
+      invalidatesTags: (response, error, arg) =>
+        response
+          ? [
+              { type: 'Domain', id: arg.domainId },
               { type: 'Domain', id: 'LIST' },
             ]
           : [],
@@ -306,6 +331,7 @@ export const {
   useAddDomainMutation,
   useDeleteDomainMutation,
   useEditDomainMutation,
+  useSetServiceAliasMutation,
   useUpdateArchivedDomainMutation,
   useGetDomainByPkQuery,
   useGetDomainsByAdminQuery,

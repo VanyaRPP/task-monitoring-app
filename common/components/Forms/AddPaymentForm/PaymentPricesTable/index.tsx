@@ -3,6 +3,11 @@ import { keepInvoiceRow } from '@components/AddPaymentModal/invoiceRowFilter'
 import { EditInvoicesTable_unstable } from '@components/Tables/EditInvoiceTable'
 import { IService } from '@common/api/serviceApi/service.api.types'
 import { Form } from 'antd'
+import { useDomainDisplaySettings } from '@modules/hooks/useDomainDisplayData'
+import {
+  resolveServiceAlias,
+  shouldHideQuantityAndPrice,
+} from '@utils/domain/service-display'
 import { useEffect } from 'react'
 
 export interface PaymentPricesTableProps {
@@ -22,6 +27,7 @@ const PaymentPricesTable: React.FC<PaymentPricesTableProps> = ({
   const { form, service, company, prevPayment } = usePaymentContext()
   const domainId = Form.useWatch('domain', form)
   const invoices = form.getFieldValue('invoice')
+  const displaySettings = useDomainDisplaySettings(domainId)
 
   useEffect(() => {
     const filteredInvoices = invoices?.filter(keepInvoiceRow)
@@ -35,6 +41,8 @@ const PaymentPricesTable: React.FC<PaymentPricesTableProps> = ({
     <EditInvoicesTable_unstable
       form={form}
       editable={!preview}
+      hideQuantityAndPrice={shouldHideQuantityAndPrice(displaySettings)}
+      getAlias={(record) => resolveServiceAlias(record, displaySettings)}
       loading={loading}
       service={service}
       company={company}

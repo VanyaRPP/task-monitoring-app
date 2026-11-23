@@ -11,6 +11,7 @@ import { IPayment } from '@common/api/paymentApi/payment.api.types'
 import { getCurrencyNames, normalizeCurrency } from '@utils/helpers'
 import { usePaymentContext } from '@components/AddPaymentModal'
 import { useInvoiceCurrency } from '@modules/hooks/useInvoiceCurrency'
+import { useDomainDisplayData } from '@modules/hooks/useDomainDisplayData'
 import {
   getDomainHeading,
   getRecipientCompanyHeading,
@@ -27,10 +28,12 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
 
   // Single source of truth: live form values when present, otherwise the
   // payment snapshot from props.
-  const payment = useMemo(
+  const rawPayment = useMemo(
     () => (liveInvoice ? { ...data, invoice: liveInvoice } : data),
     [data, liveInvoice]
   )
+  // Domain display settings: service aliases and hidden quantity/price.
+  const payment = useDomainDisplayData(rawPayment)
 
   const { totalSum, totalFractionSum } = useMemo(() => {
     const sum = payment.invoice.reduce((acc, item) => acc + Number(item.sum), 0)
@@ -198,6 +201,10 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
               domainId={payment?.domain?._id}
               currency={currency}
               invoices={payment.invoice}
+              hideQuantityAndPrice={
+                (payment as { hideQuantityAndPrice?: boolean })
+                  .hideQuantityAndPrice
+              }
             />
           </div>
 
