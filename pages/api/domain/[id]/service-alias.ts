@@ -70,7 +70,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<Data>) {
     return res.status(400).json({ success: false, message: 'Alias too long' })
   }
 
-  const domain = await Domain.findById(domainId).select('serviceAliases')
+  const domain = await Domain.findById(domainId).select('serviceAliases').lean()
   const next = upsertServiceAlias(domain?.serviceAliases, {
     serviceId,
     serviceType:

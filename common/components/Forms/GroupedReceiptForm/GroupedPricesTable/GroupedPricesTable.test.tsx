@@ -424,7 +424,7 @@ describe('GroupedPricesTable', () => {
     expect(headers.length).toBe(3)
   })
 
-  test('grouped preview: a line with a domain alias is shown by the alias, not rolled into its group', () => {
+  test('grouped preview: a line with a domain alias still rolls into its group', () => {
     mockUseGetCustomServicesByDomainQuery.mockReturnValue({
       data: {
         data: [
@@ -444,8 +444,29 @@ describe('GroupedPricesTable', () => {
       invoices: [{ ...baseInvoice, alias: 'Освітня послуга' }],
     })
 
+    expect(screen.getByText('Група тест')).toBeInTheDocument()
+    expect(screen.queryByText('Освітня послуга')).not.toBeInTheDocument()
+  })
+
+  test('grouped preview: an aliased line outside any group is shown by its alias', () => {
+    mockUseGetCustomServicesByDomainQuery.mockReturnValue({
+      data: {
+        data: [
+          {
+            groupName: 'Інше',
+            services: [{ name: 'Y', fieldName: 'yyy', _id: 'sy' }],
+          },
+        ],
+      },
+      isLoading: false,
+    })
+
+    renderTable({
+      usePreviewQuantityToggle: true,
+      invoices: [{ ...baseInvoice, alias: 'Освітня послуга' }],
+    })
+
     expect(screen.getByText('Освітня послуга')).toBeInTheDocument()
-    expect(screen.queryByText('Група тест')).not.toBeInTheDocument()
   })
 
   test('hideQuantityAndPrice drops quantity and price even in the detailed layout', () => {
