@@ -11,6 +11,7 @@ import {
 } from '@common/services/bankTokenService/bankToken.service'
 import { DOMAIN_GENERAL_PROJECTION } from '@utils/domain/domain-view-access'
 import { normalizeDisabledServiceIds } from '@common/services/customServiceService/customService.service'
+import { ensureHousingFeeSafely } from '@common/services/housingFeeService/housingFee.service'
 
 export default async function handler(
   req: NextApiRequest,
@@ -149,15 +150,17 @@ export default async function handler(
         }
 
         await Domain.create(updatedObj)
-          .then((domain) => {
+          .then(async (domain) => {
+            const housingFeeAdded = await ensureHousingFeeSafely(domain._id)
+            const saved = housingFeeAdded
+              ? await Domain.findById(domain._id)
+              : domain
             // `create` hands back the document as written, encrypted token
             // included - select: false only applies to queries.
             return res.status(201).json({
               success: true,
               data: withoutBankTokenSecrets(
-                typeof domain?.toObject === 'function'
-                  ? domain.toObject()
-                  : domain
+                typeof saved?.toObject === 'function' ? saved.toObject() : saved
               ),
             })
           })
