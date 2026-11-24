@@ -25,16 +25,11 @@ import {
   UndoOutlined,
 } from '@ant-design/icons'
 import cn from 'classnames'
+import dynamic from 'next/dynamic'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { useIsAdmin } from '@modules/hooks/useIsAdmin'
 import { useAppSelector } from '@modules/store/hooks'
-import AddPaymentModal from '@components/AddPaymentModal'
 import type { IPaymentField } from '@common/api/paymentApi/payment.api.types'
-import AddCostModal from '@components/AddCostModal'
-import AddServiceModal from '@components/AddServiceModal'
-import RealEstateModal from '@components/UI/RealEstateComponents/RealEstateModal'
-import AddStreetModal from '@components/AddStreetModal'
-import DomainModal from '@components/UI/DomainsComponents/DomainModal'
 import type { ExpenseDraft } from '@common/services/aiAssistant/expenseActions'
 import { message } from 'antd'
 import {
@@ -67,6 +62,27 @@ import {
 import styles from './style.module.scss'
 
 const { Text } = Typography
+
+const AddPaymentModal = dynamic(() => import('@components/AddPaymentModal'), {
+  ssr: false,
+})
+const AddCostModal = dynamic(() => import('@components/AddCostModal'), {
+  ssr: false,
+})
+const AddServiceModal = dynamic(() => import('@components/AddServiceModal'), {
+  ssr: false,
+})
+const RealEstateModal = dynamic(
+  () => import('@components/UI/RealEstateComponents/RealEstateModal'),
+  { ssr: false }
+)
+const AddStreetModal = dynamic(() => import('@components/AddStreetModal'), {
+  ssr: false,
+})
+const DomainModal = dynamic(
+  () => import('@components/UI/DomainsComponents/DomainModal'),
+  { ssr: false }
+)
 
 const REGENERATE_BLOCKED_REASON =
   'Ця відповідь відкрила форму. Щоб не створити запис двічі, поставте нове запитання.'

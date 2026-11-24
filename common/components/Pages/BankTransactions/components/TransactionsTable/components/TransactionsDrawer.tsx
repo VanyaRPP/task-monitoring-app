@@ -10,8 +10,7 @@ import {
 import React, { FC, useEffect, useMemo, useState } from 'react'
 import { ITransaction } from './transactionTypes'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
-import AddPaymentModal from '@components/AddPaymentModal'
-import AddCostModal from '@components/AddCostModal'
+import dynamic from 'next/dynamic'
 import {
   SendOutlined,
   DownOutlined,
@@ -34,6 +33,13 @@ import {
 import dayjs from 'dayjs'
 import { companySelectLabelRender } from '@components/UI/Reusable/CompanyStatusLabel'
 import styles from './style.module.scss'
+
+const AddPaymentModal = dynamic(() => import('@components/AddPaymentModal'), {
+  ssr: false,
+})
+const AddCostModal = dynamic(() => import('@components/AddCostModal'), {
+  ssr: false,
+})
 
 interface TransactionDrawerProps {
   transaction: ITransaction

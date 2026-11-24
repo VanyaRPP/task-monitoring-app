@@ -20,12 +20,9 @@ import {
   useHtmlToPdfZipMutation,
   useGenerateExcelMutation,
 } from '@common/api/paymentApi/payment.api'
-import HeadlessReceiptRenderer from '@components/Forms/GroupedReceiptForm/HeadlessReceiptRenderer'
 import dayjs from 'dayjs'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
-import AddPaymentModal from '@components/AddPaymentModal'
-import ImportInvoices from '@components/UI/PaymentCardHeader/ImportInvoices'
 import { AppRoutes, Operations, Roles } from '@utils/constants'
 import { isAdminCheck } from '@utils/helpers'
 import {
@@ -47,15 +44,29 @@ import {
 } from 'antd'
 import { saveAs } from 'file-saver'
 import { useRouter } from 'next/router'
+import dynamic from 'next/dynamic'
 import { shouldOpenModal } from '@utils/shouldOpenModal'
 import PaymentCardLabel from './PaymentCardLabel'
 import styles from './styles.module.scss'
-import ImportInvoicesModal from './ImportInvoices/ImportInvoicesModal'
 import {
   resolvePreselectedCompany,
   resolvePreselectedDomain,
 } from './preselect'
 const { useBreakpoint } = Grid
+
+// Rendered only after a user action (open/edit/import/bulk PDF), so keep them
+// out of the payments page chunk.
+const AddPaymentModal = dynamic(() => import('@components/AddPaymentModal'), {
+  ssr: false,
+})
+const ImportInvoicesModal = dynamic(
+  () => import('./ImportInvoices/ImportInvoicesModal'),
+  { ssr: false }
+)
+const HeadlessReceiptRenderer = dynamic(
+  () => import('@components/Forms/GroupedReceiptForm/HeadlessReceiptRenderer'),
+  { ssr: false }
+)
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { PaymentDateRange } from '@utils/paymentDateRange'
 import { getInvoiceCustomServiceNames } from '@components/Tables/Payment/usePaymentColumns'

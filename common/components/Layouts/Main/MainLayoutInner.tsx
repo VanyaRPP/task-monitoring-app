@@ -7,7 +7,7 @@ import { BreadcrumbPath } from '@components/UI/Breadcrumb'
 import { FloatButtonItem } from '@utils/types'
 import { Layout } from 'antd'
 import { FloatButtonsLayoutAddon } from './FloatButtonsLayoutAddon'
-import AIChat from '@components/AIChat'
+import AIChat from '@components/AIChat/LazyAIChat'
 
 import styles from './style.module.scss'
 

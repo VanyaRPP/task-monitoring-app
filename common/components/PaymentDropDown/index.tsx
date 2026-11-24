@@ -17,12 +17,17 @@ import {
 import { Operations } from '@utils/constants'
 import { dateToDefaultFormat } from '@assets/features/formatDate'
 import { useHtmlToPdfMutation } from '@common/api/paymentApi/payment.api'
-import HeadlessReceiptRenderer from '@components/Forms/GroupedReceiptForm/HeadlessReceiptRenderer'
+import dynamic from 'next/dynamic'
 import { saveAs } from 'file-saver'
 import { useState } from 'react'
 import dayjs from 'dayjs'
 
 import s from './PaymentDropDown.module.scss'
+
+const HeadlessReceiptRenderer = dynamic(
+  () => import('@components/Forms/GroupedReceiptForm/HeadlessReceiptRenderer'),
+  { ssr: false }
+)
 
 interface Props {
   payment: IExtendedPayment
