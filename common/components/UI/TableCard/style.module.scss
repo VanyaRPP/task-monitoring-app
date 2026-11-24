@@ -1,9 +1,8 @@
 .Card {
   overflow: hidden;
-
   min-height: 300px;
 
-  :global .ant-card-body {
+  :global(.ant-card-body) {
     padding: 0 !important;
 
     tr > * {
@@ -12,11 +11,12 @@
   }
 
   // nested tables wrong position fix
-  :global
+  :global(
     .ant-table.ant-table-small
-    .ant-table-tbody
-    .ant-table-wrapper:only-child
-    .ant-table {
+      .ant-table-tbody
+      .ant-table-wrapper:only-child
+      .ant-table
+  ) {
     margin: 0;
   }
 }

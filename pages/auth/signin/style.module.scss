@@ -60,11 +60,9 @@
 }
 
 .DividerOr {
-  :global {
-    .ant-divider-horizontal.ant-divider-with-text,
-    .ant-divider-inner-text {
-      color: var(--textColor);
-    }
+  :global(.ant-divider-horizontal.ant-divider-with-text),
+  :global(.ant-divider-inner-text) {
+    color: var(--textColor);
   }
 }
 

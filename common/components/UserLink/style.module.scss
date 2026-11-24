@@ -15,24 +15,22 @@
 }
 
 .Panel {
-  :global {
-    .ant-collapse-header-text {
-      color: var(--textColor);
-    }
-    .ant-collapse-arrow {
-      color: var(--textColor);
-    }
+  :global(.ant-collapse-header-text) {
+    color: var(--textColor);
+  }
+
+  :global(.ant-collapse-arrow) {
+    color: var(--textColor);
   }
 }
 
 .Drawer {
-  :global {
-    .ant-drawer-title {
-      color: var(--textColor);
-    }
-    .ant-drawer-close {
-      color: var(--textColor);
-    }
+  :global(.ant-drawer-title) {
+    color: var(--textColor);
+  }
+
+  :global(.ant-drawer-close) {
+    color: var(--textColor);
   }
 }
 

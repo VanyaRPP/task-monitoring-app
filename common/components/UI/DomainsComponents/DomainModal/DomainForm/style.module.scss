@@ -21,37 +21,33 @@
 }
 
 .card {
-  :global {
-    .ant-card-body {
-      padding: 0;
-    }
+  :global(.ant-card-body) {
+    padding: 0;
+  }
 
-    .ant-collapse {
-      background: transparent;
-    }
+  :global(.ant-collapse) {
+    background: transparent;
+  }
 
-    .ant-collapse-item {
-      border: none;
-    }
+  :global(.ant-collapse-item) {
+    border: none;
+  }
 
-    .ant-collapse-header {
-      display: flex;
-      align-items: center;
-      padding: 12px 16px;
-    }
+  :global(.ant-collapse-header) {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+  }
 
-    .ant-collapse-expand-icon {
-      display: flex;
-      align-items: center;
-      height: 100%;
+  :global(.ant-collapse-expand-icon) {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    transform: translateY(4px);
+  }
 
-      // ВОТ ЭТО ФИКСИТ ПРОБЛЕМУ
-      transform: translateY(4px);
-    }
-
-    .ant-collapse-content-box {
-      padding: 0 16px 16px;
-    }
+  :global(.ant-collapse-content-box) {
+    padding: 0 16px 16px;
   }
 }
 
@@ -99,9 +95,7 @@
   margin-top: 24px !important; // Відступ від кнопки токена зверху
   margin-bottom: 0 !important;
 
-  :global {
-    .ant-form-item-label {
-      padding-bottom: 8px !important; // Відступ між текстом і селектом
-    }
+  :global(.ant-form-item-label) {
+    padding-bottom: 8px !important; // Відступ між текстом і селектом
   }
 }

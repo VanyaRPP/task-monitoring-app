@@ -37,20 +37,22 @@
 }
 .FormItem {
   margin: 0 0 20px;
-  :global {
-    .ant-form-item-label > label {
-      color: var(--textColor);
-    }
-    .ant-input {
-      background-color: var(--backgroundColorPrimary);
-    }
+  :global(.ant-form-item-label) > label {
+    color: var(--textColor);
+  }
+
+  :global(.ant-input) {
+    background-color: var(--backgroundColorPrimary);
+  }
+
+  :global(
     .ant-input-status-error:not(.ant-input-disabled):not(
         .ant-input-borderless
-      ).ant-input,
-    .ant-input-status-success {
-      color: var(--textColor);
-      background-color: var(--backgroundColorPrimary);
-    }
+      ).ant-input
+  ),
+  :global(.ant-input-status-success) {
+    color: var(--textColor);
+    background-color: var(--backgroundColorPrimary);
   }
 
   .Input:-webkit-autofill,

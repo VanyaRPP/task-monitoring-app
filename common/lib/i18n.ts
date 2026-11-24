@@ -10,29 +10,31 @@ import ukBankPage from '../../public/locales/uk/bankPage.json'
 import enGroupedReceipt from '../../public/locales/en/groupedReceipt.json'
 import ukGroupedReceipt from '../../public/locales/uk/groupedReceipt.json'
 
-i18n.use(initReactI18next).init({
-  resources: {
-    en: {
-      common: enCommon,
-      bankPage: enBankPage,
-      profitPage: enProfitPage,
-      groupedReceipt: enGroupedReceipt,
+if (!i18n.isInitialized) {
+  i18n.use(initReactI18next).init({
+    resources: {
+      en: {
+        common: enCommon,
+        bankPage: enBankPage,
+        profitPage: enProfitPage,
+        groupedReceipt: enGroupedReceipt,
+      },
+      uk: {
+        common: ukCommon,
+        bankPage: ukBankPage,
+        profitPage: ukProfitPage,
+        groupedReceipt: ukGroupedReceipt,
+      },
     },
-    uk: {
-      common: ukCommon,
-      bankPage: ukBankPage,
-      profitPage: ukProfitPage,
-      groupedReceipt: ukGroupedReceipt,
+    lng: 'uk',
+    fallbackLng: 'uk',
+    ns: ['common', 'profitPage', 'bankPage', 'groupedReceipt'],
+    defaultNS: 'common',
+    interpolation: {
+      escapeValue: false,
     },
-  },
-  lng: 'uk',
-  fallbackLng: 'uk',
-  ns: ['common', 'profitPage', 'bankPage', 'groupedReceipt'],
-  defaultNS: 'common',
-  interpolation: {
-    escapeValue: false,
-  },
-  debug: process.env.NODE_ENV === 'development',
-})
+    debug: process.env.NODE_ENV === 'development',
+  })
+}
 
 export default i18n

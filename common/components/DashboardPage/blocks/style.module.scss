@@ -14,13 +14,12 @@
   li a {
     color: var(--primaryColor);
   }
-  :global {
-    .ant-pagination-item-active {
-      background-color: var(--primaryColorHover);
-    }
-    .ant-pagination-item-active a {
-      color: white;
-    }
+  :global(.ant-pagination-item-active) {
+    background-color: var(--primaryColorHover);
+  }
+
+  :global(.ant-pagination-item-active) a {
+    color: white;
   }
 }
 .block {
