@@ -403,7 +403,7 @@ export const CustomServicesTable: React.FC<CustomServicesTableProps> = ({
               allowClear
               disabled={!aliasDomainId}
               maxLength={MAX_SERVICE_ALIAS_LENGTH}
-              placeholder="Напр. «Освітня послуга»"
+              placeholder="Напр. «Комплексне обслуговування»"
             />
           </Form.Item>
         </Form>
