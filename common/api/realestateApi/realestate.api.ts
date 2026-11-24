@@ -8,6 +8,32 @@ import {
   IGetRealestateResponse,
   IRealestate,
 } from './realestate.api.types'
+import { customServicesApi } from '@common/api/customServicesApi/customServices.api'
+import { isDraftServiceEntry } from '@utils/companyServiceDrafts'
+
+const refreshCatalogAfterDraftServices = async (
+  arg: { customServices?: unknown },
+  {
+    dispatch,
+    queryFulfilled,
+  }: {
+    dispatch: (action: unknown) => unknown
+    queryFulfilled: Promise<unknown>
+  }
+) => {
+  if (
+    !Array.isArray(arg?.customServices) ||
+    !arg.customServices.some(isDraftServiceEntry)
+  ) {
+    return
+  }
+  try {
+    await queryFulfilled
+    dispatch(customServicesApi.util.invalidateTags(['CustomService']))
+  } catch {
+    // save failed — nothing was created
+  }
+}
 
 export const realestateApi = createApi({
   reducerPath: 'realestateApi',
@@ -69,6 +95,7 @@ export const realestateApi = createApi({
         }
       },
       invalidatesTags: (response) => (response ? ['RealEstate'] : []),
+      onQueryStarted: refreshCatalogAfterDraftServices,
     }),
     deleteRealEstate: builder.mutation<
       IDeleteRealestateResponse,
@@ -95,6 +122,7 @@ export const realestateApi = createApi({
         }
       },
       invalidatesTags: (response) => (response ? ['RealEstate'] : []),
+      onQueryStarted: refreshCatalogAfterDraftServices,
     }),
     updateArchivedItem: builder.mutation<
       IExtendedArchive,

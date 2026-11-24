@@ -1,9 +1,30 @@
 import { FC, useEffect, useMemo, useRef, useState } from 'react'
-import { InputNumber, Space, Button, Form, Select, Tooltip } from 'antd'
+import {
+  InputNumber,
+  Space,
+  Button,
+  Form,
+  Input,
+  Select,
+  Tooltip,
+  Typography,
+} from 'antd'
+import type { InputRef, RefSelectProps } from 'antd'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { inputNumberParser, isAdminCheck } from '@utils/helpers'
 import { ServiceType } from '@utils/constants'
-import { CloseOutlined, CheckOutlined } from '@ant-design/icons'
+import {
+  CloseOutlined,
+  CheckOutlined,
+  EditOutlined,
+  PlusOutlined,
+} from '@ant-design/icons'
+import {
+  createDraftServiceEntry,
+  getDraftServiceNameError,
+  isDraftServiceEntry,
+} from '@utils/companyServiceDrafts'
+import { useSelectTabNavigation } from '@modules/hooks/useSelectTabNavigation'
 
 type CustomServicesCardProps = {
   form: any
@@ -11,6 +32,7 @@ type CustomServicesCardProps = {
   allCustomServices?: any[]
   isServiceForm?: boolean
   skipAutoPopulate?: boolean
+  allowCreateServices?: boolean
 }
 
 const CustomServicesCard: FC<CustomServicesCardProps> = ({
@@ -19,6 +41,7 @@ const CustomServicesCard: FC<CustomServicesCardProps> = ({
   allCustomServices = [],
   isServiceForm = false,
   skipAutoPopulate = false,
+  allowCreateServices = false,
 }) => {
   const { data: user } = useGetCurrentUserQuery()
   const isAdmin = useMemo(() => isAdminCheck(user?.roles), [user])
@@ -26,8 +49,26 @@ const CustomServicesCard: FC<CustomServicesCardProps> = ({
   const customServices = Form.useWatch('customServices', form) || []
   const selectedIds: string[] = customServices.map((s: any) => s._id)
 
+  const draftIds: string[] = customServices
+    .filter(isDraftServiceEntry)
+    .map((s: any) => s._id)
+  const canCreateServices =
+    allowCreateServices && isAdmin && !disabled && !isServiceForm
+
   const [lastClickedId, setLastClickedId] = useState<string | null>(null)
   const shiftPressedRef = useRef(false)
+  const [searchText, setSearchText] = useState('')
+  const selectRef = useRef<RefSelectProps>(null)
+  const tabNavigation = useSelectTabNavigation()
+  const [editingDraftId, setEditingDraftId] = useState<string | null>(null)
+  const unconfirmedDraftIdsRef = useRef(new Set<string>())
+  const labelBeforeEditRef = useRef<string>('')
+  const draftNameInputRef = useRef<InputRef>(null)
+
+  useEffect(() => {
+    if (!editingDraftId) return
+    draftNameInputRef.current?.focus({ cursor: 'all' })
+  }, [editingDraftId])
 
   const buildEntry = (service: any) => ({
     _id: service?._id,
@@ -43,9 +84,11 @@ const CustomServicesCard: FC<CustomServicesCardProps> = ({
   const commitServices = (next: any[]) => {
     form.setFieldValue('customServices', next)
     if (!isServiceForm) {
+      const existingCount = next.filter((s) => !isDraftServiceEntry(s)).length
       form.setFieldValue(
         'allServices',
-        allCustomServices.length > 0 && next.length === allCustomServices.length
+        allCustomServices.length > 0 &&
+          existingCount === allCustomServices.length
       )
     }
   }
@@ -62,6 +105,7 @@ const CustomServicesCard: FC<CustomServicesCardProps> = ({
   }
 
   const handleSelectChange = (ids: string[]) => {
+    setSearchText('')
     if (shiftPressedRef.current && lastClickedId) {
       const added = ids.find((id) => !selectedIds.includes(id))
       if (added) {
@@ -91,27 +135,148 @@ const CustomServicesCard: FC<CustomServicesCardProps> = ({
 
   const allSelected =
     allCustomServices.length > 0 &&
-    selectedIds.length === allCustomServices.length
+    allCustomServices.every((s) => selectedIds.includes(s?._id))
 
   const handleToggleAll = () => {
     if (allSelected) {
-      applyIds([])
+      applyIds(draftIds)
       setLastClickedId(null)
     } else {
-      applyIds(allCustomServices.map((s) => s?._id))
+      applyIds([...allCustomServices.map((s) => s?._id), ...draftIds])
     }
   }
 
-  const selectOptions = allCustomServices.map((s) => ({
-    value: s?._id,
-    label: s?.label,
-  }))
+  const selectOptions = [
+    ...allCustomServices.map((s) => ({ value: s?._id, label: s?.label })),
+    ...customServices
+      .filter(isDraftServiceEntry)
+      .map((s: any) => ({ value: s._id, label: s.label })),
+  ]
+
+  const normalizedSearchText = searchText.trim().toLowerCase()
+
+  const hasExactServiceMatch =
+    normalizedSearchText.length > 0 &&
+    [...allCustomServices, ...customServices.filter(isDraftServiceEntry)].some(
+      (service) =>
+        String(service?.label ?? '')
+          .trim()
+          .toLowerCase() === normalizedSearchText
+    )
+
+  const createServiceLabel =
+    normalizedSearchText && !hasExactServiceMatch
+      ? `Створити «${searchText.trim()}»`
+      : 'Створити нову послугу'
 
   const handleRemoveService = (index: number) => {
+    const removed = customServices[index]
+    if (removed?._id === editingDraftId) setEditingDraftId(null)
+    if (removed?._id) unconfirmedDraftIdsRef.current.delete(removed._id)
     const updated = [...customServices]
     updated.splice(index, 1)
     commitServices(updated)
   }
+
+  const handleCreateDraft = (name = '') => {
+    const draft = createDraftServiceEntry()
+    const trimmedName = name.trim()
+
+    if (trimmedName) {
+      draft.label = trimmedName
+    } else {
+      unconfirmedDraftIdsRef.current.add(draft._id)
+      labelBeforeEditRef.current = draft.label
+      setEditingDraftId(draft._id)
+    }
+
+    commitServices([...customServices, draft])
+    selectRef.current?.blur()
+    setSearchText('')
+  }
+
+  const handleSelectInputKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>
+  ) => {
+    if (e.key !== 'Enter' || !canCreateServices) return
+
+    const name = searchText.trim()
+
+    if (!name) return
+
+    const normalizedName = name.toLowerCase()
+
+    const hasExactMatch = [...allCustomServices, ...customServices].some(
+      (service) =>
+        String(service?.label ?? '')
+          .trim()
+          .toLowerCase() === normalizedName
+    )
+
+    if (hasExactMatch) return
+
+    const hasMatchingOption = selectOptions.some((option) =>
+      String(option.label ?? '')
+        .toLowerCase()
+        .includes(normalizedName)
+    )
+    if (hasMatchingOption) return
+
+    e.preventDefault()
+    e.stopPropagation()
+
+    handleCreateDraft(name)
+  }
+
+  const startEditingDraft = (id: string, label: string) => {
+    labelBeforeEditRef.current = label
+    setEditingDraftId(id)
+  }
+
+  const draftIndexById = (id: string): number =>
+    (form.getFieldValue('customServices') || []).findIndex(
+      (s: any) => s?._id === id
+    )
+
+  const confirmDraftName = async (id: string) => {
+    const index = draftIndexById(id)
+    if (index === -1) return
+    const namePath = ['customServices', index, 'label']
+    try {
+      await form.validateFields([namePath])
+    } catch {
+      return
+    }
+    form.setFieldValue(namePath, String(form.getFieldValue(namePath)).trim())
+    unconfirmedDraftIdsRef.current.delete(id)
+    setEditingDraftId(null)
+  }
+
+  const cancelDraftEditing = (id: string) => {
+    const index = draftIndexById(id)
+    if (index === -1) return
+    if (unconfirmedDraftIdsRef.current.has(id)) {
+      handleRemoveService(index)
+      return
+    }
+    const namePath = ['customServices', index, 'label']
+    form.setFieldValue(namePath, labelBeforeEditRef.current)
+    form.validateFields([namePath]).catch(() => undefined)
+    setEditingDraftId(null)
+  }
+
+  const validateDraftName =
+    (index: number) => async (_: unknown, value: unknown) => {
+      const all = form.getFieldValue('customServices') || []
+      const takenNames = [
+        ...allCustomServices.map((s) => String(s?.label ?? '')),
+        ...all
+          .filter((s: any, i: number) => i !== index && isDraftServiceEntry(s))
+          .map((s: any) => String(s.label ?? '')),
+      ]
+      const error = getDraftServiceNameError(value, takenNames)
+      if (error) throw new Error(error)
+    }
   const dashIfEmpty = (v: any) => (v === 0 || v ? v : '-')
 
   const autoPopulatedRef = useRef(false)
@@ -150,40 +315,65 @@ const CustomServicesCard: FC<CustomServicesCardProps> = ({
           }
           placement="top"
         >
-          <Select
-            mode="multiple"
-            placeholder="Індивідуальні послуги"
-            value={selectedIds}
-            onChange={handleSelectChange}
-            options={selectOptions}
-            disabled={allCustomServices.length === 0}
-            style={{ width: '100%', marginBottom: 16 }}
-            maxTagCount="responsive"
-            optionFilterProp="label"
-            onKeyDown={(e) => {
-              shiftPressedRef.current = e.shiftKey
-            }}
-            onKeyUp={(e) => {
-              shiftPressedRef.current = e.shiftKey
-            }}
-            onMouseDown={(e) => {
-              shiftPressedRef.current = e.shiftKey
-            }}
-            popupRender={(menu) => (
-              <>
-                <Button
-                  type="text"
-                  block
-                  icon={allSelected ? <CheckOutlined /> : null}
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={handleToggleAll}
-                >
-                  {allSelected ? 'Скасувати вибір' : 'Обрати всі'}
-                </Button>
-                {menu}
-              </>
-            )}
-          />
+          <div onKeyDownCapture={tabNavigation.onKeyDownCapture}>
+            <Select
+              onOpenChange={tabNavigation.onOpenChange}
+              mode="multiple"
+              showSearch
+              searchValue={searchText}
+              onSearch={setSearchText}
+              onInputKeyDown={handleSelectInputKeyDown}
+              placeholder="Індивідуальні послуги"
+              value={selectedIds}
+              onChange={handleSelectChange}
+              options={selectOptions}
+              ref={selectRef}
+              disabled={allCustomServices.length === 0 && !canCreateServices}
+              style={{ width: '100%', marginBottom: 16 }}
+              maxTagCount="responsive"
+              optionFilterProp="label"
+              onKeyDown={(e) => {
+                shiftPressedRef.current = e.shiftKey
+              }}
+              onKeyUp={(e) => {
+                shiftPressedRef.current = e.shiftKey
+              }}
+              onMouseDown={(e) => {
+                shiftPressedRef.current = e.shiftKey
+              }}
+              popupRender={(menu) => (
+                <>
+                  <Button
+                    type="text"
+                    block
+                    icon={allSelected ? <CheckOutlined /> : null}
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={handleToggleAll}
+                  >
+                    {allSelected ? 'Скасувати вибір' : 'Обрати всі'}
+                  </Button>
+                  {menu}
+                  {canCreateServices && (
+                    <Button
+                      type="text"
+                      block
+                      icon={<PlusOutlined />}
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() =>
+                        handleCreateDraft(
+                          normalizedSearchText && !hasExactServiceMatch
+                            ? searchText.trim()
+                            : ''
+                        )
+                      }
+                    >
+                      {createServiceLabel}
+                    </Button>
+                  )}
+                </>
+              )}
+            />
+          </div>
         </Tooltip>
       )}
 
@@ -192,6 +382,8 @@ const CustomServicesCard: FC<CustomServicesCardProps> = ({
           <>
             {fields.map((field, index) => {
               const service = customServices[index]
+              const isDraft = isDraftServiceEntry(service)
+              const isEditingName = isDraft && service._id === editingDraftId
               return (
                 <Space
                   key={field.key}
@@ -205,30 +397,75 @@ const CustomServicesCard: FC<CustomServicesCardProps> = ({
                   }}
                   align="start"
                 >
-                  <Form.Item
-                    name={[field.name, 'price']}
-                    label={service?.label}
-                    rules={
-                      isServiceForm &&
-                      service?.fieldName === ServiceType.Inflicion
-                        ? []
-                        : [{ required: true, message: 'Введіть значення' }]
-                    }
-                    style={{ width: '100%' }}
-                    getValueProps={(v) =>
-                      disabled ? { value: dashIfEmpty(v) } : { value: v }
-                    }
-                  >
-                    <InputNumber
-                      parser={inputNumberParser}
-                      placeholder="Введіть значення"
-                      style={{
-                        width: disabled ? '100%' : !isServiceForm ? 440 : 470,
-                      }}
-                      disabled={disabled}
-                    />
-                  </Form.Item>
-                  {!disabled && isAdmin && !isServiceForm && (
+                  <div>
+                    {isDraft && (
+                      <Form.Item
+                        name={[field.name, 'label']}
+                        rules={[{ validator: validateDraftName(index) }]}
+                        style={{ marginBottom: 8 }}
+                      >
+                        {isEditingName ? (
+                          <Input
+                            ref={draftNameInputRef}
+                            aria-label="Назва нової послуги"
+                            maxLength={256}
+                            style={{ width: 440 }}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Escape') {
+                                e.preventDefault()
+                                e.stopPropagation()
+                                cancelDraftEditing(service._id)
+                              } else if (e.key === 'Enter') {
+                                e.preventDefault()
+                                confirmDraftName(service._id)
+                              }
+                            }}
+                            onBlur={() => confirmDraftName(service._id)}
+                            suffix={
+                              <Button
+                                type="text"
+                                size="small"
+                                icon={<CloseOutlined />}
+                                aria-label="Скасувати створення послуги"
+                                onMouseDown={(e) => e.preventDefault()}
+                                onClick={() => cancelDraftEditing(service._id)}
+                              />
+                            }
+                          />
+                        ) : (
+                          <DraftServiceName
+                            onEdit={() =>
+                              startEditingDraft(service._id, service.label)
+                            }
+                          />
+                        )}
+                      </Form.Item>
+                    )}
+                    <Form.Item
+                      name={[field.name, 'price']}
+                      label={isDraft ? undefined : service?.label}
+                      rules={
+                        isServiceForm &&
+                        service?.fieldName === ServiceType.Inflicion
+                          ? []
+                          : [{ required: true, message: 'Введіть значення' }]
+                      }
+                      style={{ width: '100%' }}
+                      getValueProps={(v) =>
+                        disabled ? { value: dashIfEmpty(v) } : { value: v }
+                      }
+                    >
+                      <InputNumber
+                        parser={inputNumberParser}
+                        placeholder="Введіть значення"
+                        style={{
+                          width: disabled ? '100%' : !isServiceForm ? 440 : 470,
+                        }}
+                        disabled={disabled}
+                      />
+                    </Form.Item>
+                  </div>
+                  {!disabled && (isAdmin || isDraft) && !isServiceForm && (
                     <Button
                       type="text"
                       icon={<CloseOutlined />}
@@ -247,5 +484,24 @@ const CustomServicesCard: FC<CustomServicesCardProps> = ({
     </div>
   )
 }
+
+interface DraftServiceNameProps {
+  value?: string
+  onEdit: () => void
+}
+
+const DraftServiceName: FC<DraftServiceNameProps> = ({ value, onEdit }) => (
+  <Space size={4}>
+    <Typography.Text>{value}</Typography.Text>
+    <Typography.Text type="secondary">(нова)</Typography.Text>
+    <Button
+      type="text"
+      size="small"
+      icon={<EditOutlined />}
+      aria-label={`Перейменувати ${value}`}
+      onClick={onEdit}
+    />
+  </Space>
+)
 
 export default CustomServicesCard

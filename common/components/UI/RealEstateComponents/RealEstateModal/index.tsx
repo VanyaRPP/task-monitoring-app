@@ -12,10 +12,7 @@ import dayjs from 'dayjs'
 import Modal from '../../ModalWindow'
 import RealEstateForm from './RealEstateForm'
 import { IDomain } from '@modules/models/Domain'
-import {
-  useGetCustomServicesQuery,
-  useGetCustomServicesByDomainQuery,
-} from '@common/api/customServicesApi/customServices.api'
+import { useGetCustomServicesByDomainQuery } from '@common/api/customServicesApi/customServices.api'
 
 const getEntityId = (value?: { _id?: string } | string) => {
   if (!value) return ''
@@ -54,6 +51,7 @@ const RealEstateModal: FC<Props> = ({
   const initializedForRef = useRef<string | null | undefined>(undefined)
   const [addRealEstate, { isLoading: isAdding }] = useAddRealEstateMutation()
   const [editRealEstate, { isLoading: isEditing }] = useEditRealEstateMutation()
+  const isSubmittingRef = useRef(false)
   const domainId = Form.useWatch('domain', form)
   const currentDomainId =
     getEntityId(currentRealEstate?.domain) ||
@@ -152,6 +150,16 @@ const RealEstateModal: FC<Props> = ({
   ])
 
   const handleSubmit = async () => {
+    if (isSubmittingRef.current) return
+    isSubmittingRef.current = true
+    try {
+      await submit()
+    } finally {
+      isSubmittingRef.current = false
+    }
+  }
+
+  const submit = async () => {
     const formData: IRealestate = await form.validateFields()
 
     const keptDisabledServices = (

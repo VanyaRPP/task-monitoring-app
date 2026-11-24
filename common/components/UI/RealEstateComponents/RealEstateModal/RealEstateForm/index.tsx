@@ -272,6 +272,7 @@ const RealEstateForm: FC<Props> = ({
           disabled={!editable}
           allCustomServices={customServices}
           skipAutoPopulate={!!currentRealEstate}
+          allowCreateServices={!!domainId}
         />
       </Form.Item>
     </>

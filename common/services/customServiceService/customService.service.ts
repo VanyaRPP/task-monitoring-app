@@ -9,6 +9,10 @@ import { ServiceType } from '@utils/constants'
 import { escapeRegexForMongo } from '@utils/escape-regex/escape-regex'
 import { defaultServicesSet } from '@utils/helpers'
 import { transliterateAndCamelCase } from '@utils/transliterateAndCamelCase'
+import {
+  getDraftServiceNameError,
+  isDraftServiceEntry,
+} from '@utils/companyServiceDrafts'
 import mongoose from 'mongoose'
 
 const DEFAULT_GROUP_NAME = 'Загальні'
@@ -28,6 +32,13 @@ export interface ServiceOk<T> {
 }
 
 export type ServiceResult<T> = ServiceOk<T> | ServiceErr
+
+export const SERVICE_ERROR_STATUS: Record<ServiceErrorCode, number> = {
+  invalid: 400,
+  forbidden: 403,
+  not_found: 404,
+  conflict: 409,
+}
 
 export interface UserContext {
   isGlobalAdmin: boolean
@@ -277,6 +288,124 @@ export async function createCustomService(
   }
 
   return ok(created.toObject())
+}
+
+export interface CompanyServiceEntry {
+  _id?: unknown
+  label?: unknown
+  fieldName?: unknown
+  price?: unknown
+  isDraft?: unknown
+}
+
+export const hasDraftCompanyServices = (customServices: unknown): boolean =>
+  Array.isArray(customServices) && customServices.some(isDraftServiceEntry)
+
+/**
+ * Saves a company whose `customServices` may contain draft entries — services
+ * the user created inline in the company modal (`isDraft: true`, temporary
+ * `_id`). Each draft becomes a CustomService of `domainId` attached to the
+ * domain's default group, and its entry is rewritten to point at it before
+ * `write` runs. Unlike {@link createCustomService} nothing is cascaded to the
+ * domain's other companies.
+ *
+ * There are no Mongo transactions here (no replica set guaranteed), so this
+ * compensates instead: when `write` throws or returns nothing, the created
+ * services are removed again — no orphan service survives a failed save.
+ */
+export async function withDraftCompanyServices<
+  B extends { customServices?: unknown },
+  T,
+>(
+  body: B,
+  rawDomainId: unknown,
+  ctx: UserContext,
+  write: (body: B) => Promise<T>
+): Promise<ServiceResult<T>> {
+  if (!hasDraftCompanyServices(body.customServices)) {
+    return ok(await write(body))
+  }
+
+  const access = await assertDomainAccess(rawDomainId, ctx)
+  if (isServiceErr(access)) return access
+  const domainId = access.data
+
+  const domain = await Domain.findById(domainId).select('customServices').lean()
+  if (!domain) return err('not_found', 'Домен не знайдено')
+
+  const entries = body.customServices as CompanyServiceEntry[]
+  const drafts = entries.filter(isDraftServiceEntry)
+
+  const draftNames: string[] = []
+  for (const draft of drafts) {
+    const nameError = getDraftServiceNameError(draft.label, draftNames)
+    if (nameError) return err('invalid', nameError)
+    draftNames.push(String(draft.label).trim())
+  }
+
+  const referencedIds = collectReferencedServiceIds(
+    domain.customServices as any
+  ).filter((id) => mongoose.Types.ObjectId.isValid(id))
+  for (const name of draftNames) {
+    const duplicate = await CustomService.exists({
+      name: { $regex: `^${escapeRegexForMongo(name)}$`, $options: 'i' },
+      $or: [{ domain: domainId }, { _id: { $in: referencedIds } }],
+    })
+    if (duplicate) {
+      return err('conflict', `Послуга «${name}» вже існує в домені`)
+    }
+  }
+
+  const createdIds: string[] = []
+  const rollback = async () => {
+    for (const id of createdIds) {
+      try {
+        await detachServiceFromDomainGroups(domainId, id)
+      } catch (e) {
+        console.error('draft service rollback: detach failed', e)
+      }
+    }
+    try {
+      await CustomService.deleteMany({ _id: { $in: createdIds } })
+    } catch (e) {
+      console.error('draft service rollback: delete failed', e)
+    }
+  }
+
+  try {
+    const resolvedByTempId = new Map<string, CompanyServiceEntry>()
+    for (const [index, draft] of drafts.entries()) {
+      const name = draftNames[index]
+      const created = await CustomService.create({
+        name,
+        fieldName: transliterateAndCamelCase(name),
+        domain: domainId,
+      })
+      createdIds.push(String(created._id))
+      await attachServiceToDomainGroup(domainId, created._id)
+      resolvedByTempId.set(String(draft._id), {
+        _id: created._id,
+        label: created.name,
+        fieldName: created.fieldName,
+        price: draft.price,
+      })
+    }
+
+    const customServices = entries.map((entry) =>
+      isDraftServiceEntry(entry)
+        ? resolvedByTempId.get(String(entry._id))
+        : entry
+    )
+    const result = await write({ ...body, customServices })
+    if (result === null || result === undefined) {
+      await rollback()
+      return err('not_found', 'Компанію не знайдено')
+    }
+    return ok(result)
+  } catch (e) {
+    await rollback()
+    throw e
+  }
 }
 
 export async function updateCustomService(

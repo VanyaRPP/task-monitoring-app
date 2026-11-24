@@ -4,6 +4,11 @@ import Domain from '@modules/models/Domain'
 import RealEstate from '@modules/models/RealEstate'
 import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
+import {
+  isServiceErr,
+  SERVICE_ERROR_STATUS,
+  withDraftCompanyServices,
+} from '@common/services/customServiceService/customService.service'
 import type { NextApiRequest, NextApiResponse } from 'next'
 export default async function handler(
   req: NextApiRequest,
@@ -11,7 +16,23 @@ export default async function handler(
 ) {
   await start()
 
-  const { user, isGlobalAdmin, isAdmin } = await getCurrentUser(req, res)
+  const { user, isGlobalAdmin, isDomainAdmin, isUser, isAdmin } =
+    await getCurrentUser(req, res)
+  const ctx = { user, isGlobalAdmin, isDomainAdmin, isUser }
+
+  const updateWithDraftServices = async (body, domainId) => {
+    const result = await withDraftCompanyServices(body, domainId, ctx, (b) =>
+      RealEstate.findOneAndUpdate({ _id: req.query.id }, b, {
+        returnDocument: 'after',
+      })
+    )
+    if (isServiceErr(result)) {
+      return res
+        .status(SERVICE_ERROR_STATUS[result.code])
+        .json({ success: false, message: result.message })
+    }
+    return res.status(200).json({ success: true, data: result.data })
+  }
 
   switch (req.method) {
     case 'DELETE':
@@ -71,12 +92,15 @@ export default async function handler(
       try {
         if (isAdmin) {
           if (isGlobalAdmin) {
-            const response = await RealEstate.findOneAndUpdate(
-              { _id: req.query.id },
-              req.body,
-              { returnDocument: 'after' }
-            )
-            return res.status(200).json({ success: true, data: response })
+            const bodyDomain = req.body.domain
+            const targetDomainId =
+              (typeof bodyDomain === 'string'
+                ? bodyDomain
+                : bodyDomain?._id?.toString?.()) ||
+              (
+                await RealEstate.findById(req.query.id).select('domain')
+              )?.domain?.toString()
+            return await updateWithDraftServices(req.body, targetDomainId)
           } else {
             const adminDomains = await Domain.find({
               adminEmails: { $in: [user.email] },
@@ -114,21 +138,17 @@ export default async function handler(
                   .json({ success: false, message: 'not allowed' })
               }
 
-              const response = await RealEstate.findOneAndUpdate(
-                { _id: req.query.id },
+              return await updateWithDraftServices(
                 { ...req.body, domain: newDomainId },
-                { returnDocument: 'after' }
+                newDomainId
               )
-              return res.status(200).json({ success: true, data: response })
             }
 
             const { domain, ...bodyWithoutDomain } = req.body
-            const response = await RealEstate.findOneAndUpdate(
-              { _id: req.query.id },
+            return await updateWithDraftServices(
               bodyWithoutDomain,
-              { returnDocument: 'after' }
+              currentDomainId
             )
-            return res.status(200).json({ success: true, data: response })
           }
         } else {
           return res

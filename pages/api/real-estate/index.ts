@@ -5,6 +5,11 @@ import start, { ExtendedData } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import { getDistinctCompanyAndDomain, getDistinctStreets } from '@utils/helpers'
 import { isValidEmail } from '@common/assets/features/validators'
+import {
+  isServiceErr,
+  SERVICE_ERROR_STATUS,
+  withDraftCompanyServices,
+} from '@common/services/customServiceService/customService.service'
 import { QueryFilter } from 'mongoose'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
@@ -219,8 +224,18 @@ export default async function handler(
           }
         }
 
-        const realEstate = await RealEstate.create(req.body)
-        return res.status(200).json({ success: true, data: realEstate })
+        const result = await withDraftCompanyServices(
+          req.body,
+          req.body?.domain,
+          { isGlobalAdmin, isDomainAdmin, isUser, user },
+          (body) => RealEstate.create(body)
+        )
+        if (isServiceErr(result)) {
+          return res
+            .status(SERVICE_ERROR_STATUS[result.code])
+            .json({ success: false, message: result.message })
+        }
+        return res.status(200).json({ success: true, data: result.data })
       } catch (error) {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
