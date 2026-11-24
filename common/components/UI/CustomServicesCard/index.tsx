@@ -1,9 +1,24 @@
-import { FC, useEffect, useMemo, useRef, useState } from 'react'
-import { Input, InputNumber, Space, Button, Form, Select, Tooltip } from 'antd'
+import { CSSProperties, FC, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  Input,
+  InputNumber,
+  Space,
+  Button,
+  Form,
+  Select,
+  Tooltip,
+  theme,
+} from 'antd'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { inputNumberParser, isAdminCheck } from '@utils/helpers'
 import { ServiceType } from '@utils/constants'
-import { CloseOutlined, CheckOutlined } from '@ant-design/icons'
+import {
+  CloseOutlined,
+  CheckOutlined,
+  FileTextOutlined,
+  UpOutlined,
+} from '@ant-design/icons'
+import s from './style.module.scss'
 
 type CustomServicesCardProps = {
   form: any
@@ -20,21 +35,45 @@ const CustomServicesCard: FC<CustomServicesCardProps> = ({
   isServiceForm = false,
   skipAutoPopulate = false,
 }) => {
+  const { token } = theme.useToken()
   const { data: user } = useGetCurrentUserQuery()
   const isAdmin = useMemo(() => isAdminCheck(user?.roles), [user])
 
-  const customServices = Form.useWatch('customServices', form) || []
+  const watchedCustomServices = Form.useWatch('customServices', form)
+  const customServices = useMemo(
+    () => watchedCustomServices || [],
+    [watchedCustomServices]
+  )
   const selectedIds: string[] = customServices.map((s: any) => s._id)
 
   const [lastClickedId, setLastClickedId] = useState<string | null>(null)
   const shiftPressedRef = useRef(false)
+
+  const [openNoteIds, setOpenNoteIds] = useState<Set<string>>(() => new Set())
+  const [justOpenedNoteId, setJustOpenedNoteId] = useState<string | null>(null)
+  const autoOpenedNoteIdsRef = useRef<Set<string>>(new Set())
+
+  const noteCssVars = useMemo(
+    () =>
+      ({
+        '--note-border': token.colorBorder,
+        '--note-border-hover': token.colorPrimaryHover,
+        '--note-border-focus': token.colorPrimary,
+        '--note-focus-shadow': token.controlOutline,
+        '--note-addon-bg': token.colorFillSecondary,
+        '--note-input-bg': token.colorBgContainer,
+        '--note-text': token.colorText,
+        '--note-radius': `${token.borderRadius}px`,
+        '--note-error-color': token.colorError,
+      }) as CSSProperties,
+    [token]
+  )
 
   const buildEntry = (service: any) => ({
     _id: service?._id,
     label: service?.label,
     fieldName: service?.fieldName,
     price: null,
-    ...(isServiceForm ? {} : { note: '' }),
   })
 
   // Persist the company's services together with the "all services" flag. The
@@ -109,13 +148,66 @@ const CustomServicesCard: FC<CustomServicesCardProps> = ({
   }))
 
   const handleRemoveService = (index: number) => {
+    const removed = customServices[index]
+    const removedKey = removed?._id ? String(removed._id) : null
+    if (removedKey) {
+      autoOpenedNoteIdsRef.current.delete(removedKey)
+      setOpenNoteIds((prev) => {
+        if (!prev.has(removedKey)) return prev
+        const next = new Set(prev)
+        next.delete(removedKey)
+        return next
+      })
+    }
     const updated = [...customServices]
     updated.splice(index, 1)
     commitServices(updated)
   }
+
+  const handleOpenNote = (serviceKey: string) => {
+    autoOpenedNoteIdsRef.current.add(serviceKey)
+    setOpenNoteIds((prev) => {
+      const next = new Set(prev)
+      next.add(serviceKey)
+      return next
+    })
+    setJustOpenedNoteId(serviceKey)
+  }
+
+  const handleCloseNote = (serviceKey: string) => {
+    autoOpenedNoteIdsRef.current.add(serviceKey)
+    setOpenNoteIds((prev) => {
+      if (!prev.has(serviceKey)) return prev
+      const next = new Set(prev)
+      next.delete(serviceKey)
+      return next
+    })
+    setJustOpenedNoteId((prev) => (prev === serviceKey ? null : prev))
+  }
+
   const dashIfEmpty = (v: any) => (v === 0 || v ? v : '-')
 
   const autoPopulatedRef = useRef(false)
+
+  useEffect(() => {
+    if (isServiceForm) return
+    const toOpen: string[] = []
+    for (const service of customServices) {
+      const id = service?._id ? String(service._id) : ''
+      if (!id || autoOpenedNoteIdsRef.current.has(id)) continue
+      if (typeof service?.note === 'string' && service.note.trim()) {
+        autoOpenedNoteIdsRef.current.add(id)
+        toOpen.push(id)
+      }
+    }
+    if (toOpen.length > 0) {
+      setOpenNoteIds((prev) => {
+        const next = new Set(prev)
+        toOpen.forEach((id) => next.add(id))
+        return next
+      })
+    }
+  }, [customServices, isServiceForm])
 
   useEffect(() => {
     if (skipAutoPopulate || disabled) return
@@ -141,7 +233,7 @@ const CustomServicesCard: FC<CustomServicesCardProps> = ({
   ])
 
   return (
-    <div>
+    <div style={noteCssVars}>
       {!disabled && !isServiceForm && (
         <Tooltip
           title={
@@ -193,9 +285,11 @@ const CustomServicesCard: FC<CustomServicesCardProps> = ({
           <>
             {fields.map((field, index) => {
               const service = customServices[index]
-              return (
-                <div key={field.key}>
+
+              if (isServiceForm) {
+                return (
                   <Space
+                    key={field.key}
                     style={{
                       width: '100%',
                       display: 'grid',
@@ -210,17 +304,9 @@ const CustomServicesCard: FC<CustomServicesCardProps> = ({
                       name={[field.name, 'price']}
                       label={service?.label}
                       rules={
-                        isServiceForm &&
                         service?.fieldName === ServiceType.Inflicion
                           ? []
-                          : [
-                              {
-                                required: !(
-                                  !isServiceForm && service?.note?.trim()
-                                ),
-                                message: 'Введіть значення',
-                              },
-                            ]
+                          : [{ required: true, message: 'Введіть значення' }]
                       }
                       style={{ width: '100%' }}
                       getValueProps={(v) =>
@@ -231,39 +317,153 @@ const CustomServicesCard: FC<CustomServicesCardProps> = ({
                         parser={inputNumberParser}
                         placeholder="Введіть значення"
                         style={{
-                          width: disabled ? '100%' : !isServiceForm ? 440 : 470,
+                          width: disabled ? '100%' : 470,
                         }}
                         disabled={disabled}
                       />
                     </Form.Item>
-                    {!disabled && isAdmin && !isServiceForm && (
-                      <Button
-                        type="text"
-                        icon={<CloseOutlined />}
-                        aria-label={`remove-${service?.label}`}
-                        data-testid={`remove-${service?.label}`}
-                        onClick={() => handleRemoveService(index)}
-                        style={{ marginTop: 6 }}
-                      />
-                    )}
                   </Space>
-                  {!isServiceForm && (disabled ? service?.note : true) && (
+                )
+              }
+
+              const serviceKey = String(service?._id ?? field.key)
+              const hasNote = Boolean(
+                typeof service?.note === 'string' && service.note.trim()
+              )
+              const isNoteOpen = disabled
+                ? hasNote
+                : openNoteIds.has(serviceKey)
+              const isPriceRequired = !hasNote
+              const rowGridClass = disabled ? s.rowGridDisabled : s.rowGrid
+
+              return (
+                <div key={field.key} className={s.serviceBlock}>
+                  <div className={`${rowGridClass} ${s.headerRow}`}>
+                    {isNoteOpen ? (
+                      <div
+                        className={`${s.noteGroup} ${
+                          disabled ? s.noteGroupDisabled : ''
+                        }`}
+                        data-testid={`note-group-${service?.label}`}
+                      >
+                        <Tooltip title={service?.label}>
+                          <div className={s.noteAddon}>
+                            {!disabled && isPriceRequired && (
+                              <span className={s.requiredMark}>*</span>
+                            )}
+                            <span className={s.noteAddonLabel}>
+                              {service?.label}
+                            </span>
+                          </div>
+                        </Tooltip>
+                        <div className={s.noteInputWrap}>
+                          <Form.Item name={[field.name, 'note']} noStyle>
+                            <Input.TextArea
+                              variant="borderless"
+                              autoSize={{ minRows: 1, maxRows: 6 }}
+                              maxLength={2000}
+                              allowClear={!disabled}
+                              autoFocus={justOpenedNoteId === serviceKey}
+                              placeholder="Примітка"
+                              disabled={disabled}
+                              data-testid={`note-${service?.label}`}
+                            />
+                          </Form.Item>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className={s.labelRow}>
+                        <span className={s.labelText}>
+                          {!disabled && isPriceRequired && (
+                            <span className={s.requiredMark}>*</span>
+                          )}
+                          <span>{service?.label}</span>
+                          {!disabled && (
+                            <Tooltip
+                              title={
+                                hasNote
+                                  ? 'Редагувати внутрішню примітку'
+                                  : 'Додати внутрішню примітку'
+                              }
+                            >
+                              <Button
+                                type="text"
+                                size="small"
+                                icon={<FileTextOutlined />}
+                                onClick={() => handleOpenNote(serviceKey)}
+                                data-testid={`toggle-note-${service?.label}`}
+                                aria-label={`Примітка для ${service?.label}`}
+                                className={s.noteToggleBtn}
+                                style={{
+                                  color: hasNote
+                                    ? '#722ed1'
+                                    : token.colorTextSecondary,
+                                }}
+                              >
+                                Примітка
+                              </Button>
+                            </Tooltip>
+                          )}
+                        </span>
+                        <Form.Item name={[field.name, 'note']} hidden>
+                          <Input />
+                        </Form.Item>
+                      </div>
+                    )}
+
+                    {!disabled && (
+                      <div className={s.actionSlot}>
+                        {isNoteOpen && (
+                          <Tooltip title="Згорнути примітку">
+                            <Button
+                              type="text"
+                              size="small"
+                              icon={<UpOutlined />}
+                              onClick={() => handleCloseNote(serviceKey)}
+                              data-testid={`collapse-note-${service?.label}`}
+                              aria-label={`Згорнути примітку для ${service?.label}`}
+                            />
+                          </Tooltip>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className={`${rowGridClass} ${s.priceRow}`}>
                     <Form.Item
-                      name={[field.name, 'note']}
-                      label={`Примітка (внутрішня): ${service?.label ?? ''}`}
-                      tooltip="Показується лише користувачам системи під час створення інвойсу. Не потрапляє до інвойсу, PDF чи друку."
-                      style={{ marginBottom: 8 }}
+                      name={[field.name, 'price']}
+                      rules={[
+                        {
+                          required: isPriceRequired,
+                          message: 'Введіть значення',
+                        },
+                      ]}
+                      style={{ width: '100%', marginBottom: 0 }}
+                      getValueProps={(v) =>
+                        disabled ? { value: dashIfEmpty(v) } : { value: v }
+                      }
                     >
-                      <Input.TextArea
-                        autoSize={{ minRows: 1, maxRows: 6 }}
-                        maxLength={2000}
-                        allowClear
-                        placeholder="Інструкція, домовленості, підказка (необов'язково)"
+                      <InputNumber
+                        parser={inputNumberParser}
+                        placeholder="Введіть значення"
+                        style={{ width: '100%' }}
                         disabled={disabled}
-                        data-testid={`note-${service?.label}`}
                       />
                     </Form.Item>
-                  )}
+                    {!disabled && (
+                      <div className={s.actionSlot}>
+                        {isAdmin && (
+                          <Button
+                            type="text"
+                            icon={<CloseOutlined />}
+                            aria-label={`remove-${service?.label}`}
+                            data-testid={`remove-${service?.label}`}
+                            onClick={() => handleRemoveService(index)}
+                          />
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
               )
             })}
