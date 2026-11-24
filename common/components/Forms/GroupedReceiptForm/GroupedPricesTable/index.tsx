@@ -319,15 +319,12 @@ const GroupedPricesTable: React.FC<PaymentPricesTableProps> = ({
 
     const groups = customDomainServices?.data ?? []
     const nonDiscount = filtered.filter((inv) => inv?.type !== 'discount')
-    // A line with an alias stays its own row: rolled into a group it would
-    // lose the name the domain chose to show the client.
-    const aliased = nonDiscount.filter((inv) => inv?.alias)
-    const { groupRows, unmatchedInvoices: ungrouped } =
-      assignInvoicesToGroupsFirstWin(
-        nonDiscount.filter((inv) => !inv?.alias),
-        groups
-      )
-    const unmatchedInvoices = [...ungrouped, ...aliased]
+    // Grouping wins over the alias: an aliased line still rolls into its group;
+    // the alias only names lines that render standalone.
+    const { groupRows, unmatchedInvoices } = assignInvoicesToGroupsFirstWin(
+      nonDiscount,
+      groups
+    )
 
     const rows: IPriceTableRow[] = groupRows.map((group, index) => ({
       key: index + 1,

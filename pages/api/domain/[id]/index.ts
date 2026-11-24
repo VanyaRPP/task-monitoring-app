@@ -10,6 +10,7 @@ import {
   prepareDomainBankTokens,
 } from '@common/services/bankTokenService/bankToken.service'
 import { normalizeDisabledServiceIds } from '@common/services/customServiceService/customService.service'
+import { ensureHousingFeeSafely } from '@common/services/housingFeeService/housingFee.service'
 
 export default async function handler(
   req: NextApiRequest,
@@ -146,22 +147,28 @@ export default async function handler(
             updatedObj.adminEmails.push(user.email)
           }
 
-          const response = await Domain.findOneAndUpdate(
+          let response = await Domain.findOneAndUpdate(
             { _id: req.query.id },
             updatedObj,
             { returnDocument: 'after' }
           )
+          if (await ensureHousingFeeSafely(req.query.id as string)) {
+            response = await Domain.findById(req.query.id)
+          }
           return res.status(200).json({ success: true, data: response })
         } else {
           const updatedObj = await encryptDomainBankTokens(
             req.body,
             req.query.id as string
           )
-          const response = await Domain.findOneAndUpdate(
+          let response = await Domain.findOneAndUpdate(
             { _id: req.query.id },
             updatedObj,
             { returnDocument: 'after' }
           )
+          if (await ensureHousingFeeSafely(req.query.id as string)) {
+            response = await Domain.findById(req.query.id)
+          }
           return res.status(200).json({ success: true, data: response })
         }
       } catch (error) {
