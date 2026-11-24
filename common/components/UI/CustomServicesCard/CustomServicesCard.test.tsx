@@ -203,4 +203,137 @@ describe('CustomServicesCard', () => {
     )
     expect(touchedAllServices).toBe(false)
   })
+
+  test('toggles split note bar next to service name without affecting price input', () => {
+    const Wrapper: React.FC = () => {
+      const [form] = Form.useForm()
+      return (
+        <Form
+          form={form}
+          initialValues={{
+            customServices: [
+              {
+                _id: '1',
+                label: 'Послуга 1',
+                fieldName: 'service1',
+                price: 10,
+              },
+            ],
+          }}
+        >
+          <CustomServicesCard
+            form={form}
+            allCustomServices={ALL_CUSTOM_SERVICES}
+            disabled={false}
+            isServiceForm={false}
+            skipAutoPopulate={true}
+          />
+        </Form>
+      )
+    }
+
+    useWatchSpy.mockReturnValue([
+      { _id: '1', label: 'Послуга 1', fieldName: 'service1', price: 10 },
+    ])
+
+    render(<Wrapper />)
+
+    expect(screen.getByTestId('toggle-note-Послуга 1')).toBeInTheDocument()
+    expect(screen.queryByTestId('note-group-Послуга 1')).not.toBeInTheDocument()
+    expect(screen.getByPlaceholderText('Введіть значення')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByTestId('toggle-note-Послуга 1'))
+    expect(screen.getByTestId('note-group-Послуга 1')).toBeInTheDocument()
+    expect(screen.getByTestId('note-Послуга 1')).toBeInTheDocument()
+    expect(screen.getByPlaceholderText('Введіть значення')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByTestId('collapse-note-Послуга 1'))
+    expect(screen.queryByTestId('note-group-Послуга 1')).not.toBeInTheDocument()
+    expect(screen.getByTestId('toggle-note-Послуга 1')).toBeInTheDocument()
+  })
+
+  test('auto-opens split note bar when service already has a saved note', () => {
+    const Wrapper: React.FC = () => {
+      const [form] = Form.useForm()
+      return (
+        <Form
+          form={form}
+          initialValues={{
+            customServices: [
+              {
+                _id: '1',
+                label: 'Послуга 1',
+                fieldName: 'service1',
+                price: 10,
+                note: 'Важлива умова',
+              },
+            ],
+          }}
+        >
+          <CustomServicesCard
+            form={form}
+            allCustomServices={ALL_CUSTOM_SERVICES}
+            disabled={false}
+            isServiceForm={false}
+            skipAutoPopulate={true}
+          />
+        </Form>
+      )
+    }
+
+    useWatchSpy.mockReturnValue([
+      {
+        _id: '1',
+        label: 'Послуга 1',
+        fieldName: 'service1',
+        price: 10,
+        note: 'Важлива умова',
+      },
+    ])
+
+    render(<Wrapper />)
+
+    expect(screen.getByTestId('note-group-Послуга 1')).toBeInTheDocument()
+    expect(screen.getByTestId('note-Послуга 1')).toHaveValue('Важлива умова')
+  })
+
+  test('does not show note controls in service form mode', () => {
+    const Wrapper: React.FC = () => {
+      const [form] = Form.useForm()
+      return (
+        <Form
+          form={form}
+          initialValues={{
+            customServices: [
+              {
+                _id: '1',
+                label: 'Послуга 1',
+                fieldName: 'service1',
+                price: 10,
+              },
+            ],
+          }}
+        >
+          <CustomServicesCard
+            form={form}
+            allCustomServices={ALL_CUSTOM_SERVICES}
+            disabled={false}
+            isServiceForm={true}
+            skipAutoPopulate={true}
+          />
+        </Form>
+      )
+    }
+
+    useWatchSpy.mockReturnValue([
+      { _id: '1', label: 'Послуга 1', fieldName: 'service1', price: 10 },
+    ])
+
+    render(<Wrapper />)
+
+    expect(
+      screen.queryByTestId('toggle-note-Послуга 1')
+    ).not.toBeInTheDocument()
+    expect(screen.queryByTestId('note-group-Послуга 1')).not.toBeInTheDocument()
+  })
 })

@@ -14,6 +14,8 @@ import {
   isCatalogOptionExcluded,
   typedServiceTypesOnInvoice,
 } from '@utils/domain/domain-invoice-selector'
+import ServiceNoteHint from '@components/UI/ServiceNoteHint'
+import { findServiceNote } from '@utils/serviceNotes'
 import { Empty, Form, FormInstance, Select, Table } from 'antd'
 import React, { useCallback, useMemo } from 'react'
 
@@ -322,6 +324,19 @@ export const InvoiceSelector: React.FC<{
       onChange={handleSelect}
       value={null}
       options={options}
+      optionRender={(option) => (
+        <span>
+          {option.label}
+          <ServiceNoteHint
+            note={findServiceNote(company, {
+              serviceId: (option.data?.payload as IInvoiceLineAddPayload)
+                ?.serviceId,
+              fieldName: (option.data?.payload as IInvoiceLineAddPayload)
+                ?.fieldName,
+            })}
+          />
+        </span>
+      )}
       loading={!!catalogDomainId && isLoading}
       disabled={!hasDomainContext || (!!catalogDomainId && isLoading)}
       allowClear

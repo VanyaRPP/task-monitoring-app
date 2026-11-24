@@ -1,0 +1,127 @@
+.serviceBlock {
+  margin-top: 8px;
+  margin-bottom: 14px;
+}
+
+.rowGrid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  column-gap: 8px;
+  align-items: center;
+  width: 100%;
+}
+
+.rowGridDisabled {
+  display: grid;
+  grid-template-columns: 1fr;
+  width: 100%;
+}
+
+.headerRow {
+  margin-bottom: 6px;
+}
+
+.labelRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 24px;
+}
+
+.labelText {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  line-height: 1.5714;
+}
+
+.requiredMark {
+  color: var(--note-error-color, #ff4d4f);
+  font-family: SimSun, sans-serif;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.noteToggleBtn {
+  height: 24px;
+  padding-inline: 6px;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.noteGroup {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  border: 1px solid var(--note-border);
+  border-radius: var(--note-radius, 6px);
+  background: var(--note-input-bg);
+  overflow: hidden;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+
+  &:hover:not(.noteGroupDisabled) {
+    border-color: var(--note-border-hover);
+  }
+
+  &:focus-within:not(.noteGroupDisabled) {
+    border-color: var(--note-border-focus);
+    box-shadow: 0 0 0 2px var(--note-focus-shadow);
+  }
+}
+
+.noteGroupDisabled {
+  opacity: 0.85;
+}
+
+.noteAddon {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 11px;
+  background: var(--note-addon-bg);
+  border-right: 1px solid var(--note-border);
+  color: var(--note-text);
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 1.5714;
+  white-space: nowrap;
+  max-width: 45%;
+  flex-shrink: 0;
+}
+
+.noteAddonLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.noteInputWrap {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+
+  :global(.ant-input-affix-wrapper),
+  :global(.ant-input) {
+    box-shadow: none !important;
+  }
+
+  :global(.ant-input-affix-wrapper) {
+    width: 100%;
+    padding-block: 0;
+  }
+}
+
+.priceRow {
+  align-items: start;
+}
+
+.actionSlot {
+  width: 32px;
+  display: flex;
+  justify-content: center;
+}

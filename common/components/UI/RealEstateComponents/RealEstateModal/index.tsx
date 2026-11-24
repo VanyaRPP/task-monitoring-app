@@ -158,9 +158,18 @@ const RealEstateModal: FC<Props> = ({
       currentRealEstate?.customServices ?? []
     ).filter((s) => disabledDomainServiceIds.has(String(s._id)))
     const filteredCustomServices = [
-      ...(formData.customServices?.filter(
-        (s) => typeof s.price === 'number' && s.price >= 0
-      ) || []),
+      ...(formData.customServices
+        ?.map((s) => ({
+          ...s,
+          note: (s.note ?? '').trim(),
+          price:
+            typeof s.price === 'number'
+              ? s.price
+              : s.note?.trim()
+                ? 0
+                : s.price,
+        }))
+        .filter((s) => typeof s.price === 'number' && s.price >= 0) || []),
       ...keptDisabledServices,
     ]
 

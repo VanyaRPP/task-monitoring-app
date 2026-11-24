@@ -36,6 +36,7 @@ export interface CustomServices {
   label: string
   fieldName: string
   price: number
+  note?: string
 }
 
 export interface IExtendedRealestate extends IRealestate {
