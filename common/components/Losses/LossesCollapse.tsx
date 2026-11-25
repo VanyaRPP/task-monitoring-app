@@ -1,4 +1,9 @@
 import { ServiceType } from '@utils/constants'
+import {
+  getLossesPercent,
+  getPriceWithoutVat,
+  getTotalWithVat,
+} from '@utils/electricity'
 import { inputNumberParser } from '@utils/helpers'
 import {
   Col,
@@ -30,7 +35,7 @@ export const LossesCollapse: React.FC<LossesCollapseProps> = (props) => {
   const total: number = Form.useWatch('generalElectricity', form) ?? 0
 
   // всього з пдв
-  const totalWithVAT = total * 1.2
+  const totalWithVAT = getTotalWithVat(total)
 
   // Locate the electricityPrice row inside Form.List "customServices" and
   // watch its scalar `price` directly. Watching the parent array alone is
@@ -54,14 +59,14 @@ export const LossesCollapse: React.FC<LossesCollapseProps> = (props) => {
   const pricekWHWithVAT = watchedElectricityPrice ?? 0
 
   // ціна без пдв
-  const pricekWH = pricekWHWithVAT / 1.2
+  const pricekWH = getPriceWithoutVat(pricekWHWithVAT)
 
-  // всього по тарифу без пдв
-  const totalFromTariff = pricekWH * consumed
-
-  // втрати (з пдв і без пдв однакові)
-  const losses = total / totalFromTariff - 1
-  const lossesPercent = losses * 100
+  // втрати (з пдв і без пдв однакові); null, поки заповнено не все
+  const lossesPercent = getLossesPercent({
+    priceWithVat: pricekWHWithVAT,
+    consumed,
+    totalWithoutVat: total,
+  })
 
   const labelPricekWH = pricekWH ? pricekWH.toFixed(2) : 'Тариф'
   const labelConsumed = consumed ? consumed.toFixed(2) : 'Спожито'
@@ -72,13 +77,12 @@ export const LossesCollapse: React.FC<LossesCollapseProps> = (props) => {
   useEffect(() => {
     if (!hasElectricityService) return
 
-    // When upstream inputs (consumedElectricity, generalElectricity,
-    // customServices.electricityPrice) are still loading, lossesPercent comes
-    // out as NaN (0/0) or Infinity (X/0). In that case keep whatever was saved
-    // — overwriting with 0 used to wipe the persisted loss value on every
+    // Until every upstream input (consumedElectricity, generalElectricity,
+    // customServices.electricityPrice) is there, keep whatever was saved —
+    // overwriting with 0 used to wipe the persisted loss value on every
     // re-render of the form until inputs settled, which is what the user saw
     // ("значення з'являється тільки після кліку").
-    if (!Number.isFinite(lossesPercent)) {
+    if (lossesPercent === null) {
       if (form.getFieldValue(name) == null) {
         form.setFieldValue(name, 0)
       }

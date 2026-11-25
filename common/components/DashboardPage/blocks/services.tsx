@@ -24,6 +24,7 @@ import ModalDelete from '@components/UI/ModalDelete'
 import InflationOverridePanel, {
   IDomainOption,
 } from '@components/InflationOverridePanel'
+import ElectricityChart from '@components/ElectricityChart'
 import type { ColumnsType } from 'antd/es/table'
 
 interface ServiceBlockProps {
@@ -127,6 +128,9 @@ const ServicesBlock: React.FC<ServiceBlockProps> = ({ sepDomainID }) => {
   const preferredDomainId =
     sepDomainID ??
     (filteredDomains?.length === 1 ? String(filteredDomains[0]) : undefined)
+  const filteredStreets = filter?.street as unknown as string[] | undefined
+  const preferredStreetId =
+    filteredStreets?.length === 1 ? String(filteredStreets[0]) : undefined
 
   return (
     <>
@@ -167,6 +171,13 @@ const ServicesBlock: React.FC<ServiceBlockProps> = ({ sepDomainID }) => {
           dateFilters={dateFilters}
         />
       </TableCard>
+      {isOnPage && isAdminCheck(user?.roles) && domainOptions.length > 0 && (
+        <ElectricityChart
+          domains={domainOptions}
+          preferredDomainId={preferredDomainId}
+          preferredStreetId={preferredStreetId}
+        />
+      )}
       {isOnPage && domainOptions.length > 0 && (
         <InflationOverridePanel
           domains={domainOptions}
