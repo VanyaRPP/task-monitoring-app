@@ -1,41 +1,49 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-// @ts-nocheck
 import Domain from '@modules/models/Domain'
 import Service from '@modules/models/Service'
 import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
   await start()
 
-  const { isGlobalAdmin, isDomainAdmin, isAdmin, user } = await getCurrentUser(
-    req,
-    res
-  )
+  const { isGlobalAdmin, isDomainAdmin, user } = await getCurrentUser(req, res)
+  const id = req.query.id as string
+
+  // A DomainAdmin reaches only the services of the domains they administer, so
+  // the ownership condition is part of the write query itself.
+  const getAdminDomainIds = async (): Promise<string[]> =>
+    (await Domain.distinct('_id', { adminEmails: user.email })).map(String)
 
   switch (req.method) {
     case 'DELETE':
       try {
-        if (!isAdmin) {
+        if (!isGlobalAdmin && !isDomainAdmin) {
           return res
             .status(400)
             .json({ success: false, message: 'not allowed' })
         }
-        await Service.findByIdAndDelete(req.query.id).then((service) => {
-          if (service) {
-            return res.status(200).json({
-              success: true,
-              data: 'Service ' + req.query.id + ' was deleted',
-            })
-          } else {
-            return res.status(400).json({
-              success: false,
-              data: 'Service ' + req.query.id + ' was not found',
-            })
-          }
+
+        const service = await Service.findOneAndDelete({
+          _id: id,
+          ...(!isGlobalAdmin && {
+            domain: { $in: await getAdminDomainIds() },
+          }),
+        })
+
+        if (!service) {
+          return res.status(400).json({
+            success: false,
+            data: 'Service ' + id + ' was not found',
+          })
+        }
+
+        return res.status(200).json({
+          success: true,
+          data: 'Service ' + id + ' was deleted',
         })
       } catch (error) {
         return res.status(400).json({ success: false, error: error })
@@ -43,37 +51,44 @@ export default async function handler(
 
     case 'PATCH':
       try {
-        if (isGlobalAdmin || isDomainAdmin) {
-          if (isGlobalAdmin) {
-            const response = await Service.findOneAndUpdate(
-              { _id: req.query.id },
-              req.body,
-              { returnDocument: 'after' }
-            )
-            return res.status(200).json({ success: true, data: response })
-          } else {
-            const domains = await Domain.find({
-              adminEmails: { $in: [user.email] },
-            })
-            const domainIds = domains?.map((domain) => domain._id.toString())
-            const validDomain = domainIds?.includes(req.body.domain)
-            if (validDomain) {
-              const response = await Service.findOneAndUpdate(
-                { _id: req.query.id },
-                req.body,
-                { returnDocument: 'after' }
-              )
-              return res.status(200).json({ success: true, data: response })
-            }
-            return res
-              .status(400)
-              .json({ success: false, message: 'not allowed' })
-          }
-        } else {
+        // Update operators ($set, $unset, ...) would get around the check of
+        // the target domain below.
+        const hasOperators = Object.keys(req.body).some((key) =>
+          key.startsWith('$')
+        )
+
+        if ((!isGlobalAdmin && !isDomainAdmin) || hasOperators) {
           return res
             .status(400)
             .json({ success: false, message: 'not allowed' })
         }
+
+        const adminDomainIds = isGlobalAdmin ? null : await getAdminDomainIds()
+
+        // Both ends are checked: the domain the service is moved to...
+        if (adminDomainIds && !adminDomainIds.includes(req.body.domain)) {
+          return res
+            .status(400)
+            .json({ success: false, message: 'not allowed' })
+        }
+
+        // ...and the one it currently belongs to.
+        const service = await Service.findOneAndUpdate(
+          {
+            _id: id,
+            ...(adminDomainIds && { domain: { $in: adminDomainIds } }),
+          },
+          req.body,
+          { returnDocument: 'after' }
+        )
+
+        if (!service) {
+          return res
+            .status(400)
+            .json({ success: false, message: 'not allowed' })
+        }
+
+        return res.status(200).json({ success: true, data: service })
       } catch (error) {
         return res.status(400).json({ success: false, error: error.message })
       }
