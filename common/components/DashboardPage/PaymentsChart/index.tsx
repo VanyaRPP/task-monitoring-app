@@ -1,6 +1,5 @@
 import { ExportOutlined } from '@ant-design/icons'
 import { useGetAllPaymentsQuery } from '@common/api/paymentApi/payment.api'
-import { IFilter } from '@common/api/paymentApi/payment.api.types'
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { usePaymentsChartConfig } from '@components/DashboardPage/PaymentsChart/hooks/usePaymentsChartConfig'
@@ -22,6 +21,21 @@ import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useEffect, useMemo, useState } from 'react'
+import { DomainPaymentsChart } from './DomainPaymentsChart'
+
+interface IPaymentResponse {
+  _id?: string
+  invoiceCreationDate?: string
+  generalSum?: number
+  reciever?: { 
+    companyName?: string 
+  }
+}
+
+interface IRealEstateCompany {
+  _id: string
+  companyName: string
+}
 
 const Line = dynamic(
   () => import('@ant-design/plots').then(({ Line }) => Line),
@@ -63,63 +77,139 @@ const PaymentsChart: React.FC<{
     }
   )
 
-  const chartData: any = usePaymentsChartData(payments)
-  const chartConfig: any = usePaymentsChartConfig()
+  const {
+    data: { data: domainPayments } = { data: [] },
+    isFetching: isFetchingDomain,
+    isError: isErrorDomain,
+  } = useGetAllPaymentsQuery({
+    limit: size * 5,
+    type: Operations.Debit,
+  })
+
+  const chartData = usePaymentsChartData(payments)
+  const chartConfig = usePaymentsChartConfig()
 
   const isValid = useMemo(() => {
     return payments?.length > 0 && !!companyId && !isError
   }, [companyId, payments, isError])
 
-  return (
-    <Card
-      title={
-        <Flex justify="space-between" align="center">
-          <Space>
-            <Link href={AppRoutes.PAYMENT_CHART}>
-              <Button type="link" icon={<ExportOutlined />}>
-                Графік платежів
-              </Button>
-            </Link>
-            <CompanySelector
-              value={companyId}
-              onChange={setCompanyId}
-              style={{ width: 200, fontWeight: 'normal' }}
-            />
-            {router.pathname === AppRoutes.PAYMENT_CHART && (
-              <Form.Item label="Кількість платежів" style={{ margin: 0 }}>
-                <SizeSelector
-                  value={size}
-                  onChange={setSize}
-                  style={{ fontWeight: 'normal' }}
-                />
-              </Form.Item>
-            )}
-          </Space>
-        </Flex>
+  const domainChartData = useMemo(() => {
+    if (!domainPayments || !Array.isArray(domainPayments)) return []
+
+    const sortedPayments = [...(domainPayments as unknown as IPaymentResponse[])].sort(
+      (a, b) => {
+        const dateA = new Date(a?.invoiceCreationDate || 0).getTime()
+        const dateB = new Date(b?.invoiceCreationDate || 0).getTime()
+        return dateA - dateB
       }
-      style={{
-        ...(isError && { borderColor: token.colorError }),
-        // ...(!isFetching && isValid && { height: 528 + 58 }),
-        ...style,
-      }}
-      className={className}
-    >
-      <Spin spinning={isFetching}>
-        {!isValid ? (
-          <Empty
-            description={
-              isFetching
-                ? 'Завантаження...'
-                : !companyId
-                  ? 'Оберіть компанію'
-                  : 'Неможливо відобразити графік'
-            }
-          />
-        ) : (
-          <Line data={chartData} {...chartConfig} />
-        )}
-      </Spin>
-    </Card>
+    )
+
+    return sortedPayments.map((payment) => {
+      const rawDate = payment?.invoiceCreationDate
+
+      let time = 'Невідомо'
+      if (rawDate) {
+        const parsedDate = new Date(rawDate)
+        if (!isNaN(parsedDate.getTime())) {
+          time = parsedDate.toLocaleDateString('uk-UA')
+        }
+      }
+
+      const amount = Number(payment?.generalSum || 0)
+      const companyName = payment?.reciever?.companyName || 'Невідома компанія'
+
+      return {
+        time,
+        amount,
+        companyName,
+      }
+    })
+  }, [domainPayments])
+
+  const isDarkModeActive = Boolean(
+    String(token.colorText).includes('255') || 
+    token.colorText === '#fff' || 
+    token.colorTextBase === '#fff'
+  )
+
+  return (
+    <Space direction="vertical" size="large" style={{ width: '100%' }}>
+      <Card
+        title={
+          <Flex justify="space-between" align="center">
+            <Space>
+              <Link href={AppRoutes.PAYMENT_CHART}>
+                <Button type="link" icon={<ExportOutlined />}>
+                  Детальний графік компанії
+                </Button>
+              </Link>
+              <CompanySelector
+                value={companyId}
+                onChange={setCompanyId}
+                style={{ width: 200, fontWeight: 'normal' }}
+              />
+              {router.pathname === AppRoutes.PAYMENT_CHART && (
+                <Form.Item label="Кількість платежів" style={{ margin: 0 }}>
+                  <SizeSelector
+                    value={size}
+                    onChange={setSize}
+                    style={{ fontWeight: 'normal' }}
+                  />
+                </Form.Item>
+              )}
+            </Space>
+          </Flex>
+        }
+        style={{
+          ...(isError && { borderColor: token.colorError }),
+          ...style,
+        }}
+        className={className}
+      >
+        <Spin spinning={isFetching}>
+          {!isValid ? (
+            <Empty
+              description={
+                isFetching
+                  ? 'Завантаження...'
+                  : !companyId
+                    ? 'Оберіть компанію'
+                    : 'Неможливо відобразити графік'
+              }
+            />
+          ) : (
+            <Line data={chartData} {...chartConfig} />
+          )}
+        </Spin>
+      </Card>
+
+      <Card
+        title={
+          <Flex justify="space-between" align="center">
+            <span style={{ fontWeight: 600, fontSize: '16px' }}>
+              Зведена динаміка платежів по домену
+            </span>
+          </Flex>
+        }
+        style={{
+          ...(isErrorDomain && { borderColor: token.colorError }),
+          ...style,
+        }}
+        className={className}
+      >
+        <Spin spinning={isFetchingDomain}>
+          {domainChartData.length === 0 && !isFetchingDomain ? (
+            <Empty description="Немає даних по платежах домену" />
+          ) : (
+            <DomainPaymentsChart 
+              data={domainChartData} 
+              isDarkMode={isDarkModeActive}
+              textColor={token.colorTextSecondary} 
+            />
+          )}
+        </Spin>
+      </Card>
+    </Space>
   )
 }
 
@@ -156,7 +246,6 @@ const SizeSelector: React.FC<Omit<SelectProps, 'options' | 'mode'>> = ({
   )
 }
 
-// TODO: to reusable components
 const CompanySelector: React.FC<Omit<SelectProps, 'options' | 'mode'>> = ({
   status,
   loading,
@@ -164,12 +253,6 @@ const CompanySelector: React.FC<Omit<SelectProps, 'options' | 'mode'>> = ({
   onChange,
   ...props
 }) => {
-  // TODO: replace with separated filter api later
-  // const {
-  //   data: { realEstatesFilter: companies } = { realEstatesFilter: [] },
-  //   isFetching,
-  //   isError,
-  // } = useGetAllRealEstateQuery({ limit: 1 })
   const {
     data: { data } = { data: [] },
     isFetching,
@@ -179,14 +262,14 @@ const CompanySelector: React.FC<Omit<SelectProps, 'options' | 'mode'>> = ({
   const options = useMemo(() => {
     const companies =
       data.length !== 0
-        ? data?.map((company) => {
+        ? data?.map((company: IRealEstateCompany) => {
             return {
               text: company.companyName,
               value: company._id,
             }
           })
         : []
-    return companies?.map((company: IFilter) => ({
+    return companies?.map((company: { text: string; value: string }) => ({
       label: company.text,
       value: company.value,
     }))
