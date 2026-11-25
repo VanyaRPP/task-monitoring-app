@@ -91,7 +91,44 @@ describe('buildPaymentPayload', () => {
       { type: 'electricityPrice', price: 10, sum: 1000 },
     ])
   })
+  it('invoice: keeps the order from the form (e.g. after drag-and-drop)', () => {
+    const inputs = baseInputs()
+    inputs.formData = {
+      ...inputs.formData,
+      invoice: [
+        { type: 'cleaningPrice', price: 3, sum: 30 },
+        { type: 'electricityPrice', price: 10, sum: 1000 },
+        { type: 'waterPrice', price: 5, sum: 50 },
+      ],
+    }
 
+    const result = buildPaymentPayload(inputs)
+
+    expect(result.invoice.map((item) => item.type)).toEqual([
+      'cleaningPrice',
+      'electricityPrice',
+      'waterPrice',
+    ])
+  })
+
+  it('invoice: keeps the order when a zero-sum item sits between others', () => {
+    const inputs = baseInputs()
+    inputs.formData = {
+      ...inputs.formData,
+      invoice: [
+        { type: 'waterPrice', price: 5, sum: 50 },
+        { type: 'maintenancePrice', price: 0, sum: 0 },
+        { type: 'cleaningPrice', price: 3, sum: 30 },
+      ],
+    }
+
+    const result = buildPaymentPayload(inputs)
+
+    expect(result.invoice.map((item) => item.type)).toEqual([
+      'waterPrice',
+      'cleaningPrice',
+    ])
+  })
   it('invoice: returns empty array when debit is falsy (credit/empty payment)', () => {
     const inputs = baseInputs()
     inputs.formData = { ...inputs.formData, debit: 0 }
