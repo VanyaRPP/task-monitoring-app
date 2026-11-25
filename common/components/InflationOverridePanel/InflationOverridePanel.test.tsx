@@ -1,137 +1,133 @@
-import React from 'react'
+import { useGetInflationIndexesQuery } from '@common/api/inflationIndexApi/inflationIndex.api'
+import '@testing-library/jest-dom'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import '@testing-library/jest-dom'
-import {
-  useGetDomainInflationIndexesQuery,
-  useResetDomainInflationOverrideMutation,
-  useSetDomainInflationOverrideMutation,
-} from '@common/api/inflationIndexApi/inflationIndex.api'
 import InflationOverridePanel from './index'
+import type { IIndexChartRow } from './IndexChart'
 
 jest.mock('@common/api/inflationIndexApi/inflationIndex.api', () => ({
-  useGetDomainInflationIndexesQuery: jest.fn(),
-  useSetDomainInflationOverrideMutation: jest.fn(),
-  useResetDomainInflationOverrideMutation: jest.fn(),
+  useGetInflationIndexesQuery: jest.fn(),
 }))
 
-const MONTHS = [
-  {
-    year: 2026,
-    month: 9,
-    reference: null,
-    override: null,
-    value: null,
-  },
-  {
-    year: 2026,
-    month: 8,
-    reference: 100.1,
-    override: {
-      value: 101.5,
-      updatedBy: 'admin-a@test.ua',
-      updatedAt: '2026-10-01T10:00:00.000Z',
-    },
-    value: 101.5,
-  },
+jest.mock('@modules/hooks/useTheme', () => ({
+  __esModule: true,
+  default: () => ['light', jest.fn()],
+}))
+
+let mockChartRows: IIndexChartRow[] = []
+
+// The canvas chart itself does not render in jsdom: its input is what matters.
+jest.mock(
+  'next/dynamic',
+  () => () =>
+    function LineStub({ data }: { data: IIndexChartRow[] }) {
+      mockChartRows = data
+      return <div data-testid="index-chart" />
+    }
+)
+
+const OFFICIAL = [
+  { year: 2025, month: 12, value: 100.2 },
+  { year: 2026, month: 1, value: 100.7 },
+  { year: 2026, month: 2, value: 101 },
 ]
 
-const setOverride = jest.fn()
-const resetOverride = jest.fn()
+const query = useGetInflationIndexesQuery as jest.Mock
 
-const renderPanel = (canEdit: boolean) => {
-  ;(useGetDomainInflationIndexesQuery as jest.Mock).mockReturnValue({
-    data: { canEdit, months: MONTHS },
-    isFetching: false,
-  })
+const openPanel = (official = OFFICIAL) => {
+  query.mockReturnValue({ data: official, isFetching: false })
   render(
     <InflationOverridePanel domains={[{ text: 'ОСББ А', value: 'domain-a' }]} />
   )
-  return userEvent.click(screen.getByText('Індекс інфляції домену'))
+  return userEvent.click(screen.getByText('Індекс інфляції'))
 }
 
-const augustRow = () =>
-  screen.getByText(/Серпень 2026/).closest('tr') as HTMLElement
+const openTable = async (official = OFFICIAL) => {
+  await openPanel(official)
+  await userEvent.click(screen.getByText('Таблиця'))
+}
 
-beforeEach(() => {
-  jest.clearAllMocks()
-  setOverride.mockReturnValue({ unwrap: () => Promise.resolve({}) })
-  resetOverride.mockReturnValue({ unwrap: () => Promise.resolve({}) })
-  ;(useSetDomainInflationOverrideMutation as jest.Mock).mockReturnValue([
-    setOverride,
-    { isLoading: false },
-  ])
-  ;(useResetDomainInflationOverrideMutation as jest.Mock).mockReturnValue([
-    resetOverride,
-    { isLoading: false },
-  ])
-})
+const cellsOf = (year: string) =>
+  within(screen.getByText(year).closest('tr') as HTMLElement)
+    .getAllByRole('cell')
+    .map((cell) => cell.textContent)
 
 describe('InflationOverridePanel', () => {
-  it('показує довідник, значення домену і позначку «змінено для домену»', async () => {
-    await renderPanel(false)
-
-    const row = within(augustRow())
-    expect(row.getByText('100.1')).toBeInTheDocument()
-    expect(row.getByText('101.5')).toBeInTheDocument()
-    expect(row.getByText('змінено для домену')).toBeInTheDocument()
+  beforeEach(() => {
+    jest.useFakeTimers({
+      now: new Date('2026-03-15T12:00:00Z'),
+      advanceTimers: true,
+    })
+    query.mockReset()
+    mockChartRows = []
   })
 
-  it('без права редагування — лише перегляд, без кнопок', async () => {
-    await renderPanel(false)
+  afterEach(() => jest.useRealTimers())
 
-    expect(screen.queryByRole('button', { name: 'Змінити' })).toBeNull()
-    expect(
-      screen.queryByRole('button', { name: 'Скинути до довідника' })
-    ).toBeNull()
-    expect(screen.getByText(/Лише перегляд/)).toBeInTheDocument()
+  it('відкривається графіком за останні 12 місяців, пропуски як null', async () => {
+    await openPanel()
+
+    expect(screen.getByTestId('index-chart')).toBeInTheDocument()
+    expect(query).toHaveBeenLastCalledWith({ from: '2025-03', to: '2026-02' })
+    expect(mockChartRows).toHaveLength(12)
+    expect(mockChartRows.slice(-4)).toEqual([
+      { month: '11.2025', value: null },
+      { month: '12.2025', value: 100.2 },
+      { month: '01.2026', value: 100.7 },
+      { month: '02.2026', value: 101 },
+    ])
   })
 
-  it('адмін бачить «Змінити» і «Скинути» лише там, де є значення домену', async () => {
-    await renderPanel(true)
+  it('каже, що за період немає індексів', async () => {
+    await openPanel([])
 
-    expect(screen.getAllByRole('button', { name: 'Змінити' })).toHaveLength(2)
     expect(
-      within(augustRow()).getByRole('button', { name: 'Скинути до довідника' })
+      screen.getByText('Немає індексів за обраний період')
+    ).toBeInTheDocument()
+  })
+
+  it('таблиця має роки в рядках, місяці в колонках і підсумок за рік', async () => {
+    await openTable()
+
+    expect(query).toHaveBeenLastCalledWith(undefined)
+    expect(
+      screen.getByText(/споживчих цін з 2025 по 2026 рр/)
     ).toBeInTheDocument()
     expect(
-      screen.getAllByRole('button', { name: 'Скинути до довідника' })
-    ).toHaveLength(1)
+      screen.getAllByRole('columnheader').map((cell) => cell.textContent)
+    ).toEqual(expect.arrayContaining(['Рік', 'Січ', 'Чер', 'Гру', 'За рік']))
+    // 100.7% × 101.0% = 101.7% for the two months of 2026
+    expect(cellsOf('2026')).toEqual([
+      '2026',
+      '100,7',
+      '101,0',
+      ...Array(10).fill(''),
+      '101,7',
+    ])
+    // Without January to November there is nothing to compound.
+    expect(cellsOf('2025').slice(-2)).toEqual(['100,2', '—'])
   })
 
-  it('зберігає нове значення для домену', async () => {
-    await renderPanel(true)
+  it('не показує індекс домену та його редагування', async () => {
+    await openTable()
 
-    await userEvent.click(
-      within(augustRow()).getByRole('button', { name: 'Змінити' })
-    )
-    const input = screen.getByLabelText('Індекс домену за Серпень 2026')
-    await userEvent.clear(input)
-    await userEvent.type(input, '102.3')
-    await userEvent.click(screen.getByRole('button', { name: 'Зберегти' }))
-
-    expect(setOverride).toHaveBeenCalledWith({
-      domainId: 'domain-a',
-      year: 2026,
-      month: 8,
-      value: 102.3,
-    })
+    expect(screen.queryByText(/домен/i)).not.toBeInTheDocument()
+    expect(screen.queryByRole('combobox')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Змінити' })).toBeNull()
   })
 
-  it('«Скинути до довідника» після підтвердження прибирає значення домену', async () => {
-    await renderPanel(true)
+  it('період графіка не обмежує таблицю', async () => {
+    await openPanel()
 
-    await userEvent.click(
-      within(augustRow()).getByRole('button', { name: 'Скинути до довідника' })
-    )
-    await userEvent.click(
-      await screen.findByRole('button', { name: 'Скинути' })
-    )
+    await userEvent.click(screen.getByPlaceholderText('Від місяця'))
+    await userEvent.click(screen.getByTitle('2025-01'))
+    await userEvent.click(screen.getByTitle('2025-06'))
 
-    expect(resetOverride).toHaveBeenCalledWith({
-      domainId: 'domain-a',
-      year: 2026,
-      month: 8,
-    })
+    expect(query).toHaveBeenLastCalledWith({ from: '2025-01', to: '2025-06' })
+
+    await userEvent.click(screen.getByText('Таблиця'))
+
+    expect(query).toHaveBeenLastCalledWith(undefined)
+    expect(screen.queryByPlaceholderText('Від місяця')).not.toBeInTheDocument()
   })
 })

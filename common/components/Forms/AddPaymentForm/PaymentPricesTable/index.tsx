@@ -14,6 +14,8 @@ export interface PaymentPricesTableProps {
   preview?: boolean
   loading?: boolean
   service?: IService
+  /** The payment's domain (id or populated): the form holds none in view mode. */
+  domain?: unknown
 }
 
 /**
@@ -23,11 +25,12 @@ export interface PaymentPricesTableProps {
 const PaymentPricesTable: React.FC<PaymentPricesTableProps> = ({
   preview,
   loading,
+  domain,
 }) => {
   const { form, service, company, prevPayment } = usePaymentContext()
   const domainId = Form.useWatch('domain', form)
   const invoices = form.getFieldValue('invoice')
-  const displaySettings = useDomainDisplaySettings(domainId)
+  const displaySettings = useDomainDisplaySettings(domain ?? domainId)
 
   useEffect(() => {
     const filteredInvoices = invoices?.filter(keepInvoiceRow)

@@ -1,265 +1,98 @@
-import {
-  useGetDomainInflationIndexesQuery,
-  useResetDomainInflationOverrideMutation,
-  useSetDomainInflationOverrideMutation,
-} from '@common/api/inflationIndexApi/inflationIndex.api'
-import type { IDomainIndexMonth } from '@common/api/inflationIndexApi/inflationIndex.api.types'
-import { formatMonthLabel } from '@components/DebtCalculation/format'
+import type { IDebtPeriod } from '@utils/debt-calculation/company-debt'
 import { defaultDebtPeriod } from '@utils/debt-calculation/company-debt'
 import { formatPeriod } from '@utils/debt-calculation/months'
-import {
-  Button,
-  Collapse,
-  InputNumber,
-  message,
-  Popconfirm,
-  Select,
-  Space,
-  Table,
-  Tag,
-  Tooltip,
-  Typography,
-} from 'antd'
-import type { ColumnsType } from 'antd/es/table'
-import dayjs from 'dayjs'
-import { useEffect, useMemo, useState } from 'react'
+import { Collapse, ConfigProvider, DatePicker, Flex, Segmented } from 'antd'
+import ukUA from 'antd/lib/locale/uk_UA'
+import dayjs, { Dayjs } from 'dayjs'
+import { useMemo, useState } from 'react'
+import IndexChart from './IndexChart'
+import IndexTable from './IndexTable'
 
 export interface IDomainOption {
   text: string
   value: string
 }
 
+// The index of a particular domain is hidden for now: the panel shows only the
+// official one and does not read these. The page still passes them.
 interface Props {
   domains: IDomainOption[]
   preferredDomainId?: string
 }
 
-const formatIndex = (value?: number | null): string =>
-  value == null ? '—' : value.toFixed(1)
+/** The API refuses a longer range. */
+const MAX_MONTHS = 120
 
-const errorMessage = (error: unknown, fallback: string): string =>
-  (error as { data?: { message?: string } })?.data?.message ?? fallback
+type View = 'chart' | 'table'
 
-const InflationOverridePanel: React.FC<Props> = ({
-  domains,
-  preferredDomainId,
-}) => {
-  const [domainId, setDomainId] = useState<string | undefined>(
-    preferredDomainId ?? domains[0]?.value
-  )
-  const [editing, setEditing] = useState<{
-    period: string
-    value: number | null
-  } | null>(null)
+const toDate = (period: IDebtPeriod['from']): Dayjs =>
+  dayjs(`${formatPeriod(period)}-01`)
 
-  useEffect(() => {
-    if (preferredDomainId) setDomainId(preferredDomainId)
-  }, [preferredDomainId])
+const toYearMonth = (date: Dayjs): IDebtPeriod['from'] => ({
+  year: date.year(),
+  month: date.month() + 1,
+})
 
-  useEffect(() => {
-    if (!domainId && domains[0]) setDomainId(domains[0].value)
-  }, [domainId, domains])
-
-  useEffect(() => setEditing(null), [domainId])
-
-  const period = useMemo(() => defaultDebtPeriod(), [])
-  const { data, isFetching } = useGetDomainInflationIndexesQuery(
-    {
-      domainId: domainId as string,
-      from: formatPeriod(period.from),
-      to: formatPeriod(period.to),
-    },
-    { skip: !domainId }
-  )
-  const [setOverride, { isLoading: isSaving }] =
-    useSetDomainInflationOverrideMutation()
-  const [resetOverride, { isLoading: isResetting }] =
-    useResetDomainInflationOverrideMutation()
-
-  const canEdit = !!data?.canEdit
-  const months = useMemo(() => [...(data?.months ?? [])].reverse(), [data])
-
-  const save = async (row: IDomainIndexMonth) => {
-    if (!domainId || editing?.value == null) return
-    try {
-      await setOverride({
-        domainId,
-        year: row.year,
-        month: row.month,
-        value: editing.value,
-      }).unwrap()
-      message.success('Індекс для домену збережено')
-      setEditing(null)
-    } catch (error) {
-      message.error(errorMessage(error, 'Не вдалося зберегти індекс'))
-    }
-  }
-
-  const reset = async (row: IDomainIndexMonth) => {
-    if (!domainId) return
-    try {
-      await resetOverride({
-        domainId,
-        year: row.year,
-        month: row.month,
-      }).unwrap()
-      message.success('Повернуто значення довідника')
-    } catch (error) {
-      message.error(errorMessage(error, 'Не вдалося скинути індекс'))
-    }
-  }
-
-  const columns: ColumnsType<IDomainIndexMonth> = [
-    {
-      title: 'Місяць',
-      render: (_, row) => formatMonthLabel(row.year, row.month),
-    },
-    {
-      title: 'Довідник',
-      align: 'right',
-      render: (_, row) => formatIndex(row.reference),
-    },
-    {
-      title: 'Для домену',
-      render: (_, row) => {
-        if (editing?.period === formatPeriod(row)) {
-          return (
-            <InputNumber
-              size="small"
-              min={90}
-              max={120}
-              step={0.1}
-              autoFocus
-              value={editing.value}
-              aria-label={`Індекс домену за ${formatMonthLabel(
-                row.year,
-                row.month
-              )}`}
-              onChange={(value) =>
-                setEditing({ period: formatPeriod(row), value })
-              }
-              onPressEnter={() => save(row)}
-            />
-          )
-        }
-
-        if (!row.override) return '—'
-
-        const changed = [
-          row.override.updatedBy,
-          row.override.updatedAt &&
-            dayjs(row.override.updatedAt).format('DD.MM.YYYY HH:mm'),
-        ]
-          .filter(Boolean)
-          .join(', ')
-
-        return (
-          <Space size="small">
-            {formatIndex(row.override.value)}
-            <Tooltip title={changed ? `Змінено: ${changed}` : undefined}>
-              <Tag color="orange">змінено для домену</Tag>
-            </Tooltip>
-          </Space>
-        )
-      },
-    },
-  ]
-
-  if (canEdit) {
-    columns.push({
-      title: '',
-      align: 'right',
-      render: (_, row) => {
-        if (editing?.period === formatPeriod(row)) {
-          return (
-            <Space size="small">
-              <Button
-                size="small"
-                type="primary"
-                loading={isSaving}
-                disabled={editing.value == null}
-                onClick={() => save(row)}
-              >
-                Зберегти
-              </Button>
-              <Button size="small" onClick={() => setEditing(null)}>
-                Скасувати
-              </Button>
-            </Space>
-          )
-        }
-
-        return (
-          <Space size="small">
-            <Button
-              size="small"
-              onClick={() =>
-                setEditing({ period: formatPeriod(row), value: row.value })
-              }
-            >
-              Змінити
-            </Button>
-            {row.override && (
-              <Popconfirm
-                title="Повернути значення з довідника?"
-                okText="Скинути"
-                cancelText="Ні"
-                onConfirm={() => reset(row)}
-              >
-                <Button size="small" danger loading={isResetting}>
-                  Скинути до довідника
-                </Button>
-              </Popconfirm>
-            )}
-          </Space>
-        )
-      },
-    })
-  }
+const InflationIndex: React.FC = () => {
+  const [view, setView] = useState<View>('chart')
+  const [pickedPeriod, setPickedPeriod] = useState<IDebtPeriod | null>(null)
+  const defaultPeriod = useMemo(() => defaultDebtPeriod(), [])
+  // The picker belongs to the chart: the table always has the whole history.
+  const period = pickedPeriod ?? defaultPeriod
 
   return (
-    <Collapse
-      size="small"
-      style={{ marginTop: 16 }}
-      items={[
-        {
-          key: 'inflation',
-          label: 'Індекс інфляції домену',
-          children: (
-            <Space direction="vertical" style={{ width: '100%' }}>
-              {domains.length > 1 && (
-                <Select
-                  value={domainId}
-                  onChange={setDomainId}
-                  options={domains.map(({ text, value }) => ({
-                    label: text,
-                    value,
-                  }))}
-                  aria-label="Домен"
-                  style={{ minWidth: 240 }}
-                  showSearch
-                  optionFilterProp="label"
-                />
-              )}
-              <Table<IDomainIndexMonth>
-                size="small"
-                pagination={false}
-                rowKey={(row) => formatPeriod(row)}
-                columns={columns}
-                dataSource={months}
-                loading={isFetching}
-              />
-              {data && !canEdit && (
-                <Typography.Text type="secondary">
-                  Лише перегляд: змінювати індекс може адміністратор домену.
-                </Typography.Text>
-              )}
-            </Space>
-          ),
-        },
-      ]}
-    />
+    <Flex vertical gap={12}>
+      <Flex wrap gap={8} align="center">
+        {view === 'chart' && (
+          <ConfigProvider locale={ukUA}>
+            <DatePicker.RangePicker
+              picker="month"
+              format="MM.YYYY"
+              placeholder={['Від місяця', 'До місяця']}
+              value={[toDate(period.from), toDate(period.to)]}
+              disabledDate={(date, { from }) =>
+                !!from && Math.abs(date.diff(from, 'month')) >= MAX_MONTHS
+              }
+              onChange={(dates) =>
+                setPickedPeriod(
+                  dates?.[0] && dates?.[1]
+                    ? {
+                        from: toYearMonth(dates[0]),
+                        to: toYearMonth(dates[1]),
+                      }
+                    : null
+                )
+              }
+            />
+          </ConfigProvider>
+        )}
+        <Segmented<View>
+          style={{ marginLeft: 'auto' }}
+          options={[
+            { label: 'Графік', value: 'chart' },
+            { label: 'Таблиця', value: 'table' },
+          ]}
+          value={view}
+          onChange={setView}
+        />
+      </Flex>
+      {view === 'chart' ? <IndexChart period={period} /> : <IndexTable />}
+    </Flex>
   )
 }
+
+const InflationOverridePanel: React.FC<Props> = () => (
+  <Collapse
+    size="small"
+    style={{ marginTop: 16 }}
+    items={[
+      {
+        key: 'inflation',
+        label: 'Індекс інфляції',
+        children: <InflationIndex />,
+      },
+    ]}
+  />
+)
 
 export default InflationOverridePanel

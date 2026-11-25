@@ -113,4 +113,21 @@ describe('LossesCollapse', () => {
 
     expect(form.setFieldValue).not.toHaveBeenCalled()
   })
+
+  it.each([
+    ['the total is not filled yet', { consumedElectricity: 100 }],
+    ['consumption is not filled yet', { generalElectricity: 120 }],
+  ])('does NOT turn losses into -100%% or Infinity while %s', (_, inputs) => {
+    const form = makeForm()
+    form.getFieldValue.mockReturnValue(7.5)
+
+    mockUseWatch({
+      ...inputs,
+      customServices: [{ fieldName: 'electricityPrice', price: 1.2 }],
+    })
+
+    render(<LossesCollapse form={form as any} name="losses" />)
+
+    expect(form.setFieldValue).not.toHaveBeenCalled()
+  })
 })

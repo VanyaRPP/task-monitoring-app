@@ -40,15 +40,17 @@ describe('Service API - PATCH', () => {
   it('should update valid services as DomainAdmin', async () => {
     await mockLoginAs(users.domainAdmin)
 
+    // domains[0] is the one this admin administers
+    const ownService = services.find(({ domain }) => domain === domains[0]._id)
     const updatedData = {
-      ...services[0],
+      ...ownService,
       description: 'updated',
       domain: domains[0]._id,
     }
 
     const mockReq = {
       method: 'PATCH',
-      query: { id: services[0]._id },
+      query: { id: ownService._id },
       body: updatedData,
     } as any
     const mockRes = {
