@@ -1,0 +1,23 @@
+// Рядок послуги в таблиці інвойсу: затисни поза полями, щоб перетягнути.
+.sortableRow {
+  cursor: grab;
+  touch-action: manipulation;
+  user-select: none;
+
+  // На полях і кнопках курсор звичайний, перетягування там не стартує.
+  input,
+  textarea,
+  button,
+  select,
+  a,
+  :global(.ant-select),
+  :global(.ant-input-number),
+  :global(.ant-picker) {
+    cursor: auto;
+    user-select: auto;
+  }
+}
+
+.sortableRowDragging {
+  cursor: grabbing;
+}

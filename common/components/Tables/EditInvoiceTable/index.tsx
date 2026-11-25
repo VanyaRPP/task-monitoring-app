@@ -16,6 +16,19 @@ import {
 } from '@utils/domain/domain-invoice-selector'
 import { Empty, Form, FormInstance, Select, Table } from 'antd'
 import React, { useCallback, useMemo } from 'react'
+import {
+  DndContext,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core'
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import {
+  ROW_DRAG_ACTIVATION,
+  RowPointerSensor,
+} from '@components/Forms/AddCostForm/itemsDnd'
+import { SortableRow } from './SortableRow'
 
 import Cleaning from './Cleaning'
 import Custom from './Custom'
@@ -81,9 +94,12 @@ export const EditInvoicesTable_unstable: React.FC<EditInvoicesTableProps> = ({
   const [form] = Form.useForm(_form)
   const invoices: InvoiceType[] = Form.useWatch('invoice', form) || []
 
+  const sensors = useSensors(
+    useSensor(RowPointerSensor, { activationConstraint: ROW_DRAG_ACTIVATION })
+  )
   return (
     <Form.List name="invoice">
-      {(fields, { add, remove }) => {
+      {(fields, { add, remove, move }) => {
         const columns = [
           {
             title: '№',
@@ -157,59 +173,86 @@ export const EditInvoicesTable_unstable: React.FC<EditInvoicesTableProps> = ({
             hidden: !editable,
           },
         ].filter((column) => !column.hidden)
-
+        const handleDragEnd = ({ active, over }: DragEndEvent) => {
+          if (!over || active.id === over.id) return
+          const from = fields.findIndex(
+            (f) => String(f.key) === String(active.id)
+          )
+          const to = fields.findIndex((f) => String(f.key) === String(over.id))
+          if (from < 0 || to < 0) return
+          move(from, to)
+        }
+        const dndEnabled = editable && !disabled
         return (
-          <Table
-            rowKey={(field) => field.key}
-            loading={loading}
-            size="small"
-            dataSource={fields}
-            pagination={false}
-            locale={
-              editable
-                ? {
-                    emptyText: (
-                      <Empty
-                        image={Empty.PRESENTED_IMAGE_SIMPLE}
-                        description={
-                          <span
-                            style={{
-                              maxWidth: 360,
-                              display: 'inline-block',
-                            }}
-                          >
-                            Ще немає послуг. Додайте рядок нижче: оберіть з
-                            каталогу або «Власне», вкажіть назву, кількість і
-                            ціну — сума порахується автоматично (ціна ×
-                            кількість).
-                          </span>
-                        }
-                      />
-                    ),
-                  }
-                : undefined
-            }
-            footer={
-              editable
-                ? () => (
-                    <InvoiceSelector
-                      service={service}
-                      company={company}
-                      prevPayment={prevPayment}
-                      domainId={domainId}
-                      excludeKeys={
-                        invoices?.map((inv) => invoiceLineExcludeKey(inv)) ?? []
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={fields.map((f) => f.key)}
+              strategy={verticalListSortingStrategy}
+            >
+              <Table
+                rowKey={(field) => field.key}
+                loading={loading}
+                size="small"
+                dataSource={fields}
+                pagination={false}
+                locale={
+                  editable
+                    ? {
+                        emptyText: (
+                          <Empty
+                            image={Empty.PRESENTED_IMAGE_SIMPLE}
+                            description={
+                              <span
+                                style={{
+                                  maxWidth: 360,
+                                  display: 'inline-block',
+                                }}
+                              >
+                                Ще немає послуг. Додайте рядок нижче: оберіть з
+                                каталогу або «Власне», вкажіть назву, кількість
+                                і ціну — сума порахується автоматично (ціна ×
+                                кількість).
+                              </span>
+                            }
+                          />
+                        ),
                       }
-                      excludeServiceTypes={typedServiceTypesOnInvoice(invoices)}
-                      onSelect={(payload) => add(payload)}
-                    />
-                  )
-                : null
-            }
-            scroll={{ x: 750 }}
-            columns={columns}
-            {...props}
-          />
+                    : undefined
+                }
+                footer={
+                  editable
+                    ? () => (
+                        <InvoiceSelector
+                          service={service}
+                          company={company}
+                          prevPayment={prevPayment}
+                          domainId={domainId}
+                          excludeKeys={
+                            invoices?.map((inv) =>
+                              invoiceLineExcludeKey(inv)
+                            ) ?? []
+                          }
+                          excludeServiceTypes={typedServiceTypesOnInvoice(
+                            invoices
+                          )}
+                          onSelect={(payload) => add(payload)}
+                        />
+                      )
+                    : null
+                }
+                components={
+                  dndEnabled ? { body: { row: SortableRow } } : undefined
+                }
+                scroll={{ x: 750 }}
+                columns={columns}
+                {...props}
+              />
+            </SortableContext>
+          </DndContext>
         )
       }}
     </Form.List>
