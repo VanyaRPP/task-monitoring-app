@@ -5,31 +5,67 @@ const stageOf = (pipeline: any[], name: string) =>
   pipeline.find((stage) => name in stage)?.[name]
 
 describe('getPaymentsOrderPipeline', () => {
-  it('buckets by the calendar day in the business timezone', () => {
+  it('buckets by the calendar day in the business timezone, ignoring the time', () => {
     const pipeline = getPaymentsOrderPipeline({})
 
-    expect(stageOf(pipeline, '$addFields')).toEqual({
-      invoiceCreationDay: {
-        $dateTrunc: {
-          date: '$invoiceCreationDate',
-          unit: 'day',
-          timezone: PAYMENTS_TIMEZONE,
-        },
+    expect(stageOf(pipeline, '$addFields').invoiceCreationDay).toEqual({
+      $dateTrunc: {
+        date: '$invoiceCreationDate',
+        unit: 'day',
+        timezone: PAYMENTS_TIMEZONE,
       },
     })
   })
 
-  it('tracks the newest entry of each company within a day', () => {
+  it('buckets by the month of the month service, falling back to the invoice date', () => {
+    const pipeline = getPaymentsOrderPipeline({})
+
+    expect(stageOf(pipeline, '$addFields').invoiceMonth).toEqual({
+      $dateTrunc: {
+        date: {
+          $ifNull: [
+            { $first: '$monthServiceDoc.date' },
+            '$invoiceCreationDate',
+          ],
+        },
+        unit: 'month',
+        timezone: PAYMENTS_TIMEZONE,
+      },
+    })
+  })
+
+  it('looks the month service up whether its id is a string or an ObjectId', () => {
+    const lookup = stageOf(getPaymentsOrderPipeline({}), '$lookup')
+
+    expect(lookup.from).toBe('services')
+    expect(lookup.let).toEqual({ monthServiceId: '$monthService' })
+    expect(lookup.pipeline[0].$match.$expr.$eq[1]).toEqual({
+      $convert: {
+        input: '$$monthServiceId',
+        to: 'objectId',
+        onError: null,
+        onNull: null,
+      },
+    })
+    expect(lookup.as).toBe('monthServiceDoc')
+  })
+
+  it('tracks the newest entry of each company within a day of a month', () => {
     expect(stageOf(getPaymentsOrderPipeline({}), '$setWindowFields')).toEqual({
-      partitionBy: { day: '$invoiceCreationDay', company: '$company' },
+      partitionBy: {
+        month: '$invoiceMonth',
+        day: '$invoiceCreationDay',
+        company: '$company',
+      },
       output: { companyDayLatest: { $max: '$invoiceCreationDate' } },
     })
   })
 
-  it('sorts by day, then company group, then type, so a credit sits right above its debit', () => {
+  it('sorts by month, then day, then company group, then type, so a credit sits right above its debit', () => {
     const sort = stageOf(getPaymentsOrderPipeline({}), '$sort')
 
     expect(Object.keys(sort)).toEqual([
+      'invoiceMonth',
       'invoiceCreationDay',
       'companyDayLatest',
       'company',
@@ -38,6 +74,7 @@ describe('getPaymentsOrderPipeline', () => {
       '_id',
     ])
     expect(sort).toEqual({
+      invoiceMonth: SortOrder.DESC,
       invoiceCreationDay: SortOrder.DESC,
       companyDayLatest: SortOrder.DESC,
       company: SortOrder.ASC,

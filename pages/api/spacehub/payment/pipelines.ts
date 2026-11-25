@@ -1,6 +1,16 @@
 import { PAYMENTS_TIMEZONE, SortOrder } from '@utils/constants'
+import Service from '@modules/models/Service'
 import type { PipelineStage } from 'mongoose'
 
+/**
+ * Orders the invoice table:
+ *  1. by the month the invoice is *for* ("За місяць" column) - newest first.
+ *     That is the month of its month service, or of `invoiceCreationDate` when
+ *     it has none - never the moment the record was added;
+ *  2. inside a month, by the calendar day of `invoiceCreationDate` (Kyiv time),
+ *     so the time of day never splits one day into several groups;
+ *  3. inside a day, company groups by their newest entry, credit above debit.
+ */
 export function getPaymentsOrderPipeline(
   options: Record<string, unknown>,
   { skip, limit }: { skip?: string | number; limit?: string | number } = {}
@@ -8,7 +18,48 @@ export function getPaymentsOrderPipeline(
   const pipeline: PipelineStage[] = [
     { $match: options },
     {
+      // `monthService` is Mixed: the id may be stored as a string or an
+      // ObjectId, so convert before matching instead of a plain localField.
+      $lookup: {
+        from: Service.collection.name,
+        let: { monthServiceId: '$monthService' },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $eq: [
+                  '$_id',
+                  {
+                    $convert: {
+                      input: '$$monthServiceId',
+                      to: 'objectId',
+                      onError: null,
+                      onNull: null,
+                    },
+                  },
+                ],
+              },
+            },
+          },
+          { $project: { _id: 0, date: 1 } },
+        ],
+        as: 'monthServiceDoc',
+      },
+    },
+    {
       $addFields: {
+        invoiceMonth: {
+          $dateTrunc: {
+            date: {
+              $ifNull: [
+                { $first: '$monthServiceDoc.date' },
+                '$invoiceCreationDate',
+              ],
+            },
+            unit: 'month',
+            timezone: PAYMENTS_TIMEZONE,
+          },
+        },
         invoiceCreationDay: {
           $dateTrunc: {
             date: '$invoiceCreationDate',
@@ -20,7 +71,11 @@ export function getPaymentsOrderPipeline(
     },
     {
       $setWindowFields: {
-        partitionBy: { day: '$invoiceCreationDay', company: '$company' },
+        partitionBy: {
+          month: '$invoiceMonth',
+          day: '$invoiceCreationDay',
+          company: '$company',
+        },
         output: {
           companyDayLatest: { $max: '$invoiceCreationDate' },
         },
@@ -28,6 +83,7 @@ export function getPaymentsOrderPipeline(
     },
     {
       $sort: {
+        invoiceMonth: SortOrder.DESC,
         invoiceCreationDay: SortOrder.DESC,
         companyDayLatest: SortOrder.DESC,
         company: SortOrder.ASC,
