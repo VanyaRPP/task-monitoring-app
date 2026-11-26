@@ -4,6 +4,7 @@ import {
   IServiceFilter,
 } from '@common/api/serviceApi/service.api.types'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+import { useGetDomainsByAdminQuery } from '@common/api/domainApi/domain.api'
 import ServicesHeader from '@components/Tables/Services/Header'
 import ServicesTable from '@components/Tables/Services/Table'
 import TableCard from '@components/UI/TableCard'
@@ -25,6 +26,7 @@ import InflationOverridePanel, {
   IDomainOption,
 } from '@components/InflationOverridePanel'
 import ElectricityChart from '@components/ElectricityChart'
+import TariffsChart from '@components/TariffsChart'
 import type { ColumnsType } from 'antd/es/table'
 
 interface ServiceBlockProps {
@@ -124,6 +126,21 @@ const ServicesBlock: React.FC<ServiceBlockProps> = ({ sepDomainID }) => {
       })),
     [domainsFilter]
   )
+  // The charts of the services are for admins: a GlobalAdmin gets every domain,
+  // a DomainAdmin only the ones they administer. The table filter above would not
+  // do, it also lists the domains where they merely represent a company.
+  const isAdmin = isAdminCheck(user?.roles)
+  const { data: adminDomains } = useGetDomainsByAdminQuery(
+    { archived: false },
+    { skip: !isOnPage || !isAdmin }
+  )
+  const chartDomains: IDomainOption[] = useMemo(
+    () =>
+      (adminDomains ?? [])
+        .map(({ _id, name }) => ({ value: String(_id), text: name }))
+        .sort((a, b) => a.text.localeCompare(b.text, 'uk')),
+    [adminDomains]
+  )
   const filteredDomains = filter?.domain as unknown as string[] | undefined
   const preferredDomainId =
     sepDomainID ??
@@ -171,14 +188,22 @@ const ServicesBlock: React.FC<ServiceBlockProps> = ({ sepDomainID }) => {
           dateFilters={dateFilters}
         />
       </TableCard>
-      {isOnPage && isAdminCheck(user?.roles) && domainOptions.length > 0 && (
-        <ElectricityChart
-          domains={domainOptions}
-          preferredDomainId={preferredDomainId}
-          preferredStreetId={preferredStreetId}
-        />
+      {isOnPage && isAdmin && chartDomains.length > 0 && (
+        <>
+          <TariffsChart
+            domains={chartDomains}
+            preferredDomainId={preferredDomainId}
+            preferredStreetId={preferredStreetId}
+          />
+          <ElectricityChart
+            domains={chartDomains}
+            preferredDomainId={preferredDomainId}
+            preferredStreetId={preferredStreetId}
+          />
+        </>
       )}
-      {isOnPage && domainOptions.length > 0 && (
+      {/* The official index is public: every role sees it. */}
+      {isOnPage && (
         <InflationOverridePanel
           domains={domainOptions}
           preferredDomainId={preferredDomainId}
