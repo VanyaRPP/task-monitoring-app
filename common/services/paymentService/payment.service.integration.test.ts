@@ -9,6 +9,7 @@ import Payment from '@modules/models/Payment'
 import RealEstate from '@modules/models/RealEstate'
 import Domain from '@modules/models/Domain'
 import Street from '@modules/models/Street'
+import Service from '@modules/models/Service'
 import { PaymentStatus } from '@common/api/paymentApi/payment.api.types'
 import { duplicatePayments, getPayments } from './payment.service'
 import { testConnectOptions } from '@utils/setupTestEnvironment'
@@ -42,6 +43,7 @@ afterEach(async () => {
     RealEstate.deleteMany({}),
     Domain.deleteMany({}),
     Street.deleteMany({}),
+    Service.deleteMany({}),
   ])
 })
 
@@ -79,6 +81,7 @@ async function seedPayment({
   invoiceNumber,
   date = new Date('2026-03-01'),
   type = 'debit',
+  monthService,
 }: {
   domain: Types.ObjectId | string
   street: Types.ObjectId | string
@@ -86,6 +89,7 @@ async function seedPayment({
   invoiceNumber: number
   date?: Date
   type?: 'debit' | 'credit'
+  monthService?: Types.ObjectId | string
 }) {
   return Payment.create({
     invoiceNumber,
@@ -96,6 +100,19 @@ async function seedPayment({
     company,
     generalSum: 100,
     invoice: [],
+    ...(monthService ? { monthService } : {}),
+  })
+}
+
+/** A month service dated mid-month - the same month in UTC and Kyiv. */
+async function seedMonthService(
+  scope: { domain: Types.ObjectId | string; street: Types.ObjectId | string },
+  isoMonth: string // 'YYYY-MM'
+) {
+  return Service.create({
+    domain: scope.domain,
+    street: scope.street,
+    date: new Date(`${isoMonth}-15T12:00:00Z`),
   })
 }
 
@@ -521,6 +538,310 @@ describe('getPayments — credit above debit within one displayed day', () => {
     expect(payment.status).toBe('draft')
     expect(payment.currency).toBe('UAH')
     expect(payment.template).toBe('classic')
+  })
+})
+
+describe('getPayments — sorting by «Дата створення» ignores the time of day', () => {
+  const listNumbers = async () =>
+    (await getPayments({ limit: '50', skip: '0' }, asGlobalAdmin)).data.map(
+      (payment: any) => payment.invoiceNumber
+    )
+
+  it('puts every invoice of 13.11 before every invoice of 12.11', async () => {
+    const { domain, street, company } = await seedScope({
+      companyAdminEmail: 'owner@test.com',
+    })
+    const scope = {
+      domain: domain._id,
+      street: street._id,
+      company: company._id,
+    }
+
+    // Kyiv is UTC+2 in November.
+    await seedPayment({
+      ...scope,
+      invoiceNumber: 5,
+      date: new Date('2026-11-12T06:30:00Z'),
+    }) // 12.11 08:30
+    await seedPayment({
+      ...scope,
+      invoiceNumber: 1,
+      date: new Date('2026-11-13T16:45:00Z'),
+    }) // 13.11 18:45
+    await seedPayment({
+      ...scope,
+      invoiceNumber: 4,
+      date: new Date('2026-11-12T20:50:00Z'),
+    }) // 12.11 22:50
+    await seedPayment({
+      ...scope,
+      invoiceNumber: 3,
+      date: new Date('2026-11-13T07:10:00Z'),
+    }) // 13.11 09:10
+    await seedPayment({
+      ...scope,
+      invoiceNumber: 2,
+      date: new Date('2026-11-13T12:20:00Z'),
+    }) // 13.11 14:20
+
+    expect(await listNumbers()).toEqual([1, 2, 3, 4, 5])
+  })
+
+  it('keeps one day together even when another company falls between its times', async () => {
+    const { domain, street, company } = await seedScope({
+      companyAdminEmail: 'owner@test.com',
+    })
+    const other = await RealEstate.create({
+      domain: domain._id,
+      street: street._id,
+      companyName: 'Other company',
+      description: 'c',
+      adminEmails: ['other@test.com'],
+    })
+    const scope = { domain: domain._id, street: street._id }
+
+    await seedPayment({
+      ...scope,
+      company: company._id,
+      invoiceNumber: 1,
+      date: new Date('2026-11-13T16:45:00Z'),
+    })
+    await seedPayment({
+      ...scope,
+      company: other._id,
+      invoiceNumber: 2,
+      date: new Date('2026-11-13T12:20:00Z'),
+    })
+    await seedPayment({
+      ...scope,
+      company: company._id,
+      invoiceNumber: 3,
+      date: new Date('2026-11-13T07:10:00Z'),
+    })
+    await seedPayment({
+      ...scope,
+      company: other._id,
+      invoiceNumber: 4,
+      date: new Date('2026-11-12T20:50:00Z'),
+    })
+
+    // 13.11 is one group (company first by its newest entry), then 12.11.
+    expect(await listNumbers()).toEqual([1, 3, 2, 4])
+  })
+})
+
+describe('getPayments — automatic «За місяць» ordering', () => {
+  const listNumbers = async (query = {}) =>
+    (
+      await getPayments({ limit: '50', skip: '0', ...query }, asGlobalAdmin)
+    ).data.map((payment: any) => payment.invoiceNumber)
+
+  const seedScoped = async () => {
+    const { domain, street, company } = await seedScope({
+      companyAdminEmail: 'owner@test.com',
+    })
+    return { domain: domain._id, street: street._id, company: company._id }
+  }
+
+  it('orders months newest first by the month the invoice is for, not by when it was added', async () => {
+    const scope = await seedScoped()
+    const [may, april, march] = await Promise.all(
+      ['2026-05', '2026-04', '2026-03'].map((m) => seedMonthService(scope, m))
+    )
+
+    await seedPayment({
+      ...scope,
+      invoiceNumber: 1,
+      monthService: may._id,
+      date: new Date('2026-05-01T07:00:00Z'),
+    })
+    await seedPayment({
+      ...scope,
+      invoiceNumber: 2,
+      monthService: april._id,
+      date: new Date('2026-04-15T09:00:00Z'),
+    })
+    // The March invoice is added last of all - it must still sit below April.
+    await seedPayment({
+      ...scope,
+      invoiceNumber: 3,
+      monthService: march._id,
+      date: new Date('2026-05-20T15:00:00Z'),
+    })
+
+    expect(await listNumbers()).toEqual([1, 2, 3])
+  })
+
+  it('reads the month service whether its id was stored as a string or an ObjectId', async () => {
+    const scope = await seedScoped()
+    const [may, april] = await Promise.all(
+      ['2026-05', '2026-04'].map((m) => seedMonthService(scope, m))
+    )
+
+    await seedPayment({
+      ...scope,
+      invoiceNumber: 1,
+      monthService: april._id.toString(),
+      date: new Date('2026-06-10T09:00:00Z'),
+    })
+    await seedPayment({
+      ...scope,
+      invoiceNumber: 2,
+      monthService: may._id,
+      date: new Date('2026-05-02T09:00:00Z'),
+    })
+
+    expect(await listNumbers()).toEqual([2, 1])
+  })
+
+  it('crosses the year boundary: січень 2026 → грудень 2025 → листопад 2025', async () => {
+    const scope = await seedScoped()
+    const [jan, dec, nov] = await Promise.all(
+      ['2026-01', '2025-12', '2025-11'].map((m) => seedMonthService(scope, m))
+    )
+
+    // All added on the same day, in the "wrong" order.
+    await seedPayment({
+      ...scope,
+      invoiceNumber: 3,
+      monthService: nov._id,
+      date: new Date('2026-01-10T15:00:00Z'),
+    })
+    await seedPayment({
+      ...scope,
+      invoiceNumber: 1,
+      monthService: jan._id,
+      date: new Date('2026-01-10T09:00:00Z'),
+    })
+    await seedPayment({
+      ...scope,
+      invoiceNumber: 2,
+      monthService: dec._id,
+      date: new Date('2026-01-10T12:00:00Z'),
+    })
+
+    expect(await listNumbers()).toEqual([1, 2, 3])
+  })
+
+  it('files an invoice without a month service under the month of its own date', async () => {
+    const scope = await seedScoped()
+    const october = await seedMonthService(scope, '2026-10')
+
+    await seedPayment({
+      ...scope,
+      invoiceNumber: 1,
+      monthService: october._id,
+      date: new Date('2026-11-20T09:00:00Z'),
+    })
+    // No month service, created in November → goes above the October invoice.
+    await seedPayment({
+      ...scope,
+      invoiceNumber: 2,
+      date: new Date('2026-11-05T09:00:00Z'),
+    })
+
+    expect(await listNumbers()).toEqual([2, 1])
+  })
+
+  it('keeps the existing day / company / type order inside one month', async () => {
+    const scope = await seedScoped()
+    const november = await seedMonthService(scope, '2026-11')
+    const october = await seedMonthService(scope, '2026-10')
+
+    await seedPayment({
+      ...scope,
+      invoiceNumber: 1,
+      type: 'debit',
+      monthService: november._id,
+      date: new Date('2026-11-10T07:00:00Z'),
+    })
+    await seedPayment({
+      ...scope,
+      invoiceNumber: 2,
+      type: 'credit',
+      monthService: november._id,
+      date: new Date('2026-11-10T06:00:00Z'),
+    })
+    await seedPayment({
+      ...scope,
+      invoiceNumber: 3,
+      type: 'debit',
+      monthService: november._id,
+      date: new Date('2026-11-20T07:00:00Z'),
+    })
+    // October invoice added after all of them.
+    await seedPayment({
+      ...scope,
+      invoiceNumber: 4,
+      type: 'debit',
+      monthService: october._id,
+      date: new Date('2026-11-25T07:00:00Z'),
+    })
+
+    // November: 20.11 first, then 10.11 with the credit above its debit.
+    expect(await listNumbers()).toEqual([3, 2, 1, 4])
+  })
+
+  it('holds the month order across pages', async () => {
+    const scope = await seedScoped()
+    const [nov, oct] = await Promise.all(
+      ['2026-11', '2026-10'].map((m) => seedMonthService(scope, m))
+    )
+
+    await seedPayment({
+      ...scope,
+      invoiceNumber: 1,
+      monthService: nov._id,
+      date: new Date('2026-11-02T09:00:00Z'),
+    })
+    await seedPayment({
+      ...scope,
+      invoiceNumber: 2,
+      monthService: nov._id,
+      date: new Date('2026-11-01T09:00:00Z'),
+    })
+    await seedPayment({
+      ...scope,
+      invoiceNumber: 3,
+      monthService: oct._id,
+      date: new Date('2026-11-24T09:00:00Z'),
+    })
+
+    expect(await listNumbers({ limit: '2', skip: '0' })).toEqual([1, 2])
+    expect(await listNumbers({ limit: '2', skip: '2' })).toEqual([3])
+  })
+
+  it('leaves the manual «За місяць» filter working: only the picked months, still ordered', async () => {
+    const scope = await seedScoped()
+    const [nov, oct, sep] = await Promise.all(
+      ['2026-11', '2026-10', '2026-09'].map((m) => seedMonthService(scope, m))
+    )
+
+    await seedPayment({
+      ...scope,
+      invoiceNumber: 1,
+      monthService: nov._id,
+      date: new Date('2026-11-02T09:00:00Z'),
+    })
+    await seedPayment({
+      ...scope,
+      invoiceNumber: 2,
+      monthService: oct._id.toString(),
+      date: new Date('2026-11-20T09:00:00Z'),
+    })
+    await seedPayment({
+      ...scope,
+      invoiceNumber: 3,
+      monthService: sep._id,
+      date: new Date('2026-11-21T09:00:00Z'),
+    })
+
+    expect(await listNumbers({ serviceIds: `${oct._id},${sep._id}` })).toEqual([
+      2, 3,
+    ])
+    expect(
+      await listNumbers({ year: 2026, month: 10, dateField: 'date' })
+    ).toEqual([2])
   })
 })
 
