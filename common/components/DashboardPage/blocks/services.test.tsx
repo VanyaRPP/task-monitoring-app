@@ -33,6 +33,13 @@ jest.mock(
       return <div data-testid="electricity-chart" />
     }
 )
+jest.mock(
+  '@components/TariffsChart',
+  () =>
+    function TariffsChartStub() {
+      return <div data-testid="tariffs-chart" />
+    }
+)
 
 const renderBlock = (role: Roles, pathname: string = AppRoutes.SERVICE) => {
   jest.mocked(useRouter).mockReturnValue({ pathname } as any)
@@ -43,25 +50,28 @@ const renderBlock = (role: Roles, pathname: string = AppRoutes.SERVICE) => {
   render(<ServicesBlock />)
 }
 
-describe('ServicesBlock: electricity chart', () => {
-  it.each([[Roles.DOMAIN_ADMIN], [Roles.GLOBAL_ADMIN]])(
-    'is shown to %s on the services page',
-    (role) => {
-      renderBlock(role)
+describe.each([['tariffs-chart'], ['electricity-chart']])(
+  'ServicesBlock: %s',
+  (chart) => {
+    it.each([[Roles.DOMAIN_ADMIN], [Roles.GLOBAL_ADMIN]])(
+      'is shown to %s on the services page',
+      (role) => {
+        renderBlock(role)
 
-      expect(screen.getByTestId('electricity-chart')).toBeInTheDocument()
-    }
-  )
+        expect(screen.getByTestId(chart)).toBeInTheDocument()
+      }
+    )
 
-  it('is hidden from a User', () => {
-    renderBlock(Roles.USER)
+    it('is hidden from a User', () => {
+      renderBlock(Roles.USER)
 
-    expect(screen.queryByTestId('electricity-chart')).not.toBeInTheDocument()
-  })
+      expect(screen.queryByTestId(chart)).not.toBeInTheDocument()
+    })
 
-  it('is not part of the dashboard block', () => {
-    renderBlock(Roles.DOMAIN_ADMIN, AppRoutes.INDEX)
+    it('is not part of the dashboard block', () => {
+      renderBlock(Roles.DOMAIN_ADMIN, AppRoutes.INDEX)
 
-    expect(screen.queryByTestId('electricity-chart')).not.toBeInTheDocument()
-  })
-})
+      expect(screen.queryByTestId(chart)).not.toBeInTheDocument()
+    })
+  }
+)

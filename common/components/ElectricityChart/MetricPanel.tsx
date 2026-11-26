@@ -1,7 +1,8 @@
+import { formatAxisValue, formatValue } from '@utils/formatChartValue'
 import { Empty, theme, Typography } from 'antd'
 import dynamic from 'next/dynamic'
 import type { IElectricityRow } from './electricityHistory'
-import { formatAxisValue, formatValue, IMetric } from './metrics'
+import type { IMetric } from './metrics'
 import s from './style.module.scss'
 
 const Line = dynamic(

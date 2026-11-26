@@ -1,12 +1,7 @@
 import { expect } from '@jest/globals'
 import type { IService } from '@common/api/serviceApi/service.api.types'
 import dayjs from 'dayjs'
-import {
-  buildElectricityRows,
-  filterByAddress,
-  getAddressOptions,
-  NO_ADDRESS,
-} from './electricityHistory'
+import { buildElectricityRows } from './electricityHistory'
 
 // tariff 12 with VAT -> 10 without; 10 × 1000 = 10000; billed 11000 -> +10%
 const monthService = (month: string, overrides: Partial<IService> = {}) =>
@@ -133,26 +128,5 @@ describe('buildElectricityRows', () => {
     ])
 
     expect(row.losses).toBe(expected)
-  })
-})
-
-describe('addresses', () => {
-  const street = { _id: 'street-1', address: 'Шевченка 1', city: 'Житомир' }
-  const services = [
-    monthService('2026-03', { street }),
-    monthService('2026-02'),
-    monthService('2026-01', { street }),
-  ]
-
-  it('lists each address once, including the services without one', () => {
-    expect(getAddressOptions(services)).toEqual([
-      { value: 'street-1', label: 'Шевченка 1 (м. Житомир)' },
-      { value: NO_ADDRESS, label: 'Без адреси' },
-    ])
-  })
-
-  it('keeps the services of one address only', () => {
-    expect(filterByAddress(services, 'street-1')).toHaveLength(2)
-    expect(filterByAddress(services, NO_ADDRESS)).toEqual([services[1]])
   })
 })

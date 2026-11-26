@@ -25,6 +25,7 @@ import InflationOverridePanel, {
   IDomainOption,
 } from '@components/InflationOverridePanel'
 import ElectricityChart from '@components/ElectricityChart'
+import TariffsChart from '@components/TariffsChart'
 import type { ColumnsType } from 'antd/es/table'
 
 interface ServiceBlockProps {
@@ -172,11 +173,18 @@ const ServicesBlock: React.FC<ServiceBlockProps> = ({ sepDomainID }) => {
         />
       </TableCard>
       {isOnPage && isAdminCheck(user?.roles) && domainOptions.length > 0 && (
-        <ElectricityChart
-          domains={domainOptions}
-          preferredDomainId={preferredDomainId}
-          preferredStreetId={preferredStreetId}
-        />
+        <>
+          <TariffsChart
+            domains={domainOptions}
+            preferredDomainId={preferredDomainId}
+            preferredStreetId={preferredStreetId}
+          />
+          <ElectricityChart
+            domains={domainOptions}
+            preferredDomainId={preferredDomainId}
+            preferredStreetId={preferredStreetId}
+          />
+        </>
       )}
       {isOnPage && domainOptions.length > 0 && (
         <InflationOverridePanel

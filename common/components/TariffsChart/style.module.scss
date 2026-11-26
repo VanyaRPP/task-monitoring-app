@@ -1,0 +1,134 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
+  gap: 16px;
+}
+
+.spotlight {
+  container-type: inline-size;
+}
+
+.spotlightLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+}
+
+// With a rail: the enlarged card takes what the narrow column leaves.
+.withRail {
+  grid-template-columns: minmax(0, 1fr) 240px;
+}
+
+// The column is exactly as tall as the enlarged card and scrolls inside.
+.rail {
+  position: relative;
+}
+
+.railList {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+
+  > * {
+    flex-shrink: 0;
+  }
+}
+
+// Too narrow for two columns: the rest go under the enlarged card.
+@container (max-width: 700px) {
+  .withRail {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .railList {
+    position: static;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(200px, 100%), 1fr));
+  }
+}
+
+@keyframes appear {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}
+
+.card {
+  min-width: 0;
+  animation: appear 0.2s ease-out;
+
+  > :global(.ant-card) {
+    height: 100%;
+    transition: border-color 0.2s;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    animation: none;
+  }
+}
+
+.default,
+.compact {
+  > :global(.ant-card) {
+    cursor: zoom-in;
+
+    &:hover {
+      border-color: #722ed1;
+    }
+  }
+}
+
+.focused {
+  > :global(.ant-card) {
+    cursor: zoom-out;
+    border-color: #722ed1;
+  }
+
+  .value {
+    font-size: 32px;
+  }
+}
+
+.name {
+  min-width: 0;
+}
+
+.latest {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.value {
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.compact {
+  .value {
+    font-size: 18px;
+  }
+
+  .change {
+    font-size: 12px;
+  }
+}
+
+.change {
+  display: block;
+}
+
+.reset {
+  margin-left: auto;
+}
+
+.unpriced {
+  margin: 16px 0 0;
+}
