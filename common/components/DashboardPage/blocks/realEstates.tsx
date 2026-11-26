@@ -63,6 +63,20 @@ const RealEstateBlock: React.FC<Props> = ({
     },
     { refetchOnMountOrArgChange: isArchive }
   )
+
+  // Same query WITHOUT the services filter. The header builds its service
+  // options from this data, so selecting a service must not shrink the options.
+  const { data: realEstatesForOptions } = useGetAllRealEstateQuery(
+    {
+      domainId: sepDomainID || domainId || filters?.domain || undefined,
+      companyId: filters?.company || undefined,
+      streetId: streetId || filters?.street || undefined,
+      limit: isOnPage ? 0 : 5,
+      archived: isArchive,
+    },
+    { refetchOnMountOrArgChange: isArchive }
+  )
+
   const domain = sepDomainID || domainId || filters?.domain?.[0]
 
   const isSingleCompanyByDomain = (() => {
@@ -81,7 +95,7 @@ const RealEstateBlock: React.FC<Props> = ({
           showAddButton={isAdminCheck(user?.roles)}
           currentRealEstate={currentRealEstate}
           setCurrentRealEstate={setCurrentRealEstate}
-          realEstates={realEstates}
+          realEstates={realEstatesForOptions}
           filters={filters}
           setFilters={setFilters}
           setIsArchive={setIsArchive}

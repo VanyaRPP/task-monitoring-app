@@ -166,17 +166,21 @@ const CompaniesHeader: React.FC<Props> = ({
           value={filters?.services || []}
           onChange={handleServicesChange}
           maxTagCount="responsive"
-        >
-          {customServices.length > 0 && (
-            <Select.OptGroup label="Кастомні">
-              {customServices.map((service) => (
-                <Select.Option key={service._id} value={service._id}>
-                  {service.name}
-                </Select.Option>
-              ))}
-            </Select.OptGroup>
-          )}
-        </Select>
+          optionFilterProp="label"
+          options={
+            customServices.length > 0
+              ? [
+                  {
+                    label: 'Кастомні',
+                    options: customServices.map((service) => ({
+                      label: service.name,
+                      value: service._id,
+                    })),
+                  },
+                ]
+              : []
+          }
+        />
 
         <Segmented
           options={[
